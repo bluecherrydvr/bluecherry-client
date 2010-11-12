@@ -66,9 +66,19 @@ win32 {
     unix:QMAKE_CXXFLAGS_RELEASE += -gstabs
     
     unix:!macx {
-        LIBS += "$$PWD/breakpad/src/client/linux/.libs/libbreakpad_client.a"
+        BREAKPAD_LIB = "$$PWD/breakpad/src/client/linux/libbreakpad.a"
+        BREAKPAD_DUMPSYMS = "$$PWD/breakpad/src/tools/linux/dump_syms/dump_syms"
+        LIBS += $$BREAKPAD_LIB
 
-        QMAKE_POST_LINK = python "$$PWD/breakpad-bin/symbolstore.py" "$$PWD/breakpad/src/tools/linux/dump_syms/dump_syms" $${TARGET}.symbols $(TARGET); $$QMAKE_POST_LINK
+        breakpad-client.target = $$BREAKPAD_LIB
+        breakpad-client.commands = $(MAKE) -C "$$PWD/breakpad/src/client/linux/"
+        breakpad-dumpsyms.target = $$BREAKPAD_DUMPSYMS
+        breakpad-dumpsyms.commands = $(MAKE) -C "$$PWD/breakpad/src/tools/linux/dump_syms/"
+
+        QMAKE_EXTRA_TARGETS += breakpad-client breakpad-dumpsyms
+        PRE_TARGETDEPS += $$BREAKPAD_LIB $$BREAKPAD_DUMPSYMS
+
+        QMAKE_POST_LINK = python "$$PWD/breakpad-bin/symbolstore.py" "$$BREAKPAD_DUMPSYMS" $${TARGET}.symbols $(TARGET); $$QMAKE_POST_LINK
     }
 
     macx {
