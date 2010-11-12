@@ -26,7 +26,7 @@ coverage-reset:
 ### Variables that are useful to override on the command line.
 CC = gcc
 CXX = g++
-CXXFLAGS = -g3 -O2 -Wall -m32
+CXXFLAGS = -g3 -O2 -Wall
 
 # To produce test coverage reports:
 # 1) Build all .o files and executables without optimization and with
