@@ -1,3 +1,9 @@
+bluecherry-client (2.0.0-0beta1-1) lucid; urgency=low
+
+  * New release
+
+ -- Ben Collins <bcollins@bluecherry.net>  Fri, 12 Nov 2010 14:05:16 -0500
+
 bluecherry-client (2.0.0-0beta1) unstable; urgency=low
 
   * Initial packaging
