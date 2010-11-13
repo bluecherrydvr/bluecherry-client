@@ -67,7 +67,7 @@ public:
 
     bool isValid() const { return d; }
     operator bool() const { return isValid(); }
-    operator QObject*() { return d ? d.data() : 0; }
+    operator QObject*() const { return d ? d.data() : 0; }
 
     DVRServer *server() const { return d ? d->server : 0; }
     int uniqueId() const { return d ? d->uniqueID : -1; }
@@ -79,6 +79,7 @@ public:
     bool parseXML(QXmlStreamReader &xml);
 
     static QList<DVRCamera> fromMimeData(const QMimeData *mimeData);
+    static DVRCamera fromQObject(QObject *o);
 
 private:
     QExplicitlySharedDataPointer<DVRCameraData> d;
@@ -92,5 +93,10 @@ Q_DECLARE_METATYPE(DVRCamera)
 
 QDataStream &operator<<(QDataStream &s, const DVRCamera &camera);
 QDataStream &operator>>(QDataStream &s, DVRCamera &camera);
+
+inline DVRCamera DVRCamera::fromQObject(QObject *o)
+{
+    return DVRCamera(qobject_cast<DVRCameraData*>(o));
+}
 
 #endif // DVRCAMERA_H

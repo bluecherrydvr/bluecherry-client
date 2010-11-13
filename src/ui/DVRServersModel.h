@@ -26,6 +26,7 @@ public:
     void setOfflineDisabled(bool offlineDisabled);
 
     QModelIndex indexForServer(DVRServer *server) const;
+    QModelIndex indexForCamera(const DVRCamera &camera) const;
 
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
@@ -42,6 +43,7 @@ private slots:
     void serverDataChanged();
     void serverAdded(DVRServer *server);
     void serverRemoved(DVRServer *server);
+    void cameraDataChanged();
     void cameraAdded(const DVRCamera &camera);
     void cameraRemoved(const DVRCamera &camera);
 

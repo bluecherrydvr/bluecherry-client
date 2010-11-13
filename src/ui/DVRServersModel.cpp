@@ -66,6 +66,8 @@ void DVRServersModel::cameraAdded(const DVRCamera &camera)
 
     Item &it = items[parent.row()];
 
+    connect(camera, SIGNAL(dataUpdated()), SLOT(cameraDataChanged()));
+
     beginInsertRows(parent, it.cameras.size(), it.cameras.size());
     it.cameras.append(camera);
     endInsertRows();
@@ -81,9 +83,24 @@ void DVRServersModel::cameraRemoved(const DVRCamera &camera)
     if (row < 0)
         return;
 
+    static_cast<QObject*>(camera)->disconnect(this);
+
     beginRemoveRows(parent, row, row);
     items[parent.row()].cameras.removeAt(row);
     endRemoveRows();
+}
+
+void DVRServersModel::cameraDataChanged()
+{
+    DVRCamera camera = DVRCamera::fromQObject(sender());
+    if (!camera)
+        return;
+
+    QModelIndex index = indexForCamera(camera);
+    if (!index.isValid())
+        return;
+
+    emit dataChanged(index, index);
 }
 
 DVRServer *DVRServersModel::serverForRow(const QModelIndex &index) const
@@ -111,6 +128,25 @@ QModelIndex DVRServersModel::indexForServer(DVRServer *server) const
     {
         if (items[i].server == server)
             return index(i, 0);
+    }
+
+    return QModelIndex();
+}
+
+QModelIndex DVRServersModel::indexForCamera(const DVRCamera &camera) const
+{
+    for (int i = 0; i < items.size(); ++i)
+    {
+        const Item &it = items[i];
+
+        if (it.server == camera.server())
+        {
+            int r = it.cameras.indexOf(camera);
+            if (r < 0)
+                return QModelIndex();
+
+            return index(r, 0, index(i, 0));
+        }
     }
 
     return QModelIndex();
