@@ -105,6 +105,7 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     new QShortcut(QKeySequence(Qt::Key_F11), m_cameraArea, SLOT(toggleFullScreen()));
+    new QShortcut(QKeySequence(Qt::Key_Escape), m_cameraArea, SLOT(closeFullScreen()));
 
     connect(bcApp, SIGNAL(sslConfirmRequired(DVRServer*,QList<QSslError>,QSslConfiguration)),
             SLOT(sslConfirmRequired(DVRServer*,QList<QSslError>,QSslConfiguration)));
