@@ -22,6 +22,7 @@ public:
     QString statusMessage() const { return m_statusMsg; }
 
     virtual QSize sizeHint() const;
+    QRect imageArea() const;
 
     void beginDrag(const DVRCamera &camera);
     void endDrag(bool keep = false);
@@ -57,12 +58,14 @@ protected:
     virtual void contextMenuEvent(QContextMenuEvent *event);
     virtual void keyPressEvent(QKeyEvent *event);
     virtual void resizeEvent(QResizeEvent *event);
+    virtual bool event(QEvent *event);
 
 private:
     DVRCamera m_camera, m_dragCamera;
     QSharedPointer<MJpegStream> m_stream;
     QPixmap m_currentFrame;
     QString m_statusMsg;
+    int m_titleHeight;
 
     DVRCamera cameraFromMime(const QMimeData *mimeData);
 

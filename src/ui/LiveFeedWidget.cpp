@@ -12,7 +12,7 @@
 #include <QDataStream>
 
 LiveFeedWidget::LiveFeedWidget(QWidget *parent)
-    : QWidget(parent), m_stream(0)
+    : QWidget(parent), m_stream(0), m_titleHeight(-1)
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setFocusPolicy(Qt::ClickFocus);
@@ -21,7 +21,6 @@ LiveFeedWidget::LiveFeedWidget(QWidget *parent)
 
     QPalette p = palette();
     p.setColor(QPalette::Window, Qt::black);
-    p.setColor(QPalette::WindowText, Qt::yellow);
     setPalette(p);
 
     QFont f = font();
@@ -167,13 +166,13 @@ void LiveFeedWidget::setFullScreen(bool on)
 
 void LiveFeedWidget::addScaleSize(QVector<QSize> &sizes)
 {
-    sizes.append(size());
+    sizes.append(imageArea().size());
 }
 
 void LiveFeedWidget::updateFrame(const QPixmap &frame, const QVector<QImage> &scaledFrames)
 {
     QSize desired = frame.size();
-    desired.scale(size(), Qt::KeepAspectRatio);
+    desired.scale(imageArea().size(), Qt::KeepAspectRatio);
 
     m_currentFrame = frame;
     for (QVector<QImage>::ConstIterator it = scaledFrames.begin(); it != scaledFrames.end(); ++it)
@@ -215,12 +214,31 @@ void LiveFeedWidget::mjpegStateChanged(int state)
 void LiveFeedWidget::streamSizeChanged(const QSize &size)
 {
     if (!size.isEmpty() && isWindow() && !isFullScreen() && !testAttribute(Qt::WA_Resized))
-        resize(size);
+        resize(size + QSize(0, m_titleHeight));
 }
 
 QSize LiveFeedWidget::sizeHint() const
 {
     return QSize();
+}
+
+QRect LiveFeedWidget::imageArea() const
+{
+    ensurePolished();
+    return rect().adjusted(0, m_titleHeight, 0, 0);
+}
+
+bool LiveFeedWidget::event(QEvent *event)
+{
+    if (event->type() == QEvent::FontChange || event->type() == QEvent::Polish)
+    {
+        QFontMetrics fm(font());
+        m_titleHeight = qMax(20, fm.height() + 4);
+        updateGeometry();
+        update();
+    }
+
+    return QWidget::event(event);
 }
 
 void LiveFeedWidget::paintEvent(QPaintEvent *event)
@@ -231,6 +249,15 @@ void LiveFeedWidget::paintEvent(QPaintEvent *event)
     QRect r = rect();
     p.eraseRect(r);
 
+    /* Title */
+    p.save();
+    p.setPen(QColor(175, 175, 175));
+    p.drawText(QRect(r.left(), r.top(), r.width(), m_titleHeight), Qt::AlignCenter,
+               (m_dragCamera ? m_dragCamera : m_camera).displayName());
+    p.restore();
+
+    r.setTop(r.top()+m_titleHeight);
+
     if (m_dragCamera)
     {
         p.save();
@@ -238,8 +265,6 @@ void LiveFeedWidget::paintEvent(QPaintEvent *event)
         p.setRenderHint(QPainter::Antialiasing, true);
         p.drawRoundedRect(r.adjusted(2, 2, -2, -2), 3, 3);
         p.restore();
-
-        p.drawText(r.adjusted(6, 6, -6, -6), Qt::AlignTop | Qt::AlignRight, m_dragCamera.displayName());
         return;
     }
 
@@ -255,7 +280,7 @@ void LiveFeedWidget::paintEvent(QPaintEvent *event)
             m_currentFrame = m_currentFrame.scaled(renderSize, Qt::KeepAspectRatio, Qt::FastTransformation);
         }
 
-        QPoint topLeft((r.width() - renderSize.width())/2, (r.height() - renderSize.height())/2);
+        QPoint topLeft(r.x() + (r.width() - renderSize.width())/2, r.y() + (r.height() - renderSize.height())/2);
         p.drawPixmap(topLeft, m_currentFrame);
     }
 
@@ -274,9 +299,6 @@ void LiveFeedWidget::paintEvent(QPaintEvent *event)
         p.drawText(r, Qt::AlignCenter, m_statusMsg);
         p.restore();
     }
-
-    if (m_camera)
-        p.drawText(r.adjusted(4, 4, -4, -4), Qt::AlignTop | Qt::AlignRight, m_camera.displayName());
 }
 
 DVRCamera LiveFeedWidget::cameraFromMime(const QMimeData *mimeData)
