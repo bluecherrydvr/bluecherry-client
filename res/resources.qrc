@@ -21,5 +21,9 @@
         <file>layout-4.png</file>
         <file>layout-9.png</file>
         <file>layout-16.png</file>
+        <file>icon16.png</file>
+        <file>icon32.png</file>
+        <file>icon64.png</file>
+        <file>icon512.png</file>
     </qresource>
 </RCC>

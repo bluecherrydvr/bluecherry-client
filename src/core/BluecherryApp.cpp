@@ -9,6 +9,7 @@
 #include <QSslError>
 #include <QSslConfiguration>
 #include <QSslCertificate>
+#include <QApplication>
 
 BluecherryApp *bcApp = 0;
 
@@ -17,6 +18,12 @@ BluecherryApp::BluecherryApp()
 {
     Q_ASSERT(!bcApp);
     bcApp = this;
+
+    appIcon.addFile(QLatin1String(":/icons/icon16.png"));
+    appIcon.addFile(QLatin1String(":/icons/icon32.png"));
+    appIcon.addFile(QLatin1String(":/icons/icon64.png"));
+    appIcon.addFile(QLatin1String(":/icons/icon512.png"));
+    qApp->setWindowIcon(appIcon);
 
     connect(nam, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)), SLOT(sslErrors(QNetworkReply*,QList<QSslError>)));
 

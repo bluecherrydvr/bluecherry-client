@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QList>
+#include <QIcon>
 
 class DVRServer;
 class QNetworkAccessManager;
@@ -18,6 +19,7 @@ class BluecherryApp : public QObject
 public:
     QNetworkAccessManager * const nam;
     MainWindow *mainWindow;
+    QIcon appIcon;
 
     explicit BluecherryApp();
 
