@@ -384,3 +384,56 @@ void CameraAreaWidget::dropEvent(QDropEvent *ev)
     m_dragWidgets.clear();
     ev->acceptProposedAction();
 }
+
+void CameraAreaWidget::mousePressEvent(QMouseEvent *ev)
+{
+    LiveFeedWidget *fw = qobject_cast<LiveFeedWidget*>(childAt(ev->pos()));
+    if (!fw || ev->button() != Qt::LeftButton)
+    {
+        ev->ignore();
+        return;
+    }
+
+    ev->accept();
+
+    Q_ASSERT(m_dragWidgets.isEmpty());
+    m_dragWidgets.clear();
+    m_dragWidgets.append(fw);
+}
+
+void CameraAreaWidget::mouseMoveEvent(QMouseEvent *ev)
+{
+    if (!(ev->buttons() & Qt::LeftButton) || m_dragWidgets.isEmpty())
+        return;
+
+    Q_ASSERT(m_dragWidgets.size() == 1);
+
+    LiveFeedWidget *overWidget = qobject_cast<LiveFeedWidget*>(childAt(ev->pos()));
+    if (!overWidget || overWidget == m_dragWidgets[0])
+        return;
+
+    int dragRow, dragCol, overRow, overCol, dummy;
+
+    int dragPos = mainLayout->indexOf(m_dragWidgets[0]);
+    int overPos = mainLayout->indexOf(overWidget);
+    if (dragPos < 0 || overPos < 0)
+        return;
+
+    mainLayout->getItemPosition(dragPos, &dragRow, &dragCol, &dummy, &dummy);
+    mainLayout->getItemPosition(overPos, &overRow, &overCol, &dummy, &dummy);
+    mainLayout->addWidget(overWidget, dragRow, dragCol);
+    mainLayout->addWidget(m_dragWidgets[0], overRow, overCol);
+
+    /* Swap places in the list */
+    m_cameraWidgets[dragRow][dragCol] = overWidget;
+    m_cameraWidgets[overRow][overCol] = m_dragWidgets[0];
+
+    Q_ASSERT(mainLayout->indexOf(overWidget) >= 0);
+    Q_ASSERT(mainLayout->indexOf(m_dragWidgets[0]) >= 0);
+}
+
+void CameraAreaWidget::mouseReleaseEvent(QMouseEvent *ev)
+{
+    if (ev->button() == Qt::LeftButton)
+        m_dragWidgets.clear();
+}

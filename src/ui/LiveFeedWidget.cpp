@@ -233,7 +233,7 @@ bool LiveFeedWidget::event(QEvent *event)
     if (event->type() == QEvent::FontChange || event->type() == QEvent::Polish)
     {
         QFontMetrics fm(font());
-        m_titleHeight = qMax(20, fm.height() + 4);
+        m_titleHeight = qMax(15, fm.height() + 4);
         updateGeometry();
         update();
     }
@@ -251,7 +251,10 @@ void LiveFeedWidget::paintEvent(QPaintEvent *event)
 
     /* Title */
     p.save();
-    p.setPen(QColor(175, 175, 175));
+    p.setPen(Qt::NoPen);
+    p.setBrush(QBrush(QColor(35, 35, 35), Qt::Dense6Pattern));
+    p.drawRect(QRect(r.left(), r.top(), r.width(), m_titleHeight));
+    p.setPen(QColor(195, 195, 195));
     p.drawText(QRect(r.left(), r.top(), r.width(), m_titleHeight), Qt::AlignCenter,
                (m_dragCamera ? m_dragCamera : m_camera).displayName());
     p.restore();
