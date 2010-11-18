@@ -24,6 +24,6 @@
         <file>icon16.png</file>
         <file>icon32.png</file>
         <file>icon64.png</file>
-        <file>icon512.png</file>
+        <file>bluecherry.png</file>
     </qresource>
 </RCC>

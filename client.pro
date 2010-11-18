@@ -9,7 +9,9 @@ unix:!macx {
     target.path = /usr/bin
     shortcut.path = /usr/share/applications
     shortcut.files = "linux/Bluecherry Client.desktop"
-    INSTALLS += target shortcut
+    resources.path = /usr/share/bluecherry-client
+    resources.files = "res/bluecherry.png"
+    INSTALLS += target shortcut resources
 }
 
 macx:QMAKE_POST_LINK += cp $${_PRO_FILE_PWD_}/mac/Info.plist $${OUT_PWD}/$${TARGET}.app/Contents/;
@@ -184,5 +186,4 @@ RESOURCES += \
 RC_FILE = res/windows.rc
 ICONS = res/bluecherry.icns
 
-macx:OTHER_FILES += mac/Info.plist
-unix:!macx:OTHER_FILES += "linux/Bluecherry Client.desktop"
+OTHER_FILES += mac/Info.plist "linux/Bluecherry Client.desktop"

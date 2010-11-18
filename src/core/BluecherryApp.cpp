@@ -22,7 +22,7 @@ BluecherryApp::BluecherryApp()
     appIcon.addFile(QLatin1String(":/icons/icon16.png"));
     appIcon.addFile(QLatin1String(":/icons/icon32.png"));
     appIcon.addFile(QLatin1String(":/icons/icon64.png"));
-    appIcon.addFile(QLatin1String(":/icons/icon512.png"));
+    appIcon.addFile(QLatin1String(":/icons/bluecherry.png"));
     qApp->setWindowIcon(appIcon);
 
     connect(nam, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)), SLOT(sslErrors(QNetworkReply*,QList<QSslError>)));

@@ -4,5 +4,5 @@ Type=Application
 Name=Bluecherry Client
 Categories=Network;Qt
 Comment=Bluecherry DVR Client
+Icon=/usr/share/bluecherry-client/bluecherry.png
 Exec=bluecherry-client
-
