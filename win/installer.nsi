@@ -8,6 +8,8 @@ InstallDir "$PROGRAMFILES\Bluecherry Client"
 InstallDirRegKey HKLM "Software\Bluecherry Client" ""
 RequestExecutionLevel admin
 SetCompressor /FINAL /SOLID lzma
+!define MUI_ICON "..\res\bluecherry.ico"
+!define MUI_UNICON "..\res\bluecherry.ico"
 
 !insertmacro MUI_PAGE_WELCOME
 #!insertmacro MUI_PAGE_LICENSE "${NSISDIR}\Docs\Modern UI\License.txt"
