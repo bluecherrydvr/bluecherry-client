@@ -181,6 +181,7 @@ HEADERS  += src/ui/MainWindow.h \
 
 RESOURCES += \
     res/resources.qrc
+RC_FILE += res/windows.rc
 
 macx:OTHER_FILES += mac/Info.plist
 unix:!macx:OTHER_FILES += "linux/Bluecherry Client.desktop"
