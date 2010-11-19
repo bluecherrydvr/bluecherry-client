@@ -88,6 +88,7 @@ void ServerRequestManager::login(const QString &username, const QString &passwor
     QUrl queryData;
     queryData.addQueryItem(QLatin1String("login"), username);
     queryData.addQueryItem(QLatin1String("password"), password);
+    queryData.addQueryItem(QLatin1String("from_client"), QLatin1String("true"));
 
     emit loginRequestStarted();
 
