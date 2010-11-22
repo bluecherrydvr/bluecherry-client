@@ -172,6 +172,7 @@ bool VideoPlayerBackend::start(const QUrl &url)
 
     /* Buffered HTTP source (using source) */
     m_videoBuffer = new VideoHttpBuffer(GST_APP_SRC(source), m_pipeline, this);
+    connect(m_videoBuffer, SIGNAL(streamError(QString)), SLOT(streamError(QString)));
     m_videoBuffer->start(url);
 
     /* Decoder */
@@ -278,6 +279,13 @@ void VideoPlayerBackend::setError(bool permanent, const QString &message)
     m_state = permanent ? PermanentError : Error;
     m_errorMessage = message;
     emit stateChanged(m_state, old);
+}
+
+void VideoPlayerBackend::streamError(const QString &message)
+{
+    if (m_pipeline)
+        gst_element_set_state(m_pipeline, GST_STATE_NULL);
+    setError(true, message);
 }
 
 void VideoPlayerBackend::play()

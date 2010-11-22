@@ -59,6 +59,9 @@ signals:
     void durationChanged(qint64 duration);
     void endOfStream();
 
+private slots:
+    void streamError(const QString &message);
+
 private:
     GstElement *m_pipeline, *m_videoLink;
     VideoSurface *m_surface;

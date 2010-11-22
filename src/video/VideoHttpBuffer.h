@@ -41,6 +41,8 @@ private slots:
     void networkFinished();
     void networkMetaData();
 
+    void cancelNetwork();
+
 private:
     QTemporaryFile m_bufferFile;
     QNetworkReply *m_networkReply;
@@ -68,6 +70,8 @@ private:
 
     void needData(unsigned size);
     bool seekData(qint64 offset);
+
+    void sendStreamError(const QString &message);
 };
 
 #endif // VIDEOHTTPBUFFER_H
