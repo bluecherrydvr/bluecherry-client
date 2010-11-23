@@ -145,7 +145,8 @@ void BluecherryApp::sslErrors(QNetworkReply *reply, const QList<QSslError> &erro
             foreach (DVRServer *s, servers())
             {
                 QUrl serverUrl = s->api->serverUrl();
-                if (QString::compare(serverUrl.authority(), requestUrl.authority(), Qt::CaseInsensitive) == 0
+                if (QString::compare(serverUrl.host(), requestUrl.host(), Qt::CaseInsensitive) == 0
+                    && serverUrl.port() == requestUrl.port()
                     && QString::compare(serverUrl.scheme(), requestUrl.scheme(), Qt::CaseInsensitive) == 0)
                 {
                     server = s;

@@ -81,7 +81,14 @@ void MJpegStream::start()
 
     setState(Connecting);
 
-    m_httpReply = bcApp->nam->get(QNetworkRequest(url()));
+    /* HACK: QNetworkAccessManager limits itself to 6 parallel connections to a single
+     * host and port, which is unacceptable for this. It includes the username field when
+     * caching these connections, so we can work around it by sending a fake username.
+     * Needs a proper fix, because this behavior could be a Qt bug. Issue #535 */
+    QUrl hackUrl = url();
+    hackUrl.setUserName(QString::number(qrand()));
+
+    m_httpReply = bcApp->nam->get(QNetworkRequest(hackUrl));
     connect(m_httpReply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(requestError()));
     connect(m_httpReply, SIGNAL(readyRead()), SLOT(readable()));
 
