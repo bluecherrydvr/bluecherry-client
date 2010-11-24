@@ -75,16 +75,10 @@ void LiveFeedWidget::setCamera(const DVRCamera &camera)
     else
     {
         connect(m_camera, SIGNAL(dataUpdated()), SLOT(cameraDataUpdated()));
-        connect(m_camera, SIGNAL(removed()), SLOT(cameraRemoved()));
         setStream(m_camera.mjpegStream());
     }
 
     emit cameraChanged(m_camera);
-}
-
-void LiveFeedWidget::cameraRemoved()
-{
-    setStream(QSharedPointer<MJpegStream>());
 }
 
 void LiveFeedWidget::cameraDataUpdated()
@@ -184,7 +178,8 @@ void LiveFeedWidget::updateFrame(const QPixmap &frame, const QVector<QImage> &sc
         }
     }
 
-    m_statusMsg.clear();
+    if (m_stream && m_stream->state() == MJpegStream::Streaming)
+        m_statusMsg.clear();
     update();
 }
 
@@ -198,6 +193,9 @@ void LiveFeedWidget::mjpegStateChanged(int state)
     case MJpegStream::Error:
         setStatusMessage(tr("Stream Error"));
         setToolTip(m_stream->errorMessage());
+        break;
+    case MJpegStream::StreamOffline:
+        setStatusMessage(tr("Server\nOffline"));
         break;
     case MJpegStream::NotConnected:
         setStatusMessage(tr("Disconnected"));

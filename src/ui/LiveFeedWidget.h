@@ -47,7 +47,6 @@ private slots:
     void addScaleSize(QVector<QSize> &sizes);
     void mjpegStateChanged(int state);
     void cameraDataUpdated();
-    void cameraRemoved();
     void streamSizeChanged(const QSize &size);
 
 protected:

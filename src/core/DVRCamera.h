@@ -30,12 +30,13 @@ public:
     QString displayName;
     QByteArray streamUrl;
     QWeakPointer<MJpegStream> mjpegStream;
-    bool isLoaded;
+    bool isLoaded, isOnline;
 
     DVRCameraData(DVRServer *server, int uniqueID);
     virtual ~DVRCameraData();
 
 signals:
+    void onlineChanged(bool isOnline);
     void dataUpdated();
     void removed();
 
@@ -73,7 +74,8 @@ public:
     int uniqueId() const { return d ? d->uniqueID : -1; }
     QString displayName() const { return d ? d->displayName : QString(); }
     QByteArray streamUrl() const { return d ? d->streamUrl : QByteArray(); }
-    bool canStream() const { return d && !d->streamUrl.isEmpty(); }
+    bool isOnline() const { return d && d->isOnline; }
+    bool canStream() const { return d && !d->streamUrl.isEmpty() && isOnline(); }
     QSharedPointer<MJpegStream> mjpegStream();
 
     bool parseXML(QXmlStreamReader &xml);
@@ -86,7 +88,8 @@ private:
 
     DVRCamera(DVRCameraData *dt) : d(dt) { }
 
-    void removed() { emit d->removed(); }
+    void removed();
+    void setOnline(bool on);
 };
 
 Q_DECLARE_METATYPE(DVRCamera)

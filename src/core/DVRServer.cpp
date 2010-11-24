@@ -142,6 +142,8 @@ void DVRServer::updateCamerasReply()
                         continue;
                     }
 
+                    camera.setOnline(true);
+
                     if (!m_cameras.contains(camera))
                     {
                         m_cameras.append(camera);
@@ -180,6 +182,7 @@ void DVRServer::disconnected()
     while (!m_cameras.isEmpty())
     {
         DVRCamera c = m_cameras.takeFirst();
+        c.setOnline(false);
         emit cameraRemoved(c);
         c.removed();
     }

@@ -12,14 +12,14 @@
 
 MJpegStream::MJpegStream(QObject *parent)
     : QObject(parent), m_httpReply(0), m_decodeTask(0), m_lastActivity(0), m_httpBodyLength(0), m_state(NotConnected),
-      m_parserState(ParserBoundary)
+      m_parserState(ParserBoundary), m_autoStart(false)
 {
     connect(&m_activityTimer, SIGNAL(timeout()), SLOT(checkActivity()));
 }
 
 MJpegStream::MJpegStream(const QUrl &url, QObject *parent)
     : QObject(parent), m_httpReply(0), m_decodeTask(0), m_lastActivity(0), m_httpBodyLength(0), m_state(NotConnected),
-      m_parserState(ParserBoundary)
+      m_parserState(ParserBoundary), m_autoStart(false)
 {
     setUrl(url);
     connect(&m_activityTimer, SIGNAL(timeout()), SLOT(checkActivity()));
@@ -73,6 +73,12 @@ void MJpegStream::start()
     if (state() >= Connecting)
         return;
 
+    if (state() == StreamOffline)
+    {
+        m_autoStart = true;
+        return;
+    }
+
     if (!url().isValid())
     {
         setError(QLatin1String("Internal Error"));
@@ -109,9 +115,28 @@ void MJpegStream::stop()
     m_httpBoundary.clear();
 
     if (state() > NotConnected)
+    {
         setState(NotConnected);
+        m_autoStart = false;
+    }
 
     m_activityTimer.stop();
+}
+
+void MJpegStream::setOnline(bool online)
+{
+    if (!online && state() != StreamOffline)
+    {
+        m_autoStart = (m_autoStart || state() >= Connecting);
+        setState(StreamOffline);
+        stop();
+    }
+    else if (online && state() == StreamOffline)
+    {
+        setState(NotConnected);
+        if (m_autoStart)
+            start();
+    }
 }
 
 bool MJpegStream::processHeaders()

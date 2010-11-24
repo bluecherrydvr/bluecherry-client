@@ -26,6 +26,15 @@ DVRCamera DVRCamera::getCamera(DVRServer *server, int cameraID)
     return DVRCamera(data);
 }
 
+void DVRCamera::setOnline(bool on)
+{
+    if (!d || on == d->isOnline)
+        return;
+
+    d->isOnline = on;
+    emit d->onlineChanged(on);
+}
+
 bool DVRCamera::parseXML(QXmlStreamReader &xml)
 {
     if (!isValid())
@@ -33,7 +42,7 @@ bool DVRCamera::parseXML(QXmlStreamReader &xml)
 
     Q_ASSERT(xml.isStartElement() && xml.name() == QLatin1String("device"));
 
-    QString name, streamUrl;
+    QString name;
 
     while (xml.readNext() != QXmlStreamReader::Invalid)
     {
@@ -72,6 +81,7 @@ QSharedPointer<MJpegStream> DVRCamera::mjpegStream()
         if (d && !d->streamUrl.isEmpty())
         {
             re = QSharedPointer<MJpegStream>(new MJpegStream(QUrl(QString::fromLatin1(d->streamUrl))));
+            QObject::connect(d.data(), SIGNAL(onlineChanged(bool)), re.data(), SLOT(setOnline(bool)));
             d->mjpegStream = re;
         }
     }
@@ -81,8 +91,13 @@ QSharedPointer<MJpegStream> DVRCamera::mjpegStream()
     return re;
 }
 
+void DVRCamera::removed()
+{
+    emit d->removed();
+}
+
 DVRCameraData::DVRCameraData(DVRServer *s, int i)
-    : server(s), uniqueID(i), isLoaded(false)
+    : server(s), uniqueID(i), isLoaded(false), isOnline(false)
 {
     Q_ASSERT(instances.find(qMakePair(s->configId, i)) == instances.end());
     instances.insert(qMakePair(server->configId, uniqueID), this);

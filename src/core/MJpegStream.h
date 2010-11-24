@@ -17,7 +17,8 @@ class MJpegStream : public QObject
 public:
     enum State
     {
-        Error = -1,
+        Error = -2,
+        StreamOffline = -1,
         NotConnected,
         Connecting,
         Streaming
@@ -39,6 +40,8 @@ public:
 public slots:
     void start();
     void stop();
+
+    void setOnline(bool online);
 
     void updateScaleSizes();
 
@@ -76,6 +79,7 @@ private:
         ParserHeaders,
         ParserBody
     } m_parserState;
+    bool m_autoStart;
 
     void setState(State newState);
     void setError(const QString &message);
