@@ -1,3 +1,9 @@
+bluecherry-client (2.0.0-0beta2) lucid; urgency=low
+
+  * New release
+
+ -- John Brooks <john.brooks@bluecherry.net>  Tue, 23 Nov 2010 21:03:16 -0700
+
 bluecherry-client (2.0.0-0beta1-1) lucid; urgency=low
 
   * New release
