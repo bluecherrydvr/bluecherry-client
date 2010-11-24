@@ -6,8 +6,8 @@
         <string>Bluecherry Client</string>
         <key>CFBundleDisplayName</key>
         <string>Bluecherry Client</string>
-	<key>CFBundleIconFile</key>
-	<string></string>
+        <key>CFBundleIconFile</key>
+        <string>bluecherry.icns</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleExecutable</key>

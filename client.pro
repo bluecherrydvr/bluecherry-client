@@ -183,7 +183,7 @@ HEADERS  += src/ui/MainWindow.h \
 
 RESOURCES += \
     res/resources.qrc
-RC_FILE = res/windows.rc
-ICONS = res/bluecherry.icns
+win32:RC_FILE = res/windows.rc
+ICON = res/bluecherry.icns
 
 OTHER_FILES += mac/Info.plist "linux/Bluecherry Client.desktop"
