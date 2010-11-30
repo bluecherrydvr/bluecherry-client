@@ -1,5 +1,6 @@
 #include "VideoPlayerBackend_gst.h"
 #include "VideoHttpBuffer.h"
+#include "GstSinkWidget.h"
 #include <QUrl>
 #include <QDebug>
 #include <QApplication>
@@ -200,6 +201,7 @@ bool VideoPlayerBackend::start(const QUrl &url)
         return false;
     }
 
+#if 0
 #ifdef Q_WS_MAC
     GstElement *sink = gst_element_factory_make("osxvideosink", "sink");
     if (sink)
@@ -207,9 +209,15 @@ bool VideoPlayerBackend::start(const QUrl &url)
 #else
     GstElement *sink = gst_element_factory_make("autovideosink", "sink");
 #endif
+#endif
+    GstSinkWidget *sinkWidget = new GstSinkWidget(0);
+    sinkWidget->resize(320, 240);
+    sinkWidget->show();
+    GstElement *sink = GST_ELEMENT(sinkWidget->gstElement());
     if (!sink)
     {
         setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("sink")));
+        sinkWidget->deleteLater();
         return false;
     }
 

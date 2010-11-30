@@ -166,6 +166,12 @@ void CrashReportDialog::sendReport()
     if (m_uploadReply)
         return;
 
+    if (!m_allowReport->isChecked())
+    {
+        done(m_finalResult);
+        return;
+    }
+
     QString platform =
 #if defined(Q_OS_WIN)
                        QLatin1String("windows");
