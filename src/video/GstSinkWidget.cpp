@@ -9,6 +9,10 @@
 GstSinkWidget::GstSinkWidget(QWidget *parent)
     : QWidget(parent), m_frameWidth(-1), m_frameHeight(-1)
 {
+    setAutoFillBackground(false);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    setAttribute(Qt::WA_OpaquePaintEvent);
+
     m_element = GST_APP_SINK(gst_element_factory_make("appsink", "sinkwidget"));
     if (!m_element)
     {
@@ -33,13 +37,16 @@ GstSinkWidget::GstSinkWidget(QWidget *parent)
 
 QSize GstSinkWidget::sizeHint() const
 {
-    return QSize();
+    return QSize(m_frameWidth, m_frameHeight);
 }
 
 void GstSinkWidget::paintEvent(QPaintEvent *ev)
 {
     QPainter p(this);
-    p.drawImage(QPoint(0, 0), m_latestFrame);
+    /* Cheap reference-count; atomic, so there is no threading issue as long as we
+     * make this copy. */
+    QImage frame = m_latestFrame;
+    p.drawImage(rect(), frame);
 }
 
 void GstSinkWidget::endOfStream()

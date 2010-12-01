@@ -19,7 +19,7 @@
 #endif
 
 VideoPlayerBackend::VideoPlayerBackend(QObject *parent)
-    : QObject(parent), m_pipeline(0), m_videoLink(0), m_surface(0), m_videoBuffer(0), m_state(Stopped), m_sinkReady(false)
+    : QObject(parent), m_pipeline(0), m_videoLink(0), m_sinkWidget(0), m_videoBuffer(0), m_state(Stopped), m_sinkReady(false)
 {
     GError *err;
     if (gst_init_check(0, 0, &err) == FALSE)
@@ -131,29 +131,19 @@ static void decodePadReadyWrap(GstDecodeBin *bin, GstPad *pad, gboolean islast, 
     static_cast<VideoPlayerBackend*>(user_data)->decodePadReady(bin, pad, islast);
 }
 
-VideoSurface *VideoPlayerBackend::createSurface()
+GstSinkWidget *VideoPlayerBackend::createSurface()
 {
-    Q_ASSERT(!m_surface);
+    if (m_sinkWidget)
+        return m_sinkWidget;
 
-    m_surface = new VideoSurface;
-    QPalette p = m_surface->palette();
-    p.setColor(QPalette::Window, Qt::red);
-    m_surface->setPalette(p);
-    m_surface->setAutoFillBackground(false);
-    m_surface->setAttribute(Qt::WA_NativeWindow);
-    m_surface->setAttribute(Qt::WA_PaintOnScreen);
-    m_surface->setAttribute(Qt::WA_NoSystemBackground);
-    m_surface->setAttribute(Qt::WA_OpaquePaintEvent);
-
-    return m_surface;
+    m_sinkWidget = new GstSinkWidget;
+    return m_sinkWidget;
 }
 
 bool VideoPlayerBackend::start(const QUrl &url)
 {
     if (m_pipeline)
         clear();
-
-    Q_ASSERT(m_surface);
 
     /* Pipeline */
     m_pipeline = gst_pipeline_new("stream");
@@ -210,14 +200,10 @@ bool VideoPlayerBackend::start(const QUrl &url)
     GstElement *sink = gst_element_factory_make("autovideosink", "sink");
 #endif
 #endif
-    GstSinkWidget *sinkWidget = new GstSinkWidget(0);
-    sinkWidget->resize(320, 240);
-    sinkWidget->show();
-    GstElement *sink = GST_ELEMENT(sinkWidget->gstElement());
+    GstElement *sink = GST_ELEMENT(createSurface()->gstElement());
     if (!sink)
     {
         setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("sink")));
-        sinkWidget->deleteLater();
         return false;
     }
 
@@ -515,6 +501,7 @@ GstBusSyncReply VideoPlayerBackend::busHandler(GstBus *bus, GstMessage *msg, boo
         }
         break;
 
+#if 0
     case GST_MESSAGE_ELEMENT:
         if (isSynchronous && gst_structure_has_name(msg->structure, "prepare-xwindow-id"))
         {
@@ -530,6 +517,7 @@ GstBusSyncReply VideoPlayerBackend::busHandler(GstBus *bus, GstMessage *msg, boo
             return GST_BUS_DROP;
         }
         break;
+#endif
 
     default:
         break;
@@ -555,11 +543,13 @@ bool VideoPlayerBackend::updateVideoSize()
                 if (gst_video_get_size(pad, &width, &height))
                 {
                     qDebug() << "gstreamer: Determined video size to be" << width << height;
+#if 0
                     bool ok = QMetaObject::invokeMethod(m_surface, "setVideoSize",
                                                         Qt::QueuedConnection,
                                                         Q_ARG(QSize, QSize(width, height)));
                     Q_ASSERT(ok);
                     Q_UNUSED(ok);
+#endif
                     done = success = true;
                 }
 

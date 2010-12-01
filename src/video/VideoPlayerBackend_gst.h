@@ -8,6 +8,7 @@
 
 class QUrl;
 class VideoHttpBuffer;
+class GstSinkWidget;
 
 typedef struct _GstDecodeBin GstDecodeBin;
 
@@ -29,7 +30,7 @@ public:
     explicit VideoPlayerBackend(QObject *parent = 0);
     ~VideoPlayerBackend();
 
-    VideoSurface *createSurface();
+    GstSinkWidget *createSurface();
 
     bool start(const QUrl &url);
     void clear();
@@ -64,7 +65,7 @@ private slots:
 
 private:
     GstElement *m_pipeline, *m_videoLink;
-    VideoSurface *m_surface;
+    GstSinkWidget *m_sinkWidget;
     VideoHttpBuffer *m_videoBuffer;
     VideoState m_state;
     QString m_errorMessage;

@@ -1,6 +1,7 @@
 #include "EventVideoPlayer.h"
 #include "EventVideoDownload.h"
 #include "video/VideoSurface.h"
+#include "video/GstSinkWidget.h"
 #include "core/BluecherryApp.h"
 #include "ui/MainWindow.h"
 #include <QBoxLayout>
@@ -31,7 +32,7 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     QBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
 
-    m_videoWidget = new VideoContainer(backend.createSurface());
+    m_videoWidget = backend.createSurface();
     m_videoWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_videoWidget, SIGNAL(customContextMenuRequested(QPoint)), SLOT(videoContextMenu(QPoint)));
     layout->addWidget(m_videoWidget, 1);
