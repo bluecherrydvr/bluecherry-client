@@ -8,18 +8,10 @@
 #include <gst/gst.h>
 #include <gst/app/gstappsrc.h>
 #include <gst/video/video.h>
-#include <gst/interfaces/xoverlay.h>
 #include <glib.h>
 
-#if defined(Q_OS_MAC) && !defined(QT_MAC_USE_COCOA)
-/* GStreamer's osxvideosink and glimagesink both require Cocoa views (NSView)
- * to render. As a result, we can't have a Carbon build of Qt and render the video
- * properly. */
-#error GStreamer requires a Cocoa-based build of Qt
-#endif
-
 VideoPlayerBackend::VideoPlayerBackend(QObject *parent)
-    : QObject(parent), m_pipeline(0), m_videoLink(0), m_sinkWidget(0), m_videoBuffer(0), m_state(Stopped), m_sinkReady(false)
+    : QObject(parent), m_pipeline(0), m_videoLink(0), m_sinkWidget(0), m_videoBuffer(0), m_state(Stopped)
 {
     GError *err;
     if (gst_init_check(0, 0, &err) == FALSE)
@@ -188,8 +180,6 @@ bool VideoPlayerBackend::start(const QUrl &url)
         return false;
     }
 
-    m_sinkReady = false;
-
     gst_bin_add_many(GST_BIN(m_pipeline), source, decoder, colorspace, sink, NULL);
     if (!gst_element_link_many(source, decoder, NULL))
     {
@@ -234,6 +224,7 @@ void VideoPlayerBackend::clear()
         gst_object_unref(GST_OBJECT(m_pipeline));
     }
 
+    /* XXX: m_sinkWidget isn't cleared in any way */
     m_pipeline = m_videoLink = 0;
 
     if (m_videoBuffer)
@@ -245,7 +236,6 @@ void VideoPlayerBackend::clear()
 
     m_state = Stopped;
     m_errorMessage.clear();
-    m_sinkReady = false;
 }
 
 void VideoPlayerBackend::setError(bool permanent, const QString &message)
@@ -423,12 +413,6 @@ GstBusSyncReply VideoPlayerBackend::busHandler(GstBus *bus, GstMessage *msg, boo
                 break;
             }
 
-            if (oldState < GST_STATE_PAUSED && newState >= GST_STATE_PAUSED)
-                updateVideoSize();
-
-            if (m_sinkReady && newState < GST_STATE_PAUSED)
-                m_sinkReady = false;
-
             if (vpState != m_state)
             {
                 VideoState old = m_state;
@@ -482,69 +466,9 @@ GstBusSyncReply VideoPlayerBackend::busHandler(GstBus *bus, GstMessage *msg, boo
         }
         break;
 
-#if 0
-    case GST_MESSAGE_ELEMENT:
-        if (isSynchronous && gst_structure_has_name(msg->structure, "prepare-xwindow-id"))
-        {
-            qDebug("gstreamer: Setting window ID");
-            GstElement *sink = GST_ELEMENT(GST_MESSAGE_SRC(msg));
-            gst_x_overlay_set_xwindow_id(GST_X_OVERLAY(sink), (gulong)m_surface->winId());
-            gst_x_overlay_expose(GST_X_OVERLAY(sink));
-            gst_message_unref(msg);
-
-            m_sinkReady = true;
-            updateVideoSize();
-
-            return GST_BUS_DROP;
-        }
-        break;
-#endif
-
     default:
         break;
     }
 
     return GST_BUS_PASS;
-}
-
-bool VideoPlayerBackend::updateVideoSize()
-{
-    Q_ASSERT(m_videoLink);
-
-    GstIterator *padit = gst_element_iterate_src_pads(m_videoLink);
-    bool done = false, success = false;
-    while (!done)
-    {
-        GstPad *pad;
-        switch (gst_iterator_next(padit, (gpointer*)&pad))
-        {
-        case GST_ITERATOR_OK:
-            {
-                int width, height;
-                if (gst_video_get_size(pad, &width, &height))
-                {
-                    qDebug() << "gstreamer: Determined video size to be" << width << height;
-#if 0
-                    bool ok = QMetaObject::invokeMethod(m_surface, "setVideoSize",
-                                                        Qt::QueuedConnection,
-                                                        Q_ARG(QSize, QSize(width, height)));
-                    Q_ASSERT(ok);
-                    Q_UNUSED(ok);
-#endif
-                    done = success = true;
-                }
-
-                gst_object_unref(GST_OBJECT(pad));
-            }
-            break;
-        case GST_ITERATOR_DONE:
-            done = true;
-            break;
-        default:
-            break;
-        }
-    }
-
-    gst_iterator_free(padit);
-    return success;
 }
