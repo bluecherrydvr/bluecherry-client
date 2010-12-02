@@ -101,13 +101,11 @@ GstFlowReturn GstSinkWidget::newPreroll()
     GstCaps *caps = GST_BUFFER_CAPS(buffer);
     Q_ASSERT(caps);
 
-    updateFrame(buffer);
-    gst_buffer_unref(buffer);
-
     if (!gst_caps_is_fixed(caps))
     {
-        qWarning() << "GstSinkWidget: Expecting fixed caps";
-        return GST_FLOW_ERROR;
+        qDebug() << "GstSinkWidget: Expecting fixed caps in preroll; ignoring for now";
+        gst_buffer_unref(buffer);
+        return GST_FLOW_OK;
     }
 
     GstStructure *cs = gst_caps_get_structure(caps, 0);
@@ -117,12 +115,13 @@ GstFlowReturn GstSinkWidget::newPreroll()
         !gst_structure_get_int(cs, "height", &m_frameHeight))
     {
         qWarning() << "GstSinkWidget: No frame dimensions available";
-        gst_caps_unref(caps);
+        gst_buffer_unref(buffer);
         return GST_FLOW_ERROR;
     }
 
-    gst_caps_unref(caps);
+    updateFrame(buffer);
 
+    gst_buffer_unref(buffer);
     return GST_FLOW_OK;
 }
 
