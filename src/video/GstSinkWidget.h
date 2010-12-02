@@ -14,6 +14,7 @@ class GstSinkWidget : public QGLWidget
 
 public:
     explicit GstSinkWidget(QWidget *parent = 0);
+    ~GstSinkWidget();
 
     GstAppSink *gstElement() const { return m_element; }
 

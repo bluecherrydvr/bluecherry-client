@@ -35,6 +35,18 @@ GstSinkWidget::GstSinkWidget(QWidget *parent)
     gst_app_sink_set_callbacks(m_element, &callbacks, this, NULL);
 }
 
+GstSinkWidget::~GstSinkWidget()
+{
+    m_frameLock.lock();
+    if (m_framePtr)
+    {
+        /* Corresponding to the ref done in updateFrame prior to setting the value */
+        gst_buffer_unref(m_framePtr);
+        m_framePtr = 0;
+    }
+    m_frameLock.unlock();
+}
+
 QSize GstSinkWidget::sizeHint() const
 {
     return QSize(m_frameWidth, m_frameHeight);
