@@ -7,7 +7,7 @@
 #include <gst/app/gstappsink.h>
 
 GstSinkWidget::GstSinkWidget(QWidget *parent)
-    : QWidget(parent), m_frameWidth(-1), m_frameHeight(-1)
+    : QWidget(parent), m_framePtr(0), m_frameWidth(-1), m_frameHeight(-1)
 {
     setAutoFillBackground(false);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -43,10 +43,24 @@ QSize GstSinkWidget::sizeHint() const
 void GstSinkWidget::paintEvent(QPaintEvent *ev)
 {
     QPainter p(this);
-    /* Cheap reference-count; atomic, so there is no threading issue as long as we
-     * make this copy. */
-    QImage frame = m_latestFrame;
+    p.setRenderHint(QPainter::SmoothPixmapTransform);
+
+    m_frameLock.lock();
+    GstBuffer *buffer = m_framePtr;
+    if (buffer)
+        gst_buffer_ref(buffer);
+    m_frameLock.unlock();
+
+    if (!buffer)
+    {
+        p.fillRect(rect(), Qt::black);
+        return;
+    }
+
+    QImage frame = QImage(GST_BUFFER_DATA(buffer), m_frameWidth, m_frameHeight, QImage::Format_RGB32);
     p.drawImage(rect(), frame);
+
+    gst_buffer_unref(buffer);
 }
 
 void GstSinkWidget::endOfStream()
@@ -60,7 +74,14 @@ void GstSinkWidget::updateFrame(GstBuffer *buffer)
         return;
 
     Q_ASSERT(buffer && GST_BUFFER_DATA(buffer));
-    m_latestFrame = QImage(GST_BUFFER_DATA(buffer), m_frameWidth, m_frameHeight, QImage::Format_RGB32);
+
+    gst_buffer_ref(buffer);
+    m_frameLock.lock();
+    if (m_framePtr)
+        gst_buffer_unref(m_framePtr);
+    m_framePtr = buffer;
+    m_frameLock.unlock();
+
     QMetaObject::invokeMethod(this, "repaint", Qt::QueuedConnection);
 }
 
@@ -79,7 +100,6 @@ GstFlowReturn GstSinkWidget::newPreroll()
     updateFrame(buffer);
     gst_buffer_unref(buffer);
 
-    qDebug() << "GstSinkWiget: preroll is ready; caps:" << gst_caps_to_string(caps); // MEMORY LEAK
     if (!gst_caps_is_fixed(caps))
     {
         qWarning() << "GstSinkWidget: Expecting fixed caps";
@@ -99,7 +119,6 @@ GstFlowReturn GstSinkWidget::newPreroll()
 
     gst_caps_unref(caps);
 
-    qDebug() << "GstSinkWidget: video is" << m_frameWidth << m_frameHeight;
     return GST_FLOW_OK;
 }
 
@@ -111,7 +130,6 @@ GstFlowReturn GstSinkWidget::newBuffer()
         return GST_FLOW_UNEXPECTED;
     }
 
-    qDebug() << "GstSinkWidget: new buffer is ready";
     GstBuffer *buffer = gst_app_sink_pull_buffer(m_element);
     if (!buffer)
         return GST_FLOW_UNEXPECTED;

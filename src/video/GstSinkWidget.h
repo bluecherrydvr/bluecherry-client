@@ -2,6 +2,7 @@
 #define GSTSINKWIDGET_H
 
 #include <QWidget>
+#include <QMutex>
 #include <gst/gst.h> // needed for GstFlowReturn
 
 typedef struct _GstAppSink GstAppSink;
@@ -23,7 +24,8 @@ protected:
 
 private:
     GstAppSink *m_element;
-    QImage m_latestFrame;
+    GstBuffer *m_framePtr;
+    QMutex m_frameLock;
     int m_frameWidth, m_frameHeight;
 
     static void wrapEos(GstAppSink *sink, gpointer user_data);
