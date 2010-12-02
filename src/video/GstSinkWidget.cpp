@@ -62,7 +62,14 @@ void GstSinkWidget::paintEvent(QPaintEvent *ev)
     }
 
     QImage frame = QImage(GST_BUFFER_DATA(buffer), m_frameWidth, m_frameHeight, QImage::Format_RGB32);
-    p.drawImage(rect(), frame);
+
+    QRect r = rect();
+    QSize scaledSize = frame.size();
+    scaledSize.scale(r.size(), Qt::KeepAspectRatio);
+    r.adjust((r.width() - scaledSize.width()) / 2, (r.height() - scaledSize.height()) / 2, 0, 0);
+    r.setSize(scaledSize);
+
+    p.drawImage(r, frame);
 
     gst_buffer_unref(buffer);
 }
