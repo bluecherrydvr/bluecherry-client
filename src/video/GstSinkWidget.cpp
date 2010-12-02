@@ -7,7 +7,7 @@
 #include <gst/app/gstappsink.h>
 
 GstSinkWidget::GstSinkWidget(QWidget *parent)
-    : QWidget(parent), m_framePtr(0), m_frameWidth(-1), m_frameHeight(-1)
+    : QGLWidget(parent), m_framePtr(0), m_frameWidth(-1), m_frameHeight(-1)
 {
     setAutoFillBackground(false);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -39,6 +39,10 @@ QSize GstSinkWidget::sizeHint() const
 {
     return QSize(m_frameWidth, m_frameHeight);
 }
+
+/* It is technically possible to draw into QGLWidget from another thread, if things are changed
+ * to protect the context. This would provide a big benefit in terms of latency and CPU usage
+ * here. */
 
 void GstSinkWidget::paintEvent(QPaintEvent *ev)
 {

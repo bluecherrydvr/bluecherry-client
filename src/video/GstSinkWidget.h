@@ -1,14 +1,14 @@
 #ifndef GSTSINKWIDGET_H
 #define GSTSINKWIDGET_H
 
-#include <QWidget>
+#include <QGLWidget>
 #include <QMutex>
 #include <gst/gst.h> // needed for GstFlowReturn
 
 typedef struct _GstAppSink GstAppSink;
 typedef void* gpointer;
 
-class GstSinkWidget : public QWidget
+class GstSinkWidget : public QGLWidget
 {
     Q_OBJECT
 

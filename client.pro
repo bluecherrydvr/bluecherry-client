@@ -1,4 +1,4 @@
-QT += core gui network webkit
+QT += core gui network webkit opengl
 CONFIG(static):QTPLUGIN += qjpeg
 
 TARGET = BluecherryClient
