@@ -53,16 +53,14 @@ bool VideoPlayerBackend::loadPlugins()
     const char *plugins[] =
     {
         "libgsttypefindfunctions"EXT, "libgstapp"EXT, "libgstdecodebin"EXT, "libgstmatroska"EXT,
-        "libgstvideoscale"EXT, "libgstffmpegcolorspace"EXT, "libgstcoreelements"EXT,
+        "libgstffmpegcolorspace"EXT, "libgstcoreelements"EXT,
 #ifndef Q_OS_WIN
         "libgstffmpeg"EXT,
 #endif
 #ifdef Q_OS_WIN
-        "libgstffmpeg-lgpl"EXT, "libgstautodetect"EXT, "libgstdshowvideosink"EXT, "libgstdirectsound"EXT,
+        "libgstffmpeg-lgpl"EXT, "libgstautodetect"EXT, "libgstdirectsound"EXT,
 #elif defined(Q_OS_MAC)
-        "libgstosxaudio"EXT, "libgstosxvideosink"EXT,
-#else
-        "libgstxvimagesink"EXT,
+        "libgstosxaudio"EXT,
 #endif
         0
     };
@@ -183,23 +181,6 @@ bool VideoPlayerBackend::start(const QUrl &url)
         return false;
     }
 
-    /* Video scaling */
-    GstElement *scale = gst_element_factory_make("videoscale", "scale");
-    if (!scale)
-    {
-        setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("scale")));
-        return false;
-    }
-
-#if 0
-#ifdef Q_WS_MAC
-    GstElement *sink = gst_element_factory_make("osxvideosink", "sink");
-    if (sink)
-        g_object_set(G_OBJECT(sink), "embed", TRUE, NULL);
-#else
-    GstElement *sink = gst_element_factory_make("autovideosink", "sink");
-#endif
-#endif
     GstElement *sink = GST_ELEMENT(createSurface()->gstElement());
     if (!sink)
     {
@@ -209,14 +190,14 @@ bool VideoPlayerBackend::start(const QUrl &url)
 
     m_sinkReady = false;
 
-    gst_bin_add_many(GST_BIN(m_pipeline), source, decoder, colorspace, scale, sink, NULL);
+    gst_bin_add_many(GST_BIN(m_pipeline), source, decoder, colorspace, sink, NULL);
     if (!gst_element_link_many(source, decoder, NULL))
     {
         setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("link decoder")));
         return false;
     }
 
-    if (!gst_element_link_many(colorspace, scale, sink, NULL))
+    if (!gst_element_link_many(colorspace, sink, NULL))
     {
         setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("link sink")));
         return false;
