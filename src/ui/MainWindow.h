@@ -43,6 +43,7 @@ signals:
     void closing();
 
 protected:
+    virtual void showEvent(QShowEvent *event);
     virtual void closeEvent(QCloseEvent *event);
 
 private:

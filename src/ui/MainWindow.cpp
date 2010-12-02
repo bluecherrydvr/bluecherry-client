@@ -30,6 +30,8 @@
 #include <QSslConfiguration>
 #include <QSslCertificate>
 #include <QTextDocument>
+#include <QShowEvent>
+#include <QGLFormat>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -113,6 +115,23 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+}
+
+void MainWindow::showEvent(QShowEvent *event)
+{
+    if (!event->spontaneous())
+    {
+        if (!QGLFormat::hasOpenGL())
+        {
+            QMessageBox::critical(this, tr("Error"), tr("This application is designed to utilize OpenGL "
+                                                        "acceleration, which is not supported by your system. "
+                                                        "The application may not function correctly.\n\n"
+                                                        "For help, contact support@bluecherrydvr.com."),
+                                  QMessageBox::Ok);
+        }
+    }
+
+    QMainWindow::showEvent(event);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
