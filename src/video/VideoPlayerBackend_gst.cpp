@@ -121,7 +121,7 @@ static void decodePadReadyWrap(GstDecodeBin *bin, GstPad *pad, gboolean islast, 
     static_cast<VideoPlayerBackend*>(user_data)->decodePadReady(bin, pad, islast);
 }
 
-GstSinkWidget *VideoPlayerBackend::createSurface()
+GstSinkWidget *VideoPlayerBackend::createSinkWidget()
 {
     if (m_sinkWidget)
         return m_sinkWidget;
@@ -173,7 +173,7 @@ bool VideoPlayerBackend::start(const QUrl &url)
         return false;
     }
 
-    GstElement *sink = GST_ELEMENT(createSurface()->gstElement());
+    GstElement *sink = GST_ELEMENT(createSinkWidget()->gstElement());
     if (!sink)
     {
         setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("sink")));

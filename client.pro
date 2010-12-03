@@ -175,7 +175,7 @@ HEADERS  += src/ui/MainWindow.h \
     src/ui/EventVideoPlayer.h \
     src/video/VideoPlayerBackend_gst.h \
     src/video/VideoHttpBuffer.h \
-    src/video/VideoSurface.h \
+    src/video/VideoContainer.h \
     src/ui/EventVideoDownload.h \
     src/ui/ServerConfigWindow.h \
     src/ui/AboutDialog.h \

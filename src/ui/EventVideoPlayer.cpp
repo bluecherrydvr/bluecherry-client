@@ -1,6 +1,6 @@
 #include "EventVideoPlayer.h"
 #include "EventVideoDownload.h"
-#include "video/VideoSurface.h"
+#include "video/VideoContainer.h"
 #include "video/GstSinkWidget.h"
 #include "core/BluecherryApp.h"
 #include "ui/MainWindow.h"
@@ -32,10 +32,11 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     QBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
 
-    m_videoWidget = backend.createSurface();
-    m_videoWidget->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(m_videoWidget, SIGNAL(customContextMenuRequested(QPoint)), SLOT(videoContextMenu(QPoint)));
-    layout->addWidget(m_videoWidget, 1);
+    m_videoWidget = backend.createSinkWidget();
+    m_videoContainer = new VideoContainer(m_videoWidget);
+    m_videoContainer->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_videoContainer, SIGNAL(customContextMenuRequested(QPoint)), SLOT(videoContextMenu(QPoint)));
+    layout->addWidget(m_videoContainer, 1);
 
     QBoxLayout *sliderLayout = new QHBoxLayout;
     layout->addLayout(sliderLayout);
@@ -74,7 +75,7 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     connect(sc, SIGNAL(activated()), SLOT(playPause()));
 
     sc = new QShortcut(QKeySequence(Qt::Key_F), m_videoWidget);
-    connect(sc, SIGNAL(activated()), m_videoWidget, SLOT(toggleFullScreen()));
+    connect(sc, SIGNAL(activated()), m_videoContainer, SLOT(toggleFullScreen()));
 
     sc = new QShortcut(QKeySequence(Qt::Key_R), m_videoWidget);
     connect(sc, SIGNAL(activated()), SLOT(restart()));
@@ -228,9 +229,9 @@ void EventVideoPlayer::videoContextMenu(const QPoint &rpos)
     menu.addSeparator();
 
     if (m_videoWidget->isFullScreen())
-        menu.addAction(tr("Exit &full screen"), m_videoWidget, SLOT(toggleFullScreen()));
+        menu.addAction(tr("Exit &full screen"), m_videoContainer, SLOT(toggleFullScreen()));
     else
-        menu.addAction(tr("&Full screen"), m_videoWidget, SLOT(toggleFullScreen()));
+        menu.addAction(tr("&Full screen"), m_videoContainer, SLOT(toggleFullScreen()));
 
     menu.addSeparator();
 

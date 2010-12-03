@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QWidget>
 #include <gst/gst.h>
-#include "VideoSurface.h"
 
 class QUrl;
 class VideoHttpBuffer;
@@ -30,7 +29,7 @@ public:
     explicit VideoPlayerBackend(QObject *parent = 0);
     ~VideoPlayerBackend();
 
-    GstSinkWidget *createSurface();
+    GstSinkWidget *createSinkWidget();
 
     bool start(const QUrl &url);
     void clear();

@@ -13,6 +13,7 @@ class QToolButton;
 class QSlider;
 class QLabel;
 class GstSinkWidget;
+class VideoContainer;
 
 class EventVideoPlayer : public QWidget
 {
@@ -39,6 +40,7 @@ private slots:
 
 private:
     VideoPlayerBackend backend;
+    VideoContainer *m_videoContainer;
     GstSinkWidget *m_videoWidget;
     QToolButton *m_playBtn;
     QSlider *m_seekSlider;
