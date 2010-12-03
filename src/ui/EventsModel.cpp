@@ -262,15 +262,26 @@ void EventsModel::applyFilters(bool fromCache)
     }
     else
     {
-        for (int i = 0; i < items.size(); ++i)
+        /* Group contiguous removed rows together; provides a significant boost in performance */
+        int removeFirst = -1;
+        for (int i = 0; ; ++i)
         {
-            if (!testFilter(items[i]))
+            if (i < items.size() && !testFilter(items[i]))
             {
-                emit beginRemoveRows(QModelIndex(), i, i);
-                items.removeAt(i);
-                emit endRemoveRows();
-                --i;
+                if (removeFirst < 0)
+                    removeFirst = i;
             }
+            else if (removeFirst >= 0)
+            {
+                beginRemoveRows(QModelIndex(), removeFirst, i-1);
+                items.erase(items.begin()+removeFirst, items.begin()+i);
+                i = removeFirst;
+                removeFirst = -1;
+                endRemoveRows();
+            }
+
+            if (i == items.size())
+                break;
         }
     }
 
