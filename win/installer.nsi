@@ -34,6 +34,7 @@ Section
         File "${QT_PATH}\QtGui4.dll"
         File "${QT_PATH}\QtNetwork4.dll"
         File "${QT_PATH}\QtWebkit4.dll"
+        File "${QT_PATH}\QtOpenGL4.dll"
         File "${QT_PATH}\phonon4.dll"
         File "${QT_PATH}\ssleay32.dll"
         File "${QT_PATH}\libeay32.dll"
