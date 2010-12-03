@@ -60,6 +60,7 @@ void GstSinkWidget::paintEvent(QPaintEvent *ev)
 {
     QPainter p(this);
     p.setRenderHint(QPainter::SmoothPixmapTransform);
+    p.setBackground(QColor(Qt::black));
 
     m_frameLock.lock();
     GstBuffer *buffer = m_framePtr;
@@ -76,6 +77,8 @@ void GstSinkWidget::paintEvent(QPaintEvent *ev)
     QImage frame = QImage(GST_BUFFER_DATA(buffer), m_frameWidth, m_frameHeight, QImage::Format_RGB32);
 
     QRect r = rect();
+    p.eraseRect(r);
+
     QSize scaledSize = frame.size();
     scaledSize.scale(r.size(), Qt::KeepAspectRatio);
     r.adjust((r.width() - scaledSize.width()) / 2, (r.height() - scaledSize.height()) / 2, 0, 0);
