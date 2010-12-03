@@ -16,6 +16,8 @@
 #include <QShortcut>
 #include <QMenu>
 #include <QDebug>
+#include <QToolTip>
+#include <QMessageBox>
 
 EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     : QWidget(parent)
@@ -82,6 +84,9 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
 
     sc = new QShortcut(QKeySequence::Save, m_videoWidget);
     connect(sc, SIGNAL(activated()), SLOT(saveVideo()));
+
+    sc = new QShortcut(QKeySequence(Qt::Key_F5), m_videoWidget);
+    connect(sc, SIGNAL(activated()), SLOT(saveSnapshot()));
 }
 
 void EventVideoPlayer::setVideo(const QUrl &url)
@@ -211,6 +216,31 @@ void EventVideoPlayer::saveVideo(const QString &path)
     dl->start(bcApp->mainWindow);
 }
 
+void EventVideoPlayer::saveSnapshot(const QString &ifile)
+{
+    QImage frame = m_videoWidget->currentFrame();
+    if (frame.isNull())
+        return;
+
+    QString file = ifile;
+
+    if (file.isEmpty())
+    {
+        file = QFileDialog::getSaveFileName(this, tr("Save Video Snapshot"), QString(), tr("Image (*.jpg)"));
+        if (file.isEmpty())
+            return;
+    }
+
+    if (!frame.save(file, "jpeg"))
+    {
+        QMessageBox::critical(this, tr("Snapshot Error"), tr("An error occurred while saving the video snapshot."),
+                              QMessageBox::Ok);
+        return;
+    }
+
+    QToolTip::showText(m_videoWidget->mapToGlobal(QPoint(0,0)), tr("Snapshot Saved"), this);
+}
+
 void EventVideoPlayer::videoContextMenu(const QPoint &rpos)
 {
     QPoint pos = rpos;
@@ -236,6 +266,7 @@ void EventVideoPlayer::videoContextMenu(const QPoint &rpos)
     menu.addSeparator();
 
     menu.addAction(tr("Save video"), this, SLOT(saveVideo()));
+    menu.addAction(tr("Snapshot"), this, SLOT(saveSnapshot()));
 
     menu.exec(pos);
 }

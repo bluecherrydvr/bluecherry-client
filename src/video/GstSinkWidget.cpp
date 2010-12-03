@@ -52,6 +52,27 @@ QSize GstSinkWidget::sizeHint() const
     return QSize(m_frameWidth, m_frameHeight);
 }
 
+QImage GstSinkWidget::currentFrame()
+{
+    if (m_frameWidth < 0 || m_frameHeight < 0)
+        return QImage();
+
+    m_frameLock.lock();
+    GstBuffer *buffer = m_framePtr;
+    if (buffer)
+        gst_buffer_ref(buffer);
+    m_frameLock.unlock();
+
+    if (!buffer)
+        return QImage();
+
+    QImage re = QImage(GST_BUFFER_DATA(buffer), m_frameWidth, m_frameHeight, QImage::Format_RGB32);
+    re.bits(); // force a deep copy
+    gst_buffer_unref(buffer);
+
+    return re;
+}
+
 /* It is technically possible to draw into QGLWidget from another thread, if things are changed
  * to protect the context. This would provide a big benefit in terms of latency and CPU usage
  * here. */

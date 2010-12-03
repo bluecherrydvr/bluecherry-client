@@ -26,6 +26,7 @@ public slots:
     void setVideo(const QUrl &url);
     void clearVideo();
     void saveVideo(const QString &path = QString());
+    void saveSnapshot(const QString &file = QString());
 
     void playPause();
     void seek(int position);

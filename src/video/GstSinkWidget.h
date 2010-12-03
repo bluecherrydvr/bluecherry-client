@@ -17,6 +17,7 @@ public:
     ~GstSinkWidget();
 
     GstAppSink *gstElement() const { return m_element; }
+    QImage currentFrame();
 
     virtual QSize sizeHint() const;
 
