@@ -8,6 +8,7 @@ class QLineEdit;
 class DVRServer;
 class QModelIndex;
 class QLabel;
+class QCheckBox;
 
 class OptionsServerPage : public OptionsDialogPage
 {
@@ -37,6 +38,7 @@ private:
     QTreeView *m_serversView;
     QLabel *m_connectionStatus;
     QLineEdit *m_nameEdit, *m_hostnameEdit, *m_portEdit, *m_usernameEdit, *m_passwordEdit;
+    QCheckBox *m_autoConnect;
 };
 
 #endif // OPTIONSSERVERPAGE_H

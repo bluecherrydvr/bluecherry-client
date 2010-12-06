@@ -17,16 +17,16 @@ DVRServer::DVRServer(int id, QObject *parent)
     connect(api, SIGNAL(loginSuccessful()), SLOT(updateCameras()));
     connect(api, SIGNAL(disconnected()), SLOT(disconnected()));
 
-    if (!hostname().isEmpty() && !username().isEmpty())
+    if (readSetting("autoConnect", true).toBool() && !hostname().isEmpty() && !username().isEmpty())
         QTimer::singleShot(0, this, SLOT(login()));
 
     connect(&m_refreshTimer, SIGNAL(timeout()), SLOT(updateCameras()));
 }
 
-QVariant DVRServer::readSetting(const QString &key) const
+QVariant DVRServer::readSetting(const QString &key, const QVariant &def) const
 {
     QSettings settings;
-    return settings.value(QString::fromLatin1("servers/%1/").arg(configId).append(key));
+    return settings.value(QString::fromLatin1("servers/%1/").arg(configId).append(key), def);
 }
 
 void DVRServer::writeSetting(const QString &key, const QVariant &value)

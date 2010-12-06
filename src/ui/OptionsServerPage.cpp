@@ -11,6 +11,7 @@
 #include <QTextDocument>
 #include <QMessageBox>
 #include <QIntValidator>
+#include <QCheckBox>
 
 OptionsServerPage::OptionsServerPage(QWidget *parent)
     : OptionsDialogPage(parent)
@@ -74,10 +75,14 @@ OptionsServerPage::OptionsServerPage(QWidget *parent)
     m_passwordEdit->setEchoMode(QLineEdit::PasswordEchoOnEdit);
     editsLayout->addWidget(m_passwordEdit, 1, 3);
 
+    m_autoConnect = new QCheckBox(tr("Connect Automatically"));
+    m_autoConnect->setChecked(true);
+    editsLayout->addWidget(m_autoConnect, 2, 1, 1, 1);
+
     /* Errors */
     m_connectionStatus = new QLabel;
     m_connectionStatus->setAlignment(Qt::AlignCenter);
-    m_connectionStatus->setContentsMargins(4, 4, 4, 4);
+    //m_connectionStatus->setContentsMargins(4, 4, 4, 4);
     m_connectionStatus->setVisible(false);
     mainLayout->addWidget(m_connectionStatus);
 
@@ -140,6 +145,7 @@ void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const 
     m_portEdit->setText(QString::number(server->serverPort()));
     m_usernameEdit->setText(server->readSetting("username").toString());
     m_passwordEdit->setText(server->readSetting("password").toString());
+    m_autoConnect->setChecked(server->readSetting("autoConnect", true).toBool());
 
     connect(server->api, SIGNAL(loginSuccessful()), SLOT(setLoginSuccessful()));
     connect(server->api, SIGNAL(loginError(QString)), SLOT(setLoginError(QString)));
@@ -237,7 +243,9 @@ void OptionsServerPage::saveChanges(DVRServer *server)
         connectionModified = true;
     }
 
-    if (connectionModified)
+    server->writeSetting("autoConnect", m_autoConnect->isChecked());
+
+    if (connectionModified || (m_autoConnect->isChecked() && !server->api->isOnline()))
         server->login();
 }
 

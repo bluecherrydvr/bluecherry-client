@@ -70,6 +70,7 @@ void BluecherryApp::loadServers()
         /* This must match the default username and password for the server */
         s->writeSetting("username", QLatin1String("Admin"));
         s->writeSetting("password", QLatin1String("bluecherry"));
+        s->writeSetting("autoConnect", true);
         QTimer::singleShot(0, s, SLOT(login()));
     }
 #endif

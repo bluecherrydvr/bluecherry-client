@@ -200,13 +200,18 @@ void DVRServersView::mouseDoubleClickEvent(QMouseEvent *event)
         }
         else if (server && !(index.flags() & Qt::ItemIsEnabled))
         {
-            OptionsDialog *dlg = new OptionsDialog(this);
-            dlg->showPage(OptionsDialog::ServerPage);
-            dlg->setAttribute(Qt::WA_DeleteOnClose);
+            if (server->api->isLoginPending())
+            {
+                OptionsDialog *dlg = new OptionsDialog(this);
+                dlg->showPage(OptionsDialog::ServerPage);
+                dlg->setAttribute(Qt::WA_DeleteOnClose);
 
-            OptionsServerPage *pg = static_cast<OptionsServerPage*>(dlg->pageWidget(OptionsDialog::ServerPage));
-            pg->setCurrentServer(server);
-            dlg->show();
+                OptionsServerPage *pg = static_cast<OptionsServerPage*>(dlg->pageWidget(OptionsDialog::ServerPage));
+                pg->setCurrentServer(server);
+                dlg->show();
+            }
+            else
+                server->login();
         }
         else if (server)
         {

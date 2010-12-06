@@ -32,8 +32,8 @@ public:
     DVRCamera findCamera(int id) { return DVRCamera::getCamera(this, id); }
 
     /* Settings */
-    QVariant readSetting(const QString &key) const;
-    QVariant readSetting(const char *key) const { return readSetting(QLatin1String(key)); }
+    QVariant readSetting(const QString &key, const QVariant &def = QVariant()) const;
+    QVariant readSetting(const char *key, const QVariant &def = QVariant()) const { return readSetting(QLatin1String(key), def); }
 
     void writeSetting(const char *key, const QVariant &value) { writeSetting(QLatin1String(key), value); }
     void writeSetting(const QString &key, const QVariant &value);
