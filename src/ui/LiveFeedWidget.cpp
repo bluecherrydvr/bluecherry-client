@@ -12,7 +12,7 @@
 #include <QDataStream>
 
 LiveFeedWidget::LiveFeedWidget(QWidget *parent)
-    : QWidget(parent), m_stream(0), m_titleHeight(-1)
+    : QWidget(parent), m_stream(0), m_titleHeight(-1), m_isPaused(false)
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setFocusPolicy(Qt::ClickFocus);
@@ -64,6 +64,7 @@ void LiveFeedWidget::setCamera(const DVRCamera &camera)
     m_camera = camera;
     m_currentFrame = QPixmap();
     m_statusMsg.clear();
+    m_isPaused = false;
 
     updateGeometry();
     update();
@@ -92,6 +93,9 @@ void LiveFeedWidget::cameraDataUpdated()
 
 void LiveFeedWidget::setStream(const QSharedPointer<MJpegStream> &stream)
 {
+    if (isPaused() && !stream.isNull())
+        return;
+
     if (m_stream)
         m_stream.data()->disconnect(this);
 
@@ -100,7 +104,10 @@ void LiveFeedWidget::setStream(const QSharedPointer<MJpegStream> &stream)
 
     if (m_stream)
     {
-        m_currentFrame = m_stream->currentFrame();
+        QPixmap streamFrame = m_stream->currentFrame();
+        if (!streamFrame.isNull() || m_currentFrame.isNull())
+            m_currentFrame = streamFrame;
+
         connect(m_stream.data(), SIGNAL(updateFrame(QPixmap,QVector<QImage>)),
                 SLOT(updateFrame(QPixmap,QVector<QImage>)));
         connect(m_stream.data(), SIGNAL(buildScaleSizes(QVector<QSize>&)), SLOT(addScaleSize(QVector<QSize>&)));
@@ -111,8 +118,31 @@ void LiveFeedWidget::setStream(const QSharedPointer<MJpegStream> &stream)
         if (!m_stream->streamSize().isEmpty())
             streamSizeChanged(m_stream->streamSize());
     }
-    else
+    else if (!isPaused())
         setStatusMessage(tr("No\nVideo"));
+
+    update();
+}
+
+void LiveFeedWidget::setPaused(bool paused)
+{
+    if (paused && !m_isPaused)
+    {
+        m_isPaused = true;
+        setStream(QSharedPointer<MJpegStream>());
+    }
+    else
+    {
+        m_isPaused = false;
+        setStream(m_camera.mjpegStream());
+#if 0
+        m_isPaused = false;
+        m_currentFrame = m_stream->currentFrame();
+        if (m_currentFrame.isNull())
+            mjpegStateChanged(m_stream->state());
+        update();
+#endif
+    }
 }
 
 void LiveFeedWidget::setStatusMessage(const QString &message)
@@ -165,6 +195,9 @@ void LiveFeedWidget::addScaleSize(QVector<QSize> &sizes)
 
 void LiveFeedWidget::updateFrame(const QPixmap &frame, const QVector<QImage> &scaledFrames)
 {
+    if (m_isPaused)
+        return;
+
     QSize desired = frame.size();
     desired.scale(imageArea().size(), Qt::KeepAspectRatio);
 
@@ -185,6 +218,9 @@ void LiveFeedWidget::updateFrame(const QPixmap &frame, const QVector<QImage> &sc
 
 void LiveFeedWidget::mjpegStateChanged(int state)
 {
+    if (m_isPaused)
+        return;
+
     Q_ASSERT(m_stream);
     setToolTip(QString());
 
@@ -205,6 +241,9 @@ void LiveFeedWidget::mjpegStateChanged(int state)
         break;
     case MJpegStream::Streaming:
         setStatusMessage(tr("Buffering..."));
+        break;
+    default:
+        clearStatusMessage();
         break;
     }
 }
@@ -366,6 +405,12 @@ void LiveFeedWidget::contextMenuEvent(QContextMenuEvent *event)
 
     menu.addAction(tr("Snapshot"), this, SLOT(saveSnapshot()))->setEnabled(m_camera && m_stream);
     menu.addSeparator();
+
+    QAction *a = menu.addAction(isPaused() ? tr("Paused") : tr("Pause"), this, SLOT(togglePaused()));
+    a->setCheckable(true);
+    a->setChecked(isPaused());
+
+    menu.addSeparator();
     menu.addAction(tr("Open in window"), this, SLOT(openWindow()));
     menu.addAction(!isFullScreen() ? tr("Open as fullscreen") : tr("Exit fullscreen"), this, SLOT(toggleFullScreen()));
     menu.addSeparator();
@@ -393,6 +438,14 @@ void LiveFeedWidget::keyPressEvent(QKeyEvent *event)
     }
 
     event->accept();
+}
+
+void LiveFeedWidget::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    if (event->button() != Qt::LeftButton || !isPaused())
+        return;
+
+    setPaused(false);
 }
 
 void LiveFeedWidget::saveSnapshot(const QString &ifile)

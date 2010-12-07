@@ -24,6 +24,8 @@ public:
     virtual QSize sizeHint() const;
     QRect imageArea() const;
 
+    bool isPaused() const { return m_isPaused; }
+
     void beginDrag(const DVRCamera &camera);
     void endDrag(bool keep = false);
 
@@ -38,6 +40,9 @@ public slots:
     void toggleFullScreen() { setFullScreen(!isFullScreen()); }
 
     void saveSnapshot(const QString &file = QString());
+
+    void setPaused(bool paused = true);
+    void togglePaused() { setPaused(!isPaused()); }
 
 signals:
     void cameraChanged(const DVRCamera &camera);
@@ -56,6 +61,7 @@ protected:
     virtual void paintEvent(QPaintEvent *event);
     virtual void contextMenuEvent(QContextMenuEvent *event);
     virtual void keyPressEvent(QKeyEvent *event);
+    virtual void mouseDoubleClickEvent(QMouseEvent *event);
     virtual void resizeEvent(QResizeEvent *event);
     virtual bool event(QEvent *event);
 
@@ -65,6 +71,7 @@ private:
     QPixmap m_currentFrame;
     QString m_statusMsg;
     int m_titleHeight;
+    bool m_isPaused;
 
     DVRCamera cameraFromMime(const QMimeData *mimeData);
 
