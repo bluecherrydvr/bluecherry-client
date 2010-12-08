@@ -126,6 +126,9 @@ void LiveFeedWidget::setStream(const QSharedPointer<MJpegStream> &stream)
 
 void LiveFeedWidget::setPaused(bool paused)
 {
+    if (!m_camera)
+        return;
+
     if (paused && !m_isPaused)
     {
         m_isPaused = true;
@@ -286,14 +289,30 @@ void LiveFeedWidget::paintEvent(QPaintEvent *event)
     QRect r = rect();
     p.eraseRect(r);
 
-    /* Title */
+    /* Title area */
+    QRect headerRect(r.left(), r.top(), r.width(), m_titleHeight);
+
     p.save();
+
     p.setPen(Qt::NoPen);
     p.setBrush(QBrush(QColor(35, 35, 35), Qt::Dense6Pattern));
-    p.drawRect(QRect(r.left(), r.top(), r.width(), m_titleHeight));
+    p.drawRect(headerRect);
+
+    QRect titleTextRect;
     p.setPen(QColor(195, 195, 195));
     p.drawText(QRect(r.left(), r.top(), r.width(), m_titleHeight), Qt::AlignCenter,
-               (m_dragCamera ? m_dragCamera : m_camera).displayName());
+               (m_dragCamera ? m_dragCamera : m_camera).displayName(), &titleTextRect);
+
+    if (isPaused())
+    {
+        p.setPen(QColor(255, 144, 0));
+        QRect pauseTextRect = headerRect;
+        int space = qMax(6, p.fontMetrics().width(QLatin1Char(' ')));
+        pauseTextRect.setLeft(titleTextRect.right()+space);
+        pauseTextRect.setRight(pauseTextRect.right()-space);
+        p.drawText(pauseTextRect, Qt::AlignLeft | Qt::AlignVCenter, tr("PAUSED"));
+    }
+
     p.restore();
 
     r.setTop(r.top()+m_titleHeight);
@@ -403,12 +422,13 @@ void LiveFeedWidget::contextMenuEvent(QContextMenuEvent *event)
 {
     QMenu menu(this);
 
-    menu.addAction(tr("Snapshot"), this, SLOT(saveSnapshot()))->setEnabled(m_camera && m_stream);
+    menu.addAction(tr("Snapshot"), this, SLOT(saveSnapshot()))->setEnabled(m_camera && !m_currentFrame.isNull());
     menu.addSeparator();
 
     QAction *a = menu.addAction(isPaused() ? tr("Paused") : tr("Pause"), this, SLOT(togglePaused()));
     a->setCheckable(true);
     a->setChecked(isPaused());
+    a->setEnabled(m_camera && (m_stream || isPaused()));
 
     menu.addSeparator();
     menu.addAction(tr("Open in window"), this, SLOT(openWindow()));
