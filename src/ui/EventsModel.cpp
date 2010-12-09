@@ -13,7 +13,7 @@ EventsModel::EventsModel(QObject *parent)
     : QAbstractItemModel(parent), serverEventsLimit(-1)
 {
     connect(bcApp, SIGNAL(serverAdded(DVRServer*)), SLOT(serverAdded(DVRServer*)));
-    connect(bcApp, SIGNAL(serverRemoved(DVRServer*)), SLOT(serverRemoved(DVRServer*)));
+    connect(bcApp, SIGNAL(serverRemoved(DVRServer*)), SLOT(clearServerEvents(DVRServer*)));
     connect(&updateTimer, SIGNAL(timeout()), SLOT(updateServers()));
 
     //createTestData();
@@ -29,6 +29,7 @@ EventsModel::EventsModel(QObject *parent)
 void EventsModel::serverAdded(DVRServer *server)
 {
     connect(server->api, SIGNAL(loginSuccessful()), SLOT(updateServer()));
+    connect(server->api, SIGNAL(disconnected()), SLOT(clearServerEvents()));
     updateServer(server);
 }
 
@@ -169,18 +170,40 @@ QVariant EventsModel::headerData(int section, Qt::Orientation orientation, int r
     return QVariant();
 }
 
-void EventsModel::serverRemoved(DVRServer *server)
+void EventsModel::clearServerEvents(DVRServer *server)
 {
-    /* Remove all events from this server; could be much faster */
-    for (int i = 0; i < items.size(); ++i)
+    if (!server && !(server = qobject_cast<DVRServer*>(sender())))
     {
-        if (items[i]->server == server)
+        ServerRequestManager *srm = qobject_cast<ServerRequestManager*>(sender());
+        if (srm)
+            server = srm->server;
+        else
         {
-            beginRemoveRows(QModelIndex(), i, i);
-            items.removeAt(i);
-            endRemoveRows();
-            --i;
+            Q_ASSERT_X(false, "clearServerEvents", "No server and no appropriate sender");
+            return;
         }
+    }
+
+    /* Group contiguous removed rows together; provides a significant boost in performance */
+    int removeFirst = -1;
+    for (int i = 0; ; ++i)
+    {
+        if (i < items.size() && items[i]->server == server)
+        {
+            if (removeFirst < 0)
+                removeFirst = i;
+        }
+        else if (removeFirst >= 0)
+        {
+            beginRemoveRows(QModelIndex(), removeFirst, i-1);
+            items.erase(items.begin()+removeFirst, items.begin()+i);
+            i = removeFirst;
+            removeFirst = -1;
+            endRemoveRows();
+        }
+
+        if (i == items.size())
+            break;
     }
 
     cachedEvents.remove(server);

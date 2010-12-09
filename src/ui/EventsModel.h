@@ -63,8 +63,9 @@ signals:
 
 private slots:
     void serverAdded(DVRServer *server);
-    void serverRemoved(DVRServer *server);
     void requestFinished();
+
+    void clearServerEvents(DVRServer *server = 0);
 
 private:
     QList<EventData*> items;
