@@ -2,6 +2,7 @@
 #include "core/DVRCamera.h"
 #include "core/DVRServer.h"
 #include "core/MJpegStream.h"
+#include "core/BluecherryApp.h"
 #include <QSettings>
 #include <QPainter>
 #include <QPaintEvent>
@@ -12,7 +13,7 @@
 #include <QDataStream>
 
 LiveFeedWidget::LiveFeedWidget(QWidget *parent)
-    : QWidget(parent), m_stream(0), m_titleHeight(-1), m_isPaused(false)
+    : QWidget(parent), m_stream(0), m_titleHeight(-1), m_isPaused(0)
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setFocusPolicy(Qt::ClickFocus);
@@ -28,6 +29,8 @@ LiveFeedWidget::LiveFeedWidget(QWidget *parent)
     setFont(f);
 
     setStatusMessage(tr("No\nCamera"));
+
+    connect(bcApp, SIGNAL(livePausedChanged(bool)), SLOT(setPaused(bool)));
 }
 
 LiveFeedWidget::~LiveFeedWidget()
@@ -64,7 +67,7 @@ void LiveFeedWidget::setCamera(const DVRCamera &camera)
     m_camera = camera;
     m_currentFrame = QPixmap();
     m_statusMsg.clear();
-    m_isPaused = false;
+    m_isPaused = 0;
 
     updateGeometry();
     update();
@@ -129,22 +132,19 @@ void LiveFeedWidget::setPaused(bool paused)
     if (!m_camera)
         return;
 
-    if (paused && !m_isPaused)
+    bool changed = (paused != isPaused());
+    m_isPaused = qMax(0, m_isPaused + (paused ? 1 : -1));
+
+    if (!changed)
+        return;
+
+    if (isPaused())
     {
-        m_isPaused = true;
         setStream(QSharedPointer<MJpegStream>());
     }
     else
     {
-        m_isPaused = false;
         setStream(m_camera.mjpegStream());
-#if 0
-        m_isPaused = false;
-        m_currentFrame = m_stream->currentFrame();
-        if (m_currentFrame.isNull())
-            mjpegStateChanged(m_stream->state());
-        update();
-#endif
     }
 }
 

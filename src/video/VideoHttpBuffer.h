@@ -20,6 +20,8 @@ public:
     explicit VideoHttpBuffer(GstAppSrc *element, GstElement *pipeline, QObject *parent = 0);
     ~VideoHttpBuffer();
 
+    bool isBuffering() const { return m_networkReply; }
+
     QString bufferFileName() const { return m_bufferFile.fileName(); }
     qint64 fileSize() const { return m_fileSize; }
     qint64 bufferedSize() const { return m_bufferFile.pos(); }
@@ -33,7 +35,14 @@ public slots:
 
 signals:
     void streamError(const QString &message);
+
+    /* Emitted when buffering starts, i.e. upon start() */
+    void bufferingStarted();
+    /* Emitted when buffering stops for any reason, including errors */
+    void bufferingStopped();
+    /* Emitted when buffering is finished, and the entire file is cached locally */
     void bufferingFinished();
+    /* Emitted when new data has been added to the buffer */
     void bufferUpdated();
 
 private slots:

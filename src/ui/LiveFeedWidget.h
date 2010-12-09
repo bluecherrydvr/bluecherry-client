@@ -24,7 +24,7 @@ public:
     virtual QSize sizeHint() const;
     QRect imageArea() const;
 
-    bool isPaused() const { return m_isPaused; }
+    bool isPaused() const { return m_isPaused ? true : false; }
 
     void beginDrag(const DVRCamera &camera);
     void endDrag(bool keep = false);
@@ -71,7 +71,7 @@ private:
     QPixmap m_currentFrame;
     QString m_statusMsg;
     int m_titleHeight;
-    bool m_isPaused;
+    int m_isPaused : 8;
 
     DVRCamera cameraFromMime(const QMimeData *mimeData);
 

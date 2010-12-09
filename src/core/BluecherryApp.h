@@ -28,11 +28,18 @@ public:
     DVRServer *findServerID(int id);
     bool serverExists(DVRServer *server) { return m_servers.contains(server); }
 
+    bool livePaused() const { return m_livePaused; }
+
+public slots:
+    void setLivePaused(bool paused);
+
 signals:
     void serverAdded(DVRServer *server);
     void serverRemoved(DVRServer *server);
 
     void sslConfirmRequired(DVRServer *server, const QList<QSslError> &errors, const QSslConfiguration &config);
+
+    void livePausedChanged(bool paused);
 
 private slots:
     void onServerRemoved(DVRServer *server);
@@ -41,6 +48,7 @@ private slots:
 private:
     QList<DVRServer*> m_servers;
     int m_maxServerId;
+    bool m_livePaused;
 
     void loadServers();
 };

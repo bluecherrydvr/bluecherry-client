@@ -39,6 +39,9 @@ private slots:
 
     void videoContextMenu(const QPoint &pos);
 
+    void bufferingStarted();
+    void bufferingStopped();
+
 private:
     VideoPlayerBackend backend;
     VideoContainer *m_videoContainer;

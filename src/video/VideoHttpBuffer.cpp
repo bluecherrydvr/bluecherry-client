@@ -39,7 +39,10 @@ VideoHttpBuffer::VideoHttpBuffer(GstAppSrc *element, GstElement *pipeline, QObje
 VideoHttpBuffer::~VideoHttpBuffer()
 {
     if (m_networkReply)
+    {
+        emit bufferingStopped();
         delete m_networkReply;
+    }
 
     clearPlayback();
 }
@@ -48,7 +51,10 @@ bool VideoHttpBuffer::start(const QUrl &url)
 {
     Q_ASSERT(!m_networkReply);
     if (m_networkReply)
+    {
+        emit bufferingStopped();
         delete m_networkReply;
+    }
 
     m_networkReply = bcApp->nam->get(QNetworkRequest(url));
     connect(m_networkReply, SIGNAL(readyRead()), SLOT(networkRead()));
@@ -67,6 +73,8 @@ bool VideoHttpBuffer::start(const QUrl &url)
     lock.unlock();
 
     qDebug("VideoHttpBuffer: started");
+    emit bufferingStarted();
+
     return true;
 }
 
@@ -106,6 +114,7 @@ void VideoHttpBuffer::sendStreamError(const QString &message)
     cancelNetwork();
     blockSignals(b);
     emit streamError(message);
+    emit bufferingStopped();
 }
 
 void VideoHttpBuffer::networkMetaData()
@@ -209,6 +218,7 @@ void VideoHttpBuffer::networkFinished()
 
         m_finished = true;
         emit bufferingFinished();
+        emit bufferingStopped();
     }
     else
     {

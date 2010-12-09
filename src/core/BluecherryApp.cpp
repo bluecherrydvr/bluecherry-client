@@ -14,7 +14,7 @@
 BluecherryApp *bcApp = 0;
 
 BluecherryApp::BluecherryApp()
-    : nam(new QNetworkAccessManager(this)), m_maxServerId(-1)
+    : nam(new QNetworkAccessManager(this)), m_maxServerId(-1), m_livePaused(false)
 {
     Q_ASSERT(!bcApp);
     bcApp = this;
@@ -173,4 +173,12 @@ void BluecherryApp::sslErrors(QNetworkReply *reply, const QList<QSslError> &erro
     }
 
     reply->ignoreSslErrors();
+}
+
+void BluecherryApp::setLivePaused(bool paused)
+{
+    if (paused == m_livePaused)
+        return;
+    m_livePaused = paused;
+    emit livePausedChanged(m_livePaused);
 }

@@ -2,6 +2,7 @@
 #include "EventVideoDownload.h"
 #include "video/VideoContainer.h"
 #include "video/GstSinkWidget.h"
+#include "video/VideoHttpBuffer.h"
 #include "core/BluecherryApp.h"
 #include "ui/MainWindow.h"
 #include <QBoxLayout>
@@ -93,6 +94,11 @@ void EventVideoPlayer::setVideo(const QUrl &url)
 {
     qDebug() << url;
     backend.start(url);
+    connect(backend.videoBuffer(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()));
+    connect(backend.videoBuffer(), SIGNAL(bufferingStarted()), SLOT(bufferingStarted()));
+
+    if (backend.videoBuffer()->isBuffering())
+        bufferingStarted();
 }
 
 void EventVideoPlayer::clearVideo()
@@ -124,6 +130,16 @@ void EventVideoPlayer::seek(int position)
 {
     qDebug() << "Backend seekable?" << backend.isSeekable();
     backend.seek(qint64(position) * 1000000);
+}
+
+void EventVideoPlayer::bufferingStarted()
+{
+    bcApp->setLivePaused(true);
+}
+
+void EventVideoPlayer::bufferingStopped()
+{
+    bcApp->setLivePaused(false);
 }
 
 void EventVideoPlayer::stateChanged(int state)
