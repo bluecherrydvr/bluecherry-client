@@ -4,6 +4,7 @@
 #include <QDialog>
 
 class QTabWidget;
+class QDialogButtonBox;
 
 class OptionsDialog : public QDialog
 {
@@ -25,6 +26,7 @@ protected:
 
 private:
     QTabWidget *m_tabWidget;
+    QDialogButtonBox *m_buttons;
 };
 
 class OptionsDialogPage : public QWidget
@@ -34,7 +36,8 @@ class OptionsDialogPage : public QWidget
 public:
     OptionsDialogPage(QWidget *parent = 0) : QWidget(parent) { }
 
-    virtual bool hasUnsavedChanges() const = 0;
+    virtual bool hasUnsavedChanges() const { Q_ASSERT(alwaysSaveChanges()); return false; }
+    virtual bool alwaysSaveChanges() const { return false; }
 
 public slots:
     virtual void saveChanges() = 0;

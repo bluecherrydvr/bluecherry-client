@@ -1,7 +1,10 @@
 #include "OptionsDialog.h"
+#include "OptionsGeneralPage.h"
 #include "OptionsServerPage.h"
 #include <QBoxLayout>
 #include <QTabWidget>
+#include <QDialogButtonBox>
+#include <QPushButton>
 #include <QMessageBox>
 #include <QCloseEvent>
 
@@ -9,14 +12,20 @@ OptionsDialog::OptionsDialog(QWidget *parent)
     : QDialog(parent)
 {
     setModal(true);
+    setWindowTitle(tr("Bluecherry - Options"));
 
     QBoxLayout *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 3, 0, 0);
+    layout->setContentsMargins(4, 4, 4, 4);
+    layout->setSpacing(4);
 
     m_tabWidget = new QTabWidget;
-    m_tabWidget->setDocumentMode(true);
     layout->addWidget(m_tabWidget);
 
+    m_buttons = new QDialogButtonBox();
+    connect(m_buttons->addButton(QDialogButtonBox::Close), SIGNAL(clicked()), SLOT(close()));
+    layout->addWidget(m_buttons);
+
+    m_tabWidget->addTab(new OptionsGeneralPage(this), tr("General"));
     m_tabWidget->addTab(new OptionsServerPage(this), tr("DVR Servers"));
 }
 
@@ -41,9 +50,11 @@ void OptionsDialog::closeEvent(QCloseEvent *event)
         if (!pageWidget)
             continue;
 
-        if (pageWidget->hasUnsavedChanges())
+        bool always = pageWidget->alwaysSaveChanges();
+
+        if (always || pageWidget->hasUnsavedChanges())
         {
-            if (saveChanges)
+            if (always || saveChanges)
             {
                 pageWidget->saveChanges();
                 continue;

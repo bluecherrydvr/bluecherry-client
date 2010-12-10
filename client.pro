@@ -138,7 +138,8 @@ SOURCES += src/main.cpp \
     src/ui/AboutDialog.cpp \
     src/ui/SavedLayoutsModel.cpp \
     src/core/ServerRequestManager.cpp \
-    src/video/GstSinkWidget.cpp
+    src/video/GstSinkWidget.cpp \
+    src/ui/OptionsGeneralPage.cpp
 
 HEADERS  += src/ui/MainWindow.h \
     src/ui/CameraAreaWidget.h \
@@ -181,7 +182,8 @@ HEADERS  += src/ui/MainWindow.h \
     src/ui/AboutDialog.h \
     src/ui/SavedLayoutsModel.h \
     src/core/ServerRequestManager.h \
-    src/video/GstSinkWidget.h
+    src/video/GstSinkWidget.h \
+    src/ui/OptionsGeneralPage.h
 
 RESOURCES += \
     res/resources.qrc
