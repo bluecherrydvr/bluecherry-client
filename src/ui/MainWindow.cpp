@@ -32,13 +32,15 @@
 #include <QTextDocument>
 #include <QShowEvent>
 #include <QGLFormat>
+#include <QSystemTrayIcon>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent), m_trayIcon(0)
 {
     setWindowTitle(tr("Bluecherry"));
     resize(1100, 750);
     createMenu();
+    updateTrayIcon();
 
     QWidget *centerWidget = new QWidget;
     QBoxLayout *mainLayout = new QHBoxLayout(centerWidget);
@@ -136,12 +138,66 @@ void MainWindow::showEvent(QShowEvent *event)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    QSettings settings;
+    if (settings.value(QLatin1String("ui/main/closeToTray"), false).toBool())
+    {
+        event->ignore();
+        hide();
+        return;
+    }
+
     emit closing();
 
-    QSettings settings;
     settings.setValue(QLatin1String("ui/main/geometry"), saveGeometry());
     settings.setValue(QLatin1String("ui/main/centerSplit"), m_centerSplit->saveState());
     QMainWindow::closeEvent(event);
+}
+
+void MainWindow::updateTrayIcon()
+{
+    QSettings settings;
+    if (bool(m_trayIcon) == settings.value(QLatin1String("ui/main/closeToTray"), false))
+        return;
+
+    if (m_trayIcon)
+    {
+        m_trayIcon->hide();
+        m_trayIcon->deleteLater();
+        m_trayIcon = 0;
+    }
+    else
+    {
+        m_trayIcon = new QSystemTrayIcon(windowIcon(), this);
+        m_trayIcon->setToolTip(tr("Bluecherry Client"));
+
+        QMenu *menu = new QMenu(this);
+        menu->setDefaultAction(menu->addAction(tr("Open Bluecherry Client"), this, SLOT(showFront())));
+        menu->addAction(tr("Quit"), qApp, SLOT(quit()));
+        m_trayIcon->setContextMenu(menu);
+
+        connect(m_trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+                SLOT(trayActivated(QSystemTrayIcon::ActivationReason)));
+
+        m_trayIcon->show();
+    }
+}
+
+void MainWindow::trayActivated(QSystemTrayIcon::ActivationReason reason)
+{
+    if (reason == QSystemTrayIcon::DoubleClick)
+    {
+        if (isHidden())
+            showFront();
+        else
+            hide();
+    }
+}
+
+void MainWindow::showFront()
+{
+    show();
+    setWindowState((windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
+    show();
 }
 
 void MainWindow::createMenu()
@@ -150,7 +206,7 @@ void MainWindow::createMenu()
     appMenu->addAction(tr("Add new &server..."), this, SLOT(addServer()));
     appMenu->addAction(tr("&Options"), this, SLOT(showOptionsDialog()));
     appMenu->addSeparator();
-    appMenu->addAction(tr("&Quit"), this, SLOT(close()));
+    appMenu->addAction(tr("&Quit"), qApp, SLOT(quit()));
 
     QMenu *serverMenu = menuBar()->addMenu(tr("&Server"));
     menuServerName = serverMenu->addAction(QString());

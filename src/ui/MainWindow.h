@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QSystemTrayIcon>
 
 class DVRServersView;
 class CameraAreaWidget;
@@ -21,6 +22,8 @@ public:
 
     CameraAreaWidget *cameraArea() const { return m_cameraArea; }
 
+    void updateTrayIcon();
+
 public slots:
     void showOptionsDialog();
     void showEventsWindow();
@@ -35,9 +38,12 @@ public slots:
     void openIdeas();
     void openAbout();
 
+    void showFront();
+
 private slots:
     void showServersMenu();
     void sslConfirmRequired(DVRServer *server, const QList<QSslError> &errors, const QSslConfiguration &config);
+    void trayActivated(QSystemTrayIcon::ActivationReason);
 
 signals:
     void closing();
@@ -52,6 +58,7 @@ private:
     RecentEventsView *m_eventsView;
     QSplitter *m_centerSplit;
     QAction *menuServerName;
+    QSystemTrayIcon *m_trayIcon;
 
     void createMenu();
 
