@@ -68,6 +68,12 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     btnLayout->addWidget(restartBtn);
     connect(restartBtn, SIGNAL(clicked()), SLOT(restart()));
 
+    btnLayout->addSpacing(14);
+
+    m_statusText = new QLabel;
+    m_statusText->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    btnLayout->addWidget(m_statusText);
+
     btnLayout->addStretch();
 
     QPushButton *saveBtn = new QPushButton(tr("Save Video"));
@@ -96,6 +102,7 @@ void EventVideoPlayer::setVideo(const QUrl &url)
     backend.start(url);
     connect(backend.videoBuffer(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()));
     connect(backend.videoBuffer(), SIGNAL(bufferingStarted()), SLOT(bufferingStarted()));
+    connect(backend.videoBuffer(), SIGNAL(bufferUpdated()), SLOT(updateBufferStatus()));
 
     if (backend.videoBuffer()->isBuffering())
         bufferingStarted();
@@ -135,11 +142,19 @@ void EventVideoPlayer::seek(int position)
 void EventVideoPlayer::bufferingStarted()
 {
     bcApp->setLivePaused(true);
+    updateBufferStatus();
+}
+
+void EventVideoPlayer::updateBufferStatus()
+{
+    int pcnt = qRound((double(backend.videoBuffer()->bufferedSize()) / backend.videoBuffer()->fileSize()) * 100.0);
+    m_statusText->setText(tr("<b>Buffering:</b> %1%").arg(pcnt));
 }
 
 void EventVideoPlayer::bufferingStopped()
 {
     bcApp->setLivePaused(false);
+    m_statusText->clear();
 }
 
 void EventVideoPlayer::stateChanged(int state)

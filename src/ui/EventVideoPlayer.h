@@ -40,6 +40,7 @@ private slots:
     void videoContextMenu(const QPoint &pos);
 
     void bufferingStarted();
+    void updateBufferStatus();
     void bufferingStopped();
 
 private:
@@ -48,7 +49,7 @@ private:
     GstSinkWidget *m_videoWidget;
     QToolButton *m_playBtn;
     QSlider *m_seekSlider;
-    QLabel *m_posText;
+    QLabel *m_posText, *m_statusText;
     QTimer m_posTimer;
 };
 
