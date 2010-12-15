@@ -52,6 +52,15 @@ QSize GstSinkWidget::sizeHint() const
     return QSize(m_frameWidth, m_frameHeight);
 }
 
+void GstSinkWidget::setOverlayMessage(const QString &message)
+{
+    if (message == m_overlayMsg)
+        return;
+
+    m_overlayMsg = message;
+    update();
+}
+
 QImage GstSinkWidget::currentFrame()
 {
     if (m_frameWidth < 0 || m_frameHeight < 0)
@@ -108,6 +117,24 @@ void GstSinkWidget::paintEvent(QPaintEvent *ev)
     p.drawImage(r, frame);
 
     gst_buffer_unref(buffer);
+
+    if (!m_overlayMsg.isEmpty())
+    {
+        QFont font = p.font();
+        font.setPixelSize(35);
+        p.setFont(font);
+
+        QRect textRect = p.fontMetrics().boundingRect(r, Qt::AlignCenter, m_overlayMsg);
+        QRect textBannerRect = QRect(r.x(), qMax(0, textRect.y() - 20), r.width(), qMin(r.height(), textRect.height() + 40));
+
+
+        p.fillRect(textBannerRect, QColor(0, 0, 0, 160));
+        p.setPen(Qt::white);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setRenderHint(QPainter::HighQualityAntialiasing);
+        p.setRenderHint(QPainter::TextAntialiasing);
+        p.drawText(textRect, Qt::AlignCenter, m_overlayMsg);
+    }
 }
 
 void GstSinkWidget::endOfStream()

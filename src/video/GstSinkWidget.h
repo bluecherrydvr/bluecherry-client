@@ -21,6 +21,10 @@ public:
 
     virtual QSize sizeHint() const;
 
+public slots:
+    void setOverlayMessage(const QString &message);
+    void clearOverlayMessage() { setOverlayMessage(QString()); }
+
 protected:
     virtual void paintEvent(QPaintEvent *ev);
 
@@ -28,6 +32,7 @@ private:
     GstAppSink *m_element;
     GstBuffer *m_framePtr;
     QMutex m_frameLock;
+    QString m_overlayMsg;
     int m_frameWidth, m_frameHeight;
 
     static void wrapEos(GstAppSink *sink, gpointer user_data);
