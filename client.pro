@@ -111,10 +111,8 @@ SOURCES += src/main.cpp \
     src/core/DVRCamera.cpp \
     src/ui/LiveFeedWidget.cpp \
     src/core/MJpegStream.cpp \
-    src/ui/RecentEventsView.cpp \
     src/ui/EventsModel.cpp \
     src/ui/EventsWindow.cpp \
-    src/ui/EventResultsView.cpp \
     src/ui/EventTimelineWidget.cpp \
     src/utils/ThreadTask.cpp \
     src/utils/ThreadTaskCourier.cpp \
@@ -125,7 +123,6 @@ SOURCES += src/main.cpp \
     src/ui/EventTagsDelegate.cpp \
     src/ui/EventCommentsWidget.cpp \
     src/ui/ExpandingTextEdit.cpp \
-    src/ui/RecentEventDelegate.cpp \
     src/ui/CrashReportDialog.cpp \
     src/ui/EventSourcesModel.cpp \
     src/core/EventData.cpp \
@@ -139,7 +136,8 @@ SOURCES += src/main.cpp \
     src/ui/SavedLayoutsModel.cpp \
     src/core/ServerRequestManager.cpp \
     src/video/GstSinkWidget.cpp \
-    src/ui/OptionsGeneralPage.cpp
+    src/ui/OptionsGeneralPage.cpp \
+    src/ui/EventsView.cpp
 
 HEADERS  += src/ui/MainWindow.h \
     src/ui/CameraAreaWidget.h \
@@ -154,10 +152,8 @@ HEADERS  += src/ui/MainWindow.h \
     src/core/DVRCamera.h \
     src/ui/LiveFeedWidget.h \
     src/core/MJpegStream.h \
-    src/ui/RecentEventsView.h \
     src/ui/EventsModel.h \
     src/ui/EventsWindow.h \
-    src/ui/EventResultsView.h \
     src/ui/EventTimelineWidget.h \
     src/utils/ThreadTask.h \
     src/utils/ThreadTaskCourier.h \
@@ -168,7 +164,6 @@ HEADERS  += src/ui/MainWindow.h \
     src/ui/EventTagsDelegate.h \
     src/ui/EventCommentsWidget.h \
     src/ui/ExpandingTextEdit.h \
-    src/ui/RecentEventDelegate.h \
     src/ui/CrashReportDialog.h \
     src/ui/EventSourcesModel.h \
     src/core/EventData.h \
@@ -183,7 +178,8 @@ HEADERS  += src/ui/MainWindow.h \
     src/ui/SavedLayoutsModel.h \
     src/core/ServerRequestManager.h \
     src/video/GstSinkWidget.h \
-    src/ui/OptionsGeneralPage.h
+    src/ui/OptionsGeneralPage.h \
+    src/ui/EventsView.h
 
 RESOURCES += \
     res/resources.qrc

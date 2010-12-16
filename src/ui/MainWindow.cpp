@@ -5,11 +5,11 @@
 #include "OptionsDialog.h"
 #include "EventsWindow.h"
 #include "NumericOffsetWidget.h"
-#include "RecentEventsView.h"
 #include "EventsModel.h"
 #include "AboutDialog.h"
 #include "OptionsServerPage.h"
 #include "ServerConfigWindow.h"
+#include "EventsView.h"
 #include "core/DVRServer.h"
 #include "core/BluecherryApp.h"
 #include <QBoxLayout>
@@ -269,7 +269,7 @@ QWidget *MainWindow::createCameraControls()
 
 QWidget *MainWindow::createRecentEvents()
 {
-    m_eventsView = new RecentEventsView;
+    m_eventsView = new EventsView;
     EventsModel *model = new EventsModel(m_eventsView);
     m_eventsView->setModel(model);
 

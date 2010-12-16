@@ -4,7 +4,7 @@
 #include <QWidget>
 
 class DVRServersView;
-class EventResultsView;
+class EventsView;
 class EventTimelineWidget;
 class EventTypesFilter;
 class EventTagsView;
@@ -48,7 +48,7 @@ private:
     EventTypesFilter *m_typeFilter;
     EventTagsView *m_tagsView;
     QLabel *m_resultTitle;
-    EventResultsView *m_resultsView;
+    EventsView *m_resultsView;
     EventTimelineWidget *m_timeline;
     QSlider *m_timelineZoom;
 

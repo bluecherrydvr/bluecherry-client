@@ -1,12 +1,13 @@
 #include "EventsWindow.h"
 #include "DVRServersView.h"
 #include "EventSourcesModel.h"
-#include "EventResultsView.h"
+#include "EventsView.h"
 #include "EventTimelineWidget.h"
 #include "EventViewWindow.h"
 #include "EventTypesFilter.h"
 #include "EventTagsView.h"
 #include "EventTagsModel.h"
+#include "EventsModel.h"
 #include "core/BluecherryApp.h"
 #include "ui/MainWindow.h"
 #include <QBoxLayout>
@@ -20,6 +21,7 @@
 #include <QSlider>
 #include <QSplitter>
 #include <QLineEdit>
+#include <QHeaderView>
 
 EventsWindow *EventsWindow::m_instance = 0;
 
@@ -181,8 +183,13 @@ QWidget *EventsWindow::createResultTitle()
 
 QWidget *EventsWindow::createResultsView()
 {
-    m_resultsView = new EventResultsView;
+    m_resultsView = new EventsView;
+    m_resultsView->setModel(new EventsModel(this));
     connect(m_resultsView, SIGNAL(doubleClicked(QModelIndex)), SLOT(showEvent(QModelIndex)));
+
+    QSettings settings;
+    m_resultsView->header()->restoreState(settings.value(QLatin1String("ui/events/viewHeader")).toByteArray());
+
     return m_resultsView;
 }
 
@@ -220,6 +227,7 @@ void EventsWindow::closeEvent(QCloseEvent *event)
 {
     QSettings settings;
     settings.setValue(QLatin1String("ui/events/geometry"), saveGeometry());
+    settings.setValue(QLatin1String("ui/events/viewHeader"), m_resultsView->header()->saveState());
     QWidget::closeEvent(event);
 }
 

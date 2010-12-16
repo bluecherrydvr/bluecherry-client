@@ -18,7 +18,7 @@ EventsModel::EventsModel(QObject *parent)
 
     //createTestData();
 
-    sortColumn = 3;
+    sortColumn = 4;
     sortOrder = Qt::DescendingOrder;
     applyFilters();
 
@@ -89,7 +89,7 @@ int EventsModel::columnCount(const QModelIndex &parent) const
     if (parent.isValid())
         return 0;
 
-    return 4;
+    return 5;
 }
 
 QModelIndex EventsModel::index(int row, int column, const QModelIndex &parent) const
@@ -145,6 +145,12 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
         break;
     case 3:
         if (role == Qt::DisplayRole)
+            return data->uiLevel();
+        else if (role == Qt::EditRole)
+            return data->level.level;
+        break;
+    case 4:
+        if (role == Qt::DisplayRole)
             return data->date.toString();
         else if (role == Qt::EditRole)
             return data->date;
@@ -162,9 +168,10 @@ QVariant EventsModel::headerData(int section, Qt::Orientation orientation, int r
     switch (section)
     {
     case 0: return tr("Server");
-    case 1: return tr("Location");
-    case 2: return tr("Type");
-    case 3: return tr("Date");
+    case 1: return tr("Device");
+    case 2: return tr("Event");
+    case 3: return tr("Priority");
+    case 4: return tr("Date");
     }
 
     return QVariant();
@@ -235,7 +242,10 @@ public:
         case 2: /* Type */
             re = QString::localeAwareCompare(e1->uiType(), e2->uiType()) <= 0;
             break;
-        case 3: /* Date */
+        case 3: /* Level */
+            re = e1->level <= e2->level;
+            break;
+        case 4: /* Date */
             re = e1->date <= e2->date;
             break;
         default:

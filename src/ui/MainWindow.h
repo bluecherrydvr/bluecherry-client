@@ -6,7 +6,7 @@
 
 class DVRServersView;
 class CameraAreaWidget;
-class RecentEventsView;
+class EventsView;
 class QSplitter;
 class DVRServer;
 class QSslError;
@@ -55,7 +55,7 @@ protected:
 private:
     DVRServersView *m_sourcesList;
     CameraAreaWidget *m_cameraArea;
-    RecentEventsView *m_eventsView;
+    EventsView *m_eventsView;
     QSplitter *m_centerSplit;
     QAction *menuServerName;
     QSystemTrayIcon *m_trayIcon;
