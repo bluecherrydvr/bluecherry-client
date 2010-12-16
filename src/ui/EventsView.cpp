@@ -11,8 +11,18 @@ EventsView::EventsView(QWidget *parent)
 
 void EventsView::setModel(EventsModel *model)
 {
+    bool first = !this->model();
     QTreeView::setModel(model);
-    header()->setResizeMode(QHeaderView::Interactive);
+
+    if (first)
+    {
+        header()->setResizeMode(QHeaderView::Interactive);
+        QFontMetrics fm(font());
+        header()->resizeSection(EventsModel::LocationColumn, fm.width(QLatin1Char('X')) * 20);
+        header()->resizeSection(EventsModel::DurationColumn,
+                                fm.width(QLatin1String("99 minutes, 99 seconds")) + 25);
+        header()->resizeSection(EventsModel::LevelColumn, fm.width(QLatin1String("Warning")) + 18);
+    }
 }
 
 EventsModel *EventsView::eventsModel() const

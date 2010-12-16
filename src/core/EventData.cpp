@@ -138,6 +138,48 @@ QString EventData::uiLocation(DVRServer *server, int locationId)
         return QString::fromLatin1("camera-%1").arg(locationId);
 }
 
+/* XXX not properly translatable right now */
+static inline void durationWord(QString &s, int n, const char *w)
+{
+    if (!s.isEmpty())
+        s.append(QLatin1String(", "));
+    s.append(QString::number(n));
+    s.append(QLatin1Char(' '));
+    s.append(QLatin1String(w));
+    if (n != 1)
+        s.append(QLatin1Char('s'));
+}
+
+QString EventData::uiDuration() const
+{
+    QString re;
+    int d = duration, count = 0;
+    if (d >= (60*60*24))
+    {
+        durationWord(re, d / (60*60*24), "day");
+        d %= (60*60*24);
+        ++count;
+    }
+    if (d >= (60*60))
+    {
+        durationWord(re, d / (60*60), "hour");
+        d %= (60*60);
+        if (++count == 2)
+            return re;
+    }
+    if (d >= 60)
+    {
+        durationWord(re, d / 60, "minute");
+        d %= 60;
+        if (++count == 2)
+            return re;
+    }
+    if (d || re.isEmpty())
+        durationWord(re, d, "second");
+
+    return re;
+}
+
 static EventData *parseEntry(DVRServer *server, QXmlStreamReader &reader);
 
 QList<EventData*> EventData::parseEvents(DVRServer *server, const QByteArray &input)

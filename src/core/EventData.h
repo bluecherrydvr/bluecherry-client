@@ -89,6 +89,7 @@ struct EventData
     QColor uiColor() const { return level.uiColor(); }
     QString uiLevel() const { return level.uiString(); }
     QString uiType() const { return type.uiString(); }
+    QString uiDuration() const;
     QString uiServer() const;
     QString uiLocation() const { return uiLocation(server, locationId); }
 

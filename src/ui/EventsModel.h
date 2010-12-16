@@ -26,6 +26,18 @@ public:
         EventDataPtr = Qt::UserRole
     };
 
+    enum
+    {
+        ServerColumn = 0,
+        LocationColumn,
+        TypeColumn,
+        DurationColumn,
+        LevelColumn,
+        DateColumn,
+
+        LastColumn = DateColumn
+    };
+
     explicit EventsModel(QObject *parent = 0);
 
     void setFilterDates(const QDateTime &begin, const QDateTime &end);

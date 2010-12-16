@@ -89,7 +89,7 @@ int EventsModel::columnCount(const QModelIndex &parent) const
     if (parent.isValid())
         return 0;
 
-    return 5;
+    return 6;
 }
 
 QModelIndex EventsModel::index(int row, int column, const QModelIndex &parent) const
@@ -131,25 +131,31 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
 
     switch (index.column())
     {
-    case 0:
+    case ServerColumn:
         if (role == Qt::DisplayRole)
             return data->server->displayName();
         break;
-    case 1:
+    case LocationColumn:
         if (role == Qt::DisplayRole)
             return data->uiLocation();
         break;
-    case 2:
+    case TypeColumn:
         if (role == Qt::DisplayRole)
             return data->uiType();
         break;
-    case 3:
+    case DurationColumn:
+        if (role == Qt::DisplayRole)
+            return data->uiDuration();
+        else if (role == Qt::EditRole)
+            return data->duration;
+        break;
+    case LevelColumn:
         if (role == Qt::DisplayRole)
             return data->uiLevel();
         else if (role == Qt::EditRole)
             return data->level.level;
         break;
-    case 4:
+    case DateColumn:
         if (role == Qt::DisplayRole)
             return data->date.toString();
         else if (role == Qt::EditRole)
@@ -167,11 +173,12 @@ QVariant EventsModel::headerData(int section, Qt::Orientation orientation, int r
 
     switch (section)
     {
-    case 0: return tr("Server");
-    case 1: return tr("Device");
-    case 2: return tr("Event");
-    case 3: return tr("Priority");
-    case 4: return tr("Date");
+    case ServerColumn: return tr("Server");
+    case LocationColumn: return tr("Device");
+    case TypeColumn: return tr("Event");
+    case DurationColumn: return tr("Duration");
+    case LevelColumn: return tr("Priority");
+    case DateColumn: return tr("Date");
     }
 
     return QVariant();
@@ -233,19 +240,22 @@ public:
 
         switch (column)
         {
-        case 0: /* Server */
+        case EventsModel::ServerColumn:
             re = QString::localeAwareCompare(e1->server->displayName(), e2->server->displayName()) <= 0;
             break;
-        case 1: /* Location */
+        case EventsModel::LocationColumn:
             re = QString::localeAwareCompare(e1->uiLocation(), e2->uiLocation()) <= 0;
             break;
-        case 2: /* Type */
+        case EventsModel::TypeColumn:
             re = QString::localeAwareCompare(e1->uiType(), e2->uiType()) <= 0;
             break;
-        case 3: /* Level */
+        case EventsModel::DurationColumn:
+            re = e1->duration <= e2->duration;
+            break;
+        case EventsModel::LevelColumn:
             re = e1->level <= e2->level;
             break;
-        case 4: /* Date */
+        case EventsModel::DateColumn:
             re = e1->date <= e2->date;
             break;
         default:
