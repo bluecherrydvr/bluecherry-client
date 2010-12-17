@@ -28,10 +28,15 @@ public:
     DVRServer *findServerID(int id);
     bool serverExists(DVRServer *server) { return m_servers.contains(server); }
 
+    /* Temporarily pause live feeds to free up bandwidth for other intensive transfers
+     * (particularly event video buffering). The live feed can be paused with pauseLive(),
+     * and released releaseLive(). Upon release, the queryLivePaused() signal will be emitted,
+     * and anything still requiring live feeds to be paused should call pauseLive() again. */
     bool livePaused() const { return m_livePaused; }
 
 public slots:
-    void setLivePaused(bool paused);
+    void pauseLive();
+    void releaseLive();
 
 signals:
     void serverAdded(DVRServer *server);
@@ -39,6 +44,7 @@ signals:
 
     void sslConfirmRequired(DVRServer *server, const QList<QSslError> &errors, const QSslConfiguration &config);
 
+    void queryLivePaused();
     void livePausedChanged(bool paused);
 
 private slots:
@@ -48,7 +54,7 @@ private slots:
 private:
     QList<DVRServer*> m_servers;
     int m_maxServerId;
-    bool m_livePaused;
+    bool m_livePaused, m_inPauseQuery;
 
     void loadServers();
 };

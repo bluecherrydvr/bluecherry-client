@@ -21,6 +21,7 @@ class EventVideoPlayer : public QWidget
 
 public:
     explicit EventVideoPlayer(QWidget *parent = 0);
+    ~EventVideoPlayer();
 
 public slots:
     void setVideo(const QUrl &url);
@@ -39,6 +40,7 @@ private slots:
 
     void videoContextMenu(const QPoint &pos);
 
+    void queryLivePaused();
     void bufferingStarted();
     void updateBufferStatus();
     void bufferingStopped();

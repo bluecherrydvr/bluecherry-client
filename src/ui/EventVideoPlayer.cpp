@@ -23,6 +23,7 @@
 EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     : QWidget(parent)
 {
+    connect(bcApp, SIGNAL(queryLivePaused()), SLOT(queryLivePaused()));
     connect(&backend, SIGNAL(stateChanged(int,int)),
             SLOT(stateChanged(int)));
     connect(&backend, SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
@@ -96,11 +97,17 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     connect(sc, SIGNAL(activated()), SLOT(saveSnapshot()));
 }
 
+EventVideoPlayer::~EventVideoPlayer()
+{
+    bcApp->disconnect(SIGNAL(queryLivePaused()), this);
+    bcApp->releaseLive();
+}
+
 void EventVideoPlayer::setVideo(const QUrl &url)
 {
     qDebug() << url;
     backend.start(url);
-    connect(backend.videoBuffer(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()));
+    connect(backend.videoBuffer(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()), Qt::QueuedConnection);
     connect(backend.videoBuffer(), SIGNAL(bufferingStarted()), SLOT(bufferingStarted()));
     connect(backend.videoBuffer(), SIGNAL(bufferUpdated()), SLOT(updateBufferStatus()));
 
@@ -139,9 +146,18 @@ void EventVideoPlayer::seek(int position)
     backend.seek(qint64(position) * 1000000);
 }
 
+void EventVideoPlayer::queryLivePaused()
+{
+    if (backend.videoBuffer() && backend.videoBuffer()->isBuffering())
+    {
+        qDebug("query: is buffering");
+        bcApp->pauseLive();
+    }
+}
+
 void EventVideoPlayer::bufferingStarted()
 {
-    bcApp->setLivePaused(true);
+    bcApp->pauseLive();
     updateBufferStatus();
 }
 
@@ -153,7 +169,8 @@ void EventVideoPlayer::updateBufferStatus()
 
 void EventVideoPlayer::bufferingStopped()
 {
-    bcApp->setLivePaused(false);
+    qDebug("release");
+    bcApp->releaseLive();
     m_statusText->clear();
 }
 

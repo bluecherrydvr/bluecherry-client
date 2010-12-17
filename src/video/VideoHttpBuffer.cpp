@@ -217,16 +217,18 @@ void VideoHttpBuffer::networkFinished()
         }
 
         m_finished = true;
+        m_networkReply->deleteLater();
+        m_networkReply = 0;
         emit bufferingFinished();
         emit bufferingStopped();
     }
     else
     {
-        sendStreamError(QString::fromLatin1("Network error: %1").arg(m_networkReply->errorString()));
+        QString error = m_networkReply->errorString();
+        m_networkReply->deleteLater();
+        m_networkReply = 0;
+        sendStreamError(QString::fromLatin1("Network error: %1").arg(error));
     }
-
-    m_networkReply->deleteLater();
-    m_networkReply = 0;
 
     m_bufferWait.wakeAll();
 }
