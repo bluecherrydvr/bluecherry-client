@@ -88,7 +88,7 @@ void EventViewWindow::setEvent(EventData *event)
     {
         QUrl url = m_event->server->api->serverUrl().resolved(QUrl(QLatin1String("/media/request.php")));
         url.addQueryItem(QLatin1String("id"), QString::number(m_event->mediaId));
-        m_videoPlayer->setVideo(url);
+        m_videoPlayer->setVideo(url, m_event);
     }
     else
         m_videoPlayer->setVideo(QUrl());

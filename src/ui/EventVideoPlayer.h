@@ -14,6 +14,7 @@ class QSlider;
 class QLabel;
 class GstSinkWidget;
 class VideoContainer;
+struct EventData;
 
 class EventVideoPlayer : public QWidget
 {
@@ -24,7 +25,7 @@ public:
     ~EventVideoPlayer();
 
 public slots:
-    void setVideo(const QUrl &url);
+    void setVideo(const QUrl &url, EventData *event = 0);
     void clearVideo();
     void saveVideo(const QString &path = QString());
     void saveSnapshot(const QString &file = QString());
@@ -49,6 +50,7 @@ private:
     VideoPlayerBackend backend;
     VideoContainer *m_videoContainer;
     GstSinkWidget *m_videoWidget;
+    EventData *m_event;
     QToolButton *m_playBtn;
     QSlider *m_seekSlider;
     QLabel *m_posText, *m_statusText;

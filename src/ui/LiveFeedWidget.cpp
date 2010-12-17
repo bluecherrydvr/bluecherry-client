@@ -487,7 +487,7 @@ void LiveFeedWidget::saveSnapshot(const QString &ifile)
     {
         file = getSaveFileNameExt(this, tr("%1 - Save Snapshot").arg(m_camera.displayName()),
                            QDesktopServices::storageLocation(QDesktopServices::PicturesLocation),
-                           QLatin1String("ui/livefeed/snapshotSaveLocation"),
+                           QLatin1String("ui/snapshotSaveLocation"),
                            QString::fromLatin1("%1 - %2.jpg").arg(m_camera.displayName(),
                                                                   QDateTime::currentDateTime().toString(
                                                                   QLatin1String("yyyy-MM-dd hh-mm-ss"))),

@@ -5,6 +5,8 @@
 #include "video/VideoHttpBuffer.h"
 #include "core/BluecherryApp.h"
 #include "ui/MainWindow.h"
+#include "utils/FileUtils.h"
+#include "core/EventData.h"
 #include <QBoxLayout>
 #include <QSlider>
 #include <QLabel>
@@ -19,9 +21,11 @@
 #include <QDebug>
 #include <QToolTip>
 #include <QMessageBox>
+#include <QSettings>
+#include <QDesktopServices>
 
 EventVideoPlayer::EventVideoPlayer(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent), m_event(0)
 {
     connect(bcApp, SIGNAL(queryLivePaused()), SLOT(queryLivePaused()));
     connect(&backend, SIGNAL(stateChanged(int,int)),
@@ -103,9 +107,10 @@ EventVideoPlayer::~EventVideoPlayer()
     bcApp->releaseLive();
 }
 
-void EventVideoPlayer::setVideo(const QUrl &url)
+void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
 {
-    qDebug() << url;
+    m_event = event;
+
     backend.start(url);
     connect(backend.videoBuffer(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()), Qt::QueuedConnection);
     connect(backend.videoBuffer(), SIGNAL(bufferingStarted()), SLOT(bufferingStarted()));
@@ -274,7 +279,19 @@ void EventVideoPlayer::saveSnapshot(const QString &ifile)
 
     if (file.isEmpty())
     {
-        file = QFileDialog::getSaveFileName(this, tr("Save Video Snapshot"), QString(), tr("Image (*.jpg)"));
+        QString filename;
+        if (m_event)
+        {
+            filename = QString::fromLatin1("%1 - %2.jpg").arg(m_event->uiLocation(),
+                                                              m_event->date.addSecs(int(backend.position() / 1000000000))
+                                                              .toString(QLatin1String("yyyy-MM-dd hh-mm-ss")));
+        }
+
+        file = getSaveFileNameExt(this, tr("Save Video Snapshot"),
+                           QDesktopServices::storageLocation(QDesktopServices::PicturesLocation),
+                           QLatin1String("ui/snapshotSaveLocation"),
+                           filename, tr("Image (*.jpg)"));
+
         if (file.isEmpty())
             return;
     }
