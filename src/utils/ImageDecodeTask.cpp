@@ -27,9 +27,15 @@ void ImageDecodeTask::runTask()
 
     if (!reader.read(&m_result))
     {
-        qDebug() << "Image decoding error:" << reader.errorString();
-        return;
+        if (m_result.isNull())
+        {
+            qDebug() << "Image decoding error:" << reader.errorString();
+            return;
+        }
+        else
+            qDebug() << "Image decoding warning:" << reader.errorString();
     }
+
     buffer.close();
     m_data.clear();
 
