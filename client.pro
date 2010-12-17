@@ -137,7 +137,8 @@ SOURCES += src/main.cpp \
     src/core/ServerRequestManager.cpp \
     src/video/GstSinkWidget.cpp \
     src/ui/OptionsGeneralPage.cpp \
-    src/ui/EventsView.cpp
+    src/ui/EventsView.cpp \
+    src/utils/FileUtils.cpp
 
 HEADERS  += src/ui/MainWindow.h \
     src/ui/CameraAreaWidget.h \
@@ -179,7 +180,8 @@ HEADERS  += src/ui/MainWindow.h \
     src/core/ServerRequestManager.h \
     src/video/GstSinkWidget.h \
     src/ui/OptionsGeneralPage.h \
-    src/ui/EventsView.h
+    src/ui/EventsView.h \
+    src/utils/FileUtils.h
 
 RESOURCES += \
     res/resources.qrc

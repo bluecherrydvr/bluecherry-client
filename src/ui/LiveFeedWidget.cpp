@@ -3,6 +3,7 @@
 #include "core/DVRServer.h"
 #include "core/MJpegStream.h"
 #include "core/BluecherryApp.h"
+#include "utils/FileUtils.h"
 #include <QSettings>
 #include <QPainter>
 #include <QPaintEvent>
@@ -11,6 +12,8 @@
 #include <QMessageBox>
 #include <QToolTip>
 #include <QDataStream>
+#include <QDesktopServices>
+#include <QDateTime>
 
 LiveFeedWidget::LiveFeedWidget(QWidget *parent)
     : QWidget(parent), m_stream(0), m_titleHeight(-1), m_isPaused(0)
@@ -482,7 +485,14 @@ void LiveFeedWidget::saveSnapshot(const QString &ifile)
 
     if (file.isEmpty())
     {
-        file = QFileDialog::getSaveFileName(this, tr("Save Camera Snapshot"), QString(), tr("Image (*.jpg)"));
+        file = getSaveFileNameExt(this, tr("%1 - Save Snapshot").arg(m_camera.displayName()),
+                           QDesktopServices::storageLocation(QDesktopServices::PicturesLocation),
+                           QLatin1String("ui/livefeed/snapshotSaveLocation"),
+                           QString::fromLatin1("%1 - %2.jpg").arg(m_camera.displayName(),
+                                                                  QDateTime::currentDateTime().toString(
+                                                                  QLatin1String("yyyy-MM-dd hh-mm-ss"))),
+                           tr("Image (*.jpg)"));
+
         if (file.isEmpty())
             return;
     }
