@@ -17,8 +17,8 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     m_closeToTray = new QCheckBox(tr("Close to tray"));
     m_closeToTray->setChecked(settings.value(QLatin1String("ui/main/closeToTray"), false).toBool());
     m_closeToTray->setToolTip(tr("When the main window is closed, minimize to the system tray"));
-    m_closeToTray->setVisible(QSystemTrayIcon::isSystemTrayAvailable());
     layout->addWidget(m_closeToTray);
+    m_closeToTray->setVisible(QSystemTrayIcon::isSystemTrayAvailable());
 
     m_eventsPauseLive = new QCheckBox(tr("Pause live feeds while buffering event video"));
     m_eventsPauseLive->setChecked(settings.value(QLatin1String("eventPlayer/pauseLive"), false).toBool());

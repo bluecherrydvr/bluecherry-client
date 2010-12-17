@@ -25,8 +25,8 @@ OptionsDialog::OptionsDialog(QWidget *parent)
     connect(m_buttons->addButton(QDialogButtonBox::Close), SIGNAL(clicked()), SLOT(close()));
     layout->addWidget(m_buttons);
 
-    m_tabWidget->addTab(new OptionsGeneralPage(this), tr("General"));
-    m_tabWidget->addTab(new OptionsServerPage(this), tr("DVR Servers"));
+    m_tabWidget->addTab(new OptionsGeneralPage, tr("General"));
+    m_tabWidget->addTab(new OptionsServerPage, tr("DVR Servers"));
 }
 
 void OptionsDialog::showPage(OptionsPage page)
