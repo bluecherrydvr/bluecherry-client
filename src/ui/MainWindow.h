@@ -44,12 +44,14 @@ private slots:
     void showServersMenu();
     void sslConfirmRequired(DVRServer *server, const QList<QSslError> &errors, const QSslConfiguration &config);
     void trayActivated(QSystemTrayIcon::ActivationReason);
+    void queryLivePaused();
 
 signals:
     void closing();
 
 protected:
     virtual void showEvent(QShowEvent *event);
+    virtual void hideEvent(QHideEvent *event);
     virtual void closeEvent(QCloseEvent *event);
 
 private:

@@ -31,7 +31,6 @@
 #include <QSslCertificate>
 #include <QTextDocument>
 #include <QShowEvent>
-#include <QGLFormat>
 #include <QSystemTrayIcon>
 #include <QHeaderView>
 
@@ -114,6 +113,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(bcApp, SIGNAL(sslConfirmRequired(DVRServer*,QList<QSslError>,QSslConfiguration)),
             SLOT(sslConfirmRequired(DVRServer*,QList<QSslError>,QSslConfiguration)));
+    connect(bcApp, SIGNAL(queryLivePaused()), SLOT(queryLivePaused()));
 }
 
 MainWindow::~MainWindow()
@@ -123,18 +123,23 @@ MainWindow::~MainWindow()
 void MainWindow::showEvent(QShowEvent *event)
 {
     if (!event->spontaneous())
-    {
-        if (!QGLFormat::hasOpenGL())
-        {
-            QMessageBox::critical(this, tr("Error"), tr("This application is designed to utilize OpenGL "
-                                                        "acceleration, which is not supported by your system. "
-                                                        "The application may not function correctly.\n\n"
-                                                        "For help, contact support@bluecherrydvr.com."),
-                                  QMessageBox::Ok);
-        }
-    }
+        bcApp->releaseLive();
 
     QMainWindow::showEvent(event);
+}
+
+void MainWindow::hideEvent(QHideEvent *event)
+{
+    if (!event->spontaneous())
+        bcApp->pauseLive();
+
+    QMainWindow::hideEvent(event);
+}
+
+void MainWindow::queryLivePaused()
+{
+    if (isHidden())
+        bcApp->pauseLive();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

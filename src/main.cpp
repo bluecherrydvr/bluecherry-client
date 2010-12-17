@@ -6,6 +6,7 @@
 #include <QtPlugin>
 #include <QMessageBox>
 #include <QDateTime>
+#include <QGLFormat>
 
 #ifdef QT_STATIC
 Q_IMPORT_PLUGIN(qjpeg)
@@ -45,6 +46,15 @@ int main(int argc, char *argv[])
 #ifdef USE_BREAKPAD
     initBreakpad();
 #endif
+
+    if (!QGLFormat::hasOpenGL())
+    {
+        QMessageBox::critical(0, a.tr("Error"), a.tr("This application is designed to utilize OpenGL "
+                                                    "acceleration, which is not supported by your system. "
+                                                    "The application may not function correctly.\n\n"
+                                                    "For help, contact support@bluecherrydvr.com."),
+                              QMessageBox::Ok);
+    }
 
     bcApp = new BluecherryApp;
 
