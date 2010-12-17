@@ -18,7 +18,7 @@ EventsModel::EventsModel(QObject *parent)
 
     //createTestData();
 
-    sortColumn = 4;
+    sortColumn = DateColumn;
     sortOrder = Qt::DescendingOrder;
     applyFilters();
 
@@ -89,7 +89,7 @@ int EventsModel::columnCount(const QModelIndex &parent) const
     if (parent.isValid())
         return 0;
 
-    return 6;
+    return LastColumn+1;
 }
 
 QModelIndex EventsModel::index(int row, int column, const QModelIndex &parent) const

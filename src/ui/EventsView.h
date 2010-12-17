@@ -16,6 +16,9 @@ public:
 
     void setModel(EventsModel *model);
 
+private slots:
+    void openEvent(const QModelIndex &index);
+
 private:
     using QTreeView::setModel;
 };

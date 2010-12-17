@@ -1,5 +1,6 @@
 #include "EventsView.h"
 #include "EventsModel.h"
+#include "EventViewWindow.h"
 #include <QHeaderView>
 
 EventsView::EventsView(QWidget *parent)
@@ -7,6 +8,8 @@ EventsView::EventsView(QWidget *parent)
 {
     setRootIsDecorated(false);
     setUniformRowHeights(true);
+
+    connect(this, SIGNAL(doubleClicked(QModelIndex)), SLOT(openEvent(QModelIndex)));
 }
 
 void EventsView::setModel(EventsModel *model)
@@ -29,4 +32,13 @@ EventsModel *EventsView::eventsModel() const
 {
     Q_ASSERT(!model() || qobject_cast<EventsModel*>(model()));
     return static_cast<EventsModel*>(model());
+}
+
+void EventsView::openEvent(const QModelIndex &index)
+{
+    EventData *event = index.data(EventsModel::EventDataPtr).value<EventData*>();
+    if (!event)
+        return;
+
+    EventViewWindow::open(event);
 }

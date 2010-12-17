@@ -33,6 +33,7 @@
 #include <QShowEvent>
 #include <QGLFormat>
 #include <QSystemTrayIcon>
+#include <QHeaderView>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), m_trayIcon(0)
@@ -150,6 +151,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
     settings.setValue(QLatin1String("ui/main/geometry"), saveGeometry());
     settings.setValue(QLatin1String("ui/main/centerSplit"), m_centerSplit->saveState());
+    settings.setValue(QLatin1String("ui/main/eventsView"), m_eventsView->header()->saveState());
     QMainWindow::closeEvent(event);
 }
 
@@ -276,6 +278,8 @@ QWidget *MainWindow::createRecentEvents()
     QSettings settings;
     model->setUpdateInterval(settings.value(QLatin1String("ui/main/eventRefreshInterval"), 10000).toInt());
     model->setEventLimit(50);
+
+    m_eventsView->header()->restoreState(settings.value(QLatin1String("ui/main/eventsView")).toByteArray());
 
     return m_eventsView;
 }
