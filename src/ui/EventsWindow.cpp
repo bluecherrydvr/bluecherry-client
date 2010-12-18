@@ -201,7 +201,7 @@ QWidget *EventsWindow::createTimeline()
 
     m_timeline = new EventTimelineWidget;
     m_timeline->setModel(m_resultsView->eventsModel());
-    m_timeline->setSelectionModel(m_resultsView->selectionModel());
+    //m_timeline->setSelectionModel(m_resultsView->selectionModel());
 
     m_timelineZoom = new QSlider(Qt::Horizontal);
     timelineZoomRangeChanged(m_timeline->minZoomSeconds(), m_timeline->maxZoomSeconds());
