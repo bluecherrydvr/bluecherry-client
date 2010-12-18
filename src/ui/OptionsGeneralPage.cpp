@@ -33,6 +33,7 @@ void OptionsGeneralPage::saveChanges()
 {
     QSettings settings;
     settings.setValue(QLatin1String("eventPlayer/pauseLive"), m_eventsPauseLive->isChecked());
+    bcApp->releaseLive();
     settings.setValue(QLatin1String("ui/main/closeToTray"), m_closeToTray->isChecked());
     bcApp->mainWindow->updateTrayIcon();
 }

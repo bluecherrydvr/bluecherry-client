@@ -153,16 +153,17 @@ void EventVideoPlayer::seek(int position)
 
 void EventVideoPlayer::queryLivePaused()
 {
-    if (backend.videoBuffer() && backend.videoBuffer()->isBuffering())
-    {
-        qDebug("query: is buffering");
+    QSettings settings;
+    if (backend.videoBuffer() && backend.videoBuffer()->isBuffering()
+        && settings.value(QLatin1String("eventPlayer/pauseLive")).toBool())
         bcApp->pauseLive();
-    }
 }
 
 void EventVideoPlayer::bufferingStarted()
 {
-    bcApp->pauseLive();
+    QSettings settings;
+    if (settings.value(QLatin1String("eventPlayer/pauseLive")).toBool())
+        bcApp->pauseLive();
     updateBufferStatus();
 }
 
