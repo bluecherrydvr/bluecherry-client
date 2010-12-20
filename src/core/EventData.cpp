@@ -152,8 +152,12 @@ static inline void durationWord(QString &s, int n, const char *w)
 
 QString EventData::uiDuration() const
 {
+    if (duration < 0)
+        return QApplication::translate("EventData", "In progress");
+
     QString re;
-    int d = duration, count = 0;
+    int d = qMax(1, duration), count = 0;
+
     if (d >= (60*60*24))
     {
         durationWord(re, d / (60*60*24), "day");

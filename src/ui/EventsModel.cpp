@@ -148,6 +148,12 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
             return data->uiDuration();
         else if (role == Qt::EditRole)
             return data->duration;
+        else if (role == Qt::FontRole && data->duration < 0)
+        {
+            QFont f;
+            f.setBold(true);
+            return f;
+        }
         break;
     case LevelColumn:
         if (role == Qt::DisplayRole)
