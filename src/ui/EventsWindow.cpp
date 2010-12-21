@@ -189,6 +189,9 @@ QWidget *EventsWindow::createResultsView()
 
     QSettings settings;
     m_resultsView->header()->restoreState(settings.value(QLatin1String("ui/events/viewHeader")).toByteArray());
+    m_resultsView->header()->setSortIndicatorShown(true);
+    m_resultsView->header()->setSortIndicator(EventsModel::DateColumn, Qt::DescendingOrder);
+    m_resultsView->setSortingEnabled(true);
 
     return m_resultsView;
 }
