@@ -222,13 +222,49 @@ QList<EventData*> EventData::parseEvents(DVRServer *server, const QByteArray &in
     return re;
 }
 
-static QDateTime isoToDateTime(const QString &str)
+static QDateTime isoToDateTime(const QString &str, qint16 *tzOffsetMins = 0)
 {
     /* If there is a - or a + after the T portion, it indicates timezone, and should be removed */
-    int end = str.indexOf(QLatin1Char('T'));
-    if (end >= 0)
-        end = qMax(str.indexOf(QLatin1Char('-'), end+1), str.indexOf(QLatin1Char('+'), end+1));
-    return QDateTime::fromString(str.mid(0, end), Qt::ISODate);
+    int tzpos = -1;
+    for (int i = str.size()-1; i && tzpos == -1; --i)
+    {
+        switch (str[i].toLatin1())
+        {
+        case '-':
+        case '+':
+            tzpos = i;
+            break;
+        case 'T':
+        case 'Z':
+            tzpos = -2;
+            break;
+        }
+    }
+
+    qint16 offset = 0;
+    if (tzpos > 0)
+    {
+        /* Starting from tzpos, this can be in any of the following formats:
+         *   +hh   +hh:mm   +hhmm   + may also be -                         */
+        int p = tzpos;
+        bool positive = (str[p] == QLatin1Char('+'));
+        p++;
+
+        offset = (qint16)str.mid(p, 2).toUShort() * 60;
+        p += 2;
+
+        if (p < str.size() && str[p] == QLatin1Char(':'))
+            ++p;
+        offset += (qint16)str.mid(p, 2).toUShort();
+
+        if (!positive)
+            offset = -offset;
+    }
+
+    if (tzOffsetMins)
+        *tzOffsetMins = offset;
+
+    return QDateTime::fromString(str.mid(0, tzpos), Qt::ISODate).addSecs(int(-offset)*60);
 }
 
 static EventData *parseEntry(DVRServer *server, QXmlStreamReader &reader)
@@ -262,7 +298,7 @@ static EventData *parseEntry(DVRServer *server, QXmlStreamReader &reader)
         }
         else if (reader.name() == QLatin1String("published"))
         {
-            data->date = isoToDateTime(reader.readElementText());
+            data->date = isoToDateTime(reader.readElementText(), &data->dateTzOffsetMins);
         }
         else if (reader.name() == QLatin1String("updated"))
         {

@@ -67,16 +67,17 @@ public:
 
 struct EventData
 {
-    QDateTime date;
+    QDateTime date; /* UTC */
     DVRServer * const server;
     qint64 eventId, mediaId;
     int duration;
     int locationId;
     EventLevel level;
     EventType type;
+    qint16 dateTzOffsetMins; /* Offset in minutes for the server's timezone as of this event */
 
     EventData(DVRServer *s)
-        : server(s), eventId(-1), mediaId(-1), duration(0), locationId(-1)
+        : server(s), eventId(-1), mediaId(-1), duration(0), locationId(-1), dateTzOffsetMins(0)
     {
     }
 
@@ -85,6 +86,7 @@ struct EventData
     bool isSystem() const { return locationId < 0; }
     bool isCamera() const { return locationId >= 0; }
     QDateTime endDate() const { return date.addSecs(duration); }
+    QDateTime serverLocalDate() const { return date.addSecs(int(dateTzOffsetMins)*60); }
 
     QColor uiColor() const { return level.uiColor(); }
     QString uiLevel() const { return level.uiString(); }

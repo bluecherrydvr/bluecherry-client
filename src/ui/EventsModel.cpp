@@ -122,7 +122,7 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
     else if (role == Qt::ToolTipRole)
     {
         return tr("%1 (%2)<br>%3 on %4<br>%5").arg(data->uiType(), data->uiLevel(), Qt::escape(data->uiLocation()),
-                                                   Qt::escape(data->uiServer()), data->date.toString());
+                                                   Qt::escape(data->uiServer()), data->serverLocalDate().toString());
     }
     else if (role == Qt::ForegroundRole)
     {
@@ -163,7 +163,7 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
         break;
     case DateColumn:
         if (role == Qt::DisplayRole)
-            return data->date.toString();
+            return data->serverLocalDate().toString();
         else if (role == Qt::EditRole)
             return data->date;
         break;
@@ -341,8 +341,8 @@ bool EventsModel::testFilter(EventData *data)
 {
     if (data->level < filterLevel ||
         (!filterTypes.isNull() && (int)data->type >= 0 && !filterTypes[(int)data->type]) ||
-        (!filterDateBegin.isNull() && data->date < filterDateBegin) ||
-        (!filterDateEnd.isNull() && data->date > filterDateEnd))
+        (!filterDateBegin.isNull() && data->serverLocalDate() < filterDateBegin) ||
+        (!filterDateEnd.isNull() && data->serverLocalDate() > filterDateEnd))
         return false;
 
     QHash<DVRServer*, QSet<int> >::Iterator it = filterSources.find(data->server);
