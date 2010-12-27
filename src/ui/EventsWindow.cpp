@@ -42,7 +42,7 @@ EventsWindow::EventsWindow(QWidget *parent)
     EventSourcesModel *sourcesModel = new EventSourcesModel(m_sourcesView);
     m_sourcesView->setModel(sourcesModel);
     m_sourcesView->setMaximumWidth(180);
-    m_sourcesView->setMaximumHeight(150);
+    //m_sourcesView->setMaximumHeight(150);
     filtersLayout->addWidget(m_sourcesView);
 
     connect(sourcesModel, SIGNAL(checkedSourcesChanged(QMap<DVRServer*,QList<int>>)),
@@ -60,8 +60,6 @@ EventsWindow::EventsWindow(QWidget *parent)
     label->setStyleSheet(QLatin1String("font-weight:bold;"));
     filtersLayout->addWidget(label);
     filtersLayout->addWidget(createTypeFilter());
-#else
-    filtersLayout->addStretch();
 #endif
 
 #if 0 /* Tags are not fully implemented yet */
@@ -82,7 +80,7 @@ EventsWindow::EventsWindow(QWidget *parent)
     resultLayout->addWidget(resultSplitter);
 
     resultSplitter->addWidget(m_resultsView);
-    resultSplitter->addWidget(createTimeline());
+    //resultSplitter->addWidget(createTimeline());
 
     /* Settings */
     QSettings settings;
