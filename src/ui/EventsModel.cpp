@@ -298,6 +298,9 @@ void EventsModel::applyFilters(bool fromCache)
 
         for (QHash<DVRServer*,QList<EventData*> >::Iterator it = cachedEvents.begin(); it != cachedEvents.end(); ++it)
         {
+            if (!filterSources.isEmpty() && !filterSources.contains(it.key()))
+                continue;
+
             for (QList<EventData*>::Iterator eit = it->begin(); eit != it->end(); ++eit)
             {
                 if (testFilter(*eit))
