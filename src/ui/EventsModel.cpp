@@ -8,6 +8,8 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QDebug>
+#include <QtConcurrentRun>
+#include <QFutureWatcher>
 
 EventsModel::EventsModel(QObject *parent)
     : QAbstractItemModel(parent), serverEventsLimit(-1)
@@ -513,7 +515,7 @@ void EventsModel::updateServer(DVRServer *server)
             return;
     }
 
-    if (!server->api->isOnline())
+    if (!server->api->isOnline() || updatingServers.contains(server))
         return;
 
     QUrl url(QLatin1String("/events/"));
@@ -524,6 +526,8 @@ void EventsModel::updateServer(DVRServer *server)
     if (!filterDateEnd.isNull())
         url.addQueryItem(QLatin1String("endDate"), QString::number(filterDateEnd.toTime_t()));
 #endif
+
+    updatingServers.insert(server);
 
     QNetworkRequest req = server->api->buildRequest(url);
     req.setOriginatingObject(server);
@@ -543,10 +547,13 @@ void EventsModel::requestFinished()
     if (!bcApp->serverExists(server))
         return;
 
+    Q_ASSERT(updatingServers.contains(server));
+
     if (reply->error() != QNetworkReply::NoError)
     {
         qWarning() << "Event request error:" << reply->errorString();
         /* TODO: Handle errors properly */
+        updatingServers.remove(server);
         return;
     }
 
@@ -554,17 +561,37 @@ void EventsModel::requestFinished()
     if (statusCode < 200 || statusCode >= 300)
     {
         qWarning() << "Event request error: HTTP code" << statusCode;
-        /* TODO: ^ */
+        updatingServers.remove(server);
         return;
     }
 
     QByteArray data = reply->readAll();
-    QList<EventData*> events = EventData::parseEvents(server, data);
+
+    QFuture<QList<EventData*> > future = QtConcurrent::run(&EventData::parseEvents, server, data);
+
+    QFutureWatcher<QList<EventData*> > *qfw = new QFutureWatcher<QList<EventData*> >(this);
+    qfw->setProperty("server", QVariant::fromValue(server));
+    connect(qfw, SIGNAL(finished()), SLOT(eventParseFinished()));
+    qfw->setFuture(future);
+}
+
+void EventsModel::eventParseFinished()
+{
+    Q_ASSERT(sender() && sender()->inherits("QFutureWatcherBase"));
+    QFutureWatcher<QList<EventData*> > *qfw = static_cast<QFutureWatcher<QList<EventData*> >*>(sender());
+    qfw->deleteLater();
+
+    DVRServer *server = qfw->property("server").value<DVRServer*>();
+    if (!server || !bcApp->serverExists(server))
+        return;
+
+    QList<EventData*> events = qfw->result();
     qDebug() << "EventsModel: Parsed event data into" << events.size() << "events";
 
     QList<EventData*> &cache = cachedEvents[server];
     qDeleteAll(cache);
     cache = events;
 
+    updatingServers.remove(server);
     applyFilters();
 }

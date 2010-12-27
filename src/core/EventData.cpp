@@ -184,6 +184,8 @@ QString EventData::uiDuration() const
     return re;
 }
 
+/* May be threaded; avoid dereferencing the server and so forth */
+
 static EventData *parseEntry(DVRServer *server, QXmlStreamReader &reader);
 
 QList<EventData*> EventData::parseEvents(DVRServer *server, const QByteArray &input)

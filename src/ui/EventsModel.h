@@ -76,12 +76,14 @@ signals:
 private slots:
     void serverAdded(DVRServer *server);
     void requestFinished();
+    void eventParseFinished();
 
     void clearServerEvents(DVRServer *server = 0);
 
 private:
     QList<EventData*> items;
     QHash<DVRServer*,QList<EventData*> > cachedEvents;
+    QSet<DVRServer*> updatingServers;
     QTimer updateTimer;
 
     /* Filters */
