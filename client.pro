@@ -24,7 +24,7 @@ win32-msvc2008|win32-msvc2010 {
     # public API, so we can use a different setting. Otherwise, it would cause linker errors.
     QMAKE_CXXFLAGS -= -Zc:wchar_t-
     QMAKE_CXXFLAGS_RELEASE += -Zi
-    QMAKE_LFLAGS_RELEASE += /OPT:REF,ICF
+    QMAKE_LFLAGS_RELEASE += /DEBUG /OPT:REF,ICF
 }
 
 unix:!macx {
