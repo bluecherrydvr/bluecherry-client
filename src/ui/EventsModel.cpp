@@ -373,7 +373,10 @@ QString EventsModel::filterDescription() const
          it != filterSources.end(); ++it)
     {
         if (it->count() != it.key()->cameras().size()+1)
+        {
             allCameras = false;
+            break;
+        }
     }
 
     if (!filterSources.isEmpty() && filterSources.size() != bcApp->servers().size())
@@ -400,11 +403,16 @@ QString EventsModel::filterDescription() const
         re += tr(" on selected cameras");
 
     if (!filterDateBegin.isNull() && !filterDateEnd.isNull())
-        re += tr(" from %1 to %2");
+    {
+        if (filterDateBegin.date() == filterDateEnd.date())
+            re += tr(" on %1").arg(filterDateBegin.date().toString());
+        else
+            re += tr(" between %1 to %2").arg(filterDateBegin.date().toString(), filterDateEnd.date().toString());
+    }
     else if (!filterDateBegin.isNull())
-        re += tr(" starting %1").arg(filterDateBegin.toString());
+        re += tr(" after %1").arg(filterDateBegin.date().toString());
     else if (!filterDateEnd.isNull())
-        re += tr(" ending %1").arg(filterDateEnd.toString());
+        re += tr(" before %1").arg(filterDateEnd.date().toString());
 
     return re;
 }
@@ -412,7 +420,9 @@ QString EventsModel::filterDescription() const
 void EventsModel::setFilterDates(const QDateTime &begin, const QDateTime &end)
 {
     bool fast = false;
-    if (begin >= filterDateBegin && end <= filterDateEnd)
+    if (begin >= filterDateBegin && end <= filterDateEnd &&
+        (filterDateBegin.isNull() || !begin.isNull()) &&
+        (filterDateEnd.isNull() || !end.isNull()))
         fast = true;
 
     filterDateBegin = begin;
@@ -598,3 +608,4 @@ void EventsModel::eventParseFinished()
     updatingServers.remove(server);
     applyFilters();
 }
+

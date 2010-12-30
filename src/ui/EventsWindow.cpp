@@ -12,7 +12,7 @@
 #include "ui/MainWindow.h"
 #include <QBoxLayout>
 #include <QGridLayout>
-#include <QDateTimeEdit>
+#include <QDateEdit>
 #include <QComboBox>
 #include <QLabel>
 #include <QCheckBox>
@@ -106,20 +106,68 @@ EventsWindow *EventsWindow::instance()
 
 void EventsWindow::createDateFilter(QBoxLayout *layout)
 {
-    QCheckBox *title = new QCheckBox(tr("Starting Date"));
+    QCheckBox *title = new QCheckBox(tr("Date after..."));
     title->setStyleSheet(QLatin1String("font-weight:bold;"));
     layout->addWidget(title);
+    connect(title, SIGNAL(clicked(bool)), SLOT(setStartDateEnabled(bool)));
 
-    m_startDate = new QDateTimeEdit(QDateTime::currentDateTime());
+    m_startDate = new QDateEdit(QDate::currentDate());
     m_startDate->setCalendarPopup(true);
     m_startDate->setMaximumDate(QDate::currentDate());
+    m_startDate->setDisplayFormat(QLatin1String("dddd, MMM dd, yyyy"));
+    m_startDate->setVisible(false);
     layout->addWidget(m_startDate);
 
     connect(m_startDate, SIGNAL(dateTimeChanged(QDateTime)), m_resultsView->eventsModel(),
             SLOT(setFilterBeginDate(QDateTime)));
-    connect(title, SIGNAL(clicked(bool)), this, SLOT(setStartDateEnabled(bool)));
+    connect(m_startDate, SIGNAL(dateTimeChanged(QDateTime)), SLOT(setEndDateMinimum(QDateTime)));
     title->setChecked(false);
-    m_startDate->setEnabled(false);
+
+    title = new QCheckBox(tr("Date before..."));
+    title->setStyleSheet(QLatin1String("font-weight:bold;"));
+    layout->addWidget(title);
+    connect(title, SIGNAL(clicked(bool)), SLOT(setEndDateEnabled(bool)));
+
+    m_endDate = new QDateEdit(QDate::currentDate());
+    m_endDate->setCalendarPopup(true);
+    m_endDate->setMaximumDate(QDate::currentDate());
+    m_endDate->setDisplayFormat(QLatin1String("dddd, MMM dd, yyyy"));
+    m_endDate->setTime(QTime(23, 59, 59, 999));
+    m_endDate->setVisible(false);
+    layout->addWidget(m_endDate);
+
+    connect(m_endDate, SIGNAL(dateTimeChanged(QDateTime)), m_resultsView->eventsModel(),
+            SLOT(setFilterEndDate(QDateTime)));
+}
+
+void EventsWindow::setStartDateEnabled(bool enabled)
+{
+    m_startDate->setVisible(enabled);
+    if (enabled)
+    {
+        m_resultsView->eventsModel()->setFilterBeginDate(m_startDate->dateTime());
+        setEndDateMinimum(m_startDate->dateTime());
+    }
+    else
+    {
+        m_resultsView->eventsModel()->setFilterBeginDate(QDateTime());
+        setEndDateMinimum(QDateTime());
+    }
+}
+
+void EventsWindow::setEndDateEnabled(bool enabled)
+{
+    m_endDate->setVisible(enabled);
+    if (enabled)
+        m_resultsView->eventsModel()->setFilterEndDate(m_endDate->dateTime());
+    else
+        m_resultsView->eventsModel()->setFilterEndDate(QDateTime());
+}
+
+void EventsWindow::setEndDateMinimum(const QDateTime &date)
+{
+    m_endDate->setMinimumDate(date.date());
+    m_endDate->setTime(QTime(23, 59, 59, 999));
 }
 
 QWidget *EventsWindow::createLevelFilter()
@@ -230,15 +278,6 @@ void EventsWindow::closeEvent(QCloseEvent *event)
     settings.setValue(QLatin1String("ui/events/geometry"), saveGeometry());
     settings.setValue(QLatin1String("ui/events/viewHeader"), m_resultsView->header()->saveState());
     QWidget::closeEvent(event);
-}
-
-void EventsWindow::setStartDateEnabled(bool enabled)
-{
-    m_startDate->setEnabled(enabled);
-    if (enabled)
-        m_resultsView->eventsModel()->setFilterBeginDate(m_startDate->dateTime());
-    else
-        m_resultsView->eventsModel()->setFilterBeginDate(QDateTime());
 }
 
 void EventsWindow::levelFilterChanged()

@@ -10,10 +10,11 @@ class EventTypesFilter;
 class EventTagsView;
 class QLabel;
 class QBoxLayout;
-class QDateTimeEdit;
+class QDateEdit;
 class QComboBox;
 class QSlider;
 class QModelIndex;
+class QDateTime;
 
 class EventsWindow : public QWidget
 {
@@ -30,6 +31,8 @@ protected:
 
 private slots:
     void setStartDateEnabled(bool enabled);
+    void setEndDateEnabled(bool enabled);
+    void setEndDateMinimum(const QDateTime &date);
     void levelFilterChanged();
     void updateResultTitle();
 
@@ -43,7 +46,7 @@ private:
     static EventsWindow *m_instance;
 
     DVRServersView *m_sourcesView;
-    QDateTimeEdit *m_startDate;
+    QDateEdit *m_startDate, *m_endDate;
     QComboBox *m_levelFilter;
     EventTypesFilter *m_typeFilter;
     EventTagsView *m_tagsView;
