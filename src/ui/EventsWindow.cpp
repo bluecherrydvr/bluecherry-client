@@ -22,6 +22,7 @@
 #include <QSplitter>
 #include <QLineEdit>
 #include <QHeaderView>
+#include <QTabWidget>I pa
 
 EventsWindow *EventsWindow::m_instance = 0;
 
@@ -71,16 +72,14 @@ EventsWindow::EventsWindow(QWidget *parent)
 #endif
 
     /* Results */
-    QBoxLayout *resultLayout = new QVBoxLayout;
-    layout->addLayout(resultLayout, 1);
+    m_resultTabs = new QTabWidget;
+    //m_resultTabs->setDocumentMode(true);
+    layout->addWidget(m_resultTabs, 1);
 
-    resultLayout->addWidget(createResultTitle());
+    m_resultTabs->addTab(m_resultsView, tr("List"));
+    m_resultTabs->addTab(createTimeline(), tr("Timeline"));
 
-    QSplitter *resultSplitter = new QSplitter(Qt::Vertical);
-    resultLayout->addWidget(resultSplitter);
-
-    resultSplitter->addWidget(m_resultsView);
-    //resultSplitter->addWidget(createTimeline());
+//    resultLayout->addWidget(createResultTitle());
 
     /* Settings */
     QSettings settings;
@@ -231,6 +230,7 @@ QWidget *EventsWindow::createResultsView()
 {
     m_resultsView = new EventsView;
     m_resultsView->setModel(new EventsModel(this));
+    m_resultsView->setFrameStyle(QFrame::NoFrame);
     connect(m_resultsView, SIGNAL(doubleClicked(QModelIndex)), SLOT(showEvent(QModelIndex)));
 
     QSettings settings;
@@ -246,7 +246,6 @@ QWidget *EventsWindow::createTimeline()
 {
     QWidget *container = new QWidget;
     QGridLayout *layout = new QGridLayout(container);
-    layout->setMargin(0);
 
     m_timeline = new EventTimelineWidget;
     m_timeline->setModel(m_resultsView->eventsModel());
