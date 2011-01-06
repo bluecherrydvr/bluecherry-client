@@ -128,7 +128,7 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
     }
     else if (role == Qt::ForegroundRole)
     {
-        return data->uiColor();
+        return data->uiColor(false);
     }
 
     switch (index.column())
@@ -144,6 +144,8 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
     case TypeColumn:
         if (role == Qt::DisplayRole)
             return data->uiType();
+        else if (role == Qt::DecorationRole)
+            return data->hasMedia() ? QIcon(QLatin1String(":/icons/control-000-small.png")) : QVariant();
         break;
     case DurationColumn:
         if (role == Qt::DisplayRole)

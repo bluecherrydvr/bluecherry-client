@@ -25,5 +25,6 @@
         <file>icon32.png</file>
         <file>icon64.png</file>
         <file>bluecherry.png</file>
+        <file>control-000-small.png</file>
     </qresource>
 </RCC>

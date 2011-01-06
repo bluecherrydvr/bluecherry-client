@@ -17,12 +17,12 @@ QString EventLevel::uiString() const
     }
 }
 
-QColor EventLevel::uiColor() const
+QColor EventLevel::uiColor(bool graphical) const
 {
     switch (level)
     {
     case Info: return QColor(122, 122, 122);
-    case Warning: return QColor(62, 107, 199);
+    case Warning: return graphical ? QColor(62, 107, 199) : QColor(Qt::black);
     case Alarm: return QColor(204, 120, 10);
     case Critical: return QColor(175, 0, 0);
     default: return QColor(Qt::black);

@@ -25,7 +25,7 @@ public:
     EventLevel(const QString &l) { *this = l; }
 
     QString uiString() const;
-    QColor uiColor() const;
+    QColor uiColor(bool graphical = true) const;
 
     EventLevel &operator=(const QString &l);
     operator Level() const { return level; }
@@ -87,8 +87,9 @@ struct EventData
     bool isCamera() const { return locationId >= 0; }
     QDateTime endDate() const { return date.addSecs(duration); }
     QDateTime serverLocalDate() const { return date.addSecs(int(dateTzOffsetMins)*60); }
+    bool hasMedia() const { return mediaId >= 0; }
 
-    QColor uiColor() const { return level.uiColor(); }
+    QColor uiColor(bool graphical = true) const { return level.uiColor(graphical); }
     QString uiLevel() const { return level.uiString(); }
     QString uiType() const { return type.uiString(); }
     QString uiDuration() const;
