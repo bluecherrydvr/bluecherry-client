@@ -16,6 +16,8 @@ class QSlider;
 class QModelIndex;
 class QDateTime;
 class QTabWidget;
+class EventViewWindow;
+class QSplitter;
 
 class EventsWindow : public QWidget
 {
@@ -67,6 +69,10 @@ private:
     EventsView *m_resultsView;
     EventTimelineWidget *m_timeline;
     QSlider *m_timelineZoom;
+
+    /* Playback */
+    QSplitter *m_videoSplitter;
+    EventViewWindow *m_eventViewer;
 
     void createDateFilter(QBoxLayout *layout);
     QWidget *createLevelFilter();

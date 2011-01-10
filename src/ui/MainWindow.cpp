@@ -286,6 +286,8 @@ QWidget *MainWindow::createRecentEvents()
 
     m_eventsView->header()->restoreState(settings.value(QLatin1String("ui/main/eventsView")).toByteArray());
 
+    connect(m_eventsView, SIGNAL(doubleClicked(QModelIndex)), m_eventsView, SLOT(openEvent(QModelIndex)));
+
     return m_eventsView;
 }
 

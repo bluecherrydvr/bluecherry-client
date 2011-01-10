@@ -71,19 +71,28 @@ EventsWindow::EventsWindow(QWidget *parent)
     filtersLayout->addWidget(createTagsInput());
 #endif
 
+    /* Splitter between results and playback */
+    m_videoSplitter = new QSplitter(Qt::Vertical);
+    layout->addWidget(m_videoSplitter, 1);
+
     /* Results */
     m_resultTabs = new QTabWidget;
-    //m_resultTabs->setDocumentMode(true);
-    layout->addWidget(m_resultTabs, 1);
+    m_videoSplitter->addWidget(m_resultTabs);
+    m_videoSplitter->setCollapsible(0, false);
 
     m_resultTabs->addTab(m_resultsView, tr("List"));
     m_resultTabs->addTab(createTimeline(), tr("Timeline"));
 
-//    resultLayout->addWidget(createResultTitle());
+    /* Playback */
+    m_eventViewer = new EventViewWindow;
+    m_eventViewer->layout()->setMargin(0);
+    m_eventViewer->hide();
+    m_videoSplitter->addWidget(m_eventViewer);
 
     /* Settings */
     QSettings settings;
     restoreGeometry(settings.value(QLatin1String("ui/events/geometry")).toByteArray());
+    m_videoSplitter->restoreState(settings.value(QLatin1String("ui/events/videoSplitter")).toByteArray());
 }
 
 EventsWindow::~EventsWindow()
@@ -275,6 +284,7 @@ void EventsWindow::closeEvent(QCloseEvent *event)
 {
     QSettings settings;
     settings.setValue(QLatin1String("ui/events/geometry"), saveGeometry());
+    settings.setValue(QLatin1String("ui/events/videoSplitter"), m_videoSplitter->saveState());
     settings.setValue(QLatin1String("ui/events/viewHeader"), m_resultsView->header()->saveState());
     QWidget::closeEvent(event);
 }
@@ -313,5 +323,10 @@ void EventsWindow::timelineZoomRangeChanged(int min, int max)
 void EventsWindow::showEvent(const QModelIndex &index)
 {
     EventData *data = index.data(EventsModel::EventDataPtr).value<EventData*>();
-    EventViewWindow::open(data);
+    m_eventViewer->setEvent(data);
+
+    /* Hack to ensure that the video area isn't collapsed */
+    if (m_videoSplitter->sizes()[1] == 0)
+        m_videoSplitter->setSizes(QList<int>() << m_videoSplitter->sizes()[0] << 1);
+    m_eventViewer->show();
 }

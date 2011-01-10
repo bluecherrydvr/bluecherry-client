@@ -8,8 +8,6 @@ EventsView::EventsView(QWidget *parent)
 {
     setRootIsDecorated(false);
     setUniformRowHeights(true);
-
-    connect(this, SIGNAL(doubleClicked(QModelIndex)), SLOT(openEvent(QModelIndex)));
 }
 
 void EventsView::setModel(EventsModel *model)

@@ -34,15 +34,15 @@ EventViewWindow::EventViewWindow(QWidget *parent)
     m_splitter = new QSplitter(Qt::Horizontal, this);
     layout->addWidget(m_splitter);
 
-    m_splitter->addWidget(createInfoArea());
     m_splitter->addWidget(createPlaybackArea());
-    m_splitter->setStretchFactor(1, 1);
+    m_splitter->addWidget(createInfoArea());
+    m_splitter->setStretchFactor(0, 1);
     m_splitter->setChildrenCollapsible(false);
 
     QSettings settings;
     restoreGeometry(settings.value(QLatin1String("ui/eventView/geometry")).toByteArray());
-    if (!m_splitter->restoreState(settings.value(QLatin1String("ui/eventView/splitState")).toByteArray()))
-        m_splitter->setSizes(QList<int>() << 160 << 1000);
+    if (!m_splitter->restoreState(settings.value(QLatin1String("ui/eventView/splitState2")).toByteArray()))
+        m_splitter->setSizes(QList<int>() << 1000 << 160);
 }
 
 EventViewWindow *EventViewWindow::open(EventData *event)
@@ -69,7 +69,8 @@ void EventViewWindow::closeEvent(QCloseEvent *event)
 {
     QSettings settings;
     settings.setValue(QLatin1String("ui/eventView/geometry"), saveGeometry());
-    settings.setValue(QLatin1String("ui/eventView/splitState"), m_splitter->saveState());
+    settings.setValue(QLatin1String("ui/eventView/splitState2"), m_splitter->saveState());
+    settings.remove(QLatin1String("ui/eventView/splitState")); // As of 2.0.0-beta4
     QWidget::closeEvent(event);
 }
 

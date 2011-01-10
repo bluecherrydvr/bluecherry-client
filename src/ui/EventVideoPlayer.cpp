@@ -111,6 +111,7 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
 {
     m_event = event;
 
+    backend.clear();
     backend.start(url);
     connect(backend.videoBuffer(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()), Qt::QueuedConnection);
     connect(backend.videoBuffer(), SIGNAL(bufferingStarted()), SLOT(bufferingStarted()));
