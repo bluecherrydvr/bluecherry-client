@@ -67,6 +67,7 @@ private:
     QByteArray m_httpBuffer;
     QUrl m_url;
     QPixmap m_currentFrame;
+    quint64 m_currentFrameNo, m_latestFrameNo;
     ImageDecodeTask *m_decodeTask;
     QVector<QSize> m_scaleSizes;
     QTimer m_activityTimer;

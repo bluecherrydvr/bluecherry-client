@@ -8,7 +8,9 @@
 class ImageDecodeTask : public ThreadTask
 {
 public:
-    ImageDecodeTask(QObject *caller, const char *callback);
+    const quint64 imageId;
+
+    ImageDecodeTask(QObject *caller, const char *callback, quint64 imageId = 0);
 
     void setData(const QByteArray &data) { m_data = data; }
     void setScaleSizes(const QVector<QSize> &sizes) { m_scaleSizes = sizes; }

@@ -11,15 +11,15 @@
 #include <QDateTime>
 
 MJpegStream::MJpegStream(QObject *parent)
-    : QObject(parent), m_httpReply(0), m_decodeTask(0), m_lastActivity(0), m_httpBodyLength(0), m_state(NotConnected),
-      m_parserState(ParserBoundary), m_autoStart(false)
+    : QObject(parent), m_httpReply(0), m_currentFrameNo(0), m_latestFrameNo(0), m_decodeTask(0), m_lastActivity(0),
+      m_httpBodyLength(0), m_state(NotConnected), m_parserState(ParserBoundary), m_autoStart(false)
 {
     connect(&m_activityTimer, SIGNAL(timeout()), SLOT(checkActivity()));
 }
 
 MJpegStream::MJpegStream(const QUrl &url, QObject *parent)
-    : QObject(parent), m_httpReply(0), m_decodeTask(0), m_lastActivity(0), m_httpBodyLength(0), m_state(NotConnected),
-      m_parserState(ParserBoundary), m_autoStart(false)
+    : QObject(parent), m_httpReply(0), m_currentFrameNo(0), m_latestFrameNo(0), m_decodeTask(0), m_lastActivity(0),
+      m_httpBodyLength(0), m_state(NotConnected), m_parserState(ParserBoundary), m_autoStart(false)
 {
     setUrl(url);
     connect(&m_activityTimer, SIGNAL(timeout()), SLOT(checkActivity()));
@@ -360,7 +360,7 @@ void MJpegStream::decodeFrame(const QByteArray &data)
     if (m_decodeTask)
         m_decodeTask->cancel();
 
-    m_decodeTask = new ImageDecodeTask(this, "decodeFrameResult");
+    m_decodeTask = new ImageDecodeTask(this, "decodeFrameResult", ++m_latestFrameNo);
     m_decodeTask->setData(data);
     m_decodeTask->setScaleSizes(m_scaleSizes);
 
@@ -373,11 +373,13 @@ void MJpegStream::decodeFrameResult(ThreadTask *task)
     if (m_decodeTask == decodeTask)
         m_decodeTask = 0;
 
-    if (decodeTask->result().isNull())
+    if (decodeTask->result().isNull() || decodeTask->imageId <= m_currentFrameNo)
         return;
 
     bool sizeChanged = decodeTask->result().size() != m_currentFrame.size();
     m_currentFrame = QPixmap::fromImage(decodeTask->result());
+    m_currentFrameNo = decodeTask->imageId;
+
     if (sizeChanged)
         emit streamSizeChanged(m_currentFrame.size());
     emit updateFrame(m_currentFrame, decodeTask->scaleResults());

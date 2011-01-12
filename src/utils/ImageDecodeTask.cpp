@@ -3,8 +3,8 @@
 #include <QBuffer>
 #include <QDebug>
 
-ImageDecodeTask::ImageDecodeTask(QObject *caller, const char *callback)
-    : ThreadTask(caller, callback)
+ImageDecodeTask::ImageDecodeTask(QObject *caller, const char *callback, quint64 id)
+    : ThreadTask(caller, callback), imageId(id)
 {
 }
 
