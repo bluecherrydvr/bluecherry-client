@@ -11,12 +11,16 @@ ImageDecodeTask::ImageDecodeTask(QObject *caller, const char *callback, quint64 
 void ImageDecodeTask::runTask()
 {
     if (isCancelled() || m_data.isNull())
+    {
+        m_data.clear();
         return;
+    }
 
     QBuffer buffer(&m_data);
     if (!buffer.open(QIODevice::ReadOnly))
     {
-        qDebug() << "Image decoding error:" << buffer.errorString();
+        qDebug() << "Image decoding buffer error:" << buffer.errorString();
+        m_data.clear();
         return;
     }
 
@@ -25,7 +29,12 @@ void ImageDecodeTask::runTask()
      * Qt 4.6.2 on Ubuntu 10.04. Disabled for now as a result. Issue #473 */
     //reader.setAutoDetectImageFormat(false);
 
-    if (!reader.read(&m_result))
+    bool ok = reader.read(&m_result);
+
+    buffer.close();
+    m_data.clear();
+
+    if (!ok)
     {
         if (m_result.isNull())
         {
@@ -35,9 +44,6 @@ void ImageDecodeTask::runTask()
         else
             qDebug() << "Image decoding warning:" << reader.errorString();
     }
-
-    buffer.close();
-    m_data.clear();
 
     m_scaleResults.resize(m_scaleSizes.size());
     for (int i = 0; i < m_scaleSizes.size(); ++i)
