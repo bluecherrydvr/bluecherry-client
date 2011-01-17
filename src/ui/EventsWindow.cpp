@@ -22,7 +22,9 @@
 #include <QSplitter>
 #include <QLineEdit>
 #include <QHeaderView>
-#include <QTabWidget>I pa
+#include <QTabWidget>
+#include <QMenu>
+#include <QAction>
 
 EventsWindow *EventsWindow::m_instance = 0;
 
@@ -240,6 +242,8 @@ QWidget *EventsWindow::createResultsView()
     m_resultsView = new EventsView;
     m_resultsView->setModel(new EventsModel(this));
     m_resultsView->setFrameStyle(QFrame::NoFrame);
+    m_resultsView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_resultsView, SIGNAL(customContextMenuRequested(QPoint)), SLOT(eventContextMenu(QPoint)));
     connect(m_resultsView, SIGNAL(doubleClicked(QModelIndex)), SLOT(showEvent(QModelIndex)));
 
     QSettings settings;
@@ -257,13 +261,14 @@ QWidget *EventsWindow::createTimeline()
     QGridLayout *layout = new QGridLayout(container);
 
     m_timeline = new EventTimelineWidget;
+    m_timeline->setContextMenuPolicy(Qt::CustomContextMenu);
     m_timeline->setModel(m_resultsView->eventsModel());
-    //m_timeline->setSelectionModel(m_resultsView->selectionModel());
 
     m_timelineZoom = new QSlider(Qt::Horizontal);
     timelineZoomRangeChanged(m_timeline->minZoomSeconds(), m_timeline->maxZoomSeconds());
     timelineZoomChanged(m_timeline->zoomSeconds());
 
+    connect(m_timeline, SIGNAL(customContextMenuRequested(QPoint)), SLOT(eventContextMenu(QPoint)));
     connect(m_timeline, SIGNAL(doubleClicked(QModelIndex)), SLOT(showEvent(QModelIndex)));
 
     connect(m_timeline, SIGNAL(zoomSecondsChanged(int)), SLOT(timelineZoomChanged(int)));
@@ -329,4 +334,56 @@ void EventsWindow::showEvent(const QModelIndex &index)
     if (m_videoSplitter->sizes()[1] == 0)
         m_videoSplitter->setSizes(QList<int>() << m_videoSplitter->sizes()[0] << 1);
     m_eventViewer->show();
+}
+
+void EventsWindow::eventContextMenu(const QPoint &pos)
+{
+    QAbstractItemView *view = qobject_cast<QAbstractItemView*>(sender());
+    if (!view)
+        return;
+
+    QModelIndex idx = view->indexAt(pos);
+    EventData *data = idx.data(EventsModel::EventDataPtr).value<EventData*>();
+    if (!data)
+        return;
+
+    QMenu menu(view);
+
+    QAction *aPlay = menu.addAction(tr("Play video"));
+    menu.setDefaultAction(aPlay);
+
+    QAction *aPlayWindow = menu.addAction(tr("Play in a new window"));
+    menu.addSeparator();
+
+    QAction *aSelectOnly = 0, *aSelectElse = 0;
+    if (data->isCamera())
+    {
+        aSelectOnly = menu.addAction(tr("Show only this camera"));
+        aSelectElse = menu.addAction(tr("Exclude this camera"));
+    }
+
+    QAction *act = menu.exec(view->mapToGlobal(pos));
+
+    if (!act)
+        return;
+    else if (act == aPlay)
+        showEvent(idx);
+    else if (act == aPlayWindow)
+        EventViewWindow::open(data);
+    else if (act == aSelectOnly || act == aSelectElse)
+    {
+        EventSourcesModel *sModel = qobject_cast<EventSourcesModel*>(m_sourcesView->model());
+        Q_ASSERT(sModel);
+        if (!sModel)
+            return;
+
+        QModelIndex sIdx = sModel->indexOfCamera(data->locationCamera());
+        if (!sIdx.isValid())
+            return;
+
+        if (act == aSelectOnly)
+            m_sourcesView->checkOnlyIndex(sIdx);
+        else
+            sModel->setData(sIdx, Qt::Unchecked, Qt::CheckStateRole);
+    }
 }

@@ -14,6 +14,8 @@ public:
 
     DVRServer *currentServer() const;
 
+    void checkOnlyIndex(const QModelIndex &index);
+
     virtual void setModel(QAbstractItemModel *model);
 
 protected:

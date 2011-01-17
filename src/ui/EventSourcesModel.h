@@ -18,6 +18,8 @@ public:
 
     virtual QMap<DVRServer*,QList<int> > checkedSources() const;
 
+    QModelIndex indexOfCamera(const DVRCamera &camera) const;
+
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
     virtual QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;

@@ -161,15 +161,7 @@ void DVRServersView::contextMenuEvent(QContextMenuEvent *event)
     }
     else if (action == aSelectOnly)
     {
-        /* This assumes that unchecking all top-level items will uncheck everything under them */
-        for (int i = 0, n = model()->rowCount(); i < n; ++i)
-        {
-            QModelIndex idx = model()->index(i, index.column(), QModelIndex());
-            if (idx != index)
-                model()->setData(idx, Qt::Unchecked, Qt::CheckStateRole);
-        }
-
-        model()->setData(index, Qt::Checked, Qt::CheckStateRole);
+        checkOnlyIndex(index);
     }
     else if (action == aSelectElse)
     {
@@ -182,6 +174,19 @@ void DVRServersView::contextMenuEvent(QContextMenuEvent *event)
 
         model()->setData(index, Qt::Unchecked, Qt::CheckStateRole);
     }
+}
+
+void DVRServersView::checkOnlyIndex(const QModelIndex &index)
+{
+    /* This assumes that unchecking all top-level items will uncheck everything under them */
+    for (int i = 0, n = model()->rowCount(); i < n; ++i)
+    {
+        QModelIndex idx = model()->index(i, index.column(), QModelIndex());
+        if (idx != index)
+            model()->setData(idx, Qt::Unchecked, Qt::CheckStateRole);
+    }
+
+    model()->setData(index, Qt::Checked, Qt::CheckStateRole);
 }
 
 void DVRServersView::mouseDoubleClickEvent(QMouseEvent *event)

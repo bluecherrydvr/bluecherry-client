@@ -21,6 +21,23 @@ EventSourcesModel::EventSourcesModel(QObject *parent)
     }
 }
 
+QModelIndex EventSourcesModel::indexOfCamera(const DVRCamera &camera) const
+{
+    for (int r = 0; r < servers.size(); ++r)
+    {
+        if (servers[r].server == camera.server())
+        {
+            int cr = servers[r].cameras.indexOf(camera);
+            if (cr < 0)
+                return QModelIndex();
+
+            return index(cr+1, 0, index(r+1, 0));
+        }
+    }
+
+    return QModelIndex();
+}
+
 QMap<DVRServer*,QList<int> > EventSourcesModel::checkedSources() const
 {
     QMap<DVRServer*,QList<int> > re;

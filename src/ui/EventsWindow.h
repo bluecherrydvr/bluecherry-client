@@ -43,6 +43,7 @@ private slots:
     void timelineZoomRangeChanged(int min, int max);
     void timelineSliderChanged(int value);
 
+    void eventContextMenu(const QPoint &pos);
     void showEvent(const QModelIndex &index);
 
 private:
