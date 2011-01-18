@@ -13,18 +13,8 @@
 VideoPlayerBackend::VideoPlayerBackend(QObject *parent)
     : QObject(parent), m_pipeline(0), m_videoLink(0), m_sinkWidget(0), m_videoBuffer(0), m_state(Stopped)
 {
-    GError *err;
-    if (gst_init_check(0, 0, &err) == FALSE)
-    {
-        qWarning() << "GStreamer initialization failed:" << err->message;
-        setError(true, tr("Failed to initialize video playback: %1").arg(QString::fromLatin1(err->message)));
-        return;
-    }
-
-#if !defined(Q_OS_LINUX) || defined(GSTREAMER_PLUGINS)
-    if (!loadPlugins())
-        setError(true, tr("Failed to load video plugins"));
-#endif
+    if (!initGStreamer(&m_errorMessage))
+        setError(true, m_errorMessage);
 }
 
 VideoPlayerBackend::~VideoPlayerBackend()
@@ -34,8 +24,29 @@ VideoPlayerBackend::~VideoPlayerBackend()
     clear();
 }
 
-bool VideoPlayerBackend::loadPlugins()
+bool VideoPlayerBackend::initGStreamer(QString *errorMessage)
 {
+    static bool loaded = false;
+    if (loaded)
+        return true;
+
+    GError *err;
+    if (gst_init_check(0, 0, &err) == FALSE)
+    {
+        Q_ASSERT(err);
+        qWarning() << "GStreamer initialization failed:" << err->message;
+        if (errorMessage)
+            *errorMessage = QString::fromLatin1("initialization failed: ") + QString::fromLatin1(err->message);
+        g_error_free(err);
+        return false;
+    }
+
+#if defined(Q_OS_LINUX) && !defined(GSTREAMER_PLUGINS)
+    /* Use the system installation of gstreamer on linux, where we don't need to
+     * explicitly load our plugins. */
+    return true;
+#endif
+
 #ifdef Q_OS_WIN
 #define EXT ".dll"
 #else
@@ -59,36 +70,48 @@ bool VideoPlayerBackend::loadPlugins()
 
 #undef EXT
 #if defined(Q_OS_MAC)
-    QByteArray pluginPath = QFile::encodeName(QApplication::applicationDirPath() + QLatin1String("/../PlugIns/gstreamer/"));
+    QString pluginPath = QApplication::applicationDirPath() + QLatin1String("/../PlugIns/gstreamer/");
 #else
-    QByteArray pluginPath = QFile::encodeName(QDir::toNativeSeparators(QApplication::applicationDirPath() +
-                                                                       QLatin1String("/")));
+    QString pluginPath = QDir::toNativeSeparators(QApplication::applicationDirPath() + QLatin1String("/"));
 #endif
 
 #ifdef GSTREAMER_PLUGINS
     QString ppx = QDir::toNativeSeparators(QString::fromLatin1(GSTREAMER_PLUGINS "/"));
     if (QDir::isAbsolutePath(ppx))
-        pluginPath = QFile::encodeName(ppx);
+        pluginPath = ppx;
     else
-        pluginPath = pluginPath + QFile::encodeName(QString(QDir::separator())) + QFile::encodeName(ppx);
+        pluginPath += QDir::separator() + ppx;
 #endif
 
-    if (!QFile::exists(QFile::decodeName(pluginPath)))
+    if (!QFile::exists(pluginPath))
     {
         qWarning() << "gstreamer: Plugin path" << pluginPath << "does not exist";
+        if (errorMessage)
+            *errorMessage = QString::fromLatin1("plugin path (%1) does not exist").arg(pluginPath);
         return false;
     }
 
     bool success = true;
+    QByteArray path = QFile::encodeName(pluginPath);
+    int pathEnd = path.size();
+
+    if (errorMessage)
+        errorMessage->clear();
 
     for (const char **p = plugins; *p; ++p)
     {
+        path.truncate(pathEnd);
+        path.append(*p);
+
         GError *err = 0;
-        GstPlugin *plugin = gst_plugin_load_file(pluginPath + QByteArray::fromRawData(*p, qstrlen(*p)), &err);
+        GstPlugin *plugin = gst_plugin_load_file(path.constData(), &err);
         if (!plugin)
         {
             Q_ASSERT(err);
             qWarning() << "gstreamer: Failed to load plugin" << *p << ":" << err->message;
+            if (errorMessage)
+                errorMessage->append(QString::fromLatin1("plugin '%1' failed: %2\n").arg(QLatin1String(*p))
+                                     .arg(QLatin1String(err->message)));
             g_error_free(err);
             success = false;
         }
@@ -99,23 +122,25 @@ bool VideoPlayerBackend::loadPlugins()
         }
     }
 
+    if (success)
+        loaded = true;
     return success;
 }
 
-static GstBusSyncReply bus_handler(GstBus *bus, GstMessage *msg, gpointer data)
+GstBusSyncReply VideoPlayerBackend::staticBusHandler(GstBus *bus, GstMessage *msg, gpointer data)
 {
     Q_ASSERT(data);
     return ((VideoPlayerBackend*)data)->busHandler(bus, msg, true);
 }
 
-static gboolean async_bus_handler(GstBus *bus, GstMessage *msg, gpointer data)
+gboolean VideoPlayerBackend::staticAsyncBusHandler(GstBus *bus, GstMessage *msg, gpointer data)
 {
     Q_ASSERT(data);
     ((VideoPlayerBackend*)data)->busHandler(bus, msg, false);
     return TRUE;
 }
 
-static void decodePadReadyWrap(GstDecodeBin *bin, GstPad *pad, gboolean islast, gpointer user_data)
+void VideoPlayerBackend::staticDecodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast, gpointer user_data)
 {
     Q_ASSERT(user_data);
     static_cast<VideoPlayerBackend*>(user_data)->decodePadReady(bin, pad, islast);
@@ -132,6 +157,9 @@ GstSinkWidget *VideoPlayerBackend::createSinkWidget()
 
 bool VideoPlayerBackend::start(const QUrl &url)
 {
+    if (state() == PermanentError)
+        return false;
+
     if (m_pipeline)
         clear();
 
@@ -163,7 +191,7 @@ bool VideoPlayerBackend::start(const QUrl &url)
         setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("decoder")));
         return false;
     }
-    g_signal_connect(decoder, "new-decoded-pad", G_CALLBACK(decodePadReadyWrap), this);
+    g_signal_connect(decoder, "new-decoded-pad", G_CALLBACK(staticDecodePadReady), this);
 
     /* Colorspace conversion (no-op if unnecessary) */
     GstElement *colorspace = gst_element_factory_make("ffmpegcolorspace", "colorspace");
@@ -203,9 +231,9 @@ bool VideoPlayerBackend::start(const QUrl &url)
     GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(m_pipeline));
     Q_ASSERT(bus);
     gst_bus_enable_sync_message_emission(bus);
-    gst_bus_set_sync_handler(bus, bus_handler, this);
+    gst_bus_set_sync_handler(bus, staticBusHandler, this);
 #if defined(Q_OS_LINUX) && !defined(Q_OS_MAC)
-    gst_bus_add_watch(bus, async_bus_handler, this);
+    gst_bus_add_watch(bus, staticAsyncBusHandler, this);
 #endif
     gst_object_unref(bus);
 

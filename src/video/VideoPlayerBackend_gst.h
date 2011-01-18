@@ -29,6 +29,8 @@ public:
     explicit VideoPlayerBackend(QObject *parent = 0);
     ~VideoPlayerBackend();
 
+    static bool initGStreamer(QString *errorMessage = 0);
+
     GstSinkWidget *createSinkWidget();
 
     bool start(const QUrl &url);
@@ -43,10 +45,6 @@ public:
     bool isPermanentError() const { return m_state == PermanentError; }
     QString errorMessage() const { return m_errorMessage; }
     VideoHttpBuffer *videoBuffer() const { return m_videoBuffer; }
-
-    /* Internal */
-    GstBusSyncReply busHandler(GstBus *bus, GstMessage *msg, bool isSynchronous);
-    void decodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast);
 
 public slots:
     void play();
@@ -69,8 +67,14 @@ private:
     VideoState m_state;
     QString m_errorMessage;
 
-    bool loadPlugins();
     void setError(bool permanent, const QString &message);
+
+    GstBusSyncReply busHandler(GstBus *bus, GstMessage *msg, bool isSynchronous);
+    void decodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast);
+
+    static GstBusSyncReply staticBusHandler(GstBus *bus, GstMessage *msg, gpointer data);
+    static gboolean staticAsyncBusHandler(GstBus *bus, GstMessage *msg, gpointer data);
+    static void staticDecodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast, gpointer user_data);
 };
 
 #endif // VIDEOPLAYERBACKEND_GST_H
