@@ -25,14 +25,9 @@
 #include <QDesktopServices>
 
 EventVideoPlayer::EventVideoPlayer(QWidget *parent)
-    : QWidget(parent), m_event(0)
+    : QWidget(parent), m_event(0), m_video(0), m_videoWidget(0)
 {
     connect(bcApp, SIGNAL(queryLivePaused()), SLOT(queryLivePaused()));
-    connect(&backend, SIGNAL(stateChanged(int,int)),
-            SLOT(stateChanged(int)));
-    connect(&backend, SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
-    connect(&backend, SIGNAL(endOfStream()), SLOT(durationChanged()));
-
     connect(&m_posTimer, SIGNAL(timeout()), SLOT(updatePosition()));
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -40,8 +35,7 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     QBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
 
-    m_videoWidget = backend.createSinkWidget();
-    m_videoContainer = new VideoContainer(m_videoWidget);
+    m_videoContainer = new VideoContainer;
     m_videoContainer->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_videoContainer, SIGNAL(customContextMenuRequested(QPoint)), SLOT(videoContextMenu(QPoint)));
     layout->addWidget(m_videoContainer, 1);
@@ -68,10 +62,10 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
 
     btnLayout->addSpacing(9);
 
-    QToolButton *restartBtn = new QToolButton;
-    restartBtn->setIcon(QIcon(QLatin1String(":/icons/control-stop-180.png")));
-    btnLayout->addWidget(restartBtn);
-    connect(restartBtn, SIGNAL(clicked()), SLOT(restart()));
+    m_restartBtn = new QToolButton;
+    m_restartBtn->setIcon(QIcon(QLatin1String(":/icons/control-stop-180.png")));
+    btnLayout->addWidget(m_restartBtn);
+    connect(m_restartBtn, SIGNAL(clicked()), SLOT(restart()));
 
     btnLayout->addSpacing(14);
 
@@ -81,24 +75,26 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
 
     btnLayout->addStretch();
 
-    QPushButton *saveBtn = new QPushButton(tr("Save Video"));
-    btnLayout->addWidget(saveBtn);
-    connect(saveBtn, SIGNAL(clicked()), SLOT(saveVideo()));
+    m_saveBtn = new QPushButton(tr("Save Video"));
+    btnLayout->addWidget(m_saveBtn);
+    connect(m_saveBtn, SIGNAL(clicked()), SLOT(saveVideo()));
 
-    QShortcut *sc = new QShortcut(QKeySequence(Qt::Key_Space), m_videoWidget);
+    QShortcut *sc = new QShortcut(QKeySequence(Qt::Key_Space), m_videoContainer);
     connect(sc, SIGNAL(activated()), SLOT(playPause()));
 
-    sc = new QShortcut(QKeySequence(Qt::Key_F), m_videoWidget);
+    sc = new QShortcut(QKeySequence(Qt::Key_F), m_videoContainer);
     connect(sc, SIGNAL(activated()), m_videoContainer, SLOT(toggleFullScreen()));
 
-    sc = new QShortcut(QKeySequence(Qt::Key_R), m_videoWidget);
+    sc = new QShortcut(QKeySequence(Qt::Key_R), m_videoContainer);
     connect(sc, SIGNAL(activated()), SLOT(restart()));
 
-    sc = new QShortcut(QKeySequence::Save, m_videoWidget);
+    sc = new QShortcut(QKeySequence::Save, m_videoContainer);
     connect(sc, SIGNAL(activated()), SLOT(saveVideo()));
 
-    sc = new QShortcut(QKeySequence(Qt::Key_F5), m_videoWidget);
+    sc = new QShortcut(QKeySequence(Qt::Key_F5), m_videoContainer);
     connect(sc, SIGNAL(activated()), SLOT(saveSnapshot()));
+
+    setControlsEnabled(false);
 }
 
 EventVideoPlayer::~EventVideoPlayer()
@@ -109,53 +105,87 @@ EventVideoPlayer::~EventVideoPlayer()
 
 void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
 {
+    if (m_video)
+        clearVideo();
+
     m_event = event;
 
-    backend.clear();
-    backend.start(url);
-    connect(backend.videoBuffer(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()), Qt::QueuedConnection);
-    connect(backend.videoBuffer(), SIGNAL(bufferingStarted()), SLOT(bufferingStarted()));
-    connect(backend.videoBuffer(), SIGNAL(bufferUpdated()), SLOT(updateBufferStatus()));
+    m_video = new VideoPlayerBackend(this);
+    connect(m_video, SIGNAL(stateChanged(int,int)), SLOT(stateChanged(int)));
+    connect(m_video, SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
+    connect(m_video, SIGNAL(endOfStream()), SLOT(durationChanged()));
 
-    if (backend.videoBuffer()->isBuffering())
+    m_videoWidget = m_video->createSinkWidget();
+    m_videoContainer->setInnerWidget(m_videoWidget);
+
+    m_video->start(url);
+
+    connect(m_video->videoBuffer(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()), Qt::QueuedConnection);
+    connect(m_video->videoBuffer(), SIGNAL(bufferingStarted()), SLOT(bufferingStarted()));
+    connect(m_video->videoBuffer(), SIGNAL(bufferUpdated()), SLOT(updateBufferStatus()));
+
+    if (m_video->videoBuffer()->isBuffering())
         bufferingStarted();
+
+    setControlsEnabled(true);
 }
 
 void EventVideoPlayer::clearVideo()
 {
-    backend.clear();
+    m_video->clear();
+    delete m_video;
+    m_video = 0;
+    m_event = 0;
+
+    m_playBtn->setIcon(QIcon(QLatin1String(":/icons/control.png")));
+    m_seekSlider->setRange(0, 0);
+    m_posText->clear();
+    m_statusText->clear();
+    m_posTimer.stop();
+    setControlsEnabled(false);
 }
 
 void EventVideoPlayer::playPause()
 {
-    if (backend.state() == VideoPlayerBackend::Playing)
+    if (!m_video)
+        return;
+
+    if (m_video->state() == VideoPlayerBackend::Playing)
     {
-        backend.pause();
+        m_video->pause();
     }
     else
     {
-        if (backend.atEnd())
-            backend.restart();
-        backend.play();
+        if (m_video->atEnd())
+            m_video->restart();
+        m_video->play();
     }
 }
 
 void EventVideoPlayer::restart()
 {
-    backend.restart();
-    backend.play();
+    if (!m_video)
+        return;
+
+    m_video->restart();
+    m_video->play();
 }
 
 void EventVideoPlayer::seek(int position)
 {
-    qDebug() << "Backend seekable?" << backend.isSeekable();
-    backend.seek(qint64(position) * 1000000);
+    if (!m_video)
+        return;
+
+    m_video->seek(qint64(position) * 1000000);
 }
 
 void EventVideoPlayer::queryLivePaused()
 {
+    if (!m_video)
+        return;
+
     QSettings settings;
-    if (backend.videoBuffer() && backend.videoBuffer()->isBuffering()
+    if (m_video->videoBuffer() && m_video->videoBuffer()->isBuffering()
         && settings.value(QLatin1String("eventPlayer/pauseLive")).toBool())
         bcApp->pauseLive();
 }
@@ -170,13 +200,18 @@ void EventVideoPlayer::bufferingStarted()
 
 void EventVideoPlayer::updateBufferStatus()
 {
-    int pcnt = qRound((double(backend.videoBuffer()->bufferedSize()) / backend.videoBuffer()->fileSize()) * 100.0);
+    if (!m_video)
+    {
+        m_statusText->clear();
+        return;
+    }
+
+    int pcnt = qRound((double(m_video->videoBuffer()->bufferedSize()) / m_video->videoBuffer()->fileSize()) * 100.0);
     m_statusText->setText(tr("<b>Buffering:</b> %1%").arg(pcnt));
 }
 
 void EventVideoPlayer::bufferingStopped()
 {
-    qDebug("release");
     bcApp->releaseLive();
     m_statusText->clear();
 }
@@ -203,8 +238,11 @@ void EventVideoPlayer::durationChanged(qint64 nsDuration)
 {
     Q_ASSERT(QThread::currentThread() == qApp->thread());
 
+    if (!m_video)
+        return;
+
     if (nsDuration == -1)
-        nsDuration = backend.duration();
+        nsDuration = m_video->duration();
 
     /* Time is assumed to be nanoseconds; convert to milliseconds */
     int duration = int(nsDuration / 1000000);
@@ -219,9 +257,12 @@ void EventVideoPlayer::updatePosition()
 {
     Q_ASSERT(QThread::currentThread() == qApp->thread());
 
+    if (!m_video)
+        return;
+
     if (!m_seekSlider->maximum())
     {
-        qint64 nsDuration = backend.duration();
+        qint64 nsDuration = m_video->duration();
         if (nsDuration && int(nsDuration / 1000000))
         {
             durationChanged(nsDuration);
@@ -229,14 +270,14 @@ void EventVideoPlayer::updatePosition()
         }
     }
 
-    qint64 nsPosition = backend.position();
+    qint64 nsPosition = m_video->position();
     int position = int(nsPosition / 1000000);
     m_seekSlider->blockSignals(true);
     m_seekSlider->setValue(position);
     m_seekSlider->blockSignals(false);
 
     int secs = nsPosition / 1000000000;
-    int durationSecs = backend.duration() / 1000000000;
+    int durationSecs = m_video->duration() / 1000000000;
 
     m_posText->setText(QString::fromLatin1("%1:%2 / %3:%4").arg(secs / 60, 2, 10, QLatin1Char('0'))
                        .arg(secs % 60, 2, 10, QLatin1Char('0'))
@@ -246,12 +287,15 @@ void EventVideoPlayer::updatePosition()
 
 void EventVideoPlayer::saveVideo(const QString &path)
 {
+    if (!m_video)
+        return;
+
     if (path.isEmpty())
     {
         bool restart = false;
-        if (backend.state() == VideoPlayerBackend::Playing)
+        if (m_video->state() == VideoPlayerBackend::Playing)
         {
-            backend.pause();
+            m_video->pause();
             restart = true;
         }
 
@@ -261,20 +305,20 @@ void EventVideoPlayer::saveVideo(const QString &path)
             saveVideo(upath);
 
         if (restart)
-            backend.play();
+            m_video->play();
         return;
     }
 
     EventVideoDownload *dl = new EventVideoDownload(bcApp->mainWindow);
     dl->setFilePath(path);
-    dl->setVideoBuffer(backend.videoBuffer());
+    dl->setVideoBuffer(m_video->videoBuffer());
     dl->start(bcApp->mainWindow);
 }
 
 void EventVideoPlayer::saveSnapshot(const QString &ifile)
 {
-    QImage frame = m_videoWidget->currentFrame();
-    if (frame.isNull())
+    QImage frame = m_videoWidget ? m_videoWidget->currentFrame() : QImage();
+    if (frame.isNull() || !m_video)
         return;
 
     QString file = ifile;
@@ -285,7 +329,7 @@ void EventVideoPlayer::saveSnapshot(const QString &ifile)
         if (m_event)
         {
             filename = QString::fromLatin1("%1 - %2.jpg").arg(m_event->uiLocation(),
-                                                              m_event->date.addSecs(int(backend.position() / 1000000000))
+                                                              m_event->date.addSecs(int(m_video->position() / 1000000000))
                                                               .toString(QLatin1String("yyyy-MM-dd hh-mm-ss")));
         }
 
@@ -316,7 +360,7 @@ void EventVideoPlayer::videoContextMenu(const QPoint &rpos)
 
     QMenu menu(qobject_cast<QWidget*>(sender()));
 
-    if (backend.state() == VideoPlayerBackend::Playing)
+    if (m_video && m_video->state() == VideoPlayerBackend::Playing)
         menu.addAction(tr("&Pause"), this, SLOT(playPause()));
     else
         menu.addAction(tr("&Play"), this, SLOT(playPause()));
@@ -336,4 +380,11 @@ void EventVideoPlayer::videoContextMenu(const QPoint &rpos)
     menu.addAction(tr("Snapshot"), this, SLOT(saveSnapshot()));
 
     menu.exec(pos);
+}
+
+void EventVideoPlayer::setControlsEnabled(bool enabled)
+{
+    m_playBtn->setEnabled(enabled);
+    m_restartBtn->setEnabled(enabled);
+    m_saveBtn->setEnabled(enabled);
 }

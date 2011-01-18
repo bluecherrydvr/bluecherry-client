@@ -10,12 +10,9 @@ class VideoContainer : public QFrame
     Q_OBJECT
 
 public:
-    QWidget * const innerWidget;
-
-    VideoContainer(QWidget *inner, QWidget *parent = 0)
-        : QFrame(parent), innerWidget(inner)
+    VideoContainer(QWidget *inner = 0, QWidget *parent = 0)
+        : QFrame(parent), innerWidget(0)
     {
-        inner->setParent(this);
         setMinimumSize(320, 240);
         setFrameStyle(QFrame::Sunken | QFrame::Panel);
         setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -24,6 +21,27 @@ public:
         p.setColor(QPalette::Window, Qt::black);
         p.setColor(QPalette::WindowText, Qt::white);
         setPalette(p);
+
+        if (inner)
+            setInnerWidget(inner);
+    }
+
+    void setInnerWidget(QWidget *inner)
+    {
+        if (innerWidget)
+        {
+            innerWidget->hide();
+            innerWidget->deleteLater();
+        }
+
+        innerWidget = inner;
+
+        if (innerWidget)
+        {
+            innerWidget->setParent(this);
+            innerWidget->setGeometry(contentsRect());
+            innerWidget->show();
+        }
     }
 
 public slots:
@@ -49,11 +67,13 @@ public slots:
     }
 
 protected:
+    QWidget *innerWidget;
+
     virtual void resizeEvent(QResizeEvent *ev)
     {
         QFrame::resizeEvent(ev);
-        qDebug() << contentsRect();
-        innerWidget->setGeometry(contentsRect());
+        if (innerWidget)
+            innerWidget->setGeometry(contentsRect());
     }
 
     virtual void mouseDoubleClickEvent(QMouseEvent *ev)

@@ -10,6 +10,7 @@
 #endif
 
 class QToolButton;
+class QPushButton;
 class QSlider;
 class QLabel;
 class GstSinkWidget;
@@ -47,14 +48,17 @@ private slots:
     void bufferingStopped();
 
 private:
-    VideoPlayerBackend backend;
+    EventData *m_event;
+    VideoPlayerBackend *m_video;
     VideoContainer *m_videoContainer;
     GstSinkWidget *m_videoWidget;
-    EventData *m_event;
-    QToolButton *m_playBtn;
+    QToolButton *m_playBtn, *m_restartBtn;
+    QPushButton *m_saveBtn;
     QSlider *m_seekSlider;
     QLabel *m_posText, *m_statusText;
     QTimer m_posTimer;
+
+    void setControlsEnabled(bool enabled);
 };
 
 #endif // EVENTVIDEOPLAYER_H
