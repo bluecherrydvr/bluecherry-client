@@ -4,6 +4,7 @@
 #include <QTreeView>
 
 class EventsModel;
+class QLabel;
 
 class EventsView : public QTreeView
 {
@@ -18,8 +19,15 @@ public:
 
 private slots:
     void openEvent(const QModelIndex &index);
+    void loadingStarted();
+    void loadingFinished();
+
+protected:
+    virtual bool eventFilter(QObject *obj, QEvent *ev);
 
 private:
+    QLabel *loadingIndicator;
+
     using QTreeView::setModel;
 };
 

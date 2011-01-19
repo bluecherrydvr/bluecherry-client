@@ -40,6 +40,8 @@ public:
 
     explicit EventsModel(QObject *parent = 0);
 
+    bool isLoading() const { return !updatingServers.isEmpty(); }
+
     void setFilterDates(const QDateTime &begin, const QDateTime &end);
     void setEventLimit(int limit) { serverEventsLimit = limit; }
 
@@ -72,6 +74,8 @@ public slots:
 
 signals:
     void filtersChanged();
+    void loadingStarted();
+    void loadingFinished();
 
 private slots:
     void serverAdded(DVRServer *server);

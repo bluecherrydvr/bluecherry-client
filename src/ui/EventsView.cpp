@@ -2,12 +2,17 @@
 #include "EventsModel.h"
 #include "EventViewWindow.h"
 #include <QHeaderView>
+#include <QMovie>
+#include <QLabel>
+#include <QEvent>
 
 EventsView::EventsView(QWidget *parent)
-    : QTreeView(parent)
+    : QTreeView(parent), loadingIndicator(0)
 {
     setRootIsDecorated(false);
     setUniformRowHeights(true);
+
+    viewport()->installEventFilter(this);
 }
 
 void EventsView::setModel(EventsModel *model)
@@ -24,6 +29,14 @@ void EventsView::setModel(EventsModel *model)
                                 fm.width(QLatin1String("99 minutes, 99 seconds")) + 25);
         header()->resizeSection(EventsModel::LevelColumn, fm.width(QLatin1String("Warning")) + 18);
     }
+
+    connect(model, SIGNAL(loadingStarted()), SLOT(loadingStarted()));
+    connect(model, SIGNAL(loadingFinished()), SLOT(loadingFinished()));
+    connect(model, SIGNAL(rowsAboutToBeInserted(QModelIndex,int,int)), SLOT(loadingFinished()));
+    connect(model, SIGNAL(modelReset()), SLOT(loadingFinished()));
+
+    if (model->isLoading())
+        loadingStarted();
 }
 
 EventsModel *EventsView::eventsModel() const
@@ -39,4 +52,51 @@ void EventsView::openEvent(const QModelIndex &index)
         return;
 
     EventViewWindow::open(event);
+}
+
+void EventsView::loadingStarted()
+{
+    /* The loading indicator is only displayed when no rows are visible */
+    if (model()->rowCount())
+        return;
+
+    if (!loadingIndicator)
+    {
+        loadingIndicator = new QLabel(viewport());
+        Q_ASSERT(QMovie::supportedFormats().contains("gif"));
+        QMovie *m = new QMovie(QLatin1String(":/images/loading.gif"), "gif", loadingIndicator);
+        loadingIndicator->setMovie(m);
+        m->start();
+    }
+
+    QSize size = loadingIndicator->sizeHint();
+    QRect cr = viewport()->contentsRect();
+
+    loadingIndicator->setGeometry((cr.width()-size.width())/2,
+                                  size.width()/4, size.width(), size.height());
+    loadingIndicator->show();
+}
+
+void EventsView::loadingFinished()
+{
+    if (!eventsModel()->isLoading() || eventsModel()->rowCount())
+    {
+        delete loadingIndicator;
+        loadingIndicator = 0;
+    }
+}
+
+bool EventsView::eventFilter(QObject *obj, QEvent *ev)
+{
+    Q_ASSERT(obj == viewport());
+    if (ev->type() == QEvent::Resize && loadingIndicator)
+    {
+        QSize size = loadingIndicator->sizeHint();
+        QRect cr = viewport()->contentsRect();
+
+        loadingIndicator->setGeometry((cr.width()-size.width())/2,
+                                      size.width()/4, size.width(), size.height());
+    }
+
+    return false;
 }

@@ -10,6 +10,7 @@
 
 #ifdef QT_STATIC
 Q_IMPORT_PLUGIN(qjpeg)
+Q_IMPORT_PLUGIN(qgif)
 #endif
 
 #ifdef USE_BREAKPAD

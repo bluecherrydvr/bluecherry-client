@@ -4,6 +4,7 @@
     </qresource>
     <qresource prefix="/images">
         <file>logo.png</file>
+        <file>loading.gif</file>
     </qresource>
     <qresource prefix="/icons">
         <file>status.png</file>

@@ -543,6 +543,8 @@ void EventsModel::updateServer(DVRServer *server)
 #endif
 
     updatingServers.insert(server);
+    if (updatingServers.size() == 1)
+        emit loadingStarted();
 
     QNetworkRequest req = server->api->buildRequest(url);
     req.setOriginatingObject(server);
@@ -568,7 +570,8 @@ void EventsModel::requestFinished()
     {
         qWarning() << "Event request error:" << reply->errorString();
         /* TODO: Handle errors properly */
-        updatingServers.remove(server);
+        if (updatingServers.remove(server) && updatingServers.isEmpty())
+            emit loadingFinished();
         return;
     }
 
@@ -576,7 +579,8 @@ void EventsModel::requestFinished()
     if (statusCode < 200 || statusCode >= 300)
     {
         qWarning() << "Event request error: HTTP code" << statusCode;
-        updatingServers.remove(server);
+        if (updatingServers.remove(server) && updatingServers.isEmpty())
+            emit loadingFinished();
         return;
     }
 
@@ -607,7 +611,7 @@ void EventsModel::eventParseFinished()
     qDeleteAll(cache);
     cache = events;
 
-    updatingServers.remove(server);
     applyFilters();
+    if (updatingServers.remove(server) && updatingServers.isEmpty())
+        emit loadingFinished();
 }
-

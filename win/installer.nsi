@@ -44,6 +44,7 @@ Section
         
         SetOutPath "$INSTDIR\imageformats"
         File "${QT_PATH}\..\plugins\imageformats\qjpeg4.dll"
+        File "${QT_PATH}\..\plugins\imageformats\qgif4.dll"
         
         CreateDirectory "$SMPROGRAMS\Bluecherry"
         CreateShortCut "$SMPROGRAMS\Bluecherry\Bluecherry Client.lnk" "$INSTDIR\BluecherryClient.exe"
