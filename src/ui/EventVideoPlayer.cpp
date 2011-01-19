@@ -108,6 +108,9 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     if (m_video)
         clearVideo();
 
+    if (url.isEmpty())
+        return;
+
     m_event = event;
 
     m_video = new VideoPlayerBackend(this);
@@ -132,8 +135,12 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
 
 void EventVideoPlayer::clearVideo()
 {
-    m_video->clear();
-    delete m_video;
+    if (m_video)
+    {
+        m_video->clear();
+        delete m_video;
+    }
+
     m_video = 0;
     m_event = 0;
 
@@ -142,6 +149,7 @@ void EventVideoPlayer::clearVideo()
     m_posText->clear();
     m_statusText->clear();
     m_posTimer.stop();
+    m_videoContainer->setInnerWidget(0);
     setControlsEnabled(false);
 }
 
