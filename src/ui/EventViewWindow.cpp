@@ -68,7 +68,8 @@ EventViewWindow *EventViewWindow::open(EventData *event)
 void EventViewWindow::closeEvent(QCloseEvent *event)
 {
     QSettings settings;
-    settings.setValue(QLatin1String("ui/eventView/geometry"), saveGeometry());
+    if (isWindow())
+        settings.setValue(QLatin1String("ui/eventView/geometry"), saveGeometry());
     settings.setValue(QLatin1String("ui/eventView/splitState2"), m_splitter->saveState());
     settings.remove(QLatin1String("ui/eventView/splitState")); // As of 2.0.0-beta4
     QWidget::closeEvent(event);
