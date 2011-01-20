@@ -26,6 +26,7 @@ GstSinkWidget::GstSinkWidget(QWidget *parent)
                                         "green_mask", G_TYPE_INT, 0xff0000,
                                         NULL);
     gst_app_sink_set_caps(m_element, caps);
+    gst_caps_unref(caps);
 
     GstAppSinkCallbacks callbacks;
     memset(&callbacks, 0, sizeof(callbacks));
@@ -37,6 +38,18 @@ GstSinkWidget::GstSinkWidget(QWidget *parent)
 
 GstSinkWidget::~GstSinkWidget()
 {
+    qDebug("gstreamer: Destroying sink widget");
+
+    /* Changing to NULL should always be synchronous; assertation should verify this. */
+    GstStateChangeReturn re = gst_element_set_state(GST_ELEMENT(m_element), GST_STATE_NULL);
+    Q_UNUSED(re);
+    Q_ASSERT(re == GST_STATE_CHANGE_SUCCESS);
+
+    /* At this point, it should not be possible to receive any more signals from the element,
+     * and the pipeline (if it still exists) is broken. */
+    g_object_unref(m_element);
+    m_element = 0;
+
     m_frameLock.lock();
     if (m_framePtr)
     {
