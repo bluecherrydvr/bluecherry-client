@@ -66,6 +66,9 @@ private:
     VideoHttpBuffer *m_videoBuffer;
     VideoState m_state;
     QString m_errorMessage;
+#ifdef Q_OS_LINUX
+    unsigned int m_busWatchId;
+#endif
 
     void setError(bool permanent, const QString &message);
 

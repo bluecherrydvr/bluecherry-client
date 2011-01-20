@@ -232,8 +232,8 @@ bool VideoPlayerBackend::start(const QUrl &url)
     Q_ASSERT(bus);
     gst_bus_enable_sync_message_emission(bus);
     gst_bus_set_sync_handler(bus, staticBusHandler, this);
-#if defined(Q_OS_LINUX) && !defined(Q_OS_MAC)
-    gst_bus_add_watch(bus, staticAsyncBusHandler, this);
+#ifdef Q_OS_LINUX
+    m_busWatchId = gst_bus_add_watch(bus, staticAsyncBusHandler, this);
 #endif
     gst_object_unref(bus);
 
@@ -246,7 +246,23 @@ void VideoPlayerBackend::clear()
 {
     if (m_pipeline)
     {
+        qDebug("nulling pipeline");
+
+        /* Disable the message handlers to avoid anything calling back into this instance */
+        GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(m_pipeline));
+        Q_ASSERT(bus);
+        gst_bus_disable_sync_message_emission(bus);
+
+#ifdef Q_OS_LINUX
+        gboolean ok = g_source_remove(m_busWatchId);
+        Q_UNUSED(ok);
+        Q_ASSERT(ok == TRUE);
+#endif
+
+        gst_object_unref(bus);
+
         gst_element_set_state(m_pipeline, GST_STATE_NULL);
+
         /* Ensure the transition to NULL completes */
         gst_element_get_state(m_pipeline, 0, 0, GST_CLOCK_TIME_NONE);
         gst_object_unref(GST_OBJECT(m_pipeline));
