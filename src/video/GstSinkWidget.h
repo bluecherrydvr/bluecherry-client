@@ -16,7 +16,7 @@ public:
     explicit GstSinkWidget(QWidget *parent = 0);
     ~GstSinkWidget();
 
-    GstAppSink *gstElement() const { return m_element; }
+    GstElement *gstElement() const { return GST_ELEMENT(m_element); }
     QImage currentFrame();
 
     virtual QSize sizeHint() const;

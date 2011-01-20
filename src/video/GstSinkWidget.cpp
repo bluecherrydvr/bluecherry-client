@@ -20,6 +20,8 @@ GstSinkWidget::GstSinkWidget(QWidget *parent)
         return;
     }
 
+    g_object_ref(m_element);
+
     GstCaps *caps = gst_caps_new_simple("video/x-raw-rgb",
                                         "red_mask", G_TYPE_INT, 0xff00,
                                         "blue_mask", G_TYPE_INT, 0xff000000,

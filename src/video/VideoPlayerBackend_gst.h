@@ -7,7 +7,6 @@
 
 class QUrl;
 class VideoHttpBuffer;
-class GstSinkWidget;
 
 typedef struct _GstDecodeBin GstDecodeBin;
 
@@ -31,7 +30,9 @@ public:
 
     static bool initGStreamer(QString *errorMessage = 0);
 
-    GstSinkWidget *createSinkWidget();
+    GstElement *sink() const { return m_sink; }
+    /* setSink must be called exactly and only once prior to setting up the pipeline */
+    void setSink(GstElement *sink);
 
     bool start(const QUrl &url);
     void clear();
@@ -61,8 +62,7 @@ private slots:
     void streamError(const QString &message);
 
 private:
-    GstElement *m_pipeline, *m_videoLink;
-    GstSinkWidget *m_sinkWidget;
+    GstElement *m_pipeline, *m_videoLink, *m_sink;
     VideoHttpBuffer *m_videoBuffer;
     VideoState m_state;
     QString m_errorMessage;

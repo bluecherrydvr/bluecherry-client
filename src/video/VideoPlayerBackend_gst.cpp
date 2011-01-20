@@ -1,6 +1,5 @@
 #include "VideoPlayerBackend_gst.h"
 #include "VideoHttpBuffer.h"
-#include "GstSinkWidget.h"
 #include <QUrl>
 #include <QDebug>
 #include <QApplication>
@@ -11,7 +10,7 @@
 #include <glib.h>
 
 VideoPlayerBackend::VideoPlayerBackend(QObject *parent)
-    : QObject(parent), m_pipeline(0), m_videoLink(0), m_sinkWidget(0), m_videoBuffer(0), m_state(Stopped)
+    : QObject(parent), m_pipeline(0), m_videoLink(0), m_sink(0), m_videoBuffer(0), m_state(Stopped)
 {
     if (!initGStreamer(&m_errorMessage))
         setError(true, m_errorMessage);
@@ -146,22 +145,30 @@ void VideoPlayerBackend::staticDecodePadReady(GstDecodeBin *bin, GstPad *pad, gb
     static_cast<VideoPlayerBackend*>(user_data)->decodePadReady(bin, pad, islast);
 }
 
-GstSinkWidget *VideoPlayerBackend::createSinkWidget()
+void VideoPlayerBackend::setSink(GstElement *sink)
 {
-    if (m_sinkWidget)
-        return m_sinkWidget;
+    Q_ASSERT(!m_pipeline);
+    Q_ASSERT(!m_sink);
+    Q_ASSERT(sink);
 
-    m_sinkWidget = new GstSinkWidget;
-    return m_sinkWidget;
+    if (!m_sink && !m_pipeline)
+    {
+        m_sink = sink;
+        g_object_ref(m_sink);
+    }
 }
 
 bool VideoPlayerBackend::start(const QUrl &url)
 {
-    if (state() == PermanentError)
+    Q_ASSERT(!m_pipeline);
+    if (state() == PermanentError || m_pipeline)
         return false;
 
-    if (m_pipeline)
-        clear();
+    if (!m_sink)
+    {
+        setError(true, QLatin1String("Internal error: improper usage"));
+        return false;
+    }
 
     /* Pipeline */
     m_pipeline = gst_pipeline_new("stream");
@@ -201,21 +208,14 @@ bool VideoPlayerBackend::start(const QUrl &url)
         return false;
     }
 
-    GstElement *sink = GST_ELEMENT(createSinkWidget()->gstElement());
-    if (!sink)
-    {
-        setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("sink")));
-        return false;
-    }
-
-    gst_bin_add_many(GST_BIN(m_pipeline), source, decoder, colorspace, sink, NULL);
-    if (!gst_element_link_many(source, decoder, NULL))
+    gst_bin_add_many(GST_BIN(m_pipeline), source, decoder, colorspace, m_sink, NULL);
+    if (!gst_element_link(source, decoder))
     {
         setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("link decoder")));
         return false;
     }
 
-    if (!gst_element_link_many(colorspace, sink, NULL))
+    if (!gst_element_link(colorspace, m_sink))
     {
         setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("link sink")));
         return false;
@@ -244,10 +244,11 @@ bool VideoPlayerBackend::start(const QUrl &url)
 
 void VideoPlayerBackend::clear()
 {
+    if (m_sink)
+        g_object_unref(m_sink);
+
     if (m_pipeline)
     {
-        qDebug("nulling pipeline");
-
         /* Disable the message handlers to avoid anything calling back into this instance */
         GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(m_pipeline));
         Q_ASSERT(bus);
@@ -268,8 +269,7 @@ void VideoPlayerBackend::clear()
         gst_object_unref(GST_OBJECT(m_pipeline));
     }
 
-    /* XXX: m_sinkWidget isn't cleared in any way */
-    m_pipeline = m_videoLink = 0;
+    m_pipeline = m_videoLink = m_sink = 0;
 
     if (m_videoBuffer)
     {

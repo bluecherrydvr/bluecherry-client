@@ -101,6 +101,12 @@ EventVideoPlayer::~EventVideoPlayer()
 {
     bcApp->disconnect(SIGNAL(queryLivePaused()), this);
     bcApp->releaseLive();
+
+    if (m_video)
+    {
+        m_video->clear();
+        delete m_video;
+    }
 }
 
 void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
@@ -118,8 +124,9 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     connect(m_video, SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
     connect(m_video, SIGNAL(endOfStream()), SLOT(durationChanged()));
 
-    m_videoWidget = m_video->createSinkWidget();
+    m_videoWidget = new GstSinkWidget;
     m_videoContainer->setInnerWidget(m_videoWidget);
+    m_video->setSink(m_videoWidget->gstElement());
 
     m_video->start(url);
 
