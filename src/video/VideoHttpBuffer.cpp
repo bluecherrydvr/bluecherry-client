@@ -20,20 +20,11 @@ gboolean VideoHttpBuffer::seekDataWrap(GstAppSrc *src, quint64 offset, gpointer 
     return static_cast<VideoHttpBuffer*>(user_data)->seekData(offset) ? TRUE : FALSE;
 }
 
-VideoHttpBuffer::VideoHttpBuffer(GstAppSrc *element, GstElement *pipeline, QObject *parent)
-    : QObject(parent), m_networkReply(0), m_fileSize(0), m_readPos(0), m_writePos(0), m_element(element), m_pipeline(pipeline),
+VideoHttpBuffer::VideoHttpBuffer(QObject *parent)
+    : QObject(parent), m_networkReply(0), m_fileSize(0), m_readPos(0), m_writePos(0), m_element(0), m_pipeline(0),
       m_streamInit(true), m_bufferBlocked(false), m_finished(false), ratePos(0), rateMax(0)
 {
     m_bufferFile.setFileTemplate(QDir::tempPath() + QLatin1String("/bc_vbuf_XXXXXX.mkv"));
-
-    gst_app_src_set_max_bytes(m_element, 512*1024);
-    gst_app_src_set_stream_type(m_element, GST_APP_STREAM_TYPE_SEEKABLE);
-
-    GstAppSrcCallbacks callbacks;
-    memset(&callbacks, 0, sizeof(callbacks));
-    callbacks.need_data = needDataWrap;
-    callbacks.seek_data = (gboolean (*)(GstAppSrc*,guint64,void*))seekDataWrap;
-    gst_app_src_set_callbacks(m_element, &callbacks, this, 0);
 }
 
 VideoHttpBuffer::~VideoHttpBuffer()
@@ -45,6 +36,43 @@ VideoHttpBuffer::~VideoHttpBuffer()
     }
 
     clearPlayback();
+}
+
+GstElement *VideoHttpBuffer::setupSrcElement(GstElement *pipeline)
+{
+    QMutexLocker lock(&m_lock);
+    Q_UNUSED(lock);
+
+    Q_ASSERT(!m_element && !m_pipeline);
+    if (m_element || m_pipeline)
+    {
+        if (m_pipeline == pipeline)
+            return GST_ELEMENT(m_element);
+        return 0;
+    }
+
+    m_element = GST_APP_SRC(gst_element_factory_make("appsrc", "source"));
+    if (!m_element)
+        return 0;
+
+    g_object_ref(m_element);
+
+    m_pipeline = pipeline;
+
+    gst_app_src_set_max_bytes(m_element, 512*1024);
+    gst_app_src_set_stream_type(m_element, GST_APP_STREAM_TYPE_SEEKABLE);
+
+    GstAppSrcCallbacks callbacks;
+    memset(&callbacks, 0, sizeof(callbacks));
+    callbacks.need_data = needDataWrap;
+    callbacks.seek_data = (gboolean (*)(GstAppSrc*,guint64,void*))seekDataWrap;
+    gst_app_src_set_callbacks(m_element, &callbacks, this, 0);
+
+    if (m_fileSize)
+        gst_app_src_set_size(m_element, m_fileSize);
+
+    gst_bin_add(GST_BIN(m_pipeline), GST_ELEMENT(m_element));
+    return GST_ELEMENT(m_element);
 }
 
 bool VideoHttpBuffer::start(const QUrl &url)
@@ -64,8 +92,8 @@ bool VideoHttpBuffer::start(const QUrl &url)
     QMutexLocker lock(&m_lock);
     if (!m_bufferFile.open())
     {
-        lock.unlock();
         sendStreamError(QString::fromLatin1("Failed to create buffer file: %1") + m_bufferFile.errorString());
+        lock.unlock();
         return false;
     }
 
@@ -84,9 +112,17 @@ void VideoHttpBuffer::clearPlayback()
 
     if (m_element)
     {
+        qDebug("gstreamer: Destroying source element");
+
         GstAppSrcCallbacks callbacks;
         memset(&callbacks, 0, sizeof(callbacks));
         gst_app_src_set_callbacks(m_element, &callbacks, 0, 0);
+
+        GstStateChangeReturn re = gst_element_set_state(GST_ELEMENT(m_element), GST_STATE_NULL);
+        Q_UNUSED(re);
+        Q_ASSERT(re == GST_STATE_CHANGE_SUCCESS);
+
+        g_object_unref(m_element);
     }
 
     m_element = 0;
@@ -206,7 +242,9 @@ void VideoHttpBuffer::networkRead()
 
 void VideoHttpBuffer::networkFinished()
 {
+    QMutexLocker lock(&m_lock);
     qDebug("VideoHttpBuffer: Download finished");
+
     if (m_networkReply->error() == QNetworkReply::NoError)
     {
         if (m_fileSize != m_writePos)

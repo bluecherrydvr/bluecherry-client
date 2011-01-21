@@ -17,8 +17,12 @@ class VideoHttpBuffer : public QObject
     Q_OBJECT
 
 public:
-    explicit VideoHttpBuffer(GstAppSrc *element, GstElement *pipeline, QObject *parent = 0);
+    explicit VideoHttpBuffer(QObject *parent = 0);
     ~VideoHttpBuffer();
+
+    /* Create and prepare a source element; the element will be added to the pipeline,
+     * but not linked. */
+    GstElement *setupSrcElement(GstElement *pipeline);
 
     bool isBuffering() const { return m_networkReply; }
 

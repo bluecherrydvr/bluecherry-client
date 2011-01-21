@@ -178,16 +178,18 @@ bool VideoPlayerBackend::start(const QUrl &url)
         return false;
     }
 
-    /* Source element */
-    GstElement *source = gst_element_factory_make("appsrc", "source");
+    /* Buffered HTTP source */
+    m_videoBuffer = new VideoHttpBuffer(this);
+
+    GstElement *source = m_videoBuffer->setupSrcElement(m_pipeline);
     if (!source)
     {
         setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("source")));
+        delete m_videoBuffer;
+        m_videoBuffer = 0;
         return false;
     }
 
-    /* Buffered HTTP source (using source) */
-    m_videoBuffer = new VideoHttpBuffer(GST_APP_SRC(source), m_pipeline, this);
     connect(m_videoBuffer, SIGNAL(streamError(QString)), SLOT(streamError(QString)));
     m_videoBuffer->start(url);
 
@@ -208,7 +210,7 @@ bool VideoPlayerBackend::start(const QUrl &url)
         return false;
     }
 
-    gst_bin_add_many(GST_BIN(m_pipeline), source, decoder, colorspace, m_sink, NULL);
+    gst_bin_add_many(GST_BIN(m_pipeline), decoder, colorspace, m_sink, NULL);
     if (!gst_element_link(source, decoder))
     {
         setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("link decoder")));
@@ -249,6 +251,8 @@ void VideoPlayerBackend::clear()
 
     if (m_pipeline)
     {
+        qDebug("gstreamer: Destroying pipeline");
+
         /* Disable the message handlers to avoid anything calling back into this instance */
         GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(m_pipeline));
         Q_ASSERT(bus);
