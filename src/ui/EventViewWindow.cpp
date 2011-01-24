@@ -25,7 +25,7 @@
 #include <QApplication>
 
 EventViewWindow::EventViewWindow(QWidget *parent)
-    : QWidget(parent, Qt::Window), m_event(0)
+    : QWidget(parent, Qt::Window)
 {
     setWindowTitle(tr("Bluecherry - Event Playback"));
     resize(590, 380);
@@ -45,7 +45,7 @@ EventViewWindow::EventViewWindow(QWidget *parent)
         m_splitter->setSizes(QList<int>() << 1000 << 160);
 }
 
-EventViewWindow *EventViewWindow::open(EventData *event)
+EventViewWindow *EventViewWindow::open(const EventData &event)
 {
     foreach (QWidget *w, QApplication::topLevelWidgets())
     {
@@ -75,22 +75,22 @@ void EventViewWindow::closeEvent(QCloseEvent *event)
     QWidget::closeEvent(event);
 }
 
-void EventViewWindow::setEvent(EventData *event)
+void EventViewWindow::setEvent(const EventData &event)
 {
     m_event = event;
 
     m_infoLabel->setText(tr("<b>%2</b> (%1)<br><br>%3 (%4)<br>%5")
-                         .arg(Qt::escape(event->uiServer()))
-                         .arg(Qt::escape(event->uiLocation()))
-                         .arg(Qt::escape(event->uiType()))
-                         .arg(Qt::escape(event->uiLevel()))
-                         .arg(event->date.toString()));
+                         .arg(Qt::escape(event.uiServer()))
+                         .arg(Qt::escape(event.uiLocation()))
+                         .arg(Qt::escape(event.uiType()))
+                         .arg(Qt::escape(event.uiLevel()))
+                         .arg(event.date.toString()));
 
-    if (m_event->hasMedia() && m_event->mediaId >= 0)
+    if (m_event.hasMedia() && m_event.mediaId >= 0)
     {
-        QUrl url = m_event->server->api->serverUrl().resolved(QUrl(QLatin1String("/media/request.php")));
-        url.addQueryItem(QLatin1String("id"), QString::number(m_event->mediaId));
-        m_videoPlayer->setVideo(url, m_event);
+        QUrl url = m_event.server->api->serverUrl().resolved(QUrl(QLatin1String("/media/request.php")));
+        url.addQueryItem(QLatin1String("id"), QString::number(m_event.mediaId));
+        m_videoPlayer->setVideo(url, &m_event);
     }
     else
         m_videoPlayer->clearVideo();

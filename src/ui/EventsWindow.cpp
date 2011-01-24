@@ -114,6 +114,11 @@ EventsWindow *EventsWindow::instance()
     return m_instance;
 }
 
+EventsModel *EventsWindow::model() const
+{
+    return m_resultsView->eventsModel();
+}
+
 void EventsWindow::createDateFilter(QBoxLayout *layout)
 {
     QCheckBox *title = new QCheckBox(tr("Date after..."));
@@ -328,7 +333,7 @@ void EventsWindow::timelineZoomRangeChanged(int min, int max)
 void EventsWindow::showEvent(const QModelIndex &index)
 {
     EventData *data = index.data(EventsModel::EventDataPtr).value<EventData*>();
-    m_eventViewer->setEvent(data);
+    m_eventViewer->setEvent(*data);
 
     /* Hack to ensure that the video area isn't collapsed */
     if (m_videoSplitter->sizes()[1] == 0)
@@ -369,7 +374,7 @@ void EventsWindow::eventContextMenu(const QPoint &pos)
     else if (act == aPlay)
         showEvent(idx);
     else if (act == aPlayWindow)
-        EventViewWindow::open(data);
+        EventViewWindow::open(*data);
     else if (act == aSelectOnly || act == aSelectElse)
     {
         EventSourcesModel *sModel = qobject_cast<EventSourcesModel*>(m_sourcesView->model());

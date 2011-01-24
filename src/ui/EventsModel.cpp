@@ -353,7 +353,7 @@ bool EventsModel::testFilter(EventData *data)
         return false;
 
     QHash<DVRServer*, QSet<int> >::Iterator it = filterSources.find(data->server);
-    if (!filterSources.isEmpty() && (it == filterSources.end() || !it->contains(data->locationId)))
+    if (!filterSources.isEmpty() && (it == filterSources.end() || (!it->isEmpty() && !it->contains(data->locationId))))
         return false;
 
     return true;
@@ -419,6 +419,20 @@ QString EventsModel::filterDescription() const
     return re;
 }
 
+void EventsModel::clearFilters()
+{
+    if (filterSources.isEmpty() && filterDateBegin.isNull() && filterDateEnd.isNull() &&
+        filterTypes.isNull() && filterLevel == EventLevel::Info)
+        return;
+
+    filterSources.clear();
+    filterDateBegin = filterDateEnd = QDateTime();
+    filterTypes.clear();
+    filterLevel = EventLevel::Info;
+
+    applyFilters();
+}
+
 void EventsModel::setFilterDates(const QDateTime &begin, const QDateTime &end)
 {
     bool fast = false;
@@ -480,6 +494,26 @@ void EventsModel::setFilterSources(const QMap<DVRServer*, QList<int> > &sources)
         filterSources.insert(nit.key(), nit->toSet());
 
     applyFilters(!fast);
+}
+
+void EventsModel::setFilterSource(const DVRCamera &camera)
+{
+    if (!camera.isValid())
+        return;
+
+    QMap<DVRServer*,QList<int> > sources;
+    sources.insert(camera.server(), QList<int>() << camera.uniqueId());
+    setFilterSources(sources);
+}
+
+void EventsModel::setFilterSource(DVRServer *server)
+{
+    if (!server)
+        return;
+
+    QMap<DVRServer*,QList<int> > sources;
+    sources.insert(server, QList<int>());
+    setFilterSources(sources);
 }
 
 void EventsModel::setFilterTypes(const QBitArray &typemap)

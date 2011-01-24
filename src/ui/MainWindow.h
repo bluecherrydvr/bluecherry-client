@@ -46,6 +46,8 @@ private slots:
     void trayActivated(QSystemTrayIcon::ActivationReason);
     void queryLivePaused();
 
+    void eventsContextMenu(const QPoint &pos);
+
 signals:
     void closing();
 

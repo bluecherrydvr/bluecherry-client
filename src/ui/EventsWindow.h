@@ -2,6 +2,7 @@
 #define EVENTSWINDOW_H
 
 #include <QWidget>
+#include "EventsModel.h"
 
 class DVRServersView;
 class EventsView;
@@ -28,6 +29,8 @@ public:
     ~EventsWindow();
 
     static EventsWindow *instance();
+
+    EventsModel *model() const;
 
 protected:
     virtual void closeEvent(QCloseEvent *event);

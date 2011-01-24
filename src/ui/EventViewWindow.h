@@ -2,8 +2,8 @@
 #define EVENTVIEWWINDOW_H
 
 #include <QWidget>
+#include "core/EventData.h"
 
-struct EventData;
 class QSplitter;
 class QLabel;
 class QListView;
@@ -22,9 +22,9 @@ class EventViewWindow : public QWidget
 public:
     explicit EventViewWindow(QWidget *parent = 0);
 
-    static EventViewWindow *open(EventData *event);
+    static EventViewWindow *open(const EventData &event);
 
-    void setEvent(EventData *event);
+    void setEvent(const EventData &event);
 
 protected:
     virtual void closeEvent(QCloseEvent *event);
@@ -34,7 +34,7 @@ private slots:
     void postComment();
 
 private:
-    EventData *m_event;
+    EventData m_event;
 
     QSplitter *m_splitter;
     QLabel *m_infoLabel;

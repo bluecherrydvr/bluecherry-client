@@ -68,7 +68,7 @@ public:
 struct EventData
 {
     QDateTime date; /* UTC */
-    DVRServer * const server;
+    DVRServer *server;
     qint64 eventId, mediaId;
     int duration;
     int locationId;
@@ -76,16 +76,21 @@ struct EventData
     EventType type;
     qint16 dateTzOffsetMins; /* Offset in minutes for the server's timezone as of this event */
 
-    EventData(DVRServer *s)
+    EventData(DVRServer *s = 0)
         : server(s), eventId(-1), mediaId(-1), duration(0), locationId(-1), dateTzOffsetMins(0)
     {
+    }
+
+    bool operator==(const EventData &o)
+    {
+        return (o.server == server && o.eventId == eventId);
     }
 
     void setLocation(const QString &location);
 
     bool isSystem() const { return locationId < 0; }
     bool isCamera() const { return locationId >= 0; }
-    QDateTime endDate() const { return date.addSecs(duration); }
+    QDateTime endDate() const { return date.addSecs(qMax(0, duration)); }
     QDateTime serverLocalDate() const { return date.addSecs(int(dateTzOffsetMins)*60); }
     bool hasMedia() const { return mediaId >= 0; }
 

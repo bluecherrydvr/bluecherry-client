@@ -10,6 +10,8 @@
 #include "OptionsServerPage.h"
 #include "ServerConfigWindow.h"
 #include "EventsView.h"
+#include "EventViewWindow.h"
+#include "LiveFeedWidget.h"
 #include "core/DVRServer.h"
 #include "core/BluecherryApp.h"
 #include <QBoxLayout>
@@ -277,6 +279,8 @@ QWidget *MainWindow::createCameraControls()
 QWidget *MainWindow::createRecentEvents()
 {
     m_eventsView = new EventsView;
+    m_eventsView->setContextMenuPolicy(Qt::CustomContextMenu);
+
     EventsModel *model = new EventsModel(m_eventsView);
     m_eventsView->setModel(model);
 
@@ -287,6 +291,7 @@ QWidget *MainWindow::createRecentEvents()
     m_eventsView->header()->restoreState(settings.value(QLatin1String("ui/main/eventsView")).toByteArray());
 
     connect(m_eventsView, SIGNAL(doubleClicked(QModelIndex)), m_eventsView, SLOT(openEvent(QModelIndex)));
+    connect(m_eventsView, SIGNAL(customContextMenuRequested(QPoint)), SLOT(eventsContextMenu(QPoint)));
 
     return m_eventsView;
 }
@@ -419,4 +424,86 @@ void MainWindow::sslConfirmRequired(DVRServer *server, const QList<QSslError> &e
         return;
 
     server->setKnownCertificate(config.peerCertificate());
+}
+
+void MainWindow::eventsContextMenu(const QPoint &pos)
+{
+    Q_ASSERT(sender() == m_eventsView);
+
+    EventData *eventPtr = m_eventsView->currentIndex().data(EventsModel::EventDataPtr).value<EventData*>();
+    if (!eventPtr)
+        return;
+
+    /* Make a copy of the event data, because it could be refreshed during QMenu::exec */
+    EventData event(*eventPtr);
+
+    QMenu menu(m_eventsView);
+
+    QAction *aOpen = menu.addAction(event.hasMedia() ? tr("Play video") : tr("Open"));
+    menu.setDefaultAction(aOpen);
+
+    QAction *aViewLive = 0;
+    if (event.isCamera())
+        aViewLive = menu.addAction(tr("View camera live"));
+
+    menu.addSeparator();
+
+    /* Disabled for now. Browse needs logic to update the UI when model filters change,
+     * and save video is not yet implemented here. */
+#if 0
+    QMenu *searchMenu = menu.addMenu(tr("Browse events..."));
+
+    QAction *aBrowseCamera = 0;
+    if (event.isCamera())
+        aBrowseCamera = searchMenu->addAction(tr("From this camera"));
+    QAction *aBrowseServer = searchMenu->addAction(tr("From this server"));
+    searchMenu->addSeparator();
+    QAction *aBrowseMinute = searchMenu->addAction(tr("Within one minute"));
+    QAction *aBrowseTenMin = searchMenu->addAction(tr("Within 10 minutes"));
+    QAction *aBrowseHour = searchMenu->addAction(tr("Within one hour"));
+
+    menu.addSeparator();
+    if (event.hasMedia())
+        menu.addAction(tr("Save video"));
+#endif
+
+    QAction *act = menu.exec(m_eventsView->mapToGlobal(pos));
+    if (!act)
+        return;
+    else if (act == aOpen)
+        EventViewWindow::open(event);
+    else if (act == aViewLive)
+    {
+        LiveFeedWidget *w = new LiveFeedWidget;
+        w->setWindow();
+        w->setAttribute(Qt::WA_DeleteOnClose);
+        w->setCamera(event.locationCamera());
+        w->show();
+    }
+#if 0
+    else if (act->parentWidget() == searchMenu)
+    {
+        EventsWindow *w = EventsWindow::instance();
+
+        EventsModel *model = w->model();
+        model->clearFilters();
+
+        QDateTime date = event.serverLocalDate();
+
+        if (act == aBrowseCamera)
+            model->setFilterSource(event.locationCamera());
+        else if (act == aBrowseServer)
+            model->setFilterSource(event.server);
+        else if (act == aBrowseMinute)
+            model->setFilterDates(date.addSecs(-60), date.addSecs(60 + qMax(0, event.duration)));
+        else if (act == aBrowseTenMin)
+            model->setFilterDates(date.addSecs(-600), date.addSecs(600 + qMax(0, event.duration)));
+        else if (act == aBrowseHour)
+            model->setFilterDates(date.addSecs(-3600), date.addSecs(3600 + qMax(0, event.duration)));
+        else
+            Q_ASSERT_X(false, "Set events window filter", "Unknown action");
+
+        showEventsWindow();
+    }
+#endif
 }

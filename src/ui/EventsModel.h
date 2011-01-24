@@ -57,12 +57,17 @@ public:
     virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
 
 public slots:
+    void setFilterSource(const DVRCamera &camera);
+    void setFilterSource(DVRServer *server);
     void setFilterSources(const QMap<DVRServer*,QList<int> > &sources);
+
     void setFilterTypes(const QBitArray &typemap);
     void setFilterLevel(EventLevel minimum);
 
     void setFilterBeginDate(const QDateTime &begin) { setFilterDates(begin, filterDateEnd); }
     void setFilterEndDate(const QDateTime &end) { setFilterDates(filterDateBegin, end); }
+
+    void clearFilters();
 
     /* Request the most recent events from the given server, the DVRServer* source, or the
      * DVRServer represented by the ServerRequestManager* source */
