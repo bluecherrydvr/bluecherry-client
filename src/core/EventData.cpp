@@ -50,6 +50,7 @@ QString EventType::uiString() const
     switch (type)
     {
     case CameraMotion: return QApplication::translate("EventType", "Motion");
+    case CameraContinuous: return QApplication::translate("EventType", "Continuous");
     case CameraNotFound: return QApplication::translate("EventType", "Not Found");
     case CameraVideoLost: return QApplication::translate("EventType", "Video Lost");
     case CameraAudioLost: return QApplication::translate("EventType", "Audio Lost");
@@ -69,6 +70,8 @@ EventType &EventType::operator=(const QString &str)
 {
     if (str == QLatin1String("motion"))
         type = CameraMotion;
+    else if (str == QLatin1String("continuous"))
+        type = CameraContinuous;
     else if (str == QLatin1String("not found"))
         type = CameraNotFound;
     else if (str == QLatin1String("video signal loss"))

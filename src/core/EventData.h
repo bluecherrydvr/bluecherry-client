@@ -39,6 +39,7 @@ public:
         UnknownType = -1,
         CameraMotion,
         MinCamera = CameraMotion,
+        CameraContinuous,
         CameraNotFound,
         CameraVideoLost,
         CameraAudioLost,
