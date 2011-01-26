@@ -203,7 +203,7 @@ void EventTimelineWidget::setZoomSeconds(int seconds)
     Q_ASSERT(viewTimeEnd <= timeEnd);
     Q_ASSERT(viewTimeStart.secsTo(viewTimeEnd) == viewSeconds);
 
-    updateTimeRange(false);
+    scheduleDelayedItemsLayout(DoUpdateTimeRange);
 }
 
 void EventTimelineWidget::setViewStartOffset(int secs)
@@ -614,13 +614,17 @@ void EventTimelineWidget::doItemsLayout()
 
     if (layout & DoRowsLayout)
         doRowsLayout();
+
     if (layout & DoUpdateRowsMap)
     {
         updateRowsMap(rowsMapUpdateStart);
         rowsMapUpdateStart = -1;
     }
-    if (layout & DoUpdateTimeRange)
-        updateTimeRange();
+
+    if (layout & DoUpdateTimeRangeFromData)
+        updateTimeRange(true);
+    else if (layout & DoUpdateTimeRange)
+        updateTimeRange(false);
 
     QAbstractItemView::doItemsLayout();
 }
@@ -689,20 +693,8 @@ void EventTimelineWidget::addModelRows(int first, int last)
             dataTimeEnd = ed;
     }
 
-    updateRowsMap(last+1);
-    updateTimeRange(false);
-
-#ifndef QT_NO_DEBUG
-    int count = 0;
-    foreach (ServerData *sd, serversMap)
-    {
-        foreach (LocationData *ld, sd->locationsMap)
-        {
-            count += ld->events.size();
-        }
-    }
-    Q_ASSERT(count == rowsMap.size());
-#endif
+    updateRowsMapDelayed(last+1);
+    scheduleDelayedItemsLayout(DoUpdateTimeRange);
 }
 
 void EventTimelineWidget::rowsInserted(const QModelIndex &parent, int start, int end)
@@ -757,7 +749,7 @@ void EventTimelineWidget::rowsRemoved(const QModelIndex &parent, int start, int 
     Q_ASSERT(!parent.isValid());
 
     updateRowsMapDelayed(start);
-    scheduleDelayedItemsLayout(DoUpdateTimeRange);
+    scheduleDelayedItemsLayout(DoUpdateTimeRangeFromData);
 }
 
 void EventTimelineWidget::reset()
@@ -806,7 +798,7 @@ void EventTimelineWidget::dataChanged(const QModelIndex &topLeft, const QModelIn
         location->events.insert(pos, data);
     }
 
-    updateTimeRange();
+    scheduleDelayedItemsLayout(DoUpdateTimeRangeFromData);
     QAbstractItemView::dataChanged(topLeft, bottomRight);
     viewport()->update();
 }
@@ -856,7 +848,7 @@ bool EventTimelineWidget::viewportEvent(QEvent *event)
         cachedTopPadding = height;
 
         clearLeftPadding();
-        updateTimeRange(false);
+        scheduleDelayedItemsLayout(DoUpdateTimeRange);
     }
 
     return re;

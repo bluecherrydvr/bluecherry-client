@@ -102,7 +102,8 @@ private:
     {
         DoRowsLayout = 1,
         DoUpdateRowsMap,
-        DoUpdateTimeRange
+        DoUpdateTimeRange, /* Update cached time range information, assuming that dataTimeStart is accurate */
+        DoUpdateTimeRangeFromData, /* Update cached time range information from underlying data */
     };
     Q_DECLARE_FLAGS(LayoutFlags, LayoutFlag)
     LayoutFlags pendingLayouts;
