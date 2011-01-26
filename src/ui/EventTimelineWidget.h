@@ -97,15 +97,24 @@ private:
     mutable int cachedLeftPadding;
 
     /* Cached layout information */
+    int rowsMapUpdateStart;
     enum LayoutFlag
     {
         DoRowsLayout = 1,
+        DoUpdateRowsMap,
         DoUpdateTimeRange
     };
     Q_DECLARE_FLAGS(LayoutFlags, LayoutFlag)
     LayoutFlags pendingLayouts;
     void scheduleDelayedItemsLayout(LayoutFlags flags);
     void ensureLayout();
+
+    /* Update the rowsMap starting with the item at row 'start' and continuing to the end */
+    void updateRowsMap(int start = 0);
+    void updateRowsMapDelayed(int start = 0);
+    /* Call when the time range in the underlying data may have changed. If fromData is true, dataTimeStart
+     * and dataTimeEnd will be updated. Must be called regardless, to update various other cached data. */
+    void updateTimeRange(bool fromData = true);
 
     /* Scroll-invariant inner y-position to row data, suitable for vertical painting and hit tests.
      * First row will be at position 0, which is drawn just below the top padding when scrolled up. */
@@ -131,11 +140,6 @@ private:
 
     void addModelRows(int first, int last = -1);
     void clearData();
-    /* Update the rowsMap starting with the item at row 'start' and continuing to the end */
-    void updateRowsMap(int start = 0);
-    /* Call when the time range in the underlying data may have changed. If fromData is true, dataTimeStart
-     * and dataTimeEnd will be updated. Must be called regardless, to update various other cached data. */
-    void updateTimeRange(bool fromData = true);
     /* Ensure that the view time is within the boundaries of the data, changing it (scrolling or zooming) if necessary */
     void ensureViewTimeSpan();
     /* Update the scroll bar position, which is necessary when viewSeconds has changed */

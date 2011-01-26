@@ -67,7 +67,7 @@ inline ServerData *RowData::toServer()
 
 EventTimelineWidget::EventTimelineWidget(QWidget *parent)
     : QAbstractItemView(parent), timeSeconds(0), viewSeconds(0), primaryTickSecs(0), cachedTopPadding(0),
-      cachedLeftPadding(-1), mouseRubberBand(0)
+      cachedLeftPadding(-1), rowsMapUpdateStart(-1), mouseRubberBand(0)
 {
     setAutoFillBackground(false);
 
@@ -568,6 +568,25 @@ void EventTimelineWidget::updateRowsMap(int row)
 
         rowsMap.insert(data, row);
     }
+
+#ifndef QT_NO_DEBUG
+    Q_ASSERT(rowsMap.size() == model()->rowCount());
+    int count = 0;
+    foreach (ServerData *sd, serversMap)
+    {
+        foreach (LocationData *ld, sd->locationsMap)
+        {
+            count += ld->events.size();
+        }
+    }
+    Q_ASSERT(count == rowsMap.size());
+#endif
+}
+
+void EventTimelineWidget::updateRowsMapDelayed(int start)
+{
+    rowsMapUpdateStart = (rowsMapUpdateStart < 0) ? start : qMin(rowsMapUpdateStart, start);
+    scheduleDelayedItemsLayout(DoUpdateRowsMap);
 }
 
 inline static bool serverSort(const ServerData *s1, const ServerData *s2)
@@ -595,6 +614,11 @@ void EventTimelineWidget::doItemsLayout()
 
     if (layout & DoRowsLayout)
         doRowsLayout();
+    if (layout & DoUpdateRowsMap)
+    {
+        updateRowsMap(rowsMapUpdateStart);
+        rowsMapUpdateStart = -1;
+    }
     if (layout & DoUpdateTimeRange)
         updateTimeRange();
 
@@ -732,22 +756,8 @@ void EventTimelineWidget::rowsRemoved(const QModelIndex &parent, int start, int 
     Q_UNUSED(end);
     Q_ASSERT(!parent.isValid());
 
-    updateRowsMap(start);
-    Q_ASSERT(rowsMap.size() == model()->rowCount());
-
+    updateRowsMapDelayed(start);
     scheduleDelayedItemsLayout(DoUpdateTimeRange);
-
-#ifndef QT_NO_DEBUG
-    int count = 0;
-    foreach (ServerData *sd, serversMap)
-    {
-        foreach (LocationData *ld, sd->locationsMap)
-        {
-            count += ld->events.size();
-        }
-    }
-    Q_ASSERT(count == rowsMap.size());
-#endif
 }
 
 void EventTimelineWidget::reset()
