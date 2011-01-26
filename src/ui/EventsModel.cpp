@@ -291,6 +291,21 @@ void EventsModel::sort(int column, Qt::SortOrder order)
     emit layoutChanged();
 }
 
+bool EventsModel::Filter::operator()(const EventData *data) const
+{
+    if (data->level < level ||
+        (!types.isNull() && (int)data->type >= 0 && !types[(int)data->type]) ||
+        (!dateBegin.isNull() && data->serverLocalDate() < dateBegin) ||
+        (!dateEnd.isNull() && data->serverLocalDate() > dateEnd))
+        return false;
+
+    QHash<DVRServer*, QSet<int> >::ConstIterator it = sources.find(data->server);
+    if (!sources.isEmpty() && (it == sources.end() || (!it->isEmpty() && !it->contains(data->locationId))))
+        return false;
+
+    return true;
+}
+
 void EventsModel::applyFilters(bool fromCache)
 {
     if (fromCache)
@@ -300,12 +315,12 @@ void EventsModel::applyFilters(bool fromCache)
 
         for (QHash<DVRServer*,QList<EventData*> >::Iterator it = cachedEvents.begin(); it != cachedEvents.end(); ++it)
         {
-            if (!filterSources.isEmpty() && !filterSources.contains(it.key()))
+            if (!m_filter.sources.isEmpty() && !m_filter.sources.contains(it.key()))
                 continue;
 
             for (QList<EventData*>::Iterator eit = it->begin(); eit != it->end(); ++eit)
             {
-                if (testFilter(*eit))
+                if (m_filter(*eit))
                     items.append(*eit);
             }
         }
@@ -322,7 +337,7 @@ void EventsModel::applyFilters(bool fromCache)
         int removeFirst = -1;
         for (int i = 0; ; ++i)
         {
-            if (i < items.size() && !testFilter(items[i]))
+            if (i < items.size() && !m_filter(items[i]))
             {
                 if (removeFirst < 0)
                     removeFirst = i;
@@ -339,40 +354,61 @@ void EventsModel::applyFilters(bool fromCache)
             if (i == items.size())
                 break;
         }
+
+#if 0
+        /* Experimental concurrent implementation; would later be extended to be nonblocking */
+        QList<EventData*> newItems = QtConcurrent::blockingFiltered(items, m_filter);
+
+        int oFirstRemove = -1;
+        for (int oI = 0, nI = 0; oI < items.size(); ++oI)
+        {
+            if (nI >= newItems.size())
+            {
+                if (oFirstRemove < 0)
+                    oFirstRemove = oI;
+
+                beginRemoveRows(QModelIndex(), oFirstRemove, items.size()-1);
+                items.erase(items.begin()+oFirstRemove, items.end());
+                endRemoveRows();
+                break;
+            }
+
+            if (oFirstRemove < 0 && items[oI] != newItems[nI])
+                oFirstRemove = oI;
+            else if (oFirstRemove >= 0 && items[oI] == newItems[nI])
+            {
+                beginRemoveRows(QModelIndex(), oFirstRemove, oI-1);
+                items.erase(items.begin()+oFirstRemove, items.begin()+oI);
+                oI = oFirstRemove;
+                oFirstRemove = -1;
+                endRemoveRows();
+            }
+
+            if (oFirstRemove < 0)
+            {
+                ++nI;
+            }
+        }
+#endif
     }
 
     emit filtersChanged();
-}
-
-bool EventsModel::testFilter(EventData *data)
-{
-    if (data->level < filterLevel ||
-        (!filterTypes.isNull() && (int)data->type >= 0 && !filterTypes[(int)data->type]) ||
-        (!filterDateBegin.isNull() && data->serverLocalDate() < filterDateBegin) ||
-        (!filterDateEnd.isNull() && data->serverLocalDate() > filterDateEnd))
-        return false;
-
-    QHash<DVRServer*, QSet<int> >::Iterator it = filterSources.find(data->server);
-    if (!filterSources.isEmpty() && (it == filterSources.end() || (!it->isEmpty() && !it->contains(data->locationId))))
-        return false;
-
-    return true;
 }
 
 QString EventsModel::filterDescription() const
 {
     QString re;
 
-    if (filterLevel > EventLevel::Info)
-        re = tr("%1 events").arg(filterLevel.uiString());
-    else if (filterDateBegin.isNull() && filterDateEnd.isNull())
+    if (m_filter.level > EventLevel::Info)
+        re = tr("%1 events").arg(m_filter.level.uiString());
+    else if (m_filter.dateBegin.isNull() && m_filter.dateEnd.isNull())
         re = tr("Recent events");
     else
         re = tr("All events");
 
     bool allCameras = true;
-    for (QHash<DVRServer*, QSet<int> >::ConstIterator it = filterSources.begin();
-         it != filterSources.end(); ++it)
+    for (QHash<DVRServer*, QSet<int> >::ConstIterator it = m_filter.sources.begin();
+         it != m_filter.sources.end(); ++it)
     {
         if (it->count() != it.key()->cameras().size()+1)
         {
@@ -381,20 +417,20 @@ QString EventsModel::filterDescription() const
         }
     }
 
-    if (!filterSources.isEmpty() && filterSources.size() != bcApp->servers().size())
+    if (!m_filter.sources.isEmpty() && m_filter.sources.size() != bcApp->servers().size())
     {
-        if (filterSources.size() == 1)
+        if (m_filter.sources.size() == 1)
         {
             /* Single server */
             if (!allCameras)
             {
-                if (filterSources.begin()->size() == 1)
-                    re += tr(" on %1").arg(*filterSources.begin()->begin());
+                if (m_filter.sources.begin()->size() == 1)
+                    re += tr(" on %1").arg(*m_filter.sources.begin()->begin());
                 else
                     re += tr(" on selected cameras");
             }
 
-            re += tr(" from %1").arg(filterSources.begin().key()->displayName());
+            re += tr(" from %1").arg(m_filter.sources.begin().key()->displayName());
         }
         else if (!allCameras)
             re += tr(" on selected cameras");
@@ -404,31 +440,31 @@ QString EventsModel::filterDescription() const
     else if (!allCameras)
         re += tr(" on selected cameras");
 
-    if (!filterDateBegin.isNull() && !filterDateEnd.isNull())
+    if (!m_filter.dateBegin.isNull() && !m_filter.dateEnd.isNull())
     {
-        if (filterDateBegin.date() == filterDateEnd.date())
-            re += tr(" on %1").arg(filterDateBegin.date().toString());
+        if (m_filter.dateBegin.date() == m_filter.dateEnd.date())
+            re += tr(" on %1").arg(m_filter.dateBegin.date().toString());
         else
-            re += tr(" between %1 to %2").arg(filterDateBegin.date().toString(), filterDateEnd.date().toString());
+            re += tr(" between %1 to %2").arg(m_filter.dateBegin.date().toString(), m_filter.dateEnd.date().toString());
     }
-    else if (!filterDateBegin.isNull())
-        re += tr(" after %1").arg(filterDateBegin.date().toString());
-    else if (!filterDateEnd.isNull())
-        re += tr(" before %1").arg(filterDateEnd.date().toString());
+    else if (!m_filter.dateBegin.isNull())
+        re += tr(" after %1").arg(m_filter.dateBegin.date().toString());
+    else if (!m_filter.dateEnd.isNull())
+        re += tr(" before %1").arg(m_filter.dateEnd.date().toString());
 
     return re;
 }
 
 void EventsModel::clearFilters()
 {
-    if (filterSources.isEmpty() && filterDateBegin.isNull() && filterDateEnd.isNull() &&
-        filterTypes.isNull() && filterLevel == EventLevel::Info)
+    if (m_filter.sources.isEmpty() && m_filter.dateBegin.isNull() && m_filter.dateEnd.isNull() &&
+        m_filter.types.isNull() && m_filter.level == EventLevel::Info)
         return;
 
-    filterSources.clear();
-    filterDateBegin = filterDateEnd = QDateTime();
-    filterTypes.clear();
-    filterLevel = EventLevel::Info;
+    m_filter.sources.clear();
+    m_filter.dateBegin = m_filter.dateEnd = QDateTime();
+    m_filter.types.clear();
+    m_filter.level = EventLevel::Info;
 
     applyFilters();
 }
@@ -436,24 +472,24 @@ void EventsModel::clearFilters()
 void EventsModel::setFilterDates(const QDateTime &begin, const QDateTime &end)
 {
     bool fast = false;
-    if (begin >= filterDateBegin && end <= filterDateEnd &&
-        (filterDateBegin.isNull() || !begin.isNull()) &&
-        (filterDateEnd.isNull() || !end.isNull()))
+    if (begin >= m_filter.dateBegin && end <= m_filter.dateEnd &&
+        (m_filter.dateBegin.isNull() || !begin.isNull()) &&
+        (m_filter.dateEnd.isNull() || !end.isNull()))
         fast = true;
 
-    filterDateBegin = begin;
-    filterDateEnd = end;
+    m_filter.dateBegin = begin;
+    m_filter.dateEnd = end;
 
     applyFilters(!fast);
 }
 
 void EventsModel::setFilterLevel(EventLevel minimum)
 {
-    if (filterLevel == minimum)
+    if (m_filter.level == minimum)
         return;
 
-    bool fast = minimum > filterLevel;
-    filterLevel = minimum;
+    bool fast = minimum > m_filter.level;
+    m_filter.level = minimum;
 
     applyFilters(!fast);
 }
@@ -462,14 +498,14 @@ void EventsModel::setFilterSources(const QMap<DVRServer*, QList<int> > &sources)
 {
     bool fast = false;
 
-    if (sources.size() <= filterSources.size())
+    if (sources.size() <= m_filter.sources.size())
     {
         fast = true;
         /* If the new sources contain any that the old don't, we can't do fast filtering */
         for (QMap<DVRServer*,QList<int> >::ConstIterator nit = sources.begin(); nit != sources.end(); ++nit)
         {
-            QHash<DVRServer*, QSet<int> >::Iterator oit = filterSources.find(nit.key());
-            if (oit == filterSources.end())
+            QHash<DVRServer*, QSet<int> >::Iterator oit = m_filter.sources.find(nit.key());
+            if (oit == m_filter.sources.end())
             {
                 fast = false;
                 break;
@@ -489,9 +525,9 @@ void EventsModel::setFilterSources(const QMap<DVRServer*, QList<int> > &sources)
         }
     }
 
-    filterSources.clear();
+    m_filter.sources.clear();
     for (QMap<DVRServer*, QList<int> >::ConstIterator nit = sources.begin(); nit != sources.end(); ++nit)
-        filterSources.insert(nit.key(), nit->toSet());
+        m_filter.sources.insert(nit.key(), nit->toSet());
 
     applyFilters(!fast);
 }
@@ -520,11 +556,11 @@ void EventsModel::setFilterTypes(const QBitArray &typemap)
 {
     bool fast = true;
 
-    if (!filterTypes.isNull() && filterTypes.size() == typemap.size())
+    if (!m_filter.types.isNull() && m_filter.types.size() == typemap.size())
     {
         for (int i = 0; i < typemap.size(); ++i)
         {
-            if (typemap[i] && !filterTypes[i])
+            if (typemap[i] && !m_filter.types[i])
             {
                 fast = false;
                 break;
@@ -532,7 +568,7 @@ void EventsModel::setFilterTypes(const QBitArray &typemap)
         }
     }
 
-    filterTypes = typemap;
+    m_filter.types = typemap;
     applyFilters(!fast);
 }
 
@@ -570,10 +606,10 @@ void EventsModel::updateServer(DVRServer *server)
     QUrl url(QLatin1String("/events/"));
     url.addQueryItem(QLatin1String("limit"), QString::number(serverEventsLimit));
 #if 0
-    if (!filterDateBegin.isNull())
-        url.addQueryItem(QLatin1String("startDate"), QString::number(filterDateBegin.toTime_t()));
-    if (!filterDateEnd.isNull())
-        url.addQueryItem(QLatin1String("endDate"), QString::number(filterDateEnd.toTime_t()));
+    if (!m_filter.dateBegin.isNull())
+        url.addQueryItem(QLatin1String("startDate"), QString::number(m_filter.dateBegin.toTime_t()));
+    if (!m_filter.dateEnd.isNull())
+        url.addQueryItem(QLatin1String("endDate"), QString::number(m_filter.dateEnd.toTime_t()));
 #endif
 
     updatingServers.insert(server);

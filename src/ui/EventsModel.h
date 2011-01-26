@@ -64,8 +64,8 @@ public slots:
     void setFilterTypes(const QBitArray &typemap);
     void setFilterLevel(EventLevel minimum);
 
-    void setFilterBeginDate(const QDateTime &begin) { setFilterDates(begin, filterDateEnd); }
-    void setFilterEndDate(const QDateTime &end) { setFilterDates(filterDateBegin, end); }
+    void setFilterBeginDate(const QDateTime &begin) { setFilterDates(begin, m_filter.dateEnd); }
+    void setFilterEndDate(const QDateTime &end) { setFilterDates(m_filter.dateBegin, end); }
 
     void clearFilters();
 
@@ -96,10 +96,15 @@ private:
     QTimer updateTimer;
 
     /* Filters */
-    QHash<DVRServer*, QSet<int> > filterSources;
-    QDateTime filterDateBegin, filterDateEnd;
-    QBitArray filterTypes;
-    EventLevel filterLevel;
+    struct Filter
+    {
+        QHash<DVRServer*, QSet<int> > sources;
+        QDateTime dateBegin, dateEnd;
+        QBitArray types;
+        EventLevel level;
+
+        bool operator()(const EventData *d) const;
+    } m_filter;
 
     /* Sorting */
     int serverEventsLimit;
