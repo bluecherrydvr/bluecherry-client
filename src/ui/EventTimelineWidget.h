@@ -99,7 +99,8 @@ private:
     /* Cached layout information */
     enum LayoutFlag
     {
-        DoRowsLayout = 1
+        DoRowsLayout = 1,
+        DoUpdateTimeRange
     };
     Q_DECLARE_FLAGS(LayoutFlags, LayoutFlag)
     LayoutFlags pendingLayouts;

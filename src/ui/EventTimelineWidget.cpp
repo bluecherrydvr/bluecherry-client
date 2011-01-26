@@ -595,6 +595,8 @@ void EventTimelineWidget::doItemsLayout()
 
     if (layout & DoRowsLayout)
         doRowsLayout();
+    if (layout & DoUpdateTimeRange)
+        updateTimeRange();
 
     QAbstractItemView::doItemsLayout();
 }
@@ -731,10 +733,10 @@ void EventTimelineWidget::rowsRemoved(const QModelIndex &parent, int start, int 
     Q_ASSERT(!parent.isValid());
 
     updateRowsMap(start);
-    updateTimeRange();
-    viewport()->update();
-
     Q_ASSERT(rowsMap.size() == model()->rowCount());
+
+    scheduleDelayedItemsLayout(DoUpdateTimeRange);
+
 #ifndef QT_NO_DEBUG
     int count = 0;
     foreach (ServerData *sd, serversMap)
