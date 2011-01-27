@@ -5,6 +5,7 @@
 
 class DVRServer;
 class QWebView;
+class QUrl;
 
 class ServerConfigWindow : public QWidget
 {
@@ -25,6 +26,9 @@ public slots:
 
 signals:
     void serverChanged(DVRServer *server);
+
+private slots:
+    void openLink(const QUrl &url);
 
 private:
     static ServerConfigWindow *m_instance;

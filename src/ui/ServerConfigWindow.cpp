@@ -4,6 +4,7 @@
 #include "ui/MainWindow.h"
 #include <QBoxLayout>
 #include <QWebView>
+#include <QDesktopServices>
 
 ServerConfigWindow *ServerConfigWindow::m_instance = 0;
 
@@ -31,6 +32,9 @@ ServerConfigWindow::ServerConfigWindow(QWidget *parent)
     m_webView = new QWebView;
     m_webView->page()->setNetworkAccessManager(bcApp->nam);
     layout->addWidget(m_webView);
+
+    m_webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+    connect(m_webView, SIGNAL(linkClicked(QUrl)), SLOT(openLink(QUrl)));
 }
 
 ServerConfigWindow::~ServerConfigWindow()
@@ -53,4 +57,12 @@ void ServerConfigWindow::setServer(DVRServer *server)
     }
 
     emit serverChanged(m_server);
+}
+
+void ServerConfigWindow::openLink(const QUrl &url)
+{
+    if (url.authority() == m_webView->url().authority())
+        m_webView->load(url);
+    else
+        QDesktopServices::openUrl(url);
 }
