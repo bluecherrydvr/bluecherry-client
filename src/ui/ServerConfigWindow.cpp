@@ -4,6 +4,7 @@
 #include "ui/MainWindow.h"
 #include <QBoxLayout>
 #include <QWebView>
+#include <QWebFrame>
 #include <QDesktopServices>
 
 ServerConfigWindow *ServerConfigWindow::m_instance = 0;
@@ -19,6 +20,27 @@ ServerConfigWindow *ServerConfigWindow::instance()
     return m_instance;
 }
 
+class ConfigWebPage : public QWebPage
+{
+public:
+    ConfigWebPage(QObject *parent)
+        : QWebPage(parent)
+    {
+    }
+
+protected:
+    bool acceptNavigationRequest(QWebFrame *frame, const QNetworkRequest &request, NavigationType type)
+    {
+        if (type == QWebPage::NavigationTypeLinkClicked && request.url().authority() != frame->url().authority())
+        {
+            QDesktopServices::openUrl(request.url());
+            return false;
+        }
+
+        return true;
+    }
+};
+
 ServerConfigWindow::ServerConfigWindow(QWidget *parent)
     : QWidget(parent, Qt::Window), m_server(0)
 {
@@ -30,11 +52,9 @@ ServerConfigWindow::ServerConfigWindow(QWidget *parent)
     layout->setMargin(0);
 
     m_webView = new QWebView;
+    m_webView->setPage(new ConfigWebPage(m_webView));
     m_webView->page()->setNetworkAccessManager(bcApp->nam);
     layout->addWidget(m_webView);
-
-    m_webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
-    connect(m_webView, SIGNAL(linkClicked(QUrl)), SLOT(openLink(QUrl)));
 }
 
 ServerConfigWindow::~ServerConfigWindow()
@@ -57,12 +77,4 @@ void ServerConfigWindow::setServer(DVRServer *server)
     }
 
     emit serverChanged(m_server);
-}
-
-void ServerConfigWindow::openLink(const QUrl &url)
-{
-    if (url.authority() == m_webView->url().authority())
-        m_webView->load(url);
-    else
-        QDesktopServices::openUrl(url);
 }

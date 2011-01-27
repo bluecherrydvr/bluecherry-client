@@ -27,9 +27,6 @@ public slots:
 signals:
     void serverChanged(DVRServer *server);
 
-private slots:
-    void openLink(const QUrl &url);
-
 private:
     static ServerConfigWindow *m_instance;
 
