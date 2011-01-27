@@ -92,7 +92,7 @@ struct EventData
     bool isSystem() const { return locationId < 0; }
     bool isCamera() const { return locationId >= 0; }
     QDateTime endDate() const { return date.addSecs(qMax(0, duration)); }
-    QDateTime serverLocalDate() const { return date.addSecs(int(dateTzOffsetMins)*60); }
+    QDateTime serverLocalDate() const;
     bool hasMedia() const { return mediaId >= 0; }
 
     QColor uiColor(bool graphical = true) const { return level.uiColor(graphical); }
@@ -109,5 +109,14 @@ struct EventData
 
     static QList<EventData*> parseEvents(DVRServer *server, const QByteArray &input);
 };
+
+inline QDateTime EventData::serverLocalDate() const
+{
+     Q_ASSERT(date.timeSpec() == Qt::UTC);
+     int offs = int(dateTzOffsetMins)*60;
+     QDateTime r = date.addSecs(offs);
+     r.setUtcOffset(offs);
+     return r;
+}
 
 #endif // EVENTDATA_H

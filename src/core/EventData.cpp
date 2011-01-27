@@ -269,7 +269,9 @@ static QDateTime isoToDateTime(const QString &str, qint16 *tzOffsetMins = 0)
     if (tzOffsetMins)
         *tzOffsetMins = offset;
 
-    return QDateTime::fromString(str.mid(0, tzpos), Qt::ISODate).addSecs(int(-offset)*60);
+    QDateTime re = QDateTime::fromString(str.mid(0, tzpos), Qt::ISODate);
+    re.setTimeSpec(Qt::UTC);
+    return re.addSecs(int(-offset)*60);
 }
 
 static EventData *parseEntry(DVRServer *server, QXmlStreamReader &reader)
