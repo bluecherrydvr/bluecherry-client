@@ -1,4 +1,4 @@
-QT += core gui network webkit opengl
+QT += core gui network webkit opengl declarative
 CONFIG(static):QTPLUGIN += qjpeg qgif
 
 TARGET = BluecherryClient
@@ -138,7 +138,8 @@ SOURCES += src/main.cpp \
     src/video/GstSinkWidget.cpp \
     src/ui/OptionsGeneralPage.cpp \
     src/ui/EventsView.cpp \
-    src/utils/FileUtils.cpp
+    src/utils/FileUtils.cpp \
+    src/ui/qml/MJpegStreamItem.cpp
 
 HEADERS  += src/ui/MainWindow.h \
     src/ui/CameraAreaWidget.h \
@@ -181,11 +182,14 @@ HEADERS  += src/ui/MainWindow.h \
     src/video/GstSinkWidget.h \
     src/ui/OptionsGeneralPage.h \
     src/ui/EventsView.h \
-    src/utils/FileUtils.h
+    src/utils/FileUtils.h \
+    src/ui/qml/MJpegStreamItem.h
 
 RESOURCES += \
-    res/resources.qrc
+    res/resources.qrc \
+    src/ui/qml/qml.qrc
 win32:RC_FILE = res/windows.rc
 ICON = res/bluecherry.icns
 
-OTHER_FILES += mac/Info.plist "linux/Bluecherry Client.desktop"
+OTHER_FILES += mac/Info.plist "linux/Bluecherry Client.desktop" \
+    src/ui/qml/LiveView.qml

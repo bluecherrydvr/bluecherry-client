@@ -35,6 +35,9 @@
 #include <QShowEvent>
 #include <QSystemTrayIcon>
 #include <QHeaderView>
+#include <QDeclarativeView>
+#include <QGLWidget>
+#include "qml/MJpegStreamItem.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), m_trayIcon(0)
@@ -76,7 +79,14 @@ MainWindow::MainWindow(QWidget *parent)
     controlLayout->setMargin(0);
     controlLayout->setSpacing(0);
     middleLayout->addLayout(controlLayout);
-    middleLayout->addWidget(m_cameraArea, 1);
+    //middleLayout->addWidget(m_cameraArea, 1);
+
+    qmlRegisterType<MJpegStreamItem>("Bluecherry", 1, 0, "MJpegStream");
+
+    QDeclarativeView *cameraAreaView = new QDeclarativeView(QUrl(QLatin1String("qrc:qml/LiveView.qml")));
+    cameraAreaView->setViewport(new QGLWidget);
+    cameraAreaView->setResizeMode(QDeclarativeView::SizeRootObjectToView);
+    middleLayout->addWidget(cameraAreaView, 1);
 
     QWidget *controls = createCameraControls();
     controlLayout->addWidget(controls, 1);
