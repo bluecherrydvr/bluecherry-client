@@ -139,7 +139,8 @@ SOURCES += src/main.cpp \
     src/ui/OptionsGeneralPage.cpp \
     src/ui/EventsView.cpp \
     src/utils/FileUtils.cpp \
-    src/ui/qml/MJpegStreamItem.cpp
+    src/ui/liveview/LiveViewArea.cpp \
+    src/ui/liveview/MJpegFeedItem.cpp
 
 HEADERS  += src/ui/MainWindow.h \
     src/ui/CameraAreaWidget.h \
@@ -183,13 +184,14 @@ HEADERS  += src/ui/MainWindow.h \
     src/ui/OptionsGeneralPage.h \
     src/ui/EventsView.h \
     src/utils/FileUtils.h \
-    src/ui/qml/MJpegStreamItem.h
+    src/ui/liveview/LiveViewArea.h \
+    src/ui/liveview/MJpegFeedItem.h
 
 RESOURCES += \
     res/resources.qrc \
-    src/ui/qml/qml.qrc
+    src/ui/qml.qrc
 win32:RC_FILE = res/windows.rc
 ICON = res/bluecherry.icns
 
 OTHER_FILES += mac/Info.plist "linux/Bluecherry Client.desktop" \
-    src/ui/qml/LiveView.qml
+    src/ui/liveview/LiveView.qml

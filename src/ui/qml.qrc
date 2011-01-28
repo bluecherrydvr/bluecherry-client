@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/qml">
-        <file>LiveView.qml</file>
+        <file>liveview/LiveView.qml</file>
     </qresource>
 </RCC>

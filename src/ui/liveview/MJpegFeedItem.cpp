@@ -1,11 +1,11 @@
-#include "MJpegStreamItem.h"
+#include "MJpegFeedItem.h"
 #include "core/MJpegStream.h"
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
-QSharedPointer<MJpegStream> MJpegStreamItem::hackStream;
+QSharedPointer<MJpegStream> MJpegFeedItem::hackStream;
 
-MJpegStreamItem::MJpegStreamItem(QDeclarativeItem *parent)
+MJpegFeedItem::MJpegFeedItem(QDeclarativeItem *parent)
     : QDeclarativeItem(parent)
 {
     this->setFlag(QGraphicsItem::ItemHasNoContents, false);
@@ -16,7 +16,7 @@ MJpegStreamItem::MJpegStreamItem(QDeclarativeItem *parent)
     setStream(hackStream);
 }
 
-void MJpegStreamItem::setStream(const QSharedPointer<MJpegStream> &stream)
+void MJpegFeedItem::setStream(const QSharedPointer<MJpegStream> &stream)
 {
     if (stream == m_stream)
         return;
@@ -31,7 +31,7 @@ void MJpegStreamItem::setStream(const QSharedPointer<MJpegStream> &stream)
     updateFrame();
 }
 
-void MJpegStreamItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWidget *widget)
+void MJpegFeedItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWidget *widget)
 {
     Q_UNUSED(widget);
 

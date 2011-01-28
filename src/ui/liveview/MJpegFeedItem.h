@@ -5,12 +5,12 @@
 #include <QSharedPointer>
 #include "core/MJpegStream.h"
 
-class MJpegStreamItem : public QDeclarativeItem
+class MJpegFeedItem : public QDeclarativeItem
 {
     Q_OBJECT
 
 public:
-    explicit MJpegStreamItem(QDeclarativeItem *parent = 0);
+    explicit MJpegFeedItem(QDeclarativeItem *parent = 0);
 
     virtual void paint(QPainter *, const QStyleOptionGraphicsItem *, QWidget *);
 
