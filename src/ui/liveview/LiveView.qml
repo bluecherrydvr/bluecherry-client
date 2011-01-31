@@ -6,16 +6,14 @@ Rectangle {
     color: "black"
 
     Grid {
-        spacing: 25
+        spacing: 1
         rows: 4
         anchors.fill: parent
 
         Repeater {
             model: 16
 
-            MJpegFeed {
-                width: 200
-                height: 150
+            LiveFeed {
             }
         }
     }
