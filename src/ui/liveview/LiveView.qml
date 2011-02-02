@@ -5,16 +5,9 @@ Rectangle {
     id: viewArea
     color: "black"
 
-    Grid {
-        spacing: 1
-        rows: 4
+    LiveViewLayout {
+        id: viewLayout
+        objectName: "viewLayout"
         anchors.fill: parent
-
-        Repeater {
-            model: 16
-
-            LiveFeed {
-            }
-        }
     }
 }
