@@ -15,7 +15,15 @@ QDeclarativeItem *LiveViewLayout::createNewItem()
     Q_ASSERT(context);
 
     if (!m_itemComponent)
+    {
         m_itemComponent = new QDeclarativeComponent(context->engine(), QUrl(QLatin1String("qrc:qml/liveview/LiveFeed.qml")), this);
+    }
+
+    if (m_itemComponent->isError())
+    {
+        qWarning() << "LiveViewLayout item errors:" << m_itemComponent->errors();
+        return 0;
+    }
 
     QDeclarativeItem *element = qobject_cast<QDeclarativeItem*>(m_itemComponent->create(context));
     Q_ASSERT(element);
@@ -71,11 +79,11 @@ void LiveViewLayout::doLayout()
                 break;
             c = 0;
 
-            y += h+1;
+            y += h;
             x = 0;
         }
         else
-            x += w+1;
+            x += w;
     }
 }
 
