@@ -1,12 +1,37 @@
 #include "LiveViewLayout.h"
+#include <QDeclarativeEngine>
+#include <QDeclarativeContext>
+#include <QDebug>
 
 LiveViewLayout::LiveViewLayout(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent), m_rows(0), m_columns(0)
+    : QDeclarativeItem(parent), m_rows(0), m_columns(0), m_itemComponent(0)
 {
+}
+
+QDeclarativeItem *LiveViewLayout::createNewItem()
+{
+    QDeclarativeContext *context = QDeclarativeEngine::contextForObject(this);
+    Q_ASSERT(context);
+
+    if (!m_itemComponent)
+        m_itemComponent = new QDeclarativeComponent(context->engine(), QUrl(QLatin1String("qrc:qml/liveview/LiveFeed.qml")), this);
+
+    QDeclarativeItem *element = qobject_cast<QDeclarativeItem*>(m_itemComponent->create(context));
+    Q_ASSERT(element);
+    if (!element)
+        return 0;
+
+    element->setParentItem(this);
+    return element;
 }
 
 void LiveViewLayout::doLayout()
 {
+    Q_ASSERT(m_items.size() == (m_rows*m_columns));
+
+    if (m_items.isEmpty())
+        return;
+
     qreal w = floor(width() / m_columns),
           h = floor(height() / m_rows);
 
@@ -20,7 +45,8 @@ void LiveViewLayout::doLayout()
         {
             i->setWidth(w);
             i->setHeight(h);
-            i->setPos(x, y);
+            i->setX(x);
+            i->setY(y);
         }
 
         if (++c == m_columns)
@@ -37,13 +63,19 @@ void LiveViewLayout::doLayout()
     }
 }
 
+void LiveViewLayout::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)
+{
+    QDeclarativeItem::geometryChanged(newGeometry, oldGeometry);
+    doLayout();
+}
+
 void LiveViewLayout::insertRow(int row)
 {
     row = qBound(0, row, m_rows);
     m_rows++;
 
     for (int i = (row * m_columns), n = i+m_columns; i < n; ++i)
-        m_items.insert(i, 0);
+        m_items.insert(i, createNewItem());
 
     doLayout();
 }
@@ -58,7 +90,8 @@ void LiveViewLayout::removeRow(int row)
     for (int i = (row * m_columns), n = i+m_columns; i < n; ++i)
     {
         QDeclarativeItem *item = m_items[i];
-        /* XXX destroy the item */
+        if (item)
+            item->deleteLater();
     }
 
     QList<QDeclarativeItem*>::Iterator st = m_items.begin() + (row * m_columns);
@@ -72,9 +105,9 @@ void LiveViewLayout::insertColumn(int column)
 {
     column = qBound(0, column, m_columns);
 
-    for (int i = column; i <= m_items.size(); i += m_columns)
+    for (int i = column, n = 0; n < m_rows; i += m_columns, ++n)
     {
-        m_items.insert(i, 0);
+        m_items.insert(i, createNewItem());
         ++i;
     }
 
@@ -91,7 +124,8 @@ void LiveViewLayout::removeColumn(int column)
     for (int i = column; i < m_items.size(); i += m_columns)
     {
         QDeclarativeItem *item = m_items[i];
-        /* XXX destroy the item */
+        if (item)
+            item->deleteLater();
         m_items.removeAt(i);
         --i;
     }
@@ -180,4 +214,16 @@ void LiveViewLayout::setGridSize(int rows, int columns)
         insertRow(m_rows);
 
     Q_ASSERT(m_items.size() == (m_rows*m_columns));
+}
+
+void LiveViewLayout::set(int row, int col, QDeclarativeItem *item)
+{
+    if (row >= m_rows || col >= m_columns || (item == at(row, col)))
+        return;
+
+    QDeclarativeItem *&ip = m_items[(row * m_columns) + col];
+    if (ip)
+        ip->deleteLater();
+    ip = item;
+    doLayout();
 }

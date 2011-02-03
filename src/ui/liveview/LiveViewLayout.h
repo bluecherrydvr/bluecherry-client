@@ -18,6 +18,7 @@ public:
     void setGridSize(int rows, int columns);
 
     QDeclarativeItem *at(int row, int col) const { return m_items[row * m_columns + col]; }
+    void set(int row, int col, QDeclarativeItem *item);
 
 public slots:
     void setRows(int r) { setGridSize(r, m_columns); }
@@ -28,10 +29,15 @@ public slots:
     void insertColumn(int column);
     void removeColumn(int column);
 
+protected:
+    virtual void geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry);
+
 private:
     int m_rows, m_columns;
     QList<QDeclarativeItem*> m_items;
+    QDeclarativeComponent *m_itemComponent;
 
+    QDeclarativeItem *createNewItem();
     void doLayout();
 };
 
