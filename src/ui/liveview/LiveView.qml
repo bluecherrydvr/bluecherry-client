@@ -9,5 +9,8 @@ Rectangle {
         id: viewLayout
         objectName: "viewLayout"
         anchors.fill: parent
+
+        rows: 2
+        columns: 2
     }
 }

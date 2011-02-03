@@ -1,6 +1,7 @@
 #include "LiveViewLayout.h"
 #include <QDeclarativeEngine>
 #include <QDeclarativeContext>
+#include <QTimerEvent>
 #include <QDebug>
 
 LiveViewLayout::LiveViewLayout(QDeclarativeItem *parent)
@@ -23,6 +24,21 @@ QDeclarativeItem *LiveViewLayout::createNewItem()
 
     element->setParentItem(this);
     return element;
+}
+
+void LiveViewLayout::scheduleLayout()
+{
+    if (!m_layoutTimer.isActive())
+        m_layoutTimer.start(0, this);
+}
+
+void LiveViewLayout::timerEvent(QTimerEvent *event)
+{
+    if (event->timerId() == m_layoutTimer.timerId())
+    {
+        m_layoutTimer.stop();
+        doLayout();
+    }
 }
 
 void LiveViewLayout::doLayout()
@@ -66,7 +82,7 @@ void LiveViewLayout::doLayout()
 void LiveViewLayout::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)
 {
     QDeclarativeItem::geometryChanged(newGeometry, oldGeometry);
-    doLayout();
+    scheduleLayout();
 }
 
 void LiveViewLayout::insertRow(int row)
@@ -77,7 +93,7 @@ void LiveViewLayout::insertRow(int row)
     for (int i = (row * m_columns), n = i+m_columns; i < n; ++i)
         m_items.insert(i, createNewItem());
 
-    doLayout();
+    scheduleLayout();
 }
 
 void LiveViewLayout::removeRow(int row)
@@ -98,7 +114,7 @@ void LiveViewLayout::removeRow(int row)
     m_items.erase(st, st+m_columns);
     --m_rows;
 
-    doLayout();
+    scheduleLayout();
 }
 
 void LiveViewLayout::insertColumn(int column)
@@ -112,7 +128,7 @@ void LiveViewLayout::insertColumn(int column)
     }
 
     m_columns++;
-    doLayout();
+    scheduleLayout();
 }
 
 void LiveViewLayout::removeColumn(int column)
@@ -131,7 +147,7 @@ void LiveViewLayout::removeColumn(int column)
     }
 
     --m_columns;
-    doLayout();
+    scheduleLayout();
 }
 
 void LiveViewLayout::setGridSize(int rows, int columns)
@@ -225,5 +241,5 @@ void LiveViewLayout::set(int row, int col, QDeclarativeItem *item)
     if (ip)
         ip->deleteLater();
     ip = item;
-    doLayout();
+    scheduleLayout();
 }

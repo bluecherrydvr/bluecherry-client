@@ -16,6 +16,4 @@ LiveViewArea::LiveViewArea(QWidget *parent)
 
     m_layout = rootObject()->findChild<LiveViewLayout*>(QLatin1String("viewLayout"));
     Q_ASSERT(m_layout);
-
-    m_layout->setGridSize(2, 2);
 }

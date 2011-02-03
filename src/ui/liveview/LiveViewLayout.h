@@ -2,6 +2,7 @@
 #define LIVEVIEWLAYOUT_H
 
 #include <QDeclarativeItem>
+#include <QBasicTimer>
 
 class LiveViewLayout : public QDeclarativeItem
 {
@@ -31,14 +32,18 @@ public slots:
 
 protected:
     virtual void geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry);
+    virtual void timerEvent(QTimerEvent *event);
 
 private:
     int m_rows, m_columns;
     QList<QDeclarativeItem*> m_items;
     QDeclarativeComponent *m_itemComponent;
+    QBasicTimer m_layoutTimer;
+
+    void scheduleLayout();
+    void doLayout();
 
     QDeclarativeItem *createNewItem();
-    void doLayout();
 };
 
 #endif // LIVEVIEWLAYOUT_H
