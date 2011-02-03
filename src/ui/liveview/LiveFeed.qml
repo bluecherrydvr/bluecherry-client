@@ -5,7 +5,6 @@ Item {
     id: feedItem
     width: 200
     height: 150
-    focus: true
     z: activeFocus ? 1 : 0
 
     Rectangle {

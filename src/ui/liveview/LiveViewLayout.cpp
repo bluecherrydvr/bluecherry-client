@@ -11,19 +11,11 @@ LiveViewLayout::LiveViewLayout(QDeclarativeItem *parent)
 
 QDeclarativeItem *LiveViewLayout::createNewItem()
 {
+    if (!m_itemComponent)
+        return 0;
+
     QDeclarativeContext *context = QDeclarativeEngine::contextForObject(this);
     Q_ASSERT(context);
-
-    if (!m_itemComponent)
-    {
-        m_itemComponent = new QDeclarativeComponent(context->engine(), QUrl(QLatin1String("qrc:qml/liveview/LiveFeed.qml")), this);
-    }
-
-    if (m_itemComponent->isError())
-    {
-        qWarning() << "LiveViewLayout item errors:" << m_itemComponent->errors();
-        return 0;
-    }
 
     QDeclarativeItem *element = qobject_cast<QDeclarativeItem*>(m_itemComponent->create(context));
     Q_ASSERT(element);
@@ -32,6 +24,28 @@ QDeclarativeItem *LiveViewLayout::createNewItem()
 
     element->setParentItem(this);
     return element;
+}
+
+void LiveViewLayout::setItem(QDeclarativeComponent *c)
+{
+    Q_ASSERT(!m_itemComponent || m_itemComponent == c);
+    if (m_itemComponent || !c)
+        return;
+
+    if (c->isError())
+    {
+        qWarning() << "LiveViewLayout item errors:" << c->errors();
+        return;
+    }
+
+    m_itemComponent = c;
+
+    for (int i = 0; i < m_items.size(); ++i)
+    {
+        QDeclarativeItem *&item = m_items[i];
+        if (!item)
+            item = createNewItem();
+    }
 }
 
 void LiveViewLayout::scheduleLayout()

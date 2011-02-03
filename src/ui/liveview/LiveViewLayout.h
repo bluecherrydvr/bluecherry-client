@@ -10,6 +10,7 @@ class LiveViewLayout : public QDeclarativeItem
 
     Q_PROPERTY(int rows READ rows WRITE setRows)
     Q_PROPERTY(int columns READ columns WRITE setColumns)
+    Q_PROPERTY(QDeclarativeComponent* item READ item WRITE setItem)
 
 public:
     explicit LiveViewLayout(QDeclarativeItem *parent = 0);
@@ -20,6 +21,9 @@ public:
 
     QDeclarativeItem *at(int row, int col) const { return m_items[row * m_columns + col]; }
     void set(int row, int col, QDeclarativeItem *item);
+
+    QDeclarativeComponent *item() const { return m_itemComponent; }
+    void setItem(QDeclarativeComponent *c);
 
 public slots:
     void setRows(int r) { setGridSize(r, m_columns); }

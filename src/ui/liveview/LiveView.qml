@@ -10,6 +10,8 @@ Rectangle {
         objectName: "viewLayout"
         anchors.fill: parent
 
+        item: Qt.createComponent("LiveFeed.qml")
+
         rows: 4
         columns: 4
     }
