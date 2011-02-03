@@ -73,7 +73,9 @@ void LiveViewLayout::doLayout()
     qreal w = floor(width() / m_columns),
           h = floor(height() / m_rows);
 
-    qreal x = 0, y = 0;
+    qreal left = qRound(width()) % m_columns,
+          x = left,
+          y = qRound(height()) % m_rows;
 
     for (int r = 0, c = 0;;)
     {
@@ -94,7 +96,7 @@ void LiveViewLayout::doLayout()
             c = 0;
 
             y += h;
-            x = 0;
+            x = left;
         }
         else
             x += w;
