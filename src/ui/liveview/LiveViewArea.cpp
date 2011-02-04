@@ -1,5 +1,6 @@
 #include "LiveViewArea.h"
 #include "LiveViewLayout.h"
+#include "LiveFeedItem.h"
 #include "MJpegFeedItem.h"
 #include <QGLWidget>
 #include <QDeclarativeContext>
@@ -9,6 +10,7 @@ LiveViewArea::LiveViewArea(QWidget *parent)
 {
     qmlRegisterType<LiveViewLayout>("Bluecherry", 1, 0, "LiveViewLayout");
     qmlRegisterType<MJpegFeedItem>("Bluecherry", 1, 0, "MJpegFeed");
+    qmlRegisterType<LiveFeedItem>("Bluecherry", 1, 0, "LiveFeedBase");
 
     setViewport(new QGLWidget);
     setResizeMode(SizeRootObjectToView);

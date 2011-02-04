@@ -1,7 +1,7 @@
 import Bluecherry 1.0
 import Qt 4.7
 
-Item {
+LiveFeedBase {
     id: feedItem
     width: 200
     height: 150
