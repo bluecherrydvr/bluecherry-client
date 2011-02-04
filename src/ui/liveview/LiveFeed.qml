@@ -36,7 +36,7 @@ LiveFeedBase {
             anchors.bottomMargin: 1
             color: "#ffffff"
             verticalAlignment: Text.AlignVCenter
-            text: "Test Feed"
+            text: feedItem.cameraName
         }
 
         MouseArea {

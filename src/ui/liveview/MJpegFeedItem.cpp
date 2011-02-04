@@ -35,15 +35,20 @@ void MJpegFeedItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWid
 {
     Q_UNUSED(widget);
 
-    p->setRenderHint(QPainter::SmoothPixmapTransform);
-
-    if (m_stream)
+    if (!m_stream)
     {
-        if (m_stream->currentFrame().isNull())
-            p->fillRect(opt->rect, Qt::blue);
-        else
-            p->drawPixmap(opt->rect, m_stream->currentFrame());
+        p->fillRect(opt->rect, Qt::red);
+        return;
+    }
+
+    if (!m_stream->currentFrame().isNull())
+    {
+        p->save();
+        p->setRenderHint(QPainter::SmoothPixmapTransform);
+        p->setCompositionMode(QPainter::CompositionMode_Source);
+        p->drawPixmap(opt->rect, m_stream->currentFrame());
+        p->restore();
     }
     else
-        p->fillRect(opt->rect, Qt::red);
+        p->fillRect(opt->rect, Qt::blue);
 }
