@@ -1,12 +1,16 @@
 #include "LiveViewLayout.h"
+#include "core/DVRCamera.h"
 #include <QDeclarativeEngine>
 #include <QDeclarativeContext>
 #include <QTimerEvent>
 #include <QDebug>
+#include <QGraphicsSceneDragDropEvent>
+#include <QMimeData>
 
 LiveViewLayout::LiveViewLayout(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent), m_rows(0), m_columns(0), m_itemComponent(0)
+    : QDeclarativeItem(parent), m_rows(0), m_columns(0), m_itemComponent(0), m_dragItem(0)
 {
+    setAcceptDrops(true);
 }
 
 QDeclarativeItem *LiveViewLayout::createNewItem()
@@ -101,6 +105,20 @@ void LiveViewLayout::doLayout()
         else
             x += w;
     }
+}
+
+void LiveViewLayout::gridPos(const QPointF &pos, int *row, int *column)
+{
+    Q_ASSERT(row && column);
+
+    qreal w = floor(width() / m_columns),
+          h = floor(height() / m_rows);
+
+    qreal left = qRound(width()) % m_columns,
+          top = qRound(height()) % m_rows;
+
+    *row = floor(qMax(0.0,pos.y()-top)/h);
+    *column = floor(qMax(0.0,pos.x()-left)/w);
 }
 
 void LiveViewLayout::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)
@@ -266,4 +284,64 @@ void LiveViewLayout::set(int row, int col, QDeclarativeItem *item)
         ip->deleteLater();
     ip = item;
     scheduleLayout();
+}
+
+void LiveViewLayout::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
+{
+    if (!event->mimeData()->hasFormat(QLatin1String("application/x-bluecherry-dvrcamera")))
+        return;
+
+    QList<DVRCamera> cameras = DVRCamera::fromMimeData(event->mimeData());
+    if (cameras.isEmpty())
+        return;
+
+    Q_ASSERT(!m_dragItem);
+
+    m_dragItem = createNewItem();
+    LiveViewLayoutProps::get(m_dragItem)->setIsDragItem(true);
+    bool dragItemCameraProperty = m_dragItem->setProperty("camera", QVariant::fromValue(cameras[0]));
+    Q_ASSERT(dragItemCameraProperty);
+    Q_UNUSED(dragItemCameraProperty);
+
+    m_dragItem->setX(event->pos().x());
+    m_dragItem->setY(event->pos().y());
+
+    event->acceptProposedAction();
+}
+
+void LiveViewLayout::dragMoveEvent(QGraphicsSceneDragDropEvent *event)
+{
+    if (!m_dragItem)
+        return;
+
+    int row, column;
+    gridPos(event->pos(), &row, &column);
+
+    /* Drag state (being dragged, draggable) as an attached property, put all of the effects and behaviors in QML? */
+    m_dragItem->setX(event->pos().x());
+    m_dragItem->setY(event->pos().y());
+
+    QDeclarativeItem *dropTarget = at(row, column);
+    if (dropTarget)
+        LiveViewLayoutProps::get(dropTarget)->setIsDropTarget(true);
+
+    event->acceptProposedAction();
+}
+
+void LiveViewLayout::dragLeaveEvent(QGraphicsSceneDragDropEvent *event)
+{
+    if (m_dragItem)
+        m_dragItem->deleteLater();
+    m_dragItem = 0;
+}
+
+void LiveViewLayout::dropEvent(QGraphicsSceneDragDropEvent *event)
+{
+    if (!m_dragItem)
+        return;
+
+    LiveViewLayoutProps::get(m_dragItem)->setIsDragItem(false);
+
+    m_dragItem = 0;
+    event->acceptProposedAction();
 }

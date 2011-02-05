@@ -34,7 +34,7 @@ LiveFeedBase {
             anchors.fill: parent
             anchors.leftMargin: 4
             anchors.bottomMargin: 1
-            color: "#ffffff"
+            color: feedItem.LiveViewLayout.isDragItem ? "#ff0000" : "#ffffff"
             verticalAlignment: Text.AlignVCenter
             text: feedItem.cameraName
         }
