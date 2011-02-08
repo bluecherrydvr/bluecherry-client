@@ -57,13 +57,25 @@ LiveFeedBase {
         anchors.bottom: parent.bottom
     }
 
-    states: State {
-        name: "focused"
-        when: feedItem.activeFocus
+    states: [
+        State {
+            name: "focused"
+            when: feedItem.activeFocus
 
-        PropertyChanges {
-            target: header
-            gradient: header.focusedGradient
+            PropertyChanges {
+                target: header
+                gradient: header.focusedGradient
+            }
         }
+    ]
+
+    Rectangle {
+        anchors.fill: parent
+        anchors.margins: 3
+        color: "transparent"
+        border.color: "white"
+        border.width: 3
+        radius: 2
+        visible: feedItem.LiveViewLayout.isDropTarget
     }
 }

@@ -55,12 +55,18 @@ private:
     QDeclarativeComponent *m_itemComponent;
     QBasicTimer m_layoutTimer;
 
-    QDeclarativeItem *m_dragItem;
+    struct
+    {
+        QDeclarativeItem *dragItem;
+        int dropRow, dropColumn;
+    } m_dragDrop;
 
     void scheduleLayout();
     void doLayout();
 
     QDeclarativeItem *createNewItem();
+
+    void updateDrag(QGraphicsSceneDragDropEvent *event);
 };
 
 QML_DECLARE_TYPEINFO(LiveViewLayout, QML_HAS_ATTACHED_PROPERTIES)
