@@ -18,6 +18,7 @@ public:
 
     QSharedPointer<MJpegStream> stream() const { return m_stream; }
     void setStream(const QSharedPointer<MJpegStream> &stream);
+    void clear();
 
 signals:
     void streamChanged(const QSharedPointer<MJpegStream> &stream);
@@ -30,8 +31,6 @@ private slots:
 
 private:
     QSharedPointer<MJpegStream> m_stream;
-
-    static QSharedPointer<MJpegStream> hackStream;
 };
 
 #endif // MJPEGSTREAMITEM_H
