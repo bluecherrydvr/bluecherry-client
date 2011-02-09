@@ -44,13 +44,6 @@ void LiveViewLayout::setItem(QDeclarativeComponent *c)
     }
 
     m_itemComponent = c;
-
-    for (int i = 0; i < m_items.size(); ++i)
-    {
-        QDeclarativeItem *&item = m_items[i];
-        if (!item)
-            item = createNewItem();
-    }
 }
 
 void LiveViewLayout::scheduleLayout()
@@ -134,7 +127,7 @@ void LiveViewLayout::insertRow(int row)
     m_rows++;
 
     for (int i = (row * m_columns), n = i+m_columns; i < n; ++i)
-        m_items.insert(i, createNewItem());
+        m_items.insert(i, 0);
 
     scheduleLayout();
 }
@@ -166,7 +159,7 @@ void LiveViewLayout::insertColumn(int column)
 
     for (int i = column, n = 0; n < m_rows; i += m_columns, ++n)
     {
-        m_items.insert(i, createNewItem());
+        m_items.insert(i, 0);
         ++i;
     }
 
