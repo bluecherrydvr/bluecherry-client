@@ -280,6 +280,27 @@ void LiveViewLayout::set(int row, int col, QDeclarativeItem *item)
     scheduleLayout();
 }
 
+void LiveViewLayout::moveItem(QDeclarativeItem *item, const QPointF &pos)
+{
+    int row, column;
+    gridPos(pos, &row, &column);
+    moveItem(item, row, column);
+}
+
+void LiveViewLayout::moveItem(QDeclarativeItem *item, int row, int column)
+{
+    /* Always do a layout, even if we don't make any other changes; this will
+     * ensure that drag and drop items snap to the right places */
+    scheduleLayout();
+
+    int oldPos = m_items.indexOf(item);
+    if (oldPos == (row * m_columns) + column)
+        return;
+
+    m_items[oldPos] = 0;
+    set(row, column, item);
+}
+
 void LiveViewLayout::updateDrag(QGraphicsSceneDragDropEvent *event)
 {
     if (!m_dragDrop.dragItem)

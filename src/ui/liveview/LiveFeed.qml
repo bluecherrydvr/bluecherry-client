@@ -47,6 +47,8 @@ LiveFeedBase {
             drag.minimumY: 0
             drag.maximumX: drag.target ? (viewArea.x + viewArea.width - drag.target.width) : 0
             drag.maximumY: drag.target ? (viewArea.y + viewArea.height - drag.target.height) : 0
+
+            onReleased: feedItem.parent.moveItem(feedItem, Qt.point(feedItem.x, feedItem.y))
         }
     }
 

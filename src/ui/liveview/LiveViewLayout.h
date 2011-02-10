@@ -25,6 +25,8 @@ public:
     void set(int row, int col, QDeclarativeItem *item);
 
     void gridPos(const QPointF &pos, int *row, int *column);
+    void moveItem(QDeclarativeItem *item, int row, int column);
+    Q_INVOKABLE void moveItem(QDeclarativeItem *item, const QPointF &pos);
 
     QDeclarativeComponent *item() const { return m_itemComponent; }
     void setItem(QDeclarativeComponent *c);
