@@ -33,6 +33,11 @@ public:
 
     static LiveViewLayoutProps *qmlAttachedProperties(QObject *object);
 
+    /* Called at the start of a drag movement operation for the item */
+    Q_INVOKABLE void startDrag(QDeclarativeItem *item);
+    Q_INVOKABLE void endDrag();
+    Q_INVOKABLE void updateDrag();
+
 public slots:
     void setRows(int r) { setGridSize(r, m_columns); }
     void insertRow(int row);
@@ -67,8 +72,6 @@ private:
     void doLayout();
 
     QDeclarativeItem *createNewItem();
-
-    void updateDrag(QGraphicsSceneDragDropEvent *event);
 };
 
 QML_DECLARE_TYPEINFO(LiveViewLayout, QML_HAS_ATTACHED_PROPERTIES)

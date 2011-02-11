@@ -11,6 +11,7 @@ LiveViewLayout::LiveViewLayout(QDeclarativeItem *parent)
     : QDeclarativeItem(parent), m_rows(0), m_columns(0), m_itemComponent(0)
 {
     m_dragDrop.dragItem = 0;
+    m_dragDrop.dropRow = -1, m_dragDrop.dropColumn = -1;
     setAcceptDrops(true);
 }
 
@@ -301,32 +302,56 @@ void LiveViewLayout::moveItem(QDeclarativeItem *item, int row, int column)
     set(row, column, item);
 }
 
-void LiveViewLayout::updateDrag(QGraphicsSceneDragDropEvent *event)
+void LiveViewLayout::startDrag(QDeclarativeItem *item)
+{
+    Q_ASSERT(item);
+    Q_ASSERT(!m_dragDrop.dragItem);
+
+    m_dragDrop.dragItem = item;
+    LiveViewLayoutProps::get(item)->setIsDragItem(true);
+
+    updateDrag();
+}
+
+void LiveViewLayout::endDrag()
 {
     if (!m_dragDrop.dragItem)
         return;
 
-    m_dragDrop.dragItem->setX(event->pos().x());
-    m_dragDrop.dragItem->setY(event->pos().y());
+    QDeclarativeItem *item = m_dragDrop.dragItem;
+    m_dragDrop.dragItem = 0;
+    m_dragDrop.dropRow = m_dragDrop.dropColumn = -1;
 
+    LiveViewLayoutProps::get(item)->setIsDragItem(false);
+}
+
+void LiveViewLayout::updateDrag()
+{
+    Q_ASSERT(m_dragDrop.dragItem);
+    if (!m_dragDrop.dragItem)
+        return;
+
+    QPointF pos = m_dragDrop.dragItem->pos();
     int row, column;
-    gridPos(event->pos(), &row, &column);
+    gridPos(pos, &row, &column);
 
     if (row != m_dragDrop.dropRow || column != m_dragDrop.dropColumn)
     {
-        QDeclarativeItem *dropTarget = at(m_dragDrop.dropRow, m_dragDrop.dropColumn);
-        if (dropTarget)
-            LiveViewLayoutProps::get(dropTarget)->setIsDropTarget(false);
+        if (m_dragDrop.dropRow >= 0 && m_dragDrop.dropRow < rows() &&
+            m_dragDrop.dropColumn >= 0 && m_dragDrop.dropColumn < columns())
+        {
+            QDeclarativeItem *dropTarget = at(m_dragDrop.dropRow, m_dragDrop.dropColumn);
+            if (dropTarget)
+                LiveViewLayoutProps::get(dropTarget)->setIsDropTarget(false);
+        }
 
         m_dragDrop.dropRow    = row;
         m_dragDrop.dropColumn = column;
 
-        dropTarget = at(row, column);
+        QDeclarativeItem *dropTarget = at(row, column);
         if (dropTarget)
             LiveViewLayoutProps::get(dropTarget)->setIsDropTarget(true);
     }
-
-    event->acceptProposedAction();
 }
 
 void LiveViewLayout::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
@@ -340,13 +365,14 @@ void LiveViewLayout::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
 
     Q_ASSERT(!m_dragDrop.dragItem);
 
-    m_dragDrop.dragItem = createNewItem();
-    LiveViewLayoutProps::get(m_dragDrop.dragItem)->setIsDragItem(true);
-    bool dragItemCameraProperty = m_dragDrop.dragItem->setProperty("camera", QVariant::fromValue(cameras[0]));
+    QDeclarativeItem *item = createNewItem();
+    item->setX(event->pos().x());
+    item->setY(event->pos().y());
+    startDrag(item);
+
+    bool dragItemCameraProperty = item->setProperty("camera", QVariant::fromValue(cameras[0]));
     Q_ASSERT(dragItemCameraProperty);
     Q_UNUSED(dragItemCameraProperty);
-
-    updateDrag(event);
 
     event->acceptProposedAction();
 }
@@ -356,16 +382,21 @@ void LiveViewLayout::dragMoveEvent(QGraphicsSceneDragDropEvent *event)
     if (!m_dragDrop.dragItem)
         return;
 
-    updateDrag(event);
+    m_dragDrop.dragItem->setX(event->pos().x());
+    m_dragDrop.dragItem->setY(event->pos().y());
+    updateDrag();
     event->acceptProposedAction();
 }
 
 void LiveViewLayout::dragLeaveEvent(QGraphicsSceneDragDropEvent *event)
 {
-    updateDrag(event);
+    Q_UNUSED(event);
+
     if (m_dragDrop.dragItem)
+    {
         m_dragDrop.dragItem->deleteLater();
-    m_dragDrop.dragItem = 0;
+        endDrag();
+    }
 }
 
 void LiveViewLayout::dropEvent(QGraphicsSceneDragDropEvent *event)
@@ -373,14 +404,11 @@ void LiveViewLayout::dropEvent(QGraphicsSceneDragDropEvent *event)
     if (!m_dragDrop.dragItem)
         return;
 
-    updateDrag(event);
-
     int row, column;
     gridPos(event->pos(), &row, &column);
 
     set(row, column, m_dragDrop.dragItem);
-    LiveViewLayoutProps::get(m_dragDrop.dragItem)->setIsDragItem(false);
+    endDrag();
 
-    m_dragDrop.dragItem = 0;
     event->acceptProposedAction();
 }

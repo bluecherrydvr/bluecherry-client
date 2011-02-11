@@ -14,19 +14,12 @@ LiveFeedBase {
         anchors.right: parent.right
         height: Math.max(20, headerText.paintedHeight)
 
-        /* This gradient, and focusedGradient, should be implemented in some other way to improve performance */
+        /* This gradient should be implemented in some other way to improve performance */
         gradient: Gradient {
-            GradientStop { position: 0; color: "#424242"; }
-            GradientStop { position: 0.4; color: "#292929"; }
-            GradientStop { position: 0.49; color: "#1c1c1c"; }
-            GradientStop { position: 1; color: "#0f0f0f"; }
-        }
-
-        property variant focusedGradient: Gradient {
-            GradientStop { position: 0; color: "#626262"; }
-            GradientStop { position: 0.4; color: "#494949"; }
-            GradientStop { position: 0.49; color: "#3c3c3c"; }
-            GradientStop { position: 1; color: "#2f2f2f"; }
+            GradientStop { position: 0; color: feedItem.activeFocus ? "#626262" : "#424242"; }
+            GradientStop { position: 0.4; color: feedItem.activeFocus ? "#494949" : "#292929"; }
+            GradientStop { position: 0.49; color: feedItem.activeFocus ? "#3c3c3c" : "#1c1c1c"; }
+            GradientStop { position: 1; color: feedItem.activeFocus ? "#2f2f2f" : "#0f0f0f"; }
         }
 
         Text {
@@ -48,7 +41,19 @@ LiveFeedBase {
             drag.maximumX: drag.target ? (viewArea.x + viewArea.width - drag.target.width) : 0
             drag.maximumY: drag.target ? (viewArea.y + viewArea.height - drag.target.height) : 0
 
-            onReleased: feedItem.parent.moveItem(feedItem, Qt.point(feedItem.x, feedItem.y))
+            onPositionChanged: {
+                if (drag.active) {
+                    if (!feedItem.LiveViewLayout.isDragItem)
+                        feedItem.parent.startDrag(feedItem);
+                    else
+                        feedItem.parent.updateDrag();
+                }
+            }
+
+            onReleased: {
+                feedItem.parent.moveItem(feedItem, Qt.point(feedItem.x, feedItem.y));
+                feedItem.parent.endDrag();
+            }
         }
     }
 
@@ -59,27 +64,5 @@ LiveFeedBase {
         anchors.bottom: parent.bottom
 
         objectName: "mjpegFeed"
-    }
-
-    states: [
-        State {
-            name: "focused"
-            when: feedItem.activeFocus
-
-            PropertyChanges {
-                target: header
-                gradient: header.focusedGradient
-            }
-        }
-    ]
-
-    Rectangle {
-        anchors.fill: parent
-        anchors.margins: 3
-        color: "transparent"
-        border.color: "white"
-        border.width: 3
-        radius: 2
-        visible: feedItem.LiveViewLayout.isDropTarget
     }
 }
