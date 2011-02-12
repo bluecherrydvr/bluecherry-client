@@ -59,6 +59,12 @@ void LiveFeedItem::openNewWindow()
 {
 }
 
+void LiveFeedItem::close()
+{
+    bool closeFeedItem = parentItem()->metaObject()->invokeMethod(parentItem(), "removeItem", Q_ARG(QDeclarativeItem*, this));
+    Q_ASSERT(closeFeedItem);
+}
+
 void LiveFeedItem::saveSnapshot(const QString &ifile)
 {
     if (!m_camera)
@@ -114,7 +120,7 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     //menu.addAction(!isFullScreen() ? tr("Open as fullscreen") : tr("Exit fullscreen"), this, SLOT(toggleFullScreen()));
     menu.addSeparator();
 
-    QAction *actClose = menu.addAction(tr("Close camera"), this, SLOT(clear()));
+    QAction *actClose = menu.addAction(tr("Close camera"), this, SLOT(close()));
     actClose->setEnabled(m_camera);
 
     menu.exec(event->screenPos());

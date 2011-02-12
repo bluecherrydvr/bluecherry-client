@@ -25,6 +25,8 @@ public slots:
     void setCamera(const DVRCamera &camera);
     void clear() { setCamera(DVRCamera()); }
 
+    void close();
+
     void setPaused(bool paused = true);
     void togglePaused() { setPaused(!isPaused()); }
 

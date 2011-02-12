@@ -47,6 +47,8 @@ public slots:
     void insertColumn(int column);
     void removeColumn(int column);
 
+    void removeItem(QDeclarativeItem *item);
+
 protected:
     virtual void geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry);
     virtual void timerEvent(QTimerEvent *event);

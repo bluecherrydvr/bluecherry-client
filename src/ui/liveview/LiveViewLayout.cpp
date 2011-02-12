@@ -281,6 +281,16 @@ void LiveViewLayout::set(int row, int col, QDeclarativeItem *item)
     scheduleLayout();
 }
 
+void LiveViewLayout::removeItem(QDeclarativeItem *item)
+{
+    int index = m_items.indexOf(item);
+    if (index < 0 || !item)
+        return;
+
+    m_items[index] = 0;
+    item->deleteLater();
+}
+
 void LiveViewLayout::moveItem(QDeclarativeItem *item, const QPointF &pos)
 {
     int row, column;
