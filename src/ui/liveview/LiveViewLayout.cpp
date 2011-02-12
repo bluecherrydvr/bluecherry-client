@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QGraphicsSceneDragDropEvent>
 #include <QMimeData>
+#include <math.h>
 
 LiveViewLayout::LiveViewLayout(QDeclarativeItem *parent)
     : QDeclarativeItem(parent), m_rows(0), m_columns(0), m_itemComponent(0)
