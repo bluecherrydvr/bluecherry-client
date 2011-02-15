@@ -128,7 +128,13 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     m_videoContainer->setInnerWidget(m_videoWidget);
     m_video->setSink(m_videoWidget->gstElement());
 
-    m_video->start(url);
+    if (!m_video->start(url))
+    {
+        /* TODO: Proper error handling! */
+        qWarning() << "EventVideoPlayer: start error:" << m_video->errorMessage();
+        clearVideo();
+        return;
+    }
 
     connect(m_video->videoBuffer(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()), Qt::QueuedConnection);
     connect(m_video->videoBuffer(), SIGNAL(bufferingStarted()), SLOT(bufferingStarted()));
