@@ -1,5 +1,5 @@
 #include "MainWindow.h"
-#include "liveview/LiveViewArea.h"
+#include "liveview/LiveViewWindow.h"
 #include "CameraAreaWidget.h"
 #include "CameraAreaControls.h"
 #include "DVRServersView.h"
@@ -70,30 +70,14 @@ MainWindow::MainWindow(QWidget *parent)
     middleLayout->setSpacing(0);
     middleLayout->setMargin(0);
 
-    createCameraArea();
-
     /* Controls area */
     QBoxLayout *controlLayout = new QHBoxLayout;
     controlLayout->setMargin(0);
     controlLayout->setSpacing(0);
     middleLayout->addLayout(controlLayout);
-    //middleLayout->addWidget(m_cameraArea, 1);
 
-    LiveViewArea *cameraArea = new LiveViewArea;
-    middleLayout->addWidget(cameraArea, 1);
-
-    QWidget *controls = createCameraControls();
-    controlLayout->addWidget(controls, 1);
-
-#ifdef Q_OS_MAC
-    if (qobject_cast<QMacStyle*>(style()))
-    {
-        m_cameraArea->setFrameStyle(QFrame::NoFrame);
-        cameraContainer->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-    }
-#else
-    controls->setStyleSheet(QLatin1String("QToolBar { border: none; }"));
-#endif
+    m_liveView = new LiveViewWindow;
+    middleLayout->addWidget(m_liveView, 1);
 
     QPushButton *eventsBtn = new QPushButton(tr("Search Events"));
     connect(eventsBtn, SIGNAL(clicked()), SLOT(showEventsWindow()));
@@ -114,8 +98,8 @@ MainWindow::MainWindow(QWidget *parent)
         m_centerSplit->setSizes(QList<int>() << 1000 << 100);
     }
 
-    new QShortcut(QKeySequence(Qt::Key_F11), m_cameraArea, SLOT(toggleFullScreen()));
-    new QShortcut(QKeySequence(Qt::Key_Escape), m_cameraArea, SLOT(closeFullScreen()));
+    new QShortcut(QKeySequence(Qt::Key_F11), m_liveView, SLOT(toggleFullScreen()));
+    new QShortcut(QKeySequence(Qt::Key_Escape), m_liveView, SLOT(closeFullScreen()));
 
     connect(bcApp, SIGNAL(sslConfirmRequired(DVRServer*,QList<QSslError>,QSslConfiguration)),
             SLOT(sslConfirmRequired(DVRServer*,QList<QSslError>,QSslConfiguration)));
@@ -267,15 +251,9 @@ QWidget *MainWindow::createServerBox()
     return box;
 }
 
-QWidget *MainWindow::createCameraArea()
-{
-    m_cameraArea = new CameraAreaWidget;
-    return m_cameraArea;
-}
-
 QWidget *MainWindow::createCameraControls()
 {
-    CameraAreaControls *controls = new CameraAreaControls(m_cameraArea);
+    CameraAreaControls *controls = new CameraAreaControls(0);
     connect(this, SIGNAL(closing()), controls, SLOT(saveLayout()));
     return controls;
 }

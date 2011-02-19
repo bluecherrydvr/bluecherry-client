@@ -20,31 +20,39 @@ public:
     int rows() const { return m_rows; }
     int columns() const { return m_columns; }
     void setGridSize(int rows, int columns);
+    void gridPos(const QPointF &pos, int *row, int *column);
 
     QDeclarativeItem *at(int row, int col) const { return m_items[row * m_columns + col]; }
     void set(int row, int col, QDeclarativeItem *item);
 
-    void gridPos(const QPointF &pos, int *row, int *column);
     void moveItem(QDeclarativeItem *item, int row, int column);
     Q_INVOKABLE void moveItem(QDeclarativeItem *item, const QPointF &pos);
 
+    /* Add a new item, automatically placing it in the best available position */
+    QDeclarativeItem *addItemAuto();
+
+    /* The item created to fill spaces in the layout */
     QDeclarativeComponent *item() const { return m_itemComponent; }
     void setItem(QDeclarativeComponent *c);
-
-    static LiveViewLayoutProps *qmlAttachedProperties(QObject *object);
 
     /* Called at the start of a drag movement operation for the item */
     Q_INVOKABLE void startDrag(QDeclarativeItem *item);
     Q_INVOKABLE void endDrag();
     Q_INVOKABLE void updateDrag();
 
+    /* Use LiveViewLayoutProps::get() to get the properties attached to
+     * an object; this is for use by QML. */
+    static LiveViewLayoutProps *qmlAttachedProperties(QObject *object);
+
 public slots:
     void setRows(int r) { setGridSize(r, m_columns); }
     void insertRow(int row);
+    void appendRow() { insertRow(rows()); }
     void removeRow(int row);
 
     void setColumns(int c) { setGridSize(m_rows, c); }
     void insertColumn(int column);
+    void appendColumn() { insertColumn(columns()); }
     void removeColumn(int column);
 
     void removeItem(QDeclarativeItem *item);

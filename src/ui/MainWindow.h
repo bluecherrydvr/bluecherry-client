@@ -5,7 +5,7 @@
 #include <QSystemTrayIcon>
 
 class DVRServersView;
-class CameraAreaWidget;
+class LiveViewWindow;
 class EventsView;
 class QSplitter;
 class DVRServer;
@@ -20,7 +20,7 @@ public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    CameraAreaWidget *cameraArea() const { return m_cameraArea; }
+    LiveViewWindow *liveView() const { return m_liveView; }
 
     void updateTrayIcon();
 
@@ -58,8 +58,8 @@ protected:
 
 private:
     DVRServersView *m_sourcesList;
-    CameraAreaWidget *m_cameraArea;
     EventsView *m_eventsView;
+    LiveViewWindow *m_liveView;
     QSplitter *m_centerSplit;
     QAction *menuServerName;
     QSystemTrayIcon *m_trayIcon;
@@ -69,7 +69,6 @@ private:
     QWidget *createSourcesList();
     QWidget *createServerBox();
 
-    QWidget *createCameraArea();
     QWidget *createCameraControls();
     QWidget *createRecentEvents();
 };

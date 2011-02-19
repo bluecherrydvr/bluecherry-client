@@ -4,6 +4,7 @@
 #include <QDeclarativeView>
 
 class LiveViewLayout;
+class DVRCamera;
 
 class LiveViewArea : public QDeclarativeView
 {
@@ -11,6 +12,9 @@ class LiveViewArea : public QDeclarativeView
 
 public:
     explicit LiveViewArea(QWidget *parent = 0);
+
+public slots:
+    void addCamera(const DVRCamera &camera);
 
 private:
     LiveViewLayout *m_layout;

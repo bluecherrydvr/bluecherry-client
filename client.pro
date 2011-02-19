@@ -142,7 +142,8 @@ SOURCES += src/main.cpp \
     src/ui/liveview/LiveViewArea.cpp \
     src/ui/liveview/MJpegFeedItem.cpp \
     src/ui/liveview/LiveViewLayout.cpp \
-    src/ui/liveview/LiveFeedItem.cpp
+    src/ui/liveview/LiveFeedItem.cpp \
+    src/ui/liveview/LiveViewWindow.cpp
 
 HEADERS  += src/ui/MainWindow.h \
     src/ui/CameraAreaWidget.h \
@@ -189,7 +190,8 @@ HEADERS  += src/ui/MainWindow.h \
     src/ui/liveview/LiveViewArea.h \
     src/ui/liveview/MJpegFeedItem.h \
     src/ui/liveview/LiveViewLayout.h \
-    src/ui/liveview/LiveFeedItem.h
+    src/ui/liveview/LiveFeedItem.h \
+    src/ui/liveview/LiveViewWindow.h
 
 RESOURCES += \
     res/resources.qrc \

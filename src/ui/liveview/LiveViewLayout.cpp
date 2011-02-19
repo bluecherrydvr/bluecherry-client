@@ -56,11 +56,9 @@ void LiveViewLayout::scheduleLayout()
 
 void LiveViewLayout::timerEvent(QTimerEvent *event)
 {
+    /* doLayout stops the schedule timer */
     if (event->timerId() == m_layoutTimer.timerId())
-    {
-        m_layoutTimer.stop();
         doLayout();
-    }
 }
 
 void LiveViewLayout::doLayout()
@@ -101,6 +99,8 @@ void LiveViewLayout::doLayout()
         else
             x += w;
     }
+
+    m_layoutTimer.stop();
 }
 
 void LiveViewLayout::gridPos(const QPointF &pos, int *row, int *column)
@@ -311,6 +311,29 @@ void LiveViewLayout::moveItem(QDeclarativeItem *item, int row, int column)
 
     m_items[oldPos] = 0;
     set(row, column, item);
+}
+
+QDeclarativeItem *LiveViewLayout::addItemAuto()
+{
+    /* Put the item in the first empty space, top-left to bottom-right */
+    int index = m_items.indexOf(0);
+
+    if (index < 0)
+    {
+        /* Add a row or a column to make space, whichever has fewer */
+        if (columns() < rows())
+            setGridSize(qMax(1, rows()), qMax(1, columns())+1);
+        else
+            setGridSize(qMax(1, rows()+1), qMax(1, columns()));
+
+        index = m_items.indexOf(0);
+        Q_ASSERT(index >= 0);
+    }
+
+    m_items[index] = createNewItem();
+    doLayout();
+
+    return m_items[index];
 }
 
 void LiveViewLayout::startDrag(QDeclarativeItem *item)

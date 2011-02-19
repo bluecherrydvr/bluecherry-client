@@ -7,7 +7,8 @@
 #include "LiveFeedWidget.h"
 #include "core/BluecherryApp.h"
 #include "MainWindow.h"
-#include "CameraAreaWidget.h"
+#include "liveview/LiveViewWindow.h"
+#include "liveview/LiveViewArea.h"
 #include <QHeaderView>
 #include <QContextMenuEvent>
 #include <QMenu>
@@ -146,7 +147,7 @@ void DVRServersView::contextMenuEvent(QContextMenuEvent *event)
     }
     else if (action == aAddFeed)
     {
-        bcApp->mainWindow->cameraArea()->addCamera(camera);
+        bcApp->mainWindow->liveView()->view()->addCamera(camera);
     }
     else if (action == aOpenWin || action == aOpenFull)
     {
@@ -226,7 +227,7 @@ void DVRServersView::mouseDoubleClickEvent(QMouseEvent *event)
         }
         else if (camera)
         {
-            bcApp->mainWindow->cameraArea()->addCamera(camera);
+            bcApp->mainWindow->liveView()->view()->addCamera(camera);
         }
 
         event->accept();

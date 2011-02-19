@@ -19,3 +19,13 @@ LiveViewArea::LiveViewArea(QWidget *parent)
     m_layout = rootObject()->findChild<LiveViewLayout*>(QLatin1String("viewLayout"));
     Q_ASSERT(m_layout);
 }
+
+void LiveViewArea::addCamera(const DVRCamera &camera)
+{
+    QDeclarativeItem *item = m_layout->addItemAuto();
+    Q_ASSERT(item);
+
+    bool setCameraProperty = item->setProperty("camera", QVariant::fromValue(camera));
+    Q_ASSERT(setCameraProperty);
+    Q_UNUSED(setCameraProperty);
+}
