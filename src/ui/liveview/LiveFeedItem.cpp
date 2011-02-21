@@ -1,5 +1,8 @@
 #include "LiveFeedItem.h"
 #include "MJpegFeedItem.h"
+#include "core/BluecherryApp.h"
+#include "LiveViewWindow.h"
+#include "ui/MainWindow.h"
 #include "utils/FileUtils.h"
 #include <QMessageBox>
 #include <QDesktopServices>
@@ -47,7 +50,6 @@ void LiveFeedItem::setCamera(const DVRCamera &camera)
 
 void LiveFeedItem::setPaused(bool paused)
 {
-
 }
 
 void LiveFeedItem::cameraDataUpdated()
@@ -57,6 +59,7 @@ void LiveFeedItem::cameraDataUpdated()
 
 void LiveFeedItem::openNewWindow()
 {
+    LiveViewWindow::openWindow(bcApp->mainWindow, camera())->show();
 }
 
 void LiveFeedItem::close()

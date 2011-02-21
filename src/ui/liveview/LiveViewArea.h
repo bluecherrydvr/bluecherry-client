@@ -13,6 +13,8 @@ class LiveViewArea : public QDeclarativeView
 public:
     explicit LiveViewArea(QWidget *parent = 0);
 
+    LiveViewLayout *layout() const { return m_layout; }
+
 public slots:
     void addCamera(const DVRCamera &camera);
 

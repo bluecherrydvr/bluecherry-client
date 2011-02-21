@@ -1,5 +1,6 @@
 #include "LiveViewWindow.h"
 #include "LiveViewArea.h"
+#include "LiveViewLayout.h"
 #include "ui/SavedLayoutsModel.h"
 #include <QBoxLayout>
 #include <QToolBar>
@@ -25,6 +26,17 @@ static QToolButton *createGridButton(const char *icon, const QString &text, QWid
         QObject::connect(btn, SIGNAL(clicked()), target, slot);
 
     return btn;
+}
+
+LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, const DVRCamera &camera)
+{
+    LiveViewWindow *window = new LiveViewWindow(parent);
+    window->setWindowFlags(Qt::Window);
+
+    if (camera)
+        window->showSingleCamera(camera);
+
+    return window;
 }
 
 LiveViewWindow::LiveViewWindow(QWidget *parent)
@@ -111,6 +123,13 @@ LiveViewWindow::LiveViewWindow(QWidget *parent)
 
     layout->addWidget(toolBar);
     layout->addWidget(m_liveView);
+}
+
+void LiveViewWindow::showSingleCamera(const DVRCamera &camera)
+{
+    m_liveView->layout()->setGridSize(1, 1);
+    QDeclarativeItem *item = m_liveView->layout()->addItem(0, 0);
+    item->setProperty("camera", QVariant::fromValue(camera));
 }
 
 void LiveViewWindow::savedLayoutChanged(int index)

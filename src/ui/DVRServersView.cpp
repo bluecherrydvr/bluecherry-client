@@ -151,13 +151,10 @@ void DVRServersView::contextMenuEvent(QContextMenuEvent *event)
     }
     else if (action == aOpenWin || action == aOpenFull)
     {
-        LiveFeedWidget *w = new LiveFeedWidget;
-        w->setWindow();
-        w->setAttribute(Qt::WA_DeleteOnClose);
-        w->setCamera(camera);
-        if (action == aOpenFull)
-            w->showFullScreen();
-        else
+        LiveViewWindow *w = LiveViewWindow::openWindow(bcApp->mainWindow, camera);
+//        if (action == aOpenFull)
+  //          w->showFullScreen();
+    //    else
             w->show();
     }
     else if (action == aSelectOnly)

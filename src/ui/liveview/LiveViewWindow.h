@@ -2,6 +2,7 @@
 #define LIVEVIEWWINDOW_H
 
 #include <QWidget>
+#include "core/DVRCamera.h"
 
 class LiveViewArea;
 class QComboBox;
@@ -13,9 +14,12 @@ class LiveViewWindow : public QWidget
 public:
     explicit LiveViewWindow(QWidget *parent = 0);
 
+    static LiveViewWindow *openWindow(QWidget *parent, const DVRCamera &camera = DVRCamera());
+
     LiveViewArea *view() const { return m_liveView; }
 
 public slots:
+    void showSingleCamera(const DVRCamera &camera);
     void saveLayout();
 
 private slots:

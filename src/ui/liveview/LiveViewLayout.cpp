@@ -336,6 +336,19 @@ QDeclarativeItem *LiveViewLayout::addItemAuto()
     return m_items[index];
 }
 
+QDeclarativeItem *LiveViewLayout::addItem(int row, int column)
+{
+    if (row < 0 || column < 0)
+        return 0;
+
+    setGridSize(qMax(row, rows()), qMax(column, columns()));
+
+    QDeclarativeItem *re = m_items[(row * columns()) + column] = createNewItem();
+    doLayout();
+
+    return re;
+}
+
 void LiveViewLayout::startDrag(QDeclarativeItem *item)
 {
     Q_ASSERT(item);

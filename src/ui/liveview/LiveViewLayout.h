@@ -30,6 +30,7 @@ public:
 
     /* Add a new item, automatically placing it in the best available position */
     QDeclarativeItem *addItemAuto();
+    QDeclarativeItem *addItem(int row, int column);
 
     /* The item created to fill spaces in the layout */
     QDeclarativeComponent *item() const { return m_itemComponent; }
