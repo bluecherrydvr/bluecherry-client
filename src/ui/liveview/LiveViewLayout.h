@@ -50,11 +50,15 @@ public slots:
     void insertRow(int row);
     void appendRow() { insertRow(rows()); }
     void removeRow(int row);
+    void removeRow() { setGridSize(m_rows-1, m_columns); }
 
     void setColumns(int c) { setGridSize(m_rows, c); }
     void insertColumn(int column);
     void appendColumn() { insertColumn(columns()); }
     void removeColumn(int column);
+    void removeColumn() { setGridSize(m_rows, m_columns-1); }
+
+    void setGridSize(int size) { setGridSize(size, size); }
 
     void removeItem(QDeclarativeItem *item);
 

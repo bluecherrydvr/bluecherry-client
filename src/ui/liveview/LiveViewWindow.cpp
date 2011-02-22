@@ -59,6 +59,8 @@ LiveViewWindow::LiveViewWindow(QWidget *parent)
     toolBar->setStyleSheet(QLatin1String("QToolBar { border: none; }"));
 #endif
 
+    LiveViewLayout *viewLayout = m_liveView->layout();
+
     /* Saved layouts box */
     m_savedLayouts->setModel(new SavedLayoutsModel(m_savedLayouts));
     m_savedLayouts->setSizeAdjustPolicy(QComboBox::AdjustToContents);
@@ -75,25 +77,25 @@ LiveViewWindow::LiveViewWindow(QWidget *parent)
     connect(m_savedLayouts, SIGNAL(customContextMenuRequested(QPoint)), SLOT(showLayoutMenu(QPoint)));
 
     toolBar->addAction(QIcon(QLatin1String(":/icons/layout-split-vertical.png")),
-                       tr("Add Row"), m_liveView, SLOT(addRow()));
+                       tr("Add Row"), viewLayout, SLOT(appendRow()));
     toolBar->addAction(QIcon(QLatin1String(":/icons/layout-join-vertical.png")),
-                       tr("Remove Row"), m_liveView, SLOT(removeRow()));
+                       tr("Remove Row"), viewLayout, SLOT(removeRow()));
 
     spacer = new QWidget;
     spacer->setFixedWidth(16);
     toolBar->addWidget(spacer);
 
     toolBar->addAction(QIcon(QLatin1String(":/icons/layout-split.png")),
-                       tr("Add Column"), m_liveView, SLOT(addColumn()));
+                       tr("Add Column"), viewLayout, SLOT(appendColumn()));
     toolBar->addAction(QIcon(QLatin1String(":/icons/layout-join.png")),
-                       tr("Remove Column"), m_liveView, SLOT(removeColumn()));
+                       tr("Remove Column"), viewLayout, SLOT(removeColumn()));
 
     spacer = new QWidget;
     spacer->setFixedWidth(16);
     toolBar->addWidget(spacer);
 
     QSignalMapper *mapper = new QSignalMapper(this);
-    connect(mapper, SIGNAL(mapped(int)), m_liveView, SLOT(setGridSize(int)));
+    connect(mapper, SIGNAL(mapped(int)), viewLayout, SLOT(setGridSize(int)));
 
     QAction *a = toolBar->addAction(QIcon(QLatin1String(":/icons/layout.png")),
                                     tr("Single"), mapper, SLOT(map()));
