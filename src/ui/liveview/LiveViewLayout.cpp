@@ -413,6 +413,10 @@ void LiveViewLayout::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
     Q_ASSERT(!m_dragDrop.dragItem);
 
     QDeclarativeItem *item = createNewItem();
+    Q_ASSERT(item);
+    if (!item)
+        return;
+
     item->setX(event->pos().x());
     item->setY(event->pos().y());
     startDrag(item);
