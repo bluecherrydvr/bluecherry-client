@@ -40,12 +40,25 @@ void MJpegFeedItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWid
     if (!m_stream)
         return;
 
-    if (!m_stream->currentFrame().isNull())
+    QPixmap frame = m_stream->currentFrame();
+
+    if (!frame.isNull())
     {
         p->save();
         p->setRenderHint(QPainter::SmoothPixmapTransform);
         p->setCompositionMode(QPainter::CompositionMode_Source);
-        p->drawPixmap(opt->rect, m_stream->currentFrame());
+
+        QRect r = opt->rect;
+        QSize renderSz = frame.size();
+
+        /* Force aspect ratio */
+        renderSz.scale(r.size(), Qt::KeepAspectRatio);
+
+        /* Center the image within the area */
+        r.adjust((r.width() - renderSz.width()) / 2, (r.height() - renderSz.height()) / 2, 0, 0);
+        r.setSize(renderSz);
+
+        p->drawPixmap(r, frame);
         p->restore();
     }
     else
