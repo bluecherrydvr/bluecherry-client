@@ -30,6 +30,8 @@ QDeclarativeItem *LiveViewLayout::createNewItem()
         return 0;
 
     element->setParentItem(this);
+    connect(LiveViewLayoutProps::get(element), SIGNAL(layoutNeeded()), SLOT(scheduleLayout()));
+
     return element;
 }
 
@@ -68,8 +70,7 @@ void LiveViewLayout::doLayout()
     if (m_items.isEmpty())
         return;
 
-    qreal w = floor(width() / m_columns),
-          h = floor(height() / m_rows);
+    QSizeF cellSz(floor(width() / m_columns), floor(height() / m_rows));
 
     qreal left = qRound(width()) % m_columns,
           x = left,
@@ -81,8 +82,19 @@ void LiveViewLayout::doLayout()
 
         if (i)
         {
-            i->setWidth(w);
-            i->setHeight(h);
+            LiveViewLayoutProps *ip = LiveViewLayoutProps::get(i);
+
+            QSizeF size = ip->sizeHint(), padding = ip->sizePadding();
+            if (size.isValid())
+            {
+                size.scale(cellSz - padding, ip->fixedAspectRatio() ? Qt::KeepAspectRatio : Qt::IgnoreAspectRatio);
+                size += padding;
+            }
+            else
+                size = cellSz;
+
+            i->setWidth(size.width());
+            i->setHeight(size.height());
             i->setX(x);
             i->setY(y);
         }
@@ -93,11 +105,11 @@ void LiveViewLayout::doLayout()
                 break;
             c = 0;
 
-            y += h;
+            y += cellSz.height();
             x = left;
         }
         else
-            x += w;
+            x += cellSz.width();
     }
 
     m_layoutTimer.stop();
@@ -462,4 +474,32 @@ void LiveViewLayout::dropEvent(QGraphicsSceneDragDropEvent *event)
     endDrag();
 
     event->acceptProposedAction();
+}
+
+void LiveViewLayoutProps::setFixedAspectRatio(bool v)
+{
+    if (m_fixedAspectRatio == v)
+        return;
+
+    m_fixedAspectRatio = v;
+    emit layoutNeeded();
+}
+
+void LiveViewLayoutProps::setSizeHint(const QSizeF &v)
+{
+    if (m_sizeHint == v)
+        return;
+
+    m_sizeHint = v;
+    emit sizeHintChanged(v);
+    emit layoutNeeded();
+}
+
+void LiveViewLayoutProps::setSizePadding(const QSizeF &v)
+{
+    if (m_sizePadding == v)
+        return;
+
+    m_sizePadding = v;
+    emit layoutNeeded();
 }

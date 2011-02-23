@@ -7,19 +7,23 @@ LiveFeedBase {
     height: 150
     z: activeFocus ? 1 : 0
 
+    LiveViewLayout.sizeHint: feed.frameSize
+    LiveViewLayout.sizePadding: Qt.size(0, header.height)
+    LiveViewLayout.fixedAspectRatio: true
+
     Rectangle {
         id: header
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.left: feed.left
+        anchors.right: feed.right
         height: Math.max(20, headerText.paintedHeight)
 
         /* This gradient should be implemented in some other way to improve performance */
         gradient: Gradient {
-            GradientStop { position: 0; color: feedItem.activeFocus ? "#626262" : "#424242"; }
-            GradientStop { position: 0.4; color: feedItem.activeFocus ? "#494949" : "#292929"; }
-            GradientStop { position: 0.49; color: feedItem.activeFocus ? "#3c3c3c" : "#1c1c1c"; }
-            GradientStop { position: 1; color: feedItem.activeFocus ? "#2f2f2f" : "#0f0f0f"; }
+            GradientStop { position: 0; color: feedItem.activeFocus ? "#626262" : "#4c4c4c"; }
+            GradientStop { position: 0.4; color: feedItem.activeFocus ? "#494949" : "#333333"; }
+            GradientStop { position: 0.49; color: feedItem.activeFocus ? "#3c3c3c" : "#262626"; }
+            GradientStop { position: 1; color: feedItem.activeFocus ? "#2f2f2f" : "#191919"; }
         }
 
         Text {
@@ -58,6 +62,8 @@ LiveFeedBase {
     }
 
     MJpegFeed {
+        id: feed
+
         anchors.top: header.bottom
         anchors.left: parent.left
         anchors.right: parent.right

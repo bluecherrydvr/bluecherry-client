@@ -22,9 +22,11 @@ void MJpegFeedItem::setStream(const QSharedPointer<MJpegStream> &stream)
     if (m_stream)
     {
         connect(m_stream.data(), SIGNAL(updateFrame(QPixmap,QVector<QImage>)), SLOT(updateFrame()));
+        connect(m_stream.data(), SIGNAL(streamSizeChanged(QSize)), SLOT(updateFrameSize()));
         m_stream->start();
     }
 
+    updateFrameSize();
     updateFrame();
 }
 
@@ -48,17 +50,7 @@ void MJpegFeedItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWid
         p->setRenderHint(QPainter::SmoothPixmapTransform);
         p->setCompositionMode(QPainter::CompositionMode_Source);
 
-        QRect r = opt->rect;
-        QSize renderSz = frame.size();
-
-        /* Force aspect ratio */
-        renderSz.scale(r.size(), Qt::KeepAspectRatio);
-
-        /* Center the image within the area */
-        r.adjust((r.width() - renderSz.width()) / 2, (r.height() - renderSz.height()) / 2, 0, 0);
-        r.setSize(renderSz);
-
-        p->drawPixmap(r, frame);
+        p->drawPixmap(opt->rect, frame);
         p->restore();
     }
     else

@@ -71,6 +71,9 @@ protected:
     virtual void dragLeaveEvent(QGraphicsSceneDragDropEvent *event);
     virtual void dropEvent(QGraphicsSceneDragDropEvent *event);
 
+private slots:
+    void scheduleLayout();
+
 private:
     int m_rows, m_columns;
     QList<QDeclarativeItem*> m_items;
@@ -83,7 +86,6 @@ private:
         int dropRow, dropColumn;
     } m_dragDrop;
 
-    void scheduleLayout();
     void doLayout();
 
     QDeclarativeItem *createNewItem();
@@ -98,27 +100,41 @@ class LiveViewLayoutProps : public QObject
 
     Q_PROPERTY(bool isDragItem READ isDragItem NOTIFY isDragItemChanged)
     Q_PROPERTY(bool isDropTarget READ isDropTarget NOTIFY isDropTargetChanged)
+    Q_PROPERTY(QSizeF sizeHint READ sizeHint WRITE setSizeHint NOTIFY sizeHintChanged)
+    Q_PROPERTY(QSizeF sizePadding READ sizePadding WRITE setSizePadding)
+    Q_PROPERTY(bool fixedAspectRatio READ fixedAspectRatio WRITE setFixedAspectRatio)
 
 public:
     LiveViewLayoutProps(QObject *parent)
-        : QObject(parent), m_isDragItem(false), m_isDropTarget(false)
+        : QObject(parent), m_sizePadding(0, 0), m_isDragItem(false), m_isDropTarget(false), m_fixedAspectRatio(false)
     {
     }
 
     static LiveViewLayoutProps *get(QObject *object, bool create = true)
     {
-        return qobject_cast<LiveViewLayoutProps*>(qmlAttachedPropertiesObject<LiveViewLayout>(object, create));
+        return static_cast<LiveViewLayoutProps*>(qmlAttachedPropertiesObject<LiveViewLayout>(object, create));
     }
 
     bool isDragItem() const { return m_isDragItem; }
     bool isDropTarget() const { return m_isDropTarget; }
+    QSizeF sizeHint() const { return m_sizeHint; }
+    bool fixedAspectRatio() const { return m_fixedAspectRatio; }
+    QSizeF sizePadding() const { return m_sizePadding; }
+
+public slots:
+    void setSizeHint(const QSizeF &sizeHint);
+    void setFixedAspectRatio(bool fixedAspectRatio);
+    void setSizePadding(const QSizeF &sizePadding);
 
 signals:
     void isDragItemChanged(bool isDragItem);
     void isDropTargetChanged(bool isDropTarget);
+    void sizeHintChanged(const QSizeF &sizeHint);
+    void layoutNeeded();
 
 private:
-    bool m_isDragItem, m_isDropTarget;
+    QSizeF m_sizeHint, m_sizePadding;
+    bool m_isDragItem, m_isDropTarget, m_fixedAspectRatio;
 
     void setIsDragItem(bool v) { if (m_isDragItem != v) emit isDragItemChanged((m_isDragItem = v)); }
     void setIsDropTarget(bool v) { if (m_isDropTarget != v) emit isDropTargetChanged((m_isDropTarget = v)); }
