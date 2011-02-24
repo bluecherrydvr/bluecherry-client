@@ -13,6 +13,8 @@ class LiveViewLayout : public QDeclarativeItem
     Q_PROPERTY(int rows READ rows WRITE setRows)
     Q_PROPERTY(int columns READ columns WRITE setColumns)
     Q_PROPERTY(QDeclarativeComponent* item READ item WRITE setItem)
+    Q_PROPERTY(QDeclarativeItem* dropTarget READ dropTarget NOTIFY dropTargetChanged)
+    Q_PROPERTY(QDeclarativeItem* dragItem READ dragItem NOTIFY dragItemChanged)
 
 public:
     explicit LiveViewLayout(QDeclarativeItem *parent = 0);
@@ -35,6 +37,9 @@ public:
     /* The item created to fill spaces in the layout */
     QDeclarativeComponent *item() const { return m_itemComponent; }
     void setItem(QDeclarativeComponent *c);
+
+    QDeclarativeItem *dropTarget() const;
+    QDeclarativeItem *dragItem() const { return m_dragDrop.dragItem; }
 
     /* Called at the start of a drag movement operation for the item */
     Q_INVOKABLE void startDrag(QDeclarativeItem *item);
@@ -61,6 +66,10 @@ public slots:
     void setGridSize(int size) { setGridSize(size, size); }
 
     void removeItem(QDeclarativeItem *item);
+
+signals:
+    void dropTargetChanged(QDeclarativeItem *item);
+    void dragItemChanged(QDeclarativeItem *item);
 
 protected:
     virtual void geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry);

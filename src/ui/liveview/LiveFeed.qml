@@ -5,11 +5,11 @@ LiveFeedBase {
     id: feedItem
     width: 200
     height: 150
-    z: activeFocus ? 1 : 0
+    z: LiveViewLayout.isDragItem ? 10 : (LiveViewLayout.isDropTarget ? 1 : 0)
 
     LiveViewLayout.sizeHint: feed.frameSize
     LiveViewLayout.sizePadding: Qt.size(0, header.height)
-    LiveViewLayout.fixedAspectRatio: true
+    LiveViewLayout.fixedAspectRatio: false
 
     Rectangle {
         id: header

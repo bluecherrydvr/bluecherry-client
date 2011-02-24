@@ -361,6 +361,14 @@ QDeclarativeItem *LiveViewLayout::addItem(int row, int column)
     return re;
 }
 
+QDeclarativeItem *LiveViewLayout::dropTarget() const
+{
+    if (m_dragDrop.dropRow >= 0 && m_dragDrop.dropRow < rows() &&
+        m_dragDrop.dropColumn >= 0 && m_dragDrop.dropColumn < columns())
+        return at(m_dragDrop.dropRow, m_dragDrop.dropColumn);
+    return 0;
+}
+
 void LiveViewLayout::startDrag(QDeclarativeItem *item)
 {
     Q_ASSERT(item);
@@ -368,6 +376,8 @@ void LiveViewLayout::startDrag(QDeclarativeItem *item)
 
     m_dragDrop.dragItem = item;
     LiveViewLayoutProps::get(item)->setIsDragItem(true);
+
+    emit dragItemChanged(item);
 
     updateDrag();
 }
@@ -382,6 +392,8 @@ void LiveViewLayout::endDrag()
     m_dragDrop.dropRow = m_dragDrop.dropColumn = -1;
 
     LiveViewLayoutProps::get(item)->setIsDragItem(false);
+
+    emit dragItemChanged(0);
 }
 
 void LiveViewLayout::updateDrag()
@@ -396,20 +408,18 @@ void LiveViewLayout::updateDrag()
 
     if (row != m_dragDrop.dropRow || column != m_dragDrop.dropColumn)
     {
-        if (m_dragDrop.dropRow >= 0 && m_dragDrop.dropRow < rows() &&
-            m_dragDrop.dropColumn >= 0 && m_dragDrop.dropColumn < columns())
-        {
-            QDeclarativeItem *dropTarget = at(m_dragDrop.dropRow, m_dragDrop.dropColumn);
-            if (dropTarget)
-                LiveViewLayoutProps::get(dropTarget)->setIsDropTarget(false);
-        }
+        QDeclarativeItem *drop = dropTarget();
+        if (drop)
+            LiveViewLayoutProps::get(drop)->setIsDropTarget(false);
 
         m_dragDrop.dropRow    = row;
         m_dragDrop.dropColumn = column;
 
-        QDeclarativeItem *dropTarget = at(row, column);
-        if (dropTarget)
-            LiveViewLayoutProps::get(dropTarget)->setIsDropTarget(true);
+        drop = at(row, column);
+        if (drop)
+            LiveViewLayoutProps::get(drop)->setIsDropTarget(true);
+
+        emit dropTargetChanged(drop);
     }
 }
 

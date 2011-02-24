@@ -14,5 +14,10 @@ Rectangle {
 
         rows: 4
         columns: 4
+
+        DropTargetRectangle {
+            dropTarget: viewLayout.dropTarget
+            dragItem: viewLayout.dragItem
+        }
     }
 }

@@ -2,5 +2,6 @@
     <qresource prefix="/qml">
         <file>liveview/LiveView.qml</file>
         <file>liveview/LiveFeed.qml</file>
+        <file>liveview/DropTargetRectangle.qml</file>
     </qresource>
 </RCC>
