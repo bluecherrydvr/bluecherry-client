@@ -46,6 +46,8 @@ public:
     Q_INVOKABLE void endDrag();
     Q_INVOKABLE void updateDrag();
 
+    Q_INVOKABLE QPointF cursorItemPos() const;
+
     /* Use LiveViewLayoutProps::get() to get the properties attached to
      * an object; this is for use by QML. */
     static LiveViewLayoutProps *qmlAttachedProperties(QObject *object);

@@ -6,6 +6,10 @@
 #include <QDebug>
 #include <QGraphicsSceneDragDropEvent>
 #include <QMimeData>
+#include <QApplication>
+#include <QCursor>
+#include <QGraphicsView>
+#include <QGraphicsScene>
 #include <math.h>
 
 LiveViewLayout::LiveViewLayout(QDeclarativeItem *parent)
@@ -125,8 +129,15 @@ void LiveViewLayout::gridPos(const QPointF &pos, int *row, int *column)
     qreal left = qRound(width()) % m_columns,
           top = qRound(height()) % m_rows;
 
-    *row = floor(qMax(0.0,pos.y()-top)/h);
-    *column = floor(qMax(0.0,pos.x()-left)/w);
+    if (pos.x() < 0 || pos.x() > width() || pos.y() < 0 || pos.y() > height())
+    {
+        *row = *column = -1;
+    }
+    else
+    {
+        *row = floor(qMax(0.0,pos.y()-top)/h);
+        *column = floor(qMax(0.0,pos.x()-left)/w);
+    }
 }
 
 void LiveViewLayout::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)
@@ -308,7 +319,8 @@ void LiveViewLayout::moveItem(QDeclarativeItem *item, const QPointF &pos)
 {
     int row, column;
     gridPos(pos, &row, &column);
-    moveItem(item, row, column);
+    if (row >= 0 && column >= 0)
+        moveItem(item, row, column);
 }
 
 void LiveViewLayout::moveItem(QDeclarativeItem *item, int row, int column)
@@ -388,12 +400,17 @@ void LiveViewLayout::endDrag()
         return;
 
     QDeclarativeItem *item = m_dragDrop.dragItem;
+
+    QDeclarativeItem *drop = dropTarget();
     m_dragDrop.dragItem = 0;
     m_dragDrop.dropRow = m_dragDrop.dropColumn = -1;
 
+    if (drop)
+        LiveViewLayoutProps::get(drop)->setIsDropTarget(false);
     LiveViewLayoutProps::get(item)->setIsDragItem(false);
 
     emit dragItemChanged(0);
+    emit dropTargetChanged(0);
 }
 
 void LiveViewLayout::updateDrag()
@@ -402,7 +419,8 @@ void LiveViewLayout::updateDrag()
     if (!m_dragDrop.dragItem)
         return;
 
-    QPointF pos = m_dragDrop.dragItem->pos();
+    QPointF pos = cursorItemPos();
+
     int row, column;
     gridPos(pos, &row, &column);
 
@@ -415,12 +433,25 @@ void LiveViewLayout::updateDrag()
         m_dragDrop.dropRow    = row;
         m_dragDrop.dropColumn = column;
 
-        drop = at(row, column);
+        drop = dropTarget();
         if (drop)
             LiveViewLayoutProps::get(drop)->setIsDropTarget(true);
 
         emit dropTargetChanged(drop);
     }
+}
+
+QPointF LiveViewLayout::cursorItemPos() const
+{
+    QWidget *w = QApplication::activeWindow();
+    if (w)
+        w = w->childAt(w->mapFromGlobal(QCursor::pos()));
+
+    QGraphicsView *view = qobject_cast<QGraphicsView*>(w ? w->parentWidget() : 0);
+    if (view)
+        return mapFromScene(view->mapToScene(view->viewport()->mapFromGlobal(QCursor::pos())));
+
+    return QPointF(-1, -1);
 }
 
 void LiveViewLayout::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
@@ -480,10 +511,13 @@ void LiveViewLayout::dropEvent(QGraphicsSceneDragDropEvent *event)
     int row, column;
     gridPos(event->pos(), &row, &column);
 
-    set(row, column, m_dragDrop.dragItem);
-    endDrag();
+    if (row >= 0 && column >= 0)
+    {
+        set(row, column, m_dragDrop.dragItem);
+        event->acceptProposedAction();
+    }
 
-    event->acceptProposedAction();
+    endDrag();
 }
 
 void LiveViewLayoutProps::setFixedAspectRatio(bool v)
