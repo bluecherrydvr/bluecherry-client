@@ -27,12 +27,11 @@ public:
     QDeclarativeItem *at(int row, int col) const { return m_items[row * m_columns + col]; }
     void set(int row, int col, QDeclarativeItem *item);
 
-    void moveItem(QDeclarativeItem *item, int row, int column);
-    Q_INVOKABLE void moveItem(QDeclarativeItem *item, const QPointF &pos);
-
     /* Add a new item, automatically placing it in the best available position */
     QDeclarativeItem *addItemAuto();
     QDeclarativeItem *addItem(int row, int column);
+
+    QDeclarativeItem *takeItem(QDeclarativeItem *item);
 
     /* The item created to fill spaces in the layout */
     QDeclarativeComponent *item() const { return m_itemComponent; }
@@ -43,8 +42,9 @@ public:
 
     /* Called at the start of a drag movement operation for the item */
     Q_INVOKABLE void startDrag(QDeclarativeItem *item);
-    Q_INVOKABLE void endDrag();
     Q_INVOKABLE void updateDrag();
+    Q_INVOKABLE bool drop();
+    Q_INVOKABLE void endDrag(bool dropped);
 
     Q_INVOKABLE QPointF cursorItemPos() const;
 

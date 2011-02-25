@@ -50,10 +50,7 @@ LiveFeedBase {
                 }
             }
 
-            onReleased: {
-                feedItem.parent.moveItem(feedItem, feedItem.parent.cursorItemPos());
-                feedItem.parent.endDrag();
-            }
+            onReleased: feedItem.parent.drop()
         }
     }
 
