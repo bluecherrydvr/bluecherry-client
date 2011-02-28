@@ -76,13 +76,20 @@ void LiveViewLayout::doLayout()
 
     QSizeF cellSz(floor(width() / m_columns), floor(height() / m_rows));
 
-    qreal left = qRound(width()) % m_columns,
-          x = left,
-          y = qRound(height()) % m_rows;
+    int extraX = floor(width() - (cellSz.width() * m_columns)),
+        extraY = floor(height() - (cellSz.height() * m_rows));
+
+    qreal x = 0, y = 0;
 
     for (int r = 0, c = 0;;)
     {
         QDeclarativeItem *i = at(r, c);
+
+        QSizeF sz = cellSz;
+        if (c < extraX)
+            sz.rwidth()++;
+        if (r < extraY)
+            sz.rheight()++;
 
         if (i)
         {
@@ -91,11 +98,11 @@ void LiveViewLayout::doLayout()
             QSizeF size = ip->sizeHint(), padding = ip->sizePadding();
             if (size.isValid())
             {
-                size.scale(cellSz - padding, ip->fixedAspectRatio() ? Qt::KeepAspectRatio : Qt::IgnoreAspectRatio);
+                size.scale(sz - padding, ip->fixedAspectRatio() ? Qt::KeepAspectRatio : Qt::IgnoreAspectRatio);
                 size += padding;
             }
             else
-                size = cellSz;
+                size = sz;
 
             i->setWidth(size.width());
             i->setHeight(size.height());
@@ -109,11 +116,11 @@ void LiveViewLayout::doLayout()
                 break;
             c = 0;
 
-            y += cellSz.height();
-            x = left;
+            y += sz.height();
+            x = 0;
         }
         else
-            x += cellSz.width();
+            x += sz.width();
     }
 
     m_layoutTimer.stop();
