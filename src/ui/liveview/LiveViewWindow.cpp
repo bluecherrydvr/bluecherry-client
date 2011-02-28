@@ -13,6 +13,10 @@
 #include <QMenu>
 #include <QDebug>
 
+#ifdef Q_OS_MAC
+#include <QMacStyle>
+#endif
+
 static QToolButton *createGridButton(const char *icon, const QString &text, QWidget *target, const char *slot)
 {
     QToolButton *btn = new QToolButton;
