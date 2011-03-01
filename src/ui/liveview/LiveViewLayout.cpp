@@ -12,12 +12,32 @@
 #include <QGraphicsScene>
 #include <math.h>
 
-LiveViewLayout::LiveViewLayout(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent), m_rows(0), m_columns(0), m_itemComponent(0)
+struct LiveViewLayout::DragDropData
 {
-    m_dragDrop.dragItem = 0;
-    m_dragDrop.dropRow = -1, m_dragDrop.dropColumn = -1;
+    QDeclarativeItem *item;
+    int sourceRow, sourceColumn;
+    QDeclarativeItem *target;
+    int targetRow, targetColumn;
+    DragDropMode mode;
+
+    DragDropData()
+        : item(0), sourceRow(-1), sourceColumn(-1),
+          target(0), targetRow(-1), targetColumn(-1),
+          mode(DragReplace)
+    {
+    }
+};
+
+LiveViewLayout::LiveViewLayout(QDeclarativeItem *parent)
+    : QDeclarativeItem(parent), m_rows(0), m_columns(0), m_itemComponent(0), drag(0)
+{
     setAcceptDrops(true);
+}
+
+LiveViewLayout::~LiveViewLayout()
+{
+    if (drag)
+        delete drag;
 }
 
 QDeclarativeItem *LiveViewLayout::createNewItem()
@@ -145,6 +165,23 @@ void LiveViewLayout::gridPos(const QPointF &pos, int *row, int *column)
         *row = floor(qMax(0.0,pos.y()-top)/h);
         *column = floor(qMax(0.0,pos.x()-left)/w);
     }
+}
+
+bool LiveViewLayout::gridPos(QDeclarativeItem *item, int *row, int *column)
+{
+    Q_ASSERT(item && row && column);
+    int i = m_items.indexOf(item);
+    if (i < 0)
+    {
+        *row = *column = -1;
+        return false;
+    }
+
+    Q_ASSERT(m_columns && m_rows);
+
+    *row = i / m_columns;
+    *column = i % m_columns;
+    return true;
 }
 
 void LiveViewLayout::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)
@@ -358,33 +395,43 @@ QDeclarativeItem *LiveViewLayout::addItem(int row, int column)
     return re;
 }
 
-QDeclarativeItem *LiveViewLayout::takeItem(QDeclarativeItem *item)
+QDeclarativeItem *LiveViewLayout::takeItem(int row, int column)
 {
-    int i = m_items.indexOf(item);
-    if (i < 0)
+    if (row < 0 || column < 0 || row >= m_rows || column >= m_columns)
         return 0;
 
+    int i = (row * m_columns) + column;
+    QDeclarativeItem *item = m_items[i];
     m_items[i] = 0;
+
     return item;
 }
 
 QDeclarativeItem *LiveViewLayout::dropTarget() const
 {
-    if (m_dragDrop.dropRow >= 0 && m_dragDrop.dropRow < rows() &&
-        m_dragDrop.dropColumn >= 0 && m_dragDrop.dropColumn < columns())
-        return at(m_dragDrop.dropRow, m_dragDrop.dropColumn);
-    return 0;
+    return drag ? drag->target : 0;
 }
 
-void LiveViewLayout::startDrag(QDeclarativeItem *item)
+QDeclarativeItem *LiveViewLayout::dragItem() const
+{
+    return drag ? drag->item : 0;
+}
+
+void LiveViewLayout::startDrag(QDeclarativeItem *item, DragDropMode mode)
 {
     Q_ASSERT(item);
-    Q_ASSERT(!m_dragDrop.dragItem);
+    Q_ASSERT(!drag);
 
-    /* Remove the item from the layout while it's being dragged */
-    takeItem(item);
+    drag = new DragDropData;
+    if (gridPos(item, &drag->sourceRow, &drag->sourceColumn))
+        takeItem(drag->sourceRow, drag->sourceColumn);
 
-    m_dragDrop.dragItem = item;
+    drag->item = item;
+    drag->mode = mode;
+
+    if (drag->mode == DragSwap && (drag->sourceRow | drag->sourceColumn) < 0)
+        drag->mode = DragReplace;
+
     LiveViewLayoutProps::get(item)->setIsDragItem(true);
 
     emit dragItemChanged(item);
@@ -393,8 +440,8 @@ void LiveViewLayout::startDrag(QDeclarativeItem *item)
 
 void LiveViewLayout::updateDrag()
 {
-    Q_ASSERT(m_dragDrop.dragItem);
-    if (!m_dragDrop.dragItem)
+    Q_ASSERT(drag);
+    if (!drag)
         return;
 
     QPointF pos = cursorItemPos();
@@ -402,57 +449,63 @@ void LiveViewLayout::updateDrag()
     int row, column;
     gridPos(pos, &row, &column);
 
-    if (row != m_dragDrop.dropRow || column != m_dragDrop.dropColumn)
+    if (row != drag->targetRow || column != drag->targetColumn)
     {
-        QDeclarativeItem *drop = dropTarget();
-        if (drop)
-            LiveViewLayoutProps::get(drop)->setIsDropTarget(false);
+        QDeclarativeItem *oldTarget = drag->target;
 
-        m_dragDrop.dropRow    = row;
-        m_dragDrop.dropColumn = column;
+        drag->targetRow = row;
+        drag->targetColumn = column;
+        drag->target = (row >= 0 && column >= 0) ? at(row, column) : 0;
 
-        drop = dropTarget();
-        if (drop)
-            LiveViewLayoutProps::get(drop)->setIsDropTarget(true);
+        if (oldTarget)
+            LiveViewLayoutProps::get(oldTarget)->setIsDropTarget(false);
+        if (drag->target)
+            LiveViewLayoutProps::get(drag->target)->setIsDropTarget(true);
 
-        emit dropTargetChanged(drop);
+        emit dropTargetChanged(drag->target);
     }
 }
 
 void LiveViewLayout::endDrag(bool dropped)
 {
-    if (!m_dragDrop.dragItem)
+    if (!drag)
         return;
 
-    QDeclarativeItem *item = m_dragDrop.dragItem;
+    DragDropData *d = drag;
+    drag = 0;
 
-    QDeclarativeItem *drop = dropTarget();
-    m_dragDrop.dragItem = 0;
-    m_dragDrop.dropRow = m_dragDrop.dropColumn = -1;
-
-    if (drop)
-        LiveViewLayoutProps::get(drop)->setIsDropTarget(false);
-    LiveViewLayoutProps::get(item)->setIsDragItem(false);
+    if (d->target)
+        LiveViewLayoutProps::get(d->target)->setIsDropTarget(false);
+    LiveViewLayoutProps::get(d->item)->setIsDragItem(false);
 
     emit dragItemChanged(0);
     emit dropTargetChanged(0);
 
     if (!dropped)
-        item->deleteLater();
+        d->item->deleteLater();
+
+    delete d;
 }
 
 bool LiveViewLayout::drop()
 {
-    if (!m_dragDrop.dragItem)
+    if (!drag)
         return false;
 
-    if (m_dragDrop.dropRow < 0 || m_dragDrop.dropColumn < 0)
+    if (drag->targetRow < 0 || drag->targetColumn < 0)
     {
         endDrag(false);
         return false;
     }
 
-    set(m_dragDrop.dropRow, m_dragDrop.dropColumn, m_dragDrop.dragItem);
+    if (drag->mode == DragSwap)
+    {
+        QDeclarativeItem *target = takeItem(drag->targetRow, drag->targetColumn);
+        Q_ASSERT(target == drag->target);
+        set(drag->sourceRow, drag->sourceColumn, target);
+    }
+
+    set(drag->targetRow, drag->targetColumn, drag->item);
 
     endDrag(true);
     return true;
@@ -480,7 +533,7 @@ void LiveViewLayout::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
     if (cameras.isEmpty())
         return;
 
-    Q_ASSERT(!m_dragDrop.dragItem);
+    Q_ASSERT(!drag);
 
     QDeclarativeItem *item = createNewItem();
     Q_ASSERT(item);
@@ -500,11 +553,11 @@ void LiveViewLayout::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
 
 void LiveViewLayout::dragMoveEvent(QGraphicsSceneDragDropEvent *event)
 {
-    if (!m_dragDrop.dragItem)
+    if (!drag)
         return;
 
-    m_dragDrop.dragItem->setX(event->pos().x());
-    m_dragDrop.dragItem->setY(event->pos().y());
+    drag->item->setX(event->pos().x());
+    drag->item->setY(event->pos().y());
     updateDrag();
     event->acceptProposedAction();
 }

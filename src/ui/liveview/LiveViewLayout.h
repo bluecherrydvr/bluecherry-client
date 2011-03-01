@@ -9,6 +9,7 @@ class LiveViewLayoutProps;
 class LiveViewLayout : public QDeclarativeItem
 {
     Q_OBJECT
+    Q_ENUMS(DragDropMode)
 
     Q_PROPERTY(int rows READ rows WRITE setRows)
     Q_PROPERTY(int columns READ columns WRITE setColumns)
@@ -17,12 +18,19 @@ class LiveViewLayout : public QDeclarativeItem
     Q_PROPERTY(QDeclarativeItem* dragItem READ dragItem NOTIFY dragItemChanged)
 
 public:
+    enum DragDropMode {
+        DragReplace,
+        DragSwap
+    };
+
     explicit LiveViewLayout(QDeclarativeItem *parent = 0);
+    virtual ~LiveViewLayout();
 
     int rows() const { return m_rows; }
     int columns() const { return m_columns; }
     void setGridSize(int rows, int columns);
     void gridPos(const QPointF &pos, int *row, int *column);
+    bool gridPos(QDeclarativeItem *item, int *row, int *column);
 
     QDeclarativeItem *at(int row, int col) const { return m_items[row * m_columns + col]; }
     void set(int row, int col, QDeclarativeItem *item);
@@ -31,17 +39,17 @@ public:
     QDeclarativeItem *addItemAuto();
     QDeclarativeItem *addItem(int row, int column);
 
-    QDeclarativeItem *takeItem(QDeclarativeItem *item);
+    QDeclarativeItem *takeItem(int row, int column);
 
     /* The item created to fill spaces in the layout */
     QDeclarativeComponent *item() const { return m_itemComponent; }
     void setItem(QDeclarativeComponent *c);
 
     QDeclarativeItem *dropTarget() const;
-    QDeclarativeItem *dragItem() const { return m_dragDrop.dragItem; }
+    QDeclarativeItem *dragItem() const;
 
     /* Called at the start of a drag movement operation for the item */
-    Q_INVOKABLE void startDrag(QDeclarativeItem *item);
+    Q_INVOKABLE void startDrag(QDeclarativeItem *item, DragDropMode mode = DragSwap);
     Q_INVOKABLE void updateDrag();
     Q_INVOKABLE bool drop();
     Q_INVOKABLE void endDrag(bool dropped);
@@ -91,11 +99,8 @@ private:
     QDeclarativeComponent *m_itemComponent;
     QBasicTimer m_layoutTimer;
 
-    struct
-    {
-        QDeclarativeItem *dragItem;
-        int dropRow, dropColumn;
-    } m_dragDrop;
+    struct DragDropData;
+    DragDropData *drag;
 
     void doLayout();
 
