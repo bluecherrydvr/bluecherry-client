@@ -44,12 +44,12 @@ void MJpegStream::setState(State newState)
 
     emit stateChanged(newState);
 
-    if (newState == Streaming)
+    if (newState >= Buffering && oldState < Buffering)
     {
         emit streamRunning();
         updateScaleSizes();
     }
-    else if (oldState == Streaming)
+    else if (oldState >= Buffering && newState < Buffering)
         emit streamStopped();
 }
 
@@ -96,6 +96,7 @@ void MJpegStream::start()
 
     m_httpReply = bcApp->nam->get(QNetworkRequest(hackUrl));
     connect(m_httpReply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(requestError()));
+    connect(m_httpReply, SIGNAL(finished()), SLOT(requestError()));
     connect(m_httpReply, SIGNAL(readyRead()), SLOT(readable()));
 
     m_activityTimer.start(30000);
@@ -182,7 +183,7 @@ void MJpegStream::readable()
         Q_ASSERT(!m_httpBoundary.isNull());
 
         m_parserState = ParserBoundary;
-        setState(Streaming);
+        setState(Buffering);
     }
 
     /* Don't allow the buffer to exceed 2MB */
@@ -343,7 +344,10 @@ void MJpegStream::checkActivity()
 
 void MJpegStream::requestError()
 {
-    setError(QString::fromLatin1("HTTP error: %1").arg(m_httpReply->errorString()));
+    if (m_httpReply->error() == QNetworkReply::NoError)
+        setError(QLatin1String("Connection lost"));
+    else
+        setError(QString::fromLatin1("HTTP error: %1").arg(m_httpReply->errorString()));
 }
 
 void MJpegStream::updateScaleSizes()
@@ -383,4 +387,7 @@ void MJpegStream::decodeFrameResult(ThreadTask *task)
     if (sizeChanged)
         emit streamSizeChanged(m_currentFrame.size());
     emit updateFrame(m_currentFrame, decodeTask->scaleResults());
+
+    if (m_state == Buffering)
+        setState(Streaming);
 }

@@ -21,6 +21,7 @@ public:
         StreamOffline = -1,
         NotConnected,
         Connecting,
+        Buffering,
         Streaming
     };
 
