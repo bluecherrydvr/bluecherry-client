@@ -37,12 +37,7 @@ void LiveFeedItem::setCamera(const DVRCamera &camera)
     m_camera = camera;
 
     if (m_camera)
-    {
         connect(m_camera, SIGNAL(dataUpdated()), SLOT(cameraDataUpdated()));
-
-        if (mjpeg)
-            mjpeg->setStream(m_camera.mjpegStream());
-    }
 
     emit cameraChanged(camera);
     cameraDataUpdated();
@@ -55,6 +50,20 @@ void LiveFeedItem::setPaused(bool paused)
 void LiveFeedItem::cameraDataUpdated()
 {
     emit cameraNameChanged(cameraName());
+
+    MJpegFeedItem *mjpeg = findChild<MJpegFeedItem*>(QLatin1String("mjpegFeed"));
+    if (mjpeg)
+    {
+        QSharedPointer<MJpegStream> nstream = m_camera.mjpegStream();
+        if (nstream != mjpeg->stream())
+            mjpeg->setStream(m_camera.mjpegStream());
+    }
+}
+
+void LiveFeedItem::setStatusText(const QString &text)
+{
+    m_statusText = text;
+    emit statusTextChanged(m_statusText);
 }
 
 void LiveFeedItem::openNewWindow()

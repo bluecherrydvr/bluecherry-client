@@ -13,6 +13,7 @@ class LiveFeedItem : public QDeclarativeItem
     Q_PROPERTY(DVRCamera camera READ camera WRITE setCamera NOTIFY cameraChanged)
     Q_PROPERTY(QString cameraName READ cameraName NOTIFY cameraNameChanged)
     Q_PROPERTY(bool paused READ isPaused WRITE setPaused NOTIFY pausedChanged)
+    Q_PROPERTY(QString statusText READ statusText NOTIFY statusTextChanged)
 
 public:
     explicit LiveFeedItem(QDeclarativeItem *parent = 0);
@@ -20,6 +21,7 @@ public:
     DVRCamera camera() const { return m_camera; }
     QString cameraName() const { return m_camera ? m_camera.displayName() : QLatin1String(" "); }
     bool isPaused() const { return false; }
+    QString statusText() const { return m_statusText; }
 
 public slots:
     void setCamera(const DVRCamera &camera);
@@ -33,10 +35,13 @@ public slots:
     void openNewWindow();
     void saveSnapshot(const QString &file = QString());
 
+    void setStatusText(const QString &text);
+
 signals:
     void cameraChanged(const DVRCamera &camera);
     void cameraNameChanged(const QString &cameraName);
     void pausedChanged(bool isPaused);
+    void statusTextChanged(const QString &statusText);
 
 protected:
     virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
@@ -46,6 +51,7 @@ private slots:
 
 private:
     DVRCamera m_camera;
+    QString m_statusText;
 };
 
 #endif // LIVEFEEDITEM_H

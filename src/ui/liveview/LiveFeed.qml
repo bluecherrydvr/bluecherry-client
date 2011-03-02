@@ -63,5 +63,43 @@ LiveFeedBase {
         anchors.bottom: parent.bottom
 
         objectName: "mjpegFeed"
+
+        onErrorTextChanged: feedItem.setStatusText(errorText)
+    }
+
+    Rectangle {
+        id: statusOverlay
+
+        color: "#BE000000"
+        anchors.fill: feed
+        opacity: 0
+
+        states: State {
+            name: "active"
+            when: feedItem.statusText
+
+            PropertyChanges { target: statusOverlay; visible: true; opacity: 1; }
+        }
+
+        transitions: Transition {
+            to: "active"
+            reversible: true
+
+            PropertyAnimation {
+                target: statusOverlay
+                property: "opacity"
+                duration: 500
+            }
+        }
+
+        Text {
+            anchors.centerIn: parent
+            font.pointSize: 14
+            horizontalAlignment: Qt.AlignHCenter
+
+            color: "white"
+
+            text: feedItem.statusText
+        }
     }
 }

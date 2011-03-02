@@ -26,6 +26,7 @@ public:
 signals:
     void streamChanged(const QSharedPointer<MJpegStream> &stream);
     void frameSizeChanged(const QSizeF &frameSize);
+    void errorTextChanged(const QString &errorText);
 
 private slots:
     void updateFrame()
@@ -37,6 +38,8 @@ private slots:
     {
         emit frameSizeChanged(frameSize());
     }
+
+    void streamStateChanged(int state);
 
 private:
     QSharedPointer<MJpegStream> m_stream;
