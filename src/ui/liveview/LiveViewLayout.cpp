@@ -342,6 +342,8 @@ void LiveViewLayout::set(int row, int col, QDeclarativeItem *item)
     if (row >= m_rows || col >= m_columns || (item == at(row, col)))
         return;
 
+    qDebug("set %d %d %p", row, col, item);
+
     QDeclarativeItem *&ip = m_items[(row * m_columns) + col];
     if (ip)
         ip->deleteLater();
@@ -405,6 +407,17 @@ QDeclarativeItem *LiveViewLayout::takeItem(int row, int column)
     m_items[i] = 0;
 
     return item;
+}
+
+QDeclarativeItem *LiveViewLayout::takeItem(QDeclarativeItem *item)
+{
+    if (!item)
+        return 0;
+
+    int r, c;
+    if (gridPos(item, &r, &c))
+        return takeItem(r, c);
+    return 0;
 }
 
 QDeclarativeItem *LiveViewLayout::dropTarget() const

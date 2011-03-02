@@ -33,13 +33,14 @@ public:
     bool gridPos(QDeclarativeItem *item, int *row, int *column);
 
     QDeclarativeItem *at(int row, int col) const { return m_items[row * m_columns + col]; }
-    void set(int row, int col, QDeclarativeItem *item);
+    Q_INVOKABLE void set(int row, int col, QDeclarativeItem *item);
 
     /* Add a new item, automatically placing it in the best available position */
     QDeclarativeItem *addItemAuto();
     QDeclarativeItem *addItem(int row, int column);
 
     QDeclarativeItem *takeItem(int row, int column);
+    Q_INVOKABLE QDeclarativeItem *takeItem(QDeclarativeItem *item);
 
     /* The item created to fill spaces in the layout */
     QDeclarativeComponent *item() const { return m_itemComponent; }
