@@ -50,6 +50,7 @@ LiveFeedBase {
                 }
             }
 
+            onPressed: feedItem.focus = true
             onReleased: feedItem.parent.drop()
         }
     }
@@ -65,6 +66,12 @@ LiveFeedBase {
         objectName: "mjpegFeed"
 
         onErrorTextChanged: feedItem.setStatusText(errorText)
+    }
+
+    MouseArea {
+        anchors.fill: feed
+
+        onPressed: feedItem.focus = true
     }
 
     Rectangle {
