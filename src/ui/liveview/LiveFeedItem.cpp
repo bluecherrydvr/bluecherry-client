@@ -43,10 +43,6 @@ void LiveFeedItem::setCamera(const DVRCamera &camera)
     cameraDataUpdated();
 }
 
-void LiveFeedItem::setPaused(bool paused)
-{
-}
-
 void LiveFeedItem::cameraDataUpdated()
 {
     emit cameraNameChanged(cameraName());
@@ -122,10 +118,14 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     menu.addAction(tr("Snapshot"), this, SLOT(saveSnapshot()))->setEnabled(m_camera && !m_camera.mjpegStream()->currentFrame().isNull());
     menu.addSeparator();
 
-    QAction *a = menu.addAction(isPaused() ? tr("Paused") : tr("Pause"), this, SLOT(togglePaused()));
-    a->setCheckable(true);
-    a->setChecked(isPaused());
-    a->setEnabled(m_camera && (m_camera.mjpegStream() || isPaused()));
+    MJpegFeedItem *mjpeg = findChild<MJpegFeedItem*>(QLatin1String("mjpegFeed"));
+    if (mjpeg)
+    {
+        QAction *a = menu.addAction(mjpeg->isPaused() ? tr("Paused") : tr("Pause"), mjpeg, SLOT(togglePaused()));
+        a->setCheckable(true);
+        a->setChecked(mjpeg->isPaused());
+        a->setEnabled(m_camera && (m_camera.mjpegStream() || a->isChecked()));
+    }
 
     menu.addSeparator();
     menu.addAction(tr("Open in window"), this, SLOT(openNewWindow()));

@@ -12,14 +12,14 @@
 
 MJpegStream::MJpegStream(QObject *parent)
     : QObject(parent), m_httpReply(0), m_currentFrameNo(0), m_latestFrameNo(0), m_decodeTask(0), m_lastActivity(0),
-      m_httpBodyLength(0), m_state(NotConnected), m_parserState(ParserBoundary), m_autoStart(false)
+      m_httpBodyLength(0), m_state(NotConnected), m_parserState(ParserBoundary), m_autoStart(false), m_paused(false)
 {
     connect(&m_activityTimer, SIGNAL(timeout()), SLOT(checkActivity()));
 }
 
 MJpegStream::MJpegStream(const QUrl &url, QObject *parent)
     : QObject(parent), m_httpReply(0), m_currentFrameNo(0), m_latestFrameNo(0), m_decodeTask(0), m_lastActivity(0),
-      m_httpBodyLength(0), m_state(NotConnected), m_parserState(ParserBoundary), m_autoStart(false)
+      m_httpBodyLength(0), m_state(NotConnected), m_parserState(ParserBoundary), m_autoStart(false), m_paused(false)
 {
     setUrl(url);
     connect(&m_activityTimer, SIGNAL(timeout()), SLOT(checkActivity()));
@@ -76,6 +76,13 @@ void MJpegStream::start()
     if (state() == StreamOffline)
     {
         m_autoStart = true;
+        return;
+    }
+
+    if (m_paused)
+    {
+        if (m_state != Paused)
+            setState(Paused);
         return;
     }
 
@@ -138,6 +145,31 @@ void MJpegStream::setOnline(bool online)
         if (m_autoStart)
             start();
     }
+}
+
+void MJpegStream::setPaused(bool pause)
+{
+    if (pause == m_paused)
+        return;
+
+    if (pause)
+    {
+        m_paused = true;
+        if (m_state >= Connecting)
+        {
+            setState(Paused);
+            stop();
+        }
+    }
+    else
+    {
+        m_paused = false;
+        Q_ASSERT(m_state <= Paused);
+        if (m_state == Paused)
+            start();
+    }
+
+    emit pausedChanged(pause);
 }
 
 bool MJpegStream::processHeaders()

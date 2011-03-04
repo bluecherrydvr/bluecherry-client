@@ -33,7 +33,7 @@ LiveFeedBase {
             anchors.bottomMargin: 1
             color: "white"
             verticalAlignment: Text.AlignVCenter
-            text: feedItem.cameraName
+            text: feedItem.cameraName + (feed.paused ? " (paused)" : "")
         }
 
         MouseArea {
@@ -51,7 +51,7 @@ LiveFeedBase {
             }
 
             onPressed: feedItem.focus = true
-            onReleased: feedItem.parent.drop()
+            onReleased: if (drag.active) feedItem.parent.drop()
         }
     }
 

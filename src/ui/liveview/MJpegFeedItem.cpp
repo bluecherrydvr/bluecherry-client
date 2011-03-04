@@ -24,12 +24,15 @@ void MJpegFeedItem::setStream(const QSharedPointer<MJpegStream> &stream)
         connect(m_stream.data(), SIGNAL(updateFrame(QPixmap,QVector<QImage>)), SLOT(updateFrame()));
         connect(m_stream.data(), SIGNAL(streamSizeChanged(QSize)), SLOT(updateFrameSize()));
         connect(m_stream.data(), SIGNAL(stateChanged(int)), SLOT(streamStateChanged(int)));
+        connect(m_stream.data(), SIGNAL(pausedChanged(bool)), SIGNAL(pausedChanged(bool)));
         m_stream->start();
 
         streamStateChanged(m_stream->state());
     }
     else
         emit errorTextChanged(tr("No<br>Video"));
+
+    emit pausedChanged(isPaused());
 
     updateFrameSize();
     updateFrame();
@@ -38,6 +41,17 @@ void MJpegFeedItem::setStream(const QSharedPointer<MJpegStream> &stream)
 void MJpegFeedItem::clear()
 {
     setStream(QSharedPointer<MJpegStream>());
+}
+
+bool MJpegFeedItem::isPaused() const
+{
+    return m_stream ? m_stream->isPaused() : false;
+}
+
+void MJpegFeedItem::setPaused(bool paused)
+{
+    if (m_stream)
+        m_stream->setPaused(paused);
 }
 
 void MJpegFeedItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWidget *widget)

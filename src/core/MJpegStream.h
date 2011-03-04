@@ -14,11 +14,14 @@ class MJpegStream : public QObject
 {
     Q_OBJECT
 
+    Q_PROPERTY(bool paused READ isPaused WRITE setPaused NOTIFY pausedChanged)
+
 public:
     enum State
     {
-        Error = -2,
-        StreamOffline = -1,
+        Error = -3,
+        StreamOffline = -2,
+        Paused = -1,
         NotConnected,
         Connecting,
         Buffering,
@@ -38,9 +41,13 @@ public:
     QSize streamSize() const { return m_currentFrame.size(); }
     QPixmap currentFrame() const { return m_currentFrame; }
 
+    bool isPaused() const { return m_paused; }
+
 public slots:
     void start();
     void stop();
+
+    void setPaused(bool paused = true);
 
     void setOnline(bool online);
 
@@ -51,6 +58,8 @@ signals:
     void streamRunning();
     void streamStopped();
     void streamSizeChanged(const QSize &size);
+
+    void pausedChanged(bool isPaused);
 
     void buildScaleSizes(QVector<QSize> &sizes);
 
@@ -81,7 +90,7 @@ private:
         ParserHeaders,
         ParserBody
     } m_parserState;
-    bool m_autoStart;
+    bool m_autoStart, m_paused;
 
     void setState(State newState);
     void setError(const QString &message);

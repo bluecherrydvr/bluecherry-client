@@ -12,7 +12,6 @@ class LiveFeedItem : public QDeclarativeItem
 
     Q_PROPERTY(DVRCamera camera READ camera WRITE setCamera NOTIFY cameraChanged)
     Q_PROPERTY(QString cameraName READ cameraName NOTIFY cameraNameChanged)
-    Q_PROPERTY(bool paused READ isPaused WRITE setPaused NOTIFY pausedChanged)
     Q_PROPERTY(QString statusText READ statusText NOTIFY statusTextChanged)
 
 public:
@@ -20,7 +19,6 @@ public:
 
     DVRCamera camera() const { return m_camera; }
     QString cameraName() const { return m_camera ? m_camera.displayName() : QLatin1String(" "); }
-    bool isPaused() const { return false; }
     QString statusText() const { return m_statusText; }
 
 public slots:
@@ -28,9 +26,6 @@ public slots:
     void clear() { setCamera(DVRCamera()); }
 
     void close();
-
-    void setPaused(bool paused = true);
-    void togglePaused() { setPaused(!isPaused()); }
 
     void openNewWindow();
     void saveSnapshot(const QString &file = QString());
