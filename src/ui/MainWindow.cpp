@@ -98,6 +98,12 @@ MainWindow::MainWindow(QWidget *parent)
         m_centerSplit->setSizes(QList<int>() << 1000 << 100);
     }
 
+    QString lastLayout = settings.value(QLatin1String("ui/cameraArea/lastLayout")).toString();
+    if (!lastLayout.isEmpty())
+        m_liveView->setLayout(lastLayout);
+
+    connect(m_liveView, SIGNAL(layoutChanged(QString)), SLOT(liveViewLayoutChanged(QString)));
+
     new QShortcut(QKeySequence(Qt::Key_F11), m_liveView, SLOT(toggleFullScreen()));
     new QShortcut(QKeySequence(Qt::Key_Escape), m_liveView, SLOT(closeFullScreen()));
 
@@ -488,4 +494,10 @@ void MainWindow::eventsContextMenu(const QPoint &pos)
         showEventsWindow();
     }
 #endif
+}
+
+void MainWindow::liveViewLayoutChanged(const QString &layout)
+{
+    QSettings settings;
+    settings.setValue(QLatin1String("ui/cameraArea/lastLayout"), layout);
 }

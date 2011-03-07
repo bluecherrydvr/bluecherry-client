@@ -20,12 +20,17 @@ public:
     static LiveViewWindow *openWindow(QWidget *parent, const DVRCamera &camera = DVRCamera());
 
     LiveViewArea *view() const { return m_liveView; }
+    QString currentLayout() const;
 
     void setAutoSized(bool autoSized);
 
 public slots:
     void showSingleCamera(const DVRCamera &camera);
+    bool setLayout(const QString &layout);
     void saveLayout();
+
+signals:
+    void layoutChanged(const QString &layout);
 
 private slots:
     void savedLayoutChanged(int index);

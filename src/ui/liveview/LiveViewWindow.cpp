@@ -48,7 +48,7 @@ LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, const DVRCamera &cam
 }
 
 LiveViewWindow::LiveViewWindow(QWidget *parent)
-    : QWidget(parent), m_liveView(new LiveViewArea), m_savedLayouts(new QComboBox), m_autoSized(false)
+    : QWidget(parent), m_liveView(new LiveViewArea), m_savedLayouts(new QComboBox), m_lastLayoutIndex(-1), m_autoSized(false)
 {
     QBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
@@ -70,11 +70,12 @@ LiveViewWindow::LiveViewWindow(QWidget *parent)
     LiveViewLayout *viewLayout = m_liveView->layout();
 
     /* Saved layouts box */
-    m_savedLayouts->setModel(new SavedLayoutsModel(m_savedLayouts));
+    m_savedLayouts->setModel(SavedLayoutsModel::instance());
     m_savedLayouts->setSizeAdjustPolicy(QComboBox::AdjustToContents);
     m_savedLayouts->setInsertPolicy(QComboBox::NoInsert);
     m_savedLayouts->setMinimumWidth(100);
     m_savedLayouts->setContextMenuPolicy(Qt::CustomContextMenu);
+    m_savedLayouts->setCurrentIndex(-1);
     toolBar->addWidget(m_savedLayouts);
 
     QWidget *spacer = new QWidget;
@@ -117,19 +118,6 @@ LiveViewWindow::LiveViewWindow(QWidget *parent)
     a = toolBar->addAction(QIcon(QLatin1String(":/icons/layout-16.png")),
                            tr("4x4"), mapper, SLOT(map()));
     mapper->setMapping(a, 4);
-
-    QSettings settings;
-    QString lastLayout = settings.value(QLatin1String("ui/cameraArea/lastLayout")).toString();
-    if (!lastLayout.isEmpty())
-    {
-        int index = m_savedLayouts->findText(lastLayout);
-        if (index >= 0 && index != m_savedLayouts->currentIndex())
-            m_savedLayouts->setCurrentIndex(index);
-        else
-            savedLayoutChanged(m_savedLayouts->currentIndex());
-    }
-    else
-        savedLayoutChanged(m_savedLayouts->currentIndex());
 
     layout->addWidget(toolBar);
     layout->addWidget(m_liveView);
@@ -177,6 +165,24 @@ void LiveViewWindow::showSingleCamera(const DVRCamera &camera)
     item->setProperty("camera", QVariant::fromValue(camera));
 }
 
+bool LiveViewWindow::setLayout(const QString &layout)
+{
+    int index = m_savedLayouts->findText(layout);
+    if (index < 0)
+        return false;
+
+    m_savedLayouts->setCurrentIndex(index);
+    return true;
+}
+
+QString LiveViewWindow::currentLayout() const
+{
+    int index = m_savedLayouts->currentIndex();
+    if (index >= 0)
+        return m_savedLayouts->itemText(index);
+    return QString();
+}
+
 void LiveViewWindow::savedLayoutChanged(int index)
 {
     static bool recursing = false;
@@ -208,12 +214,11 @@ void LiveViewWindow::savedLayoutChanged(int index)
     saveLayout();
 
     QByteArray data = m_savedLayouts->itemData(index, SavedLayoutsModel::LayoutDataRole).toByteArray();
-    if (!data.isEmpty() && !m_liveView->layout()->loadLayout(data))
+    if (data.isEmpty() || !m_liveView->layout()->loadLayout(data))
         qDebug() << "Failed to load camera layout" << m_savedLayouts->itemText(index);
 
     m_lastLayoutIndex = index;
-    QSettings settings;
-    settings.setValue(QLatin1String("ui/cameraArea/lastLayout"), m_savedLayouts->itemText(index));
+    emit layoutChanged(currentLayout());
 }
 
 void LiveViewWindow::saveLayout()
@@ -230,7 +235,7 @@ void LiveViewWindow::showLayoutMenu(const QPoint &rpos, int index)
     if (index < 0)
         index = m_savedLayouts->currentIndex();
 
-    if (static_cast<SavedLayoutsModel*>(m_savedLayouts->model())->isNewLayoutItem(index))
+    if (index < 0 || static_cast<SavedLayoutsModel*>(m_savedLayouts->model())->isNewLayoutItem(index))
         return;
 
     QPoint pos = rpos;
@@ -240,7 +245,7 @@ void LiveViewWindow::showLayoutMenu(const QPoint &rpos, int index)
     QMenu menu;
     menu.setTitle(m_savedLayouts->itemText(index));
 
-    QAction *deleteAction = menu.addAction(tr("Delete %1").arg(menu.title()));
+    QAction *deleteAction = menu.addAction(tr("Delete \"%1\"").arg(menu.title()));
     if (m_savedLayouts->count() == 2)
         deleteAction->setEnabled(false);
 

@@ -1,6 +1,14 @@
 #include "SavedLayoutsModel.h"
+#include "core/BluecherryApp.h"
 #include <QSettings>
 #include <QStringList>
+
+SavedLayoutsModel *SavedLayoutsModel::m_instance = 0;
+
+SavedLayoutsModel *SavedLayoutsModel::instance()
+{
+    return m_instance ? m_instance : (m_instance = new SavedLayoutsModel(bcApp));
+}
 
 SavedLayoutsModel::SavedLayoutsModel(QObject *parent)
     : QAbstractListModel(parent)

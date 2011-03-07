@@ -32,6 +32,7 @@ LiveViewLayout::LiveViewLayout(QDeclarativeItem *parent)
     : QDeclarativeItem(parent), m_rows(0), m_columns(0), m_itemComponent(0), drag(0)
 {
     setAcceptDrops(true);
+    setGridSize(1, 1);
 }
 
 LiveViewLayout::~LiveViewLayout()

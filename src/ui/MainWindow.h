@@ -45,6 +45,7 @@ private slots:
     void sslConfirmRequired(DVRServer *server, const QList<QSslError> &errors, const QSslConfiguration &config);
     void trayActivated(QSystemTrayIcon::ActivationReason);
     void queryLivePaused();
+    void liveViewLayoutChanged(const QString &layout);
 
     void eventsContextMenu(const QPoint &pos);
 
