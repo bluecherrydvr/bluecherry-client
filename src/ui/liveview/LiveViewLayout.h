@@ -32,6 +32,8 @@ public:
     void gridPos(const QPointF &pos, int *row, int *column);
     bool gridPos(QDeclarativeItem *item, int *row, int *column);
 
+    QSize idealSize() const;
+
     QDeclarativeItem *at(int row, int col) const { return m_items[row * m_columns + col]; }
     Q_INVOKABLE void set(int row, int col, QDeclarativeItem *item);
 
@@ -81,6 +83,7 @@ public slots:
 signals:
     void dropTargetChanged(QDeclarativeItem *item);
     void dragItemChanged(QDeclarativeItem *item);
+    void idealSizeChanged(const QSize &idealSize);
 
 protected:
     virtual void geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry);
@@ -93,6 +96,7 @@ protected:
 
 private slots:
     void scheduleLayout();
+    void updateIdealSize();
 
 private:
     int m_rows, m_columns;

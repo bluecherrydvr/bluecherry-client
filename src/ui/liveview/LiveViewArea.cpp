@@ -29,3 +29,14 @@ void LiveViewArea::addCamera(const DVRCamera &camera)
     Q_ASSERT(setCameraProperty);
     Q_UNUSED(setCameraProperty);
 }
+
+QSize LiveViewArea::sizeHint() const
+{
+    if (!m_sizeHint.isValid())
+    {
+        m_sizeHint = layout()->idealSize();
+        qDebug() << "LiveViewArea size hint:" << m_sizeHint;
+    }
+
+    return m_sizeHint;
+}

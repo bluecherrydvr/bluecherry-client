@@ -55,6 +55,7 @@ QDeclarativeItem *LiveViewLayout::createNewItem()
 
     element->setParentItem(this);
     connect(LiveViewLayoutProps::get(element), SIGNAL(layoutNeeded()), SLOT(scheduleLayout()));
+    connect(LiveViewLayoutProps::get(element), SIGNAL(sizeHintChanged(QSizeF)), SLOT(updateIdealSize()));
 
     return element;
 }
@@ -115,17 +116,23 @@ void LiveViewLayout::doLayout()
         {
             LiveViewLayoutProps *ip = LiveViewLayoutProps::get(i);
 
-            QSizeF size = ip->sizeHint(), padding = ip->sizePadding();
-            if (size.isValid())
+            if (ip->fixedAspectRatio())
             {
-                size.scale(sz - padding, ip->fixedAspectRatio() ? Qt::KeepAspectRatio : Qt::IgnoreAspectRatio);
-                size += padding;
+                QSizeF size = ip->sizeHint(), padding = ip->sizePadding();
+                if (size.isValid())
+                {
+                    size.scale(sz - padding, ip->fixedAspectRatio() ? Qt::KeepAspectRatio : Qt::IgnoreAspectRatio);
+                    size += padding;
+                }
+                i->setWidth(size.width());
+                i->setHeight(size.height());
             }
             else
-                size = sz;
+            {
+                i->setWidth(sz.width());
+                i->setHeight(sz.height());
+            }
 
-            i->setWidth(size.width());
-            i->setHeight(size.height());
             i->setX(x);
             i->setY(y);
         }
@@ -184,10 +191,38 @@ bool LiveViewLayout::gridPos(QDeclarativeItem *item, int *row, int *column)
     return true;
 }
 
+QSize LiveViewLayout::idealSize() const
+{
+    QSizeF sz(0, 0);
+
+    for (int r = 0; r < m_rows; ++r)
+    {
+        for (int c = 0; c < m_columns; ++c)
+        {
+            QDeclarativeItem *item = at(r, c);
+            if (item)
+            {
+                QSizeF hint = LiveViewLayoutProps::get(item)->sizeHint();
+                sz.rwidth() += qMax(qreal(0), hint.width());
+                sz.rheight() += qMax(qreal(0), hint.height());
+            }
+        }
+    }
+
+    return sz.toSize();
+}
+
+void LiveViewLayout::updateIdealSize()
+{
+    if (receivers(SIGNAL(idealSizeChanged(QSize))))
+        emit idealSizeChanged(idealSize());
+}
+
 void LiveViewLayout::geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry)
 {
     QDeclarativeItem::geometryChanged(newGeometry, oldGeometry);
-    scheduleLayout();
+    if (newGeometry.size() != oldGeometry.size())
+        doLayout();
 }
 
 void LiveViewLayout::insertRow(int row)
@@ -342,12 +377,15 @@ void LiveViewLayout::set(int row, int col, QDeclarativeItem *item)
     if (row >= m_rows || col >= m_columns || (item == at(row, col)))
         return;
 
-    qDebug("set %d %d %p", row, col, item);
-
     QDeclarativeItem *&ip = m_items[(row * m_columns) + col];
+    if (ip == item)
+        return;
+
     if (ip)
         ip->deleteLater();
+
     ip = item;
+
     scheduleLayout();
 }
 
@@ -462,20 +500,25 @@ void LiveViewLayout::updateDrag()
     int row, column;
     gridPos(pos, &row, &column);
 
-    if (row != drag->targetRow || column != drag->targetColumn)
+    QDeclarativeItem *newTarget = (row >= 0 && column >= 0) ? at(row, column) : 0;
+
+    if (drag->target != newTarget || row != drag->targetRow || column != drag->targetColumn)
     {
         QDeclarativeItem *oldTarget = drag->target;
 
         drag->targetRow = row;
         drag->targetColumn = column;
-        drag->target = (row >= 0 && column >= 0) ? at(row, column) : 0;
+        drag->target = newTarget;
 
-        if (oldTarget)
-            LiveViewLayoutProps::get(oldTarget)->setIsDropTarget(false);
-        if (drag->target)
-            LiveViewLayoutProps::get(drag->target)->setIsDropTarget(true);
+        if (oldTarget != drag->target)
+        {
+            if (oldTarget)
+                LiveViewLayoutProps::get(oldTarget)->setIsDropTarget(false);
+            if (drag->target)
+                LiveViewLayoutProps::get(drag->target)->setIsDropTarget(true);
 
-        emit dropTargetChanged(drag->target);
+            emit dropTargetChanged(drag->target);
+        }
     }
 }
 

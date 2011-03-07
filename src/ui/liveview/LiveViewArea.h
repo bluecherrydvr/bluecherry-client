@@ -15,11 +15,15 @@ public:
 
     LiveViewLayout *layout() const { return m_layout; }
 
+    QSize sizeHint() const;
+
 public slots:
     void addCamera(const DVRCamera &camera);
+    void updateGeometry() { m_sizeHint = QSize(); QDeclarativeView::updateGeometry(); }
 
 private:
     LiveViewLayout *m_layout;
+    mutable QSize m_sizeHint;
 };
 
 #endif // LIVEVIEWAREA_H

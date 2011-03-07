@@ -12,6 +12,8 @@
 #include <QAction>
 #include <QMenu>
 #include <QDebug>
+#include <QDesktopWidget>
+#include <QApplication>
 
 #ifdef Q_OS_MAC
 #include <QMacStyle>
@@ -36,6 +38,8 @@ LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, const DVRCamera &cam
 {
     LiveViewWindow *window = new LiveViewWindow(parent);
     window->setWindowFlags(Qt::Window);
+    window->setAutoSized(true);
+    window->setAttribute(Qt::WA_DeleteOnClose);
 
     if (camera)
         window->showSingleCamera(camera);
@@ -44,7 +48,7 @@ LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, const DVRCamera &cam
 }
 
 LiveViewWindow::LiveViewWindow(QWidget *parent)
-    : QWidget(parent), m_liveView(new LiveViewArea), m_savedLayouts(new QComboBox)
+    : QWidget(parent), m_liveView(new LiveViewArea), m_savedLayouts(new QComboBox), m_autoSized(false)
 {
     QBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
@@ -129,6 +133,41 @@ LiveViewWindow::LiveViewWindow(QWidget *parent)
 
     layout->addWidget(toolBar);
     layout->addWidget(m_liveView);
+}
+
+void LiveViewWindow::setAutoSized(bool autoSized)
+{
+    if (m_autoSized == autoSized)
+        return;
+
+    m_autoSized = autoSized;
+    if (m_autoSized)
+    {
+        connect(m_liveView->layout(), SIGNAL(idealSizeChanged(QSize)), SLOT(doAutoResize()));
+        doAutoResize();
+    }
+    else
+        disconnect(m_liveView->layout(), SIGNAL(idealSizeChanged(QSize)), this, SLOT(doAutoResize()));
+}
+
+void LiveViewWindow::doAutoResize()
+{
+    if (!m_autoSized)
+        return;
+
+    m_liveView->updateGeometry();
+    if (m_liveView->sizeHint().isEmpty())
+        return;
+
+    QSize hint = sizeHint();
+
+    const QRect rect = QApplication::desktop()->availableGeometry(this);
+
+    hint.rwidth() = qRound(qMin(rect.width()*.9, double(hint.rwidth())));
+    hint.rheight() = qRound(qMin(rect.height()*.9, double(hint.rheight())));
+
+    resize(hint);
+    setAutoSized(false);
 }
 
 void LiveViewWindow::showSingleCamera(const DVRCamera &camera)
