@@ -48,7 +48,8 @@ LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, const DVRCamera &cam
 }
 
 LiveViewWindow::LiveViewWindow(QWidget *parent)
-    : QWidget(parent), m_liveView(new LiveViewArea), m_savedLayouts(new QComboBox), m_lastLayoutIndex(-1), m_autoSized(false)
+    : QWidget(parent), m_liveView(new LiveViewArea), m_savedLayouts(new QComboBox), m_lastLayoutIndex(-1), m_autoSized(false),
+      m_isLayoutChanging(false)
 {
     QBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
@@ -119,6 +120,8 @@ LiveViewWindow::LiveViewWindow(QWidget *parent)
                            tr("4x4"), mapper, SLOT(map()));
     mapper->setMapping(a, 4);
 
+    connect(m_liveView->layout(), SIGNAL(layoutChanged()), SLOT(saveLayout()));
+
     layout->addWidget(toolBar);
     layout->addWidget(m_liveView);
 }
@@ -185,9 +188,10 @@ QString LiveViewWindow::currentLayout() const
 
 void LiveViewWindow::savedLayoutChanged(int index)
 {
-    static bool recursing = false;
-    if (recursing)
+    if (m_isLayoutChanging)
         return;
+
+    m_isLayoutChanging = true;
 
     if (static_cast<SavedLayoutsModel*>(m_savedLayouts->model())->isNewLayoutItem(index))
     {
@@ -195,23 +199,18 @@ void LiveViewWindow::savedLayoutChanged(int index)
         if (re.isEmpty())
         {
             /* Cancelled; change back to the previous item */
-            recursing = true;
             m_savedLayouts->setCurrentIndex(m_lastLayoutIndex);
-            recursing = false;
+            m_isLayoutChanging = false;
             return;
         }
-
-        recursing = true;
 
         index = m_savedLayouts->count() - 1;
         m_savedLayouts->insertItem(index, re, m_liveView->layout()->saveLayout());
         m_savedLayouts->setCurrentIndex(index);
 
-        recursing = false;
+        m_isLayoutChanging = false;
         return;
     }
-
-    saveLayout();
 
     QByteArray data = m_savedLayouts->itemData(index, SavedLayoutsModel::LayoutDataRole).toByteArray();
     if (data.isEmpty() || !m_liveView->layout()->loadLayout(data))
@@ -219,11 +218,12 @@ void LiveViewWindow::savedLayoutChanged(int index)
 
     m_lastLayoutIndex = index;
     emit layoutChanged(currentLayout());
+    m_isLayoutChanging = false;
 }
 
 void LiveViewWindow::saveLayout()
 {
-    if (m_lastLayoutIndex < 0)
+    if (m_lastLayoutIndex < 0 || m_isLayoutChanging)
         return;
 
     QByteArray data = m_liveView->layout()->saveLayout();

@@ -29,7 +29,7 @@ struct LiveViewLayout::DragDropData
 };
 
 LiveViewLayout::LiveViewLayout(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent), m_rows(0), m_columns(0), m_itemComponent(0), drag(0)
+    : QDeclarativeItem(parent), m_rows(0), m_columns(0), m_itemComponent(0), drag(0), layoutChanges(NoLayoutChanges)
 {
     setAcceptDrops(true);
     setGridSize(1, 1);
@@ -76,17 +76,25 @@ void LiveViewLayout::setItem(QDeclarativeComponent *c)
     m_itemComponent = c;
 }
 
-void LiveViewLayout::scheduleLayout()
+void LiveViewLayout::scheduleLayout(int changes)
 {
-    if (!m_layoutTimer.isActive())
+    layoutChanges |= LayoutChanges(changes);
+
+    if (layoutChanges && !m_layoutTimer.isActive())
         m_layoutTimer.start(0, this);
 }
 
 void LiveViewLayout::timerEvent(QTimerEvent *event)
 {
-    /* doLayout stops the schedule timer */
     if (event->timerId() == m_layoutTimer.timerId())
-        doLayout();
+    {
+        if (layoutChanges & DoItemsLayout)
+            doLayout();
+        if (layoutChanges & EmitLayoutChanged)
+            emit layoutChanged();
+        layoutChanges = NoLayoutChanges;
+        m_layoutTimer.stop();
+    }
 }
 
 void LiveViewLayout::doLayout()
@@ -151,7 +159,8 @@ void LiveViewLayout::doLayout()
             x += sz.width();
     }
 
-    m_layoutTimer.stop();
+    if (!(layoutChanges &= ~DoItemsLayout))
+        m_layoutTimer.stop();
 }
 
 void LiveViewLayout::gridPos(const QPointF &pos, int *row, int *column)
@@ -234,7 +243,7 @@ void LiveViewLayout::insertRow(int row)
     for (int i = (row * m_columns), n = i+m_columns; i < n; ++i)
         m_items.insert(i, 0);
 
-    scheduleLayout();
+    scheduleLayout(DoItemsLayout | EmitLayoutChanged);
 }
 
 void LiveViewLayout::removeRow(int row)
@@ -255,7 +264,7 @@ void LiveViewLayout::removeRow(int row)
     m_items.erase(st, st+m_columns);
     --m_rows;
 
-    scheduleLayout();
+    scheduleLayout(DoItemsLayout | EmitLayoutChanged);
 }
 
 void LiveViewLayout::insertColumn(int column)
@@ -269,7 +278,7 @@ void LiveViewLayout::insertColumn(int column)
     }
 
     m_columns++;
-    scheduleLayout();
+    scheduleLayout(DoItemsLayout | EmitLayoutChanged);
 }
 
 void LiveViewLayout::removeColumn(int column)
@@ -288,7 +297,7 @@ void LiveViewLayout::removeColumn(int column)
     }
 
     --m_columns;
-    scheduleLayout();
+    scheduleLayout(DoItemsLayout | EmitLayoutChanged);
 }
 
 void LiveViewLayout::setGridSize(int rows, int columns)
@@ -387,7 +396,7 @@ void LiveViewLayout::set(int row, int col, QDeclarativeItem *item)
 
     ip = item;
 
-    scheduleLayout();
+    scheduleLayout(DoItemsLayout | EmitLayoutChanged);
 }
 
 void LiveViewLayout::removeItem(QDeclarativeItem *item)
@@ -398,6 +407,7 @@ void LiveViewLayout::removeItem(QDeclarativeItem *item)
 
     m_items[index] = 0;
     item->deleteLater();
+    scheduleLayout(DoItemsLayout | EmitLayoutChanged);
 }
 
 QDeclarativeItem *LiveViewLayout::addItemAuto()
@@ -418,6 +428,8 @@ QDeclarativeItem *LiveViewLayout::addItemAuto()
     }
 
     m_items[index] = createNewItem();
+
+    scheduleLayout(EmitLayoutChanged);
     doLayout();
 
     return m_items[index];
@@ -431,6 +443,8 @@ QDeclarativeItem *LiveViewLayout::addItem(int row, int column)
     setGridSize(qMax(row, rows()), qMax(column, columns()));
 
     QDeclarativeItem *re = m_items[(row * columns()) + column] = createNewItem();
+
+    scheduleLayout(EmitLayoutChanged);
     doLayout();
 
     return re;
@@ -444,6 +458,8 @@ QDeclarativeItem *LiveViewLayout::takeItem(int row, int column)
     int i = (row * m_columns) + column;
     QDeclarativeItem *item = m_items[i];
     m_items[i] = 0;
+
+    scheduleLayout(EmitLayoutChanged);
 
     return item;
 }
@@ -668,8 +684,6 @@ bool LiveViewLayout::loadLayout(const QByteArray &buf)
 
     setGridSize(rc, cc);
 
-    qDebug() << buf.toHex();
-
     for (int r = 0; r < rc; ++r)
     {
         for (int c = 0; c < cc; ++c)
@@ -677,8 +691,6 @@ bool LiveViewLayout::loadLayout(const QByteArray &buf)
             qint64 pos = data.device()->pos();
             int value = -1;
             data >> value;
-
-            qDebug("%d", value);
 
             QDeclarativeItem *item = 0;
 

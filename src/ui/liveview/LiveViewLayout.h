@@ -17,6 +17,13 @@ class LiveViewLayout : public QDeclarativeItem
     Q_PROPERTY(QDeclarativeItem* dropTarget READ dropTarget NOTIFY dropTargetChanged)
     Q_PROPERTY(QDeclarativeItem* dragItem READ dragItem NOTIFY dragItemChanged)
 
+    enum LayoutChange {
+        NoLayoutChanges = 0,
+        DoItemsLayout = 1 << 0,
+        EmitLayoutChanged = 1 << 1
+    };
+    Q_DECLARE_FLAGS(LayoutChanges, LayoutChange)
+
 public:
     enum DragDropMode {
         DragReplace,
@@ -87,6 +94,7 @@ signals:
     void dropTargetChanged(QDeclarativeItem *item);
     void dragItemChanged(QDeclarativeItem *item);
     void idealSizeChanged(const QSize &idealSize);
+    void layoutChanged();
 
 protected:
     virtual void geometryChanged(const QRectF &newGeometry, const QRectF &oldGeometry);
@@ -97,10 +105,6 @@ protected:
     virtual void dragLeaveEvent(QGraphicsSceneDragDropEvent *event);
     virtual void dropEvent(QGraphicsSceneDragDropEvent *event);
 
-private slots:
-    void scheduleLayout();
-    void updateIdealSize();
-
 private:
     int m_rows, m_columns;
     QList<QDeclarativeItem*> m_items;
@@ -110,9 +114,15 @@ private:
     struct DragDropData;
     DragDropData *drag;
 
+    LayoutChanges layoutChanges;
+
     void doLayout();
 
     QDeclarativeItem *createNewItem();
+
+private slots:
+    void scheduleLayout(int changes = DoItemsLayout);
+    void updateIdealSize();
 };
 
 QML_DECLARE_TYPEINFO(LiveViewLayout, QML_HAS_ATTACHED_PROPERTIES)

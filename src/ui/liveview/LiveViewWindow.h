@@ -41,7 +41,7 @@ private:
     LiveViewArea * const m_liveView;
     QComboBox * const m_savedLayouts;
     int m_lastLayoutIndex;
-    bool m_autoSized;
+    bool m_autoSized, m_isLayoutChanging;
 };
 
 #endif // LIVEVIEWWINDOW_H
