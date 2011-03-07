@@ -4,7 +4,6 @@
 #include "OptionsServerPage.h"
 #include "ServerConfigWindow.h"
 #include "core/DVRServer.h"
-#include "LiveFeedWidget.h"
 #include "core/BluecherryApp.h"
 #include "MainWindow.h"
 #include "liveview/LiveViewWindow.h"

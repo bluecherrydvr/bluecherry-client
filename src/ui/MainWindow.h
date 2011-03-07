@@ -70,7 +70,6 @@ private:
     QWidget *createSourcesList();
     QWidget *createServerBox();
 
-    QWidget *createCameraControls();
     QWidget *createRecentEvents();
 };
 

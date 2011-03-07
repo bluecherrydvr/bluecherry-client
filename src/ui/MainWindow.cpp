@@ -1,7 +1,5 @@
 #include "MainWindow.h"
 #include "liveview/LiveViewWindow.h"
-#include "CameraAreaWidget.h"
-#include "CameraAreaControls.h"
 #include "DVRServersView.h"
 #include "OptionsDialog.h"
 #include "EventsWindow.h"
@@ -12,7 +10,6 @@
 #include "ServerConfigWindow.h"
 #include "EventsView.h"
 #include "EventViewWindow.h"
-#include "LiveFeedWidget.h"
 #include "core/DVRServer.h"
 #include "core/BluecherryApp.h"
 #include <QBoxLayout>
@@ -257,13 +254,6 @@ QWidget *MainWindow::createServerBox()
     return box;
 }
 
-QWidget *MainWindow::createCameraControls()
-{
-    CameraAreaControls *controls = new CameraAreaControls(0);
-    connect(this, SIGNAL(closing()), controls, SLOT(saveLayout()));
-    return controls;
-}
-
 QWidget *MainWindow::createRecentEvents()
 {
     m_eventsView = new EventsView;
@@ -461,13 +451,7 @@ void MainWindow::eventsContextMenu(const QPoint &pos)
     else if (act == aOpen)
         EventViewWindow::open(event);
     else if (act == aViewLive)
-    {
-        LiveFeedWidget *w = new LiveFeedWidget;
-        w->setWindow();
-        w->setAttribute(Qt::WA_DeleteOnClose);
-        w->setCamera(event.locationCamera());
-        w->show();
-    }
+        LiveViewWindow::openWindow(this, event.locationCamera())->show();
 #if 0
     else if (act->parentWidget() == searchMenu)
     {
