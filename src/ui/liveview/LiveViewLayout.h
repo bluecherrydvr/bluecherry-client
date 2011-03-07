@@ -51,6 +51,9 @@ public:
     QDeclarativeItem *dropTarget() const;
     QDeclarativeItem *dragItem() const;
 
+    QByteArray saveLayout() const;
+    bool loadLayout(const QByteArray &data);
+
     /* Called at the start of a drag movement operation for the item */
     Q_INVOKABLE void startDrag(QDeclarativeItem *item, DragDropMode mode = DragSwap);
     Q_INVOKABLE void updateDrag();

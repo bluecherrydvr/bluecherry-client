@@ -12,6 +12,7 @@
 #include <QDateTime>
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <QDataStream>
 
 LiveFeedItem::LiveFeedItem(QDeclarativeItem *parent)
     : QDeclarativeItem(parent)
@@ -115,12 +116,13 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
     QMenu menu(event->widget());
 
-    menu.addAction(tr("Snapshot"), this, SLOT(saveSnapshot()))->setEnabled(m_camera && !m_camera.mjpegStream()->currentFrame().isNull());
-    menu.addSeparator();
-
     MJpegFeedItem *mjpeg = findChild<MJpegFeedItem*>(QLatin1String("mjpegFeed"));
+
     if (mjpeg)
     {
+        menu.addAction(tr("Snapshot"), this, SLOT(saveSnapshot()))->setEnabled(mjpeg->stream() && !mjpeg->stream()->currentFrame().isNull());
+        menu.addSeparator();
+
         QAction *a = menu.addAction(mjpeg->isPaused() ? tr("Paused") : tr("Pause"), mjpeg, SLOT(togglePaused()));
         a->setCheckable(true);
         a->setChecked(mjpeg->isPaused());
@@ -136,4 +138,20 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     actClose->setEnabled(m_camera);
 
     menu.exec(event->screenPos());
+}
+
+void LiveFeedItem::saveState(QDataStream *stream)
+{
+    Q_ASSERT(stream);
+
+    *stream << m_camera;
+}
+
+void LiveFeedItem::loadState(QDataStream *stream)
+{
+    Q_ASSERT(stream);
+
+    DVRCamera c;
+    *stream >> c;
+    setCamera(c);
 }

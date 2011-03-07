@@ -631,6 +631,77 @@ void LiveViewLayout::dropEvent(QGraphicsSceneDragDropEvent *event)
         event->acceptProposedAction();
 }
 
+QByteArray LiveViewLayout::saveLayout() const
+{
+    QByteArray re;
+    QDataStream data(&re, QIODevice::WriteOnly);
+    data.setVersion(QDataStream::Qt_4_5);
+
+    data << m_rows << m_columns;
+    foreach (QDeclarativeItem *item, m_items)
+    {
+        if (!item)
+            data << -1;
+        else if (!item->metaObject()->invokeMethod(item, "saveState", Qt::DirectConnection, Q_ARG(QDataStream*,&data)))
+        {
+            qWarning() << "Failed to save LiveViewLayout state for item" << item;
+            data << -1;
+        }
+    }
+
+    return re;
+}
+
+bool LiveViewLayout::loadLayout(const QByteArray &buf)
+{
+    if (buf.isEmpty())
+        return false;
+
+    QDataStream data(buf);
+    data.setVersion(QDataStream::Qt_4_5);
+
+    int rc, cc;
+    data >> rc >> cc;
+    if (data.status() != QDataStream::Ok)
+        return false;
+
+    setGridSize(rc, cc);
+
+    qDebug() << buf.toHex();
+
+    for (int r = 0; r < rc; ++r)
+    {
+        for (int c = 0; c < cc; ++c)
+        {
+            qint64 pos = data.device()->pos();
+            int value = -1;
+            data >> value;
+
+            qDebug("%d", value);
+
+            QDeclarativeItem *item = 0;
+
+            if (value != -1)
+            {
+                /* Seek back to before the field we peeked at */
+                data.device()->seek(pos);
+
+                item = createNewItem();
+                if (!item->metaObject()->invokeMethod(item, "loadState", Qt::DirectConnection, Q_ARG(QDataStream*,&data)))
+                {
+                    qWarning() << "Failed to load LiveViewLayout state";
+                    delete item;
+                    item = 0;
+                }
+            }
+
+            set(r, c, item);
+        }
+    }
+
+    return (data.status() == QDataStream::Ok);
+}
+
 void LiveViewLayoutProps::setFixedAspectRatio(bool v)
 {
     if (m_fixedAspectRatio == v)

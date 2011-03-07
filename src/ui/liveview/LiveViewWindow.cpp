@@ -183,9 +183,6 @@ void LiveViewWindow::savedLayoutChanged(int index)
     if (recursing)
         return;
 
-    /* XXXXXXX */
-    return;
-
     if (static_cast<SavedLayoutsModel*>(m_savedLayouts->model())->isNewLayoutItem(index))
     {
         QString re = QInputDialog::getText(window(), tr("Create camera layout"), tr("Enter a name for the new camera layout:"));
@@ -201,7 +198,7 @@ void LiveViewWindow::savedLayoutChanged(int index)
         recursing = true;
 
         index = m_savedLayouts->count() - 1;
-        //m_savedLayouts->insertItem(index, re, m_liveView->saveLayout());
+        m_savedLayouts->insertItem(index, re, m_liveView->layout()->saveLayout());
         m_savedLayouts->setCurrentIndex(index);
 
         recursing = false;
@@ -211,7 +208,7 @@ void LiveViewWindow::savedLayoutChanged(int index)
     saveLayout();
 
     QByteArray data = m_savedLayouts->itemData(index, SavedLayoutsModel::LayoutDataRole).toByteArray();
-    //if (!data.isEmpty() && !m_liveView->loadLayout(data))
+    if (!data.isEmpty() && !m_liveView->layout()->loadLayout(data))
         qDebug() << "Failed to load camera layout" << m_savedLayouts->itemText(index);
 
     m_lastLayoutIndex = index;
@@ -224,8 +221,8 @@ void LiveViewWindow::saveLayout()
     if (m_lastLayoutIndex < 0)
         return;
 
-    //QByteArray data = m_liveView->saveLayout();
-    //m_savedLayouts->setItemData(m_lastLayoutIndex, data, SavedLayoutsModel::LayoutDataRole);
+    QByteArray data = m_liveView->layout()->saveLayout();
+    m_savedLayouts->setItemData(m_lastLayoutIndex, data, SavedLayoutsModel::LayoutDataRole);
 }
 
 void LiveViewWindow::showLayoutMenu(const QPoint &rpos, int index)

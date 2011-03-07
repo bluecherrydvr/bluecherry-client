@@ -6,6 +6,8 @@
 
 /* Base of LiveFeed.qml, used to implement some features that are currently missing in pure QML. */
 
+class QDataStream;
+
 class LiveFeedItem : public QDeclarativeItem
 {
     Q_OBJECT
@@ -20,6 +22,9 @@ public:
     DVRCamera camera() const { return m_camera; }
     QString cameraName() const { return m_camera ? m_camera.displayName() : QLatin1String(" "); }
     QString statusText() const { return m_statusText; }
+
+    Q_INVOKABLE void saveState(QDataStream *stream);
+    Q_INVOKABLE void loadState(QDataStream *stream);
 
 public slots:
     void setCamera(const DVRCamera &camera);
