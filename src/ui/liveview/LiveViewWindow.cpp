@@ -14,6 +14,7 @@
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QApplication>
+#include <QShortcut>
 
 #ifdef Q_OS_MAC
 #include <QMacStyle>
@@ -49,7 +50,7 @@ LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, const DVRCamera &cam
 
 LiveViewWindow::LiveViewWindow(QWidget *parent)
     : QWidget(parent), m_liveView(new LiveViewArea), m_savedLayouts(new QComboBox), m_lastLayoutIndex(-1), m_autoSized(false),
-      m_isLayoutChanging(false)
+      m_isLayoutChanging(false), m_fsSetWindow(false)
 {
     QBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
@@ -120,6 +121,16 @@ LiveViewWindow::LiveViewWindow(QWidget *parent)
                            tr("4x4"), mapper, SLOT(map()));
     mapper->setMapping(a, 4);
 
+    spacer = new QWidget;
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    toolBar->addWidget(spacer);
+
+    a = toolBar->addAction(QIcon(QLatin1String(":/icons/application-resize-full.png")),
+                       tr("Fullscreen"), this, SLOT(toggleFullScreen()));
+    a->setShortcut(Qt::Key_F11);
+
+    new QShortcut(Qt::Key_Escape, this, SLOT(exitFullScreen()), 0, Qt::WindowShortcut);
+
     connect(m_liveView->layout(), SIGNAL(layoutChanged()), SLOT(saveLayout()));
 
     layout->addWidget(toolBar);
@@ -150,14 +161,17 @@ void LiveViewWindow::doAutoResize()
     if (m_liveView->sizeHint().isEmpty())
         return;
 
-    QSize hint = sizeHint();
+    if (!isFullScreen())
+    {
+        QSize hint = sizeHint();
+        const QRect rect = QApplication::desktop()->availableGeometry(this);
 
-    const QRect rect = QApplication::desktop()->availableGeometry(this);
+        hint.rwidth() = qRound(qMin(rect.width()*.9, double(hint.rwidth())));
+        hint.rheight() = qRound(qMin(rect.height()*.9, double(hint.rheight())));
 
-    hint.rwidth() = qRound(qMin(rect.width()*.9, double(hint.rwidth())));
-    hint.rheight() = qRound(qMin(rect.height()*.9, double(hint.rheight())));
+        resize(hint);
+    }
 
-    resize(hint);
     setAutoSized(false);
 }
 
@@ -267,5 +281,32 @@ void LiveViewWindow::showLayoutMenu(const QPoint &rpos, int index)
             m_savedLayouts->setCurrentIndex(i);
         else
             savedLayoutChanged(i);
+    }
+}
+
+void LiveViewWindow::setFullScreen(bool on)
+{
+    if (on == isFullScreen())
+        return;
+
+    if (on)
+    {
+        if (!isWindow())
+        {
+            setWindowFlags(windowFlags() | Qt::Window);
+            m_fsSetWindow = true;
+        }
+
+        showFullScreen();
+    }
+    else
+    {
+        if (m_fsSetWindow)
+        {
+            setWindowFlags(windowFlags() & ~Qt::Window);
+            m_fsSetWindow = false;
+        }
+
+        showNormal();
     }
 }

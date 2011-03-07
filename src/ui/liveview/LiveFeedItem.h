@@ -33,6 +33,7 @@ public slots:
     void close();
 
     void openNewWindow();
+    void openFullScreen();
     void saveSnapshot(const QString &file = QString());
 
     void setStatusText(const QString &text);

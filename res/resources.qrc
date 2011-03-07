@@ -27,5 +27,6 @@
         <file>icon64.png</file>
         <file>bluecherry.png</file>
         <file>control-000-small.png</file>
+        <file>application-resize-full.png</file>
     </qresource>
 </RCC>

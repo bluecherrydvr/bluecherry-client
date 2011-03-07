@@ -586,9 +586,7 @@ bool LiveViewLayout::drop()
 
 QPointF LiveViewLayout::cursorItemPos() const
 {
-    QWidget *w = QApplication::activeWindow();
-    if (w)
-        w = w->childAt(w->mapFromGlobal(QCursor::pos()));
+    QWidget *w = QApplication::widgetAt(QCursor::pos());
 
     QGraphicsView *view = qobject_cast<QGraphicsView*>(w ? w->parentWidget() : 0);
     if (view)

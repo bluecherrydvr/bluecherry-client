@@ -29,6 +29,10 @@ public slots:
     bool setLayout(const QString &layout);
     void saveLayout();
 
+    void setFullScreen(bool fullScreen = true);
+    void toggleFullScreen() { setFullScreen(!isFullScreen()); }
+    void exitFullScreen() { setFullScreen(false); }
+
 signals:
     void layoutChanged(const QString &layout);
 
@@ -41,7 +45,7 @@ private:
     LiveViewArea * const m_liveView;
     QComboBox * const m_savedLayouts;
     int m_lastLayoutIndex;
-    bool m_autoSized, m_isLayoutChanging;
+    bool m_autoSized, m_isLayoutChanging, m_fsSetWindow;
 };
 
 #endif // LIVEVIEWWINDOW_H

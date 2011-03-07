@@ -101,9 +101,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(m_liveView, SIGNAL(layoutChanged(QString)), SLOT(liveViewLayoutChanged(QString)));
 
-    new QShortcut(QKeySequence(Qt::Key_F11), m_liveView, SLOT(toggleFullScreen()));
-    new QShortcut(QKeySequence(Qt::Key_Escape), m_liveView, SLOT(closeFullScreen()));
-
     connect(bcApp, SIGNAL(sslConfirmRequired(DVRServer*,QList<QSslError>,QSslConfiguration)),
             SLOT(sslConfirmRequired(DVRServer*,QList<QSslError>,QSslConfiguration)));
     connect(bcApp, SIGNAL(queryLivePaused()), SLOT(queryLivePaused()));
