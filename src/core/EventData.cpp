@@ -35,7 +35,7 @@ EventLevel &EventLevel::operator=(const QString &str)
         level = Info;
     else if (str == QLatin1String("warn"))
         level = Warning;
-    else if (str == QLatin1String("alarm"))
+    else if (str == QLatin1String("alrm") || str == QLatin1String("alarm"))
         level = Alarm;
     else if (str == QLatin1String("critical"))
         level = Critical;
