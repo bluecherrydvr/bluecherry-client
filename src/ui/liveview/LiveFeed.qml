@@ -68,10 +68,56 @@ LiveFeedBase {
         onErrorTextChanged: feedItem.setStatusText(errorText)
     }
 
+    onPtzEnabledChanged: {
+        if (!ptzEnabled)
+            feedItem.customCursor = LiveFeedBase.DefaultCursor
+    }
+
     MouseArea {
         anchors.fill: feed
 
-        onPressed: feedItem.focus = true
+        hoverEnabled: feedItem.ptzEnabled
+
+        onPressed: {
+            feedItem.focus = true
+        }
+
+        onClicked: {
+            if (!feedItem.ptzEnabled)
+                return;
+
+            console.log("click ptz magic")
+        }
+
+        onPositionChanged: {
+            if (!feedItem.ptzEnabled)
+                return;
+
+            var xarea = width / 4, yarea = height / 4;
+            if (mouse.x < xarea) {
+                if (mouse.y <= yarea)
+                    feedItem.customCursor = LiveFeedBase.MoveCursorNW
+                else if (mouse.y >= 3*yarea)
+                    feedItem.customCursor = LiveFeedBase.MoveCursorSW
+                else
+                    feedItem.customCursor = LiveFeedBase.MoveCursorW
+            } else if (mouse.x >= 3*xarea) {
+                if (mouse.y <= yarea)
+                    feedItem.customCursor = LiveFeedBase.MoveCursorNE
+                else if (mouse.y >= 3*yarea)
+                    feedItem.customCursor = LiveFeedBase.MoveCursorSE
+                else
+                    feedItem.customCursor = LiveFeedBase.MoveCursorE
+            }
+            else if (mouse.y <= yarea)
+                feedItem.customCursor = LiveFeedBase.MoveCursorN
+            else if (mouse.y >= 3*yarea)
+                feedItem.customCursor = LiveFeedBase.MoveCursorS
+            else
+                feedItem.customCursor = LiveFeedBase.DefaultCursor
+        }
+
+        onExited: feedItem.customCursor = LiveFeedBase.DefaultCursor
     }
 
     Rectangle {

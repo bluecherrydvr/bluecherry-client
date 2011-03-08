@@ -5,6 +5,7 @@
     <qresource prefix="/images">
         <file>logo.png</file>
         <file>loading.gif</file>
+        <file>ptz-arrow.png</file>
     </qresource>
     <qresource prefix="/icons">
         <file>status.png</file>

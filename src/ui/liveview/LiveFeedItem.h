@@ -11,17 +11,35 @@ class QDataStream;
 class LiveFeedItem : public QDeclarativeItem
 {
     Q_OBJECT
+    Q_ENUMS(CustomCursor)
 
     Q_PROPERTY(DVRCamera camera READ camera WRITE setCamera NOTIFY cameraChanged)
     Q_PROPERTY(QString cameraName READ cameraName NOTIFY cameraNameChanged)
     Q_PROPERTY(QString statusText READ statusText NOTIFY statusTextChanged)
+    Q_PROPERTY(CustomCursor customCursor READ customCursor WRITE setCustomCursor)
+    Q_PROPERTY(bool ptzEnabled READ ptzEnabled WRITE setPtzEnabled NOTIFY ptzEnabledChanged)
 
 public:
+    enum CustomCursor {
+        DefaultCursor = 0,
+        MoveCursorN,
+        MoveCursorS,
+        MoveCursorW,
+        MoveCursorE,
+        MoveCursorNW,
+        MoveCursorNE,
+        MoveCursorSW,
+        MoveCursorSE
+    };
+
     explicit LiveFeedItem(QDeclarativeItem *parent = 0);
 
     DVRCamera camera() const { return m_camera; }
     QString cameraName() const { return m_camera ? m_camera.displayName() : QLatin1String(" "); }
     QString statusText() const { return m_statusText; }
+
+    CustomCursor customCursor() const { return m_customCursor; }
+    bool ptzEnabled() const { return m_ptzEnabled; }
 
     Q_INVOKABLE void saveState(QDataStream *stream);
     Q_INVOKABLE void loadState(QDataStream *stream);
@@ -37,12 +55,16 @@ public slots:
     void saveSnapshot(const QString &file = QString());
 
     void setStatusText(const QString &text);
+    void setCustomCursor(CustomCursor cursor);
+    void setPtzEnabled(bool ptzEnabled);
+    void togglePtzEnabled() { setPtzEnabled(!ptzEnabled()); }
 
 signals:
     void cameraChanged(const DVRCamera &camera);
     void cameraNameChanged(const QString &cameraName);
     void pausedChanged(bool isPaused);
     void statusTextChanged(const QString &statusText);
+    void ptzEnabledChanged(bool ptzEnabled);
 
 protected:
     virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
@@ -53,6 +75,8 @@ private slots:
 private:
     DVRCamera m_camera;
     QString m_statusText;
+    CustomCursor m_customCursor;
+    bool m_ptzEnabled;
 };
 
 #endif // LIVEFEEDITEM_H

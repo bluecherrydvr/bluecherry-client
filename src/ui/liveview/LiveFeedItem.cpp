@@ -13,9 +13,10 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QDataStream>
+#include <QPixmapCache>
 
 LiveFeedItem::LiveFeedItem(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent)
+    : QDeclarativeItem(parent), m_customCursor(DefaultCursor), m_ptzEnabled(false)
 {
 }
 
@@ -122,17 +123,20 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     QMenu menu(event->widget());
 
     MJpegFeedItem *mjpeg = findChild<MJpegFeedItem*>(QLatin1String("mjpegFeed"));
+    if (!mjpeg)
+        return;
 
-    if (mjpeg)
-    {
-        menu.addAction(tr("Snapshot"), this, SLOT(saveSnapshot()))->setEnabled(mjpeg->stream() && !mjpeg->stream()->currentFrame().isNull());
-        menu.addSeparator();
+    menu.addAction(tr("Snapshot"), this, SLOT(saveSnapshot()))->setEnabled(mjpeg->stream() && !mjpeg->stream()->currentFrame().isNull());
+    menu.addSeparator();
 
-        QAction *a = menu.addAction(mjpeg->isPaused() ? tr("Paused") : tr("Pause"), mjpeg, SLOT(togglePaused()));
-        a->setCheckable(true);
-        a->setChecked(mjpeg->isPaused());
-        a->setEnabled(m_camera && (m_camera.mjpegStream() || a->isChecked()));
-    }
+    QAction *a = menu.addAction(tr("Pan / Tilt / Zoom"), this, SLOT(togglePtzEnabled()));
+    a->setCheckable(true);
+    a->setChecked(ptzEnabled());
+
+    a = menu.addAction(mjpeg->isPaused() ? tr("Paused") : tr("Pause"), mjpeg, SLOT(togglePaused()));
+    a->setCheckable(true);
+    a->setChecked(mjpeg->isPaused());
+    a->setEnabled(m_camera && (m_camera.mjpegStream() || a->isChecked()));
 
     menu.addSeparator();
     menu.addAction(tr("Open in window"), this, SLOT(openNewWindow()));
@@ -159,4 +163,63 @@ void LiveFeedItem::loadState(QDataStream *stream)
     DVRCamera c;
     *stream >> c;
     setCamera(c);
+}
+
+void LiveFeedItem::setCustomCursor(CustomCursor cursor)
+{
+    if (cursor == m_customCursor)
+        return;
+
+    m_customCursor = cursor;
+
+    int rotate = 0;
+
+    switch (m_customCursor)
+    {
+    case DefaultCursor:
+        setCursor(QCursor());
+        return;
+    case MoveCursorE:
+        break;
+    case MoveCursorSE:
+        rotate = 45;
+        break;
+    case MoveCursorS:
+        rotate = 90;
+        break;
+    case MoveCursorSW:
+        rotate = 135;
+        break;
+    case MoveCursorW:
+        rotate = 180;
+        break;
+    case MoveCursorNW:
+        rotate = 225;
+        break;
+    case MoveCursorN:
+        rotate = 270;
+        break;
+    case MoveCursorNE:
+        rotate = 315;
+        break;
+    }
+
+    QString key = QString::fromLatin1("ptzcursor-%1").arg(rotate);
+    QPixmap pm;
+    if (!QPixmapCache::find(key, pm))
+    {
+        pm = QPixmap(QLatin1String(":/images/ptz-arrow.png")).transformed(QTransform().rotate(rotate), Qt::SmoothTransformation);
+        QPixmapCache::insert(key, pm);
+    }
+
+    setCursor(QCursor(pm));
+}
+
+void LiveFeedItem::setPtzEnabled(bool ptzEnabled)
+{
+    if (m_ptzEnabled == ptzEnabled)
+        return;
+
+    m_ptzEnabled = ptzEnabled;
+    emit ptzEnabledChanged(m_ptzEnabled);
 }
