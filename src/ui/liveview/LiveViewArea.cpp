@@ -2,6 +2,7 @@
 #include "LiveViewLayout.h"
 #include "LiveFeedItem.h"
 #include "MJpegFeedItem.h"
+#include "core/CameraPtzControl.h"
 #include <QGLWidget>
 #include <QDeclarativeContext>
 
@@ -11,6 +12,7 @@ LiveViewArea::LiveViewArea(QWidget *parent)
     qmlRegisterType<LiveViewLayout>("Bluecherry", 1, 0, "LiveViewLayout");
     qmlRegisterType<MJpegFeedItem>("Bluecherry", 1, 0, "MJpegFeed");
     qmlRegisterType<LiveFeedItem>("Bluecherry", 1, 0, "LiveFeedBase");
+    qmlRegisterUncreatableType<CameraPtzControl>("Bluecherry", 1, 0, "CameraPtzControl", QLatin1String(""));
 
     setViewport(new QGLWidget);
     setResizeMode(SizeRootObjectToView);

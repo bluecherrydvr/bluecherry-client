@@ -1,6 +1,7 @@
 #include "LiveFeedItem.h"
 #include "MJpegFeedItem.h"
 #include "core/BluecherryApp.h"
+#include "core/CameraPtzControl.h"
 #include "LiveViewWindow.h"
 #include "ui/MainWindow.h"
 #include "utils/FileUtils.h"
@@ -16,7 +17,7 @@
 #include <QPixmapCache>
 
 LiveFeedItem::LiveFeedItem(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent), m_customCursor(DefaultCursor), m_ptzEnabled(false)
+    : QDeclarativeItem(parent), m_customCursor(DefaultCursor), m_ptz(0)
 {
 }
 
@@ -131,7 +132,7 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
     QAction *a = menu.addAction(tr("Pan / Tilt / Zoom"), this, SLOT(togglePtzEnabled()));
     a->setCheckable(true);
-    a->setChecked(ptzEnabled());
+    a->setChecked(ptz());
 
     a = menu.addAction(mjpeg->isPaused() ? tr("Paused") : tr("Pause"), mjpeg, SLOT(togglePaused()));
     a->setCheckable(true);
@@ -217,9 +218,19 @@ void LiveFeedItem::setCustomCursor(CustomCursor cursor)
 
 void LiveFeedItem::setPtzEnabled(bool ptzEnabled)
 {
-    if (m_ptzEnabled == ptzEnabled)
+    if (ptzEnabled == !!m_ptz)
         return;
 
-    m_ptzEnabled = ptzEnabled;
-    emit ptzEnabledChanged(m_ptzEnabled);
+    if (ptzEnabled)
+    {
+        m_ptz = new CameraPtzControl(camera(), this);
+    }
+    else
+    {
+        m_ptz->cancel();
+        m_ptz->deleteLater();
+        m_ptz = 0;
+    }
+
+    emit ptzChanged(m_ptz);
 }

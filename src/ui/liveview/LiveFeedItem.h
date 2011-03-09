@@ -7,6 +7,7 @@
 /* Base of LiveFeed.qml, used to implement some features that are currently missing in pure QML. */
 
 class QDataStream;
+class CameraPtzControl;
 
 class LiveFeedItem : public QDeclarativeItem
 {
@@ -17,7 +18,7 @@ class LiveFeedItem : public QDeclarativeItem
     Q_PROPERTY(QString cameraName READ cameraName NOTIFY cameraNameChanged)
     Q_PROPERTY(QString statusText READ statusText NOTIFY statusTextChanged)
     Q_PROPERTY(CustomCursor customCursor READ customCursor WRITE setCustomCursor)
-    Q_PROPERTY(bool ptzEnabled READ ptzEnabled WRITE setPtzEnabled NOTIFY ptzEnabledChanged)
+    Q_PROPERTY(CameraPtzControl* ptz READ ptz NOTIFY ptzChanged)
 
 public:
     enum CustomCursor {
@@ -39,7 +40,7 @@ public:
     QString statusText() const { return m_statusText; }
 
     CustomCursor customCursor() const { return m_customCursor; }
-    bool ptzEnabled() const { return m_ptzEnabled; }
+    CameraPtzControl *ptz() const { return m_ptz; }
 
     Q_INVOKABLE void saveState(QDataStream *stream);
     Q_INVOKABLE void loadState(QDataStream *stream);
@@ -57,14 +58,14 @@ public slots:
     void setStatusText(const QString &text);
     void setCustomCursor(CustomCursor cursor);
     void setPtzEnabled(bool ptzEnabled);
-    void togglePtzEnabled() { setPtzEnabled(!ptzEnabled()); }
+    void togglePtzEnabled() { setPtzEnabled(!ptz()); }
 
 signals:
     void cameraChanged(const DVRCamera &camera);
     void cameraNameChanged(const QString &cameraName);
     void pausedChanged(bool isPaused);
     void statusTextChanged(const QString &statusText);
-    void ptzEnabledChanged(bool ptzEnabled);
+    void ptzChanged(CameraPtzControl *ptz);
 
 protected:
     virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
@@ -75,8 +76,8 @@ private slots:
 private:
     DVRCamera m_camera;
     QString m_statusText;
+    CameraPtzControl *m_ptz;
     CustomCursor m_customCursor;
-    bool m_ptzEnabled;
 };
 
 #endif // LIVEFEEDITEM_H

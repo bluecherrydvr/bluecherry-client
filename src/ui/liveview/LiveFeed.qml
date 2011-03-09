@@ -68,29 +68,48 @@ LiveFeedBase {
         onErrorTextChanged: feedItem.setStatusText(errorText)
     }
 
-    onPtzEnabledChanged: {
-        if (!ptzEnabled)
+    onPtzChanged: {
+        if (ptz == null)
             feedItem.customCursor = LiveFeedBase.DefaultCursor
     }
 
     MouseArea {
         anchors.fill: feed
 
-        hoverEnabled: feedItem.ptzEnabled
+        hoverEnabled: feedItem.ptz != null
 
         onPressed: {
             feedItem.focus = true
         }
 
         onClicked: {
-            if (!feedItem.ptzEnabled)
+            if (feedItem.ptz == null)
                 return;
 
-            console.log("click ptz magic")
+            var xarea = width / 4, yarea = height / 4
+            var movement = CameraPtzControl.NoMovement
+
+            if (mouse.x < xarea)
+                movement |= CameraPtzControl.MoveWest
+            else if (mouse.x >= 3*xarea)
+                movement |= CameraPtzControl.MoveEast
+            if (mouse.y < yarea)
+                movement |= CameraPtzControl.MoveNorth
+            else if (mouse.y >= 3*yarea)
+                movement |= CameraPtzControl.MoveSouth
+
+            feedItem.ptz.move(movement)
+        }
+
+        onDoubleClicked: {
+            if (feedItem.ptz == null)
+                return;
+
+            console.log("doubleclick ptz zoom magic")
         }
 
         onPositionChanged: {
-            if (!feedItem.ptzEnabled)
+            if (feedItem.ptz == null)
                 return;
 
             var xarea = width / 4, yarea = height / 4;
