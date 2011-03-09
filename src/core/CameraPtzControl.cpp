@@ -17,6 +17,52 @@ CameraPtzControl::Movements CameraPtzControl::pendingMovements() const
     return NoMovement;
 }
 
+bool CameraPtzControl::parseResponse(QNetworkReply *reply, QXmlStreamReader &xml, QString &errorMessage)
+{
+    int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    if (status == 401)
+    {
+        errorMessage = QLatin1String("authentication needed");
+        return false;
+    }
+    else if (status == 403)
+    {
+        errorMessage = QLatin1String("access denied");
+        return false;
+    }
+
+    if (reply->error() != QNetworkReply::NoError)
+    {
+        errorMessage = reply->errorString();
+        return false;
+    }
+
+    QByteArray data = reply->readAll();
+    xml.addData(data);
+
+    if (xml.hasError() || !xml.readNextStartElement() || xml.name() != QLatin1String("response"))
+    {
+        errorMessage = QLatin1String("invalid command response");
+        return false;
+    }
+    else
+    {
+        QStringRef s = xml.attributes().value(QLatin1String("status"));
+        if (s != QLatin1String("OK"))
+        {
+            if (s != QLatin1String("ERROR"))
+                errorMessage = QLatin1String("invalid command status");
+            else if (!xml.readNextStartElement() || xml.name() != QLatin1String("error"))
+                errorMessage = QLatin1String("unknown error");
+            else
+                errorMessage = xml.readElementText();
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void CameraPtzControl::sendQuery()
 {
     QUrl url(QLatin1String("/ptz.php"));
@@ -34,59 +80,12 @@ void CameraPtzControl::queryResult()
     if (!reply)
         return;
 
-    int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-    if (status == 401)
-    {
-        qWarning() << "PTZ query failed with HTTP 401";
-        return;
-    }
-    else if (status == 403)
-    {
-        m_protocol = NoPtz;
-        m_capabilities = NoCapabilities;
-        emit infoUpdated();
-        return;
-    }
-
-    if (reply->error() != QNetworkReply::NoError)
-    {
-        qWarning() << "PTZ query failed:" << reply->errorString();
-        return;
-    }
-
-    QByteArray data = reply->readAll();
-    QXmlStreamReader xml(data);
-
-    status = -1;
+    QXmlStreamReader xml;
     QString error;
 
-    if (xml.hasError() || !xml.readNextStartElement() || xml.name() != QLatin1String("response"))
+    if (!parseResponse(reply, xml, error))
     {
-        status = 0;
-        error = QLatin1String("invalid command response");
-    }
-    else
-    {
-        QStringRef s = xml.attributes().value(QLatin1String("status"));
-        if (s == QLatin1String("OK"))
-        {
-            status = 1;
-        }
-        else
-        {
-            status = 0;
-            if (s != QLatin1String("ERROR"))
-                error = QLatin1String("invalid command status");
-            else if (!xml.readNextStartElement() || xml.name() != QLatin1String("error"))
-                error = QLatin1String("unknown error");
-            else
-                error = xml.readElementText();
-        }
-    }
-
-    if (status != 1)
-    {
-        qDebug() << "PTZ query error:" << error;
+        qWarning() << "PTZ query failed:" << error;
         return;
     }
 
@@ -125,7 +124,54 @@ void CameraPtzControl::queryResult()
 
 void CameraPtzControl::move(Movements movements, int panSpeed, int tiltSpeed, int duration)
 {
-    qDebug() << "PTZ move:" << movements;
+    if (!movements)
+        return;
+
+    QUrl url(QLatin1String("/ptz.php"));
+    url.addEncodedQueryItem("device", QByteArray::number(m_camera.uniqueId()));
+    url.addEncodedQueryItem("command", "move");
+
+    if (movements & MoveNorth)
+        url.addEncodedQueryItem("tilt", "u");
+    else if (movements & MoveSouth)
+        url.addEncodedQueryItem("tilt", "d");
+    if (movements & MoveWest)
+        url.addEncodedQueryItem("pan", "l");
+    else if (movements & MoveEast)
+        url.addEncodedQueryItem("pan", "r");
+    if (movements & MoveWide)
+        url.addEncodedQueryItem("zoom", "w");
+    else if (movements & MoveTele)
+        url.addEncodedQueryItem("zoom" ,"t");
+
+    if (panSpeed > 0)
+        url.addEncodedQueryItem("panspeed", QByteArray::number(panSpeed));
+    if (tiltSpeed > 0)
+        url.addEncodedQueryItem("tiltspeed", QByteArray::number(tiltSpeed));
+    if (duration > 0)
+        url.addEncodedQueryItem("duration", QByteArray::number(duration));
+
+    QNetworkReply *reply = m_camera.server()->api->sendRequest(url);
+    connect(reply, SIGNAL(finished()), reply, SLOT(deleteLater()));
+    connect(reply, SIGNAL(finished()), SLOT(moveResult()));
+}
+
+void CameraPtzControl::moveResult()
+{
+    QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
+    if (!reply)
+        return;
+
+    QXmlStreamReader xml;
+    QString error;
+
+    if (!parseResponse(reply, xml, error))
+    {
+        qWarning() << "PTZ move failed:" << error;
+        return;
+    }
+
+    qDebug() << "PTZ move succeeded";
 }
 
 void CameraPtzControl::cancel()

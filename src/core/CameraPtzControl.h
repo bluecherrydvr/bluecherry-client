@@ -4,6 +4,8 @@
 #include <QObject>
 #include "DVRCamera.h"
 
+class QNetworkReply;
+
 class CameraPtzControl : public QObject
 {
     Q_OBJECT
@@ -62,6 +64,7 @@ signals:
 
 private slots:
     void queryResult();
+    void moveResult();
 
 private:
     DVRCamera m_camera;
@@ -69,6 +72,7 @@ private:
     Capabilities m_capabilities;
 
     void sendQuery();
+    bool parseResponse(QNetworkReply *reply, QXmlStreamReader &xml, QString &errorMessage);
 };
 
 #endif // CAMERAPTZCONTROL_H

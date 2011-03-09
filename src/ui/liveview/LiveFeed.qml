@@ -101,12 +101,7 @@ LiveFeedBase {
             feedItem.ptz.move(movement)
         }
 
-        onDoubleClicked: {
-            if (feedItem.ptz == null)
-                return;
-
-            console.log("doubleclick ptz zoom magic")
-        }
+        onDoubleClicked: mouse.accepted = false
 
         onPositionChanged: {
             if (feedItem.ptz == null)
@@ -137,6 +132,30 @@ LiveFeedBase {
         }
 
         onExited: feedItem.customCursor = LiveFeedBase.DefaultCursor
+    }
+
+    Keys.onPressed: {
+        if (ptz == null || event.isAutoRepeat)
+            return
+
+        switch (event.key) {
+        case Qt.Key_Left:
+            ptz.move(CameraPtzControl.MoveWest)
+            break
+        case Qt.Key_Right:
+            ptz.move(CameraPtzControl.MoveEast)
+            break
+        case Qt.Key_Up:
+            ptz.move((event.modifiers & Qt.ShiftModifier) ? CameraPtzControl.MoveTele : CameraPtzControl.MoveNorth)
+            break
+        case Qt.Key_Down:
+            ptz.move((event.modifiers & Qt.ShiftModifier) ? CameraPtzControl.MoveWide : CameraPtzControl.MoveSouth)
+            break
+        default:
+            return
+        }
+
+        event.accepted = true
     }
 
     Rectangle {

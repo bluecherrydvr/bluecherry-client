@@ -69,6 +69,7 @@ signals:
 
 protected:
     virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
+    virtual void wheelEvent(QGraphicsSceneWheelEvent *event);
 
 private slots:
     void cameraDataUpdated();

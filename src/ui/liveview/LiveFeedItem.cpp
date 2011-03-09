@@ -234,3 +234,20 @@ void LiveFeedItem::setPtzEnabled(bool ptzEnabled)
 
     emit ptzChanged(m_ptz);
 }
+
+void LiveFeedItem::wheelEvent(QGraphicsSceneWheelEvent *event)
+{
+    if (!m_ptz)
+    {
+        event->ignore();
+        return;
+    }
+
+    event->accept();
+
+    int steps = event->delta() / 120;
+    if (!steps)
+        return;
+
+    m_ptz->move((steps < 0) ? CameraPtzControl::MoveWide : CameraPtzControl::MoveTele);
+}
