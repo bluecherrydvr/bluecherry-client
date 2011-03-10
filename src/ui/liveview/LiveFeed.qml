@@ -53,6 +53,89 @@ LiveFeedBase {
             onPressed: feedItem.focus = true
             onReleased: if (drag.active) feedItem.parent.drop()
         }
+
+        Rectangle {
+            id: headerPtzElement
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.left: parent.right
+            clip: true
+            width: 30 + ptzText.paintedWidth
+            visible: false
+
+            states: State {
+                name: "enabled"
+                when: feedItem.ptz != null
+
+                PropertyChanges {
+                    target: headerPtzElement
+                    visible: true
+                }
+
+                AnchorChanges {
+                    target: headerPtzElement
+                    anchors.left: undefined
+                    anchors.right: parent.right
+                }
+            }
+
+            transitions: [
+                Transition {
+                    to: "enabled"
+
+                    AnchorAnimation {
+                        duration: 400
+                        easing.type: Easing.OutQuad
+                    }
+                },
+                Transition {
+                    to: ""
+
+                    SequentialAnimation {
+                        AnchorAnimation {
+                            duration: 400
+                            easing.type: Easing.InQuad
+                        }
+                        PropertyAction {
+                            target: headerPtzElement
+                            property: "visible"
+                        }
+                    }
+                }
+            ]
+
+            gradient: Gradient {
+                GradientStop { position: 0; color: "#2d2d2d"; }
+                GradientStop { position: 1; color: "#030303"; }
+            }
+
+            Text {
+                id: ptzText
+
+                anchors.left: parent.left
+                anchors.leftMargin: 8
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                verticalAlignment: Qt.AlignVCenter
+                color: "#75c0ff"
+                text: "PTZ Enabled"
+            }
+
+            Image {
+                anchors.left: ptzText.right
+                anchors.leftMargin: 6
+                anchors.verticalCenter: parent.verticalCenter
+
+                source: ":/icons/down-arrow.png"
+            }
+
+            MouseArea {
+                acceptedButtons: MouseArea.Left | MouseArea.Right
+                anchors.fill: parent
+
+                onPressed: feedItem.showPtzMenu(headerPtzElement)
+            }
+        }
     }
 
     MJpegFeed {

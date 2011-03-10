@@ -56,6 +56,9 @@ public:
 
 public slots:
     void move(Movements movements, int panSpeed = -1, int tiltSpeed = -1, int duration = -1);
+    void moveToPreset(int preset);
+    void savePreset(int preset, const QString &name);
+    void clearPreset(int preset);
     void cancel();
 
 signals:

@@ -17,6 +17,11 @@ CameraPtzControl::Movements CameraPtzControl::pendingMovements() const
     return NoMovement;
 }
 
+bool CameraPtzControl::hasPendingActions() const
+{
+    return false;
+}
+
 bool CameraPtzControl::parseResponse(QNetworkReply *reply, QXmlStreamReader &xml, QString &errorMessage)
 {
     int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
@@ -172,6 +177,40 @@ void CameraPtzControl::moveResult()
     }
 
     qDebug() << "PTZ move succeeded";
+}
+
+void CameraPtzControl::moveToPreset(int preset)
+{
+    QUrl url(QLatin1String("/ptz.php"));
+    url.addEncodedQueryItem("device", QByteArray::number(m_camera.uniqueId()));
+    url.addEncodedQueryItem("command", "go");
+    url.addEncodedQueryItem("preset", QByteArray::number(preset));
+
+    QNetworkReply *reply = m_camera.server()->api->sendRequest(url);
+    connect(reply, SIGNAL(finished()), reply, SLOT(deleteLater()));
+}
+
+void CameraPtzControl::savePreset(int preset, const QString &name)
+{
+    QUrl url(QLatin1String("/ptz.php"));
+    url.addEncodedQueryItem("device", QByteArray::number(m_camera.uniqueId()));
+    url.addEncodedQueryItem("command", "save");
+    url.addEncodedQueryItem("preset", QByteArray::number(preset));
+    url.addQueryItem(QLatin1String("name"), name);
+
+    QNetworkReply *reply = m_camera.server()->api->sendRequest(url);
+    connect(reply, SIGNAL(finished()), reply, SLOT(deleteLater()));
+}
+
+void CameraPtzControl::clearPreset(int preset)
+{
+    QUrl url(QLatin1String("/ptz.php"));
+    url.addEncodedQueryItem("device", QByteArray::number(m_camera.uniqueId()));
+    url.addEncodedQueryItem("command", "clear");
+    url.addEncodedQueryItem("preset", QByteArray::number(preset));
+
+    QNetworkReply *reply = m_camera.server()->api->sendRequest(url);
+    connect(reply, SIGNAL(finished()), reply, SLOT(deleteLater()));
 }
 
 void CameraPtzControl::cancel()

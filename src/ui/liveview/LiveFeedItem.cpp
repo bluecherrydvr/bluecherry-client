@@ -251,3 +251,34 @@ void LiveFeedItem::wheelEvent(QGraphicsSceneWheelEvent *event)
 
     m_ptz->move((steps < 0) ? CameraPtzControl::MoveWide : CameraPtzControl::MoveTele);
 }
+
+void LiveFeedItem::showPtzMenu(QDeclarativeItem *sourceItem)
+{
+    if (!m_ptz)
+        return;
+
+    QMenu menu;
+
+    QMenu *presetsMenu = menu.addMenu(tr("Presets"));
+    presetsMenu->addAction(tr("Full view"));
+    presetsMenu->addAction(tr("Register"));
+    presetsMenu->addAction(tr("Front door"));
+
+    menu.addAction(tr("Save preset..."), this, SLOT(ptzPresetSave()));
+
+    menu.addSeparator();
+    menu.addAction(tr("Cancel actions"))->setEnabled(m_ptz->hasPendingActions());
+    menu.addSeparator();
+    menu.addAction(tr("Disable PTZ"), this, SLOT(togglePtzEnabled()));
+
+    QPoint pos = QCursor::pos();
+    if (sourceItem)
+    {
+        QGraphicsView *view = sourceItem->scene()->views().value(0);
+        Q_ASSERT(view && sourceItem->scene()->views().size() == 1);
+        if (view)
+            pos = view->mapToGlobal(view->mapFromScene(sourceItem->mapToScene(0, sourceItem->height())));
+    }
+
+    menu.exec(pos);
+}

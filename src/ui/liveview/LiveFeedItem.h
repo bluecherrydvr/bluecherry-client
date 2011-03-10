@@ -60,6 +60,8 @@ public slots:
     void setPtzEnabled(bool ptzEnabled);
     void togglePtzEnabled() { setPtzEnabled(!ptz()); }
 
+    void showPtzMenu(QDeclarativeItem *sourceItem = 0);
+
 signals:
     void cameraChanged(const DVRCamera &camera);
     void cameraNameChanged(const QString &cameraName);
