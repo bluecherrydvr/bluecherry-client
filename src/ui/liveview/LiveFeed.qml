@@ -171,53 +171,72 @@ LiveFeedBase {
             feedItem.focus = true
         }
 
+        function moveForPosition(x, y) {
+            var xarea = width / 4, yarea = height / 4
+            var movement = CameraPtzControl.NoMovement
+
+            if (x < xarea)
+                movement |= CameraPtzControl.MoveWest
+            else if (x >= 3*xarea)
+                movement |= CameraPtzControl.MoveEast
+            if (y < yarea)
+                movement |= CameraPtzControl.MoveNorth
+            else if (y >= 3*yarea)
+                movement |= CameraPtzControl.MoveSouth
+
+            return movement;
+        }
+
         onClicked: {
             if (feedItem.ptz == null)
                 return;
 
-            var xarea = width / 4, yarea = height / 4
-            var movement = CameraPtzControl.NoMovement
-
-            if (mouse.x < xarea)
-                movement |= CameraPtzControl.MoveWest
-            else if (mouse.x >= 3*xarea)
-                movement |= CameraPtzControl.MoveEast
-            if (mouse.y < yarea)
-                movement |= CameraPtzControl.MoveNorth
-            else if (mouse.y >= 3*yarea)
-                movement |= CameraPtzControl.MoveSouth
-
-            feedItem.ptz.move(movement)
+            var movement = moveForPosition(mouse.x, mouse.y)
+            if (movement != CameraPtzControl.NoMovement)
+                feedItem.ptz.move(movement)
+            else
+                mouse.accepted = false
         }
 
-        onDoubleClicked: mouse.accepted = false
+        onDoubleClicked: {
+            if (feedItem.ptz == null)
+                return;
+
+            if (moveForPosition(mouse.x, mouse.y) != CameraPtzControl.NoMovement)
+                mouse.accepted = false
+            else
+                feedItem.ptz.move(CameraPtzControl.MoveTele)
+        }
 
         onPositionChanged: {
             if (feedItem.ptz == null)
                 return;
 
-            var xarea = width / 4, yarea = height / 4;
-            if (mouse.x < xarea) {
-                if (mouse.y <= yarea)
-                    feedItem.customCursor = LiveFeedBase.MoveCursorNW
-                else if (mouse.y >= 3*yarea)
-                    feedItem.customCursor = LiveFeedBase.MoveCursorSW
+            var movements = moveForPosition(mouse.x, mouse.y)
+            var cursor = LiveFeedBase.DefaultCursor
+
+            if (movements & CameraPtzControl.MoveNorth) {
+                if (movements & CameraPtzControl.MoveWest)
+                    cursor = LiveFeedBase.MoveCursorNW
+                else if (movements & CameraPtzControl.MoveEast)
+                    cursor = LiveFeedBase.MoveCursorNE
                 else
-                    feedItem.customCursor = LiveFeedBase.MoveCursorW
-            } else if (mouse.x >= 3*xarea) {
-                if (mouse.y <= yarea)
-                    feedItem.customCursor = LiveFeedBase.MoveCursorNE
-                else if (mouse.y >= 3*yarea)
-                    feedItem.customCursor = LiveFeedBase.MoveCursorSE
-                else
-                    feedItem.customCursor = LiveFeedBase.MoveCursorE
+                    cursor = LiveFeedBase.MoveCursorN
             }
-            else if (mouse.y <= yarea)
-                feedItem.customCursor = LiveFeedBase.MoveCursorN
-            else if (mouse.y >= 3*yarea)
-                feedItem.customCursor = LiveFeedBase.MoveCursorS
-            else
-                feedItem.customCursor = LiveFeedBase.DefaultCursor
+            else if (movements & CameraPtzControl.MoveSouth) {
+                if (movements & CameraPtzControl.MoveWest)
+                    cursor = LiveFeedBase.MoveCursorSW
+                else if (movements & CameraPtzControl.MoveEast)
+                    cursor = LiveFeedBase.MoveCursorSE
+                else
+                    cursor = LiveFeedBase.MoveCursorS
+            }
+            else if (movements & CameraPtzControl.MoveWest)
+                cursor = LiveFeedBase.MoveCursorW
+            else if (movements & CameraPtzControl.MoveEast)
+                cursor = LiveFeedBase.MoveCursorE
+
+            feedItem.customCursor = cursor
         }
 
         onExited: feedItem.customCursor = LiveFeedBase.DefaultCursor
