@@ -109,6 +109,12 @@ LiveFeedBase {
                 GradientStop { position: 1; color: "#030303"; }
             }
 
+            Behavior on width {
+                SmoothedAnimation {
+                    velocity: 250
+                }
+            }
+
             Text {
                 id: ptzText
 
@@ -118,7 +124,7 @@ LiveFeedBase {
                 anchors.bottom: parent.bottom
                 verticalAlignment: Qt.AlignVCenter
                 color: "#75c0ff"
-                text: "PTZ Enabled"
+                text: (feedItem.ptz == null || feedItem.ptz.currentPreset < 0) ? "PTZ Enabled" : ("PTZ: " + feedItem.ptz.currentPresetName)
             }
 
             Image {

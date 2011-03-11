@@ -15,6 +15,8 @@
 #include <QGraphicsView>
 #include <QDataStream>
 #include <QPixmapCache>
+#include <QInputDialog>
+#include <QSignalMapper>
 
 LiveFeedItem::LiveFeedItem(QDeclarativeItem *parent)
     : QDeclarativeItem(parent), m_customCursor(DefaultCursor), m_ptz(0)
@@ -260,14 +262,23 @@ void LiveFeedItem::showPtzMenu(QDeclarativeItem *sourceItem)
     QMenu menu;
 
     QMenu *presetsMenu = menu.addMenu(tr("Presets"));
-    presetsMenu->addAction(tr("Full view"));
-    presetsMenu->addAction(tr("Register"));
-    presetsMenu->addAction(tr("Front door"));
+    QSignalMapper mapper;
+    connect(&mapper, SIGNAL(mapped(int)), m_ptz, SLOT(moveToPreset(int)));
+
+    const QMap<int,QString> &presets = m_ptz->presets();
+    for (QMap<int,QString>::ConstIterator it = presets.constBegin(); it != presets.constEnd(); ++it)
+    {
+        QAction *a = presetsMenu->addAction(it.value(), &mapper, SLOT(map()));
+        mapper.setMapping(a, it.key());
+    }
+
+    presetsMenu->addSeparator();
+    presetsMenu->addAction(tr("Edit presets..."));
 
     menu.addAction(tr("Save preset..."), this, SLOT(ptzPresetSave()));
 
     menu.addSeparator();
-    menu.addAction(tr("Cancel actions"))->setEnabled(m_ptz->hasPendingActions());
+    menu.addAction(tr("Cancel actions"), m_ptz, SLOT(cancel()))->setEnabled(m_ptz->hasPendingActions());
     menu.addSeparator();
     menu.addAction(tr("Disable PTZ"), this, SLOT(togglePtzEnabled()));
 
@@ -281,4 +292,19 @@ void LiveFeedItem::showPtzMenu(QDeclarativeItem *sourceItem)
     }
 
     menu.exec(pos);
+}
+
+void LiveFeedItem::ptzPresetSave()
+{
+    if (!m_ptz)
+        return;
+
+    QGraphicsView *view = scene()->views().value(0);
+    Q_ASSERT(view && scene()->views().size() == 1);
+
+    QString re = QInputDialog::getText(view, tr("Save PTZ preset"), tr("Enter a name for the new PTZ preset:"));
+    if (re.isEmpty())
+        return;
+
+    m_ptz->savePreset(-1, re);
 }

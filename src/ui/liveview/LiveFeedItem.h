@@ -61,6 +61,7 @@ public slots:
     void togglePtzEnabled() { setPtzEnabled(!ptz()); }
 
     void showPtzMenu(QDeclarativeItem *sourceItem = 0);
+    void ptzPresetSave();
 
 signals:
     void cameraChanged(const DVRCamera &camera);

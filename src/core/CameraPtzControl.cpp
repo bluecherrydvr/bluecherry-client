@@ -6,7 +6,8 @@
 #include <QXmlStreamReader>
 
 CameraPtzControl::CameraPtzControl(const DVRCamera &camera, QObject *parent)
-    : QObject(parent), m_camera(camera), m_protocol(UnknownProtocol), m_capabilities(NoCapabilities)
+    : QObject(parent), m_camera(camera), m_protocol(UnknownProtocol), m_capabilities(NoCapabilities),
+      m_currentPreset(-1)
 {
     Q_ASSERT(m_camera.isValid());
     sendQuery();
@@ -96,9 +97,17 @@ void CameraPtzControl::queryResult()
 
     m_protocol = UnknownProtocol;
     m_capabilities = NoCapabilities;
+    m_presets.clear();
 
-    while (xml.readNextStartElement())
+    while (xml.readNext() != QXmlStreamReader::Invalid)
     {
+        if (xml.tokenType() == QXmlStreamReader::EndElement
+            && xml.name() == QLatin1String("response"))
+            break;
+
+        if (xml.tokenType() != QXmlStreamReader::StartElement)
+            continue;
+
         if (xml.name() == QLatin1String("protocol"))
         {
             QString s = xml.readElementText();
@@ -117,6 +126,21 @@ void CameraPtzControl::queryResult()
             if (attr.value(QLatin1String("zoom")) == "1")
                 m_capabilities |= CanZoom;
         }
+        else if (xml.name() == QLatin1String("presets"))
+        {
+            while (xml.readNextStartElement())
+            {
+                if (xml.name() == QLatin1String("preset"))
+                {
+                    bool ok = false;
+                    int id = xml.attributes().value(QLatin1String("id")).toString().toInt(&ok);
+                    if (ok)
+                        m_presets.insert(id, xml.readElementText());
+                    else
+                        qDebug() << "PTZ parsing error: failed to parse <preset> element";
+                }
+            }
+        }
         else
             xml.skipCurrentElement();
     }
@@ -125,6 +149,30 @@ void CameraPtzControl::queryResult()
         qDebug() << "PTZ parsing error:" << xml.errorString();
 
     emit infoUpdated();
+    if (m_currentPreset >= 0)
+        emit currentPresetChanged(m_currentPreset);
+}
+
+bool CameraPtzControl::parsePresetResponse(QXmlStreamReader &xml, int &presetId, QString &presetName)
+{
+    presetId = -1;
+    presetName.clear();
+
+    while (xml.readNextStartElement())
+    {
+        if (xml.name() == QLatin1String("preset"))
+        {
+            bool ok = false;
+            presetId = xml.attributes().value(QLatin1String("id")).toString().toInt(&ok);
+            if (!ok)
+                presetId = -1;
+            else
+                presetName = xml.readElementText();
+            break;
+        }
+    }
+
+    return (presetId >= 0 && !presetName.isEmpty());
 }
 
 void CameraPtzControl::move(Movements movements, int panSpeed, int tiltSpeed, int duration)
@@ -177,6 +225,11 @@ void CameraPtzControl::moveResult()
     }
 
     qDebug() << "PTZ move succeeded";
+    if (m_currentPreset >= 0)
+    {
+        m_currentPreset = -1;
+        emit currentPresetChanged(m_currentPreset);
+    }
 }
 
 void CameraPtzControl::moveToPreset(int preset)
@@ -188,10 +241,53 @@ void CameraPtzControl::moveToPreset(int preset)
 
     QNetworkReply *reply = m_camera.server()->api->sendRequest(url);
     connect(reply, SIGNAL(finished()), reply, SLOT(deleteLater()));
+    connect(reply, SIGNAL(finished()), SLOT(moveToPresetResult()));
 }
 
-void CameraPtzControl::savePreset(int preset, const QString &name)
+void CameraPtzControl::moveToPresetResult()
 {
+    QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
+    if (!reply)
+        return;
+
+    QXmlStreamReader xml;
+    QString error;
+
+    if (!parseResponse(reply, xml, error))
+    {
+        qWarning() << "PTZ preset move failed:" << error;
+        return;
+    }
+
+    int presetId = -1;
+    QString presetName;
+
+    if (!parsePresetResponse(xml, presetId, presetName))
+    {
+        qWarning() << "PTZ preset move succeeded, but was not a valid response";
+        return;
+    }
+
+    m_currentPreset = presetId;
+    emit currentPresetChanged(presetId);
+}
+
+int CameraPtzControl::nextPresetID() const
+{
+    QMap<int,QString>::ConstIterator it = m_presets.begin();
+    int i = qMin(it != m_presets.end() ? it.key() : 1, 1);
+
+    for (; it != m_presets.end() && it.key() == i; ++it, ++i)
+        ;
+
+    return i;
+}
+
+int CameraPtzControl::savePreset(int preset, const QString &name)
+{
+    if (preset < 0)
+        preset = nextPresetID();
+
     QUrl url(QLatin1String("/ptz.php"));
     url.addEncodedQueryItem("device", QByteArray::number(m_camera.uniqueId()));
     url.addEncodedQueryItem("command", "save");
@@ -200,6 +296,44 @@ void CameraPtzControl::savePreset(int preset, const QString &name)
 
     QNetworkReply *reply = m_camera.server()->api->sendRequest(url);
     connect(reply, SIGNAL(finished()), reply, SLOT(deleteLater()));
+    connect(reply, SIGNAL(finished()), SLOT(savePresetResult()));
+
+    return preset;
+}
+
+void CameraPtzControl::savePresetResult()
+{
+    QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
+    if (!reply)
+        return;
+
+    QXmlStreamReader xml;
+    QString error;
+
+    if (!parseResponse(reply, xml, error))
+    {
+        qWarning() << "PTZ preset save failed:" << error;
+        return;
+    }
+
+    int presetId = -1;
+    QString presetName;
+
+    if (!parsePresetResponse(xml, presetId, presetName))
+    {
+        qWarning() << "PTZ preset save succeeded, but was not a valid response";
+        return;
+    }
+
+    qDebug() << "PTZ preset save succeeded for preset" << presetId << ":" << presetName;
+
+    /* It might be a good idea to create this before it succeeds, and handle failure instead.
+     * That depends on how the UI ends up working. */
+    m_presets.insert(presetId, presetName);
+    emit infoUpdated();
+
+    m_currentPreset = presetId;
+    emit currentPresetChanged(m_currentPreset);
 }
 
 void CameraPtzControl::clearPreset(int preset)

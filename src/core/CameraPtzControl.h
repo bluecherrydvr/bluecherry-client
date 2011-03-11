@@ -2,6 +2,7 @@
 #define CAMERAPTZCONTROL_H
 
 #include <QObject>
+#include <QMap>
 #include "DVRCamera.h"
 
 class QNetworkReply;
@@ -17,6 +18,9 @@ class CameraPtzControl : public QObject
     Q_PROPERTY(PtzProtocol protocol READ protocol NOTIFY infoUpdated)
     Q_PROPERTY(Capabilities capabilities READ capabilities NOTIFY infoUpdated)
     Q_PROPERTY(Movements pendingMovements READ pendingMovements NOTIFY pendingMovementsChanged)
+    /* May be -1, indicating that we're not currently on a preset (or don't know that we are) */
+    Q_PROPERTY(int currentPreset READ currentPreset WRITE moveToPreset NOTIFY currentPresetChanged)
+    Q_PROPERTY(QString currentPresetName READ currentPresetName NOTIFY currentPresetChanged)
 
 public:
     enum PtzProtocol {
@@ -54,28 +58,41 @@ public:
     bool hasPendingActions() const;
     Movements pendingMovements() const;
 
+    int currentPreset() const { return m_currentPreset; }
+    QString currentPresetName() const { return m_presets.value(m_currentPreset); }
+
+    const QMap<int,QString> &presets() const { return m_presets; }
+    int nextPresetID() const;
+
 public slots:
     void move(Movements movements, int panSpeed = -1, int tiltSpeed = -1, int duration = -1);
     void moveToPreset(int preset);
-    void savePreset(int preset, const QString &name);
+    /* preset ID may be -1 to automatically use the next available ID, which is returned */
+    int savePreset(int preset, const QString &name);
     void clearPreset(int preset);
     void cancel();
 
 signals:
     void infoUpdated();
     void pendingMovementsChanged(Movements pendingMovements);
+    void currentPresetChanged(int currentPreset);
 
 private slots:
     void queryResult();
     void moveResult();
+    void moveToPresetResult();
+    void savePresetResult();
 
 private:
     DVRCamera m_camera;
+    QMap<int,QString> m_presets;
     PtzProtocol m_protocol;
     Capabilities m_capabilities;
+    int m_currentPreset;
 
     void sendQuery();
     bool parseResponse(QNetworkReply *reply, QXmlStreamReader &xml, QString &errorMessage);
+    bool parsePresetResponse(QXmlStreamReader &xml, int &presetId, QString &presetName);
 };
 
 #endif // CAMERAPTZCONTROL_H
