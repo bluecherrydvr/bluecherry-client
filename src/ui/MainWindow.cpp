@@ -95,9 +95,8 @@ MainWindow::MainWindow(QWidget *parent)
         m_centerSplit->setSizes(QList<int>() << 1000 << 100);
     }
 
-    QString lastLayout = settings.value(QLatin1String("ui/cameraArea/lastLayout")).toString();
-    if (!lastLayout.isEmpty())
-        m_liveView->setLayout(lastLayout);
+    QString lastLayout = settings.value(QLatin1String("ui/cameraArea/lastLayout"), tr("Default")).toString();
+    m_liveView->setLayout(lastLayout);
 
     connect(m_liveView, SIGNAL(layoutChanged(QString)), SLOT(liveViewLayoutChanged(QString)));
 
