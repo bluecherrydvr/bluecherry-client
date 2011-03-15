@@ -6,7 +6,7 @@
 #include <QXmlStreamReader>
 
 CameraPtzControl::CameraPtzControl(const DVRCamera &camera, QObject *parent)
-    : QObject(parent), m_camera(camera), m_protocol(UnknownProtocol), m_capabilities(NoCapabilities),
+    : QObject(parent), m_camera(camera), m_protocol(DVRCamera::UnknownProtocol), m_capabilities(NoCapabilities),
       m_currentPreset(-1)
 {
     Q_ASSERT(m_camera.isValid());
@@ -95,7 +95,7 @@ void CameraPtzControl::queryResult()
         return;
     }
 
-    m_protocol = UnknownProtocol;
+    m_protocol = DVRCamera::UnknownProtocol;
     m_capabilities = NoCapabilities;
     m_presets.clear();
 
@@ -110,11 +110,7 @@ void CameraPtzControl::queryResult()
 
         if (xml.name() == QLatin1String("protocol"))
         {
-            QString s = xml.readElementText();
-            if (s == QLatin1String("none"))
-                m_protocol = NoPtz;
-            else if (s.contains(QLatin1String("basic")))
-                m_protocol = BasicPtz;
+            m_protocol = DVRCamera::parseProtocol(xml.readElementText());
         }
         else if (xml.name() == QLatin1String("capabilities"))
         {

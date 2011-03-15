@@ -10,12 +10,11 @@ class QNetworkReply;
 class CameraPtzControl : public QObject
 {
     Q_OBJECT
-    Q_ENUMS(PtzProtocol)
     Q_FLAGS(Capability Capabilities)
     Q_FLAGS(Movement Movements)
 
     Q_PROPERTY(DVRCamera camera READ camera)
-    Q_PROPERTY(PtzProtocol protocol READ protocol NOTIFY infoUpdated)
+    Q_PROPERTY(int protocol READ protocol NOTIFY infoUpdated)
     Q_PROPERTY(Capabilities capabilities READ capabilities NOTIFY infoUpdated)
     Q_PROPERTY(Movements pendingMovements READ pendingMovements NOTIFY pendingMovementsChanged)
     /* May be -1, indicating that we're not currently on a preset (or don't know that we are) */
@@ -23,12 +22,6 @@ class CameraPtzControl : public QObject
     Q_PROPERTY(QString currentPresetName READ currentPresetName NOTIFY currentPresetChanged)
 
 public:
-    enum PtzProtocol {
-        UnknownProtocol = -1,
-        NoPtz,
-        BasicPtz
-    };
-
     enum Capability {
         NoCapabilities = 0,
         CanPan = 1 << 0,
@@ -51,7 +44,7 @@ public:
     explicit CameraPtzControl(const DVRCamera &camera, QObject *parent = 0);
 
     const DVRCamera &camera() const { return m_camera; }
-    PtzProtocol protocol() const { return m_protocol; }
+    DVRCamera::PtzProtocol protocol() const { return m_protocol; }
     Capabilities capabilities() const { return m_capabilities; }
 
     bool isReady() const;
@@ -88,7 +81,7 @@ private slots:
 private:
     DVRCamera m_camera;
     QMap<int,QString> m_presets;
-    PtzProtocol m_protocol;
+    DVRCamera::PtzProtocol m_protocol;
     Capabilities m_capabilities;
     int m_currentPreset;
 

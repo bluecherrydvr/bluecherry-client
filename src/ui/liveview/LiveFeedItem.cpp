@@ -133,20 +133,23 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     menu.addAction(tr("Snapshot"), this, SLOT(saveSnapshot()))->setEnabled(mjpeg->stream() && !mjpeg->stream()->currentFrame().isNull());
     menu.addSeparator();
 
-    QAction *a = menu.addAction(tr("Pan / Tilt / Zoom"), this, SLOT(togglePtzEnabled()));
-    a->setCheckable(true);
-    a->setChecked(ptz());
-
     QMenu *ptzmenu = 0;
-    if (m_ptz)
+    if (camera().hasPtz())
     {
-        ptzmenu = ptzMenu();
-        ptzmenu->setTitle(tr("PTZ"));
-        menu.addMenu(ptzmenu);
-        menu.addSeparator();
+        QAction *a = menu.addAction(tr("Pan / Tilt / Zoom"), this, SLOT(togglePtzEnabled()));
+        a->setCheckable(true);
+        a->setChecked(ptz());
+
+        if (m_ptz)
+        {
+            ptzmenu = ptzMenu();
+            ptzmenu->setTitle(tr("PTZ"));
+            menu.addMenu(ptzmenu);
+            menu.addSeparator();
+        }
     }
 
-    a = menu.addAction(mjpeg->isPaused() ? tr("Paused") : tr("Pause"), mjpeg, SLOT(togglePaused()));
+    QAction *a = menu.addAction(mjpeg->isPaused() ? tr("Paused") : tr("Pause"), mjpeg, SLOT(togglePaused()));
     a->setCheckable(true);
     a->setChecked(mjpeg->isPaused());
     a->setEnabled(m_camera && (m_camera.mjpegStream() || a->isChecked()));

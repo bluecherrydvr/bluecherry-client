@@ -31,6 +31,7 @@ public:
     QByteArray streamUrl;
     QWeakPointer<MJpegStream> mjpegStream;
     bool isLoaded, isOnline;
+    qint8 ptzProtocol;
 
     DVRCameraData(DVRServer *server, int uniqueID);
     virtual ~DVRCameraData();
@@ -49,6 +50,14 @@ class DVRCamera
     friend class DVRServer;
 
 public:
+    enum PtzProtocol {
+        UnknownProtocol = -1,
+        NoPtz,
+        PelcoPtz
+    };
+
+    static PtzProtocol parseProtocol(const QString &protocol);
+
     static DVRCamera getCamera(int serverID, int cameraID);
     static DVRCamera getCamera(DVRServer *server, int cameraID);
 
@@ -77,6 +86,9 @@ public:
     bool isOnline() const { return d && d->isOnline; }
     bool canStream() const { return d && !d->streamUrl.isEmpty() && isOnline(); }
     QSharedPointer<MJpegStream> mjpegStream();
+
+    PtzProtocol ptzProtocol() const { return d ? static_cast<PtzProtocol>(d->ptzProtocol) : NoPtz; }
+    bool hasPtz() const { return d ? (d->ptzProtocol > 0) : false; }
 
     bool parseXML(QXmlStreamReader &xml);
 

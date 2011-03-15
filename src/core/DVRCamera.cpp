@@ -35,6 +35,16 @@ void DVRCamera::setOnline(bool on)
     emit d->onlineChanged(on);
 }
 
+DVRCamera::PtzProtocol DVRCamera::parseProtocol(const QString &protocol)
+{
+    if (protocol == QLatin1String("none") || protocol.isEmpty())
+        return NoPtz;
+    else if (protocol == QLatin1String("PELCO"))
+        return PelcoPtz;
+    else
+        return UnknownProtocol;
+}
+
 bool DVRCamera::parseXML(QXmlStreamReader &xml)
 {
     if (!isValid())
@@ -54,6 +64,10 @@ bool DVRCamera::parseXML(QXmlStreamReader &xml)
         if (xml.name() == QLatin1String("device_name"))
         {
             name = xml.readElementText();
+        }
+        else if (xml.name() == QLatin1String("ptz_control_protocol"))
+        {
+            d->ptzProtocol = parseProtocol(xml.readElementText());
         }
         else
             xml.skipCurrentElement();
