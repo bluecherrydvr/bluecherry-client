@@ -14,11 +14,11 @@ PtzPresetsWindow::PtzPresetsWindow(CameraPtzControl *ptzControl, QWidget *parent
     connect(ptzControl, SIGNAL(destroyed()), SLOT(close()));
 
     setWindowTitle(tr("PTZ - %1").arg(m_ptz->camera().displayName()));
-    resize(140, 200);
+    resize(150, 200);
 
     QBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
-    layout->setSpacing(0);
+    layout->setSpacing(3);
 
     m_presetsView = new QTreeView;
     m_presetsView->setRootIsDecorated(false);
