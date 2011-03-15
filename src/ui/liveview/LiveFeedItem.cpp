@@ -22,7 +22,7 @@
 #include <QDesktopWidget>
 
 LiveFeedItem::LiveFeedItem(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent), m_customCursor(DefaultCursor), m_ptz(0)
+    : QDeclarativeItem(parent), m_customCursor(DefaultCursor)
 {
 }
 
@@ -236,21 +236,15 @@ void LiveFeedItem::setCustomCursor(CustomCursor cursor)
 
 void LiveFeedItem::setPtzEnabled(bool ptzEnabled)
 {
-    if (ptzEnabled == !!m_ptz)
+    if (ptzEnabled == !m_ptz.isNull())
         return;
 
     if (ptzEnabled)
-    {
-        m_ptz = new CameraPtzControl(camera(), this);
-    }
+        m_ptz = CameraPtzControl::sharedObjectFor(camera());
     else
-    {
-        m_ptz->cancel();
-        m_ptz->deleteLater();
-        m_ptz = 0;
-    }
+        m_ptz.clear();
 
-    emit ptzChanged(m_ptz);
+    emit ptzChanged(m_ptz.data());
 }
 
 void LiveFeedItem::wheelEvent(QGraphicsSceneWheelEvent *event)
@@ -276,7 +270,7 @@ QMenu *LiveFeedItem::ptzMenu()
 
     QMenu *presetsMenu = menu->addMenu(tr("Presets"));
     QSignalMapper *mapper = new QSignalMapper(presetsMenu);
-    connect(mapper, SIGNAL(mapped(int)), m_ptz, SLOT(moveToPreset(int)));
+    connect(mapper, SIGNAL(mapped(int)), m_ptz.data(), SLOT(moveToPreset(int)));
 
     const QMap<int,QString> &presets = m_ptz->presets();
     for (QMap<int,QString>::ConstIterator it = presets.constBegin(); it != presets.constEnd(); ++it)
@@ -292,7 +286,7 @@ QMenu *LiveFeedItem::ptzMenu()
     menu->addAction(tr("Save preset..."), this, SLOT(ptzPresetSave()));
 
     menu->addSeparator();
-    menu->addAction(tr("Cancel actions"), m_ptz, SLOT(cancel()))->setEnabled(m_ptz->hasPendingActions());
+    menu->addAction(tr("Cancel actions"), m_ptz.data(), SLOT(cancel()))->setEnabled(m_ptz->hasPendingActions());
     menu->addSeparator();
     menu->addAction(tr("Disable PTZ"), this, SLOT(togglePtzEnabled()));
 
@@ -339,7 +333,7 @@ void LiveFeedItem::ptzPresetWindow()
     if (!m_ptz)
         return;
 
-    PtzPresetsWindow *window = new PtzPresetsWindow(m_ptz, bcApp->mainWindow);
+    PtzPresetsWindow *window = new PtzPresetsWindow(m_ptz.data(), bcApp->mainWindow);
     window->setAttribute(Qt::WA_DeleteOnClose);
 
     QGraphicsView *view = scene()->views().value(0);

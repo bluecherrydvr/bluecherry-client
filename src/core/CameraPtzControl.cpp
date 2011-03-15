@@ -5,12 +5,27 @@
 #include <QDebug>
 #include <QXmlStreamReader>
 
+Q_DECLARE_METATYPE(QWeakPointer<CameraPtzControl>)
+
 CameraPtzControl::CameraPtzControl(const DVRCamera &camera, QObject *parent)
     : QObject(parent), m_camera(camera), m_protocol(DVRCamera::UnknownProtocol), m_capabilities(NoCapabilities),
       m_currentPreset(-1)
 {
     Q_ASSERT(m_camera.isValid());
     sendQuery();
+}
+
+QSharedPointer<CameraPtzControl> CameraPtzControl::sharedObjectFor(const DVRCamera &camera)
+{
+    QSharedPointer<CameraPtzControl> ptr = static_cast<QObject*>(camera)->property("cameraPtzControl")
+                                           .value<QWeakPointer<CameraPtzControl> >();
+    if (ptr.isNull())
+    {
+        ptr = QSharedPointer<CameraPtzControl>(new CameraPtzControl(camera));
+        static_cast<QObject*>(camera)->setProperty("cameraPtzControl", QVariant::fromValue(ptr.toWeakRef()));
+    }
+
+    return ptr;
 }
 
 CameraPtzControl::Movements CameraPtzControl::pendingMovements() const

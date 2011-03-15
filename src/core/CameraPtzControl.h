@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QMap>
+#include <QSharedPointer>
 #include "DVRCamera.h"
 
 class QNetworkReply;
@@ -40,6 +41,8 @@ public:
         MoveTele = 1 << 5
     };
     Q_DECLARE_FLAGS(Movements, Movement)
+
+    static QSharedPointer<CameraPtzControl> sharedObjectFor(const DVRCamera &camera);
 
     explicit CameraPtzControl(const DVRCamera &camera, QObject *parent = 0);
 

@@ -2,6 +2,7 @@
 #define LIVEFEEDITEM_H
 
 #include <QDeclarativeItem>
+#include <QSharedPointer>
 #include "core/DVRCamera.h"
 
 /* Base of LiveFeed.qml, used to implement some features that are currently missing in pure QML. */
@@ -40,7 +41,7 @@ public:
     QString statusText() const { return m_statusText; }
 
     CustomCursor customCursor() const { return m_customCursor; }
-    CameraPtzControl *ptz() const { return m_ptz; }
+    CameraPtzControl *ptz() const { return m_ptz.data(); }
 
     Q_INVOKABLE void saveState(QDataStream *stream);
     Q_INVOKABLE void loadState(QDataStream *stream);
@@ -81,7 +82,7 @@ private slots:
 private:
     DVRCamera m_camera;
     QString m_statusText;
-    CameraPtzControl *m_ptz;
+    QSharedPointer<CameraPtzControl> m_ptz;
     CustomCursor m_customCursor;
 
     /* Caller is responsible for deleting */
