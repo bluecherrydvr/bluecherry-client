@@ -1,5 +1,6 @@
 #include "LiveFeedItem.h"
 #include "MJpegFeedItem.h"
+#include "PtzPresetsWindow.h"
 #include "core/BluecherryApp.h"
 #include "core/CameraPtzControl.h"
 #include "LiveViewWindow.h"
@@ -136,6 +137,15 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     a->setCheckable(true);
     a->setChecked(ptz());
 
+    QMenu *ptzmenu = 0;
+    if (m_ptz)
+    {
+        ptzmenu = ptzMenu();
+        ptzmenu->setTitle(tr("PTZ"));
+        menu.addMenu(ptzmenu);
+        menu.addSeparator();
+    }
+
     a = menu.addAction(mjpeg->isPaused() ? tr("Paused") : tr("Pause"), mjpeg, SLOT(togglePaused()));
     a->setCheckable(true);
     a->setChecked(mjpeg->isPaused());
@@ -150,6 +160,7 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     actClose->setEnabled(m_camera);
 
     menu.exec(event->screenPos());
+    delete ptzmenu;
 }
 
 void LiveFeedItem::saveState(QDataStream *stream)
@@ -254,33 +265,41 @@ void LiveFeedItem::wheelEvent(QGraphicsSceneWheelEvent *event)
     m_ptz->move((steps < 0) ? CameraPtzControl::MoveWide : CameraPtzControl::MoveTele);
 }
 
+QMenu *LiveFeedItem::ptzMenu()
+{
+    QMenu *menu = new QMenu;
+
+    QMenu *presetsMenu = menu->addMenu(tr("Presets"));
+    QSignalMapper *mapper = new QSignalMapper(presetsMenu);
+    connect(mapper, SIGNAL(mapped(int)), m_ptz, SLOT(moveToPreset(int)));
+
+    const QMap<int,QString> &presets = m_ptz->presets();
+    for (QMap<int,QString>::ConstIterator it = presets.constBegin(); it != presets.constEnd(); ++it)
+    {
+        QAction *a = presetsMenu->addAction(it.value(), mapper, SLOT(map()));
+        mapper->setMapping(a, it.key());
+    }
+
+    presetsMenu->addSeparator();
+    presetsMenu->addAction(tr("Edit presets..."), this, SLOT(ptzPresetWindow()));
+
+    menu->addAction(tr("Edit presets..."), this, SLOT(ptzPresetWindow()));
+    menu->addAction(tr("Save preset..."), this, SLOT(ptzPresetSave()));
+
+    menu->addSeparator();
+    menu->addAction(tr("Cancel actions"), m_ptz, SLOT(cancel()))->setEnabled(m_ptz->hasPendingActions());
+    menu->addSeparator();
+    menu->addAction(tr("Disable PTZ"), this, SLOT(togglePtzEnabled()));
+
+    return menu;
+}
+
 void LiveFeedItem::showPtzMenu(QDeclarativeItem *sourceItem)
 {
     if (!m_ptz)
         return;
 
-    QMenu menu;
-
-    QMenu *presetsMenu = menu.addMenu(tr("Presets"));
-    QSignalMapper mapper;
-    connect(&mapper, SIGNAL(mapped(int)), m_ptz, SLOT(moveToPreset(int)));
-
-    const QMap<int,QString> &presets = m_ptz->presets();
-    for (QMap<int,QString>::ConstIterator it = presets.constBegin(); it != presets.constEnd(); ++it)
-    {
-        QAction *a = presetsMenu->addAction(it.value(), &mapper, SLOT(map()));
-        mapper.setMapping(a, it.key());
-    }
-
-    presetsMenu->addSeparator();
-    presetsMenu->addAction(tr("Edit presets..."));
-
-    menu.addAction(tr("Save preset..."), this, SLOT(ptzPresetSave()));
-
-    menu.addSeparator();
-    menu.addAction(tr("Cancel actions"), m_ptz, SLOT(cancel()))->setEnabled(m_ptz->hasPendingActions());
-    menu.addSeparator();
-    menu.addAction(tr("Disable PTZ"), this, SLOT(togglePtzEnabled()));
+    QMenu *menu = ptzMenu();
 
     QPoint pos = QCursor::pos();
     if (sourceItem)
@@ -291,7 +310,8 @@ void LiveFeedItem::showPtzMenu(QDeclarativeItem *sourceItem)
             pos = view->mapToGlobal(view->mapFromScene(sourceItem->mapToScene(0, sourceItem->height())));
     }
 
-    menu.exec(pos);
+    menu->exec(pos);
+    delete menu;
 }
 
 void LiveFeedItem::ptzPresetSave()
@@ -307,4 +327,14 @@ void LiveFeedItem::ptzPresetSave()
         return;
 
     m_ptz->savePreset(-1, re);
+}
+
+void LiveFeedItem::ptzPresetWindow()
+{
+    if (!m_ptz)
+        return;
+
+    PtzPresetsWindow *window = new PtzPresetsWindow(m_ptz, bcApp->mainWindow);
+    window->setAttribute(Qt::WA_DeleteOnClose);
+    window->show();
 }

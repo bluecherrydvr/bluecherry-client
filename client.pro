@@ -141,7 +141,9 @@ SOURCES += src/main.cpp \
     src/ui/liveview/LiveViewLayout.cpp \
     src/ui/liveview/LiveFeedItem.cpp \
     src/ui/liveview/LiveViewWindow.cpp \
-    src/core/CameraPtzControl.cpp
+    src/core/CameraPtzControl.cpp \
+    src/ui/liveview/PtzPresetsWindow.cpp \
+    src/core/PtzPresetsModel.cpp
 
 HEADERS  += src/ui/MainWindow.h \
     src/ui/OptionsDialog.h \
@@ -187,7 +189,9 @@ HEADERS  += src/ui/MainWindow.h \
     src/ui/liveview/LiveViewLayout.h \
     src/ui/liveview/LiveFeedItem.h \
     src/ui/liveview/LiveViewWindow.h \
-    src/core/CameraPtzControl.h
+    src/core/CameraPtzControl.h \
+    src/ui/liveview/PtzPresetsWindow.h \
+    src/core/PtzPresetsModel.h
 
 RESOURCES += \
     res/resources.qrc \

@@ -62,6 +62,7 @@ public slots:
 
     void showPtzMenu(QDeclarativeItem *sourceItem = 0);
     void ptzPresetSave();
+    void ptzPresetWindow();
 
 signals:
     void cameraChanged(const DVRCamera &camera);
@@ -82,6 +83,9 @@ private:
     QString m_statusText;
     CameraPtzControl *m_ptz;
     CustomCursor m_customCursor;
+
+    /* Caller is responsible for deleting */
+    QMenu *ptzMenu();
 };
 
 #endif // LIVEFEEDITEM_H
