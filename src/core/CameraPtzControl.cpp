@@ -71,8 +71,8 @@ bool CameraPtzControl::parseResponse(QNetworkReply *reply, QXmlStreamReader &xml
 
 void CameraPtzControl::sendQuery()
 {
-    QUrl url(QLatin1String("/ptz.php"));
-    url.addEncodedQueryItem("device", QByteArray::number(m_camera.uniqueId()));
+    QUrl url(QLatin1String("/media/ptz.php"));
+    url.addEncodedQueryItem("id", QByteArray::number(m_camera.uniqueId()));
     url.addEncodedQueryItem("command", "query");
 
     QNetworkReply *reply = m_camera.server()->api->sendRequest(url);
@@ -180,9 +180,12 @@ void CameraPtzControl::move(Movements movements, int panSpeed, int tiltSpeed, in
     if (!movements)
         return;
 
-    QUrl url(QLatin1String("/ptz.php"));
-    url.addEncodedQueryItem("device", QByteArray::number(m_camera.uniqueId()));
+    QUrl url(QLatin1String("/media/ptz.php"));
+    url.addEncodedQueryItem("id", QByteArray::number(m_camera.uniqueId()));
     url.addEncodedQueryItem("command", "move");
+    url.addEncodedQueryItem("panspeed", "32");
+    url.addEncodedQueryItem("tiltspeed", "32");
+    url.addEncodedQueryItem("duration", "250");
 
     if (movements & MoveNorth)
         url.addEncodedQueryItem("tilt", "u");
@@ -234,8 +237,8 @@ void CameraPtzControl::moveResult()
 
 void CameraPtzControl::moveToPreset(int preset)
 {
-    QUrl url(QLatin1String("/ptz.php"));
-    url.addEncodedQueryItem("device", QByteArray::number(m_camera.uniqueId()));
+    QUrl url(QLatin1String("/media/ptz.php"));
+    url.addEncodedQueryItem("id", QByteArray::number(m_camera.uniqueId()));
     url.addEncodedQueryItem("command", "go");
     url.addEncodedQueryItem("preset", QByteArray::number(preset));
 
@@ -288,8 +291,8 @@ int CameraPtzControl::savePreset(int preset, const QString &name)
     if (preset < 0)
         preset = nextPresetID();
 
-    QUrl url(QLatin1String("/ptz.php"));
-    url.addEncodedQueryItem("device", QByteArray::number(m_camera.uniqueId()));
+    QUrl url(QLatin1String("/media/ptz.php"));
+    url.addEncodedQueryItem("id", QByteArray::number(m_camera.uniqueId()));
     url.addEncodedQueryItem("command", "save");
     url.addEncodedQueryItem("preset", QByteArray::number(preset));
     url.addQueryItem(QLatin1String("name"), name);
@@ -338,8 +341,8 @@ void CameraPtzControl::savePresetResult()
 
 void CameraPtzControl::clearPreset(int preset)
 {
-    QUrl url(QLatin1String("/ptz.php"));
-    url.addEncodedQueryItem("device", QByteArray::number(m_camera.uniqueId()));
+    QUrl url(QLatin1String("/media/ptz.php"));
+    url.addEncodedQueryItem("id", QByteArray::number(m_camera.uniqueId()));
     url.addEncodedQueryItem("command", "clear");
     url.addEncodedQueryItem("preset", QByteArray::number(preset));
 
