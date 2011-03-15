@@ -172,7 +172,7 @@ bool CameraPtzControl::parsePresetResponse(QXmlStreamReader &xml, int &presetId,
         }
     }
 
-    return (presetId >= 0 && !presetName.isEmpty());
+    return (presetId >= 0);
 }
 
 void CameraPtzControl::move(Movements movements, int panSpeed, int tiltSpeed, int duration)
@@ -322,7 +322,7 @@ void CameraPtzControl::savePresetResult()
     int presetId = -1;
     QString presetName;
 
-    if (!parsePresetResponse(xml, presetId, presetName))
+    if (!parsePresetResponse(xml, presetId, presetName) || presetName.isEmpty())
     {
         qWarning() << "PTZ preset save succeeded, but was not a valid response";
         return;
@@ -339,6 +339,27 @@ void CameraPtzControl::savePresetResult()
     emit currentPresetChanged(m_currentPreset);
 }
 
+void CameraPtzControl::renamePreset(int preset, const QString &name)
+{
+    if (!m_presets.contains(preset) || m_presets[preset] == name)
+        return;
+
+    QUrl url(QLatin1String("/media/ptz.php"));
+    url.addEncodedQueryItem("id", QByteArray::number(m_camera.uniqueId()));
+    url.addEncodedQueryItem("command", "rename");
+    url.addEncodedQueryItem("preset", QByteArray::number(preset));
+    url.addQueryItem(QLatin1String("name"), name);
+
+    QNetworkReply *reply = m_camera.server()->api->sendRequest(url);
+    connect(reply, SIGNAL(finished()), reply, SLOT(deleteLater()));
+
+    m_presets[preset] = name;
+    emit infoUpdated();
+
+    if (preset == m_currentPreset)
+        emit currentPresetChanged(m_currentPreset);
+}
+
 void CameraPtzControl::clearPreset(int preset)
 {
     QUrl url(QLatin1String("/media/ptz.php"));
@@ -348,6 +369,41 @@ void CameraPtzControl::clearPreset(int preset)
 
     QNetworkReply *reply = m_camera.server()->api->sendRequest(url);
     connect(reply, SIGNAL(finished()), reply, SLOT(deleteLater()));
+    connect(reply, SIGNAL(finished()), SLOT(clearPresetResult()));
+}
+
+void CameraPtzControl::clearPresetResult()
+{
+    QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
+    if (!reply)
+        return;
+
+    QXmlStreamReader xml;
+    QString error;
+
+    if (!parseResponse(reply, xml, error))
+    {
+        qWarning() << "PTZ preset clear failed:" << error;
+        return;
+    }
+
+    int presetId = -1;
+    QString presetName;
+
+    if (!parsePresetResponse(xml, presetId, presetName))
+    {
+        qWarning() << "PTZ preset clear succeeded, but was not a valid response";
+        return;
+    }
+
+    if (m_currentPreset == presetId)
+    {
+        m_currentPreset = -1;
+        emit currentPresetChanged(m_currentPreset);
+    }
+
+    m_presets.remove(presetId);
+    emit infoUpdated();
 }
 
 void CameraPtzControl::cancel()

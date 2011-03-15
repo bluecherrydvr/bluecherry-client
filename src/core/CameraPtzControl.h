@@ -69,6 +69,7 @@ public slots:
     void moveToPreset(int preset);
     /* preset ID may be -1 to automatically use the next available ID, which is returned */
     int savePreset(int preset, const QString &name);
+    void renamePreset(int preset, const QString &name);
     void clearPreset(int preset);
     void cancel();
 
@@ -82,6 +83,7 @@ private slots:
     void moveResult();
     void moveToPresetResult();
     void savePresetResult();
+    void clearPresetResult();
 
 private:
     DVRCamera m_camera;
