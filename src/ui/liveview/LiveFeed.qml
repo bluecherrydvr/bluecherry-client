@@ -267,6 +267,21 @@ LiveFeedBase {
     }
 
     Rectangle {
+        id: focusRect
+        anchors.fill: parent
+        anchors.bottomMargin: 1
+        anchors.rightMargin: 1
+        color: "transparent"
+        border.color: "#2d9ae6"
+        border.width: 1
+        radius: 4
+        smooth: false
+        z: 3
+
+        visible: feedItem.activeFocus
+    }
+
+    Rectangle {
         id: statusOverlay
 
         color: "#BE000000"
