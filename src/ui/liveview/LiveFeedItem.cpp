@@ -18,6 +18,8 @@
 #include <QPixmapCache>
 #include <QInputDialog>
 #include <QSignalMapper>
+#include <QApplication>
+#include <QDesktopWidget>
 
 LiveFeedItem::LiveFeedItem(QDeclarativeItem *parent)
     : QDeclarativeItem(parent), m_customCursor(DefaultCursor), m_ptz(0)
@@ -339,5 +341,17 @@ void LiveFeedItem::ptzPresetWindow()
 
     PtzPresetsWindow *window = new PtzPresetsWindow(m_ptz, bcApp->mainWindow);
     window->setAttribute(Qt::WA_DeleteOnClose);
+
+    QGraphicsView *view = scene()->views().value(0);
+    Q_ASSERT(view && scene()->views().size() == 1);
+    if (view)
+    {
+        QRect itemScreenRect = view->mapFromScene(mapToScene(QRectF(0, 0, width(), height()))).boundingRect();
+        itemScreenRect.moveTopLeft(view->viewport()->mapToGlobal(itemScreenRect.topLeft()));
+
+        window->move(itemScreenRect.right() - qRound(window->width() / 2.0),
+                     itemScreenRect.top() + qMax(0, qRound((itemScreenRect.height() - window->height()) / 2.0)));
+    }
+
     window->show();
 }

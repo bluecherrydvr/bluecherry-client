@@ -2,6 +2,7 @@
 #define PTZPRESETSWINDOW_H
 
 #include <QWidget>
+#include <QModelIndex>
 
 class CameraPtzControl;
 class QModelIndex;
@@ -16,7 +17,10 @@ public:
     explicit PtzPresetsWindow(CameraPtzControl *ptzControl, QWidget *parent = 0);
 
 private slots:
-    void moveToPreset(const QModelIndex &index);
+    void newPreset();
+    void moveToPreset(const QModelIndex &index = QModelIndex());
+    void renamePreset(const QModelIndex &index = QModelIndex());
+    void deletePreset(const QModelIndex &index = QModelIndex());
     void presetsViewContextMenu(const QPoint &pos);
 
 private:
