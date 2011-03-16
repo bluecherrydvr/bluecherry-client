@@ -220,9 +220,9 @@ void LiveViewWindow::savedLayoutChanged(int index)
 
         index = m_savedLayouts->count() - 1;
         m_savedLayouts->insertItem(index, re, m_liveView->layout()->saveLayout());
-        m_savedLayouts->setCurrentIndex(index);
 
         m_isLayoutChanging = false;
+        m_savedLayouts->setCurrentIndex(index);
         return;
     }
 
