@@ -15,6 +15,9 @@
 #include <QDesktopWidget>
 #include <QApplication>
 #include <QShortcut>
+#include <QTextDocument>
+#include <QMessageBox>
+#include <QPushButton>
 
 #ifdef Q_OS_MAC
 #include <QMacStyle>
@@ -82,6 +85,14 @@ LiveViewWindow::LiveViewWindow(QWidget *parent)
 
     QWidget *spacer = new QWidget;
     spacer->setFixedWidth(20);
+    toolBar->addWidget(spacer);
+
+    toolBar->addAction(QIcon(QLatin1String(":/icons/plus.png")), tr("New Layout"), this, SLOT(createNewLayout()));
+    toolBar->addAction(QIcon(QLatin1String(":/icons/pencil.png")), tr("Rename Layout"), this, SLOT(renameLayout()));
+    toolBar->addAction(QIcon(QLatin1String(":/icons/cross.png")), tr("Delete Layout"), this, SLOT(deleteCurrentLayout()));
+
+    spacer = new QWidget;
+    spacer->setFixedWidth(16);
     toolBar->addWidget(spacer);
 
     connect(m_savedLayouts, SIGNAL(currentIndexChanged(int)), SLOT(savedLayoutChanged(int)));
@@ -209,20 +220,10 @@ void LiveViewWindow::savedLayoutChanged(int index)
 
     if (static_cast<SavedLayoutsModel*>(m_savedLayouts->model())->isNewLayoutItem(index))
     {
-        QString re = QInputDialog::getText(window(), tr("Create camera layout"), tr("Enter a name for the new camera layout:"));
-        if (re.isEmpty())
-        {
-            /* Cancelled; change back to the previous item */
+        if (!createNewLayout())
             m_savedLayouts->setCurrentIndex(m_lastLayoutIndex);
-            m_isLayoutChanging = false;
-            return;
-        }
-
-        index = m_savedLayouts->count() - 1;
-        m_savedLayouts->insertItem(index, re, m_liveView->layout()->saveLayout());
 
         m_isLayoutChanging = false;
-        m_savedLayouts->setCurrentIndex(index);
         return;
     }
 
@@ -233,6 +234,70 @@ void LiveViewWindow::savedLayoutChanged(int index)
     m_lastLayoutIndex = index;
     emit layoutChanged(currentLayout());
     m_isLayoutChanging = false;
+}
+
+bool LiveViewWindow::createNewLayout(QString name)
+{
+    if (name.isEmpty())
+    {
+        name = QInputDialog::getText(window(), tr("Create live view layout"), tr("Enter a name for the new layout:"));
+        if (name.isEmpty())
+            return false;
+    }
+
+    int index = m_savedLayouts->count() - 1;
+    m_savedLayouts->insertItem(index, name, m_liveView->layout()->saveLayout());
+
+    m_isLayoutChanging = false;
+    m_savedLayouts->setCurrentIndex(index);
+    return true;
+}
+
+void LiveViewWindow::renameLayout(QString name)
+{
+    if (m_savedLayouts->currentIndex() < 0)
+        return;
+
+    if (name.isEmpty())
+    {
+        name = QInputDialog::getText(window(), tr("Rename live view layout"),
+                                     tr("Enter a new name for the <b>%1</b>:").arg(Qt::escape(m_savedLayouts->currentText())));
+        if (name.isEmpty())
+            return;
+    }
+
+    m_savedLayouts->setItemText(m_savedLayouts->currentIndex(), name);
+}
+
+void LiveViewWindow::deleteCurrentLayout(bool confirm)
+{
+    if (confirm)
+    {
+        QMessageBox dlg(QMessageBox::Question, tr("Bluecherry Client"),
+                        tr("Are you sure you want to delete the <b>%1</b> layout?").arg(Qt::escape(m_savedLayouts->currentText())));
+        QPushButton *delBtn = dlg.addButton(tr("Delete"), QMessageBox::DestructiveRole);
+        dlg.addButton(QMessageBox::Cancel);
+        dlg.setDefaultButton(QMessageBox::Cancel);
+
+        dlg.exec();
+        if (dlg.clickedButton() != delBtn)
+            return;
+    }
+
+    int index = m_savedLayouts->currentIndex();
+
+    bool b = m_savedLayouts->blockSignals(true);
+    m_savedLayouts->removeItem(index);
+    m_savedLayouts->blockSignals(b);
+
+    int i = m_lastLayoutIndex - ((index < m_lastLayoutIndex) ? 1 : 0);
+    if (index == m_lastLayoutIndex)
+        i = qMax(index - 1, 0);
+    m_lastLayoutIndex = -1;
+    if (i != m_savedLayouts->currentIndex())
+        m_savedLayouts->setCurrentIndex(i);
+    else
+        savedLayoutChanged(i);
 }
 
 void LiveViewWindow::saveLayout()
@@ -268,20 +333,7 @@ void LiveViewWindow::showLayoutMenu(const QPoint &rpos, int index)
         return;
 
     if (action == deleteAction)
-    {
-        bool b = m_savedLayouts->blockSignals(true);
-        m_savedLayouts->removeItem(index);
-        m_savedLayouts->blockSignals(b);
-
-        int i = m_lastLayoutIndex - ((index < m_lastLayoutIndex) ? 1 : 0);
-        if (index == m_lastLayoutIndex)
-            i = qMax(index - 1, 0);
-        m_lastLayoutIndex = -1;
-        if (i != m_savedLayouts->currentIndex())
-            m_savedLayouts->setCurrentIndex(i);
-        else
-            savedLayoutChanged(i);
-    }
+        deleteCurrentLayout();
 }
 
 void LiveViewWindow::setFullScreen(bool on)

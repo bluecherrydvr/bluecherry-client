@@ -29,6 +29,10 @@ public slots:
     bool setLayout(const QString &layout);
     void saveLayout();
 
+    bool createNewLayout(QString name = QString());
+    void renameLayout(QString name = QString());
+    void deleteCurrentLayout(bool needsConfirmation = true);
+
     void setFullScreen(bool fullScreen = true);
     void toggleFullScreen() { setFullScreen(!isFullScreen()); }
     void exitFullScreen() { setFullScreen(false); }
