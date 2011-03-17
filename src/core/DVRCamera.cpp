@@ -5,7 +5,6 @@
 #include <QXmlStreamReader>
 #include <QMimeData>
 #include <QSettings>
-#include <QDebug>
 
 QHash<QPair<int,int>,DVRCameraData*> DVRCameraData::instances;
 
@@ -137,7 +136,6 @@ void DVRCameraData::loadSavedSettings()
 {
     QSettings settings;
     displayName = settings.value(QString::fromLatin1("servers/%1/cameras/%2").arg(server->configId).arg(uniqueID)).toString();
-    qDebug() << server->configId << uniqueID << displayName;
 }
 
 void DVRCameraData::doDataUpdated()
