@@ -135,14 +135,13 @@ void DVRServer::updateCamerasReply()
 
                     idSet.insert(deviceId);
                     DVRCamera camera = DVRCamera::getCamera(this, deviceId);
+                    camera.setOnline(true);
                     if (!camera.parseXML(xml))
                     {
                         if (!xml.hasError())
                             xml.raiseError(QLatin1String("Device parsing failed"));
                         continue;
                     }
-
-                    camera.setOnline(true);
 
                     if (!m_cameras.contains(camera))
                     {

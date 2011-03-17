@@ -54,6 +54,7 @@ bool DVRCamera::parseXML(QXmlStreamReader &xml)
     Q_ASSERT(xml.isStartElement() && xml.name() == QLatin1String("device"));
 
     QString name;
+    d->ptzProtocol = UnknownProtocol;
 
     while (xml.readNext() != QXmlStreamReader::Invalid)
     {
@@ -69,6 +70,13 @@ bool DVRCamera::parseXML(QXmlStreamReader &xml)
         else if (xml.name() == QLatin1String("ptz_control_protocol"))
         {
             d->ptzProtocol = parseProtocol(xml.readElementText());
+        }
+        else if (xml.name() == QLatin1String("disabled"))
+        {
+            bool ok = false;
+            d->isDisabled = xml.readElementText().toInt(&ok);
+            if (!ok)
+                d->isDisabled = false;
         }
         else
             xml.skipCurrentElement();
@@ -112,7 +120,7 @@ void DVRCamera::removed()
 }
 
 DVRCameraData::DVRCameraData(DVRServer *s, int i)
-    : server(s), uniqueID(i), isLoaded(false), isOnline(false)
+    : server(s), uniqueID(i), isLoaded(false), isOnline(false), isDisabled(false)
 {
     Q_ASSERT(instances.find(qMakePair(s->configId, i)) == instances.end());
     instances.insert(qMakePair(server->configId, uniqueID), this);

@@ -30,7 +30,7 @@ public:
     QString displayName;
     QByteArray streamUrl;
     QWeakPointer<MJpegStream> mjpegStream;
-    bool isLoaded, isOnline;
+    bool isLoaded, isOnline, isDisabled;
     qint8 ptzProtocol;
 
     DVRCameraData(DVRServer *server, int uniqueID);
@@ -86,7 +86,8 @@ public:
     int uniqueId() const { return d ? d->uniqueID : -1; }
     QString displayName() const { return d ? d->displayName : QString(); }
     QByteArray streamUrl() const { return d ? d->streamUrl : QByteArray(); }
-    bool isOnline() const { return d && d->isOnline; }
+    bool isOnline() const { return d && d->isOnline && !d->isDisabled; }
+    bool isDisabled() const { return d && d->isDisabled; }
     bool canStream() const { return d && !d->streamUrl.isEmpty() && isOnline(); }
     QSharedPointer<MJpegStream> mjpegStream();
 
