@@ -6,6 +6,7 @@
 #include "LiveViewWindow.h"
 #include "ui/MainWindow.h"
 #include "utils/FileUtils.h"
+#include "core/DVRServer.h"
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QGraphicsSceneContextMenuEvent>
@@ -45,7 +46,10 @@ void LiveFeedItem::setCamera(const DVRCamera &camera)
     m_camera = camera;
 
     if (m_camera)
+    {
         connect(m_camera, SIGNAL(dataUpdated()), SLOT(cameraDataUpdated()));
+        connect(m_camera, SIGNAL(onlineChanged(bool)), SLOT(cameraDataUpdated()));
+    }
 
     emit cameraChanged(camera);
     cameraDataUpdated();
@@ -56,12 +60,26 @@ void LiveFeedItem::cameraDataUpdated()
     emit cameraNameChanged(cameraName());
 
     MJpegFeedItem *mjpeg = findChild<MJpegFeedItem*>(QLatin1String("mjpegFeed"));
-    if (mjpeg)
+
+    if (!m_camera.isOnline())
     {
-        QSharedPointer<MJpegStream> nstream = m_camera.mjpegStream();
-        if (nstream != mjpeg->stream())
-            mjpeg->setStream(m_camera.mjpegStream());
+        if (m_camera.isDisabled())
+        {
+            mjpeg->clear();
+            setStatusText(tr("<span style='color:#444444'>Disabled</span>"));
+            return;
+        }
+        else if (!mjpeg->stream() || mjpeg->stream()->currentFrame().isNull())
+        {
+            mjpeg->clear();
+            setStatusText(tr("<span style='color:#444444'>Offline</span>"));
+            return;
+        }
     }
+
+    QSharedPointer<MJpegStream> nstream = m_camera.mjpegStream();
+    if (nstream != mjpeg->stream())
+        mjpeg->setStream(m_camera.mjpegStream());
 }
 
 void LiveFeedItem::setStatusText(const QString &text)

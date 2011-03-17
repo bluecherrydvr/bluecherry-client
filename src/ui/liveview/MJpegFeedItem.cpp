@@ -87,7 +87,7 @@ void MJpegFeedItem::streamStateChanged(int state)
         //setToolTip(m_stream->errorMessage());
         break;
     case MJpegStream::StreamOffline:
-        emit errorTextChanged(tr("Server<br>Offline"));
+        emit errorTextChanged(tr("Offline"));
         break;
     case MJpegStream::NotConnected:
         emit errorTextChanged(tr("Disconnected"));
