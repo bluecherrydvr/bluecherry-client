@@ -4,6 +4,7 @@
 #include "MJpegStream.h"
 #include <QXmlStreamReader>
 #include <QMimeData>
+#include <QSettings>
 #include <QDebug>
 
 QHash<QPair<int,int>,DVRCameraData*> DVRCameraData::instances;
@@ -82,7 +83,7 @@ bool DVRCamera::parseXML(QXmlStreamReader &xml)
     d->streamUrl = server()->api->serverUrl().resolved(url).toString().toLatin1();
     d->isLoaded = true;
 
-    emit d->dataUpdated();
+    d->doDataUpdated();
     return true;
 }
 
@@ -115,11 +116,32 @@ DVRCameraData::DVRCameraData(DVRServer *s, int i)
 {
     Q_ASSERT(instances.find(qMakePair(s->configId, i)) == instances.end());
     instances.insert(qMakePair(server->configId, uniqueID), this);
+
+    loadSavedSettings();
 }
 
 DVRCameraData::~DVRCameraData()
 {
     instances.remove(qMakePair(server->configId, uniqueID));
+}
+
+void DVRCameraData::loadSavedSettings()
+{
+    QSettings settings;
+    displayName = settings.value(QString::fromLatin1("servers/%1/cameras/%2").arg(server->configId).arg(uniqueID)).toString();
+    qDebug() << server->configId << uniqueID << displayName;
+}
+
+void DVRCameraData::doDataUpdated()
+{
+    if (server)
+    {
+        QSettings settings;
+        settings.beginGroup(QString::fromLatin1("servers/%1/cameras/").arg(server->configId));
+        settings.setValue(QString::number(uniqueID), displayName);
+    }
+
+    emit dataUpdated();
 }
 
 QDataStream &operator<<(QDataStream &s, const DVRCamera &camera)

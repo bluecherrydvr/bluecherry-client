@@ -36,6 +36,9 @@ public:
     DVRCameraData(DVRServer *server, int uniqueID);
     virtual ~DVRCameraData();
 
+    void loadSavedSettings();
+    void doDataUpdated();
+
 signals:
     void onlineChanged(bool isOnline);
     void dataUpdated();
