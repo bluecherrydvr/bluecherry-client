@@ -207,6 +207,8 @@ QModelIndex DVRServersModel::parent(const QModelIndex &child) const
     return server ? indexForServer(server) : QModelIndex();
 }
 
+#include <QDebug>
+
 Qt::ItemFlags DVRServersModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
@@ -214,13 +216,17 @@ Qt::ItemFlags DVRServersModel::flags(const QModelIndex &index) const
 
     Qt::ItemFlags re = Qt::ItemIsSelectable;
     DVRServer *s;
+    DVRCamera camera;
 
     if (index.internalPointer())
-        s = static_cast<DVRServer*>(index.internalPointer());
+    {
+        camera = cameraForRow(index);
+        s = camera.server();
+    }
     else
         s = serverForRow(index);
 
-    if (!m_offlineDisabled || (s && s->api->isOnline()))
+    if (!m_offlineDisabled || (s && s->api->isOnline() && (!camera.isValid() || !camera.isDisabled())))
         re |= Qt::ItemIsEnabled;
     else
         return re;
