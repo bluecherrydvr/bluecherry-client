@@ -48,6 +48,7 @@ private slots:
 private:
     LiveViewArea * const m_liveView;
     QComboBox * const m_savedLayouts;
+    QAction *aRenameLayout, *aDelLayout;
     int m_lastLayoutIndex;
     bool m_autoSized, m_isLayoutChanging, m_fsSetWindow;
 };

@@ -88,8 +88,11 @@ LiveViewWindow::LiveViewWindow(QWidget *parent)
     toolBar->addWidget(spacer);
 
     toolBar->addAction(QIcon(QLatin1String(":/icons/plus.png")), tr("New Layout"), this, SLOT(createNewLayout()));
-    toolBar->addAction(QIcon(QLatin1String(":/icons/pencil.png")), tr("Rename Layout"), this, SLOT(renameLayout()));
-    toolBar->addAction(QIcon(QLatin1String(":/icons/cross.png")), tr("Delete Layout"), this, SLOT(deleteCurrentLayout()));
+    aRenameLayout = toolBar->addAction(QIcon(QLatin1String(":/icons/pencil.png")), tr("Rename Layout"), this, SLOT(renameLayout()));
+    aDelLayout = toolBar->addAction(QIcon(QLatin1String(":/icons/cross.png")), tr("Delete Layout"), this, SLOT(deleteCurrentLayout()));
+
+    aRenameLayout->setEnabled(false);
+    aDelLayout->setEnabled(false);
 
     spacer = new QWidget;
     spacer->setFixedWidth(16);
@@ -233,6 +236,10 @@ void LiveViewWindow::savedLayoutChanged(int index)
 
     m_lastLayoutIndex = index;
     emit layoutChanged(currentLayout());
+
+    aRenameLayout->setEnabled(index >= 0);
+    aDelLayout->setEnabled(index >= 0);
+
     m_isLayoutChanging = false;
 }
 
