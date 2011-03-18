@@ -2,8 +2,7 @@ Source: bluecherry-client
 Section: admin
 Priority: optional
 Maintainer: Ben Collins <bcollins@bluecherry.com>
-Build-Depends: debhelper (>= 7), libqt4-dev, libphonon-dev, qt4-qmake,
- libqt4-opengl-dev, libgstreamer0.10-dev, libgstreamer-plugins-base0.10-dev
+Build-Depends: debhelper (>= 7), libgstreamer0.10-dev, libgstreamer-plugins-base0.10-dev
 Standards-Version: 3.8.4
 
 Package: bluecherry-client
