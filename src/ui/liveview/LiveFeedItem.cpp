@@ -102,6 +102,7 @@ void LiveFeedItem::close()
 {
     bool closeFeedItem = parentItem()->metaObject()->invokeMethod(parentItem(), "removeItem", Q_ARG(QDeclarativeItem*, this));
     Q_ASSERT(closeFeedItem);
+    Q_UNUSED(closeFeedItem);
 }
 
 void LiveFeedItem::saveSnapshot(const QString &ifile)
