@@ -166,6 +166,11 @@ void LiveViewLayout::doLayout()
 void LiveViewLayout::gridPos(const QPointF &pos, int *row, int *column)
 {
     Q_ASSERT(row && column);
+    if (!m_rows || !m_columns)
+    {
+        *row = *column = -1;
+        return;
+    }
 
     qreal w = floor(width() / m_columns),
           h = floor(height() / m_rows);
@@ -262,7 +267,10 @@ void LiveViewLayout::removeRow(int row)
 
     QList<QDeclarativeItem*>::Iterator st = m_items.begin() + (row * m_columns);
     m_items.erase(st, st+m_columns);
-    --m_rows;
+
+    /* Ensure that we always have at least one row, but still clear it if asked to remove */
+    if (!--m_rows)
+        insertRow(0);
 
     scheduleLayout(DoItemsLayout | EmitLayoutChanged);
 }
@@ -296,14 +304,16 @@ void LiveViewLayout::removeColumn(int column)
         --i;
     }
 
-    --m_columns;
+    if (!--m_columns)
+        insertColumn(0);
+
     scheduleLayout(DoItemsLayout | EmitLayoutChanged);
 }
 
 void LiveViewLayout::setGridSize(int rows, int columns)
 {
-    rows = qMax(0, rows);
-    columns = qMax(0, columns);
+    rows = qMax(1, rows);
+    columns = qMax(1, columns);
     if (rows == m_rows && columns == m_columns)
         return;
 
