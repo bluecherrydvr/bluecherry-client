@@ -16,7 +16,7 @@ public:
     virtual void saveChanges();
 
 private:
-    QCheckBox *m_eventsPauseLive, *m_closeToTray;
+    QCheckBox *m_eventsPauseLive, *m_closeToTray, *m_liveHwAccel;
 };
 
 #endif // OPTIONSGENERALPAGE_H

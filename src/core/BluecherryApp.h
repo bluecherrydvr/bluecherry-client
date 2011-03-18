@@ -34,6 +34,8 @@ public:
      * and anything still requiring live feeds to be paused should call pauseLive() again. */
     bool livePaused() const { return m_livePaused; }
 
+    void sendSettingsChanged() { emit settingsChanged(); }
+
 public slots:
     void pauseLive();
     void releaseLive();
@@ -46,6 +48,8 @@ signals:
 
     void queryLivePaused();
     void livePausedChanged(bool paused);
+
+    void settingsChanged();
 
 private slots:
     void onServerRemoved(DVRServer *server);

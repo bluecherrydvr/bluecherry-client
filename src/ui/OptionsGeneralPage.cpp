@@ -26,6 +26,11 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
                                      "slow internet connections"));
     layout->addWidget(m_eventsPauseLive);
 
+    m_liveHwAccel = new QCheckBox(tr("Use hardware acceleration (OpenGL)"));
+    m_liveHwAccel->setChecked(!settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration"), false).toBool());
+    m_liveHwAccel->setToolTip(tr("Disable hardware acceleration only if you do not see anything in the live view area."));
+    layout->addWidget(m_liveHwAccel);
+
     layout->addStretch();
 }
 
@@ -36,4 +41,7 @@ void OptionsGeneralPage::saveChanges()
     bcApp->releaseLive();
     settings.setValue(QLatin1String("ui/main/closeToTray"), m_closeToTray->isChecked());
     bcApp->mainWindow->updateTrayIcon();
+    settings.setValue(QLatin1String("ui/liveview/disableHardwareAcceleration"), !m_liveHwAccel->isChecked());
+
+    bcApp->sendSettingsChanged();
 }

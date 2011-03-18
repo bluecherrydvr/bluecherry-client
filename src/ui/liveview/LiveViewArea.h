@@ -17,9 +17,13 @@ public:
 
     QSize sizeHint() const;
 
+    bool isHardwareAccelerated() const;
+
 public slots:
     void addCamera(const DVRCamera &camera);
     void updateGeometry() { m_sizeHint = QSize(); QDeclarativeView::updateGeometry(); }
+
+    void settingsChanged();
 
 private:
     LiveViewLayout *m_layout;
