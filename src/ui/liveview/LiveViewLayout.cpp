@@ -596,13 +596,12 @@ bool LiveViewLayout::drop()
 
 QPointF LiveViewLayout::cursorItemPos() const
 {
-    QWidget *w = QApplication::widgetAt(QCursor::pos());
+    QGraphicsView *view = scene()->views().value(0);
+    Q_ASSERT(view && scene()->views().size() == 1);
+    if (!view)
+        return QPointF(-1, -1);
 
-    QGraphicsView *view = qobject_cast<QGraphicsView*>(w ? w->parentWidget() : 0);
-    if (view)
-        return mapFromScene(view->mapToScene(view->viewport()->mapFromGlobal(QCursor::pos())));
-
-    return QPointF(-1, -1);
+    return mapFromScene(view->mapToScene(view->viewport()->mapFromGlobal(QCursor::pos())));
 }
 
 void LiveViewLayout::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
