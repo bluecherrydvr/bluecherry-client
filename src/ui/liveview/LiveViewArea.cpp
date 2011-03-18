@@ -7,6 +7,7 @@
 #include <QGLWidget>
 #include <QDeclarativeContext>
 #include <QSettings>
+#include <QShowEvent>
 
 LiveViewArea::LiveViewArea(QWidget *parent)
     : QDeclarativeView(parent)
@@ -34,6 +35,29 @@ LiveViewArea::LiveViewArea(QWidget *parent)
 bool LiveViewArea::isHardwareAccelerated() const
 {
     return viewport()->inherits("QGLWidget");
+}
+
+void LiveViewArea::showEvent(QShowEvent *event)
+{
+    if (!event->spontaneous() && isHardwareAccelerated())
+    {
+        /* Hack around a bug that causes the surface to never paint anything on some systems
+         * running OpenGL 1.x (specifically witnessed on 1.4), by creating a new viewport shortly
+         * after the actual window has been shown. */
+        Q_ASSERT(QGLContext::currentContext());
+        if (QGLFormat::openGLVersionFlags() < QGLFormat::OpenGL_Version_2_0)
+        {
+            qDebug("Using OpenGL 1.x late viewport hack");
+            QTimer::singleShot(0, this, SLOT(setViewportHack()));
+        }
+    }
+
+    QDeclarativeView::showEvent(event);
+}
+
+void LiveViewArea::setViewportHack()
+{
+    setViewport(new QGLWidget);
 }
 
 void LiveViewArea::addCamera(const DVRCamera &camera)

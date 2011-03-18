@@ -25,6 +25,12 @@ public slots:
 
     void settingsChanged();
 
+protected:
+    virtual void showEvent(QShowEvent *event);
+
+private slots:
+    void setViewportHack();
+
 private:
     LiveViewLayout *m_layout;
     mutable QSize m_sizeHint;
