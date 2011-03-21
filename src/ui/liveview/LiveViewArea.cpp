@@ -2,10 +2,12 @@
 #include "LiveViewLayout.h"
 #include "LiveFeedItem.h"
 #include "MJpegFeedItem.h"
+#include "LiveViewGradients.h"
 #include "core/CameraPtzControl.h"
 #include "core/BluecherryApp.h"
 #include <QGLWidget>
 #include <QDeclarativeContext>
+#include <QDeclarativeEngine>
 #include <QSettings>
 #include <QShowEvent>
 
@@ -24,6 +26,8 @@ LiveViewArea::LiveViewArea(QWidget *parent)
         setViewport(new QGLWidget);
     else
         qDebug("Hardware-accelerated live view is DISABLED");
+
+    engine()->addImageProvider(QLatin1String("liveViewGradients"), new LiveViewGradients);
 
     setResizeMode(SizeRootObjectToView);
     setSource(QUrl(QLatin1String("qrc:qml/liveview/LiveView.qml")));

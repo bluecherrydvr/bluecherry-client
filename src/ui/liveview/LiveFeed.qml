@@ -11,20 +11,16 @@ LiveFeedBase {
     LiveViewLayout.sizePadding: Qt.size(0, header.height)
     LiveViewLayout.fixedAspectRatio: false
 
-    Rectangle {
+    Image {
         id: header
         anchors.top: parent.top
         anchors.left: feed.left
         anchors.right: feed.right
         height: Math.max(20, headerText.paintedHeight)
 
-        /* This gradient should be implemented in some other way to improve performance */
-        gradient: Gradient {
-            GradientStop { position: 0; color: feedItem.activeFocus ? "#626262" : "#4c4c4c"; }
-            GradientStop { position: 0.4; color: feedItem.activeFocus ? "#494949" : "#333333"; }
-            GradientStop { position: 0.49; color: feedItem.activeFocus ? "#3c3c3c" : "#262626"; }
-            GradientStop { position: 1; color: feedItem.activeFocus ? "#2f2f2f" : "#191919"; }
-        }
+        source: "image://liveViewGradients/header" + (feedItem.activeFocus ? "/focused" : "")
+        sourceSize: Qt.size(1, height)
+        fillMode: Image.TileHorizontally
 
         Text {
             id: headerText
@@ -54,7 +50,7 @@ LiveFeedBase {
             onReleased: if (drag.active) feedItem.parent.drop()
         }
 
-        Rectangle {
+        Image {
             id: headerPtzElement
             anchors.top: parent.top
             anchors.bottom: parent.bottom
@@ -62,6 +58,10 @@ LiveFeedBase {
             clip: true
             width: 30 + ptzText.paintedWidth
             visible: false
+
+            source: "image://liveViewGradients/ptzHeader"
+            sourceSize: Qt.size(1, height)
+            fillMode: Image.TileHorizontally
 
             states: State {
                 name: "enabled"
@@ -103,11 +103,6 @@ LiveFeedBase {
                     }
                 }
             ]
-
-            gradient: Gradient {
-                GradientStop { position: 0; color: "#2d2d2d"; }
-                GradientStop { position: 1; color: "#030303"; }
-            }
 
             Behavior on width {
                 SmoothedAnimation {
