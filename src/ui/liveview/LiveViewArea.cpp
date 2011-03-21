@@ -48,6 +48,7 @@ void LiveViewArea::showEvent(QShowEvent *event)
         /* Hack around a bug that causes the surface to never paint anything on some systems
          * running OpenGL 1.x (specifically witnessed on 1.4), by creating a new viewport shortly
          * after the actual window has been shown. */
+        static_cast<QGLWidget*>(viewport())->makeCurrent();
         Q_ASSERT(QGLContext::currentContext());
         if (QGLFormat::openGLVersionFlags() < QGLFormat::OpenGL_Version_2_0)
         {
