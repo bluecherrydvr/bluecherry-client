@@ -28,7 +28,7 @@ LiveViewArea::LiveViewArea(QWidget *parent)
     else
         qDebug("Hardware-accelerated live view is DISABLED");
 
-    engine()->addImageProvider(QLatin1String("liveViewGradients"), new LiveViewGradients);
+    engine()->addImageProvider(QLatin1String("liveviewgradients"), new LiveViewGradients);
 
     setResizeMode(SizeRootObjectToView);
     setSource(QUrl(QLatin1String("qrc:qml/liveview/LiveView.qml")));

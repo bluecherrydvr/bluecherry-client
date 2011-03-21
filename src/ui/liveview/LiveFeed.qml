@@ -18,7 +18,7 @@ LiveFeedBase {
         anchors.right: feed.right
         height: Math.max(20, headerText.paintedHeight)
 
-        source: "image://liveViewGradients/header" + (feedItem.activeFocus ? "/focused" : "")
+        source: "image://liveviewgradients/header" + (feedItem.activeFocus ? "/focused" : "")
         sourceSize: Qt.size(1, height)
         fillMode: Image.TileHorizontally
 
@@ -59,7 +59,7 @@ LiveFeedBase {
             width: 30 + ptzText.paintedWidth
             visible: false
 
-            source: "image://liveViewGradients/ptzHeader"
+            source: "image://liveviewgradients/ptzHeader"
             sourceSize: Qt.size(1, height)
             fillMode: Image.TileHorizontally
 
