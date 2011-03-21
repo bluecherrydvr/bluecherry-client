@@ -231,7 +231,7 @@ void LiveViewWindow::savedLayoutChanged(int index)
     }
 
     QByteArray data = m_savedLayouts->itemData(index, SavedLayoutsModel::LayoutDataRole).toByteArray();
-    if (data.isEmpty() || !m_liveView->layout()->loadLayout(data))
+    if (!data.isEmpty() && !m_liveView->layout()->loadLayout(data))
         qDebug() << "Failed to load camera layout" << m_savedLayouts->itemText(index);
 
     m_lastLayoutIndex = index;
