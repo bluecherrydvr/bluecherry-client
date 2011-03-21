@@ -27,6 +27,7 @@ public slots:
 
 protected:
     virtual void showEvent(QShowEvent *event);
+    virtual void hideEvent(QHideEvent *event);
 
 private slots:
     void setViewportHack();

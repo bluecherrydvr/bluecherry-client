@@ -10,6 +10,7 @@
 #include <QDeclarativeEngine>
 #include <QSettings>
 #include <QShowEvent>
+#include <QApplication>
 
 LiveViewArea::LiveViewArea(QWidget *parent)
     : QDeclarativeView(parent)
@@ -58,6 +59,25 @@ void LiveViewArea::showEvent(QShowEvent *event)
     }
 
     QDeclarativeView::showEvent(event);
+}
+
+void LiveViewArea::hideEvent(QHideEvent *event)
+{
+    if (!event->spontaneous() && isHardwareAccelerated())
+    {
+        static_cast<QGLWidget*>(viewport())->makeCurrent();
+        Q_ASSERT(QGLContext::currentContext());
+        if (QGLFormat::openGLVersionFlags() < QGLFormat::OpenGL_Version_2_0)
+        {
+            /* Run the viewport hack on any other LiveViewAreas that exist */
+            QWidgetList widgets = qApp->allWidgets();
+            foreach (QWidget *w, widgets)
+            {
+                if (qobject_cast<LiveViewArea*>(w) && w != this)
+                    QTimer::singleShot(0, w, SLOT(setViewportHack()));
+            }
+        }
+    }
 }
 
 void LiveViewArea::setViewportHack()
