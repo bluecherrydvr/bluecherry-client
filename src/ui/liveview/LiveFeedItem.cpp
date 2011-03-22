@@ -305,7 +305,9 @@ QMenu *LiveFeedItem::ptzMenu()
     menu->addAction(tr("Save preset..."), this, SLOT(ptzPresetSave()));
 
     menu->addSeparator();
-    menu->addAction(tr("Cancel actions"), m_ptz.data(), SLOT(cancel()))->setEnabled(m_ptz->hasPendingActions());
+    QAction *a = menu->addAction(tr("Cancel actions"), m_ptz.data(), SLOT(cancelAll()));
+    a->setEnabled(m_ptz->hasPendingActions());
+    connect(m_ptz.data(), SIGNAL(hasPendingActionsChanged(bool)), a, SLOT(setEnabled(bool)));
     menu->addSeparator();
     menu->addAction(tr("Disable PTZ"), this, SLOT(togglePtzEnabled()));
 

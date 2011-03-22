@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QMap>
 #include <QSharedPointer>
+#include <QUrl>
 #include "DVRCamera.h"
 
 class QNetworkReply;
@@ -17,7 +18,7 @@ class CameraPtzControl : public QObject
     Q_PROPERTY(DVRCamera camera READ camera)
     Q_PROPERTY(int protocol READ protocol NOTIFY infoUpdated)
     Q_PROPERTY(Capabilities capabilities READ capabilities NOTIFY infoUpdated)
-    Q_PROPERTY(Movements pendingMovements READ pendingMovements NOTIFY pendingMovementsChanged)
+    Q_PROPERTY(bool hasPendingActions READ hasPendingActions NOTIFY hasPendingActionsChanged)
     /* May be -1, indicating that we're not currently on a preset (or don't know that we are) */
     Q_PROPERTY(int currentPreset READ currentPreset WRITE moveToPreset NOTIFY currentPresetChanged)
     Q_PROPERTY(QString currentPresetName READ currentPresetName NOTIFY currentPresetChanged)
@@ -45,14 +46,14 @@ public:
     static QSharedPointer<CameraPtzControl> sharedObjectFor(const DVRCamera &camera);
 
     explicit CameraPtzControl(const DVRCamera &camera, QObject *parent = 0);
+    virtual ~CameraPtzControl();
 
     const DVRCamera &camera() const { return m_camera; }
     DVRCamera::PtzProtocol protocol() const { return m_protocol; }
     Capabilities capabilities() const { return m_capabilities; }
 
     bool isReady() const;
-    bool hasPendingActions() const;
-    Movements pendingMovements() const;
+    bool hasPendingActions() const { return !m_pendingCommands.isEmpty(); }
 
     int currentPreset() const { return m_currentPreset; }
     QString currentPresetName() const { return m_presets.value(m_currentPreset); }
@@ -67,14 +68,16 @@ public slots:
     int savePreset(int preset, const QString &name);
     void renamePreset(int preset, const QString &name);
     void clearPreset(int preset);
-    void cancel();
+    void cancel(QNetworkReply *command);
+    void cancelAll();
 
 signals:
     void infoUpdated();
-    void pendingMovementsChanged(Movements pendingMovements);
     void currentPresetChanged(int currentPreset);
+    void hasPendingActionsChanged(bool hasPendingActions);
 
 private slots:
+    void finishCommand();
     void queryResult();
     void moveResult();
     void moveToPresetResult();
@@ -84,10 +87,12 @@ private slots:
 private:
     DVRCamera m_camera;
     QMap<int,QString> m_presets;
+    QList<QNetworkReply*> m_pendingCommands;
     DVRCamera::PtzProtocol m_protocol;
     Capabilities m_capabilities;
     int m_currentPreset;
 
+    QNetworkReply *sendCommand(const QUrl &partialUrl);
     void sendQuery();
     bool parseResponse(QNetworkReply *reply, QXmlStreamReader &xml, QString &errorMessage);
     bool parsePresetResponse(QXmlStreamReader &xml, int &presetId, QString &presetName);

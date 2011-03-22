@@ -28,14 +28,44 @@ QSharedPointer<CameraPtzControl> CameraPtzControl::sharedObjectFor(const DVRCame
     return ptr;
 }
 
-CameraPtzControl::Movements CameraPtzControl::pendingMovements() const
+CameraPtzControl::~CameraPtzControl()
 {
-    return NoMovement;
+    foreach (QNetworkReply *r, m_pendingCommands)
+    {
+        r->disconnect(this);
+        r->abort();
+        r->deleteLater();
+    }
 }
 
-bool CameraPtzControl::hasPendingActions() const
+QNetworkReply *CameraPtzControl::sendCommand(const QUrl &partialUrl)
 {
-    return false;
+    QUrl url(QLatin1String("/media/ptz.php"));
+    url = url.resolved(partialUrl);
+    url.addEncodedQueryItem("id", QByteArray::number(m_camera.uniqueId()));
+
+    Q_ASSERT(url.hasQueryItem(QLatin1String("command")));
+
+    QNetworkReply *reply = m_camera.server()->api->sendRequest(url);
+    connect(reply, SIGNAL(finished()), SLOT(finishCommand()));
+
+    m_pendingCommands.append(reply);
+    if (m_pendingCommands.size() == 1)
+        emit hasPendingActionsChanged(true);
+
+    return reply;
+}
+
+void CameraPtzControl::finishCommand()
+{
+    QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
+    if (!reply)
+        return;
+
+    reply->deleteLater();
+
+    if (m_pendingCommands.removeOne(reply) && m_pendingCommands.isEmpty())
+        emit hasPendingActionsChanged(false);
 }
 
 bool CameraPtzControl::parseResponse(QNetworkReply *reply, QXmlStreamReader &xml, QString &errorMessage)
@@ -86,12 +116,7 @@ bool CameraPtzControl::parseResponse(QNetworkReply *reply, QXmlStreamReader &xml
 
 void CameraPtzControl::sendQuery()
 {
-    QUrl url(QLatin1String("/media/ptz.php"));
-    url.addEncodedQueryItem("id", QByteArray::number(m_camera.uniqueId()));
-    url.addEncodedQueryItem("command", "query");
-
-    QNetworkReply *reply = m_camera.server()->api->sendRequest(url);
-    connect(reply, SIGNAL(finished()), reply, SLOT(deleteLater()));
+    QNetworkReply *reply = sendCommand(QUrl(QLatin1String("?command=query")));
     connect(reply, SIGNAL(finished()), SLOT(queryResult()));
 }
 
@@ -191,8 +216,7 @@ void CameraPtzControl::move(Movements movements, int panSpeed, int tiltSpeed, in
     if (!movements)
         return;
 
-    QUrl url(QLatin1String("/media/ptz.php"));
-    url.addEncodedQueryItem("id", QByteArray::number(m_camera.uniqueId()));
+    QUrl url;
     url.addEncodedQueryItem("command", "move");
     url.addEncodedQueryItem("panspeed", "32");
     url.addEncodedQueryItem("tiltspeed", "32");
@@ -218,8 +242,7 @@ void CameraPtzControl::move(Movements movements, int panSpeed, int tiltSpeed, in
     if (duration > 0)
         url.addEncodedQueryItem("duration", QByteArray::number(duration));
 
-    QNetworkReply *reply = m_camera.server()->api->sendRequest(url);
-    connect(reply, SIGNAL(finished()), reply, SLOT(deleteLater()));
+    QNetworkReply *reply = sendCommand(url);
     connect(reply, SIGNAL(finished()), SLOT(moveResult()));
 }
 
@@ -248,13 +271,11 @@ void CameraPtzControl::moveResult()
 
 void CameraPtzControl::moveToPreset(int preset)
 {
-    QUrl url(QLatin1String("/media/ptz.php"));
-    url.addEncodedQueryItem("id", QByteArray::number(m_camera.uniqueId()));
+    QUrl url;
     url.addEncodedQueryItem("command", "go");
     url.addEncodedQueryItem("preset", QByteArray::number(preset));
 
-    QNetworkReply *reply = m_camera.server()->api->sendRequest(url);
-    connect(reply, SIGNAL(finished()), reply, SLOT(deleteLater()));
+    QNetworkReply *reply = sendCommand(url);
     connect(reply, SIGNAL(finished()), SLOT(moveToPresetResult()));
 }
 
@@ -302,14 +323,12 @@ int CameraPtzControl::savePreset(int preset, const QString &name)
     if (preset < 0)
         preset = nextPresetID();
 
-    QUrl url(QLatin1String("/media/ptz.php"));
-    url.addEncodedQueryItem("id", QByteArray::number(m_camera.uniqueId()));
+    QUrl url;
     url.addEncodedQueryItem("command", "save");
     url.addEncodedQueryItem("preset", QByteArray::number(preset));
     url.addQueryItem(QLatin1String("name"), name);
 
-    QNetworkReply *reply = m_camera.server()->api->sendRequest(url);
-    connect(reply, SIGNAL(finished()), reply, SLOT(deleteLater()));
+    QNetworkReply *reply = sendCommand(url);
     connect(reply, SIGNAL(finished()), SLOT(savePresetResult()));
 
     return preset;
@@ -355,14 +374,12 @@ void CameraPtzControl::renamePreset(int preset, const QString &name)
     if (!m_presets.contains(preset) || m_presets[preset] == name)
         return;
 
-    QUrl url(QLatin1String("/media/ptz.php"));
-    url.addEncodedQueryItem("id", QByteArray::number(m_camera.uniqueId()));
+    QUrl url;
     url.addEncodedQueryItem("command", "rename");
     url.addEncodedQueryItem("preset", QByteArray::number(preset));
     url.addQueryItem(QLatin1String("name"), name);
 
-    QNetworkReply *reply = m_camera.server()->api->sendRequest(url);
-    connect(reply, SIGNAL(finished()), reply, SLOT(deleteLater()));
+    sendCommand(url);
 
     m_presets[preset] = name;
     emit infoUpdated();
@@ -373,13 +390,11 @@ void CameraPtzControl::renamePreset(int preset, const QString &name)
 
 void CameraPtzControl::clearPreset(int preset)
 {
-    QUrl url(QLatin1String("/media/ptz.php"));
-    url.addEncodedQueryItem("id", QByteArray::number(m_camera.uniqueId()));
+    QUrl url;
     url.addEncodedQueryItem("command", "clear");
     url.addEncodedQueryItem("preset", QByteArray::number(preset));
 
-    QNetworkReply *reply = m_camera.server()->api->sendRequest(url);
-    connect(reply, SIGNAL(finished()), reply, SLOT(deleteLater()));
+    QNetworkReply *reply = sendCommand(url);
     connect(reply, SIGNAL(finished()), SLOT(clearPresetResult()));
 }
 
@@ -417,7 +432,28 @@ void CameraPtzControl::clearPresetResult()
     emit infoUpdated();
 }
 
-void CameraPtzControl::cancel()
+void CameraPtzControl::cancel(QNetworkReply *command)
 {
+    if (command && m_pendingCommands.removeOne(command))
+    {
+        command->disconnect(this);
+        command->abort();
+        command->deleteLater();
 
+        if (m_pendingCommands.isEmpty())
+            emit hasPendingActionsChanged(false);
+    }
+}
+
+void CameraPtzControl::cancelAll()
+{
+    foreach (QNetworkReply *reply, m_pendingCommands)
+    {
+        reply->disconnect(this);
+        reply->abort();
+        reply->deleteLater();
+    }
+
+    m_pendingCommands.clear();
+    emit hasPendingActionsChanged(false);
 }
