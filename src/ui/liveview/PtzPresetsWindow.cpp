@@ -68,6 +68,20 @@ void PtzPresetsWindow::moveToPreset(const QModelIndex &idx)
     m_ptz->moveToPreset(id);
 }
 
+void PtzPresetsWindow::updatePreset(const QModelIndex &idx)
+{
+    QModelIndex index = idx.isValid() ? idx : m_presetsView->currentIndex();
+    if (!index.isValid())
+        return;
+
+    bool ok = false;
+    int id = index.data(PtzPresetsModel::PresetIdRole).toInt(&ok);
+    if (!ok || id < 0)
+        return;
+
+    m_ptz->savePreset(id, index.data(Qt::DisplayRole).toString());
+}
+
 void PtzPresetsWindow::renamePreset(const QModelIndex &idx)
 {
     QModelIndex index = idx.isValid() ? idx : m_presetsView->currentIndex();
@@ -98,12 +112,13 @@ void PtzPresetsWindow::presetsViewContextMenu(const QPoint &pos)
         return;
 
     QMenu menu;
-    QAction *goTo = 0, *rename = 0, *remove = 0, *newPreset = 0;
+    QAction *goTo = 0, *update = 0, *rename = 0, *remove = 0, *newPreset = 0;
 
     if (idx.isValid())
     {
         goTo = menu.addAction(tr("Go to Preset"));
         menu.setDefaultAction(goTo);
+        update = menu.addAction(tr("Update preset"));
         menu.addSeparator();
         rename = menu.addAction(tr("Rename preset"));
         remove = menu.addAction(tr("Delete preset"));
@@ -119,6 +134,8 @@ void PtzPresetsWindow::presetsViewContextMenu(const QPoint &pos)
 
     if (a == goTo)
         moveToPreset(idx);
+    else if (a == update)
+        updatePreset(idx);
     else if (a == rename)
         renamePreset(idx);
     else if (a == remove)

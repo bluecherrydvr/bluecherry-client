@@ -19,6 +19,7 @@ public:
 private slots:
     void newPreset();
     void moveToPreset(const QModelIndex &index = QModelIndex());
+    void updatePreset(const QModelIndex &index = QModelIndex());
     void renamePreset(const QModelIndex &index = QModelIndex());
     void deletePreset(const QModelIndex &index = QModelIndex());
     void presetsViewContextMenu(const QPoint &pos);
