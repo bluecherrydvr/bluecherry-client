@@ -62,6 +62,7 @@ public:
     int nextPresetID() const;
 
 public slots:
+    void updateInfo();
     void move(Movements movements, int panSpeed = -1, int tiltSpeed = -1, int duration = -1);
     void moveToPreset(int preset);
     /* preset ID may be -1 to automatically use the next available ID, which is returned */
@@ -93,7 +94,6 @@ private:
     int m_currentPreset;
 
     QNetworkReply *sendCommand(const QUrl &partialUrl);
-    void sendQuery();
     bool parseResponse(QNetworkReply *reply, QXmlStreamReader &xml, QString &errorMessage);
     bool parsePresetResponse(QXmlStreamReader &xml, int &presetId, QString &presetName);
 };

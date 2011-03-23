@@ -34,5 +34,6 @@
         <file>tick.png</file>
         <file>cross.png</file>
         <file>pencil.png</file>
+        <file>arrow-circle-double.png</file>
     </qresource>
 </RCC>

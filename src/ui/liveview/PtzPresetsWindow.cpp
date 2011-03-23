@@ -41,6 +41,8 @@ PtzPresetsWindow::PtzPresetsWindow(CameraPtzControl *ptzControl, QWidget *parent
     tb->addAction(QIcon(QLatin1String(":/icons/tick.png")), tr("Go to Preset"), this, SLOT(moveToPreset()));
     tb->addAction(QIcon(QLatin1String(":/icons/pencil.png")), tr("Rename Preset"), this, SLOT(renamePreset()));
     tb->addAction(QIcon(QLatin1String(":/icons/cross.png")), tr("Delete Preset"), this, SLOT(deletePreset()));
+    tb->addSeparator();
+    tb->addAction(QIcon(QLatin1String(":/icons/arrow-circle-double.png")), tr("Refresh Presets"), m_ptz, SLOT(updateInfo()));
 
     layout->addWidget(tb);
 }
@@ -126,6 +128,7 @@ void PtzPresetsWindow::presetsViewContextMenu(const QPoint &pos)
     else
     {
         newPreset = menu.addAction(tr("New Preset"));
+        menu.addAction(tr("Refresh Presets"), m_ptz, SLOT(updateInfo()));
     }
 
     QAction *a = menu.exec(m_presetsView->mapToGlobal(pos));

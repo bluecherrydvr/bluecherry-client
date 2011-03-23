@@ -12,7 +12,7 @@ CameraPtzControl::CameraPtzControl(const DVRCamera &camera, QObject *parent)
       m_currentPreset(-1)
 {
     Q_ASSERT(m_camera.isValid());
-    sendQuery();
+    updateInfo();
 }
 
 QSharedPointer<CameraPtzControl> CameraPtzControl::sharedObjectFor(const DVRCamera &camera)
@@ -114,7 +114,7 @@ bool CameraPtzControl::parseResponse(QNetworkReply *reply, QXmlStreamReader &xml
     return true;
 }
 
-void CameraPtzControl::sendQuery()
+void CameraPtzControl::updateInfo()
 {
     QNetworkReply *reply = sendCommand(QUrl(QLatin1String("?command=query")));
     connect(reply, SIGNAL(finished()), SLOT(queryResult()));
