@@ -3,6 +3,9 @@
 #include <QBuffer>
 #include <QDebug>
 
+/* main.cpp */
+extern const char *jpegFormatName;
+
 ImageDecodeTask::ImageDecodeTask(QObject *caller, const char *callback, quint64 id)
     : ThreadTask(caller, callback), imageId(id)
 {
@@ -24,7 +27,7 @@ void ImageDecodeTask::runTask()
         return;
     }
 
-    QImageReader reader(&buffer, "jpeg");
+    QImageReader reader(&buffer, jpegFormatName);
     /* This would be more efficient, but causes the decoding to fail with
      * Qt 4.6.2 on Ubuntu 10.04. Disabled for now as a result. Issue #473 */
     //reader.setAutoDetectImageFormat(false);

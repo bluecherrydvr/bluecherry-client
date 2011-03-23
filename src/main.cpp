@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QDateTime>
 #include <QGLFormat>
+#include <QImageReader>
 
 #ifdef QT_STATIC
 Q_IMPORT_PLUGIN(qjpeg)
@@ -16,6 +17,8 @@ Q_IMPORT_PLUGIN(qgif)
 #ifdef USE_BREAKPAD
 void initBreakpad();
 #endif
+
+const char *jpegFormatName = "jpeg";
 
 int main(int argc, char *argv[])
 {
@@ -58,6 +61,12 @@ int main(int argc, char *argv[])
     }
 
     bcApp = new BluecherryApp;
+
+    if (QImageReader::supportedImageFormats().contains("jpeg-turbo"))
+    {
+        jpegFormatName = "jpeg-turbo";
+        qDebug("Using qjpeg-turbo");
+    }
 
     MainWindow w;
     bcApp->mainWindow = &w;
