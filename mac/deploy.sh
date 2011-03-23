@@ -38,6 +38,10 @@ if [ ! -z $2 ]; then
 	$2 $1
 fi
 
+echo "Removing unused plugins..."
+rm $1/Contents/PlugIns/imageformats/lib{qico,qjpeg,qmng,qsvg,qtiff}.dylib
+rm -r $1/Contents/PlugIns/{accessible,bearer,codecs,graphicssystems,iconengines,phonon_backend,qmltooling,script,sqldrivers}
+
 echo "Running lipo..."
 for I in $1/Contents/Frameworks/*.dylib; do
 	FILE=$I;
