@@ -6,6 +6,16 @@
 #include <QPixmap>
 #include <QTimer>
 
+#ifdef Q_WS_MAC
+/* On mac, it is very expensive to convert between QImage and QPixmap, and
+ * QImage is required when uploading textures to OpenGL. We can save significantly
+ * by never using pixmaps in this case. */
+typedef QImage MJpegFrame;
+#else
+#define MJPEGFRAME_IS_PIXMAP
+typedef QPixmap MJpegFrame;
+#endif
+
 class QNetworkReply;
 class ThreadTask;
 class ImageDecodeTask;
@@ -39,7 +49,7 @@ public:
     QString errorMessage() const { return m_errorMessage; }
 
     QSize streamSize() const { return m_currentFrame.size(); }
-    QPixmap currentFrame() const { return m_currentFrame; }
+    MJpegFrame currentFrame() const { return m_currentFrame; }
 
     bool isPaused() const { return m_paused; }
 
@@ -63,7 +73,7 @@ signals:
 
     void buildScaleSizes(QVector<QSize> &sizes);
 
-    void updateFrame(const QPixmap &frame, const QVector<QImage> &scaledFrames);
+    void updateFrame(const MJpegFrame &frame, const QVector<QImage> &scaledFrames);
 
 private slots:
     void readable();
@@ -76,7 +86,7 @@ private:
     QByteArray m_httpBoundary;
     QByteArray m_httpBuffer;
     QUrl m_url;
-    QPixmap m_currentFrame;
+    MJpegFrame m_currentFrame;
     quint64 m_currentFrameNo, m_latestFrameNo;
     ImageDecodeTask *m_decodeTask;
     QVector<QSize> m_scaleSizes;

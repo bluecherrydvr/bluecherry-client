@@ -21,7 +21,7 @@ void MJpegFeedItem::setStream(const QSharedPointer<MJpegStream> &stream)
 
     if (m_stream)
     {
-        connect(m_stream.data(), SIGNAL(updateFrame(QPixmap,QVector<QImage>)), SLOT(updateFrame()));
+        connect(m_stream.data(), SIGNAL(updateFrame(MJpegFrame,QVector<QImage>)), SLOT(updateFrame()));
         connect(m_stream.data(), SIGNAL(streamSizeChanged(QSize)), SLOT(updateFrameSize()));
         connect(m_stream.data(), SIGNAL(stateChanged(int)), SLOT(streamStateChanged(int)));
         connect(m_stream.data(), SIGNAL(pausedChanged(bool)), SIGNAL(pausedChanged(bool)));
@@ -61,7 +61,7 @@ void MJpegFeedItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWid
     if (!m_stream)
         return;
 
-    QPixmap frame = m_stream->currentFrame();
+    MJpegFrame frame = m_stream->currentFrame();
 
     if (!frame.isNull())
     {
@@ -69,7 +69,12 @@ void MJpegFeedItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWid
         p->setRenderHint(QPainter::SmoothPixmapTransform);
         p->setCompositionMode(QPainter::CompositionMode_Source);
 
+#ifdef MJPEGFRAME_IS_PIXMAP
         p->drawPixmap(opt->rect, frame);
+#else
+        p->drawImage(opt->rect, frame);
+#endif
+
         p->restore();
     }
     else
