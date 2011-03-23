@@ -326,7 +326,7 @@ int CameraPtzControl::savePreset(int preset, const QString &name)
     QUrl url;
     url.addEncodedQueryItem("command", "save");
     url.addEncodedQueryItem("preset", QByteArray::number(preset));
-    url.addQueryItem(QLatin1String("name"), name);
+    url.addQueryItem(QLatin1String("name"), validatePresetName(name));
 
     QNetworkReply *reply = sendCommand(url);
     connect(reply, SIGNAL(finished()), SLOT(savePresetResult()));
@@ -374,14 +374,16 @@ void CameraPtzControl::renamePreset(int preset, const QString &name)
     if (!m_presets.contains(preset) || m_presets[preset] == name)
         return;
 
+    QString actualName = validatePresetName(name);
+
     QUrl url;
     url.addEncodedQueryItem("command", "rename");
     url.addEncodedQueryItem("preset", QByteArray::number(preset));
-    url.addQueryItem(QLatin1String("name"), name);
+    url.addQueryItem(QLatin1String("name"), actualName);
 
     sendCommand(url);
 
-    m_presets[preset] = name;
+    m_presets[preset] = actualName;
     emit infoUpdated();
 
     if (preset == m_currentPreset)
@@ -456,4 +458,14 @@ void CameraPtzControl::cancelAll()
 
     m_pendingCommands.clear();
     emit hasPendingActionsChanged(false);
+}
+
+QString CameraPtzControl::validatePresetName(const QString &name) const
+{
+    QList<QString> names = m_presets.values();
+    QString re = name;
+    int c = 1;
+    while (names.contains(re))
+        re = tr("%1 (%2)", "e.g.: Name (2)").arg(name).arg(++c);
+    return re;
 }

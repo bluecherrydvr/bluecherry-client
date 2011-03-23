@@ -93,6 +93,8 @@ private:
     Capabilities m_capabilities;
     int m_currentPreset;
 
+    QString validatePresetName(const QString &name) const;
+
     QNetworkReply *sendCommand(const QUrl &partialUrl);
     bool parseResponse(QNetworkReply *reply, QXmlStreamReader &xml, QString &errorMessage);
     bool parsePresetResponse(QXmlStreamReader &xml, int &presetId, QString &presetName);
