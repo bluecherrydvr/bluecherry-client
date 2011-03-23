@@ -323,10 +323,14 @@ int CameraPtzControl::savePreset(int preset, const QString &name)
     if (preset < 0)
         preset = nextPresetID();
 
+    QString actualName = name;
+    if (m_presets.value(preset) != actualName)
+        actualName = validatePresetName(name);
+
     QUrl url;
     url.addEncodedQueryItem("command", "save");
     url.addEncodedQueryItem("preset", QByteArray::number(preset));
-    url.addQueryItem(QLatin1String("name"), validatePresetName(name));
+    url.addQueryItem(QLatin1String("name"), actualName);
 
     QNetworkReply *reply = sendCommand(url);
     connect(reply, SIGNAL(finished()), SLOT(savePresetResult()));
