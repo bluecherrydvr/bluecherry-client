@@ -38,9 +38,9 @@ static QToolButton *createGridButton(const char *icon, const QString &text, QWid
     return btn;
 }
 
-LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, const DVRCamera &camera)
+LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, bool fullscreen, const DVRCamera &camera)
 {
-    LiveViewWindow *window = new LiveViewWindow(parent);
+    LiveViewWindow *window = new LiveViewWindow(parent, fullscreen);
     window->setWindowFlags(Qt::Window);
     window->setAutoSized(true);
     window->setAttribute(Qt::WA_DeleteOnClose);
@@ -51,9 +51,9 @@ LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, const DVRCamera &cam
     return window;
 }
 
-LiveViewWindow::LiveViewWindow(QWidget *parent)
+LiveViewWindow::LiveViewWindow(QWidget *parent, bool openfs)
     : QWidget(parent), m_liveView(new LiveViewArea), m_savedLayouts(new QComboBox), m_lastLayoutIndex(-1), m_autoSized(false),
-      m_isLayoutChanging(false), m_fsSetWindow(false)
+      m_isLayoutChanging(false), m_fsSetWindow(false), m_wasOpenedFs(openfs)
 {
     QBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
@@ -143,7 +143,14 @@ LiveViewWindow::LiveViewWindow(QWidget *parent)
                        tr("Fullscreen"), this, SLOT(toggleFullScreen()));
     a->setShortcut(Qt::Key_F11);
 
-    new QShortcut(Qt::Key_Escape, this, SLOT(exitFullScreen()), 0, Qt::WindowShortcut);
+    if (m_wasOpenedFs)
+    {
+        toolBar->addAction(QIcon(QLatin1String(":/icons/cross.png")), tr("Exit"),
+                           this, SLOT(close()));
+        new QShortcut(Qt::Key_Escape, this, SLOT(close()), 0, Qt::WindowShortcut);
+    }
+    else
+        new QShortcut(Qt::Key_Escape, this, SLOT(exitFullScreen()), 0, Qt::WindowShortcut);
 
     connect(m_liveView->layout(), SIGNAL(layoutChanged()), SLOT(saveLayout()));
 

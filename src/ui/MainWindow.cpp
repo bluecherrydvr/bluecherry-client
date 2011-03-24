@@ -447,7 +447,7 @@ void MainWindow::eventsContextMenu(const QPoint &pos)
     else if (act == aOpen)
         EventViewWindow::open(event);
     else if (act == aViewLive)
-        LiveViewWindow::openWindow(this, event.locationCamera())->show();
+        LiveViewWindow::openWindow(this, false, event.locationCamera())->show();
 #if 0
     else if (act->parentWidget() == searchMenu)
     {

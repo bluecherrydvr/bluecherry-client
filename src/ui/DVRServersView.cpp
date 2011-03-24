@@ -150,7 +150,7 @@ void DVRServersView::contextMenuEvent(QContextMenuEvent *event)
     }
     else if (action == aOpenWin || action == aOpenFull)
     {
-        LiveViewWindow *w = LiveViewWindow::openWindow(bcApp->mainWindow, camera);
+        LiveViewWindow *w = LiveViewWindow::openWindow(bcApp->mainWindow, (action == aOpenFull), camera);
         if (action == aOpenFull)
             w->showFullScreen();
         else

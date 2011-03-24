@@ -90,12 +90,12 @@ void LiveFeedItem::setStatusText(const QString &text)
 
 void LiveFeedItem::openNewWindow()
 {
-    LiveViewWindow::openWindow(bcApp->mainWindow, camera())->show();
+    LiveViewWindow::openWindow(bcApp->mainWindow, false, camera())->show();
 }
 
 void LiveFeedItem::openFullScreen()
 {
-    LiveViewWindow::openWindow(bcApp->mainWindow, camera())->showFullScreen();
+    LiveViewWindow::openWindow(bcApp->mainWindow, true, camera())->showFullScreen();
 }
 
 void LiveFeedItem::close()

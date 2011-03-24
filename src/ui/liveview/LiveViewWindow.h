@@ -12,12 +12,12 @@ class LiveViewWindow : public QWidget
     Q_OBJECT
 
 public:
-    explicit LiveViewWindow(QWidget *parent = 0);
+    explicit LiveViewWindow(QWidget *parent = 0, bool fullscreen = false);
 
     /* Note that the returned window has the Qt::WA_DeleteOnClose attribute set.
      * If you intend to save this pointer long-term, put it in a guard (QWeakPointer) or
      * unset this attribute. */
-    static LiveViewWindow *openWindow(QWidget *parent, const DVRCamera &camera = DVRCamera());
+    static LiveViewWindow *openWindow(QWidget *parent, bool fullscreen, const DVRCamera &camera = DVRCamera());
 
     LiveViewArea *view() const { return m_liveView; }
     QString currentLayout() const;
@@ -50,7 +50,7 @@ private:
     QComboBox * const m_savedLayouts;
     QAction *aRenameLayout, *aDelLayout;
     int m_lastLayoutIndex;
-    bool m_autoSized, m_isLayoutChanging, m_fsSetWindow;
+    bool m_autoSized, m_isLayoutChanging, m_fsSetWindow, m_wasOpenedFs;
 };
 
 #endif // LIVEVIEWWINDOW_H
