@@ -294,7 +294,10 @@ QMenu *LiveFeedItem::ptzMenu()
     const QMap<int,QString> &presets = m_ptz->presets();
     for (QMap<int,QString>::ConstIterator it = presets.constBegin(); it != presets.constEnd(); ++it)
     {
-        QAction *a = presetsMenu->addAction(it.value(), mapper, SLOT(map()));
+        /* Necessary to avoid mnemonics (issue #730) */
+        QString text = it.value();
+        text.replace(QLatin1Char('&'), QLatin1String("&&"));
+        QAction *a = presetsMenu->addAction(text, mapper, SLOT(map()));
         mapper->setMapping(a, it.key());
     }
 
