@@ -144,7 +144,8 @@ SOURCES += src/main.cpp \
     src/core/CameraPtzControl.cpp \
     src/ui/liveview/PtzPresetsWindow.cpp \
     src/core/PtzPresetsModel.cpp \
-    src/ui/liveview/LiveViewGradients.cpp
+    src/ui/liveview/LiveViewGradients.cpp \
+    src/ui/SetupWizard.cpp
 
 HEADERS  += src/ui/MainWindow.h \
     src/ui/OptionsDialog.h \
@@ -193,7 +194,9 @@ HEADERS  += src/ui/MainWindow.h \
     src/core/CameraPtzControl.h \
     src/ui/liveview/PtzPresetsWindow.h \
     src/core/PtzPresetsModel.h \
-    src/ui/liveview/LiveViewGradients.h
+    src/ui/liveview/LiveViewGradients.h \
+    src/ui/SetupWizard.h \
+    src/ui/SetupWizard_p.h
 
 RESOURCES += \
     res/resources.qrc \

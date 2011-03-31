@@ -10,6 +10,7 @@
 #include "ServerConfigWindow.h"
 #include "EventsView.h"
 #include "EventViewWindow.h"
+#include "SetupWizard.h"
 #include "core/DVRServer.h"
 #include "core/BluecherryApp.h"
 #include <QBoxLayout>
@@ -112,6 +113,11 @@ MainWindow::~MainWindow()
 void MainWindow::showEvent(QShowEvent *event)
 {
     if (!event->spontaneous())
+    {
+        if (bcApp->servers().isEmpty())
+            addServer();
+    }
+    else
         bcApp->releaseLive();
 
     QMainWindow::showEvent(event);
@@ -323,13 +329,9 @@ void MainWindow::openSupport()
 
 void MainWindow::addServer()
 {
-    OptionsDialog *dlg = new OptionsDialog(this);
-    dlg->showPage(OptionsDialog::ServerPage);
+    SetupWizard *dlg = new SetupWizard(this);
     dlg->setAttribute(Qt::WA_DeleteOnClose);
-
-    OptionsServerPage *pg = static_cast<OptionsServerPage*>(dlg->pageWidget(OptionsDialog::ServerPage));
-    pg->addNewServer();
-
+    dlg->setWindowModality(Qt::WindowModal);
     dlg->show();
 }
 

@@ -6,6 +6,7 @@
         <file>logo.png</file>
         <file>loading.gif</file>
         <file>ptz-arrow.png</file>
+        <file>loading-circle.gif</file>
     </qresource>
     <qresource prefix="/icons">
         <file>status.png</file>
@@ -35,5 +36,6 @@
         <file>cross.png</file>
         <file>pencil.png</file>
         <file>arrow-circle-double.png</file>
+        <file>exclamation-red.png</file>
     </qresource>
 </RCC>
