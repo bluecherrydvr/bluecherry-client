@@ -45,7 +45,6 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
 
     m_seekSlider = new QSlider(Qt::Horizontal);
     connect(m_seekSlider, SIGNAL(valueChanged(int)), SLOT(seek(int)));
-    m_seekSlider->setEnabled(false);
     sliderLayout->addWidget(m_seekSlider);
 
     m_posText = new QLabel;
@@ -300,9 +299,12 @@ void EventVideoPlayer::updatePosition()
 
     qint64 nsPosition = m_video->position();
     int position = int(nsPosition / 1000000);
-    m_seekSlider->blockSignals(true);
-    m_seekSlider->setValue(position);
-    m_seekSlider->blockSignals(false);
+    if (!m_seekSlider->isSliderDown())
+    {
+        m_seekSlider->blockSignals(true);
+        m_seekSlider->setValue(position);
+        m_seekSlider->blockSignals(false);
+    }
 
     int secs = nsPosition / 1000000000;
     int durationSecs = m_video->duration() / 1000000000;

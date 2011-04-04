@@ -54,7 +54,7 @@ bool VideoPlayerBackend::initGStreamer(QString *errorMessage)
 
     const char *plugins[] =
     {
-        "libgsttypefindfunctions"EXT, "libgstapp"EXT, "libgstdecodebin"EXT, "libgstmatroska"EXT,
+        "libgsttypefindfunctions"EXT, "libgstapp"EXT, "libgstdecodebin2"EXT, "libgstmatroska"EXT,
         "libgstffmpegcolorspace"EXT, "libgstcoreelements"EXT,
 #ifndef Q_OS_WIN
         "libgstffmpeg"EXT,
@@ -194,12 +194,18 @@ bool VideoPlayerBackend::start(const QUrl &url)
     m_videoBuffer->start(url);
 
     /* Decoder */
-    GstElement *decoder = gst_element_factory_make("decodebin", "decoder");
+    GstElement *decoder = gst_element_factory_make("decodebin2", "decoder");
     if (!decoder)
     {
         setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("decoder")));
         return false;
     }
+
+    g_object_set(G_OBJECT(decoder),
+                 "use-buffering", TRUE,
+                 "max-size-time", 10 * GST_SECOND,
+                 NULL);
+
     g_signal_connect(decoder, "new-decoded-pad", G_CALLBACK(staticDecodePadReady), this);
 
     /* Colorspace conversion (no-op if unnecessary) */

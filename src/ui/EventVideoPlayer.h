@@ -15,6 +15,7 @@ class QSlider;
 class QLabel;
 class GstSinkWidget;
 class VideoContainer;
+class QThread;
 struct EventData;
 
 class EventVideoPlayer : public QWidget

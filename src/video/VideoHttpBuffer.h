@@ -66,22 +66,10 @@ private:
     QWaitCondition m_bufferWait;
     bool m_streamInit, m_bufferBlocked, m_finished;
 
-    /* Rate estimation; circular buffer holding amounts for the last 64 buffer requests */
-    static const int rateCount = 64;
-    Q_PACKED struct
-    {
-        quint64 time;
-        unsigned size;
-    } rateData[rateCount];
-    int ratePos, rateMax;
-
-    void addRateData(quint64 time, unsigned size);
-    void getRateEstimation(quint64 *duration, unsigned *size);
-
     static void needDataWrap(GstAppSrc *, unsigned, void*);
     static int seekDataWrap(GstAppSrc *, quint64, void*);
 
-    void needData(unsigned size);
+    void needData(int size);
     bool seekData(qint64 offset);
 
     void sendStreamError(const QString &message);

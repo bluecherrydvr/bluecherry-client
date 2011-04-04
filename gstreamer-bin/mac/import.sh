@@ -27,7 +27,7 @@ cp -RL ${BASE}/include/gstreamer-0.10/ include/
 cp ${BASE}/lib/libgst{riff,audio,tag,pbutils}-0.10.0.dylib lib/
 
 # gstreamer plugins (gst-plugins-base, gst-plugins-good, gst-ffmpeg)
-cp ${BASE}/lib/gstreamer-0.10/libgst{coreelements,app,decodebin,matroska,osxaudio,ffmpegcolorspace,ffmpeg,typefindfunctions}.so plugins/
+cp ${BASE}/lib/gstreamer-0.10/libgst{coreelements,app,decodebin2,matroska,osxaudio,ffmpegcolorspace,ffmpeg,typefindfunctions}.so plugins/
 
 # glib
 cp ${BASE}/lib/{libglib,libgobject,libgthread,libgmodule,libgio}-2.0.0.dylib lib/

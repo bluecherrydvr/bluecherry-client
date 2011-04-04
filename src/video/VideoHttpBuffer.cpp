@@ -11,7 +11,8 @@
 void VideoHttpBuffer::needDataWrap(GstAppSrc *src, guint length, gpointer user_data)
 {
     Q_UNUSED(src);
-    static_cast<VideoHttpBuffer*>(user_data)->needData(length);
+    Q_ASSERT(length < INT_MAX);
+    static_cast<VideoHttpBuffer*>(user_data)->needData(int(length));
 }
 
 gboolean VideoHttpBuffer::seekDataWrap(GstAppSrc *src, quint64 offset, gpointer user_data)
@@ -22,7 +23,7 @@ gboolean VideoHttpBuffer::seekDataWrap(GstAppSrc *src, quint64 offset, gpointer 
 
 VideoHttpBuffer::VideoHttpBuffer(QObject *parent)
     : QObject(parent), m_networkReply(0), m_fileSize(0), m_readPos(0), m_writePos(0), m_element(0), m_pipeline(0),
-      m_streamInit(true), m_bufferBlocked(false), m_finished(false), ratePos(0), rateMax(0)
+      m_streamInit(true), m_bufferBlocked(false), m_finished(false)
 {
     m_bufferFile.setFileTemplate(QDir::tempPath() + QLatin1String("/bc_vbuf_XXXXXX.mkv"));
 }
@@ -60,7 +61,7 @@ GstElement *VideoHttpBuffer::setupSrcElement(GstElement *pipeline)
     m_pipeline = pipeline;
 
     gst_app_src_set_max_bytes(m_element, 512*1024);
-    gst_app_src_set_stream_type(m_element, GST_APP_STREAM_TYPE_SEEKABLE);
+    gst_app_src_set_stream_type(m_element, GST_APP_STREAM_TYPE_RANDOM_ACCESS);
 
     GstAppSrcCallbacks callbacks;
     memset(&callbacks, 0, sizeof(callbacks));
@@ -181,7 +182,9 @@ void VideoHttpBuffer::networkMetaData()
 
 void VideoHttpBuffer::networkRead()
 {
+    qDebug("trying to acquire lock for networkRead...");
     QMutexLocker lock(&m_lock);
+    qDebug("acquired");
     Q_ASSERT(m_bufferFile.isOpen());
 
     if (!m_bufferFile.seek(m_writePos))
@@ -221,14 +224,17 @@ void VideoHttpBuffer::networkRead()
     m_fileSize = qMax(m_fileSize, (qint64)m_writePos);
     lock.unlock();
 
-    if (m_streamInit && (m_writePos >= 40960 || m_writePos == m_fileSize))
+    if (m_streamInit && false && (m_writePos >= 40960 || m_writePos == m_fileSize))
     {
+        qDebug("streamInit");
         /* Attempt to initialize the stream with 40KB in the buffer */
         GstState stateNow, statePending;
         GstStateChangeReturn re = gst_element_get_state(m_pipeline, &stateNow, &statePending, GST_CLOCK_TIME_NONE);
         if (re == GST_STATE_CHANGE_FAILURE || stateNow < GST_STATE_PAUSED)
         {
+            qDebug("got state");
             re = gst_element_set_state(m_pipeline, GST_STATE_PAUSED);
+            qDebug("set state re=%d", (int)re);
             if (re == GST_STATE_CHANGE_FAILURE)
                 qWarning() << "VideoHttpBuffer: FAILED to transition pipeline into PAUSED state for initialization";
         }
@@ -236,6 +242,7 @@ void VideoHttpBuffer::networkRead()
         m_streamInit = false;
     }
 
+    qDebug("waking bufferwait");
     m_bufferWait.wakeOne();
     emit bufferUpdated();
 }
@@ -271,33 +278,20 @@ void VideoHttpBuffer::networkFinished()
     m_bufferWait.wakeAll();
 }
 
-void VideoHttpBuffer::needData(unsigned size)
+void VideoHttpBuffer::needData(int size)
 {
     /* Stop the stream if there is less than twice the amount requested, unless that is the end of the stream.
-     * This gives the pipeline enough buffer to resume from the paused state properly.
-     *
-     * TODO: Calculate this buffer using time rather than bytes */
-
-#if 0
-    /* Record the request for rate estimation */
-    GstClock *clock = gst_system_clock_obtain();
-    addRateData(gst_clock_get_time(clock), size);
-    gst_object_unref(GST_OBJECT(clock));
-
-    quint64 edur;
-    unsigned esize;
-    getRateEstimation(&edur, &esize);
-#endif
+     * This gives the pipeline enough buffer to resume from the paused state properly. */
 
     QMutexLocker lock(&m_lock);
     if (!m_element || !m_pipeline)
         return;
 
-    unsigned avail = unsigned(m_writePos - m_readPos);
+    qint64 avail = m_writePos - m_readPos;
 
     /* If there is less than three times as much as the current request, try to pause the stream now, but continue to
      * provide data. There may be another few requests before the stream actually can pause. */
-    if (m_writePos < m_fileSize && avail < size*3)
+    if (false && m_writePos < m_fileSize && avail < size*3)
     {
         /* Unlock prior to changing the pipeline state to prevent deadlocks.
          * Nothing here needs to be under the buffer lock. */
@@ -336,6 +330,7 @@ void VideoHttpBuffer::needData(unsigned size)
         /* This exists mostly for stream initialization (when we don't
          * have enough buffered for smooth playback). We wake every second
          * to prevent any possibility of getting stuck in an indefinite wait. */
+#if 0
         bool b;
         do
         {
@@ -343,7 +338,14 @@ void VideoHttpBuffer::needData(unsigned size)
             if (!m_element)
                 return;
         } while (!b);
-        avail = unsigned(m_writePos - m_readPos);
+#endif
+        qDebug("avail is too low: %lld, want %u", avail, size);
+        while (avail < size && m_writePos < m_fileSize)
+        {
+            m_bufferWait.wait(&m_lock);
+            avail = m_writePos - m_readPos;
+            qDebug("after waiting, avail is %lld", avail);
+        }
     }
 
     /* Refactor to use gst_pad_alloc_buffer? Probably wouldn't provide any benefit. */
@@ -384,41 +386,15 @@ void VideoHttpBuffer::needData(unsigned size)
 
 bool VideoHttpBuffer::seekData(qint64 offset)
 {
-    qDebug() << "VideoHttpBuffer: seek to" << offset;
+    QMutexLocker lock(&m_lock);
+    if (offset == m_readPos)
+        return true;
+
+    qDebug() << "VideoHttpBuffer: seek to" << offset << "from" << m_readPos << "delta" <<
+                offset - m_readPos;
     m_readPos = offset;
+    lock.unlock();
+
     m_bufferWait.wakeOne();
     return true;
-}
-
-void VideoHttpBuffer::addRateData(quint64 time, unsigned size)
-{
-    rateData[ratePos].time = time;
-    rateData[ratePos].size = size;
-    rateMax = qMax(rateMax, ++ratePos);
-    if (ratePos == rateCount)
-        ratePos = 0;
-}
-
-void VideoHttpBuffer::getRateEstimation(quint64 *duration, unsigned *size)
-{
-    *size = 0;
-    if (!rateMax)
-    {
-        *duration = 0;
-        return;
-    }
-
-    int end = ratePos ? (ratePos-1) : (rateMax-1);
-    int begin = (ratePos == rateMax) ? 0 : ratePos;
-
-    *duration = rateData[end].time - rateData[begin].time;
-    for (int i = begin; i != end;)
-    {
-        *size += rateData[i].size;
-        if (++i == rateMax)
-            i = 0;
-    }
-    *size += rateData[end].size;
-
-    qDebug() << "Data in" << *duration << "ns was" << *size;
 }
