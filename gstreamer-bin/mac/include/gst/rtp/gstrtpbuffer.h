@@ -45,6 +45,9 @@ GstBuffer*      gst_rtp_buffer_new_copy_data         (gpointer data, guint len);
 GstBuffer*      gst_rtp_buffer_new_allocate          (guint payload_len, guint8 pad_len, guint8 csrc_count);
 GstBuffer*      gst_rtp_buffer_new_allocate_len      (guint packet_len, guint8 pad_len, guint8 csrc_count);
 
+GstBufferList*  gst_rtp_buffer_list_from_buffer      (GstBuffer * buffer);
+
+
 guint           gst_rtp_buffer_calc_header_len       (guint8 csrc_count);
 guint           gst_rtp_buffer_calc_packet_len       (guint payload_len, guint8 pad_len, guint8 csrc_count);
 guint           gst_rtp_buffer_calc_payload_len      (guint packet_len, guint8 pad_len, guint8 csrc_count);
@@ -109,6 +112,53 @@ gpointer        gst_rtp_buffer_get_payload           (GstBuffer *buffer);
 guint32         gst_rtp_buffer_default_clock_rate    (guint8 payload_type);
 gint            gst_rtp_buffer_compare_seqnum        (guint16 seqnum1, guint16 seqnum2);
 guint64         gst_rtp_buffer_ext_timestamp         (guint64 *exttimestamp, guint32 timestamp);
+
+gboolean        gst_rtp_buffer_get_extension_onebyte_header (GstBuffer * buffer,
+                                                             guint8 id,
+                                                             guint nth,
+                                                             gpointer * data,
+                                                             guint * size);
+gboolean        gst_rtp_buffer_get_extension_twobytes_header (GstBuffer * buffer,
+                                                              guint8 * appbits,
+                                                              guint8 id,
+                                                              guint nth,
+                                                              gpointer * data,
+                                                              guint * size);
+
+gboolean       gst_rtp_buffer_add_extension_onebyte_header (GstBuffer * buffer,
+                                                            guint8 id,
+                                                            gpointer data,
+                                                            guint size);
+gboolean       gst_rtp_buffer_add_extension_twobytes_header (GstBuffer * buffer,
+                                                             guint8 appbits,
+                                                             guint8 id,
+                                                             gpointer data,
+                                                             guint size);
+
+gboolean       gst_rtp_buffer_list_get_extension_onebyte_header (GstBufferList * bufferlist,
+                                                                 guint group_idx,
+                                                                 guint8 id,
+                                                                 guint nth,
+                                                                 gpointer * data,
+                                                                 guint * size);
+gboolean       gst_rtp_buffer_list_get_extension_twobytes_header (GstBufferList * bufferlist,
+                                                                  guint group_idx,
+                                                                  guint8 * appbits,
+                                                                  guint8 id,
+                                                                  guint nth,
+                                                                  gpointer * data,
+                                                                  guint * size);
+
+gboolean       gst_rtp_buffer_list_add_extension_onebyte_header (GstBufferListIterator * it,
+                                                                  guint8 id,
+                                                                  gpointer data,
+                                                                  guint size);
+gboolean       gst_rtp_buffer_list_add_extension_twobytes_header (GstBufferListIterator * it,
+                                                                  guint8 appbits,
+                                                                  guint8 id,
+                                                                  gpointer data,
+                                                                  guint size);
+
 
 G_END_DECLS
 

@@ -330,7 +330,7 @@ gst_message_unref (GstMessage * msg)
  *
  * Creates a copy of the message. Returns a copy of the message.
  *
- * Returns: a new copy of @msg.
+ * Returns: (transfer full): a new copy of @msg.
  *
  * MT safe
  */
@@ -341,15 +341,17 @@ G_INLINE_FUNC GstMessage * gst_message_copy (const GstMessage * msg);
 static inline GstMessage *
 gst_message_copy (const GstMessage * msg)
 {
-  return GST_MESSAGE_CAST (gst_mini_object_copy (GST_MINI_OBJECT_CAST (msg)));
+  return GST_MESSAGE_CAST (gst_mini_object_copy (GST_MINI_OBJECT_CONST_CAST (msg)));
 }
 
 /**
  * gst_message_make_writable:
- * @msg: the message to make writable
+ * @msg: (transfer full): the message to make writable
  *
  * Checks if a message is writable. If not, a writable copy is made and
- * returned. Returns a message (possibly a duplicate) that is writable.
+ * returned.
+ *
+ * Returns: (transfer full): a message (possibly a duplicate) that is writable.
  *
  * MT safe
  */

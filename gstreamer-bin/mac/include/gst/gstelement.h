@@ -317,6 +317,7 @@ typedef enum /*< flags=0 >*/
  * @GST_ELEMENT_IS_SINK: the element is a sink
  * @GST_ELEMENT_UNPARENTING: Child is being removed from the parent bin.
  *  gst_bin_remove() on a child already being removed immediately returns FALSE
+ * @GST_ELEMENT_IS_SOURCE: the element is a source. Since 0.10.31
  * @GST_ELEMENT_FLAG_LAST: offset to define more flags
  *
  * The standard flags that an element may have.
@@ -326,6 +327,7 @@ typedef enum
   GST_ELEMENT_LOCKED_STATE      = (GST_OBJECT_FLAG_LAST << 0),
   GST_ELEMENT_IS_SINK           = (GST_OBJECT_FLAG_LAST << 1),
   GST_ELEMENT_UNPARENTING       = (GST_OBJECT_FLAG_LAST << 2),
+  GST_ELEMENT_IS_SOURCE         = (GST_OBJECT_FLAG_LAST << 3),
   /* padding */
   GST_ELEMENT_FLAG_LAST         = (GST_OBJECT_FLAG_LAST << 16)
 } GstElementFlags;
@@ -599,6 +601,7 @@ struct _GstElement
  * @send_event: send a #GstEvent to the element
  * @get_query_types: get the supported #GstQueryType of this element
  * @query: perform a #GstQuery on the element
+ * @request_new_pad_full: called when a new pad is requested. Since: 0.10.32.
  *
  * GStreamer element class. Override the vmethods to implement the element
  * functionality.
@@ -609,6 +612,7 @@ struct _GstElementClass
 
   /*< public >*/
   /* the element details */
+  /* FIXME-0.11: deprecate this in favour of meta_data */
   GstElementDetails      details;
 
   /* factory that the element was created from */
@@ -656,13 +660,27 @@ struct _GstElementClass
   gboolean              (*query)                (GstElement *element, GstQuery *query);
 
   /*< private >*/
-  gpointer _gst_reserved[GST_PADDING];
+  /* FIXME-0.11: move up and replace details */
+  gpointer		meta_data;
+
+  /*< public >*/
+  /* Virtual method for subclasses (additions) */
+  /* FIXME-0.11 Make this the default behaviour */
+  GstPad*		(*request_new_pad_full) (GstElement *element, GstPadTemplate *templ,
+						 const gchar* name, const GstCaps *caps);
+
+  /*< private >*/
+  gpointer _gst_reserved[GST_PADDING-2];
 };
 
 /* element class pad templates */
 void                    gst_element_class_add_pad_template      (GstElementClass *klass, GstPadTemplate *templ);
 GstPadTemplate*         gst_element_class_get_pad_template      (GstElementClass *element_class, const gchar *name);
 GList*                  gst_element_class_get_pad_template_list (GstElementClass *element_class);
+
+/* element class meta data */
+void                    gst_element_class_set_documentation_uri (GstElementClass * klass, const gchar *uri);
+void                    gst_element_class_set_icon_name         (GstElementClass * klass, const gchar *name);
 #ifndef GST_DISABLE_DEPRECATED
 void                    gst_element_class_set_details           (GstElementClass *klass, const GstElementDetails *details);
 #endif
@@ -686,7 +704,7 @@ GType                   gst_element_get_type            (void);
  * For a nameless element, this returns NULL, which you can safely g_free()
  * as well.
  *
- * Returns: the name of @elem. g_free() after usage. MT safe. 
+ * Returns: (transfer full): the name of @elem. g_free() after usage. MT safe.
  *
  */
 #define                 gst_element_get_name(elem)      gst_object_get_name(GST_OBJECT_CAST(elem))
@@ -704,7 +722,7 @@ GType                   gst_element_get_type            (void);
  * gst_element_get_parent:
  * @elem: a #GstElement to get the parent of.
  *
- * Gets the parent of an element.
+ * Returns: (transfer full): the parent of an element.
  */
 #define                 gst_element_get_parent(elem)    gst_object_get_parent(GST_OBJECT_CAST(elem))
 
@@ -747,6 +765,9 @@ GstPad*                 gst_element_get_pad             (GstElement *element, co
 #endif /* GST_DISABLE_DEPRECATED */
 GstPad*                 gst_element_get_static_pad      (GstElement *element, const gchar *name);
 GstPad*                 gst_element_get_request_pad     (GstElement *element, const gchar *name);
+GstPad*                 gst_element_request_pad         (GstElement *element,
+							 GstPadTemplate *templ,
+							 const gchar * name, const GstCaps *caps);
 void                    gst_element_release_request_pad (GstElement *element, GstPad *pad);
 
 GstIterator *           gst_element_iterate_pads        (GstElement * element);

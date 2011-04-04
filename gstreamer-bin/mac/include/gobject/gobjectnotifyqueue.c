@@ -50,6 +50,8 @@ struct _GObjectNotifyQueue
   guint16               freeze_count;
 };
 
+G_LOCK_DEFINE_STATIC(notify_lock);
+
 /* --- functions --- */
 static void
 g_object_notify_queue_free (gpointer data)
@@ -66,6 +68,7 @@ g_object_notify_queue_freeze (GObject		   *object,
 {
   GObjectNotifyQueue *nqueue;
 
+  G_LOCK(notify_lock);
   nqueue = g_datalist_id_get_data (&object->qdata, context->quark_notify_queue);
   if (!nqueue)
     {
@@ -75,8 +78,14 @@ g_object_notify_queue_freeze (GObject		   *object,
 				   nqueue, g_object_notify_queue_free);
     }
 
-  g_return_val_if_fail (nqueue->freeze_count < 65535, nqueue);
-  nqueue->freeze_count++;
+  if (nqueue->freeze_count >= 65535)
+    g_critical("Free queue for %s (%p) is larger than 65535,"
+               " called g_object_freeze_notify() too often."
+               " Forgot to call g_object_thaw_notify() or infinite loop",
+               G_OBJECT_TYPE_NAME (object), object);
+  else
+    nqueue->freeze_count++;
+  G_UNLOCK(notify_lock);
 
   return nqueue;
 }
@@ -91,30 +100,33 @@ g_object_notify_queue_thaw (GObject            *object,
   guint n_pspecs = 0;
 
   g_return_if_fail (nqueue->freeze_count > 0);
+  g_return_if_fail (g_atomic_int_get(&object->ref_count) > 0);
+
+  G_LOCK(notify_lock);
+
+  /* Just make sure we never get into some nasty race condition */
+  if (G_UNLIKELY(nqueue->freeze_count == 0)) {
+    G_UNLOCK(notify_lock);
+    g_warning ("%s: property-changed notification for %s(%p) is not frozen",
+	       G_STRFUNC, G_OBJECT_TYPE_NAME (object), object);
+    return;
+  }
 
   nqueue->freeze_count--;
-  if (nqueue->freeze_count)
+  if (nqueue->freeze_count) {
+    G_UNLOCK(notify_lock);
     return;
-  g_return_if_fail (object->ref_count > 0);
+  }
 
   pspecs = nqueue->n_pspecs > 16 ? free_me = g_new (GParamSpec*, nqueue->n_pspecs) : pspecs_mem;
-  /* set first entry to NULL since it's checked unconditionally */
-  pspecs[0] = NULL;
+
   for (slist = nqueue->pspecs; slist; slist = slist->next)
     {
-      GParamSpec *pspec = slist->data;
-      guint i = 0;
-
-      /* dedup, make pspecs in the list unique */
-    redo_dedup_check:
-      if (pspecs[i] == pspec)
-	continue;
-      if (++i < n_pspecs)
-	goto redo_dedup_check;
-
-      pspecs[n_pspecs++] = pspec;
+      pspecs[n_pspecs++] = slist->data;
     }
   g_datalist_id_set_data (&object->qdata, context->quark_notify_queue, NULL);
+
+  G_UNLOCK(notify_lock);
 
   if (n_pspecs)
     context->dispatcher (object, n_pspecs, pspecs);
@@ -127,9 +139,13 @@ g_object_notify_queue_clear (GObject            *object,
 {
   g_return_if_fail (nqueue->freeze_count > 0);
 
+  G_LOCK(notify_lock);
+
   g_slist_free (nqueue->pspecs);
   nqueue->pspecs = NULL;
   nqueue->n_pspecs = 0;
+
+  G_UNLOCK(notify_lock);
 }
 
 static inline void
@@ -141,6 +157,8 @@ g_object_notify_queue_add (GObject            *object,
     {
       GParamSpec *redirect;
 
+      G_LOCK(notify_lock);
+
       g_return_if_fail (nqueue->n_pspecs < 65535);
 
       redirect = g_param_spec_get_redirect_target (pspec);
@@ -148,18 +166,27 @@ g_object_notify_queue_add (GObject            *object,
 	pspec = redirect;
 	    
       /* we do the deduping in _thaw */
-      nqueue->pspecs = g_slist_prepend (nqueue->pspecs, pspec);
-      nqueue->n_pspecs++;
+      if (g_slist_find (nqueue->pspecs, pspec) == NULL)
+        {
+          nqueue->pspecs = g_slist_prepend (nqueue->pspecs, pspec);
+          nqueue->n_pspecs++;
+        }
+
+      G_UNLOCK(notify_lock);
     }
 }
 
+/* NB: This function is not threadsafe, do not ever use it if
+ * you need a threadsafe notify queue.
+ * Use g_object_notify_queue_freeze() to acquire the queue and
+ * g_object_notify_queue_thaw() after you are done instead.
+ */
 static inline GObjectNotifyQueue*
 g_object_notify_queue_from_object (GObject              *object,
-				   GObjectNotifyContext *context)
+                                   GObjectNotifyContext *context)
 {
   return g_datalist_id_get_data (&object->qdata, context->quark_notify_queue);
 }
-
 
 G_END_DECLS
 

@@ -37,13 +37,15 @@ G_BEGIN_DECLS
  * @G_APP_INFO_CREATE_NONE: No flags.
  * @G_APP_INFO_CREATE_NEEDS_TERMINAL: Application opens in a terminal window.
  * @G_APP_INFO_CREATE_SUPPORTS_URIS: Application supports URI arguments.
+ * @G_APP_INFO_CREATE_SUPPORTS_STARTUP_NOTIFICATION: Application supports startup notification. Since 2.26
  *
  * Flags used when creating a #GAppInfo.
  */
 typedef enum {
-  G_APP_INFO_CREATE_NONE           = 0,         /*< nick=none >*/
-  G_APP_INFO_CREATE_NEEDS_TERMINAL = (1 << 0),  /*< nick=needs-terminal >*/
-  G_APP_INFO_CREATE_SUPPORTS_URIS  = (1 << 1)   /*< nick=supports-uris >*/
+  G_APP_INFO_CREATE_NONE                           = 0,         /*< nick=none >*/
+  G_APP_INFO_CREATE_NEEDS_TERMINAL                 = (1 << 0),  /*< nick=needs-terminal >*/
+  G_APP_INFO_CREATE_SUPPORTS_URIS                  = (1 << 1),  /*< nick=supports-uris >*/
+  G_APP_INFO_CREATE_SUPPORTS_STARTUP_NOTIFICATION  = (1 << 2)   /*< nick=supports-startup-notification >*/
 } GAppInfoCreateFlags;
 
 /**
@@ -195,7 +197,7 @@ typedef enum {
  * @G_FILE_CREATE_REPLACE_DESTINATION: Replace the destination
  *    as if it didn't exist before. Don't try to keep any old
  *    permissions, replace instead of following links. This
- *    is generally useful if you're doing a "copy over" 
+ *    is generally useful if you're doing a "copy over"
  *    rather than a "save new version of" replace operation.
  *    You can think of it as "unlink destination" before
  *    writing to it, although the implementation may not
@@ -420,15 +422,28 @@ typedef enum {
  * @G_IO_ERROR_WOULD_BLOCK: Operation would block.
  * @G_IO_ERROR_HOST_NOT_FOUND: Host couldn't be found (remote operations).
  * @G_IO_ERROR_WOULD_MERGE: Operation would merge files.
- * @G_IO_ERROR_FAILED_HANDLED: Operation failed and a helper program has 
+ * @G_IO_ERROR_FAILED_HANDLED: Operation failed and a helper program has
  *     already interacted with the user. Do not display any error dialog.
- * @G_IO_ERROR_TOO_MANY_OPEN_FILES: The current process has too many files 
- *     open and can't open any more. Duplicate descriptors do count toward 
+ * @G_IO_ERROR_TOO_MANY_OPEN_FILES: The current process has too many files
+ *     open and can't open any more. Duplicate descriptors do count toward
  *     this limit. Since 2.20
  * @G_IO_ERROR_NOT_INITIALIZED: The object has not been initialized. Since 2.22
  * @G_IO_ERROR_ADDRESS_IN_USE: The requested address is already in use. Since 2.22
  * @G_IO_ERROR_PARTIAL_INPUT: Need more input to finish operation. Since 2.24
  * @G_IO_ERROR_INVALID_DATA: There input data was invalid. Since 2.24
+ * @G_IO_ERROR_DBUS_ERROR: A remote object generated an error that
+ *     doesn't correspond to a locally registered #GError error
+ *     domain. Use g_dbus_error_get_remote_error() to extract the D-Bus
+ *     error name and g_dbus_error_strip_remote_error() to fix up the
+ *     message so it matches what was received on the wire. Since 2.26.
+ * @G_IO_ERROR_HOST_UNREACHABLE: Host unreachable. Since 2.26
+ * @G_IO_ERROR_NETWORK_UNREACHABLE: Network unreachable. Since 2.26
+ * @G_IO_ERROR_CONNECTION_REFUSED: Connection refused. Since 2.26
+ * @G_IO_ERROR_PROXY_FAILED: Connection to proxy server failed. Since 2.26
+ * @G_IO_ERROR_PROXY_AUTH_FAILED: Proxy authentication failed. Since 2.26
+ * @G_IO_ERROR_PROXY_NEED_AUTH: Proxy server needs authentication. Since 2.26
+ * @G_IO_ERROR_PROXY_NOT_ALLOWED: Proxy connection is not allowed by ruleset.
+ *     Since 2.26
  *
  * Error codes returned by GIO functions.
  *
@@ -469,7 +484,15 @@ typedef enum {
   G_IO_ERROR_NOT_INITIALIZED,
   G_IO_ERROR_ADDRESS_IN_USE,
   G_IO_ERROR_PARTIAL_INPUT,
-  G_IO_ERROR_INVALID_DATA
+  G_IO_ERROR_INVALID_DATA,
+  G_IO_ERROR_DBUS_ERROR,
+  G_IO_ERROR_HOST_UNREACHABLE,
+  G_IO_ERROR_NETWORK_UNREACHABLE,
+  G_IO_ERROR_CONNECTION_REFUSED,
+  G_IO_ERROR_PROXY_FAILED,
+  G_IO_ERROR_PROXY_AUTH_FAILED,
+  G_IO_ERROR_PROXY_NEED_AUTH,
+  G_IO_ERROR_PROXY_NOT_ALLOWED
 } GIOErrorEnum;
 
 
@@ -547,6 +570,27 @@ typedef enum {
   G_OUTPUT_STREAM_SPLICE_CLOSE_TARGET = (1 << 1)
 } GOutputStreamSpliceFlags;
 
+
+/**
+ * GIOStreamSpliceFlags:
+ * @G_IO_STREAM_SPLICE_NONE: Do not close either stream.
+ * @G_IO_STREAM_SPLICE_CLOSE_STREAM1: Close the first stream after
+ *     the splice.
+ * @G_IO_STREAM_SPLICE_CLOSE_STREAM2: Close the second stream after
+ *     the splice.
+ * @G_IO_STREAM_SPLICE_WAIT_FOR_BOTH: Wait for both splice operations to finish
+ *     before calling the callback.
+ *
+ * GIOStreamSpliceFlags determine how streams should be spliced.
+ *
+ * Since: 2.28
+ **/
+typedef enum {
+  G_IO_STREAM_SPLICE_NONE          = 0,
+  G_IO_STREAM_SPLICE_CLOSE_STREAM1 = (1 << 0),
+  G_IO_STREAM_SPLICE_CLOSE_STREAM2 = (1 << 1),
+  G_IO_STREAM_SPLICE_WAIT_FOR_BOTH = (1 << 2)
+} GIOStreamSpliceFlags;
 
 /**
  * GEmblemOrigin:
@@ -697,6 +741,647 @@ typedef enum {
   G_ZLIB_COMPRESSOR_FORMAT_GZIP,
   G_ZLIB_COMPRESSOR_FORMAT_RAW
 } GZlibCompressorFormat;
+
+/**
+ * GUnixSocketAddressType:
+ * @G_UNIX_SOCKET_ADDRESS_INVALID: invalid
+ * @G_UNIX_SOCKET_ADDRESS_ANONYMOUS: anonymous
+ * @G_UNIX_SOCKET_ADDRESS_PATH: a filesystem path
+ * @G_UNIX_SOCKET_ADDRESS_ABSTRACT: an abstract name
+ * @G_UNIX_SOCKET_ADDRESS_ABSTRACT_PADDED: an abstract name, 0-padded
+ *   to the full length of a unix socket name
+ *
+ * The type of name used by a #GUnixSocketAddress.
+ * %G_UNIX_SOCKET_ADDRESS_PATH indicates a traditional unix domain
+ * socket bound to a filesystem path. %G_UNIX_SOCKET_ADDRESS_ANONYMOUS
+ * indicates a socket not bound to any name (eg, a client-side socket,
+ * or a socket created with socketpair()).
+ *
+ * For abstract sockets, there are two incompatible ways of naming
+ * them; the man pages suggest using the entire <literal>struct
+ * sockaddr_un</literal> as the name, padding the unused parts of the
+ * %sun_path field with zeroes; this corresponds to
+ * %G_UNIX_SOCKET_ADDRESS_ABSTRACT_PADDED. However, many programs
+ * instead just use a portion of %sun_path, and pass an appropriate
+ * smaller length to bind() or connect(). This is
+ * %G_UNIX_SOCKET_ADDRESS_ABSTRACT.
+ *
+ * Since: 2.26
+ */
+typedef enum {
+  G_UNIX_SOCKET_ADDRESS_INVALID,
+  G_UNIX_SOCKET_ADDRESS_ANONYMOUS,
+  G_UNIX_SOCKET_ADDRESS_PATH,
+  G_UNIX_SOCKET_ADDRESS_ABSTRACT,
+  G_UNIX_SOCKET_ADDRESS_ABSTRACT_PADDED
+} GUnixSocketAddressType;
+
+/**
+ * GBusType:
+ * @G_BUS_TYPE_STARTER: An alias for the message bus that activated the process, if any.
+ * @G_BUS_TYPE_NONE: Not a message bus.
+ * @G_BUS_TYPE_SYSTEM: The system-wide message bus.
+ * @G_BUS_TYPE_SESSION: The login session message bus.
+ *
+ * An enumeration for well-known message buses.
+ *
+ * Since: 2.26
+ */
+typedef enum
+{
+  G_BUS_TYPE_STARTER = -1,
+  G_BUS_TYPE_NONE = 0,
+  G_BUS_TYPE_SYSTEM  = 1,
+  G_BUS_TYPE_SESSION = 2
+} GBusType;
+
+/**
+ * GBusNameOwnerFlags:
+ * @G_BUS_NAME_OWNER_FLAGS_NONE: No flags set.
+ * @G_BUS_NAME_OWNER_FLAGS_ALLOW_REPLACEMENT: Allow another message bus connection to claim the the name.
+ * @G_BUS_NAME_OWNER_FLAGS_REPLACE: If another message bus connection owns the name and have
+ * specified #G_BUS_NAME_OWNER_FLAGS_ALLOW_REPLACEMENT, then take the name from the other connection.
+ *
+ * Flags used in g_bus_own_name().
+ *
+ * Since: 2.26
+ */
+typedef enum
+{
+  G_BUS_NAME_OWNER_FLAGS_NONE = 0,                    /*< nick=none >*/
+  G_BUS_NAME_OWNER_FLAGS_ALLOW_REPLACEMENT = (1<<0),  /*< nick=allow-replacement >*/
+  G_BUS_NAME_OWNER_FLAGS_REPLACE = (1<<1)            /*< nick=replace >*/
+} GBusNameOwnerFlags;
+
+/**
+ * GBusNameWatcherFlags:
+ * @G_BUS_NAME_WATCHER_FLAGS_NONE: No flags set.
+ * @G_BUS_NAME_WATCHER_FLAGS_AUTO_START: If no-one owns the name when
+ * beginning to watch the name, ask the bus to launch an owner for the
+ * name.
+ *
+ * Flags used in g_bus_watch_name().
+ *
+ * Since: 2.26
+ */
+typedef enum
+{
+  G_BUS_NAME_WATCHER_FLAGS_NONE = 0,
+  G_BUS_NAME_WATCHER_FLAGS_AUTO_START = (1<<0)
+} GBusNameWatcherFlags;
+
+/**
+ * GDBusProxyFlags:
+ * @G_DBUS_PROXY_FLAGS_NONE: No flags set.
+ * @G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES: Don't load properties.
+ * @G_DBUS_PROXY_FLAGS_DO_NOT_CONNECT_SIGNALS: Don't connect to signals on the remote object.
+ * @G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START: If not set and the proxy if for a well-known name,
+ * then request the bus to launch an owner for the name if no-one owns the name. This flag can
+ * only be used in proxies for well-known names.
+ *
+ * Flags used when constructing an instance of a #GDBusProxy derived class.
+ *
+ * Since: 2.26
+ */
+typedef enum
+{
+  G_DBUS_PROXY_FLAGS_NONE = 0,
+  G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES = (1<<0),
+  G_DBUS_PROXY_FLAGS_DO_NOT_CONNECT_SIGNALS = (1<<1),
+  G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START = (1<<2)
+} GDBusProxyFlags;
+
+/**
+ * GDBusError:
+ * @G_DBUS_ERROR_FAILED:
+ * A generic error; "something went wrong" - see the error message for
+ * more.
+ * @G_DBUS_ERROR_NO_MEMORY:
+ * There was not enough memory to complete an operation.
+ * @G_DBUS_ERROR_SERVICE_UNKNOWN:
+ * The bus doesn't know how to launch a service to supply the bus name
+ * you wanted.
+ * @G_DBUS_ERROR_NAME_HAS_NO_OWNER:
+ * The bus name you referenced doesn't exist (i.e. no application owns
+ * it).
+ * @G_DBUS_ERROR_NO_REPLY:
+ * No reply to a message expecting one, usually means a timeout occurred.
+ * @G_DBUS_ERROR_IO_ERROR:
+ * Something went wrong reading or writing to a socket, for example.
+ * @G_DBUS_ERROR_BAD_ADDRESS:
+ * A D-Bus bus address was malformed.
+ * @G_DBUS_ERROR_NOT_SUPPORTED:
+ * Requested operation isn't supported (like ENOSYS on UNIX).
+ * @G_DBUS_ERROR_LIMITS_EXCEEDED:
+ * Some limited resource is exhausted.
+ * @G_DBUS_ERROR_ACCESS_DENIED:
+ * Security restrictions don't allow doing what you're trying to do.
+ * @G_DBUS_ERROR_AUTH_FAILED:
+ * Authentication didn't work.
+ * @G_DBUS_ERROR_NO_SERVER:
+ * Unable to connect to server (probably caused by ECONNREFUSED on a
+ * socket).
+ * @G_DBUS_ERROR_TIMEOUT:
+ * Certain timeout errors, possibly ETIMEDOUT on a socket.  Note that
+ * %G_DBUS_ERROR_NO_REPLY is used for message reply timeouts. Warning:
+ * this is confusingly-named given that %G_DBUS_ERROR_TIMED_OUT also
+ * exists. We can't fix it for compatibility reasons so just be
+ * careful.
+ * @G_DBUS_ERROR_NO_NETWORK:
+ * No network access (probably ENETUNREACH on a socket).
+ * @G_DBUS_ERROR_ADDRESS_IN_USE:
+ * Can't bind a socket since its address is in use (i.e. EADDRINUSE).
+ * @G_DBUS_ERROR_DISCONNECTED:
+ * The connection is disconnected and you're trying to use it.
+ * @G_DBUS_ERROR_INVALID_ARGS:
+ * Invalid arguments passed to a method call.
+ * @G_DBUS_ERROR_FILE_NOT_FOUND:
+ * Missing file.
+ * @G_DBUS_ERROR_FILE_EXISTS:
+ * Existing file and the operation you're using does not silently overwrite.
+ * @G_DBUS_ERROR_UNKNOWN_METHOD:
+ * Method name you invoked isn't known by the object you invoked it on.
+ * @G_DBUS_ERROR_TIMED_OUT:
+ * Certain timeout errors, e.g. while starting a service. Warning: this is
+ * confusingly-named given that %G_DBUS_ERROR_TIMEOUT also exists. We
+ * can't fix it for compatibility reasons so just be careful.
+ * @G_DBUS_ERROR_MATCH_RULE_NOT_FOUND:
+ * Tried to remove or modify a match rule that didn't exist.
+ * @G_DBUS_ERROR_MATCH_RULE_INVALID:
+ * The match rule isn't syntactically valid.
+ * @G_DBUS_ERROR_SPAWN_EXEC_FAILED:
+ * While starting a new process, the exec() call failed.
+ * @G_DBUS_ERROR_SPAWN_FORK_FAILED:
+ * While starting a new process, the fork() call failed.
+ * @G_DBUS_ERROR_SPAWN_CHILD_EXITED:
+ * While starting a new process, the child exited with a status code.
+ * @G_DBUS_ERROR_SPAWN_CHILD_SIGNALED:
+ * While starting a new process, the child exited on a signal.
+ * @G_DBUS_ERROR_SPAWN_FAILED:
+ * While starting a new process, something went wrong.
+ * @G_DBUS_ERROR_SPAWN_SETUP_FAILED:
+ * We failed to setup the environment correctly.
+ * @G_DBUS_ERROR_SPAWN_CONFIG_INVALID:
+ * We failed to setup the config parser correctly.
+ * @G_DBUS_ERROR_SPAWN_SERVICE_INVALID:
+ * Bus name was not valid.
+ * @G_DBUS_ERROR_SPAWN_SERVICE_NOT_FOUND:
+ * Service file not found in system-services directory.
+ * @G_DBUS_ERROR_SPAWN_PERMISSIONS_INVALID:
+ * Permissions are incorrect on the setuid helper.
+ * @G_DBUS_ERROR_SPAWN_FILE_INVALID:
+ * Service file invalid (Name, User or Exec missing).
+ * @G_DBUS_ERROR_SPAWN_NO_MEMORY:
+ * Tried to get a UNIX process ID and it wasn't available.
+ * @G_DBUS_ERROR_UNIX_PROCESS_ID_UNKNOWN:
+ * Tried to get a UNIX process ID and it wasn't available.
+ * @G_DBUS_ERROR_INVALID_SIGNATURE:
+ * A type signature is not valid.
+ * @G_DBUS_ERROR_INVALID_FILE_CONTENT:
+ * A file contains invalid syntax or is otherwise broken.
+ * @G_DBUS_ERROR_SELINUX_SECURITY_CONTEXT_UNKNOWN:
+ * Asked for SELinux security context and it wasn't available.
+ * @G_DBUS_ERROR_ADT_AUDIT_DATA_UNKNOWN:
+ * Asked for ADT audit data and it wasn't available.
+ * @G_DBUS_ERROR_OBJECT_PATH_IN_USE:
+ * There's already an object with the requested object path.
+ *
+ * Error codes for the %G_DBUS_ERROR error domain.
+ *
+ * Since: 2.26
+ */
+typedef enum
+{
+  /* Well-known errors in the org.freedesktop.DBus.Error namespace */
+  G_DBUS_ERROR_FAILED,                           /* org.freedesktop.DBus.Error.Failed */
+  G_DBUS_ERROR_NO_MEMORY,                        /* org.freedesktop.DBus.Error.NoMemory */
+  G_DBUS_ERROR_SERVICE_UNKNOWN,                  /* org.freedesktop.DBus.Error.ServiceUnknown */
+  G_DBUS_ERROR_NAME_HAS_NO_OWNER,                /* org.freedesktop.DBus.Error.NameHasNoOwner */
+  G_DBUS_ERROR_NO_REPLY,                         /* org.freedesktop.DBus.Error.NoReply */
+  G_DBUS_ERROR_IO_ERROR,                         /* org.freedesktop.DBus.Error.IOError */
+  G_DBUS_ERROR_BAD_ADDRESS,                      /* org.freedesktop.DBus.Error.BadAddress */
+  G_DBUS_ERROR_NOT_SUPPORTED,                    /* org.freedesktop.DBus.Error.NotSupported */
+  G_DBUS_ERROR_LIMITS_EXCEEDED,                  /* org.freedesktop.DBus.Error.LimitsExceeded */
+  G_DBUS_ERROR_ACCESS_DENIED,                    /* org.freedesktop.DBus.Error.AccessDenied */
+  G_DBUS_ERROR_AUTH_FAILED,                      /* org.freedesktop.DBus.Error.AuthFailed */
+  G_DBUS_ERROR_NO_SERVER,                        /* org.freedesktop.DBus.Error.NoServer */
+  G_DBUS_ERROR_TIMEOUT,                          /* org.freedesktop.DBus.Error.Timeout */
+  G_DBUS_ERROR_NO_NETWORK,                       /* org.freedesktop.DBus.Error.NoNetwork */
+  G_DBUS_ERROR_ADDRESS_IN_USE,                   /* org.freedesktop.DBus.Error.AddressInUse */
+  G_DBUS_ERROR_DISCONNECTED,                     /* org.freedesktop.DBus.Error.Disconnected */
+  G_DBUS_ERROR_INVALID_ARGS,                     /* org.freedesktop.DBus.Error.InvalidArgs */
+  G_DBUS_ERROR_FILE_NOT_FOUND,                   /* org.freedesktop.DBus.Error.FileNotFound */
+  G_DBUS_ERROR_FILE_EXISTS,                      /* org.freedesktop.DBus.Error.FileExists */
+  G_DBUS_ERROR_UNKNOWN_METHOD,                   /* org.freedesktop.DBus.Error.UnknownMethod */
+  G_DBUS_ERROR_TIMED_OUT,                        /* org.freedesktop.DBus.Error.TimedOut */
+  G_DBUS_ERROR_MATCH_RULE_NOT_FOUND,             /* org.freedesktop.DBus.Error.MatchRuleNotFound */
+  G_DBUS_ERROR_MATCH_RULE_INVALID,               /* org.freedesktop.DBus.Error.MatchRuleInvalid */
+  G_DBUS_ERROR_SPAWN_EXEC_FAILED,                /* org.freedesktop.DBus.Error.Spawn.ExecFailed */
+  G_DBUS_ERROR_SPAWN_FORK_FAILED,                /* org.freedesktop.DBus.Error.Spawn.ForkFailed */
+  G_DBUS_ERROR_SPAWN_CHILD_EXITED,               /* org.freedesktop.DBus.Error.Spawn.ChildExited */
+  G_DBUS_ERROR_SPAWN_CHILD_SIGNALED,             /* org.freedesktop.DBus.Error.Spawn.ChildSignaled */
+  G_DBUS_ERROR_SPAWN_FAILED,                     /* org.freedesktop.DBus.Error.Spawn.Failed */
+  G_DBUS_ERROR_SPAWN_SETUP_FAILED,               /* org.freedesktop.DBus.Error.Spawn.FailedToSetup */
+  G_DBUS_ERROR_SPAWN_CONFIG_INVALID,             /* org.freedesktop.DBus.Error.Spawn.ConfigInvalid */
+  G_DBUS_ERROR_SPAWN_SERVICE_INVALID,            /* org.freedesktop.DBus.Error.Spawn.ServiceNotValid */
+  G_DBUS_ERROR_SPAWN_SERVICE_NOT_FOUND,          /* org.freedesktop.DBus.Error.Spawn.ServiceNotFound */
+  G_DBUS_ERROR_SPAWN_PERMISSIONS_INVALID,        /* org.freedesktop.DBus.Error.Spawn.PermissionsInvalid */
+  G_DBUS_ERROR_SPAWN_FILE_INVALID,               /* org.freedesktop.DBus.Error.Spawn.FileInvalid */
+  G_DBUS_ERROR_SPAWN_NO_MEMORY,                  /* org.freedesktop.DBus.Error.Spawn.NoMemory */
+  G_DBUS_ERROR_UNIX_PROCESS_ID_UNKNOWN,          /* org.freedesktop.DBus.Error.UnixProcessIdUnknown */
+  G_DBUS_ERROR_INVALID_SIGNATURE,                /* org.freedesktop.DBus.Error.InvalidSignature */
+  G_DBUS_ERROR_INVALID_FILE_CONTENT,             /* org.freedesktop.DBus.Error.InvalidFileContent */
+  G_DBUS_ERROR_SELINUX_SECURITY_CONTEXT_UNKNOWN, /* org.freedesktop.DBus.Error.SELinuxSecurityContextUnknown */
+  G_DBUS_ERROR_ADT_AUDIT_DATA_UNKNOWN,           /* org.freedesktop.DBus.Error.AdtAuditDataUnknown */
+  G_DBUS_ERROR_OBJECT_PATH_IN_USE                /* org.freedesktop.DBus.Error.ObjectPathInUse */
+} GDBusError;
+/* Remember to update g_dbus_error_quark() in gdbuserror.c if you extend this enumeration */
+
+/**
+ * GDBusConnectionFlags:
+ * @G_DBUS_CONNECTION_FLAGS_NONE: No flags set.
+ * @G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_CLIENT: Perform authentication against server.
+ * @G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_SERVER: Perform authentication against client.
+ * @G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_ALLOW_ANONYMOUS: When
+ * authenticating as a server, allow the anonymous authentication
+ * method.
+ * @G_DBUS_CONNECTION_FLAGS_MESSAGE_BUS_CONNECTION: Pass this flag if connecting to a peer that is a
+ * message bus. This means that the Hello() method will be invoked as part of the connection setup.
+ * @G_DBUS_CONNECTION_FLAGS_DELAY_MESSAGE_PROCESSING: If set, processing of D-Bus messages is
+ * delayed until g_dbus_connection_start_message_processing() is called.
+ *
+ * Flags used when creating a new #GDBusConnection.
+ *
+ * Since: 2.26
+ */
+typedef enum {
+  G_DBUS_CONNECTION_FLAGS_NONE = 0,
+  G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_CLIENT = (1<<0),
+  G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_SERVER = (1<<1),
+  G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_ALLOW_ANONYMOUS = (1<<2),
+  G_DBUS_CONNECTION_FLAGS_MESSAGE_BUS_CONNECTION = (1<<3),
+  G_DBUS_CONNECTION_FLAGS_DELAY_MESSAGE_PROCESSING = (1<<4)
+} GDBusConnectionFlags;
+
+/**
+ * GDBusCapabilityFlags:
+ * @G_DBUS_CAPABILITY_FLAGS_NONE: No flags set.
+ * @G_DBUS_CAPABILITY_FLAGS_UNIX_FD_PASSING: The connection
+ * supports exchanging UNIX file descriptors with the remote peer.
+ *
+ * Capabilities negotiated with the remote peer.
+ *
+ * Since: 2.26
+ */
+typedef enum {
+  G_DBUS_CAPABILITY_FLAGS_NONE = 0,
+  G_DBUS_CAPABILITY_FLAGS_UNIX_FD_PASSING = (1<<0)
+} GDBusCapabilityFlags;
+
+/**
+ * GDBusCallFlags:
+ * @G_DBUS_CALL_FLAGS_NONE: No flags set.
+ * @G_DBUS_CALL_FLAGS_NO_AUTO_START: The bus must not launch
+ * an owner for the destination name in response to this method
+ * invocation.
+ *
+ * Flags used in g_dbus_connection_call() and similar APIs.
+ *
+ * Since: 2.26
+ */
+typedef enum {
+  G_DBUS_CALL_FLAGS_NONE = 0,
+  G_DBUS_CALL_FLAGS_NO_AUTO_START = (1<<0)
+} GDBusCallFlags;
+
+/**
+ * GDBusMessageType:
+ * @G_DBUS_MESSAGE_TYPE_INVALID: Message is of invalid type.
+ * @G_DBUS_MESSAGE_TYPE_METHOD_CALL: Method call.
+ * @G_DBUS_MESSAGE_TYPE_METHOD_RETURN: Method reply.
+ * @G_DBUS_MESSAGE_TYPE_ERROR: Error reply.
+ * @G_DBUS_MESSAGE_TYPE_SIGNAL: Signal emission.
+ *
+ * Message types used in #GDBusMessage.
+ *
+ * Since: 2.26
+ */
+typedef enum {
+  G_DBUS_MESSAGE_TYPE_INVALID,
+  G_DBUS_MESSAGE_TYPE_METHOD_CALL,
+  G_DBUS_MESSAGE_TYPE_METHOD_RETURN,
+  G_DBUS_MESSAGE_TYPE_ERROR,
+  G_DBUS_MESSAGE_TYPE_SIGNAL
+} GDBusMessageType;
+
+/**
+ * GDBusMessageFlags:
+ * @G_DBUS_MESSAGE_FLAGS_NONE: No flags set.
+ * @G_DBUS_MESSAGE_FLAGS_NO_REPLY_EXPECTED: A reply is not expected.
+ * @G_DBUS_MESSAGE_FLAGS_NO_AUTO_START: The bus must not launch an
+ * owner for the destination name in response to this message.
+ *
+ * Message flags used in #GDBusMessage.
+ *
+ * Since: 2.26
+ */
+typedef enum {
+  G_DBUS_MESSAGE_FLAGS_NONE = 0,
+  G_DBUS_MESSAGE_FLAGS_NO_REPLY_EXPECTED = (1<<0),
+  G_DBUS_MESSAGE_FLAGS_NO_AUTO_START = (1<<1)
+} GDBusMessageFlags;
+
+/**
+ * GDBusMessageHeaderField:
+ * @G_DBUS_MESSAGE_HEADER_FIELD_INVALID: Not a valid header field.
+ * @G_DBUS_MESSAGE_HEADER_FIELD_PATH: The object path.
+ * @G_DBUS_MESSAGE_HEADER_FIELD_INTERFACE: The interface name.
+ * @G_DBUS_MESSAGE_HEADER_FIELD_MEMBER: The method or signal name.
+ * @G_DBUS_MESSAGE_HEADER_FIELD_ERROR_NAME: The name of the error that occurred.
+ * @G_DBUS_MESSAGE_HEADER_FIELD_REPLY_SERIAL: The serial number the message is a reply to.
+ * @G_DBUS_MESSAGE_HEADER_FIELD_DESTINATION: The name the message is intended for.
+ * @G_DBUS_MESSAGE_HEADER_FIELD_SENDER: Unique name of the sender of the message (filled in by the bus).
+ * @G_DBUS_MESSAGE_HEADER_FIELD_SIGNATURE: The signature of the message body.
+ * @G_DBUS_MESSAGE_HEADER_FIELD_NUM_UNIX_FDS: The number of UNIX file descriptors that accompany the message.
+ *
+ * Header fields used in #GDBusMessage.
+ *
+ * Since: 2.26
+ */
+typedef enum {
+  G_DBUS_MESSAGE_HEADER_FIELD_INVALID,
+  G_DBUS_MESSAGE_HEADER_FIELD_PATH,
+  G_DBUS_MESSAGE_HEADER_FIELD_INTERFACE,
+  G_DBUS_MESSAGE_HEADER_FIELD_MEMBER,
+  G_DBUS_MESSAGE_HEADER_FIELD_ERROR_NAME,
+  G_DBUS_MESSAGE_HEADER_FIELD_REPLY_SERIAL,
+  G_DBUS_MESSAGE_HEADER_FIELD_DESTINATION,
+  G_DBUS_MESSAGE_HEADER_FIELD_SENDER,
+  G_DBUS_MESSAGE_HEADER_FIELD_SIGNATURE,
+  G_DBUS_MESSAGE_HEADER_FIELD_NUM_UNIX_FDS
+} GDBusMessageHeaderField;
+
+/**
+ * GDBusPropertyInfoFlags:
+ * @G_DBUS_PROPERTY_INFO_FLAGS_NONE: No flags set.
+ * @G_DBUS_PROPERTY_INFO_FLAGS_READABLE: Property is readable.
+ * @G_DBUS_PROPERTY_INFO_FLAGS_WRITABLE: Property is writable.
+ *
+ * Flags describing the access control of a D-Bus property.
+ *
+ * Since: 2.26
+ */
+typedef enum
+{
+  G_DBUS_PROPERTY_INFO_FLAGS_NONE = 0,
+  G_DBUS_PROPERTY_INFO_FLAGS_READABLE = (1<<0),
+  G_DBUS_PROPERTY_INFO_FLAGS_WRITABLE = (1<<1)
+} GDBusPropertyInfoFlags;
+
+/**
+ * GDBusSubtreeFlags:
+ * @G_DBUS_SUBTREE_FLAGS_NONE: No flags set.
+ * @G_DBUS_SUBTREE_FLAGS_DISPATCH_TO_UNENUMERATED_NODES: Method calls to objects not in the enumerated range
+ *                                                       will still be dispatched. This is useful if you want
+ *                                                       to dynamically spawn objects in the subtree.
+ *
+ * Flags passed to g_dbus_connection_register_subtree().
+ *
+ * Since: 2.26
+ */
+typedef enum
+{
+  G_DBUS_SUBTREE_FLAGS_NONE = 0,
+  G_DBUS_SUBTREE_FLAGS_DISPATCH_TO_UNENUMERATED_NODES = (1<<0)
+} GDBusSubtreeFlags;
+
+/**
+ * GDBusServerFlags:
+ * @G_DBUS_SERVER_FLAGS_NONE: No flags set.
+ * @G_DBUS_SERVER_FLAGS_RUN_IN_THREAD: All #GDBusServer::new-connection
+ * signals will run in separated dedicated threads (see signal for
+ * details).
+ * @G_DBUS_SERVER_FLAGS_AUTHENTICATION_ALLOW_ANONYMOUS: Allow the anonymous
+ * authentication method.
+ *
+ * Flags used when creating a #GDBusServer.
+ *
+ * Since: 2.26
+ */
+typedef enum
+{
+  G_DBUS_SERVER_FLAGS_NONE = 0,
+  G_DBUS_SERVER_FLAGS_RUN_IN_THREAD = (1<<0),
+  G_DBUS_SERVER_FLAGS_AUTHENTICATION_ALLOW_ANONYMOUS = (1<<1)
+} GDBusServerFlags;
+
+/**
+ * GDBusSignalFlags:
+ * @G_DBUS_SIGNAL_FLAGS_NONE: No flags set.
+ * @G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE: Don't actually send the AddMatch
+ * DBus call for this signal subscription.  This gives you more control
+ * over which match rules you add (but you must add them manually).
+ *
+ * Flags used when subscribing to signals via g_dbus_connection_signal_subscribe().
+ *
+ * Since: 2.26
+ */
+typedef enum /*< flags >*/
+{
+  G_DBUS_SIGNAL_FLAGS_NONE = 0,
+  G_DBUS_SIGNAL_FLAGS_NO_MATCH_RULE = (1<<0)
+} GDBusSignalFlags;
+
+/**
+ * GDBusSendMessageFlags:
+ * @G_DBUS_SEND_MESSAGE_FLAGS_NONE: No flags set.
+ * @G_DBUS_SEND_MESSAGE_FLAGS_PRESERVE_SERIAL: Do not automatically
+ * assign a serial number from the #GDBusConnection object when
+ * sending a message.
+ *
+ * Flags used when sending #GDBusMessage<!-- -->s on a #GDBusConnection.
+ *
+ * Since: 2.26
+ */
+typedef enum
+{
+  G_DBUS_SEND_MESSAGE_FLAGS_NONE = 0,
+  G_DBUS_SEND_MESSAGE_FLAGS_PRESERVE_SERIAL = (1<<0)
+} GDBusSendMessageFlags;
+
+/**
+ * GCredentialsType:
+ * @G_CREDENTIALS_TYPE_INVALID: Indicates an invalid native credential type.
+ * @G_CREDENTIALS_TYPE_LINUX_UCRED: The native credentials type is a <type>struct ucred</type>.
+ * @G_CREDENTIALS_TYPE_FREEBSD_CMSGCRED: The native credentials type is a <type>struct cmsgcred</type>.
+ *
+ * Enumeration describing different kinds of native credential types.
+ *
+ * Since: 2.26
+ */
+typedef enum
+{
+  G_CREDENTIALS_TYPE_INVALID,
+  G_CREDENTIALS_TYPE_LINUX_UCRED,
+  G_CREDENTIALS_TYPE_FREEBSD_CMSGCRED
+} GCredentialsType;
+
+/**
+ * GDBusMessageByteOrder:
+ * @G_DBUS_MESSAGE_BYTE_ORDER_BIG_ENDIAN: The byte order is big endian.
+ * @G_DBUS_MESSAGE_BYTE_ORDER_LITTLE_ENDIAN: The byte order is little endian.
+ *
+ * Enumeration used to describe the byte order of a D-Bus message.
+ *
+ * Since: 2.26
+ */
+typedef enum
+{
+  G_DBUS_MESSAGE_BYTE_ORDER_BIG_ENDIAN    = 'B',
+  G_DBUS_MESSAGE_BYTE_ORDER_LITTLE_ENDIAN = 'l'
+} GDBusMessageByteOrder;
+
+/**
+ * GApplicationFlags:
+ * @G_APPLICATION_FLAGS_NONE: Default
+ * @G_APPLICATION_IS_SERVICE: Run as a service. In this mode, registration
+ *      fails if the service is already running, and the application will
+ *      stay around for a while when the use count falls to zero.
+ * @G_APPLICATION_IS_LAUNCHER: Don't try to become the primary instance.
+ * @G_APPLICATION_HANDLES_OPEN: This application handles opening files (in
+ *     the primary instance). Note that this flag only affects the default
+ *     implementation of local_command_line(), and has no effect if
+ *     %G_APPLICATION_HANDLES_COMMAND_LINE is given.
+ *     See g_application_run() for details.
+ * @G_APPLICATION_HANDLES_COMMAND_LINE: This application handles command line
+ *     arguments (in the primary instance). Note that this flag only affect
+ *     the default implementation of local_command_line().
+ *     See g_application_run() for details.
+ * @G_APPLICATION_SEND_ENVIRONMENT: Send the environment of the
+ *     launching process to the primary instance. Set this flag if your
+ *     application is expected to behave differently depending on certain
+ *     environment variables. For instance, an editor might be expected
+ *     to use the <envar>GIT_COMMITTER_NAME</envar> environment variable
+ *     when editing a git commit message. The environment is available
+ *     to the #GApplication::command-line signal handler, via
+ *     g_application_command_line_getenv().
+ *
+ * Flags used to define the behaviour of a #GApplication.
+ *
+ * Since: 2.28
+ **/
+typedef enum
+{
+  G_APPLICATION_FLAGS_NONE,
+  G_APPLICATION_IS_SERVICE  =          (1 << 0),
+  G_APPLICATION_IS_LAUNCHER =          (1 << 1),
+
+  G_APPLICATION_HANDLES_OPEN =         (1 << 2),
+  G_APPLICATION_HANDLES_COMMAND_LINE = (1 << 3),
+  G_APPLICATION_SEND_ENVIRONMENT    =  (1 << 4)
+} GApplicationFlags;
+
+/**
+ * GTlsError:
+ * @G_TLS_ERROR_UNAVAILABLE: No TLS provider is available
+ * @G_TLS_ERROR_MISC: Miscellaneous TLS error
+ * @G_TLS_ERROR_BAD_CERTIFICATE: A certificate could not be parsed
+ * @G_TLS_ERROR_NOT_TLS: The TLS handshake failed because the
+ *   peer does not seem to be a TLS server.
+ * @G_TLS_ERROR_HANDSHAKE: The TLS handshake failed because the
+ *   peer's certificate was not acceptable.
+ * @G_TLS_ERROR_CERTIFICATE_REQUIRED: The TLS handshake failed because
+ *   the server requested a client-side certificate, but none was
+ *   provided. See g_tls_connection_set_certificate().
+ * @G_TLS_ERROR_EOF: The TLS connection was closed without proper
+ *   notice, which may indicate an attack. See
+ *   g_tls_connection_set_require_close_notify().
+ *
+ * An error code used with %G_TLS_ERROR in a #GError returned from a
+ * TLS-related routine.
+ *
+ * Since: 2.28
+ */
+typedef enum {
+  G_TLS_ERROR_UNAVAILABLE,
+  G_TLS_ERROR_MISC,
+  G_TLS_ERROR_BAD_CERTIFICATE,
+  G_TLS_ERROR_NOT_TLS,
+  G_TLS_ERROR_HANDSHAKE,
+  G_TLS_ERROR_CERTIFICATE_REQUIRED,
+  G_TLS_ERROR_EOF
+} GTlsError;
+
+/**
+ * GTlsCertificateFlags:
+ * @G_TLS_CERTIFICATE_UNKNOWN_CA: The signing certificate authority is
+ *   not known.
+ * @G_TLS_CERTIFICATE_BAD_IDENTITY: The certificate does not match the
+ *   expected identity of the site that it was retrieved from.
+ * @G_TLS_CERTIFICATE_NOT_ACTIVATED: The certificate's activation time
+ *   is still in the future
+ * @G_TLS_CERTIFICATE_EXPIRED: The certificate has expired
+ * @G_TLS_CERTIFICATE_REVOKED: The certificate has been revoked
+ *   according to the #GTlsContext's certificate revocation list.
+ * @G_TLS_CERTIFICATE_INSECURE: The certificate's algorithm is
+ *   considered insecure.
+ * @G_TLS_CERTIFICATE_GENERIC_ERROR: Some other error occurred validating
+ *   the certificate
+ * @G_TLS_CERTIFICATE_VALIDATE_ALL: the combination of all of the above
+ *   flags
+ *
+ * A set of flags describing TLS certification validation. This can be
+ * used to set which validation steps to perform (eg, with
+ * g_tls_client_connection_set_validation_flags()), or to describe why
+ * a particular certificate was rejected (eg, in
+ * #GTlsConnection::accept-certificate).
+ *
+ * Since: 2.28
+ */
+typedef enum {
+  G_TLS_CERTIFICATE_UNKNOWN_CA    = (1 << 0),
+  G_TLS_CERTIFICATE_BAD_IDENTITY  = (1 << 1),
+  G_TLS_CERTIFICATE_NOT_ACTIVATED = (1 << 2),
+  G_TLS_CERTIFICATE_EXPIRED       = (1 << 3),
+  G_TLS_CERTIFICATE_REVOKED       = (1 << 4),
+  G_TLS_CERTIFICATE_INSECURE      = (1 << 5),
+  G_TLS_CERTIFICATE_GENERIC_ERROR = (1 << 6),
+
+  G_TLS_CERTIFICATE_VALIDATE_ALL  = 0x007f
+} GTlsCertificateFlags;
+
+/**
+ * GTlsAuthenticationMode:
+ * @G_TLS_AUTHENTICATION_NONE: client authentication not required
+ * @G_TLS_AUTHENTICATION_REQUESTED: client authentication is requested
+ * @G_TLS_AUTHENTICATION_REQUIRED: client authentication is required
+ *
+ * The client authentication mode for a #GTlsServerConnection.
+ *
+ * Since: 2.28
+ */
+typedef enum {
+  G_TLS_AUTHENTICATION_NONE,
+  G_TLS_AUTHENTICATION_REQUESTED,
+  G_TLS_AUTHENTICATION_REQUIRED
+} GTlsAuthenticationMode;
+
+/**
+ * GTlsRehandshakeMode:
+ * @G_TLS_REHANDSHAKE_NEVER: Never allow rehandshaking
+ * @G_TLS_REHANDSHAKE_SAFELY: Allow safe rehandshaking only
+ * @G_TLS_REHANDSHAKE_UNSAFELY: Allow unsafe rehandshaking
+ *
+ * When to allow rehandshaking. See
+ * g_tls_connection_set_rehandshake_mode().
+ *
+ * Since: 2.28
+ */
+typedef enum {
+  G_TLS_REHANDSHAKE_NEVER,
+  G_TLS_REHANDSHAKE_SAFELY,
+  G_TLS_REHANDSHAKE_UNSAFELY
+} GTlsRehandshakeMode;
 
 G_END_DECLS
 

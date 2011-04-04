@@ -153,7 +153,11 @@ _g_win32_get_system_data_dirs (void)
 
 G_CONST_RETURN gchar* G_CONST_RETURN * g_get_system_config_dirs (void);
 
+const gchar * g_get_user_runtime_dir (void);
+
 G_CONST_RETURN gchar* G_CONST_RETURN * g_get_language_names (void);
+
+gchar **g_get_locale_variants (const gchar *locale);
 
 /**
  * GUserDirectory:
@@ -258,6 +262,7 @@ gboolean              g_setenv             (const gchar *variable,
 					    gboolean     overwrite);
 void                  g_unsetenv           (const gchar *variable);
 gchar**               g_listenv            (void);
+gchar**               g_get_environ        (void);
 
 /* private */
 const gchar*	     _g_getenv_nomalloc	   (const gchar	*variable,
@@ -355,7 +360,7 @@ g_bit_storage (gulong number)
 {
 #if defined(__GNUC__) && (__GNUC__ >= 4) && defined(__OPTIMIZE__)
   return G_LIKELY (number) ?
-	   ((GLIB_SIZEOF_LONG * 8 - 1) ^ __builtin_clzl(number)) + 1 : 1;
+	   ((GLIB_SIZEOF_LONG * 8U - 1) ^ __builtin_clzl(number)) + 1 : 1;
 #else
   register guint n_bits = 0;
   

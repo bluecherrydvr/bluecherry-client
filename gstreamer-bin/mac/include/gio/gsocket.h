@@ -97,6 +97,9 @@ gboolean               g_socket_get_keepalive           (GSocket                
 gint                   g_socket_get_listen_backlog      (GSocket                 *socket);
 void                   g_socket_set_listen_backlog      (GSocket                 *socket,
 							 gint                     backlog);
+guint                  g_socket_get_timeout             (GSocket                 *socket);
+void                   g_socket_set_timeout             (GSocket                 *socket,
+							 guint                    timeout);
 gboolean               g_socket_is_connected            (GSocket                 *socket);
 gboolean               g_socket_bind                    (GSocket                 *socket,
 							 GSocketAddress          *address,
@@ -170,6 +173,21 @@ GSource *              g_socket_create_source           (GSocket                
 							 GIOCondition             condition,
 							 GCancellable            *cancellable);
 gboolean               g_socket_speaks_ipv4             (GSocket                 *socket);
+GCredentials          *g_socket_get_credentials         (GSocket                 *socket,
+                                                         GError                 **error);
+
+gssize                 g_socket_receive_with_blocking   (GSocket                 *socket,
+							 gchar                   *buffer,
+							 gsize                    size,
+							 gboolean                 blocking,
+							 GCancellable            *cancellable,
+							 GError                 **error);
+gssize                 g_socket_send_with_blocking      (GSocket                 *socket,
+							 const gchar             *buffer,
+							 gsize                    size,
+							 gboolean                 blocking,
+							 GCancellable            *cancellable,
+							 GError                 **error);
 
 G_END_DECLS
 

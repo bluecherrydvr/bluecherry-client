@@ -40,7 +40,6 @@ G_BEGIN_DECLS
 
 /**
  * GFileEnumerator:
- * @parent_instance: The parent class.
  *
  * A per matched file iterator.
  **/
@@ -75,7 +74,7 @@ struct _GFileEnumeratorClass
                                      GAsyncReadyCallback   callback,
                                      gpointer              user_data);
   GList *     (* next_files_finish) (GFileEnumerator      *enumerator,
-                                     GAsyncResult         *res,
+                                     GAsyncResult         *result,
                                      GError              **error);
   void        (* close_async)       (GFileEnumerator      *enumerator,
                                      int                   io_priority,
@@ -83,7 +82,7 @@ struct _GFileEnumeratorClass
                                      GAsyncReadyCallback   callback,
                                      gpointer              user_data);
   gboolean    (* close_finish)      (GFileEnumerator      *enumerator,
-                                     GAsyncResult         *res,
+                                     GAsyncResult         *result,
                                      GError              **error);
 
   /*< private >*/

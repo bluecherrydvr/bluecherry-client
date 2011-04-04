@@ -25,11 +25,22 @@ def process_lib(old, new, name, fn):
     pipe = subprocess.Popen('otool -L ' + fn, shell=True, stdout=subprocess.PIPE).stdout
     output = pipe.readlines()
 
+    baseold = old
+    if baseold.endswith('*'):
+        baseold = baseold[0:-1]
+
     for line in output[1:len(output)]:
         line = line.strip()
         dep_old = line.split()[0]
-        if -1 < dep_old.find(old):
-            dep_new = dep_old.replace(old, new)
+        if -1 < dep_old.find(baseold):
+            dep_new = old
+            if old.endswith('*'):
+                dep_new = new + dep_old[dep_old.rindex('/')+1:]
+            else:
+                dep_new = dep_old.replace(old, new)
+
+            print "dep_old: ", dep_old, " dep_new: ", dep_new
+
             if -1 < dep_old.find(name):
                 # Changing name of dylib.
                 proc = subprocess.Popen('install_name_tool -id ' + dep_new + ' ' + fn, shell=True)

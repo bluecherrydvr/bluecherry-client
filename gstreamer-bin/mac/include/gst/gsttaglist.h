@@ -23,6 +23,7 @@
 #ifndef __GST_TAGLIST_H__
 #define __GST_TAGLIST_H__
 
+#include <gst/gstdatetime.h>
 #include <gst/gstbuffer.h>
 #include <gst/gststructure.h>
 #include <gst/glib-compat.h>
@@ -363,6 +364,13 @@ gboolean     gst_tag_list_get_date_index    (const GstTagList * list,
                                              const gchar      * tag,
                                              guint              index,
                                              GDate           ** value);
+gboolean     gst_tag_list_get_date_time     (const GstTagList * list,
+                                             const gchar      * tag,
+                                             GstDateTime     ** value);
+gboolean     gst_tag_list_get_date_time_index (const GstTagList * list,
+                                             const gchar      * tag,
+                                             guint              index,
+                                             GstDateTime     ** value);
 gboolean     gst_tag_list_get_buffer        (const GstTagList * list,
                                              const gchar      * tag,
                                              GstBuffer       ** value);
@@ -459,6 +467,14 @@ gboolean     gst_tag_list_get_buffer_index  (const GstTagList * list,
  * date the data was created (#GDate structure)
  */
 #define GST_TAG_DATE                   "date"
+/**
+ * GST_TAG_DATE_TIME:
+ *
+ * date and time the data was created (#GstDateTime structure)
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_DATE_TIME              "datetime"
 /**
  * GST_TAG_GENRE:
  *
@@ -827,6 +843,15 @@ gboolean     gst_tag_list_get_buffer_index  (const GstTagList * list,
  */
 #define GST_TAG_GEO_LOCATION_SUBLOCATION             "geo-location-sublocation"
 /**
+ * GST_TAG_GEO_LOCATION_HORIZONTAL_ERROR:
+ *
+ * Represents the expected error on the horizontal positioning in
+ * meters (double).
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_GEO_LOCATION_HORIZONTAL_ERROR   "geo-location-horizontal-error"
+/**
  * GST_TAG_GEO_LOCATION_MOVEMENT_SPEED:
  *
  * Speed of the capturing device when performing the capture.
@@ -944,6 +969,25 @@ gboolean     gst_tag_list_get_buffer_index  (const GstTagList * list,
  * Since: 0.10.30
  */
 #define GST_TAG_DEVICE_MODEL                      "device-model"
+/**
+ * GST_TAG_APPLICATION_NAME:
+ *
+ * Name of the application used to create the media (string)
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_APPLICATION_NAME                  "application-name"
+/**
+ * GST_TAG_APPLICATION_DATA:
+ *
+ * Arbitrary application data (buffer)
+ *
+ * Some formats allow application's to add their own arbitrary data
+ * into files. This data is application's dependent.
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_APPLICATION_DATA          "application-data"
 /**
  * GST_TAG_IMAGE_ORIENTATION:
  *

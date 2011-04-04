@@ -260,6 +260,7 @@ typedef gboolean	(*GstClockCallback)	(GstClock *clock, GstClockTime time,
  * @GST_CLOCK_BADTIME: A bad time was provided to a function.
  * @GST_CLOCK_ERROR: An error occurred
  * @GST_CLOCK_UNSUPPORTED: Operation is not supported
+ * @GST_CLOCK_DONE: The ClockID is done waiting
  *
  * The return value of a clock operation.
  */
@@ -271,7 +272,8 @@ typedef enum
   GST_CLOCK_BUSY	=  3,
   GST_CLOCK_BADTIME	=  4,
   GST_CLOCK_ERROR	=  5,
-  GST_CLOCK_UNSUPPORTED	=  6
+  GST_CLOCK_UNSUPPORTED	=  6,
+  GST_CLOCK_DONE	=  7
 } GstClockReturn;
 
 /**
@@ -349,6 +351,8 @@ struct _GstClockEntry {
   GstClockCallback	 func;
   gpointer		 user_data;
   GDestroyNotify	 destroy_data;
+  gboolean               unscheduled;
+  gboolean               woken_up;
 };
 
 /**
@@ -553,6 +557,9 @@ GstClockReturn		gst_clock_id_wait_async_full	(GstClockID id,
 							 GDestroyNotify destroy_data);
 void			gst_clock_id_unschedule		(GstClockID id);
 
+gboolean                gst_clock_single_shot_id_reinit (GstClock * clock,
+							 GstClockID id,
+							 GstClockTime time);
 
 G_END_DECLS
 

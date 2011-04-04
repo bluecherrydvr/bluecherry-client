@@ -123,8 +123,7 @@ static void type_as_function ## _init	       (type          *object,	\
                                                 type ## Class *g_class);\
 static parent_type ## Class *parent_class = NULL;			\
 static void								\
-type_as_function ## _class_init_trampoline (gpointer g_class,		\
-					    gpointer data)		\
+type_as_function ## _class_init_trampoline (gpointer g_class)		\
 {									\
   parent_class = (parent_type ## Class *)				\
       g_type_class_peek_parent (g_class);				\
@@ -145,7 +144,7 @@ type_as_function ## _get_type (void)					\
 	sizeof (type ## Class),						\
         type_as_function ## _base_init,					\
         NULL,		  /* base_finalize */				\
-        type_as_function ## _class_init_trampoline,			\
+        (GClassInitFunc) type_as_function ## _class_init_trampoline,    \
         NULL,		  /* class_finalize */				\
         NULL,               /* class_data */				\
         sizeof (type),							\
@@ -270,7 +269,7 @@ GST_BOILERPLATE_FULL (type, type_as_function, parent_type,              \
 
 /* Define PUT and GET functions for unaligned memory */
 #define _GST_GET(__data, __idx, __size, __shift) \
-    (((guint##__size) (((guint8 *) (__data))[__idx])) << (__shift))
+    (((guint##__size) (((const guint8 *) (__data))[__idx])) << (__shift))
 
 #define _GST_PUT(__data, __idx, __size, __shift, __num) \
     (((guint8 *) (__data))[__idx] = (((guint##__size) (__num)) >> (__shift)) & 0xff)
@@ -993,8 +992,9 @@ GST_WRITE_DOUBLE_BE(guint8 *data, gdouble num)
  */
 #define GST_ROUND_DOWN_64(num) ((num)&(~63))
 
-void			gst_object_default_error	(GstObject * source,
-							 GError * error, gchar * debug);
+void			gst_object_default_error	(GstObject    * source,
+							 const GError * error,
+							 const gchar  * debug);
 
 /* element functions */
 void                    gst_element_create_all_pads     (GstElement *element);
@@ -1172,6 +1172,7 @@ void gst_util_fraction_to_double (gint src_n, gint src_d, gdouble *dest);
 void gst_util_double_to_fraction (gdouble src, gint *dest_n, gint *dest_d);
 gboolean gst_util_fraction_multiply (gint a_n, gint a_d, gint b_n, gint b_d, gint *res_n, gint *res_d);
 gboolean gst_util_fraction_add (gint a_n, gint a_d, gint b_n, gint b_d, gint *res_n, gint *res_d);
+gint gst_util_fraction_compare (gint a_n, gint a_d, gint b_n, gint b_d);
 
 
 /* sink message event

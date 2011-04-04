@@ -20,6 +20,10 @@
  * Author: Ryan Lortie <desrt@desrt.ca>
  */
 
+#if defined(G_DISABLE_SINGLE_INCLUDES) && !defined (__GLIB_H_INSIDE__) && !defined (GLIB_COMPILATION)
+#error "Only <glib.h> can be included directly."
+#endif
+
 #ifndef __G_VARIANT_H__
 #define __G_VARIANT_H__
 
@@ -55,6 +59,7 @@ typedef enum
 void                            g_variant_unref                         (GVariant             *value);
 GVariant *                      g_variant_ref                           (GVariant             *value);
 GVariant *                      g_variant_ref_sink                      (GVariant             *value);
+gboolean                        g_variant_is_floating                   (GVariant             *value);
 
 const GVariantType *            g_variant_get_type                      (GVariant             *value);
 const gchar *                   g_variant_get_type_string               (GVariant             *value);
@@ -62,17 +67,16 @@ gboolean                        g_variant_is_of_type                    (GVarian
                                                                          const GVariantType   *type);
 gboolean                        g_variant_is_container                  (GVariant             *value);
 GVariantClass                   g_variant_classify                      (GVariant             *value);
-
-GVariant *                      g_variant_new_boolean                   (gboolean              boolean);
-GVariant *                      g_variant_new_byte                      (guchar                byte);
-GVariant *                      g_variant_new_int16                     (gint16                int16);
-GVariant *                      g_variant_new_uint16                    (guint16               uint16);
-GVariant *                      g_variant_new_int32                     (gint32                int32);
-GVariant *                      g_variant_new_uint32                    (guint32               uint32);
-GVariant *                      g_variant_new_int64                     (gint64                int64);
-GVariant *                      g_variant_new_uint64                    (guint64               uint64);
-GVariant *                      g_variant_new_handle                    (gint32                handle);
-GVariant *                      g_variant_new_double                    (gdouble               floating);
+GVariant *                      g_variant_new_boolean                   (gboolean              value);
+GVariant *                      g_variant_new_byte                      (guchar                value);
+GVariant *                      g_variant_new_int16                     (gint16                value);
+GVariant *                      g_variant_new_uint16                    (guint16               value);
+GVariant *                      g_variant_new_int32                     (gint32                value);
+GVariant *                      g_variant_new_uint32                    (guint32               value);
+GVariant *                      g_variant_new_int64                     (gint64                value);
+GVariant *                      g_variant_new_uint64                    (guint64               value);
+GVariant *                      g_variant_new_handle                    (gint32                value);
+GVariant *                      g_variant_new_double                    (gdouble               value);
 GVariant *                      g_variant_new_string                    (const gchar          *string);
 GVariant *                      g_variant_new_object_path               (const gchar          *object_path);
 gboolean                        g_variant_is_object_path                (const gchar          *string);
@@ -80,6 +84,9 @@ GVariant *                      g_variant_new_signature                 (const g
 gboolean                        g_variant_is_signature                  (const gchar          *string);
 GVariant *                      g_variant_new_variant                   (GVariant             *value);
 GVariant *                      g_variant_new_strv                      (const gchar * const  *strv,
+                                                                         gssize                length);
+GVariant *                      g_variant_new_bytestring                (const gchar          *string);
+GVariant *                      g_variant_new_bytestring_array          (const gchar * const  *strv,
                                                                          gssize                length);
 
 gboolean                        g_variant_get_boolean                   (GVariant             *value);
@@ -101,6 +108,13 @@ const gchar **                  g_variant_get_strv                      (GVarian
                                                                          gsize                *length);
 gchar **                        g_variant_dup_strv                      (GVariant             *value,
                                                                          gsize                *length);
+const gchar *                   g_variant_get_bytestring                (GVariant             *value);
+gchar *                         g_variant_dup_bytestring                (GVariant             *value,
+                                                                         gsize                *length);
+const gchar **                  g_variant_get_bytestring_array          (GVariant             *value,
+                                                                         gsize                *length);
+gchar **                        g_variant_dup_bytestring_array          (GVariant             *value,
+                                                                         gsize                *length);
 
 GVariant *                      g_variant_new_maybe                     (const GVariantType   *child_type,
                                                                          GVariant             *child);
@@ -120,6 +134,13 @@ void                            g_variant_get_child                     (GVarian
                                                                          ...);
 GVariant *                      g_variant_get_child_value               (GVariant             *value,
                                                                          gsize                 index_);
+gboolean                        g_variant_lookup                        (GVariant             *dictionary,
+                                                                         const gchar          *key,
+                                                                         const gchar          *format_string,
+                                                                         ...);
+GVariant *                      g_variant_lookup_value                  (GVariant             *dictionary,
+                                                                         const gchar          *key,
+                                                                         const GVariantType   *expected_type);
 gconstpointer                   g_variant_get_fixed_array               (GVariant             *value,
                                                                          gsize                *n_elements,
                                                                          gsize                 element_size);
@@ -176,7 +197,29 @@ struct _GVariantBuilder {
   gsize x[16];
 };
 
+typedef enum
+{
+  G_VARIANT_PARSE_ERROR_FAILED,
+  G_VARIANT_PARSE_ERROR_BASIC_TYPE_EXPECTED,
+  G_VARIANT_PARSE_ERROR_CANNOT_INFER_TYPE,
+  G_VARIANT_PARSE_ERROR_DEFINITE_TYPE_EXPECTED,
+  G_VARIANT_PARSE_ERROR_INPUT_NOT_AT_END,
+  G_VARIANT_PARSE_ERROR_INVALID_CHARACTER,
+  G_VARIANT_PARSE_ERROR_INVALID_FORMAT_STRING,
+  G_VARIANT_PARSE_ERROR_INVALID_OBJECT_PATH,
+  G_VARIANT_PARSE_ERROR_INVALID_SIGNATURE,
+  G_VARIANT_PARSE_ERROR_INVALID_TYPE_STRING,
+  G_VARIANT_PARSE_ERROR_NO_COMMON_TYPE,
+  G_VARIANT_PARSE_ERROR_NUMBER_OUT_OF_RANGE,
+  G_VARIANT_PARSE_ERROR_NUMBER_TOO_BIG,
+  G_VARIANT_PARSE_ERROR_TYPE_ERROR,
+  G_VARIANT_PARSE_ERROR_UNEXPECTED_TOKEN,
+  G_VARIANT_PARSE_ERROR_UNKNOWN_KEYWORD,
+  G_VARIANT_PARSE_ERROR_UNTERMINATED_STRING_CONSTANT,
+  G_VARIANT_PARSE_ERROR_VALUE_EXPECTED
+} GVariantParseError;
 #define G_VARIANT_PARSE_ERROR (g_variant_parser_get_error_quark ())
+
 GQuark                          g_variant_parser_get_error_quark        (void);
 
 GVariantBuilder *               g_variant_builder_new                   (const GVariantType   *type);
@@ -193,6 +236,9 @@ void                            g_variant_builder_add_value             (GVarian
                                                                          GVariant             *value);
 void                            g_variant_builder_add                   (GVariantBuilder      *builder,
                                                                          const gchar          *format_string,
+                                                                         ...);
+void                            g_variant_builder_add_parsed            (GVariantBuilder      *builder,
+                                                                         const gchar          *format,
                                                                          ...);
 
 GVariant *                      g_variant_new                           (const gchar          *format_string,
@@ -219,6 +265,8 @@ GVariant *                      g_variant_new_parsed                    (const g
 GVariant *                      g_variant_new_parsed_va                 (const gchar          *format,
                                                                          va_list              *app);
 
+gint                            g_variant_compare                       (gconstpointer one,
+                                                                         gconstpointer two);
 G_END_DECLS
 
 #endif /* __G_VARIANT_H__ */

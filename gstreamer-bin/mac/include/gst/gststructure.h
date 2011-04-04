@@ -23,6 +23,7 @@
 #include <gst/gstconfig.h>
 #include <glib-object.h>
 #include <gst/gstclock.h>
+#include <gst/gstdatetime.h>
 #include <gst/glib-compat.h>
 
 G_BEGIN_DECLS
@@ -116,6 +117,12 @@ void                    gst_structure_id_set_value         (GstStructure        
 void                    gst_structure_set_value            (GstStructure            *structure,
 							    const gchar             *fieldname,
 							    const GValue            *value);
+void                    gst_structure_id_take_value         (GstStructure            *structure,
+							    GQuark                   field,
+							    GValue                  *value);
+void                    gst_structure_take_value            (GstStructure            *structure,
+							    const gchar             *fieldname,
+							    GValue                  *value);
 void                    gst_structure_set                  (GstStructure            *structure,
 							    const gchar             *fieldname,
 							    ...) G_GNUC_NULL_TERMINATED;
@@ -132,19 +139,19 @@ void                    gst_structure_id_set_valist         (GstStructure       
 							    GQuark                   fieldname,
 							    va_list varargs);
 
-gboolean                gst_structure_get_valist           (GstStructure            *structure,
+gboolean                gst_structure_get_valist           (const GstStructure      *structure,
                                                             const char              *first_fieldname,
                                                             va_list                  args);
 
-gboolean                gst_structure_get                  (GstStructure            *structure,
+gboolean                gst_structure_get                  (const GstStructure      *structure,
                                                             const char              *first_fieldname,
                                                             ...) G_GNUC_NULL_TERMINATED;
 
-gboolean                gst_structure_id_get_valist        (GstStructure            *structure,
+gboolean                gst_structure_id_get_valist        (const GstStructure      *structure,
                                                             GQuark                   first_field_id,
                                                             va_list                  args);
 
-gboolean                gst_structure_id_get               (GstStructure            *structure,
+gboolean                gst_structure_id_get               (const GstStructure      *structure,
                                                             GQuark                   first_field_id,
                                                             ...) G_GNUC_NULL_TERMINATED;
 
@@ -202,6 +209,9 @@ gboolean                gst_structure_get_double           (const GstStructure  
 gboolean                gst_structure_get_date             (const GstStructure      *structure,
 							    const gchar             *fieldname,
                                                             GDate                  **value);
+gboolean                gst_structure_get_date_time        (const GstStructure      *structure,
+							    const gchar             *fieldname,
+                                                            GstDateTime              **value);
 gboolean                gst_structure_get_clock_time       (const GstStructure      *structure,
 							    const gchar             *fieldname,
 							    GstClockTime            *value);

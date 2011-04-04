@@ -50,7 +50,6 @@ typedef struct _GstBaseSinkPrivate GstBaseSinkPrivate;
 
 /**
  * GstBaseSink:
- * @element: the parent element.
  *
  * The opaque #GstBaseSink data structure.
  */
@@ -68,7 +67,7 @@ struct _GstBaseSink {
 
   /*< protected >*/ /* with PREROLL_LOCK */
   GQueue        *preroll_queue;
-  gint           preroll_queue_max_len;
+  gint           preroll_queue_max_len; /* FIXME-0.11: the property is guint */
   gint           preroll_queued;
   gint           buffers_queued;
   gint           events_queued;
@@ -218,7 +217,7 @@ GstClockTimeDiff gst_base_sink_get_ts_offset    (GstBaseSink *sink);
 
 /* last buffer */
 GstBuffer *     gst_base_sink_get_last_buffer   (GstBaseSink *sink);
-void            gst_base_sink_set_last_buffer_enabled (GstBaseSink *sink, gboolean enable);
+void            gst_base_sink_set_last_buffer_enabled (GstBaseSink *sink, gboolean enabled);
 gboolean        gst_base_sink_is_last_buffer_enabled (GstBaseSink *sink);
 
 /* latency */

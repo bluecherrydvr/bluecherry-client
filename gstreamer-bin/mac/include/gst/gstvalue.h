@@ -102,6 +102,16 @@ G_BEGIN_DECLS
 #define GST_VALUE_HOLDS_INT_RANGE(x)    (G_VALUE_HOLDS((x), gst_int_range_get_type ()))
 
 /**
+ * GST_VALUE_HOLDS_INT64_RANGE:
+ * @x: the #GValue to check
+ *
+ * Checks if the given #GValue contains a #GST_TYPE_INT64_RANGE value.
+ *
+ * Since: 0.10.31
+ */
+#define GST_VALUE_HOLDS_INT64_RANGE(x)    (G_VALUE_HOLDS((x), gst_int64_range_get_type ()))
+
+/**
  * GST_VALUE_HOLDS_DOUBLE_RANGE:
  * @x: the #GValue to check
  *
@@ -176,6 +186,16 @@ G_BEGIN_DECLS
 #define GST_VALUE_HOLDS_DATE(x)         (G_VALUE_HOLDS((x), gst_date_get_type ()))
 
 /**
+ * GST_VALUE_HOLDS_DATE_TIME:
+ * @x: the #GValue to check
+ *
+ * Checks if the given #GValue contains a #GST_TYPE_DATE_TIME value.
+ *
+ * Since: 0.10.31
+ */
+#define GST_VALUE_HOLDS_DATE_TIME(x)    (G_VALUE_HOLDS((x), gst_date_time_get_type ()))
+
+/**
  * GST_TYPE_FOURCC:
  *
  * a #GValue type that represents 4 byte identifier (e.g. used for codecs)
@@ -192,6 +212,17 @@ G_BEGIN_DECLS
  * Returns: the #GType of GstIntRange
  */
 #define GST_TYPE_INT_RANGE               gst_int_range_get_type ()
+
+/**
+ * GST_TYPE_INT64_RANGE:
+ *
+ * a #GValue type that represents an #gint64 range
+ *
+ * Returns: the #GType of GstInt64Range
+ *
+ * Since: 0.10.31
+ */
+#define GST_TYPE_INT64_RANGE             gst_int64_range_get_type ()
 
 /**
  * GST_TYPE_DOUBLE_RANGE:
@@ -260,6 +291,17 @@ G_BEGIN_DECLS
 #define GST_TYPE_DATE                    gst_date_get_type ()
 
 /**
+ * GST_TYPE_DATE_TIME:
+ *
+ * a boxed #GValue type for #GstDateTime that represents a date and time.
+ *
+ * Returns: the #GType of GstDateTime
+ * Since: 0.10.31
+ */
+
+#define GST_TYPE_DATE_TIME               gst_date_time_get_type ()
+
+/**
  * GST_VALUE_LESS_THAN:
  *
  * Indicates that the first value provided to a comparison function
@@ -310,7 +352,9 @@ typedef gint     (* GstValueCompareFunc)     (const GValue *value1,
  *
  * Used by gst_value_serialize() to obtain a non-binary form of the #GValue.
  *
- * Returns: the string representation of the value
+ * Free-function: g_free
+ *
+ * Returns: (transfer full): the string representation of the value
  */
 typedef gchar *  (* GstValueSerializeFunc)   (const GValue *value1);
 
@@ -343,7 +387,7 @@ typedef gboolean (* GstValueUnionFunc)       (GValue       *dest,
 
 /**
  * GstValueIntersectFunc:
- * @dest: a #GValue for the result
+ * @dest: (out caller-allocates): a #GValue for the result
  * @value1: a #GValue operand
  * @value2: a #GValue operand
  *
@@ -361,7 +405,7 @@ typedef gboolean (* GstValueIntersectFunc)   (GValue       *dest,
 
 /**
  * GstValueSubtractFunc:
- * @dest: a #GValue for the result
+ * @dest: (out caller-allocates): a #GValue for the result
  * @minuend: a #GValue operand
  * @subtrahend: a #GValue operand
  *
@@ -395,6 +439,7 @@ struct _GstValueTable {
 };
 
 GType gst_int_range_get_type (void);
+GType gst_int64_range_get_type (void);
 GType gst_double_range_get_type (void);
 GType gst_fraction_range_get_type (void);
 GType gst_fourcc_get_type (void);
@@ -403,6 +448,7 @@ GType gst_value_list_get_type (void);
 GType gst_value_array_get_type (void);
 
 GType gst_date_get_type (void);
+GType gst_date_time_get_type (void);
 
 void		gst_value_register		(const GstValueTable   *table);
 void		gst_value_init_and_copy		(GValue                *dest,
@@ -418,6 +464,9 @@ void		gst_value_list_append_value	(GValue		*value,
 void		gst_value_list_prepend_value	(GValue		*value,
 						 const GValue	*prepend_value);
 void		gst_value_list_concat		(GValue		*dest,
+						 const GValue   *value1,
+						 const GValue	*value2);
+void		gst_value_list_merge		(GValue		*dest,
 						 const GValue   *value1,
 						 const GValue	*value2);
 guint		gst_value_list_get_size		(const GValue	*value);
@@ -446,6 +495,13 @@ void		gst_value_set_int_range		(GValue		*value,
 						 gint		end);
 gint		gst_value_get_int_range_min	(const GValue	*value);
 gint		gst_value_get_int_range_max	(const GValue	*value);
+
+/* int64 range */
+void		gst_value_set_int64_range      	(GValue		*value,
+						 gint64		start,
+						 gint64		end);
+gint64		gst_value_get_int64_range_min	(const GValue	*value);
+gint64		gst_value_get_int64_range_max	(const GValue	*value);
 
 /* double range */
 void		gst_value_set_double_range	(GValue		*value,

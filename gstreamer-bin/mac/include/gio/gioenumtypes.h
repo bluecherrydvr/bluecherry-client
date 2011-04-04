@@ -57,6 +57,8 @@ GType g_mount_operation_result_get_type (void) G_GNUC_CONST;
 #define G_TYPE_MOUNT_OPERATION_RESULT (g_mount_operation_result_get_type ())
 GType g_output_stream_splice_flags_get_type (void) G_GNUC_CONST;
 #define G_TYPE_OUTPUT_STREAM_SPLICE_FLAGS (g_output_stream_splice_flags_get_type ())
+GType g_io_stream_splice_flags_get_type (void) G_GNUC_CONST;
+#define G_TYPE_IO_STREAM_SPLICE_FLAGS (g_io_stream_splice_flags_get_type ())
 GType g_emblem_origin_get_type (void) G_GNUC_CONST;
 #define G_TYPE_EMBLEM_ORIGIN (g_emblem_origin_get_type ())
 GType g_resolver_error_get_type (void) G_GNUC_CONST;
@@ -71,6 +73,58 @@ GType g_socket_protocol_get_type (void) G_GNUC_CONST;
 #define G_TYPE_SOCKET_PROTOCOL (g_socket_protocol_get_type ())
 GType g_zlib_compressor_format_get_type (void) G_GNUC_CONST;
 #define G_TYPE_ZLIB_COMPRESSOR_FORMAT (g_zlib_compressor_format_get_type ())
+GType g_unix_socket_address_type_get_type (void) G_GNUC_CONST;
+#define G_TYPE_UNIX_SOCKET_ADDRESS_TYPE (g_unix_socket_address_type_get_type ())
+GType g_bus_type_get_type (void) G_GNUC_CONST;
+#define G_TYPE_BUS_TYPE (g_bus_type_get_type ())
+GType g_bus_name_owner_flags_get_type (void) G_GNUC_CONST;
+#define G_TYPE_BUS_NAME_OWNER_FLAGS (g_bus_name_owner_flags_get_type ())
+GType g_bus_name_watcher_flags_get_type (void) G_GNUC_CONST;
+#define G_TYPE_BUS_NAME_WATCHER_FLAGS (g_bus_name_watcher_flags_get_type ())
+GType g_dbus_proxy_flags_get_type (void) G_GNUC_CONST;
+#define G_TYPE_DBUS_PROXY_FLAGS (g_dbus_proxy_flags_get_type ())
+GType g_dbus_error_get_type (void) G_GNUC_CONST;
+#define G_TYPE_DBUS_ERROR (g_dbus_error_get_type ())
+GType g_dbus_connection_flags_get_type (void) G_GNUC_CONST;
+#define G_TYPE_DBUS_CONNECTION_FLAGS (g_dbus_connection_flags_get_type ())
+GType g_dbus_capability_flags_get_type (void) G_GNUC_CONST;
+#define G_TYPE_DBUS_CAPABILITY_FLAGS (g_dbus_capability_flags_get_type ())
+GType g_dbus_call_flags_get_type (void) G_GNUC_CONST;
+#define G_TYPE_DBUS_CALL_FLAGS (g_dbus_call_flags_get_type ())
+GType g_dbus_message_type_get_type (void) G_GNUC_CONST;
+#define G_TYPE_DBUS_MESSAGE_TYPE (g_dbus_message_type_get_type ())
+GType g_dbus_message_flags_get_type (void) G_GNUC_CONST;
+#define G_TYPE_DBUS_MESSAGE_FLAGS (g_dbus_message_flags_get_type ())
+GType g_dbus_message_header_field_get_type (void) G_GNUC_CONST;
+#define G_TYPE_DBUS_MESSAGE_HEADER_FIELD (g_dbus_message_header_field_get_type ())
+GType g_dbus_property_info_flags_get_type (void) G_GNUC_CONST;
+#define G_TYPE_DBUS_PROPERTY_INFO_FLAGS (g_dbus_property_info_flags_get_type ())
+GType g_dbus_subtree_flags_get_type (void) G_GNUC_CONST;
+#define G_TYPE_DBUS_SUBTREE_FLAGS (g_dbus_subtree_flags_get_type ())
+GType g_dbus_server_flags_get_type (void) G_GNUC_CONST;
+#define G_TYPE_DBUS_SERVER_FLAGS (g_dbus_server_flags_get_type ())
+GType g_dbus_signal_flags_get_type (void) G_GNUC_CONST;
+#define G_TYPE_DBUS_SIGNAL_FLAGS (g_dbus_signal_flags_get_type ())
+GType g_dbus_send_message_flags_get_type (void) G_GNUC_CONST;
+#define G_TYPE_DBUS_SEND_MESSAGE_FLAGS (g_dbus_send_message_flags_get_type ())
+GType g_credentials_type_get_type (void) G_GNUC_CONST;
+#define G_TYPE_CREDENTIALS_TYPE (g_credentials_type_get_type ())
+GType g_dbus_message_byte_order_get_type (void) G_GNUC_CONST;
+#define G_TYPE_DBUS_MESSAGE_BYTE_ORDER (g_dbus_message_byte_order_get_type ())
+GType g_application_flags_get_type (void) G_GNUC_CONST;
+#define G_TYPE_APPLICATION_FLAGS (g_application_flags_get_type ())
+GType g_tls_error_get_type (void) G_GNUC_CONST;
+#define G_TYPE_TLS_ERROR (g_tls_error_get_type ())
+GType g_tls_certificate_flags_get_type (void) G_GNUC_CONST;
+#define G_TYPE_TLS_CERTIFICATE_FLAGS (g_tls_certificate_flags_get_type ())
+GType g_tls_authentication_mode_get_type (void) G_GNUC_CONST;
+#define G_TYPE_TLS_AUTHENTICATION_MODE (g_tls_authentication_mode_get_type ())
+GType g_tls_rehandshake_mode_get_type (void) G_GNUC_CONST;
+#define G_TYPE_TLS_REHANDSHAKE_MODE (g_tls_rehandshake_mode_get_type ())
+
+/* enumerations from "gsettings.h" */
+GType g_settings_bind_flags_get_type (void) G_GNUC_CONST;
+#define G_TYPE_SETTINGS_BIND_FLAGS (g_settings_bind_flags_get_type ())
 G_END_DECLS
 
 #endif /* __GIO_ENUM_TYPES_H__ */

@@ -63,6 +63,12 @@ G_BEGIN_DECLS
  * @GST_VIDEO_FORMAT_BGR16: reverse rgb 5-6-5 bits per component (Since: 0.10.30)
  * @GST_VIDEO_FORMAT_RGB15: rgb 5-5-5 bits per component (Since: 0.10.30)
  * @GST_VIDEO_FORMAT_BGR15: reverse rgb 5-5-5 bits per component (Since: 0.10.30)
+ * @GST_VIDEO_FORMAT_UYVP: packed 10-bit 4:2:2 YUV (U0-Y0-V0-Y1 U2-Y2-V2-Y3 U4 ...) (Since: 0.10.31)
+ * @GST_VIDEO_FORMAT_A420: planar 4:4:2:0 AYUV (Since: 0.10.31)
+ * @GST_VIDEO_FORMAT_RGB8_PALETTED: 8-bit paletted RGB (Since: 0.10.32)
+ * @GST_VIDEO_FORMAT_YUV9: planar 4:1:0 YUV (Since: 0.10.32)
+ * @GST_VIDEO_FORMAT_YVU9: planar 4:1:0 YUV (like YUV9 but UV planes swapped) (Since: 0.10.32)
+ * @GST_VIDEO_FORMAT_IYU1: packed 4:1:1 YUV (Cb-Y0-Y1-Cr-Y2-Y3 ...) (Since: 0.10.32)
  *
  * Enum value describing the most common video formats.
  */
@@ -100,7 +106,13 @@ typedef enum {
   GST_VIDEO_FORMAT_RGB16,
   GST_VIDEO_FORMAT_BGR16,
   GST_VIDEO_FORMAT_RGB15,
-  GST_VIDEO_FORMAT_BGR15
+  GST_VIDEO_FORMAT_BGR15,
+  GST_VIDEO_FORMAT_UYVP,
+  GST_VIDEO_FORMAT_A420,
+  GST_VIDEO_FORMAT_RGB8_PALETTED,
+  GST_VIDEO_FORMAT_YUV9,
+  GST_VIDEO_FORMAT_YVU9,
+  GST_VIDEO_FORMAT_IYU1
 } GstVideoFormat;
 
 #define GST_VIDEO_BYTE1_MASK_32  "0xFF000000"
@@ -285,6 +297,19 @@ typedef enum {
     __GST_VIDEO_CAPS_MAKE_15 (3, 2, 1)
 
 /**
+ * GST_VIDEO_CAPS_RGB8_PALETTED:
+ *
+ * Generic caps string for 8-bit paletted RGB video, for use in pad templates.
+ *
+ * Since: 0.10.32
+ */
+#define GST_VIDEO_CAPS_RGB8_PALETTED \
+  "video/x-raw-rgb, bpp = (int)8, depth = (int)8, "                     \
+      "width = "GST_VIDEO_SIZE_RANGE" , "		                \
+      "height = " GST_VIDEO_SIZE_RANGE ", "                             \
+      "framerate = "GST_VIDEO_FPS_RANGE
+
+/**
  * GST_VIDEO_CAPS_YUV:
  * @fourcc: YUV fourcc format that describes the pixel layout, as string
  *     (e.g. "I420", "YV12", "YUY2", "AYUV", etc.)
@@ -383,6 +408,7 @@ gboolean gst_video_parse_caps_pixel_aspect_ratio (GstCaps *caps,
     int *par_n, int *par_d);
 const char *gst_video_parse_caps_color_matrix (GstCaps * caps);
 const char *gst_video_parse_caps_chroma_site (GstCaps * caps);
+GstBuffer *gst_video_parse_caps_palette (GstCaps * caps);
 GstCaps * gst_video_format_new_caps (GstVideoFormat format,
     int width, int height, int framerate_n, int framerate_d,
     int par_n, int par_d);
@@ -412,6 +438,14 @@ gboolean gst_video_format_convert (GstVideoFormat format, int width, int height,
 
 GstEvent *gst_video_event_new_still_frame (gboolean in_still);
 gboolean gst_video_event_parse_still_frame (GstEvent *event, gboolean *in_still);
+
+GstBuffer *gst_video_convert_frame(GstBuffer *buf, const GstCaps *to_caps,
+				   GstClockTime timeout, GError **error);
+
+typedef void (*GstVideoConvertFrameCallback) (GstBuffer *buf, GError *error, gpointer user_data);
+void gst_video_convert_frame_async(GstBuffer *buf, const GstCaps *to_caps,
+				   GstClockTime timeout, GstVideoConvertFrameCallback callback,
+                                   gpointer user_data, GDestroyNotify destroy_notify);
 
 G_END_DECLS
 

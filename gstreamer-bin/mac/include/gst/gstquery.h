@@ -228,7 +228,9 @@ gst_query_unref (GstQuery * q)
  *
  * Copies the given query using the copy function of the parent #GstStructure.
  *
- * Returns: a new copy of @q.
+ * Free-function: gst_query_unref
+ *
+ * Returns: (transfer full): a new copy of @q.
  */
 #ifdef _FOOL_GTK_DOC_
 G_INLINE_FUNC GstQuery * gst_query_copy (const GstQuery * q);
@@ -237,14 +239,16 @@ G_INLINE_FUNC GstQuery * gst_query_copy (const GstQuery * q);
 static inline GstQuery *
 gst_query_copy (const GstQuery * q)
 {
-  return GST_QUERY_CAST (gst_mini_object_copy (GST_MINI_OBJECT_CAST (q)));
+  return GST_QUERY_CAST (gst_mini_object_copy (GST_MINI_OBJECT_CONST_CAST (q)));
 }
 
 /**
  * gst_query_make_writable:
- * @q: a #GstQuery to make writable
+ * @q: (transfer full): a #GstQuery to make writable
  *
  * Makes a writable query from the given query.
+ *
+ * Returns: (transfer full): a new writable query (possibly same as @q)
  */
 #define         gst_query_make_writable(q)      GST_QUERY_CAST (gst_mini_object_make_writable (GST_MINI_OBJECT_CAST (q)))
 
@@ -318,6 +322,15 @@ void            gst_query_set_buffering_range     (GstQuery *query, GstFormat fo
 void            gst_query_parse_buffering_range   (GstQuery *query, GstFormat *format,
                                                    gint64 *start, gint64 *stop,
                                                    gint64 *estimated_total);
+gboolean        gst_query_add_buffering_range     (GstQuery *query,
+                                                   gint64 start, gint64 stop);
+
+guint           gst_query_get_n_buffering_ranges  (GstQuery *query);
+
+gboolean        gst_query_parse_nth_buffering_range (GstQuery *query,
+                                                     guint index, gint64 *start,
+                                                     gint64 *stop);
+
 /* URI query */
 GstQuery *      gst_query_new_uri                 (void);
 void            gst_query_parse_uri               (GstQuery *query, gchar **uri);

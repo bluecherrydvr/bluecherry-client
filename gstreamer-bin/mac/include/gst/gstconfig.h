@@ -87,7 +87,7 @@
  * Configures the inclusion of the plugin graph xml-serialisation
  * (was used in 0.8 by gst-editor)
  */
-#define GST_DISABLE_LOADSAVE 1
+/* #undef GST_DISABLE_LOADSAVE */
 
 /**
  * GST_DISABLE_PARSE:
@@ -119,7 +119,7 @@
  * If one disables this, required plugins need to be loaded and registered
  * manually
  */
-#define GST_DISABLE_REGISTRY 1
+/* #undef GST_DISABLE_REGISTRY */
 
 /**
  * GST_DISABLE_XML:
@@ -127,7 +127,7 @@
  * Configures the use libxml2. This setting is derived from the settings of
  * %GST_DISABLE_LOADSAVE and %GST_DISABLE_REGISTRY (in the xml registry case).
  */
-#define GST_DISABLE_XML 1
+/* #undef GST_DISABLE_XML */
 
 /* FIXME: test and document these! */
 /* Configures the use of external plugins */
@@ -174,7 +174,9 @@
  *
  * (not official API)
  */
-#ifdef GST_DISABLE_PRINTF_EXTENSION
+/* If GLib is not using the system printf, we can't use the registered
+ * extensions because the GLib-internal printf won't know how to parse them */
+#if defined(GST_DISABLE_PRINTF_EXTENSION) || !defined(GLIB_USING_SYSTEM_PRINTF)
   #undef GST_PTR_FORMAT
   #define GST_PTR_FORMAT "p"
   #undef GST_SEGMENT_FORMAT

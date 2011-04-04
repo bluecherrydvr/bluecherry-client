@@ -120,6 +120,257 @@ G_BEGIN_DECLS
  */
 #define GST_TAG_CDDA_MUSICBRAINZ_DISCID_FULL  "musicbrainz-discid-full"
 
+/**
+ * GST_TAG_CAPTURING_SHUTTER_SPEED:
+ *
+ * Shutter speed used when capturing an image, in seconds. (fraction)
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_CAPTURING_SHUTTER_SPEED        "capturing-shutter-speed"
+
+/**
+ * GST_TAG_CAPTURING_FOCAL_RATIO:
+ *
+ * Focal ratio (f-number) used when capturing an image. (double)
+ *
+ * The value stored is the denominator of the focal ratio (f-number).
+ * For example, if this tag value is 2, the focal ratio is f/2.
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_CAPTURING_FOCAL_RATIO          "capturing-focal-ratio"
+
+/**
+ * GST_TAG_CAPTURING_FOCAL_LENGTH:
+ *
+ * Focal length used when capturing an image, in mm. (double)
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_CAPTURING_FOCAL_LENGTH         "capturing-focal-length"
+
+/**
+ * GST_TAG_CAPTURING_DIGITAL_ZOOM_RATIO:
+ *
+ * Digital zoom ratio used when capturing an image. (double)
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_CAPTURING_DIGITAL_ZOOM_RATIO   "capturing-digital-zoom-ratio"
+
+/**
+ * GST_TAG_CAPTURING_ISO_SPEED:
+ *
+ * ISO speed used when capturing an image. (integer)
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_CAPTURING_ISO_SPEED           "capturing-iso-speed"
+
+/**
+ * GST_TAG_CAPTURING_EXPOSURE_PROGRAM:
+ *
+ * Type of exposure control used when capturing an image. (string)
+ *
+ * The allowed values are:
+ *   "undefined"
+ *   "manual"
+ *   "normal" - automatically controlled
+ *   "aperture-priority" - user selects aperture value
+ *   "shutter-priority" - user selects shutter speed
+ *   "creative" - biased towards depth of field
+ *   "action" - biased towards fast shutter speed
+ *   "portrait" - closeup, leaving background out of focus
+ *   "landscape" - landscape photos, background in focus
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_CAPTURING_EXPOSURE_PROGRAM     "capturing-exposure-program"
+
+/**
+ * GST_TAG_CAPTURING_EXPOSURE_MODE:
+ *
+ * Exposure mode used when capturing an image. (string)
+ *
+ * The allowed values are:
+ *   "auto-exposure"
+ *   "manual-exposure"
+ *   "auto-bracket"
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_CAPTURING_EXPOSURE_MODE       "capturing-exposure-mode"
+
+/**
+ * GST_TAG_CAPTURING_SCENE_CAPTURE_TYPE:
+ *
+ * Scene mode used when capturing an image. (string)
+ *
+ * The allowed values are:
+ *   "standard"
+ *   "landscape"
+ *   "portrait"
+ *   "night-scene"
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_CAPTURING_SCENE_CAPTURE_TYPE  "capturing-scene-capture-type"
+
+/**
+ * GST_TAG_CAPTURING_GAIN_ADJUSTMENT:
+ *
+ * Gain adjustment applied to an image. (string)
+ *
+ * The allowed values are:
+ *   "none"
+ *   "low-gain-up"
+ *   "high-gain-up"
+ *   "low-gain-down"
+ *   "high-gain-down"
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_CAPTURING_GAIN_ADJUSTMENT     "capturing-gain-adjustment"
+
+/**
+ * GST_TAG_CAPTURING_WHITE_BALANCE:
+ *
+ * White balance mode used when capturing an image. (string)
+ *
+ * The allowed values are:
+ *   "auto"
+ *   "manual"
+ *   "daylight"
+ *   "cloudy"
+ *   "tungsten"
+ *   "fluorescent"
+ *   "fluorescent h" (newer daylight-calibrated fluorescents)
+ *   "flash"
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_CAPTURING_WHITE_BALANCE       "capturing-white-balance"
+
+/**
+ * GST_TAG_CAPTURING_CONTRAST:
+ *
+ * Direction of contrast processing applied when capturing an image. (string)
+ *
+ * The allowed values are:
+ *  "normal"
+ *  "soft"
+ *  "hard"
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_CAPTURING_CONTRAST            "capturing-contrast"
+
+/**
+ * GST_TAG_CAPTURING_SATURATION:
+ *
+ * Direction of saturation processing applied when capturing an image. (string)
+ *
+ * The allowed values are:
+ *  "normal"
+ *  "low-saturation"
+ *  "high-saturation"
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_CAPTURING_SATURATION          "capturing-saturation"
+
+/**
+ * GST_TAG_CAPTURING_SHARPNESS:
+ *
+ * Direction of sharpness processing applied when capturing an image. (string)
+ *
+ * The allowed values are:
+ *  "normal"
+ *  "soft"
+ *  "hard"
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_CAPTURING_SHARPNESS          "capturing-sharpness"
+
+/**
+ * GST_TAG_CAPTURING_FLASH_FIRED:
+ *
+ * If flash was fired during the capture of an image. (boolean)
+ *
+ * Note that if this tag isn't present, it should not be assumed that
+ * the flash did not fire. It should be treated as unknown.
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_CAPTURING_FLASH_FIRED         "capturing-flash-fired"
+
+/**
+ * GST_TAG_CAPTURING_FLASH_MODE:
+ *
+ * The flash mode selected during the capture of an image. (string)
+ *
+ * The allowed values are:
+ *  "auto"
+ *  "always"
+ *  "never"
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_CAPTURING_FLASH_MODE         "capturing-flash-mode"
+
+/**
+ * GST_TAG_CAPTURING_METERING_MODE:
+ *
+ * Defines the way a camera determines the exposure. (string)
+ *
+ * The allowed values are:
+ *   "unknown"
+ *   "average"
+ *   "center-weighted-average"
+ *   "spot"
+ *   "multi-spot"
+ *   "pattern"
+ *   "partial"
+ *   "other"
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_CAPTURING_METERING_MODE      "capturing-metering-mode"
+
+/**
+ * GST_TAG_CAPTURING_SOURCE:
+ *
+ * Indicates the source of capture. The device/medium used to do the
+ * capture. (string)
+ *
+ * Allowed values are:
+ *   "dsc" (= digital still camera)
+ *   "transparent-scanner"
+ *   "reflex-scanner"
+ *   "other"
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_CAPTURING_SOURCE             "capturing-source"
+
+/**
+ * GST_TAG_IMAGE_HORIZONTAL_PPI:
+ *
+ * Media (image/video) intended horizontal pixel density in ppi. (double)
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_IMAGE_HORIZONTAL_PPI         "image-horizontal-ppi"
+/**
+ * GST_TAG_IMAGE_VERTICAL_PPI:
+ *
+ * Media (image/video) intended vertical pixel density in ppi. (double)
+ *
+ * Since: 0.10.31
+ */
+#define GST_TAG_IMAGE_VERTICAL_PPI           "image-vertical-ppi"
 
 
 /* additional information for image tags */

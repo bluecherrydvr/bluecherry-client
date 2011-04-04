@@ -280,9 +280,15 @@ GstSDPResult            gst_sdp_message_uninit              (GstSDPMessage *msg)
 GstSDPResult            gst_sdp_message_free                (GstSDPMessage *msg);
 
 GstSDPResult            gst_sdp_message_parse_buffer        (const guint8 *data, guint size, GstSDPMessage *msg);
-
 gchar*                  gst_sdp_message_as_text             (const GstSDPMessage *msg);
 
+/* convert from/to uri */
+GstSDPResult            gst_sdp_message_parse_uri           (const gchar *uri, GstSDPMessage *msg);
+gchar*                  gst_sdp_message_as_uri              (const gchar *scheme, const GstSDPMessage *msg);
+
+/* utils */
+gboolean                gst_sdp_address_is_multicast        (const gchar *nettype, const gchar *addrtype,
+                                                             const gchar *addr);
 /* v=.. */
 const gchar*            gst_sdp_message_get_version         (const GstSDPMessage *msg);
 GstSDPResult            gst_sdp_message_set_version         (GstSDPMessage *msg, const gchar *version);
