@@ -283,6 +283,7 @@ LiveFeedBase {
         color: "#BE000000"
         anchors.fill: feed
         opacity: 0
+        clip: true
 
         states: State {
             name: "active"

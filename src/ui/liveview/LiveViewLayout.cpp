@@ -97,6 +97,8 @@ void LiveViewLayout::timerEvent(QTimerEvent *event)
     }
 }
 
+static const qreal maxAspectVariance = 0.4;
+
 void LiveViewLayout::doLayout()
 {
     Q_ASSERT(m_items.size() == (m_rows*m_columns));
@@ -125,9 +127,9 @@ void LiveViewLayout::doLayout()
         {
             LiveViewLayoutProps *ip = LiveViewLayoutProps::get(i);
 
+            QSizeF size = ip->sizeHint(), padding = ip->sizePadding();
             if (ip->fixedAspectRatio())
             {
-                QSizeF size = ip->sizeHint(), padding = ip->sizePadding();
                 if (size.isValid())
                 {
                     size.scale(sz - padding, ip->fixedAspectRatio() ? Qt::KeepAspectRatio : Qt::IgnoreAspectRatio);
@@ -138,8 +140,30 @@ void LiveViewLayout::doLayout()
             }
             else
             {
-                i->setWidth(sz.width());
-                i->setHeight(sz.height());
+                if (size.isValid() && !size.isEmpty() && size.width() > padding.width()
+                        && size.height() > padding.height())
+                {
+                    qreal desiredAspect = size.width() / size.height();
+                    size = sz - padding;
+                    qreal actualAspect = size.width() / size.height();
+
+                    if (qAbs(desiredAspect - actualAspect) > maxAspectVariance)
+                    {
+                        desiredAspect += (desiredAspect > actualAspect) ? -maxAspectVariance : maxAspectVariance;
+
+                        if (size.width() < size.height())
+                            size.rheight() = qRound(size.width() / desiredAspect);
+                        else
+                            size.rwidth() = qRound(size.height() * desiredAspect);
+                    }
+
+                    size += padding;
+                }
+                else
+                    size = sz;
+
+                i->setWidth(size.width());
+                i->setHeight(size.height());
             }
 
             i->setX(x);
