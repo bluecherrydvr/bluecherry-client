@@ -36,7 +36,7 @@ void EventVideoDownload::setVideoBuffer(VideoHttpBuffer *buffer)
 
     if (m_videoBuffer)
     {
-        m_tempFilePath = m_videoBuffer->bufferFileName();
+        //m_tempFilePath = m_videoBuffer->bufferFileName();
 
         /* Prevent the buffer from being deleted while we're using it; if we finish
          * and the parent still exists, this will be restored */
@@ -82,7 +82,7 @@ void EventVideoDownload::updateBufferProgress()
     Q_ASSERT(m_dialog && m_videoBuffer);
 
     m_dialog->setRange(0, (int)m_videoBuffer->fileSize());
-    m_dialog->setValue((int)m_videoBuffer->bufferedSize());
+    //m_dialog->setValue((int)m_videoBuffer->bufferedSize());
 }
 
 void EventVideoDownload::startCopy()

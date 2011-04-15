@@ -226,7 +226,8 @@ void EventVideoPlayer::updateBufferStatus()
         return;
     }
 
-    int pcnt = qRound((double(m_video->videoBuffer()->bufferedSize()) / m_video->videoBuffer()->fileSize()) * 100.0);
+    //int pcnt = qRound((double(m_video->videoBuffer()->bufferedSize()) / m_video->videoBuffer()->fileSize()) * 100.0);
+    int pcnt = 0;
     m_statusText->setText(tr("<b>Buffering:</b> %1%").arg(pcnt));
 }
 

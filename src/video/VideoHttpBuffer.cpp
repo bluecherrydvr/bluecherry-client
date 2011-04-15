@@ -4,6 +4,7 @@
 #include <QNetworkReply>
 #include <QDebug>
 #include <QDir>
+#include <QThread>
 
 #include <gst/gst.h>
 #include <gst/app/gstappsrc.h>
@@ -22,28 +23,17 @@ gboolean VideoHttpBuffer::seekDataWrap(GstAppSrc *src, quint64 offset, gpointer 
 }
 
 VideoHttpBuffer::VideoHttpBuffer(QObject *parent)
-    : QObject(parent), m_networkReply(0), m_fileSize(0), m_readPos(0), m_writePos(0), m_element(0), m_pipeline(0),
-      m_streamInit(true), m_bufferBlocked(false), m_finished(false)
+    : QObject(parent), media(0), m_element(0), m_pipeline(0), m_lastSeekPos(0)
 {
-    m_bufferFile.setFileTemplate(QDir::tempPath() + QLatin1String("/bc_vbuf_XXXXXX.mkv"));
 }
 
 VideoHttpBuffer::~VideoHttpBuffer()
 {
-    if (m_networkReply)
-    {
-        emit bufferingStopped();
-        delete m_networkReply;
-    }
-
     clearPlayback();
 }
 
 GstElement *VideoHttpBuffer::setupSrcElement(GstElement *pipeline)
 {
-    QMutexLocker lock(&m_lock);
-    Q_UNUSED(lock);
-
     Q_ASSERT(!m_element && !m_pipeline);
     if (m_element || m_pipeline)
     {
@@ -69,8 +59,8 @@ GstElement *VideoHttpBuffer::setupSrcElement(GstElement *pipeline)
     callbacks.seek_data = (gboolean (*)(GstAppSrc*,guint64,void*))seekDataWrap;
     gst_app_src_set_callbacks(m_element, &callbacks, this, 0);
 
-    if (m_fileSize)
-        gst_app_src_set_size(m_element, m_fileSize);
+    if (media && media->fileSize())
+        gst_app_src_set_size(m_element, media->fileSize());
 
     gst_bin_add(GST_BIN(m_pipeline), GST_ELEMENT(m_element));
     return GST_ELEMENT(m_element);
@@ -78,28 +68,12 @@ GstElement *VideoHttpBuffer::setupSrcElement(GstElement *pipeline)
 
 bool VideoHttpBuffer::start(const QUrl &url)
 {
-    Q_ASSERT(!m_networkReply);
-    if (m_networkReply)
-    {
-        emit bufferingStopped();
-        delete m_networkReply;
-    }
+    Q_ASSERT(!media);
 
-    m_networkReply = bcApp->nam->get(QNetworkRequest(url));
-    connect(m_networkReply, SIGNAL(readyRead()), SLOT(networkRead()));
-    connect(m_networkReply, SIGNAL(finished()), SLOT(networkFinished()));
-    connect(m_networkReply, SIGNAL(metaDataChanged()), SLOT(networkMetaData()));
+    media = new MediaDownload(this);
+    connect(media, SIGNAL(fileSizeChanged(uint)), SLOT(fileSizeChanged(uint)));
 
-    QMutexLocker lock(&m_lock);
-    if (!m_bufferFile.open())
-    {
-        sendStreamError(QString::fromLatin1("Failed to create buffer file: %1") + m_bufferFile.errorString());
-        lock.unlock();
-        return false;
-    }
-
-    m_readPos = m_writePos = 0;
-    lock.unlock();
+    media->start(url);
 
     qDebug("VideoHttpBuffer: started");
     emit bufferingStarted();
@@ -109,8 +83,6 @@ bool VideoHttpBuffer::start(const QUrl &url)
 
 void VideoHttpBuffer::clearPlayback()
 {
-    QMutexLocker lock(&m_lock);
-
     if (m_element)
     {
         qDebug("gstreamer: Destroying source element");
@@ -128,58 +100,29 @@ void VideoHttpBuffer::clearPlayback()
 
     m_element = 0;
     m_pipeline = 0;
-    m_streamInit = m_bufferBlocked = false;
-
-    lock.unlock();
-
-    m_bufferWait.wakeAll();
-}
-
-void VideoHttpBuffer::cancelNetwork()
-{
-    /* This is just a test to make sure the mutex is locked by this thread. If it were recursive, this
-     * would fail incorrectly. */
-    Q_ASSERT(!m_lock.tryLock());
-
-    if (m_networkReply)
-        m_networkReply->abort();
 }
 
 void VideoHttpBuffer::sendStreamError(const QString &message)
 {
     bool b = blockSignals(true);
-    cancelNetwork();
     blockSignals(b);
     emit streamError(message);
     emit bufferingStopped();
 }
 
-void VideoHttpBuffer::networkMetaData()
+void VideoHttpBuffer::fileSizeChanged(unsigned fileSize)
 {
-    QMutexLocker lock(&m_lock);
-    if (m_fileSize)
-        return;
+    if (!fileSize)
+        qDebug() << "VideoHttpBuffer: fileSize is 0, may cause problems!";
 
-    bool ok = false;
-    m_fileSize = m_networkReply->header(QNetworkRequest::ContentLengthHeader).toLongLong(&ok);
-
-    if (!ok)
+    if (m_element)
     {
-        sendStreamError(QLatin1String("No content length for video"));
-        m_fileSize = 0;
-        return;
+        qDebug("VideoHttpBuffer: setting filesize");
+        gst_app_src_set_size(m_element, fileSize);
     }
-
-    Q_ASSERT(m_bufferFile.isOpen());
-    if (!m_bufferFile.resize(m_fileSize))
-        qDebug() << "VideoHttpBuffer: Failed to resize buffer file:" << m_bufferFile.errorString();
-
-    lock.unlock();
-
-    gst_app_src_set_size(m_element, m_fileSize);
-    emit bufferUpdated();
 }
 
+#if 0
 void VideoHttpBuffer::networkRead()
 {
     qDebug("trying to acquire lock for networkRead...");
@@ -277,124 +220,50 @@ void VideoHttpBuffer::networkFinished()
 
     m_bufferWait.wakeAll();
 }
+#endif
 
 void VideoHttpBuffer::needData(int size)
 {
-    /* Stop the stream if there is less than twice the amount requested, unless that is the end of the stream.
-     * This gives the pipeline enough buffer to resume from the paused state properly. */
-
-    QMutexLocker lock(&m_lock);
-    if (!m_element || !m_pipeline)
-        return;
-
-    qint64 avail = m_writePos - m_readPos;
-
-    /* If there is less than three times as much as the current request, try to pause the stream now, but continue to
-     * provide data. There may be another few requests before the stream actually can pause. */
-    if (false && m_writePos < m_fileSize && avail < size*3)
-    {
-        /* Unlock prior to changing the pipeline state to prevent deadlocks.
-         * Nothing here needs to be under the buffer lock. */
-        m_bufferBlocked = true;
-        lock.unlock();
-
-        qDebug() << "VideoHttpBuffer: buffer is exhausted with" << (m_fileSize - m_readPos) << "bytes remaining in stream";
-
-        GstState stateNow;
-        GstStateChangeReturn re = gst_element_get_state(m_pipeline, &stateNow, 0, 0);
-        Q_ASSERT(re != GST_STATE_CHANGE_FAILURE);
-        if (re == GST_STATE_CHANGE_FAILURE || stateNow == GST_STATE_PLAYING)
-        {
-            re = gst_element_set_state(m_pipeline, GST_STATE_PAUSED);
-            if (re == GST_STATE_CHANGE_FAILURE)
-                qWarning() << "VideoHttpBuffer: FAILED to pause pipeline!";
-
-            if (re == GST_STATE_CHANGE_ASYNC)
-            {
-                /* gst_element_get_state will block until the asynchronous state change completes */
-                GstState stateNow, statePending;
-                re = gst_element_get_state(m_pipeline, &stateNow, &statePending, GST_CLOCK_TIME_NONE);
-            }
-        }
-
-        lock.relock();
-        if (!m_element || !m_pipeline)
-            return;
-        avail = unsigned(m_writePos - m_readPos);
-    }
-    else
-        m_bufferBlocked = false;
-
-    while (avail < size && m_writePos < m_fileSize)
-    {
-        /* This exists mostly for stream initialization (when we don't
-         * have enough buffered for smooth playback). We wake every second
-         * to prevent any possibility of getting stuck in an indefinite wait. */
-#if 0
-        bool b;
-        do
-        {
-            b = m_bufferWait.wait(&m_lock, 1000);
-            if (!m_element)
-                return;
-        } while (!b);
-#endif
-        qDebug("avail is too low: %lld, want %u", avail, size);
-        while (avail < size && m_writePos < m_fileSize)
-        {
-            m_bufferWait.wait(&m_lock);
-            avail = m_writePos - m_readPos;
-            qDebug("after waiting, avail is %lld", avail);
-        }
-    }
+    Q_ASSERT(media);
 
     /* Refactor to use gst_pad_alloc_buffer? Probably wouldn't provide any benefit. */
     GstBuffer *buffer = gst_buffer_new_and_alloc(size);
 
-    if (!m_bufferFile.seek(m_readPos))
+    int re = media->read(media->readPosition(), (char*)GST_BUFFER_DATA(buffer), size);
+    if (re < 0)
     {
-        qDebug() << "VideoHttpBuffer: Failed to seek for read:" << m_bufferFile.errorString();
+        qDebug() << "VideoHttpBuffer: read error";
         return;
     }
-
-    GST_BUFFER_SIZE(buffer) = m_bufferFile.read((char*)GST_BUFFER_DATA(buffer), size);
-
-    if (GST_BUFFER_SIZE(buffer) < 1)
+    else if (re == 0)
     {
-        gst_buffer_unref(buffer);
-
-        if (m_bufferFile.atEnd())
+        if (media->readPosition() >= media->fileSize() && media->isFinished())
         {
-            lock.unlock();
             qDebug() << "VideoHttpBuffer: end of stream";
             gst_app_src_end_of_stream(m_element);
-            return;
         }
-
-        sendStreamError(QString::fromLatin1("Read error: %1").arg(m_bufferFile.errorString()));
+        else
+            qDebug() << "VideoHttpBuffer: read aborted";
         return;
     }
 
-    m_readPos += size;
-    GstAppSrc *e = m_element;
-    lock.unlock();
+    GST_BUFFER_SIZE(buffer) = re;
 
-    GstFlowReturn flow = gst_app_src_push_buffer(e, buffer);
+    GstFlowReturn flow = gst_app_src_push_buffer(m_element, buffer);
     if (flow != GST_FLOW_OK)
         qDebug() << "VideoHttpBuffer: Push result is" << flow;
+
+    if (media->readPosition() >= media->fileSize() && media->isFinished()
+        && m_lastSeekPos < media->fileSize()-4096)
+    {
+        qDebug() << "VideoHttpBuffer: end of stream (pushed last buffer)";
+        gst_app_src_end_of_stream(m_element);
+    }
 }
 
 bool VideoHttpBuffer::seekData(qint64 offset)
 {
-    QMutexLocker lock(&m_lock);
-    if (offset == m_readPos)
-        return true;
-
-    qDebug() << "VideoHttpBuffer: seek to" << offset << "from" << m_readPos << "delta" <<
-                offset - m_readPos;
-    m_readPos = offset;
-    lock.unlock();
-
-    m_bufferWait.wakeOne();
-    return true;
+    Q_ASSERT(media);
+    m_lastSeekPos = (unsigned)offset;
+    return media->seek(m_lastSeekPos);
 }

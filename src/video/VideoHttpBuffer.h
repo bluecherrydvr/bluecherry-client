@@ -3,11 +3,7 @@
 
 #include <QObject>
 #include <QUrl>
-#include <QTemporaryFile>
-#include <QMutex>
-#include <QWaitCondition>
-
-class QNetworkReply;
+#include "MediaDownload.h"
 
 typedef struct _GstAppSrc GstAppSrc;
 typedef struct _GstElement GstElement;
@@ -24,14 +20,14 @@ public:
      * but not linked. */
     GstElement *setupSrcElement(GstElement *pipeline);
 
-    bool isBuffering() const { return m_networkReply; }
+    bool isBuffering() const { return media && !media->isFinished(); }
 
-    QString bufferFileName() const { return m_bufferFile.fileName(); }
-    qint64 fileSize() const { return m_fileSize; }
-    qint64 bufferedSize() const { return m_bufferFile.pos(); }
-    bool isBufferingFinished() const { return m_finished; }
+    //QString bufferFileName() const { return m_bufferFile.fileName(); }
+    qint64 fileSize() const { return media ? media->fileSize() : 0; }
+    //qint64 bufferedSize() const { return m_bufferFile.pos(); }
+    bool isBufferingFinished() const { return media && media->isFinished(); }
 
-    void setAutoDelete(bool enabled) { m_bufferFile.setAutoRemove(enabled); }
+    //void setAutoDelete(bool enabled) { m_bufferFile.setAutoRemove(enabled); }
 
 public slots:
     bool start(const QUrl &url);
@@ -50,21 +46,13 @@ signals:
     void bufferUpdated();
 
 private slots:
-    void networkRead();
-    void networkFinished();
-    void networkMetaData();
-
-    void cancelNetwork();
+    void fileSizeChanged(unsigned fileSize);
 
 private:
-    QTemporaryFile m_bufferFile;
-    QNetworkReply *m_networkReply;
-    qint64 m_fileSize, m_readPos, m_writePos;
+    MediaDownload *media;
     GstAppSrc *m_element;
     GstElement *m_pipeline;
-    QMutex m_lock;
-    QWaitCondition m_bufferWait;
-    bool m_streamInit, m_bufferBlocked, m_finished;
+    unsigned m_lastSeekPos;
 
     static void needDataWrap(GstAppSrc *, unsigned, void*);
     static int seekDataWrap(GstAppSrc *, quint64, void*);

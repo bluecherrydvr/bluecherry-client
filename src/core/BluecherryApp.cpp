@@ -54,6 +54,13 @@ void BluecherryApp::sendSettingsChanged()
     setScreensaverInhibited(settings.value(QLatin1String("ui/disableScreensaver/always"), true).toBool());
 }
 
+QNetworkAccessManager *BluecherryApp::createNam()
+{
+    QNetworkAccessManager *n = new QNetworkAccessManager(this);
+    connect(n, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)), SLOT(sslErrors(QNetworkReply*,QList<QSslError>)));
+    return n;
+}
+
 void BluecherryApp::loadServers()
 {
     Q_ASSERT(m_servers.isEmpty());

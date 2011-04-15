@@ -1,6 +1,8 @@
 QT += core gui network webkit opengl declarative
 CONFIG(static):QTPLUGIN += qjpeg qgif
 
+CONFIG(debug,debug|release):CONFIG += console
+
 TARGET = BluecherryClient
 TEMPLATE = app
 
@@ -145,7 +147,9 @@ SOURCES += src/main.cpp \
     src/ui/liveview/PtzPresetsWindow.cpp \
     src/core/PtzPresetsModel.cpp \
     src/ui/liveview/LiveViewGradients.cpp \
-    src/ui/SetupWizard.cpp
+    src/ui/SetupWizard.cpp \
+    src/video/MediaDownload.cpp \
+    src/utils/RangeMap.cpp
 
 HEADERS  += src/ui/MainWindow.h \
     src/ui/OptionsDialog.h \
@@ -196,7 +200,10 @@ HEADERS  += src/ui/MainWindow.h \
     src/core/PtzPresetsModel.h \
     src/ui/liveview/LiveViewGradients.h \
     src/ui/SetupWizard.h \
-    src/ui/SetupWizard_p.h
+    src/ui/SetupWizard_p.h \
+    src/video/MediaDownload.h \
+    src/utils/RangeMap.h \
+    src/video/MediaDownload_p.h
 
 RESOURCES += \
     res/resources.qrc \

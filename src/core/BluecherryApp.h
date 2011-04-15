@@ -29,6 +29,11 @@ public:
     DVRServer *findServerID(int id);
     bool serverExists(DVRServer *server) { return m_servers.contains(server); }
 
+    /* Used to create other QNAM instances, for use on other threads.
+     * Keeps the correct SSL verification behavior, although changes in fingerprints
+     * will error rather than prompting the user on any but the default (GUI thread). */
+    QNetworkAccessManager *createNam();
+
     /* Temporarily pause live feeds to free up bandwidth for other intensive transfers
      * (particularly event video buffering). The live feed can be paused with pauseLive(),
      * and released releaseLive(). Upon release, the queryLivePaused() signal will be emitted,
