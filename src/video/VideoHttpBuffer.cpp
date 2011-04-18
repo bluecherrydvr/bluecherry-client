@@ -23,7 +23,7 @@ gboolean VideoHttpBuffer::seekDataWrap(GstAppSrc *src, quint64 offset, gpointer 
 }
 
 VideoHttpBuffer::VideoHttpBuffer(QObject *parent)
-    : QObject(parent), media(0), m_element(0), m_pipeline(0), m_lastSeekPos(0)
+    : QObject(parent), media(0), m_element(0), m_pipeline(0)
 {
 }
 
@@ -50,7 +50,7 @@ GstElement *VideoHttpBuffer::setupSrcElement(GstElement *pipeline)
 
     m_pipeline = pipeline;
 
-    gst_app_src_set_max_bytes(m_element, 512*1024);
+    gst_app_src_set_max_bytes(m_element, 0);
     gst_app_src_set_stream_type(m_element, GST_APP_STREAM_TYPE_RANDOM_ACCESS);
 
     GstAppSrcCallbacks callbacks;
@@ -252,18 +252,10 @@ void VideoHttpBuffer::needData(int size)
     GstFlowReturn flow = gst_app_src_push_buffer(m_element, buffer);
     if (flow != GST_FLOW_OK)
         qDebug() << "VideoHttpBuffer: Push result is" << flow;
-
-    if (media->readPosition() >= media->fileSize() && media->isFinished()
-        && m_lastSeekPos < media->fileSize()-4096)
-    {
-        qDebug() << "VideoHttpBuffer: end of stream (pushed last buffer)";
-        gst_app_src_end_of_stream(m_element);
-    }
 }
 
 bool VideoHttpBuffer::seekData(qint64 offset)
 {
     Q_ASSERT(media);
-    m_lastSeekPos = (unsigned)offset;
-    return media->seek(m_lastSeekPos);
+    return media->seek((unsigned)offset);
 }

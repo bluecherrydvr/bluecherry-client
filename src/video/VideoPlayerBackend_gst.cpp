@@ -386,6 +386,12 @@ bool VideoPlayerBackend::seek(qint64 position)
     if (!m_pipeline)
         return false;
 
+    if (state() != Playing && state() != Paused)
+    {
+        qDebug() << "gstreamer: Stream is not playing or paused, ignoring seek";
+        return false;
+    }
+
     gboolean re = gst_element_seek_simple(m_pipeline, GST_FORMAT_TIME,
                             (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT),
                             position);
@@ -499,7 +505,9 @@ GstBusSyncReply VideoPlayerBackend::busHandler(GstBus *bus, GstMessage *msg, boo
             qDebug() << "gstreamer: Error:" << error->message;
             qDebug() << "gstreamer: Debug:" << debug;
 
-            setError(false, tr("Playback error: %1").arg(QString::fromLatin1(error->message)));
+            /* Set the error message, but don't move to the error state, because that will stop playback,
+             * possibly incorrectly. */
+            m_errorMessage = QString::fromLatin1(error->message);
 
             g_free(debug);
             g_error_free(error);

@@ -52,7 +52,6 @@ private:
     MediaDownload *media;
     GstAppSrc *m_element;
     GstElement *m_pipeline;
-    unsigned m_lastSeekPos;
 
     static void needDataWrap(GstAppSrc *, unsigned, void*);
     static int seekDataWrap(GstAppSrc *, quint64, void*);

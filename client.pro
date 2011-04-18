@@ -1,8 +1,6 @@
 QT += core gui network webkit opengl declarative
 CONFIG(static):QTPLUGIN += qjpeg qgif
 
-CONFIG(debug,debug|release):CONFIG += console
-
 TARGET = BluecherryClient
 TEMPLATE = app
 
