@@ -39,6 +39,7 @@ public:
 
     qint64 duration() const;
     qint64 position() const;
+    double playbackSpeed() const { return m_playbackSpeed; }
     bool isSeekable() const;
     bool atEnd() const { return m_state == Done; }
     VideoState state() const { return m_state; }
@@ -51,6 +52,7 @@ public slots:
     void play();
     void pause();
     bool seek(qint64 position);
+    bool setSpeed(double speed);
     void restart();
 
 signals:
@@ -66,6 +68,7 @@ private:
     VideoHttpBuffer *m_videoBuffer;
     VideoState m_state;
     QString m_errorMessage;
+    double m_playbackSpeed;
 #ifdef Q_OS_LINUX
     unsigned int m_busWatchId;
 #endif

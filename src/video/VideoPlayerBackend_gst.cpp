@@ -10,7 +10,8 @@
 #include <glib.h>
 
 VideoPlayerBackend::VideoPlayerBackend(QObject *parent)
-    : QObject(parent), m_pipeline(0), m_videoLink(0), m_sink(0), m_videoBuffer(0), m_state(Stopped)
+    : QObject(parent), m_pipeline(0), m_videoLink(0), m_sink(0), m_videoBuffer(0), m_state(Stopped),
+      m_playbackSpeed(1.0)
 {
     if (!initGStreamer(&m_errorMessage))
         setError(true, m_errorMessage);
@@ -233,6 +234,8 @@ bool VideoPlayerBackend::start(const QUrl &url)
      * gives us the video pad. */
     m_videoLink = colorspace;
 
+    m_playbackSpeed = 1.0;
+
     /* We handle all messages in the sync handler, because we can't run a glib event loop.
      * Although linux does use glib's loop (and we could take advantage of that), it's better
      * to handle everything this way for windows and mac support. */
@@ -398,6 +401,28 @@ bool VideoPlayerBackend::seek(qint64 position)
 
     if (!re)
         qDebug() << "gstreamer: seek to position" << position << "failed";
+
+    return re ? true : false;
+}
+
+bool VideoPlayerBackend::setSpeed(double speed)
+{
+    if (!m_pipeline)
+        return false;
+
+    if (speed == m_playbackSpeed)
+        return true;
+
+    if (speed == 0)
+        return false;
+
+    gboolean re = gst_element_seek(m_pipeline, speed, GST_FORMAT_TIME, GST_SEEK_FLAG_NONE,
+                                   GST_SEEK_TYPE_NONE, 0, GST_SEEK_TYPE_NONE, 0);
+
+    if (!re)
+        qDebug() << "gstreamer: Setting playback speed failed";
+    else
+        m_playbackSpeed = speed;
 
     return re ? true : false;
 }

@@ -68,6 +68,18 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
 
     btnLayout->addSpacing(14);
 
+    m_slowBtn = new QToolButton;
+    m_slowBtn->setIcon(QIcon(QLatin1String(":/icons/control-double-180.png")));
+    btnLayout->addWidget(m_slowBtn);
+    connect(m_slowBtn, SIGNAL(clicked()), SLOT(slower()));
+
+    m_fastBtn = new QToolButton;
+    m_fastBtn->setIcon(QIcon(QLatin1String(":/icons/control-double.png")));
+    btnLayout->addWidget(m_fastBtn);
+    connect(m_fastBtn, SIGNAL(clicked()), SLOT(faster()));
+
+    btnLayout->addSpacing(14);
+
     m_statusText = new QLabel;
     m_statusText->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     btnLayout->addWidget(m_statusText);
@@ -199,6 +211,26 @@ void EventVideoPlayer::seek(int position)
     m_video->seek(qint64(position) * 1000000);
 }
 
+void EventVideoPlayer::faster()
+{
+    if (!m_video)
+        return;
+
+    m_video->setSpeed(m_video->playbackSpeed() + 1.0);
+}
+
+void EventVideoPlayer::slower()
+{
+    if (!m_video)
+        return;
+
+    double speed = m_video->playbackSpeed() - 1.0;
+    if (!speed)
+        speed = -1.0;
+
+    m_video->setSpeed(speed);
+}
+
 void EventVideoPlayer::queryLivePaused()
 {
     if (!m_video)
@@ -226,8 +258,7 @@ void EventVideoPlayer::updateBufferStatus()
         return;
     }
 
-    //int pcnt = qRound((double(m_video->videoBuffer()->bufferedSize()) / m_video->videoBuffer()->fileSize()) * 100.0);
-    int pcnt = 0;
+    int pcnt = m_video->videoBuffer()->isBufferingFinished() ? 0 : 100;
     m_statusText->setText(tr("<b>Buffering:</b> %1%").arg(pcnt));
 }
 

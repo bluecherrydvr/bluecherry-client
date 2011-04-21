@@ -229,6 +229,8 @@ void VideoHttpBuffer::needData(int size)
     /* Refactor to use gst_pad_alloc_buffer? Probably wouldn't provide any benefit. */
     GstBuffer *buffer = gst_buffer_new_and_alloc(size);
 
+    qDebug() << "read" << media->readPosition() << size;
+
     int re = media->read(media->readPosition(), (char*)GST_BUFFER_DATA(buffer), size);
     if (re < 0)
     {
@@ -252,10 +254,13 @@ void VideoHttpBuffer::needData(int size)
     GstFlowReturn flow = gst_app_src_push_buffer(m_element, buffer);
     if (flow != GST_FLOW_OK)
         qDebug() << "VideoHttpBuffer: Push result is" << flow;
+
+    qDebug() << "read done";
 }
 
 bool VideoHttpBuffer::seekData(qint64 offset)
 {
     Q_ASSERT(media);
+    qDebug() << "seek" << offset;
     return media->seek((unsigned)offset);
 }

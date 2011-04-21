@@ -35,6 +35,8 @@ public slots:
     void playPause();
     void seek(int position);
     void restart();
+    void faster();
+    void slower();
 
 private slots:
     void stateChanged(int state);
@@ -53,7 +55,7 @@ private:
     VideoPlayerBackend *m_video;
     VideoContainer *m_videoContainer;
     GstSinkWidget *m_videoWidget;
-    QToolButton *m_playBtn, *m_restartBtn;
+    QToolButton *m_playBtn, *m_restartBtn, *m_fastBtn, *m_slowBtn;
     QPushButton *m_saveBtn;
     QSlider *m_seekSlider;
     QLabel *m_posText, *m_statusText;
