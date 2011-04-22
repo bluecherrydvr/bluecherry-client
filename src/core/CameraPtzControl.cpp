@@ -338,6 +338,17 @@ int CameraPtzControl::savePreset(int preset, const QString &name)
     return preset;
 }
 
+void CameraPtzControl::updatePreset(int preset)
+{
+    QUrl url;
+    url.addEncodedQueryItem("command", "sync");
+    url.addEncodedQueryItem("preset", QByteArray::number(preset));
+    url.addQueryItem(QLatin1String("name"), m_presets.value(preset));
+
+    QNetworkReply *reply = sendCommand(url);
+    connect(reply, SIGNAL(finished()), SLOT(savePresetResult()));
+}
+
 void CameraPtzControl::savePresetResult()
 {
     QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());

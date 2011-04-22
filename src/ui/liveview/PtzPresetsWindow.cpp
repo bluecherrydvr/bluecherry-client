@@ -81,7 +81,7 @@ void PtzPresetsWindow::updatePreset(const QModelIndex &idx)
     if (!ok || id < 0)
         return;
 
-    m_ptz->savePreset(id, index.data(Qt::DisplayRole).toString());
+    m_ptz->updatePreset(id);
 }
 
 void PtzPresetsWindow::renamePreset(const QModelIndex &idx)

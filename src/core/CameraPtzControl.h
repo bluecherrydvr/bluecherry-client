@@ -67,6 +67,7 @@ public slots:
     void moveToPreset(int preset);
     /* preset ID may be -1 to automatically use the next available ID, which is returned */
     int savePreset(int preset, const QString &name);
+    void updatePreset(int preset);
     void renamePreset(int preset, const QString &name);
     void clearPreset(int preset);
     void cancel(QNetworkReply *command);
