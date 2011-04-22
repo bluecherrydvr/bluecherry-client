@@ -334,6 +334,28 @@ SetupFinishPage::SetupFinishPage()
     setButtonText(QWizard::FinishButton, tr("Close"));
 
     QBoxLayout *layout = new QVBoxLayout(this);
+    layout->addSpacing(8);
+
+    QLabel *text = new QLabel;
+    text->setWordWrap(true);
+    text->setText(tr("<ul><li>Cameras are shown on the left. You can double-click or drag a "
+                     "camera into the live view area to view it<br></li>"
+                     "<li>Use the buttons above the live view to create, save, and switch "
+                     "layouts - even with cameras from multiple servers!<br></li>"
+                     "<li>Double-click on a server to open its configuration page in a new "
+                     "window, where you can configure cameras and recordings<br></li>"
+                     "<li>Click 'Search Events' to open the event viewer and browse and watch "
+                     "events and recordings<br></li>"
+                     "</ul>"
+                     ));
+    text->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    layout->addWidget(text);
+
+    text = new QLabel(tr("If you need help, browse our online documentation through the Help menu at "
+                         "the top of the window."));
+    text->setWordWrap(true);
+    layout->addWidget(text);
+
     layout->addStretch();
 }
 
