@@ -25,6 +25,9 @@ public slots:
     void setOverlayMessage(const QString &message);
     void clearOverlayMessage() { setOverlayMessage(QString()); }
 
+private slots:
+    void setBufferStatus(int percent);
+
 protected:
     virtual void paintEvent(QPaintEvent *ev);
 

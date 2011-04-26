@@ -467,6 +467,7 @@ GstBusSyncReply VideoPlayerBackend::busHandler(GstBus *bus, GstMessage *msg, boo
             gint percent = 0;
             gst_message_parse_buffering(msg, &percent);
             qDebug() << "gstreamer: buffering" << percent << "%";
+            emit bufferingStatus(percent);
         }
         break;
 

@@ -3,6 +3,8 @@
 #include <QPainter>
 #include <QDebug>
 #include <QTimer>
+#include <QThread>
+#include <QApplication>
 #include <gst/gst.h>
 #include <gst/app/gstappsink.h>
 
@@ -74,6 +76,15 @@ void GstSinkWidget::setOverlayMessage(const QString &message)
 
     m_overlayMsg = message;
     update();
+}
+
+void GstSinkWidget::setBufferStatus(int percent)
+{
+    Q_ASSERT(QThread::currentThread() == qApp->thread());
+    if (percent == 100)
+        clearOverlayMessage();
+    else
+        setOverlayMessage(tr("Buffering\n%1%").arg(percent));
 }
 
 QImage GstSinkWidget::currentFrame()

@@ -139,6 +139,8 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     m_videoContainer->setInnerWidget(m_videoWidget);
     m_video->setSink(m_videoWidget->gstElement());
 
+    connect(m_video, SIGNAL(bufferingStatus(int)), m_videoWidget, SLOT(setBufferStatus(int)));
+
     if (!m_video->start(url))
     {
         /* TODO: Proper error handling! */

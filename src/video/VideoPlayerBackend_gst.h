@@ -59,6 +59,10 @@ signals:
     void stateChanged(int newState, int oldState);
     void durationChanged(qint64 duration);
     void endOfStream();
+    /* This reports the status of buffering enough for playback, not the buffering of the entire file.
+     * The size of this buffer depends on how it's configured in decodebin2, currently 10 seconds of
+     * playback. */
+    void bufferingStatus(int percent);
 
 private slots:
     void streamError(const QString &message);
