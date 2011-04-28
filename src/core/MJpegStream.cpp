@@ -197,6 +197,16 @@ bool MJpegStream::processHeaders()
         return false;
     }
 
+    if (m_httpBoundary.startsWith("--"))
+    {
+        /* Hack to work around broken MJPEG feeds, particularly some Axis devices,
+         * which incorrectly include '--' in their boundary header (which would mean
+         * that the actual boundary is ----xxx). We'll silently discard any extra data
+         * before a boundary, so we can remove the extra --'s and it will work fine whether
+         * they're properly included or not. */
+        m_httpBoundary.remove(0, 2);
+    }
+
     m_httpBoundary.prepend("\n--");
     return true;
 }
