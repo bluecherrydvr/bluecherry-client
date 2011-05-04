@@ -28,7 +28,7 @@ public:
     virtual ~MediaDownloadTask();
 
 public slots:
-    void start(const QUrl &url, const QList<QNetworkCookie> &cookies, unsigned postion);
+    void start(const QUrl &url, const QList<QNetworkCookie> &cookies, unsigned postion, unsigned size);
     void abort();
 
 signals:

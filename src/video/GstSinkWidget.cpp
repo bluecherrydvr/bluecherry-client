@@ -83,8 +83,8 @@ void GstSinkWidget::setBufferStatus(int percent)
     Q_ASSERT(QThread::currentThread() == qApp->thread());
     if (percent == 100)
         clearOverlayMessage();
-    else
-        setOverlayMessage(tr("Buffering\n%1%").arg(percent));
+    //else
+      //  setOverlayMessage(tr("Buffering\n%1%").arg(percent));
 }
 
 QImage GstSinkWidget::currentFrame()

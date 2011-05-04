@@ -37,7 +37,7 @@ MediaDownload::~MediaDownload()
         m_thread->quit();
 }
 
-void MediaDownload::start(const QUrl &url)
+void MediaDownload::start(const QUrl &url, const QList<QNetworkCookie> &cookies)
 {
     Q_ASSERT(!m_thread && !m_url.isValid());
 
@@ -55,7 +55,8 @@ void MediaDownload::start(const QUrl &url)
     qDebug() << "MediaDownload: started for" << url;
 
     m_url = url;
-    startRequest();
+    m_cookies = cookies;
+    startRequest(0, 0);
 }
 
 void MediaDownload::cancel()
@@ -93,6 +94,24 @@ bool MediaDownload::seek(unsigned offset)
         return true;
 
     m_readPos = offset;
+
+    unsigned npos, nsize;
+    if (m_bufferRanges.nextMissingRange(m_readPos - qMin(m_readPos, seekMinimumSkip), m_fileSize, npos, nsize))
+    {
+        if (npos >= m_writePos && npos - m_writePos < seekMinimumSkip)
+        {
+            qDebug() << "MediaDownload: but writepos is" << m_writePos << "so nothing is needed";
+        }
+        else
+        {
+            qDebug() << "MediaDownload: launching new request after seek";
+            qDebug() << "MediaDownload: rdpos" << m_readPos << "next missing is" << npos << nsize;
+            qDebug() << m_bufferRanges;
+            m_writePos = npos;
+            startRequest(npos, nsize);
+        }
+    }
+
     m_bufferWait.wakeAll();
 
     /* XXX even when the seek position is available
@@ -112,6 +131,7 @@ int MediaDownload::read(unsigned position, char *buffer, int reqSize)
     while (!m_bufferRanges.contains(position, size))
     {
         qDebug() << "MediaDownload: blocking to wait for read of" << size << "at" << position;
+        qDebug() << m_bufferRanges;
         m_bufferWait.wait(&m_bufferLock);
         if (oldRdPos != m_readPos)
         {
@@ -141,10 +161,9 @@ int MediaDownload::read(unsigned position, char *buffer, int reqSize)
     return re;
 }
 
-void MediaDownload::startRequest()
+void MediaDownload::startRequest(unsigned position, unsigned size)
 {
     Q_ASSERT(m_url.isValid());
-    Q_ASSERT(QThread::currentThread() == qApp->thread());
 
     if (m_task)
     {
@@ -160,17 +179,20 @@ void MediaDownload::startRequest()
             Qt::DirectConnection);
     connect(m_task, SIGNAL(dataRead(QByteArray,uint)), SLOT(incomingData(QByteArray,uint)),
             Qt::DirectConnection);
-    /* These two will be queued, not delivered on the network thread */
-    connect(m_task, SIGNAL(finished()), SLOT(taskFinished()));
-    connect(m_task, SIGNAL(error(QString)), SLOT(taskError(QString)));
+    connect(m_task, SIGNAL(finished()), SLOT(taskFinished()), Qt::DirectConnection);
+    connect(m_task, SIGNAL(error(QString)), SLOT(taskError(QString)), Qt::DirectConnection);
 
-    qDebug() << "MediaDownload: Starting task for position" << "NOT_IMPLEMENTED";
+    /* If size will reach the end of what we believe the file size to be, make it infinite instead,
+     * to ease behavior with still active files */
+    if (position + size >= m_fileSize)
+        size = 0;
 
-    QList<QNetworkCookie> cookies = bcApp->nam->cookieJar()->cookiesForUrl(m_url);
+    qDebug() << "MediaDownload: Starting task for position" << position << "of size" << size;
 
     m_task->metaObject()->invokeMethod(m_task, "start", Q_ARG(QUrl, m_url),
-                                       Q_ARG(QList<QNetworkCookie>, cookies),
-                                       Q_ARG(unsigned, 0));
+                                       Q_ARG(QList<QNetworkCookie>, m_cookies),
+                                       Q_ARG(unsigned, position),
+                                       Q_ARG(unsigned, size));
 }
 
 void MediaDownload::requestReady(unsigned fileSize)
@@ -199,13 +221,18 @@ void MediaDownload::incomingData(const QByteArray &data, unsigned position)
     QMutexLocker l(&m_bufferLock);
     qDebug() << "MediaDownload: Received" << data.size() << "bytes at" << position;
     m_bufferRanges.insert(position, data.size());
-    m_writePos = position + data.size();
-    if (m_fileSize < m_writePos)
+
+    if (m_writePos == position)
+        m_writePos += data.size();
+
+    if (m_fileSize < position+data.size())
     {
         qDebug() << "MediaDownload: file size is less than write position, adjusting size";
-        m_fileSize = m_writePos;
+        m_fileSize = position + data.size();
         metaObject()->invokeMethod(this, "fileSizeChanged", Q_ARG(unsigned, m_fileSize));
     }
+
+    m_bufferWait.wakeAll();
 }
 
 void MediaDownload::taskError(const QString &message)
@@ -222,25 +249,28 @@ void MediaDownload::taskFinished()
     {
         qDebug() << "MediaDownload: Media finished";
         m_isFinished = true;
-        metaObject()->invokeMethod(this, "finished");
+        metaObject()->invokeMethod(this, "finished", Qt::QueuedConnection);
     }
     else
     {
         /* Launch a new task to fill in gaps. Prioritize anything that is missing and is closest
          * to the current read position. */
         unsigned npos, nsize;
-        if (!m_bufferRanges.nextMissingRange(m_readPos, npos, nsize))
+        if (!m_bufferRanges.nextMissingRange(m_readPos, m_fileSize, npos, nsize))
         {
-            if (npos >= m_fileSize && !m_bufferRanges.nextMissingRange(0, npos, nsize))
+            if (npos >= m_fileSize && !m_bufferRanges.nextMissingRange(0, m_fileSize, npos, nsize))
             {
                 /* Should not be possible; this would mean that 0-m_fileSize is included. */
                 Q_ASSERT_X(false, "RangeMap", "Impossible conflict between nextMissingRange and contains");
+                m_isFinished = true;
+                metaObject()->invokeMethod(this, "finished", Qt::QueuedConnection);
+                return;
             }
         }
 
         qDebug() << "MediaDownload: Want to start request at" << npos << "for" << nsize;
-        /* Not implemented, needs to be! */
-        Q_ASSERT(false);
+        m_writePos = npos;
+        startRequest(npos, nsize);
     }
 }
 
@@ -249,7 +279,8 @@ MediaDownloadTask::MediaDownloadTask(QObject *parent)
 {
 }
 
-void MediaDownloadTask::start(const QUrl &url, const QList<QNetworkCookie> &cookies, unsigned position)
+void MediaDownloadTask::start(const QUrl &url, const QList<QNetworkCookie> &cookies, unsigned position,
+                              unsigned size)
 {
     Q_ASSERT(!m_reply);
 
@@ -266,7 +297,10 @@ void MediaDownloadTask::start(const QUrl &url, const QList<QNetworkCookie> &cook
     QNetworkRequest req(url);
     if (position)
     {
-        req.setRawHeader("Range", "bytes=" + QByteArray::number(position) + "-");
+        QByteArray range = "bytes=" + QByteArray::number(position) + "-";
+        if (size)
+            range += QByteArray::number(position + size);
+        req.setRawHeader("Range", range);
         m_writePos = position;
     }
 
@@ -286,6 +320,8 @@ void MediaDownloadTask::abort()
 {
     if (!m_reply)
         return;
+
+    qDebug("MediaDownloadTask::abort");
 
     m_reply->disconnect(this);
     m_reply->abort();
@@ -315,7 +351,10 @@ void MediaDownloadTask::requestFinished()
     if (m_reply->error() != QNetworkReply::NoError)
         emit error(m_reply->errorString());
     else
+    {
+        qDebug() << "MediaDownloadTask finished" << m_reply->errorString() << m_reply->bytesAvailable();
         emit finished();
+    }
 
     m_reply->deleteLater();
     m_reply = 0;

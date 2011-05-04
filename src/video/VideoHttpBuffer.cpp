@@ -5,6 +5,8 @@
 #include <QDebug>
 #include <QDir>
 #include <QThread>
+#include <QNetworkCookieJar>
+#include <QApplication>
 
 #include <gst/gst.h>
 #include <gst/app/gstappsrc.h>
@@ -69,11 +71,12 @@ GstElement *VideoHttpBuffer::setupSrcElement(GstElement *pipeline)
 bool VideoHttpBuffer::start(const QUrl &url)
 {
     Q_ASSERT(!media);
+    Q_ASSERT(QThread::currentThread() == qApp->thread());
 
     media = new MediaDownload(this);
     connect(media, SIGNAL(fileSizeChanged(uint)), SLOT(fileSizeChanged(uint)));
 
-    media->start(url);
+    media->start(url, bcApp->nam->cookieJar()->cookiesForUrl(url));
 
     qDebug("VideoHttpBuffer: started");
     emit bufferingStarted();

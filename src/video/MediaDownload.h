@@ -10,6 +10,7 @@
 
 class QNetworkReply;
 class MediaDownloadTask;
+class QNetworkCookie;
 
 class MediaDownload : public QObject
 {
@@ -35,7 +36,7 @@ public:
      * value is the number of bytes read. */
     int read(unsigned position, char *buffer, int size);
 
-    void start(const QUrl &url);
+    void start(const QUrl &url, const QList<QNetworkCookie> &cookies);
 
 public slots:
     void cancel();
@@ -73,11 +74,13 @@ private:
     QWaitCondition m_bufferWait;
     QTemporaryFile m_bufferFile;
     QFile m_readFile;
+    QList<QNetworkCookie> m_cookies;
     unsigned m_fileSize, m_readPos, m_writePos;
     RangeMap m_bufferRanges;
     bool m_isFinished;
 
-    void startRequest();
+    /* size may be 0, which will continue to the end of the file */
+    Q_INVOKABLE void startRequest(unsigned position, unsigned size);
     bool openFiles();
 };
 
