@@ -2,9 +2,12 @@
 #define RANGEMAP_H
 
 #include <QMap>
+#include <QDebug>
 
 class RangeMap
 {
+    friend QDebug &operator<<(QDebug &d, const RangeMap &r);
+
 public:
     RangeMap();
 
@@ -18,8 +21,7 @@ public:
      * false if there are no gaps before the end of the range. In the latter case,
      * position will be set to one past the largest position in the range, and size
      * will be zero. */
-    bool nextMissingRange(unsigned startPosition, unsigned &position, unsigned &size);
-
+    bool nextMissingRange(unsigned startPosition, unsigned totalSize, unsigned &position, unsigned &size);
 private:
     struct Range {
         unsigned start; /* First index, inclusive */
@@ -30,5 +32,16 @@ private:
 
     QList<Range> ranges;
 };
+
+#ifndef QT_NO_DEBUG
+inline QDebug& operator<<(QDebug &d, const RangeMap &r)
+{
+    QString text = QLatin1String("Range: ");
+    foreach (const RangeMap::Range &n, r.ranges)
+        text.append(QString::number(n.start) + QLatin1String(" - ")
+                    + QString::number(n.end) + QLatin1String("; "));
+    return (d << text);
+}
+#endif
 
 #endif // RANGEMAP_H

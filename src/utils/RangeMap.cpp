@@ -31,25 +31,27 @@ bool RangeMap::contains(unsigned position, unsigned size) const
     return false;
 }
 
-bool RangeMap::nextMissingRange(unsigned startPosition, unsigned &position, unsigned &size)
+bool RangeMap::nextMissingRange(unsigned startPosition, unsigned totalSize, unsigned &position, unsigned &size)
 {
     if (ranges.isEmpty())
     {
         position = startPosition;
-        size = 0;
-        return false;
+        size = totalSize;
+        return true;
     }
 
     /* Find the range inclusive of or less than startPosition */
     Range r = { startPosition, startPosition };
     QList<Range>::ConstIterator it = qLowerBound(ranges.begin(), ranges.end(), r, rangeStartLess);
-    if (it == ranges.end() || it->start > position)
+    if (it == ranges.end() || it->start > startPosition)
         --it;
 
-    position = qMax(startPosition, it->end+1);
-    size = (it+1 == ranges.end()) ? 0 : ((it+1)->start - position - 1);
+    Q_ASSERT(it->start <= startPosition);
 
-    Q_ASSERT(size == 0 || (position+size)+1 == (it+1)->start);
+    position = qMax(startPosition, it->end+1);
+    size = qMin((it+1 == ranges.end()) ? (totalSize - position) : ((it+1)->start - position - 1), totalSize);
+
+    Q_ASSERT(size == 0 || (position+size) == totalSize || (position+size)+1 == (it+1)->start);
 
     return size != 0;
 }
@@ -67,11 +69,7 @@ void RangeMap::insert(unsigned position, unsigned size)
     QList<Range>::Iterator upper = qUpperBound(lower, ranges.end(), r2, rangeStartLess);
 
 #ifdef RANGEMAP_DEBUG
-    QString text = QLatin1String("Range: ");
-    foreach (const Range &n, ranges)
-        text.append(QString::number(n.start) + QLatin1String(" - ")
-                    + QString::number(n.end) + QLatin1String("; "));
-    qDebug() << text;
+    qDebug() << *this;
     qDebug() << "Inserting:" << position << "of size" << size;
 #endif
 
@@ -103,10 +101,6 @@ void RangeMap::insert(unsigned position, unsigned size)
     }
 
 #ifdef RANGEMAP_DEBUG
-    text = QLatin1String("Range: ");
-    foreach (const Range &n, ranges)
-        text.append(QString::number(n.start) + QLatin1String(" - ")
-                    + QString::number(n.end) + QLatin1String("; "));
-    qDebug() << text;
+    qDebug() << *this;
 #endif
 }
