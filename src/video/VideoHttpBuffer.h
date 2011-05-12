@@ -24,7 +24,8 @@ public:
 
     //QString bufferFileName() const { return m_bufferFile.fileName(); }
     qint64 fileSize() const { return media ? media->fileSize() : 0; }
-    //qint64 bufferedSize() const { return m_bufferFile.pos(); }
+    qint64 bufferedSize() const { return media ? media->downloadedSize() : 0; }
+    int bufferedPercent() const;
     bool isBufferingFinished() const { return media && media->isFinished(); }
 
     //void setAutoDelete(bool enabled) { m_bufferFile.setAutoRemove(enabled); }
@@ -61,5 +62,13 @@ private:
 
     void sendStreamError(const QString &message);
 };
+
+inline int VideoHttpBuffer::bufferedPercent() const
+{
+    double file = fileSize(), avail = bufferedSize();
+    if (!file || !avail)
+        return 0;
+    return qRound((avail / file) * 100);
+}
 
 #endif // VIDEOHTTPBUFFER_H

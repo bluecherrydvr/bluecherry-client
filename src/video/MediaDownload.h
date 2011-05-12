@@ -21,6 +21,7 @@ public:
     virtual ~MediaDownload();
 
     unsigned fileSize() const { return m_fileSize; }
+    unsigned downloadedSize() const { return m_downloadedSize; }
     unsigned readPosition() const { return m_readPos; }
     bool isFinished() const { return m_isFinished; }
 
@@ -75,7 +76,7 @@ private:
     QTemporaryFile m_bufferFile;
     QFile m_readFile;
     QList<QNetworkCookie> m_cookies;
-    unsigned m_fileSize, m_readPos, m_writePos;
+    unsigned m_fileSize, m_downloadedSize, m_readPos, m_writePos;
     RangeMap m_bufferRanges;
     bool m_isFinished;
 

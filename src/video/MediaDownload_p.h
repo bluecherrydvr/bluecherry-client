@@ -30,6 +30,7 @@ public:
 public slots:
     void start(const QUrl &url, const QList<QNetworkCookie> &cookies, unsigned postion, unsigned size);
     void abort();
+    void abortLater();
 
 signals:
     void requestReady(unsigned fileSize);
@@ -43,6 +44,7 @@ private slots:
     void requestFinished();
 
 private:
+    friend class MediaDownload;
     static QThreadStorage<QNetworkAccessManager*> threadNAM;
     QNetworkReply *m_reply;
     unsigned m_writePos;

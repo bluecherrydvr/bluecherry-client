@@ -19,8 +19,8 @@ static const unsigned seekMinimumSkip = 256000;
 QThreadStorage<QNetworkAccessManager*> MediaDownloadTask::threadNAM;
 
 MediaDownload::MediaDownload(QObject *parent)
-    : QObject(parent), m_thread(0), m_task(0), m_fileSize(0), m_readPos(0), m_writePos(0),
-      m_isFinished(false)
+    : QObject(parent), m_thread(0), m_task(0), m_fileSize(0), m_downloadedSize(0),
+      m_readPos(0), m_writePos(0), m_isFinished(false)
 {
 }
 
@@ -130,7 +130,8 @@ int MediaDownload::read(unsigned position, char *buffer, int reqSize)
 
     while (!m_bufferRanges.contains(position, size))
     {
-        qDebug() << "MediaDownload: blocking to wait for read of" << size << "at" << position;
+        qDebug() << "MediaDownload: blocking" << QThread::currentThread() << "to wait for read of"
+                 << size << "at" << position;
         qDebug() << m_bufferRanges;
         m_bufferWait.wait(&m_bufferLock);
         if (oldRdPos != m_readPos)
@@ -168,7 +169,7 @@ void MediaDownload::startRequest(unsigned position, unsigned size)
     if (m_task)
     {
         qDebug() << "MediaDownload: Aborting existing download task";
-        m_task->metaObject()->invokeMethod(m_task, "abort");
+        m_task->abortLater();
         m_task->deleteLater();
     }
 
@@ -187,12 +188,15 @@ void MediaDownload::startRequest(unsigned position, unsigned size)
     if (position + size >= m_fileSize)
         size = 0;
 
-    qDebug() << "MediaDownload: Starting task for position" << position << "of size" << size;
+    qDebug() << "MediaDownload: Starting task for position" << position << "of size" << size << "from thread"
+             << QThread::currentThread();
 
-    m_task->metaObject()->invokeMethod(m_task, "start", Q_ARG(QUrl, m_url),
-                                       Q_ARG(QList<QNetworkCookie>, m_cookies),
-                                       Q_ARG(unsigned, position),
-                                       Q_ARG(unsigned, size));
+    bool ok = m_task->metaObject()->invokeMethod(m_task, "start", Q_ARG(QUrl, m_url),
+                                                 Q_ARG(QList<QNetworkCookie>, m_cookies),
+                                                 Q_ARG(unsigned, position),
+                                                 Q_ARG(unsigned, size));
+    Q_ASSERT(ok);
+    Q_UNUSED(ok);
 }
 
 void MediaDownload::requestReady(unsigned fileSize)
@@ -219,11 +223,14 @@ void MediaDownload::incomingData(const QByteArray &data, unsigned position)
     m_bufferFile.write(data);
 
     QMutexLocker l(&m_bufferLock);
-    qDebug() << "MediaDownload: Received" << data.size() << "bytes at" << position;
+    qDebug() << "MediaDownload: Received" << data.size() << "bytes at" << position << "thread is"
+                << QThread::currentThread();
     m_bufferRanges.insert(position, data.size());
 
     if (m_writePos == position)
         m_writePos += data.size();
+
+    m_downloadedSize += data.size();
 
     if (m_fileSize < position+data.size())
     {
@@ -244,6 +251,9 @@ void MediaDownload::taskFinished()
 {    
     QMutexLocker l(&m_bufferLock);
     qDebug() << "MediaDownload: Task finished";
+
+    /* These should both be true or both be false, anything else is a logic error. */
+    Q_ASSERT(!(m_bufferRanges.contains(0, m_fileSize) ^ (m_downloadedSize >= m_fileSize)));
 
     if (m_bufferRanges.contains(0, m_fileSize))
     {
@@ -309,6 +319,8 @@ void MediaDownloadTask::start(const QUrl &url, const QList<QNetworkCookie> &cook
     connect(m_reply, SIGNAL(metaDataChanged()), SLOT(metaDataReady()));
     connect(m_reply, SIGNAL(readyRead()), SLOT(read()));
     connect(m_reply, SIGNAL(finished()), SLOT(requestFinished()));
+
+    qDebug() << "MediaDownloadTask: started, thread is" << QThread::currentThread();
 }
 
 MediaDownloadTask::~MediaDownloadTask()
@@ -316,12 +328,25 @@ MediaDownloadTask::~MediaDownloadTask()
     abort();
 }
 
+void MediaDownloadTask::abortLater()
+{
+    /* Mostly threadsafe; caller must know that the instance will not be deleted at this time. */
+    if (m_reply)
+        m_reply->disconnect(this);
+    metaObject()->invokeMethod(this, "abort", Qt::QueuedConnection);
+}
+
 void MediaDownloadTask::abort()
 {
+    qDebug() << "MediaDownloadTask: abort called on thread" << QThread::currentThread();
     if (!m_reply)
+    {
+        qDebug() << "MediaDownloadTask: abort with no m_reply";
         return;
+    }
 
-    qDebug("MediaDownloadTask::abort");
+    qDebug() << "MediaDownloadTask: aborting for request of" << m_reply->request().rawHeader("Range")
+             << "with write position" << m_writePos << "and bytesAvailable" << m_reply->bytesAvailable();
 
     m_reply->disconnect(this);
     m_reply->abort();
