@@ -6,7 +6,7 @@
 
 class RangeMap
 {
-    friend QDebug &operator<<(QDebug &d, const RangeMap &r);
+    friend QDebug operator<<(QDebug d, const RangeMap &r);
 
 public:
     RangeMap();
@@ -34,7 +34,7 @@ private:
 };
 
 #ifndef QT_NO_DEBUG
-inline QDebug& operator<<(QDebug &d, const RangeMap &r)
+inline QDebug operator<<(QDebug d, const RangeMap &r)
 {
     QString text = QLatin1String("Range: ");
     foreach (const RangeMap::Range &n, r.ranges)

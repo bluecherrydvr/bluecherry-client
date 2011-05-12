@@ -49,7 +49,8 @@ bool RangeMap::nextMissingRange(unsigned startPosition, unsigned totalSize, unsi
     Q_ASSERT(it->start <= startPosition);
 
     position = qMax(startPosition, it->end+1);
-    size = qMin((it+1 == ranges.end()) ? (totalSize - position) : ((it+1)->start - position - 1), totalSize);
+    size = qMin((it+1 == ranges.end()) ? (totalSize - position) : ((it+1)->start - position - 1),
+                totalSize - position);
 
     Q_ASSERT(size == 0 || (position+size) == totalSize || (position+size)+1 == (it+1)->start);
 
@@ -62,7 +63,7 @@ void RangeMap::insert(unsigned position, unsigned size)
 
     /* Item with a position LESS THAN OR EQUAL TO the BEGINNING of the inserted range */
     QList<Range>::Iterator lower = qLowerBound(ranges.begin(), ranges.end(), range, rangeStartLess);
-    if (lower != ranges.begin())
+    if (!ranges.isEmpty() && (lower == ranges.end() || lower->start > position))
         lower--;
     /* Item with a position GREATER THAN the END of the inserted range */
     Range r2 = { range.end, range.end };
@@ -72,6 +73,8 @@ void RangeMap::insert(unsigned position, unsigned size)
     qDebug() << *this;
     qDebug() << "Inserting:" << position << "of size" << size;
 #endif
+
+    Q_ASSERT(lower == ranges.end() || lower->start <= position);
 
     /* Intersection at the beginning */
     if (lower != ranges.end() && position <= lower->end+1)
