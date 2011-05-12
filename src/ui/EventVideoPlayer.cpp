@@ -28,7 +28,9 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     : QWidget(parent), m_event(0), m_video(0), m_videoWidget(0)
 {
     connect(bcApp, SIGNAL(queryLivePaused()), SLOT(queryLivePaused()));
-    connect(&m_posTimer, SIGNAL(timeout()), SLOT(updatePosition()));
+    connect(&m_uiTimer, SIGNAL(timeout()), SLOT(updateUI()));
+
+    m_uiTimer.setInterval(100);
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -151,7 +153,6 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
 
     connect(m_video->videoBuffer(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()), Qt::QueuedConnection);
     connect(m_video->videoBuffer(), SIGNAL(bufferingStarted()), SLOT(bufferingStarted()));
-    connect(m_video->videoBuffer(), SIGNAL(bufferUpdated()), SLOT(updateBufferStatus()));
 
     if (m_video->videoBuffer()->isBuffering())
         bufferingStarted();
@@ -174,7 +175,7 @@ void EventVideoPlayer::clearVideo()
     m_seekSlider->setRange(0, 0);
     m_posText->clear();
     m_statusText->clear();
-    m_posTimer.stop();
+    m_uiTimer.stop();
     m_videoContainer->setInnerWidget(0);
     setControlsEnabled(false);
 }
@@ -244,11 +245,23 @@ void EventVideoPlayer::queryLivePaused()
         bcApp->pauseLive();
 }
 
+bool EventVideoPlayer::uiRefreshNeeded() const
+{
+    return m_video && (m_video->videoBuffer()->isBuffering() || m_video->state() == VideoPlayerBackend::Playing);
+}
+
+void EventVideoPlayer::updateUI()
+{
+    updatePosition();
+    updateBufferStatus();
+}
+
 void EventVideoPlayer::bufferingStarted()
 {
     QSettings settings;
     if (settings.value(QLatin1String("eventPlayer/pauseLive")).toBool())
         bcApp->pauseLive();
+    m_uiTimer.start();
     updateBufferStatus();
 }
 
@@ -260,14 +273,17 @@ void EventVideoPlayer::updateBufferStatus()
         return;
     }
 
-    int pcnt = m_video->videoBuffer()->isBufferingFinished() ? 0 : 100;
-    m_statusText->setText(tr("<b>Buffering:</b> %1%").arg(pcnt));
+    int pcnt = m_video->videoBuffer()->bufferedPercent();
+    m_statusText->setText(tr("<b>Downloading:</b> %1%").arg(pcnt));
 }
 
 void EventVideoPlayer::bufferingStopped()
 {
     bcApp->releaseLive();
     m_statusText->clear();
+
+    if (!uiRefreshNeeded())
+        m_uiTimer.stop();
 }
 
 void EventVideoPlayer::stateChanged(int state)
@@ -278,13 +294,15 @@ void EventVideoPlayer::stateChanged(int state)
     if (state == VideoPlayerBackend::Playing)
     {
         m_playBtn->setIcon(QIcon(QLatin1String(":/icons/control-pause.png")));
-        m_posTimer.start(30);
+        m_uiTimer.start();
+        updatePosition();
     }
     else
     {
         m_playBtn->setIcon(QIcon(QLatin1String(":/icons/control.png")));
-        m_posTimer.stop();
         updatePosition();
+        if (!uiRefreshNeeded())
+            m_uiTimer.stop();
     }
 
     QSettings settings;

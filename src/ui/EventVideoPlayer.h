@@ -50,6 +50,8 @@ private slots:
     void updateBufferStatus();
     void bufferingStopped();
 
+    void updateUI();
+
 private:
     EventData *m_event;
     VideoPlayerBackend *m_video;
@@ -59,9 +61,10 @@ private:
     QPushButton *m_saveBtn;
     QSlider *m_seekSlider;
     QLabel *m_posText, *m_statusText;
-    QTimer m_posTimer;
+    QTimer m_uiTimer;
 
     void setControlsEnabled(bool enabled);
+    bool uiRefreshNeeded() const;
 };
 
 #endif // EVENTVIDEOPLAYER_H
