@@ -60,7 +60,7 @@ private:
     QToolButton *m_playBtn, *m_restartBtn, *m_fastBtn, *m_slowBtn;
     QPushButton *m_saveBtn;
     QSlider *m_seekSlider;
-    QLabel *m_posText, *m_statusText;
+    QLabel *m_startTime, *m_endTime, *m_statusText, *m_rateText;
     QTimer m_uiTimer;
 
     void setControlsEnabled(bool enabled);

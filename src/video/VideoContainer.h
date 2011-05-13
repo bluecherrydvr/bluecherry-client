@@ -52,13 +52,14 @@ public slots:
         if (on)
         {
             setWindowFlags(windowFlags() | Qt::Window);
+            m_normalFrameStyle = frameStyle();
             setFrameStyle(QFrame::NoFrame);
             showFullScreen();
         }
         else
         {
             setWindowFlags(windowFlags() & ~Qt::Window);
-            setFrameStyle(QFrame::Sunken | QFrame::Panel);
+            setFrameStyle(m_normalFrameStyle);
             showNormal();
         }
 
@@ -74,6 +75,7 @@ public slots:
 
 protected:
     QWidget *innerWidget;
+    int m_normalFrameStyle;
 
     virtual void resizeEvent(QResizeEvent *ev)
     {

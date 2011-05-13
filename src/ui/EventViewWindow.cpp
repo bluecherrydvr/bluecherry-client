@@ -31,6 +31,8 @@ EventViewWindow::EventViewWindow(QWidget *parent)
     resize(590, 380);
 
     QBoxLayout *layout = new QVBoxLayout(this);
+    layout->setMargin(0);
+#if 0
     m_splitter = new QSplitter(Qt::Horizontal, this);
     layout->addWidget(m_splitter);
 
@@ -38,11 +40,17 @@ EventViewWindow::EventViewWindow(QWidget *parent)
     m_splitter->addWidget(createInfoArea());
     m_splitter->setStretchFactor(0, 1);
     m_splitter->setChildrenCollapsible(false);
+#else
+    createInfoArea();
+    layout->addWidget(createPlaybackArea());
+#endif
 
     QSettings settings;
     restoreGeometry(settings.value(QLatin1String("ui/eventView/geometry")).toByteArray());
+#if 0
     if (!m_splitter->restoreState(settings.value(QLatin1String("ui/eventView/splitState2")).toByteArray()))
         m_splitter->setSizes(QList<int>() << 1000 << 160);
+#endif
 }
 
 EventViewWindow *EventViewWindow::open(const EventData &event)
