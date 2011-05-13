@@ -327,7 +327,7 @@ void EventVideoPlayer::bufferingStarted()
 
 void EventVideoPlayer::updateBufferStatus()
 {
-    if (!m_video)
+    if (!m_video || m_video->videoBuffer()->isBufferingFinished())
     {
         m_statusText->clear();
         return;
@@ -339,8 +339,11 @@ void EventVideoPlayer::updateBufferStatus()
 
 void EventVideoPlayer::bufferingStopped()
 {
+    qDebug("bufferingstopped");
     bcApp->releaseLive();
-    m_statusText->clear();
+
+    if (m_video->videoBuffer()->isBufferingFinished())
+        m_statusText->clear();
 
     if (!uiRefreshNeeded())
         m_uiTimer.stop();

@@ -75,6 +75,8 @@ bool VideoHttpBuffer::start(const QUrl &url)
 
     media = new MediaDownload(this);
     connect(media, SIGNAL(fileSizeChanged(uint)), SLOT(fileSizeChanged(uint)));
+    connect(media, SIGNAL(finished()), SIGNAL(bufferingFinished()));
+    connect(media, SIGNAL(stopped()), SIGNAL(bufferingStopped()));
 
     media->start(url, bcApp->nam->cookieJar()->cookiesForUrl(url));
 

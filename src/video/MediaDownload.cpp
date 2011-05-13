@@ -259,7 +259,11 @@ void MediaDownload::taskFinished()
     {
         qDebug() << "MediaDownload: Media finished";
         m_isFinished = true;
-        metaObject()->invokeMethod(this, "finished", Qt::QueuedConnection);
+        bool ok = metaObject()->invokeMethod(this, "finished", Qt::QueuedConnection);
+        Q_ASSERT(ok);
+        ok = metaObject()->invokeMethod(this, "stopped", Qt::QueuedConnection);
+        Q_ASSERT(ok);
+        Q_UNUSED(ok);
     }
     else
     {
@@ -273,7 +277,11 @@ void MediaDownload::taskFinished()
                 /* Should not be possible; this would mean that 0-m_fileSize is included. */
                 Q_ASSERT_X(false, "RangeMap", "Impossible conflict between nextMissingRange and contains");
                 m_isFinished = true;
-                metaObject()->invokeMethod(this, "finished", Qt::QueuedConnection);
+                bool ok = metaObject()->invokeMethod(this, "finished", Qt::QueuedConnection);
+                Q_ASSERT(ok);
+                ok = metaObject()->invokeMethod(this, "stopped", Qt::QueuedConnection);
+                Q_ASSERT(ok);
+                Q_UNUSED(ok);
                 return;
             }
         }
