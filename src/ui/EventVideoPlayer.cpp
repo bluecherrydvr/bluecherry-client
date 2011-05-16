@@ -37,7 +37,13 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     QBoxLayout *layout = new QVBoxLayout(this);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0,
+#ifndef Q_OS_MAC
+                               style()->pixelMetric(QStyle::PM_LayoutBottomMargin)
+#else
+                               0
+#endif
+                               );
 
     m_videoContainer = new VideoContainer;
     m_videoContainer->setFrameStyle(QFrame::NoFrame);
