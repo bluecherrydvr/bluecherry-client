@@ -1,8 +1,10 @@
 #ifndef VIDEOCONTAINER_H
 #define VIDEOCONTAINER_H
 
+#include "core/BluecherryApp.h"
 #include <QFrame>
 #include <QMouseEvent>
+#include <QSettings>
 #include <QDebug>
 
 class VideoContainer : public QFrame
@@ -59,6 +61,10 @@ public slots:
             setFrameStyle(QFrame::Sunken | QFrame::Panel);
             showNormal();
         }
+
+        QSettings settings;
+        if (settings.value(QLatin1String("ui/disableScreensaver/onFullscreen")).toBool())
+            bcApp->setScreensaverInhibited(on);
     }
 
     void toggleFullScreen()

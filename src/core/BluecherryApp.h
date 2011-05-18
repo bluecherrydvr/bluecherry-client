@@ -11,6 +11,7 @@ class MainWindow;
 class QNetworkReply;
 class QSslError;
 class QSslConfiguration;
+class QTimer;
 
 class BluecherryApp : public QObject
 {
@@ -34,11 +35,14 @@ public:
      * and anything still requiring live feeds to be paused should call pauseLive() again. */
     bool livePaused() const { return m_livePaused; }
 
-    void sendSettingsChanged() { emit settingsChanged(); }
+    void sendSettingsChanged();
+
+    bool screensaverInhibited() const { return m_screensaverInhibited; }
 
 public slots:
     void pauseLive();
     void releaseLive();
+    void setScreensaverInhibited(bool inhibit);
 
 signals:
     void serverAdded(DVRServer *server);
@@ -54,11 +58,18 @@ signals:
 private slots:
     void onServerRemoved(DVRServer *server);
     void sslErrors(QNetworkReply *reply, const QList<QSslError> &errors);
+    void aboutToQuit();
+    void resetSystemActivity();
 
 private:
     QList<DVRServer*> m_servers;
     int m_maxServerId;
-    bool m_livePaused, m_inPauseQuery;
+    bool m_livePaused, m_inPauseQuery, m_screensaverInhibited;
+#ifdef Q_OS_WIN
+    int m_screensaveValue;
+#else
+    QTimer *m_screensaveTimer;
+#endif
 
     void loadServers();
 };

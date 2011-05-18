@@ -204,6 +204,10 @@ RESOURCES += \
 win32:RC_FILE = res/windows.rc
 ICON = res/bluecherry.icns
 
+macx:OBJECTIVE_SOURCES += src/utils/PlatformOSX.mm
+macx:LIBS += -framework CoreServices
+
 OTHER_FILES += mac/Info.plist "linux/Bluecherry Client.desktop" \
     src/ui/liveview/LiveView.qml \
-    src/ui/liveview/LiveFeed.qml
+    src/ui/liveview/LiveFeed.qml \
+    src/utils/PlatformOSX.mm

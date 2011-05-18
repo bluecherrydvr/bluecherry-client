@@ -2,6 +2,7 @@
 #include "LiveViewArea.h"
 #include "LiveViewLayout.h"
 #include "ui/SavedLayoutsModel.h"
+#include "core/BluecherryApp.h"
 #include <QBoxLayout>
 #include <QToolBar>
 #include <QComboBox>
@@ -375,4 +376,8 @@ void LiveViewWindow::setFullScreen(bool on)
 
         showNormal();
     }
+
+    QSettings settings;
+    if (settings.value(QLatin1String("ui/disableScreensaver/onFullscreen")).toBool())
+        bcApp->setScreensaverInhibited(on);
 }

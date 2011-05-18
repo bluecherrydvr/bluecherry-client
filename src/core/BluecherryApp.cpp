@@ -14,10 +14,13 @@
 BluecherryApp *bcApp = 0;
 
 BluecherryApp::BluecherryApp()
-    : nam(new QNetworkAccessManager(this)), m_maxServerId(-1), m_livePaused(false), m_inPauseQuery(false)
+    : nam(new QNetworkAccessManager(this)), m_maxServerId(-1), m_livePaused(false), m_inPauseQuery(false),
+      m_screensaverInhibited(false)
 {
     Q_ASSERT(!bcApp);
     bcApp = this;
+
+    connect(qApp, SIGNAL(aboutToQuit()), SLOT(aboutToQuit()));
 
     appIcon.addFile(QLatin1String(":/icons/icon16.png"));
     appIcon.addFile(QLatin1String(":/icons/icon32.png"));
@@ -33,6 +36,22 @@ BluecherryApp::BluecherryApp()
     QSslConfiguration::setDefaultConfiguration(sslConfig);
 
     loadServers();
+    sendSettingsChanged();
+}
+
+void BluecherryApp::aboutToQuit()
+{
+    setScreensaverInhibited(false);
+}
+
+void BluecherryApp::sendSettingsChanged()
+{
+    emit settingsChanged();
+
+    QSettings settings;
+    /* If always is disabled while another condition would keep the screensaver off right now,
+     * this will incorrectly turn off inhibition. Detecting this case is complicated. */
+    setScreensaverInhibited(settings.value(QLatin1String("ui/disableScreensaver/always"), true).toBool());
 }
 
 void BluecherryApp::loadServers()
@@ -193,4 +212,52 @@ void BluecherryApp::releaseLive()
 
     if (!m_livePaused)
         emit livePausedChanged(false);
+}
+
+#ifdef Q_OS_WIN
+#include <Windows.h>
+#endif
+
+void BluecherryApp::setScreensaverInhibited(bool inhibit)
+{
+    if (m_screensaverInhibited == inhibit)
+        return;
+
+    m_screensaverInhibited = inhibit;
+    if (m_screensaverInhibited)
+    {
+#ifdef Q_OS_WIN
+        m_screensaveValue = 0;
+        SystemParametersInfo(SPI_GETSCREENSAVETIMEOUT, 0, &m_screensaveValue, 0);
+        if (m_screensaveValue != 0)
+            SystemParametersInfo(SPI_SETSCREENSAVETIMEOUT, 0, NULL, 0);
+#elif defined(Q_OS_MAC)
+        m_screensaveTimer = new QTimer(this);
+        connect(m_screensaveTimer, SIGNAL(timeout()), SLOT(resetSystemActivity()));
+        m_screensaveTimer->start(30000);
+        resetSystemActivity();
+#else
+        qCritical("Screensaver inhibit is not supported on this platform");
+#endif
+    }
+    else
+    {
+#ifdef Q_OS_WIN
+        SystemParametersInfo(SPI_SETSCREENSAVETIMEOUT, m_screensaveValue, NULL, 0);
+#elif defined(Q_OS_MAC)
+        delete m_screensaveTimer;
+        m_screensaveTimer = 0;
+#endif
+    }
+}
+
+#ifdef Q_OS_MAC
+void resetSystemActivity(); // PlatformOSX.mm
+#endif
+
+void BluecherryApp::resetSystemActivity()
+{
+#ifdef Q_OS_MAC
+    ::resetSystemActivity();
+#endif
 }

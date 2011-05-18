@@ -253,6 +253,13 @@ void EventVideoPlayer::stateChanged(int state)
         m_posTimer.stop();
         updatePosition();
     }
+
+    QSettings settings;
+    if (settings.value(QLatin1String("ui/disableScreensaver/onVideo")).toBool())
+    {
+        bcApp->setScreensaverInhibited(state == VideoPlayerBackend::Playing
+                                       || state == VideoPlayerBackend::Paused);
+    }
 }
 
 void EventVideoPlayer::durationChanged(qint64 nsDuration)
