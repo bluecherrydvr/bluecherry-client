@@ -318,9 +318,13 @@ static EventData *parseEntry(DVRServer *server, QXmlStreamReader &reader)
         else if (reader.name() == QLatin1String("content"))
         {
             bool ok = false;
-            data->mediaId = reader.attributes().value(QLatin1String("media_id")).toString().toLongLong(&ok);
-            if (!ok)
-                data->mediaId = -1;
+            QXmlStreamAttributes &attr = reader.attributes();
+            if (attr.hasAttribute(QLatin1String("media_id")))
+            {
+                data->mediaId = attr.value(QLatin1String("media_id")).toString().toLongLong(&ok);
+                if (!ok)
+                    data->mediaId = -1;
+            }
         }
         else if (reader.name() == QLatin1String("category"))
         {
