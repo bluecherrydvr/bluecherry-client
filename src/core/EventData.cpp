@@ -318,7 +318,7 @@ static EventData *parseEntry(DVRServer *server, QXmlStreamReader &reader)
         else if (reader.name() == QLatin1String("content"))
         {
             bool ok = false;
-            QXmlStreamAttributes &attr = reader.attributes();
+            QXmlStreamAttributes attr = reader.attributes();
             if (attr.hasAttribute(QLatin1String("media_id")))
             {
                 data->mediaId = attr.value(QLatin1String("media_id")).toString().toLongLong(&ok);
