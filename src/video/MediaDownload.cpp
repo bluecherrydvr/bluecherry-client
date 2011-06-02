@@ -83,6 +83,11 @@ bool MediaDownload::openFiles()
     return true;
 }
 
+QString MediaDownload::bufferFilePath() const
+{
+    return m_bufferFile.fileName();
+}
+
 bool MediaDownload::seek(unsigned offset)
 {
     QMutexLocker l(&m_bufferLock);

@@ -25,6 +25,8 @@ public:
     unsigned readPosition() const { return m_readPos; }
     bool isFinished() const { return m_isFinished; }
 
+    QString bufferFilePath() const;
+
     /* Read (up to) 'size' bytes at 'position' into 'buffer'
      *
      * This may block for a long time, because some reads may spawn

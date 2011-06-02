@@ -6,42 +6,43 @@
 #include <QProgressBar>
 
 EventVideoDownload::EventVideoDownload(QObject *parent)
-    : QObject(parent), m_dialog(0), m_futureWatch(0), m_videoBuffer(0)
+    : QObject(parent), m_dialog(0), m_futureWatch(0), m_media(0)
 {
+    connect(&m_progressTimer, SIGNAL(timeout()), SLOT(updateBufferProgress()));
 }
 
 EventVideoDownload::~EventVideoDownload()
 {
-    if (m_videoBuffer)
-        setVideoBuffer(0);
+    if (m_media)
+        setMediaDownload(0);
 }
 
-void EventVideoDownload::setVideoBuffer(VideoHttpBuffer *buffer)
+void EventVideoDownload::setMediaDownload(MediaDownload *media)
 {
-    Q_ASSERT(!m_dialog || !buffer);
+    Q_ASSERT(!m_dialog || !media);
 
-    if (m_videoBuffer)
+    if (m_media)
     {
         m_tempFilePath.clear();
 
-        m_videoBuffer->disconnect(this);
+        m_media->disconnect(this);
 
-        if (m_videoBufferParent)
-            m_videoBuffer->setParent(m_videoBufferParent.data());
+        if (m_origMediaParent)
+            m_media->setParent(m_origMediaParent.data());
         else
-            delete m_videoBuffer;
+            delete m_media;
+
+        m_origMediaParent = 0;
     }
 
-    m_videoBuffer = buffer;
+    m_media = media;
 
-    if (m_videoBuffer)
+    if (m_media)
     {
-        //m_tempFilePath = m_videoBuffer->bufferFileName();
-
         /* Prevent the buffer from being deleted while we're using it; if we finish
          * and the parent still exists, this will be restored */
-        m_videoBufferParent = m_videoBuffer->parent();
-        m_videoBuffer->setParent(0);
+        m_origMediaParent = m_media->parent();
+        m_media->setParent(0);
     }
 }
 
@@ -52,7 +53,7 @@ void EventVideoDownload::setFilePath(const QString &path)
 
 void EventVideoDownload::start(QWidget *parentWindow)
 {
-    Q_ASSERT(m_videoBuffer && !m_finalPath.isEmpty());
+    Q_ASSERT(m_media && !m_finalPath.isEmpty());
 
     m_dialog = new QProgressDialog(parentWindow);
     m_dialog->setLabelText(tr("Downloading event video..."));
@@ -66,30 +67,38 @@ void EventVideoDownload::start(QWidget *parentWindow)
 
     connect(m_dialog, SIGNAL(canceled()), SLOT(cancel()));
 
-    if (m_videoBuffer->isBufferingFinished())
+    if (m_media->isFinished())
     {
         startCopy();
     }
     else
     {
-        connect(m_videoBuffer, SIGNAL(bufferingFinished()), SLOT(startCopy()));
-        connect(m_videoBuffer, SIGNAL(bufferUpdated()), SLOT(updateBufferProgress()));
+        connect(m_media, SIGNAL(finished()), SLOT(startCopy()));
+        m_progressTimer.start(1000);
     }
 }
 
 void EventVideoDownload::updateBufferProgress()
 {
-    Q_ASSERT(m_dialog && m_videoBuffer);
+    if (!m_dialog || !m_media)
+        return;
 
-    m_dialog->setRange(0, (int)m_videoBuffer->fileSize());
-    //m_dialog->setValue((int)m_videoBuffer->bufferedSize());
+    m_dialog->setRange(0, (int)m_media->fileSize());
+    m_dialog->setValue((int)m_media->downloadedSize());
 }
 
 void EventVideoDownload::startCopy()
 {
-    if (m_tempFilePath.isEmpty() || m_finalPath.isEmpty())
+    if (!m_media || m_finalPath.isEmpty())
     {
         qWarning() << "EventVideoDownload::startCopy: Invalid parameters";
+        return;
+    }
+
+    m_tempFilePath = m_media->bufferFilePath();
+    if (m_tempFilePath.isEmpty())
+    {
+        qWarning() << "EventVideoDownload::startCopy: No buffer file to copy from";
         return;
     }
 
@@ -141,13 +150,13 @@ void EventVideoDownload::copyFinished()
     m_futureWatch->deleteLater();
     m_futureWatch = 0;
 
-    setVideoBuffer(0);
+    setMediaDownload(0);
 }
 
 void EventVideoDownload::cancel()
 {
-    if (m_videoBuffer)
-        setVideoBuffer(0);
+    if (m_media)
+        setMediaDownload(0);
 
     m_dialog->close();
     m_dialog->deleteLater();
