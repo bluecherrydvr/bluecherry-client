@@ -37,13 +37,7 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     QBoxLayout *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0,
-#ifndef Q_OS_MAC
-                               style()->pixelMetric(QStyle::PM_LayoutBottomMargin)
-#else
-                               0
-#endif
-                               );
+    layout->setMargin(0);
 
     m_videoContainer = new VideoContainer;
     m_videoContainer->setFrameStyle(QFrame::NoFrame);
@@ -242,7 +236,10 @@ void EventVideoPlayer::seek(int position)
     if (!m_video)
         return;
 
-    m_video->seek(qint64(position) * 1000000);
+    bool success = m_video->seek(qint64(position) * 1000000);
+
+    if (!success)
+        m_statusText->setText(tr("<span style='color:red;font-weight:bold'>Seeking failed</span>"));
 }
 
 static const float playbackRates[] = {
@@ -334,10 +331,7 @@ void EventVideoPlayer::bufferingStarted()
 void EventVideoPlayer::updateBufferStatus()
 {
     if (!m_video || m_video->videoBuffer()->isBufferingFinished())
-    {
-        m_statusText->clear();
         return;
-    }
 
     int pcnt = m_video->videoBuffer()->bufferedPercent();
     m_statusText->setText(tr("<b>Downloading:</b> %1%").arg(pcnt));
@@ -426,16 +420,6 @@ void EventVideoPlayer::updatePosition()
         m_seekSlider->setValue(position);
         m_seekSlider->blockSignals(false);
     }
-
-#if 0
-    int secs = nsPosition / 1000000000;
-    int durationSecs = m_video->duration() / 1000000000;
-
-    m_posText->setText(QString::fromLatin1("%1:%2 / %3:%4").arg(secs / 60, 2, 10, QLatin1Char('0'))
-                       .arg(secs % 60, 2, 10, QLatin1Char('0'))
-                       .arg(durationSecs / 60, 2, 10, QLatin1Char('0'))
-                       .arg(durationSecs % 60, 2, 10, QLatin1Char('0')));
-#endif
 }
 
 void EventVideoPlayer::saveVideo(const QString &path)

@@ -31,7 +31,13 @@ EventViewWindow::EventViewWindow(QWidget *parent)
     resize(590, 380);
 
     QBoxLayout *layout = new QVBoxLayout(this);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0,
+#ifndef Q_OS_MAC
+                               style()->pixelMetric(QStyle::PM_LayoutBottomMargin)
+#else
+                               0
+#endif
+                               );
 #if 0
     m_splitter = new QSplitter(Qt::Horizontal, this);
     layout->addWidget(m_splitter);

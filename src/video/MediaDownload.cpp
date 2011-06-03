@@ -34,7 +34,10 @@ MediaDownload::~MediaDownload()
     }
 
     if (m_thread)
+    {
         m_thread->quit();
+        m_thread->wait();
+    }
 }
 
 void MediaDownload::start(const QUrl &url, const QList<QNetworkCookie> &cookies)
