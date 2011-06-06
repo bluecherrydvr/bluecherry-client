@@ -386,9 +386,12 @@ void EventVideoPlayer::videoContextMenu(const QPoint &rpos)
     if (qobject_cast<QWidget*>(sender()))
         pos = static_cast<QWidget*>(sender())->mapToGlobal(pos);
 
+    if (!m_video || !m_videoWidget)
+        return;
+
     QMenu menu(qobject_cast<QWidget*>(sender()));
 
-    if (m_video && m_video->state() == VideoPlayerBackend::Playing)
+    if (m_video->state() == VideoPlayerBackend::Playing)
         menu.addAction(tr("&Pause"), this, SLOT(playPause()));
     else
         menu.addAction(tr("&Play"), this, SLOT(playPause()));
