@@ -342,7 +342,7 @@ void EventVideoPlayer::bufferingStopped()
     qDebug("bufferingstopped");
     bcApp->releaseLive();
 
-    if (m_video->videoBuffer()->isBufferingFinished())
+    if (!m_video || m_video->videoBuffer()->isBufferingFinished())
         m_statusText->clear();
 
     if (!uiRefreshNeeded())
