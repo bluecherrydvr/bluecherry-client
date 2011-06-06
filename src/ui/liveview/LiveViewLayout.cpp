@@ -132,11 +132,11 @@ void LiveViewLayout::doLayout()
             {
                 if (size.isValid())
                 {
-                    size.scale(sz - padding, ip->fixedAspectRatio() ? Qt::KeepAspectRatio : Qt::IgnoreAspectRatio);
+                    size.scale(sz - padding, Qt::KeepAspectRatio);
                     size += padding;
                 }
-                i->setWidth(size.width());
-                i->setHeight(size.height());
+                else
+                    size = sz;
             }
             else
             {
@@ -161,13 +161,12 @@ void LiveViewLayout::doLayout()
                 }
                 else
                     size = sz;
-
-                i->setWidth(size.width());
-                i->setHeight(size.height());
             }
 
-            i->setX(x);
-            i->setY(y);
+            i->setWidth(size.width());
+            i->setHeight(size.height());
+            i->setX(x + ((sz.width()-size.width()) / 2.0));
+            i->setY(y + ((sz.height()-size.height()) / 2.0));
         }
 
         if (++c == m_columns)
