@@ -11,8 +11,8 @@ class LiveViewLayout : public QDeclarativeItem
     Q_OBJECT
     Q_ENUMS(DragDropMode)
 
-    Q_PROPERTY(int rows READ rows WRITE setRows)
-    Q_PROPERTY(int columns READ columns WRITE setColumns)
+    Q_PROPERTY(int rows READ rows WRITE setRows NOTIFY layoutChanged)
+    Q_PROPERTY(int columns READ columns WRITE setColumns NOTIFY layoutChanged)
     Q_PROPERTY(QDeclarativeComponent* item READ item WRITE setItem)
     Q_PROPERTY(QDeclarativeItem* dropTarget READ dropTarget NOTIFY dropTargetChanged)
     Q_PROPERTY(QDeclarativeItem* dragItem READ dragItem NOTIFY dragItemChanged)

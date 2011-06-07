@@ -273,8 +273,7 @@ LiveFeedBase {
         smooth: false
         z: 3
 
-        visible: feedItem.activeFocus && ((feedItem.width != feedItem.parent.width) ||
-                 (feedItem.height != feedItem.parent.height))
+        visible: feedItem.activeFocus && (feedItem.parent.rows > 1 || feedItem.parent.columns > 1)
     }
 
     Rectangle {
