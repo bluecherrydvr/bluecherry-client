@@ -68,17 +68,22 @@ GstElement *VideoHttpBuffer::setupSrcElement(GstElement *pipeline)
     return GST_ELEMENT(m_element);
 }
 
+void VideoHttpBuffer::setCookies(const QList<QNetworkCookie> &cookies)
+{
+    m_cookies = cookies;
+}
+
 bool VideoHttpBuffer::start(const QUrl &url)
 {
     Q_ASSERT(!media);
-    Q_ASSERT(QThread::currentThread() == qApp->thread());
 
     media = new MediaDownload(this);
     connect(media, SIGNAL(fileSizeChanged(uint)), SLOT(fileSizeChanged(uint)));
     connect(media, SIGNAL(finished()), SIGNAL(bufferingFinished()));
     connect(media, SIGNAL(stopped()), SIGNAL(bufferingStopped()));
+    connect(media, SIGNAL(error(QString)), SLOT(sendStreamError(QString)));
 
-    media->start(url, bcApp->nam->cookieJar()->cookiesForUrl(url));
+    media->start(url, m_cookies);
 
     qDebug("VideoHttpBuffer: started");
     emit bufferingStarted();
@@ -109,8 +114,6 @@ void VideoHttpBuffer::clearPlayback()
 
 void VideoHttpBuffer::sendStreamError(const QString &message)
 {
-    bool b = blockSignals(true);
-    blockSignals(b);
     emit streamError(message);
     emit bufferingStopped();
 }
@@ -127,106 +130,6 @@ void VideoHttpBuffer::fileSizeChanged(unsigned fileSize)
     }
 }
 
-#if 0
-void VideoHttpBuffer::networkRead()
-{
-    qDebug("trying to acquire lock for networkRead...");
-    QMutexLocker lock(&m_lock);
-    qDebug("acquired");
-    Q_ASSERT(m_bufferFile.isOpen());
-
-    if (!m_bufferFile.seek(m_writePos))
-    {
-        sendStreamError(tr("Seek in buffer file failed: %1").arg(m_bufferFile.errorString()));
-        return;
-    }
-
-    char data[5120];
-    qint64 r;
-    while ((r = m_networkReply->read(data, sizeof(data))) > 0)
-    {
-        qint64 wr = m_bufferFile.write(data, r);
-        if (wr < 0)
-        {
-            sendStreamError(tr("Write to buffer file failed: %1").arg(m_bufferFile.errorString()));
-            return;
-        }
-        else if (wr < r)
-        {
-            sendStreamError(tr("Write to buffer file failed: %1").arg(QLatin1String("Data written to buffer is incomplete")));
-            return;
-        }
-
-        m_writePos += wr;
-
-        if ((unsigned)r < sizeof(data))
-            break;
-    }
-
-    if (r < 0)
-    {
-        sendStreamError(tr("Failed to read video stream: %1").arg(m_networkReply->errorString()));
-        return;
-    }
-
-    m_fileSize = qMax(m_fileSize, (qint64)m_writePos);
-    lock.unlock();
-
-    if (m_streamInit && false && (m_writePos >= 40960 || m_writePos == m_fileSize))
-    {
-        qDebug("streamInit");
-        /* Attempt to initialize the stream with 40KB in the buffer */
-        GstState stateNow, statePending;
-        GstStateChangeReturn re = gst_element_get_state(m_pipeline, &stateNow, &statePending, GST_CLOCK_TIME_NONE);
-        if (re == GST_STATE_CHANGE_FAILURE || stateNow < GST_STATE_PAUSED)
-        {
-            qDebug("got state");
-            re = gst_element_set_state(m_pipeline, GST_STATE_PAUSED);
-            qDebug("set state re=%d", (int)re);
-            if (re == GST_STATE_CHANGE_FAILURE)
-                qWarning() << "VideoHttpBuffer: FAILED to transition pipeline into PAUSED state for initialization";
-        }
-
-        m_streamInit = false;
-    }
-
-    qDebug("waking bufferwait");
-    m_bufferWait.wakeOne();
-    emit bufferUpdated();
-}
-
-void VideoHttpBuffer::networkFinished()
-{
-    QMutexLocker lock(&m_lock);
-    qDebug("VideoHttpBuffer: Download finished");
-
-    if (m_networkReply->error() == QNetworkReply::NoError)
-    {
-        if (m_fileSize != m_writePos)
-        {
-            qDebug() << "VideoHttpBuffer: Adjusting filesize to match actual downloaded amount";
-            m_fileSize = m_writePos;
-            gst_app_src_set_size(m_element, m_fileSize);
-        }
-
-        m_finished = true;
-        m_networkReply->deleteLater();
-        m_networkReply = 0;
-        emit bufferingFinished();
-        emit bufferingStopped();
-    }
-    else
-    {
-        QString error = m_networkReply->errorString();
-        m_networkReply->deleteLater();
-        m_networkReply = 0;
-        sendStreamError(QString::fromLatin1("Network error: %1").arg(error));
-    }
-
-    m_bufferWait.wakeAll();
-}
-#endif
-
 void VideoHttpBuffer::needData(int size)
 {
     Q_ASSERT(media);
@@ -237,6 +140,7 @@ void VideoHttpBuffer::needData(int size)
     int re = media->read(media->readPosition(), (char*)GST_BUFFER_DATA(buffer), size);
     if (re < 0)
     {
+        /* Error reporting is handled by MediaDownload for this case */
         qDebug() << "VideoHttpBuffer: read error";
         return;
     }

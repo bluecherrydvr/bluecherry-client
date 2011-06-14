@@ -41,6 +41,7 @@ public slots:
 private slots:
     void stateChanged(int state);
     void durationChanged(qint64 duration = -1);
+    void playbackSpeedChanged(double playbackSpeed);
     void updatePosition();
 
     void videoContextMenu(const QPoint &pos);
@@ -54,6 +55,7 @@ private slots:
 
 private:
     EventData *m_event;
+    QThread *m_videoThread;
     VideoPlayerBackend *m_video;
     VideoContainer *m_videoContainer;
     GstSinkWidget *m_videoWidget;

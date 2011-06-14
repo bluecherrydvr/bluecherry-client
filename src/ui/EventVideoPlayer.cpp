@@ -24,10 +24,12 @@
 #include <QSettings>
 #include <QStyle>
 #include <QDesktopServices>
+#include <QNetworkAccessManager>
+#include <QNetworkCookieJar>
 #include <math.h>
 
 EventVideoPlayer::EventVideoPlayer(QWidget *parent)
-    : QWidget(parent), m_event(0), m_video(0), m_videoWidget(0)
+    : QWidget(parent), m_event(0), m_videoThread(0), m_video(0), m_videoWidget(0)
 {
     connect(bcApp, SIGNAL(queryLivePaused()), SLOT(queryLivePaused()));
     connect(&m_uiTimer, SIGNAL(timeout()), SLOT(updateUI()));
@@ -133,9 +135,16 @@ EventVideoPlayer::~EventVideoPlayer()
     bcApp->releaseLive();
 
     if (m_video)
+        m_video->metaObject()->invokeMethod(m_video, "deleteLater", Qt::QueuedConnection);
+
+    if (m_videoThread)
     {
-        m_video->clear();
-        delete m_video;
+        connect(m_videoThread, SIGNAL(finished()), m_videoThread, SLOT(deleteLater()));
+
+        if (m_video)
+            connect(m_video, SIGNAL(destroyed()), m_videoThread, SLOT(quit()));
+        else
+            m_videoThread->quit();
     }
 }
 
@@ -149,30 +158,34 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
 
     m_event = event;
 
-    m_video = new VideoPlayerBackend(this);
+    if (!m_videoThread)
+    {
+        /* Not parented to this instance, because it may live slightly beyond the window while
+         * the pipeline is being destroyed. */
+        m_videoThread = new QThread;
+        m_videoThread->start();
+    }
+
+    m_video = new VideoPlayerBackend;
+    m_video->moveToThread(m_videoThread);
     connect(m_video, SIGNAL(stateChanged(int,int)), SLOT(stateChanged(int)));
     connect(m_video, SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
     connect(m_video, SIGNAL(endOfStream()), SLOT(durationChanged()));
+    connect(m_video, SIGNAL(playbackSpeedChanged(double)), SLOT(playbackSpeedChanged(double)));
 
     m_videoWidget = new GstSinkWidget;
     m_videoContainer->setInnerWidget(m_videoWidget);
     m_video->setSink(m_videoWidget->gstElement());
 
     connect(m_video, SIGNAL(bufferingStatus(int)), m_videoWidget, SLOT(setBufferStatus(int)));
-
-    if (!m_video->start(url))
-    {
-        /* TODO: Proper error handling! */
-        qWarning() << "EventVideoPlayer: start error:" << m_video->errorMessage();
-        clearVideo();
-        return;
-    }
-
     connect(m_video->videoBuffer(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()), Qt::QueuedConnection);
     connect(m_video->videoBuffer(), SIGNAL(bufferingStarted()), SLOT(bufferingStarted()));
 
-    if (m_video->videoBuffer()->isBuffering())
-        bufferingStarted();
+    m_video->videoBuffer()->setCookies(bcApp->nam->cookieJar()->cookiesForUrl(url));
+
+    bool ok = m_video->metaObject()->invokeMethod(m_video, "start", Qt::QueuedConnection, Q_ARG(QUrl, url));
+    Q_ASSERT(ok);
+    Q_UNUSED(ok);
 
     setControlsEnabled(true);
     QDateTime evd = event->serverLocalDate();
@@ -187,8 +200,11 @@ void EventVideoPlayer::clearVideo()
 {
     if (m_video)
     {
-        m_video->clear();
-        delete m_video;
+        m_video->disconnect(this);
+        bool ok = m_video->metaObject()->invokeMethod(m_video, "clear", Qt::QueuedConnection);
+        ok &= m_video->metaObject()->invokeMethod(m_video, "deleteLater", Qt::QueuedConnection);
+        Q_ASSERT(ok);
+        Q_UNUSED(ok);
     }
 
     m_video = 0;
@@ -212,13 +228,14 @@ void EventVideoPlayer::playPause()
 
     if (m_video->state() == VideoPlayerBackend::Playing)
     {
-        m_video->pause();
+        m_video->metaObject()->invokeMethod(m_video, "pause", Qt::QueuedConnection);
     }
     else
     {
         if (m_video->atEnd())
-            m_video->restart();
-        m_video->play();
+            restart();
+        else
+            m_video->metaObject()->invokeMethod(m_video, "play", Qt::QueuedConnection);
     }
 }
 
@@ -227,8 +244,8 @@ void EventVideoPlayer::restart()
     if (!m_video)
         return;
 
-    m_video->restart();
-    m_video->play();
+    m_video->metaObject()->invokeMethod(m_video, "restart", Qt::QueuedConnection);
+    m_video->metaObject()->invokeMethod(m_video, "play", Qt::QueuedConnection);
 }
 
 void EventVideoPlayer::seek(int position)
@@ -236,10 +253,22 @@ void EventVideoPlayer::seek(int position)
     if (!m_video)
         return;
 
-    bool success = m_video->seek(qint64(position) * 1000000);
+    bool ok = m_video->metaObject()->invokeMethod(m_video, "seek", Qt::QueuedConnection,
+                                                  Q_ARG(qint64, qint64(position) * 1000000));
+    Q_ASSERT(ok);
+    Q_UNUSED(ok);
 
-    if (!success)
-        m_statusText->setText(tr("<span style='color:red;font-weight:bold'>Seeking failed</span>"));
+    //if (!success)
+        //m_statusText->setText(tr("<span style='color:red;font-weight:bold'>Seeking failed</span>"));
+}
+
+void EventVideoPlayer::playbackSpeedChanged(double speed)
+{
+    if (!m_video)
+        return;
+
+    int prc = (speed - floor(speed) >= 0.005) ? 2 : 0;
+    m_rateText->setText(QString::fromLatin1("%L1x").arg(speed, 0, 'f', prc));
 }
 
 static const float playbackRates[] = {
@@ -266,11 +295,8 @@ void EventVideoPlayer::faster()
 
     speed = qBound(playbackRates[0], speed, playbackRates[playbackRateCount-1]);
 
-    m_video->setSpeed(speed);
-    speed = m_video->playbackSpeed();
-
-    int prc = (speed - floor(speed) >= 0.005) ? 2 : 0;
-    m_rateText->setText(QString::fromLatin1("%L1x").arg(m_video->playbackSpeed(), 0, 'f', prc));
+    m_video->metaObject()->invokeMethod(m_video, "setSpeed", Qt::QueuedConnection,
+                                        Q_ARG(double, speed));
 }
 
 void EventVideoPlayer::slower()
@@ -290,11 +316,8 @@ void EventVideoPlayer::slower()
 
     speed = qBound(playbackRates[0], speed, playbackRates[playbackRateCount-1]);
 
-    m_video->setSpeed(speed);
-    speed = m_video->playbackSpeed();
-
-    int prc = (speed - floor(speed) >= 0.005) ? 2 : 0;
-    m_rateText->setText(QString::fromLatin1("%L1x").arg(m_video->playbackSpeed(), 0, 'f', prc));
+    m_video->metaObject()->invokeMethod(m_video, "setSpeed", Qt::QueuedConnection,
+                                        Q_ARG(double, speed));
 }
 
 void EventVideoPlayer::queryLivePaused()

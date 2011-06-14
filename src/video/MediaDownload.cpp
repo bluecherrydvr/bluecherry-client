@@ -14,7 +14,7 @@
  * and the forward seek position before we will launch a new ranged
  * request. This parameter should probably be based on a rough approximation
  * of time rather than any fixed number of bytes. */
-static const unsigned seekMinimumSkip = 256000;
+static const unsigned seekMinimumSkip = 96000;
 
 QThreadStorage<QNetworkAccessManager*> MediaDownloadTask::threadNAM;
 
@@ -48,7 +48,7 @@ void MediaDownload::start(const QUrl &url, const QList<QNetworkCookie> &cookies)
 
     if (!openFiles())
     {
-        qDebug() << "MediaDownload: ERROR!";
+        /* openFiles calls sendError */
         return;
     }
 
@@ -67,19 +67,26 @@ void MediaDownload::cancel()
 
 }
 
+void MediaDownload::sendError(const QString &message)
+{
+    qDebug() << "MediaDownload: sending error:" << message;
+    emit error(message);
+    emit stopped();
+}
+
 bool MediaDownload::openFiles()
 {
     Q_ASSERT(!m_bufferFile.isOpen());
     if (!m_bufferFile.open())
     {
-        qDebug() << "MediaDownload: failed to open buffer file for write:" << m_bufferFile.errorString();
+        sendError(QLatin1String("Failed to open write buffer: ") + m_bufferFile.errorString());
         return false;
     }
 
     m_readFile.setFileName(m_bufferFile.fileName());
     if (!m_readFile.open(QIODevice::ReadOnly))
     {
-        qDebug() << "MediaDownload: failed to open buffer file for read:" << m_readFile.errorString();
+        sendError(QLatin1String("Failed to open read buffer: ") + m_readFile.errorString());
         return false;
     }
 
@@ -121,12 +128,6 @@ bool MediaDownload::seek(unsigned offset)
     }
 
     m_bufferWait.wakeAll();
-
-    /* XXX even when the seek position is available
-     * within cached ranges, we should move our request
-     * to the nearest time after that which is not buffered,
-     * under the assumption that the user will want to keep
-     * playing the video from here (or to seek forward farther). */
     return true;
 }
 
@@ -163,7 +164,9 @@ int MediaDownload::read(unsigned position, char *buffer, int reqSize)
     int re = m_readFile.read(buffer, size);
     if (re < 0)
     {
-        qDebug() << "MediaDownload: read error:" << m_readFile.errorString();
+        /* Called from VideoHttpBuffer::needData. We handle error reporting,
+         * as we have more information here. */
+        sendError(QLatin1String("Buffer read error: ") + m_readFile.errorString());
         return -1;
     }
 
@@ -252,7 +255,9 @@ void MediaDownload::incomingData(const QByteArray &data, unsigned position)
 
 void MediaDownload::taskError(const QString &message)
 {
+    /* We probably want some smart retrying behavior for tasks */
     qDebug() << "MediaDownload: Task reports error:" << message;
+    sendError(message);
 }
 
 void MediaDownload::taskFinished()

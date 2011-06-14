@@ -69,6 +69,8 @@ private slots:
     void taskError(const QString &message);
     void taskFinished();
 
+    void sendError(const QString &message);
+
 private:
     QUrl m_url;
     QThread *m_thread;

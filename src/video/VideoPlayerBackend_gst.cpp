@@ -13,6 +13,8 @@ VideoPlayerBackend::VideoPlayerBackend(QObject *parent)
     : QObject(parent), m_pipeline(0), m_videoLink(0), m_sink(0), m_videoBuffer(0), m_state(Stopped),
       m_playbackSpeed(1.0)
 {
+    m_videoBuffer = new VideoHttpBuffer(this);
+
     if (!initGStreamer(&m_errorMessage))
         setError(true, m_errorMessage);
 }
@@ -180,8 +182,7 @@ bool VideoPlayerBackend::start(const QUrl &url)
     }
 
     /* Buffered HTTP source */
-    m_videoBuffer = new VideoHttpBuffer(this);
-
+    Q_ASSERT(m_videoBuffer);
     GstElement *source = m_videoBuffer->setupSrcElement(m_pipeline);
     if (!source)
     {
@@ -250,6 +251,7 @@ bool VideoPlayerBackend::start(const QUrl &url)
 
     /* When VideoHttpBuffer has buffered a reasonable amount of data to facilitate detection and such, it will
      * move the pipeline into the PAUSED state, which should set everything else up. */
+    pause();
     return true;
 }
 
@@ -288,7 +290,7 @@ void VideoPlayerBackend::clear()
     {
         if (m_videoBuffer->parent() == this)
             m_videoBuffer->deleteLater();
-        m_videoBuffer = 0;
+        m_videoBuffer = new VideoHttpBuffer(this);
     }
 
     m_state = Stopped;
@@ -305,6 +307,7 @@ void VideoPlayerBackend::setError(bool permanent, const QString &message)
 
 void VideoPlayerBackend::streamError(const QString &message)
 {
+    qDebug() << "VideoPlayerBackend: stopping stream due to error:" << message;
     if (m_pipeline)
         gst_element_set_state(m_pipeline, GST_STATE_NULL);
     setError(true, message);
@@ -315,6 +318,7 @@ void VideoPlayerBackend::play()
     if (!m_pipeline)
         return;
     gst_element_set_state(m_pipeline, GST_STATE_PLAYING);
+    emit playbackSpeedChanged(m_playbackSpeed);
 }
 
 void VideoPlayerBackend::pause()
@@ -429,6 +433,7 @@ bool VideoPlayerBackend::setSpeed(double speed)
     {
         m_playbackSpeed = speed;
         qDebug() << "gstreamer: set playback speed to" << m_playbackSpeed;
+        emit playbackSpeedChanged(m_playbackSpeed);
     }
 
     return re ? true : false;

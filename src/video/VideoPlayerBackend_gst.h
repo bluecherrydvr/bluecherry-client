@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QWidget>
+#include <QMutex>
 #include <gst/gst.h>
 
 class QUrl;
@@ -34,9 +35,6 @@ public:
     /* setSink must be called exactly and only once prior to setting up the pipeline */
     void setSink(GstElement *sink);
 
-    bool start(const QUrl &url);
-    void clear();
-
     qint64 duration() const;
     qint64 position() const;
     double playbackSpeed() const { return m_playbackSpeed; }
@@ -49,6 +47,9 @@ public:
     VideoHttpBuffer *videoBuffer() const { return m_videoBuffer; }
 
 public slots:
+    bool start(const QUrl &url);
+    void clear();
+
     void play();
     void pause();
     bool seek(qint64 position);
@@ -58,6 +59,7 @@ public slots:
 signals:
     void stateChanged(int newState, int oldState);
     void durationChanged(qint64 duration);
+    void playbackSpeedChanged(double playbackSpeed);
     void endOfStream();
     /* This reports the status of buffering enough for playback, not the buffering of the entire file.
      * The size of this buffer depends on how it's configured in decodebin2, currently 10 seconds of
@@ -68,6 +70,8 @@ private slots:
     void streamError(const QString &message);
 
 private:
+    QThread *m_controlThread;
+    QMutex m_mutex;
     GstElement *m_pipeline, *m_videoLink, *m_sink;
     VideoHttpBuffer *m_videoBuffer;
     VideoState m_state;

@@ -7,6 +7,7 @@
 
 typedef struct _GstAppSrc GstAppSrc;
 typedef struct _GstElement GstElement;
+class QNetworkCookie;
 
 class VideoHttpBuffer : public QObject
 {
@@ -29,6 +30,8 @@ public:
     int bufferedPercent() const;
     bool isBufferingFinished() const { return media && media->isFinished(); }
 
+    void setCookies(const QList<QNetworkCookie> &cookies);
+
 public slots:
     bool start(const QUrl &url);
     void clearPlayback();
@@ -47,19 +50,19 @@ signals:
 
 private slots:
     void fileSizeChanged(unsigned fileSize);
+    void sendStreamError(const QString &message);
 
 private:
     MediaDownload *media;
     GstAppSrc *m_element;
     GstElement *m_pipeline;
+    QList<QNetworkCookie> m_cookies;
 
     static void needDataWrap(GstAppSrc *, unsigned, void*);
     static int seekDataWrap(GstAppSrc *, quint64, void*);
 
     void needData(int size);
     bool seekData(qint64 offset);
-
-    void sendStreamError(const QString &message);
 };
 
 inline int VideoHttpBuffer::bufferedPercent() const
