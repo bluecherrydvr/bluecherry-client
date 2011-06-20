@@ -43,6 +43,7 @@ private slots:
     void durationChanged(qint64 duration = -1);
     void playbackSpeedChanged(double playbackSpeed);
     void updatePosition();
+    void videoNonFatalError(const QString &message);
 
     void videoContextMenu(const QPoint &pos);
 

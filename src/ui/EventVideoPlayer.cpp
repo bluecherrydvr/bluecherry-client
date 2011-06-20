@@ -169,6 +169,7 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     m_video = new VideoPlayerBackend;
     m_video->moveToThread(m_videoThread);
     connect(m_video, SIGNAL(stateChanged(int,int)), SLOT(stateChanged(int)));
+    connect(m_video, SIGNAL(nonFatalError(QString)), SLOT(videoNonFatalError(QString)));
     connect(m_video, SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
     connect(m_video, SIGNAL(endOfStream()), SLOT(durationChanged()));
     connect(m_video, SIGNAL(playbackSpeedChanged(double)), SLOT(playbackSpeedChanged(double)));
@@ -257,9 +258,6 @@ void EventVideoPlayer::seek(int position)
                                                   Q_ARG(qint64, qint64(position) * 1000000));
     Q_ASSERT(ok);
     Q_UNUSED(ok);
-
-    //if (!success)
-        //m_statusText->setText(tr("<span style='color:red;font-weight:bold'>Seeking failed</span>"));
 }
 
 void EventVideoPlayer::playbackSpeedChanged(double speed)
@@ -370,6 +368,15 @@ void EventVideoPlayer::bufferingStopped()
 
     if (!uiRefreshNeeded())
         m_uiTimer.stop();
+}
+
+void EventVideoPlayer::videoNonFatalError(const QString &message)
+{
+    if (message.isEmpty())
+        return;
+
+    m_statusText->setText(QLatin1String("<span style='color:red;font-weight:bold'>") + message +
+                          QLatin1String("</span>"));
 }
 
 void EventVideoPlayer::stateChanged(int state)

@@ -407,7 +407,10 @@ bool VideoPlayerBackend::seek(qint64 position)
                             GST_SEEK_TYPE_SET, position, GST_SEEK_TYPE_SET, GST_CLOCK_TIME_NONE);
 
     if (!re)
+    {
         qDebug() << "gstreamer: seek to position" << position << "failed";
+        emit nonFatalError(tr("Seeking failed"));
+    }
 
     return re ? true : false;
 }
@@ -428,7 +431,10 @@ bool VideoPlayerBackend::setSpeed(double speed)
                                    GST_SEEK_TYPE_SET, position(), GST_SEEK_TYPE_SET, GST_CLOCK_TIME_NONE);
 
     if (!re)
+    {
         qDebug() << "gstreamer: Setting playback speed failed";
+        emit nonFatalError(tr("Playback speed failed"));
+    }
     else
     {
         m_playbackSpeed = speed;

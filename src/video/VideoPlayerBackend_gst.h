@@ -65,6 +65,7 @@ signals:
      * The size of this buffer depends on how it's configured in decodebin2, currently 10 seconds of
      * playback. */
     void bufferingStatus(int percent);
+    void nonFatalError(const QString &message);
 
 private slots:
     void streamError(const QString &message);
