@@ -32,6 +32,8 @@ VideoHttpBuffer::VideoHttpBuffer(QObject *parent)
 VideoHttpBuffer::~VideoHttpBuffer()
 {
     clearPlayback();
+    if (media)
+        media->deref();
 }
 
 GstElement *VideoHttpBuffer::setupSrcElement(GstElement *pipeline)
@@ -77,7 +79,8 @@ bool VideoHttpBuffer::start(const QUrl &url)
 {
     Q_ASSERT(!media);
 
-    media = new MediaDownload(this);
+    media = new MediaDownload;
+    media->ref();
     connect(media, SIGNAL(fileSizeChanged(uint)), SLOT(fileSizeChanged(uint)));
     connect(media, SIGNAL(finished()), SIGNAL(bufferingFinished()));
     connect(media, SIGNAL(stopped()), SIGNAL(bufferingStopped()));

@@ -26,24 +26,13 @@ void EventVideoDownload::setMediaDownload(MediaDownload *media)
         m_tempFilePath.clear();
 
         m_media->disconnect(this);
-
-        if (m_origMediaParent)
-            m_media->setParent(m_origMediaParent.data());
-        else
-            delete m_media;
-
-        m_origMediaParent = 0;
+        m_media->deref();
     }
 
     m_media = media;
 
     if (m_media)
-    {
-        /* Prevent the buffer from being deleted while we're using it; if we finish
-         * and the parent still exists, this will be restored */
-        m_origMediaParent = m_media->parent();
-        m_media->setParent(0);
-    }
+        m_media->ref();
 }
 
 void EventVideoDownload::setFilePath(const QString &path)

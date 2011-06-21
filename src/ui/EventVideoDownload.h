@@ -2,7 +2,6 @@
 #define EVENTVIDEODOWNLOAD_H
 
 #include <QObject>
-#include <QPointer>
 #include <QFutureWatcher>
 #include <QTimer>
 
@@ -32,7 +31,6 @@ private:
     QProgressDialog *m_dialog;
     QFutureWatcher<bool> *m_futureWatch;
     MediaDownload *m_media;
-    QPointer<QObject> m_origMediaParent;
     QString m_tempFilePath;
     QString m_finalPath;
     QTimer m_progressTimer;

@@ -20,7 +20,7 @@ QThreadStorage<QNetworkAccessManager*> MediaDownloadTask::threadNAM;
 
 MediaDownload::MediaDownload(QObject *parent)
     : QObject(parent), m_thread(0), m_task(0), m_fileSize(0), m_downloadedSize(0),
-      m_readPos(0), m_writePos(0), m_isFinished(false)
+      m_readPos(0), m_writePos(0), m_refCount(0), m_isFinished(false)
 {
 }
 
@@ -38,6 +38,23 @@ MediaDownload::~MediaDownload()
         m_thread->quit();
         m_thread->wait();
     }
+}
+
+void MediaDownload::ref()
+{
+    m_refCount++;
+}
+
+bool MediaDownload::deref()
+{
+    Q_ASSERT(m_refCount > 0);
+    if (!--m_refCount)
+    {
+        deleteLater();
+        return true;
+    }
+
+    return false;
 }
 
 void MediaDownload::start(const QUrl &url, const QList<QNetworkCookie> &cookies)

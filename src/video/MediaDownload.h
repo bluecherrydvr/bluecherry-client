@@ -20,6 +20,13 @@ public:
     explicit MediaDownload(QObject *parent = 0);
     virtual ~MediaDownload();
 
+    /* Reference counting used by VideoHttpBuffer and
+     * EventVideoDownload to track if we need to keep this
+     * download alive because one of the two is still using
+     * it. */
+    void ref();
+    bool deref();
+
     unsigned fileSize() const { return m_fileSize; }
     unsigned downloadedSize() const { return m_downloadedSize; }
     unsigned readPosition() const { return m_readPos; }
@@ -82,6 +89,7 @@ private:
     QList<QNetworkCookie> m_cookies;
     unsigned m_fileSize, m_downloadedSize, m_readPos, m_writePos;
     RangeMap m_bufferRanges;
+    unsigned m_refCount;
     bool m_isFinished;
 
     /* size may be 0, which will continue to the end of the file */
