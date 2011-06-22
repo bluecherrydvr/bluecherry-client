@@ -6,6 +6,7 @@
 #include <QTemporaryFile>
 #include <QWaitCondition>
 #include <QMutex>
+#include <QAtomicInt>
 #include "utils/RangeMap.h"
 
 class QNetworkReply;
@@ -89,7 +90,7 @@ private:
     QList<QNetworkCookie> m_cookies;
     unsigned m_fileSize, m_downloadedSize, m_readPos, m_writePos;
     RangeMap m_bufferRanges;
-    unsigned m_refCount;
+    QAtomicInt m_refCount;
     bool m_isFinished;
 
     /* size may be 0, which will continue to the end of the file */

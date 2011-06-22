@@ -42,13 +42,13 @@ MediaDownload::~MediaDownload()
 
 void MediaDownload::ref()
 {
-    m_refCount++;
+    m_refCount.fetchAndAddOrdered(1);
 }
 
 bool MediaDownload::deref()
 {
     Q_ASSERT(m_refCount > 0);
-    if (!--m_refCount)
+    if (m_refCount.fetchAndAddOrdered(-1) == 1)
     {
         deleteLater();
         return true;
@@ -112,6 +112,8 @@ bool MediaDownload::openFiles()
 
 QString MediaDownload::bufferFilePath() const
 {
+    /* Safe on account of this being static after initialization, which is
+     * prior to any other usage in our case. */
     return m_bufferFile.fileName();
 }
 
