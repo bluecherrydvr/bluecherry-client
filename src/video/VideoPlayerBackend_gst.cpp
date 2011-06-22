@@ -249,9 +249,9 @@ bool VideoPlayerBackend::start(const QUrl &url)
 #endif
     gst_object_unref(bus);
 
-    /* When VideoHttpBuffer has buffered a reasonable amount of data to facilitate detection and such, it will
-     * move the pipeline into the PAUSED state, which should set everything else up. */
-    pause();
+    /* Move the pipeline into the PLAYING state. This call may block for a very long time
+     * (up to several seconds), because it will block until the pipeline has completed that move. */
+    play();
     return true;
 }
 
