@@ -30,6 +30,10 @@ private:
 
     static bool rangeStartLess(const Range &a, const Range &b);
 
+#ifndef QT_NO_DEBUG
+    void debugTestConsistency();
+#endif
+
     QList<Range> ranges;
 };
 

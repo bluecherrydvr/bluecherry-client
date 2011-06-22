@@ -66,13 +66,8 @@ void RangeMap::insert(unsigned position, unsigned size)
     if (!ranges.isEmpty() && (lower == ranges.end() || lower->start > position))
         lower--;
     /* Item with a position GREATER THAN the END of the inserted range */
-    Range r2 = { range.end, range.end };
+    Range r2 = { range.end+1, range.end+1 };
     QList<Range>::Iterator upper = qUpperBound(lower, ranges.end(), r2, rangeStartLess);
-
-#ifdef RANGEMAP_DEBUG
-    qDebug() << *this;
-    qDebug() << "Inserting:" << position << "of size" << size;
-#endif
 
     Q_ASSERT(lower == ranges.end() || lower->start <= position);
 
@@ -104,6 +99,33 @@ void RangeMap::insert(unsigned position, unsigned size)
     }
 
 #ifdef RANGEMAP_DEBUG
-    qDebug() << *this;
+    qDebug() << "Rangemap insert" << position << size << ":" << *this;
 #endif
+    debugTestConsistency();
 }
+
+#ifndef QT_NO_DEBUG
+void RangeMap::debugTestConsistency()
+{
+    Range last = { 0, 0 };
+    for (QList<Range>::Iterator it = ranges.begin(); it != ranges.end(); ++it)
+    {
+        const Range &current = *it;
+        const bool isFirst = it == ranges.begin();
+
+        /* End is after start; these are both inclusive, so they may be equal (in the case
+         * of a range of one). */
+        Q_ASSERT(current.start <= current.end);
+
+        if (!isFirst)
+        {
+            /* Sequentially ordered */
+            Q_ASSERT(current.start > last.end);
+            /* There is a gap of at least one between ranges (otherwise, they would be the same range) */
+            Q_ASSERT(current.start - last.end > 1);
+        }
+
+        last = current;
+    }
+}
+#endif
