@@ -81,7 +81,7 @@ bool VideoHttpBuffer::start(const QUrl &url)
 
     media = new MediaDownload;
     media->ref();
-    connect(media, SIGNAL(fileSizeChanged(uint)), SLOT(fileSizeChanged(uint)));
+    connect(media, SIGNAL(fileSizeChanged(uint)), SLOT(fileSizeChanged(uint)), Qt::DirectConnection);
     connect(media, SIGNAL(finished()), SIGNAL(bufferingFinished()));
     connect(media, SIGNAL(stopped()), SIGNAL(bufferingStopped()));
     connect(media, SIGNAL(error(QString)), SLOT(sendStreamError(QString)));

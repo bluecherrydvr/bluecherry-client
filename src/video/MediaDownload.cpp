@@ -122,7 +122,10 @@ bool MediaDownload::seek(unsigned offset)
     QMutexLocker l(&m_bufferLock);
     //qDebug() << "MediaDownload: seek from" << m_readPos << "to" << offset << "of" << m_fileSize;
     if (offset > m_fileSize)
+    {
+        qDebug() << "MediaDownload: seek offset" << offset << "is past the end of filesize" << m_fileSize;
         return false;
+    }
 
     if (m_readPos == offset)
         return true;
@@ -172,14 +175,14 @@ int MediaDownload::read(unsigned position, char *buffer, int reqSize)
         size = qMin(reqSize, (m_fileSize >= position) ? int(m_fileSize - position) : 0);
     }
 
-    if (m_readPos == position)
-        m_readPos += size;
-
     l.unlock();
 
-    //qDebug() << "MediaDownload: read of" << size << "at" << position;
+    if (!m_readFile.seek(position))
+    {
+        sendError(QLatin1String("Buffer seek error: ") + m_readFile.errorString());
+        return -1;
+    }
 
-    m_readFile.seek(position);
     int re = m_readFile.read(buffer, size);
     if (re < 0)
     {
@@ -188,6 +191,9 @@ int MediaDownload::read(unsigned position, char *buffer, int reqSize)
         sendError(QLatin1String("Buffer read error: ") + m_readFile.errorString());
         return -1;
     }
+
+    if (m_readPos == position)
+        m_readPos += re;
 
     return re;
 }
@@ -235,39 +241,76 @@ void MediaDownload::requestReady(unsigned fileSize)
      * may change as a result (for active events) */
 
     QMutexLocker l(&m_bufferLock);
-    if (fileSize != m_fileSize)
+
+    bool emitSizeChanged = false;
+    if (fileSize > m_fileSize)
     {
         qDebug() << "MediaDownload: file size changed from" << m_fileSize << "to" << fileSize;
         m_fileSize = fileSize;
-        metaObject()->invokeMethod(this, "fileSizeChanged", Q_ARG(unsigned, fileSize));
+        emitSizeChanged = true;
+
+        Q_ASSERT(m_bufferFile.isOpen());
+        if (!m_bufferFile.resize(m_fileSize))
+        {
+            sendError(QLatin1String("Buffer resize failed: ") + m_bufferFile.errorString());
+            return;
+        }
     }
+
     l.unlock();
 
-    Q_ASSERT(m_bufferFile.isOpen());
-    m_bufferFile.resize(fileSize);
+    if (emitSizeChanged)
+        emit fileSizeChanged(fileSize);
 }
 
 void MediaDownload::incomingData(const QByteArray &data, unsigned position)
 {
-    m_bufferFile.seek(position);
-    m_bufferFile.write(data);
-
     QMutexLocker l(&m_bufferLock);
-    qDebug() << "MediaDownload: Received" << data.size() << "bytes at" << position << "thread is"
-                << QThread::currentThread();
-    m_bufferRanges.insert(position, data.size());
+    bool emitFileSize = false;
 
-    if (m_writePos == position)
-        m_writePos += data.size();
-
-    m_downloadedSize += data.size();
-
-    if (m_fileSize < position+data.size())
+    if (position+data.size() > m_fileSize)
     {
         qDebug() << "MediaDownload: file size is less than write position, adjusting size";
         m_fileSize = position + data.size();
-        metaObject()->invokeMethod(this, "fileSizeChanged", Q_ARG(unsigned, m_fileSize));
+        if (!m_bufferFile.resize(m_fileSize))
+        {
+            sendError(QLatin1String("Buffering failed: ") + m_bufferFile.errorString());
+            return;
+        }
+        emitFileSize = true;
     }
+
+    Q_ASSERT(m_bufferFile.size() == m_fileSize);
+
+    if (!m_bufferFile.seek(position))
+    {
+        sendError(QLatin1String("Buffer write failed: ") + m_bufferFile.errorString());
+        return;
+    }
+
+    qint64 re = m_bufferFile.write(data);
+    if (re < 0)
+    {
+        sendError(QLatin1String("Buffer write failed: ") + m_bufferFile.errorString());
+        return;
+    }
+
+    if (!m_bufferFile.flush())
+        qDebug() << "MediaDownload: Buffer flush after write failed (non-critical):" << m_bufferFile.errorString();
+
+    Q_ASSERT(re == data.size());
+
+    m_bufferRanges.insert(position, re);
+
+    if (m_writePos == position)
+        m_writePos += re;
+
+    m_downloadedSize += re;
+
+    l.unlock();
+
+    if (emitFileSize)
+        emit fileSizeChanged(m_fileSize);
 
     m_bufferWait.wakeAll();
 }
@@ -284,7 +327,8 @@ void MediaDownload::taskFinished()
     QMutexLocker l(&m_bufferLock);
     qDebug() << "MediaDownload: Task finished";
 
-    /* These should both be true or both be false, anything else is a logic error. */
+    /* These should both be true or both be false, anything else is a logic error.
+     * This test does assume that we will never download the same byte twice. */
     Q_ASSERT(!(m_bufferRanges.contains(0, m_fileSize) ^ (m_downloadedSize >= m_fileSize)));
 
     if (m_bufferRanges.contains(0, m_fileSize))
@@ -345,14 +389,15 @@ void MediaDownloadTask::start(const QUrl &url, const QList<QNetworkCookie> &cook
         qDebug() << "MediaDownload: No cookies for media URL, likely to fail authentication";
 
     QNetworkRequest req(url);
-    if (position)
+    if (position || size)
     {
         QByteArray range = "bytes=" + QByteArray::number(position) + "-";
         if (size)
             range += QByteArray::number(position + size);
         req.setRawHeader("Range", range);
-        m_writePos = position;
     }
+
+    m_writePos = position;
 
     m_reply = threadNAM.localData()->get(req);
     m_reply->ignoreSslErrors(); // XXX Do this properly!
