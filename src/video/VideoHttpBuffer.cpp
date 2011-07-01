@@ -127,10 +127,7 @@ void VideoHttpBuffer::fileSizeChanged(unsigned fileSize)
         qDebug() << "VideoHttpBuffer: fileSize is 0, may cause problems!";
 
     if (m_element)
-    {
-        qDebug("VideoHttpBuffer: setting filesize");
         gst_app_src_set_size(m_element, fileSize);
-    }
 }
 
 void VideoHttpBuffer::needData(int size)

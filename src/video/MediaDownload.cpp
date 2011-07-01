@@ -120,7 +120,6 @@ QString MediaDownload::bufferFilePath() const
 bool MediaDownload::seek(unsigned offset)
 {
     QMutexLocker l(&m_bufferLock);
-    //qDebug() << "MediaDownload: seek from" << m_readPos << "to" << offset << "of" << m_fileSize;
     if (offset > m_fileSize)
     {
         qDebug() << "MediaDownload: seek offset" << offset << "is past the end of filesize" << m_fileSize;
@@ -137,13 +136,11 @@ bool MediaDownload::seek(unsigned offset)
     {
         if (npos >= m_writePos && npos - m_writePos < seekMinimumSkip)
         {
-            qDebug() << "MediaDownload: but writepos is" << m_writePos << "so nothing is needed";
+            /* We're already downloading at the correct position; nothing to do */
         }
         else
         {
             qDebug() << "MediaDownload: launching new request after seek";
-            qDebug() << "MediaDownload: rdpos" << m_readPos << "next missing is" << npos << nsize;
-            qDebug() << m_bufferRanges;
             m_writePos = npos;
             startRequest(npos, nsize);
         }
@@ -161,13 +158,9 @@ int MediaDownload::read(unsigned position, char *buffer, int reqSize)
 
     while (!m_bufferRanges.contains(position, size))
     {
-        qDebug() << "MediaDownload: blocking" << QThread::currentThread() << "to wait for read of"
-                 << size << "at" << position;
-        qDebug() << m_bufferRanges;
         m_bufferWait.wait(&m_bufferLock);
         if (oldRdPos != m_readPos)
         {
-            qDebug() << "MediaDownload: aborting blocked read(), readPos changed";
             /* reading stream has seeked, abort this read */
             return 0;
         }
@@ -204,7 +197,6 @@ void MediaDownload::startRequest(unsigned position, unsigned size)
 
     if (m_task)
     {
-        qDebug() << "MediaDownload: Aborting existing download task";
         m_task->abortLater();
         m_task->deleteLater();
     }
@@ -224,9 +216,6 @@ void MediaDownload::startRequest(unsigned position, unsigned size)
     if (position + size >= m_fileSize)
         size = 0;
 
-    qDebug() << "MediaDownload: Starting task for position" << position << "of size" << size << "from thread"
-             << QThread::currentThread();
-
     bool ok = m_task->metaObject()->invokeMethod(m_task, "start", Q_ARG(QUrl, m_url),
                                                  Q_ARG(QList<QNetworkCookie>, m_cookies),
                                                  Q_ARG(unsigned, position),
@@ -245,7 +234,6 @@ void MediaDownload::requestReady(unsigned fileSize)
     bool emitSizeChanged = false;
     if (fileSize > m_fileSize)
     {
-        qDebug() << "MediaDownload: file size changed from" << m_fileSize << "to" << fileSize;
         m_fileSize = fileSize;
         emitSizeChanged = true;
 
@@ -325,7 +313,6 @@ void MediaDownload::taskError(const QString &message)
 void MediaDownload::taskFinished()
 {    
     QMutexLocker l(&m_bufferLock);
-    qDebug() << "MediaDownload: Task finished";
 
     /* These should both be true or both be false, anything else is a logic error.
      * This test does assume that we will never download the same byte twice. */
@@ -362,7 +349,6 @@ void MediaDownload::taskFinished()
             }
         }
 
-        qDebug() << "MediaDownload: Want to start request at" << npos << "for" << nsize;
         m_writePos = npos;
         startRequest(npos, nsize);
     }
@@ -404,8 +390,6 @@ void MediaDownloadTask::start(const QUrl &url, const QList<QNetworkCookie> &cook
     connect(m_reply, SIGNAL(metaDataChanged()), SLOT(metaDataReady()));
     connect(m_reply, SIGNAL(readyRead()), SLOT(read()));
     connect(m_reply, SIGNAL(finished()), SLOT(requestFinished()));
-
-    qDebug() << "MediaDownloadTask: started, thread is" << QThread::currentThread();
 }
 
 MediaDownloadTask::~MediaDownloadTask()
@@ -423,15 +407,8 @@ void MediaDownloadTask::abortLater()
 
 void MediaDownloadTask::abort()
 {
-    qDebug() << "MediaDownloadTask: abort called on thread" << QThread::currentThread();
     if (!m_reply)
-    {
-        qDebug() << "MediaDownloadTask: abort with no m_reply";
         return;
-    }
-
-    qDebug() << "MediaDownloadTask: aborting for request of" << m_reply->request().rawHeader("Range")
-             << "with write position" << m_writePos << "and bytesAvailable" << m_reply->bytesAvailable();
 
     m_reply->disconnect(this);
     m_reply->abort();
@@ -461,10 +438,7 @@ void MediaDownloadTask::requestFinished()
     if (m_reply->error() != QNetworkReply::NoError)
         emit error(m_reply->errorString());
     else
-    {
-        qDebug() << "MediaDownloadTask finished" << m_reply->errorString() << m_reply->bytesAvailable();
         emit finished();
-    }
 
     m_reply->deleteLater();
     m_reply = 0;
