@@ -192,7 +192,11 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     QDateTime evd = event->serverLocalDate();
     m_startTime->setText(evd.time().toString());
     if (event->duration > 0)
-        m_endTime->setText(evd.addSecs(qMax(0, event->duration)).time().toString());
+    {
+        /* QDateTime's timezone support is horrific. */
+        evd = evd.toUTC().addSecs(qMax(0, event->duration) + evd.utcOffset());
+        m_endTime->setText(evd.time().toString());
+    }
     else
         m_endTime->clear();
 }
