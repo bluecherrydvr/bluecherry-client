@@ -1,4 +1,4 @@
-<center>Copyright &copy; 2010, Bluecherry LLC. All rights reserved.</center>
+<center>Copyright &copy; 2011, Bluecherry LLC. All rights reserved.</center>
 <br><hr><br>
 The following software is distributed under the terms of the GNU Lesser General Public License, either version 2.0, 2.1, or 2.1 or later, as indicated with their distribution:
 <ul>
