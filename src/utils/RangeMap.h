@@ -37,15 +37,17 @@ private:
     QList<Range> ranges;
 };
 
-#ifndef QT_NO_DEBUG
 inline QDebug operator<<(QDebug d, const RangeMap &r)
 {
+#ifndef QT_NO_DEBUG
     QString text = QLatin1String("Range: ");
     foreach (const RangeMap::Range &n, r.ranges)
         text.append(QString::number(n.start) + QLatin1String(" - ")
                     + QString::number(n.end) + QLatin1String("; "));
     return (d << text);
-}
+#else
+    return d;
 #endif
+}
 
 #endif // RANGEMAP_H

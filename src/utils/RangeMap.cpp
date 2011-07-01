@@ -101,7 +101,9 @@ void RangeMap::insert(unsigned position, unsigned size)
 #ifdef RANGEMAP_DEBUG
     qDebug() << "Rangemap insert" << position << size << ":" << *this;
 #endif
+#ifndef QT_NO_DEBUG
     debugTestConsistency();
+#endif
 }
 
 #ifndef QT_NO_DEBUG
