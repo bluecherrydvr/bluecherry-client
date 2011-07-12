@@ -28,6 +28,32 @@
 #include <QNetworkCookieJar>
 #include <math.h>
 
+/* Hack to disable the "page step" behavior for left click on non-Mac. For seeking, especially in
+ * incomplete downloads, it's much better to seek right to the position that was clicked on. */
+class CustomSlider : public QSlider
+{
+public:
+    CustomSlider(Qt::Orientation orientation, QWidget *parent = 0)
+        : QSlider(orientation, parent)
+    {
+    }
+
+protected:
+    virtual void mousePressEvent(QMouseEvent *ev)
+    {
+        if (ev->button() == Qt::LeftButton && ev->button() & style()->styleHint(QStyle::SH_Slider_PageSetButtons))
+        {
+            Qt::MouseButton btn = static_cast<Qt::MouseButton>(style()->styleHint(QStyle::SH_Slider_AbsoluteSetButtons));
+            QMouseEvent fake(ev->type(), ev->pos(), ev->globalPos(), btn, btn, ev->modifiers());
+            QSlider::mousePressEvent(&fake);
+            if (fake.isAccepted())
+                ev->accept();
+        }
+        else
+            QSlider::mousePressEvent(ev);
+    }
+};
+
 EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     : QWidget(parent), m_event(0), m_videoThread(0), m_video(0), m_videoWidget(0)
 {
@@ -59,7 +85,7 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     m_startTime = new QLabel;
     sliderLayout->addWidget(m_startTime);
 
-    m_seekSlider = new QSlider(Qt::Horizontal);
+    m_seekSlider = new CustomSlider(Qt::Horizontal);
     connect(m_seekSlider, SIGNAL(valueChanged(int)), SLOT(seek(int)));
     sliderLayout->addWidget(m_seekSlider);
 
