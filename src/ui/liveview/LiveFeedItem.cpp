@@ -170,6 +170,27 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
         }
     }
 
+    QMenu *frmenu = menu.addMenu(tr("Frame rate"));
+    frmenu->setEnabled(m_camera && m_camera.mjpegStream());
+    frmenu->addAction(tr("Full"), this, SLOT(setIntervalFromAction()))->setData(1);
+    frmenu->addAction(tr("Half"), this, SLOT(setIntervalFromAction()))->setData(2);
+    frmenu->addAction(tr("Quarter"), this, SLOT(setIntervalFromAction()))->setData(4);
+    frmenu->addAction(tr("Eighth"), this, SLOT(setIntervalFromAction()))->setData(8);
+    frmenu->addSeparator();
+    frmenu->addAction(tr("1 FPS"), this, SLOT(setIntervalFromAction()))->setData(0);
+
+    foreach (QAction *a, frmenu->actions())
+    {
+        if (a->isSeparator())
+            continue;
+        a->setCheckable(true);
+        if (a->data().toInt() == mjpeg->interval())
+        {
+            a->setChecked(true);
+            break;
+        }
+    }
+
     QAction *a = menu.addAction(mjpeg->isPaused() ? tr("Paused") : tr("Pause"), mjpeg, SLOT(togglePaused()));
     a->setCheckable(true);
     a->setChecked(mjpeg->isPaused());
@@ -185,6 +206,17 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
     menu.exec(event->screenPos());
     delete ptzmenu;
+}
+
+void LiveFeedItem::setIntervalFromAction()
+{
+    QAction *a = qobject_cast<QAction*>(sender());
+    MJpegFeedItem *mjpeg = findChild<MJpegFeedItem*>(QLatin1String("mjpegFeed"));
+    if (!a || a->data().isNull() || !mjpeg)
+        return;
+
+    int interval = a->data().toInt();
+    mjpeg->setInterval(interval);
 }
 
 void LiveFeedItem::saveState(QDataStream *stream)

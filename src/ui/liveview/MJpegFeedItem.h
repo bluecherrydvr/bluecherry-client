@@ -12,6 +12,7 @@ class MJpegFeedItem : public QDeclarativeItem
     Q_PROPERTY(QSharedPointer<MJpegStream> stream READ stream WRITE setStream NOTIFY streamChanged)
     Q_PROPERTY(QSizeF frameSize READ frameSize NOTIFY frameSizeChanged)
     Q_PROPERTY(bool paused READ isPaused WRITE setPaused NOTIFY pausedChanged)
+    Q_PROPERTY(int interval READ interval WRITE setInterval RESET clearInterval NOTIFY intervalChanged)
 
 public:
     explicit MJpegFeedItem(QDeclarativeItem *parent = 0);
@@ -25,16 +26,20 @@ public:
     QSizeF frameSize() const { return m_stream ? m_stream->streamSize() : QSize(0, 0); }
 
     bool isPaused() const;
+    int interval() const;
 
 public slots:
     void setPaused(bool paused);
     void togglePaused() { setPaused(!isPaused()); }
+    void setInterval(int interval);
+    void clearInterval();
 
 signals:
     void streamChanged(const QSharedPointer<MJpegStream> &stream);
     void frameSizeChanged(const QSizeF &frameSize);
     void errorTextChanged(const QString &errorText);
     void pausedChanged(bool paused);
+    void intervalChanged(int interval);
 
 private slots:
     void updateFrame()

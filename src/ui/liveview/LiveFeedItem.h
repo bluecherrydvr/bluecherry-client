@@ -78,6 +78,7 @@ protected:
 
 private slots:
     void cameraDataUpdated();
+    void setIntervalFromAction();
 
 private:
     DVRCamera m_camera;

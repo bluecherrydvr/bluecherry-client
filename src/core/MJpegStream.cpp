@@ -12,14 +12,16 @@
 
 MJpegStream::MJpegStream(QObject *parent)
     : QObject(parent), m_httpReply(0), m_currentFrameNo(0), m_latestFrameNo(0), m_decodeTask(0), m_lastActivity(0),
-      m_httpBodyLength(0), m_state(NotConnected), m_parserState(ParserBoundary), m_autoStart(false), m_paused(false)
+      m_httpBodyLength(0), m_state(NotConnected), m_parserState(ParserBoundary), m_autoStart(false), m_paused(false),
+      m_interval(1)
 {
     connect(&m_activityTimer, SIGNAL(timeout()), SLOT(checkActivity()));
 }
 
 MJpegStream::MJpegStream(const QUrl &url, QObject *parent)
     : QObject(parent), m_httpReply(0), m_currentFrameNo(0), m_latestFrameNo(0), m_decodeTask(0), m_lastActivity(0),
-      m_httpBodyLength(0), m_state(NotConnected), m_parserState(ParserBoundary), m_autoStart(false), m_paused(false)
+      m_httpBodyLength(0), m_state(NotConnected), m_parserState(ParserBoundary), m_autoStart(false), m_paused(false),
+      m_interval(1)
 {
     setUrl(url);
     connect(&m_activityTimer, SIGNAL(timeout()), SLOT(checkActivity()));
@@ -101,6 +103,12 @@ void MJpegStream::start()
     QUrl hackUrl = url();
     hackUrl.setUserName(QString::number(qrand()));
 
+    /* Interval */
+    if (m_interval > 1)
+        hackUrl.addEncodedQueryItem("interval", QByteArray::number(m_interval));
+    else if (!m_interval)
+        hackUrl.addEncodedQueryItem("interval", "low");
+
     m_httpReply = bcApp->nam->get(QNetworkRequest(hackUrl));
     connect(m_httpReply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(requestError()));
     connect(m_httpReply, SIGNAL(finished()), SLOT(requestError()));
@@ -170,6 +178,25 @@ void MJpegStream::setPaused(bool pause)
     }
 
     emit pausedChanged(pause);
+}
+
+void MJpegStream::setInterval(int interval)
+{
+    /* "low" FPS, a static 1fps option */
+    if (interval < 1)
+        interval = 0;
+
+    if (interval == m_interval)
+        return;
+
+    m_interval = interval;
+    emit intervalChanged(m_interval);
+
+    if (state() > NotConnected)
+    {
+        stop();
+        start();
+    }
 }
 
 bool MJpegStream::processHeaders()

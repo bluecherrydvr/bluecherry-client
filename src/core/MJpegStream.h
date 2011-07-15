@@ -25,6 +25,7 @@ class MJpegStream : public QObject
     Q_OBJECT
 
     Q_PROPERTY(bool paused READ isPaused WRITE setPaused NOTIFY pausedChanged)
+    Q_PROPERTY(int interval READ interval WRITE setInterval RESET clearInterval NOTIFY intervalChanged)
 
 public:
     enum State
@@ -52,12 +53,15 @@ public:
     MJpegFrame currentFrame() const { return m_currentFrame; }
 
     bool isPaused() const { return m_paused; }
+    int interval() const { return m_interval; }
 
 public slots:
     void start();
     void stop();
 
     void setPaused(bool paused = true);
+    void setInterval(int interval);
+    void clearInterval() { setInterval(1); }
 
     void setOnline(bool online);
 
@@ -70,6 +74,7 @@ signals:
     void streamSizeChanged(const QSize &size);
 
     void pausedChanged(bool isPaused);
+    void intervalChanged(int interval);
 
     void buildScaleSizes(QVector<QSize> &sizes);
 
@@ -101,6 +106,7 @@ private:
         ParserBody
     } m_parserState;
     bool m_autoStart, m_paused;
+    qint8 m_interval;
 
     void setState(State newState);
     void setError(const QString &message);

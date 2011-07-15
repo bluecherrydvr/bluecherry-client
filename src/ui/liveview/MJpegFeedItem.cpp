@@ -54,6 +54,22 @@ void MJpegFeedItem::setPaused(bool paused)
         m_stream->setPaused(paused);
 }
 
+int MJpegFeedItem::interval() const
+{
+    return m_stream ? m_stream->interval() : 1;
+}
+
+void MJpegFeedItem::setInterval(int interval)
+{
+    if (m_stream)
+        m_stream->setInterval(interval);
+}
+
+void MJpegFeedItem::clearInterval()
+{
+    m_stream->clearInterval();
+}
+
 void MJpegFeedItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWidget *widget)
 {
     Q_UNUSED(widget);
