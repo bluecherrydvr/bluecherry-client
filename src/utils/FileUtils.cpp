@@ -43,12 +43,11 @@ QString sanitizeFilename(const QString &filename)
 
     for (int i = 0; i < re.size(); ++i)
     {
-        for (int j = 0; j < sizeof(forbidden); ++j)
+        for (int j = 0; j < (sizeof(forbidden) / sizeof(QChar)); ++j)
         {
             if (re[i] == forbidden[j])
             {
                 re[i] = QLatin1Char('_');
-                --i;
                 break;
             }
         }
