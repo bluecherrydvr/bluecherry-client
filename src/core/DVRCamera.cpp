@@ -119,7 +119,8 @@ void DVRCamera::removed()
 }
 
 DVRCameraData::DVRCameraData(DVRServer *s, int i)
-    : server(s), uniqueID(i), isLoaded(false), isOnline(false), isDisabled(false)
+    : server(s), uniqueID(i), isLoaded(false), isOnline(false), isDisabled(false),
+      ptzProtocol(DVRCamera::UnknownProtocol)
 {
     Q_ASSERT(instances.find(qMakePair(s->configId, i)) == instances.end());
     instances.insert(qMakePair(server->configId, uniqueID), this);
