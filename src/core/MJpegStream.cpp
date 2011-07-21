@@ -12,16 +12,16 @@
 
 MJpegStream::MJpegStream(QObject *parent)
     : QObject(parent), m_httpReply(0), m_currentFrameNo(0), m_latestFrameNo(0), m_decodeTask(0), m_lastActivity(0),
-      m_httpBodyLength(0), m_state(NotConnected), m_parserState(ParserBoundary), m_autoStart(false), m_paused(false),
-      m_interval(1)
+      m_httpBodyLength(0), m_state(NotConnected), m_parserState(ParserBoundary), m_recordingState(DVRCamera::NoRecording),
+      m_autoStart(false), m_paused(false), m_interval(1)
 {
     connect(&m_activityTimer, SIGNAL(timeout()), SLOT(checkActivity()));
 }
 
 MJpegStream::MJpegStream(const QUrl &url, QObject *parent)
     : QObject(parent), m_httpReply(0), m_currentFrameNo(0), m_latestFrameNo(0), m_decodeTask(0), m_lastActivity(0),
-      m_httpBodyLength(0), m_state(NotConnected), m_parserState(ParserBoundary), m_autoStart(false), m_paused(false),
-      m_interval(1)
+      m_httpBodyLength(0), m_state(NotConnected), m_parserState(ParserBoundary), m_recordingState(DVRCamera::NoRecording),
+      m_autoStart(false), m_paused(false), m_interval(1)
 {
     setUrl(url);
     connect(&m_activityTimer, SIGNAL(timeout()), SLOT(checkActivity()));
@@ -29,6 +29,12 @@ MJpegStream::MJpegStream(const QUrl &url, QObject *parent)
 
 MJpegStream::~MJpegStream()
 {
+    if (m_recordingState != DVRCamera::NoRecording)
+    {
+        m_recordingState = DVRCamera::NoRecording;
+        emit recordingStateChanged(m_recordingState);
+    }
+
     if (m_httpReply)
         m_httpReply->deleteLater();
 }
@@ -52,7 +58,14 @@ void MJpegStream::setState(State newState)
         updateScaleSizes();
     }
     else if (oldState >= Buffering && newState < Buffering)
+    {
         emit streamStopped();
+        if (m_recordingState != DVRCamera::NoRecording)
+        {
+            m_recordingState = DVRCamera::NoRecording;
+            emit recordingStateChanged(m_recordingState);
+        }
+    }
 }
 
 void MJpegStream::setError(const QString &message)
@@ -108,6 +121,8 @@ void MJpegStream::start()
         hackUrl.addEncodedQueryItem("interval", QByteArray::number(m_interval));
     else if (!m_interval)
         hackUrl.addEncodedQueryItem("interval", "low");
+
+    hackUrl.addEncodedQueryItem("activity", "1");
 
     m_httpReply = bcApp->nam->get(QNetworkRequest(hackUrl));
     connect(m_httpReply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(requestError()));
@@ -352,6 +367,7 @@ bool MJpegStream::parseBuffer()
                 m_parserState = ParserBody;
                 /* Skip the final \n */
                 lnStart = lnEnd+1;
+
                 break;
             }
 
@@ -362,6 +378,23 @@ bool MJpegStream::parseBuffer()
                 m_httpBodyLength = m_httpBuffer.mid(lnStart+15, lnEnd-lnStart-15).trimmed().toUInt(&ok);
                 if (!ok)
                     m_httpBodyLength = 0;
+            }
+            else if ((lnEnd - lnStart) > 18 && qstrnicmp(m_httpBuffer.data()+lnStart, "Bluecherry-Active:", 18) == 0)
+            {
+                QByteArray active = m_httpBuffer.mid(lnStart+18, lnEnd-lnStart-18).trimmed();
+
+                /* Because we remove processed headers, we can guarantee that the header is
+                 * only parsed once, so it's safe to set and emit here. */
+                DVRCamera::RecordingState newState = DVRCamera::NoRecording;
+
+                if (active == "true")
+                    newState = DVRCamera::MotionActive;
+
+                if (newState != m_recordingState)
+                {
+                    m_recordingState = newState;
+                    emit recordingStateChanged(m_recordingState);
+                }
             }
         }
 

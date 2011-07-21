@@ -104,6 +104,7 @@ QSharedPointer<MJpegStream> DVRCamera::mjpegStream()
         {
             re = QSharedPointer<MJpegStream>(new MJpegStream(QUrl(QString::fromLatin1(d->streamUrl))));
             QObject::connect(d.data(), SIGNAL(onlineChanged(bool)), re.data(), SLOT(setOnline(bool)));
+            QObject::connect(re.data(), SIGNAL(recordingStateChanged(int)), d.data(), SLOT(setRecordingState(int)));
             d->mjpegStream = re;
         }
     }
@@ -120,7 +121,7 @@ void DVRCamera::removed()
 
 DVRCameraData::DVRCameraData(DVRServer *s, int i)
     : server(s), uniqueID(i), isLoaded(false), isOnline(false), isDisabled(false),
-      ptzProtocol(DVRCamera::UnknownProtocol)
+      ptzProtocol(DVRCamera::UnknownProtocol), recordingState(DVRCamera::NoRecording)
 {
     Q_ASSERT(instances.find(qMakePair(s->configId, i)) == instances.end());
     instances.insert(qMakePair(server->configId, uniqueID), this);
@@ -149,6 +150,15 @@ void DVRCameraData::doDataUpdated()
     }
 
     emit dataUpdated();
+}
+
+void DVRCameraData::setRecordingState(int state)
+{
+    if (state == recordingState)
+        return;
+
+    recordingState = DVRCamera::RecordingState(state);
+    emit recordingStateChanged(state);
 }
 
 QDataStream &operator<<(QDataStream &s, const DVRCamera &camera)

@@ -32,6 +32,7 @@ public:
     QWeakPointer<MJpegStream> mjpegStream;
     bool isLoaded, isOnline, isDisabled;
     qint8 ptzProtocol;
+    qint8 recordingState;
 
     DVRCameraData(DVRServer *server, int uniqueID);
     virtual ~DVRCameraData();
@@ -39,10 +40,15 @@ public:
     void loadSavedSettings();
     void doDataUpdated();
 
+public slots:
+    void setRecordingState(int recordingState);
+
 signals:
     void onlineChanged(bool isOnline);
     void dataUpdated();
     void removed();
+
+    void recordingStateChanged(int recordingState);
 
 private:
     static QHash<QPair<int,int>,DVRCameraData*> instances;
@@ -57,6 +63,14 @@ public:
         UnknownProtocol = -1,
         NoPtz,
         PelcoPtz
+    };
+
+    /* Duplicated in LiveFeedItem for QMetaObject. This is not ideal. */
+    enum RecordingState {
+        NoRecording = 0,
+        Continuous,
+        MotionInactive,
+        MotionActive
     };
 
     static PtzProtocol parseProtocol(const QString &protocol);
@@ -93,6 +107,8 @@ public:
 
     PtzProtocol ptzProtocol() const { return d ? static_cast<PtzProtocol>(d->ptzProtocol) : NoPtz; }
     bool hasPtz() const { return d ? (d->ptzProtocol > 0) : false; }
+
+    RecordingState recordingState() const { return d ? RecordingState(d->recordingState) : NoRecording; }
 
     bool parseXML(QXmlStreamReader &xml);
 

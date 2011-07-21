@@ -5,6 +5,7 @@
 #include <QUrl>
 #include <QPixmap>
 #include <QTimer>
+#include "DVRCamera.h"
 
 #if defined(Q_WS_MAC) || defined(Q_OS_WIN)
 /* On mac, it is very expensive to convert between QImage and QPixmap, and
@@ -23,6 +24,7 @@ class ImageDecodeTask;
 class MJpegStream : public QObject
 {
     Q_OBJECT
+    Q_ENUMS(RecordingState)
 
     Q_PROPERTY(bool paused READ isPaused WRITE setPaused NOTIFY pausedChanged)
     Q_PROPERTY(int interval READ interval WRITE setInterval RESET clearInterval NOTIFY intervalChanged)
@@ -54,6 +56,7 @@ public:
 
     bool isPaused() const { return m_paused; }
     int interval() const { return m_interval; }
+    DVRCamera::RecordingState recordingState() const { return m_recordingState; }
 
 public slots:
     void start();
@@ -75,6 +78,7 @@ signals:
 
     void pausedChanged(bool isPaused);
     void intervalChanged(int interval);
+    void recordingStateChanged(int state);
 
     void buildScaleSizes(QVector<QSize> &sizes);
 
@@ -105,6 +109,7 @@ private:
         ParserHeaders,
         ParserBody
     } m_parserState;
+    DVRCamera::RecordingState m_recordingState;
     bool m_autoStart, m_paused;
     qint8 m_interval;
 
