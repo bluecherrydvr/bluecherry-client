@@ -49,6 +49,7 @@ void LiveFeedItem::setCamera(const DVRCamera &camera)
     {
         connect(m_camera, SIGNAL(dataUpdated()), SLOT(cameraDataUpdated()));
         connect(m_camera, SIGNAL(onlineChanged(bool)), SLOT(cameraDataUpdated()));
+        connect(m_camera, SIGNAL(recordingStateChanged(int)), SIGNAL(recordingStateChanged()));
     }
 
     emit cameraChanged(camera);
@@ -58,6 +59,7 @@ void LiveFeedItem::setCamera(const DVRCamera &camera)
 void LiveFeedItem::cameraDataUpdated()
 {
     emit cameraNameChanged(cameraName());
+    emit hasPtzChanged();
 
     MJpegFeedItem *mjpeg = findChild<MJpegFeedItem*>(QLatin1String("mjpegFeed"));
 

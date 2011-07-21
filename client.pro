@@ -215,4 +215,5 @@ macx:LIBS += -framework CoreServices
 OTHER_FILES += mac/Info.plist "linux/Bluecherry Client.desktop" \
     src/ui/liveview/LiveView.qml \
     src/ui/liveview/LiveFeed.qml \
-    src/utils/PlatformOSX.mm
+    src/utils/PlatformOSX.mm \
+    src/ui/liveview/HeaderPTZControl.qml

@@ -17,20 +17,11 @@ LiveFeedBase {
         anchors.left: feed.left
         anchors.right: feed.right
         height: Math.max(20, headerText.paintedHeight)
+        clip: true
 
         source: "image://liveviewgradients/header" + (feedItem.activeFocus ? "/focused" : "")
         sourceSize: Qt.size(1, height)
         fillMode: Image.TileHorizontally
-
-        Text {
-            id: headerText
-            anchors.fill: parent
-            anchors.leftMargin: 4
-            anchors.bottomMargin: 1
-            color: "white"
-            verticalAlignment: Text.AlignVCenter
-            text: feedItem.cameraName + (feed.paused ? " (paused)" : "")
-        }
 
         MouseArea {
             anchors.fill: parent
@@ -50,18 +41,58 @@ LiveFeedBase {
             onReleased: if (drag.active) feedItem.parent.drop()
         }
 
-        Image {
+        Text {
+            id: headerText
+            anchors.left: parent.left
+            anchors.leftMargin: 4
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 1
+            color: "white"
+            font.bold: true
+            verticalAlignment: Text.AlignVCenter
+            height: parent.height
+            text: feedItem.cameraName
+            //elide: Text.ElideRight
+        }
+
+        Row {
+            id: headerItems
+            x: headerText.x + headerText.paintedWidth + 10
+            width: parent.width - x
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 1
+            spacing: 10
+
+            Text {
+                id: feedRecording
+                color: "#8e8e8e"
+                height: parent.height
+                verticalAlignment: Text.AlignVCenter
+                text: "No Recording"
+
+                states: State {
+                    name: "recording"
+                    when: feedItem.recordingState == LiveFeedBase.MotionActive
+
+                    PropertyChanges {
+                        target: feedRecording
+                        text: "Recording"
+                        color: "#ff6262"
+                    }
+                }
+            }
+        }
+
+        HeaderPTZControl {
             id: headerPtzElement
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             anchors.left: parent.right
             clip: true
-            width: 30 + ptzText.paintedWidth
             visible: false
-
-            source: "image://liveviewgradients/ptzHeader"
-            sourceSize: Qt.size(1, height)
-            fillMode: Image.TileHorizontally
 
             states: State {
                 name: "enabled"
@@ -77,64 +108,16 @@ LiveFeedBase {
                     anchors.left: undefined
                     anchors.right: parent.right
                 }
-            }
 
-            transitions: [
-                Transition {
-                    to: "enabled"
-
-                    AnchorAnimation {
-                        duration: 400
-                        easing.type: Easing.OutQuad
-                    }
-                },
-                Transition {
-                    to: ""
-
-                    SequentialAnimation {
-                        AnchorAnimation {
-                            duration: 400
-                            easing.type: Easing.InQuad
-                        }
-                        PropertyAction {
-                            target: headerPtzElement
-                            property: "visible"
-                        }
-                    }
+                PropertyChanges {
+                    target: headerItems
+                    width: header.width - x - headerPtzElement.width
                 }
-            ]
 
-            Behavior on width {
-                SmoothedAnimation {
-                    velocity: 250
+                AnchorChanges {
+                    target: headerText
+                    anchors.right: headerPtzElement.left
                 }
-            }
-
-            Text {
-                id: ptzText
-
-                anchors.left: parent.left
-                anchors.leftMargin: 8
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                verticalAlignment: Qt.AlignVCenter
-                color: "#75c0ff"
-                text: (feedItem.ptz == null || feedItem.ptz.currentPreset < 0) ? "PTZ Enabled" : ("PTZ: " + feedItem.ptz.currentPresetName)
-            }
-
-            Image {
-                anchors.left: ptzText.right
-                anchors.leftMargin: 6
-                anchors.verticalCenter: parent.verticalCenter
-
-                source: ":/icons/down-arrow.png"
-            }
-
-            MouseArea {
-                acceptedButtons: MouseArea.Left | MouseArea.Right
-                anchors.fill: parent
-
-                onPressed: feedItem.showPtzMenu(headerPtzElement)
             }
         }
     }

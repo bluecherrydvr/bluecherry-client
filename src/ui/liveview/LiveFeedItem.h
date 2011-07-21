@@ -13,13 +13,15 @@ class CameraPtzControl;
 class LiveFeedItem : public QDeclarativeItem
 {
     Q_OBJECT
-    Q_ENUMS(CustomCursor)
+    Q_ENUMS(CustomCursor RecordingState)
 
     Q_PROPERTY(DVRCamera camera READ camera WRITE setCamera NOTIFY cameraChanged)
     Q_PROPERTY(QString cameraName READ cameraName NOTIFY cameraNameChanged)
     Q_PROPERTY(QString statusText READ statusText NOTIFY statusTextChanged)
     Q_PROPERTY(CustomCursor customCursor READ customCursor WRITE setCustomCursor)
     Q_PROPERTY(CameraPtzControl* ptz READ ptz NOTIFY ptzChanged)
+    Q_PROPERTY(bool hasPtz READ hasPtz NOTIFY hasPtzChanged)
+    Q_PROPERTY(RecordingState recordingState READ recordingState NOTIFY recordingStateChanged)
 
 public:
     enum CustomCursor {
@@ -34,6 +36,14 @@ public:
         MoveCursorSE
     };
 
+    /* Duplicated with regrets from DVRCamera for the benefit of QML/QMetaObject */
+    enum RecordingState {
+        NoRecording = 0,
+        Continuous,
+        MotionInactive,
+        MotionActive
+    };
+
     explicit LiveFeedItem(QDeclarativeItem *parent = 0);
 
     DVRCamera camera() const { return m_camera; }
@@ -42,6 +52,8 @@ public:
 
     CustomCursor customCursor() const { return m_customCursor; }
     CameraPtzControl *ptz() const { return m_ptz.data(); }
+    bool hasPtz() const { return m_camera ? m_camera.hasPtz() : false; }
+    RecordingState recordingState() const { return m_camera ? RecordingState(m_camera.recordingState()) : NoRecording; }
 
     Q_INVOKABLE void saveState(QDataStream *stream);
     Q_INVOKABLE void loadState(QDataStream *stream);
@@ -71,6 +83,8 @@ signals:
     void pausedChanged(bool isPaused);
     void statusTextChanged(const QString &statusText);
     void ptzChanged(CameraPtzControl *ptz);
+    void hasPtzChanged();
+    void recordingStateChanged();
 
 protected:
     virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
