@@ -164,7 +164,7 @@ void MJpegStream::setOnline(bool online)
     }
     else if (online && state() == StreamOffline)
     {
-        setState(NotConnected);
+        setState(m_paused ? Paused : NotConnected);
         if (m_autoStart)
             start();
     }
