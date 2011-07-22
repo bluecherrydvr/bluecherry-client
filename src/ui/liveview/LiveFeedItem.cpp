@@ -54,6 +54,7 @@ void LiveFeedItem::setCamera(const DVRCamera &camera)
 
     emit cameraChanged(camera);
     cameraDataUpdated();
+    emit recordingStateChanged();
 }
 
 void LiveFeedItem::cameraDataUpdated()

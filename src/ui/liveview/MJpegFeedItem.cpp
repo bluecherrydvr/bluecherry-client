@@ -33,6 +33,8 @@ void MJpegFeedItem::setStream(const QSharedPointer<MJpegStream> &stream)
         emit errorTextChanged(tr("No<br>Video"));
 
     emit pausedChanged(isPaused());
+    emit connectedChanged(isConnected());
+    emit intervalChanged(interval());
 
     updateFrameSize();
     updateFrame();
