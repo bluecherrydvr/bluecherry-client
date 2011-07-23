@@ -58,6 +58,8 @@ public:
     int interval() const { return m_interval; }
     DVRCamera::RecordingState recordingState() const { return m_recordingState; }
 
+    float receivedFps() const { return m_receivedFps; }
+
 public slots:
     void start();
     void stop();
@@ -97,10 +99,12 @@ private:
     QUrl m_url;
     MJpegFrame m_currentFrame;
     quint64 m_currentFrameNo, m_latestFrameNo;
+    quint64 m_fpsRecvTs, m_fpsRecvNo;
     ImageDecodeTask *m_decodeTask;
     QVector<QSize> m_scaleSizes;
     QTimer m_activityTimer;
     uint m_lastActivity;
+    float m_receivedFps;
 
     int m_httpBodyLength;
     State m_state;

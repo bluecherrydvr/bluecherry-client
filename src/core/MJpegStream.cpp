@@ -11,17 +11,19 @@
 #include <QDateTime>
 
 MJpegStream::MJpegStream(QObject *parent)
-    : QObject(parent), m_httpReply(0), m_currentFrameNo(0), m_latestFrameNo(0), m_decodeTask(0), m_lastActivity(0),
-      m_httpBodyLength(0), m_state(NotConnected), m_parserState(ParserBoundary), m_recordingState(DVRCamera::NoRecording),
-      m_autoStart(false), m_paused(false), m_interval(1)
+    : QObject(parent), m_httpReply(0), m_currentFrameNo(0), m_latestFrameNo(0), m_fpsRecvTs(0), m_fpsRecvNo(0),
+      m_decodeTask(0), m_lastActivity(0), m_receivedFps(0), m_httpBodyLength(0), m_state(NotConnected),
+      m_parserState(ParserBoundary), m_recordingState(DVRCamera::NoRecording), m_autoStart(false),
+      m_paused(false), m_interval(1)
 {
     connect(&m_activityTimer, SIGNAL(timeout()), SLOT(checkActivity()));
 }
 
 MJpegStream::MJpegStream(const QUrl &url, QObject *parent)
-    : QObject(parent), m_httpReply(0), m_currentFrameNo(0), m_latestFrameNo(0), m_decodeTask(0), m_lastActivity(0),
-      m_httpBodyLength(0), m_state(NotConnected), m_parserState(ParserBoundary), m_recordingState(DVRCamera::NoRecording),
-      m_autoStart(false), m_paused(false), m_interval(1)
+    : QObject(parent), m_httpReply(0), m_currentFrameNo(0), m_latestFrameNo(0), m_fpsRecvTs(0), m_fpsRecvNo(0),
+      m_decodeTask(0), m_lastActivity(0), m_receivedFps(0), m_httpBodyLength(0), m_state(NotConnected),
+      m_parserState(ParserBoundary), m_recordingState(DVRCamera::NoRecording), m_autoStart(false),
+      m_paused(false), m_interval(1)
 {
     setUrl(url);
     connect(&m_activityTimer, SIGNAL(timeout()), SLOT(checkActivity()));
@@ -152,6 +154,8 @@ void MJpegStream::stop()
     }
 
     m_activityTimer.stop();
+    m_fpsRecvTs = 0;
+    m_fpsRecvNo = 0;
 }
 
 void MJpegStream::setOnline(bool online)
@@ -471,6 +475,16 @@ void MJpegStream::decodeFrame(const QByteArray &data)
     m_decodeTask->setScaleSizes(m_scaleSizes);
 
     QThreadPool::globalInstance()->start(m_decodeTask);
+
+    quint64 now = QDateTime::currentMSecsSinceEpoch();
+    if (now - m_fpsRecvTs >= 1500)
+    {
+        if (m_fpsRecvTs)
+            m_receivedFps = float((m_latestFrameNo - m_fpsRecvNo) * 1000 / double(now - m_fpsRecvTs));
+
+        m_fpsRecvTs = now;
+        m_fpsRecvNo = m_latestFrameNo;
+    }
 }
 
 void MJpegStream::decodeFrameResult(ThreadTask *task)

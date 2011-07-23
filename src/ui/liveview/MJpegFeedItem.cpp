@@ -56,20 +56,34 @@ void MJpegFeedItem::setPaused(bool paused)
         m_stream->setPaused(paused);
 }
 
+bool MJpegFeedItem::isConnected() const
+{
+    return m_stream ? (m_stream->state() >= MJpegStream::Streaming || m_stream->state() == MJpegStream::Paused) : false;
+}
+
 int MJpegFeedItem::interval() const
 {
     return m_stream ? m_stream->interval() : 1;
 }
 
+int MJpegFeedItem::fps() const
+{
+    return m_stream ? qRound(m_stream->receivedFps()) : 0;
+}
+
 void MJpegFeedItem::setInterval(int interval)
 {
     if (m_stream)
+    {
         m_stream->setInterval(interval);
+        emit intervalChanged(interval);
+    }
 }
 
 void MJpegFeedItem::clearInterval()
 {
     m_stream->clearInterval();
+    emit intervalChanged(interval());
 }
 
 void MJpegFeedItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWidget *widget)
@@ -102,6 +116,8 @@ void MJpegFeedItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWid
 void MJpegFeedItem::streamStateChanged(int state)
 {
     Q_ASSERT(m_stream);
+
+    emit connectedChanged(isConnected());
 
     switch (state)
     {

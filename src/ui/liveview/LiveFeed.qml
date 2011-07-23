@@ -65,6 +65,7 @@ LiveFeedBase {
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 1
             spacing: 10
+            visible: feed.connected
 
             Text {
                 id: feedRecording
@@ -72,6 +73,7 @@ LiveFeedBase {
                 height: parent.height
                 verticalAlignment: Text.AlignVCenter
                 text: "No Recording"
+                visible: !feed.paused
 
                 states: State {
                     name: "recording"
@@ -81,6 +83,41 @@ LiveFeedBase {
                         target: feedRecording
                         text: "Recording"
                         color: "#ff6262"
+                    }
+                }
+            }
+
+            Text {
+                color: "#75c0ff"
+                height: parent.height
+                verticalAlignment: Text.AlignVCenter
+                text: "PTZ"
+                visible: feedItem.hasPtz
+            }
+
+            Text {
+                id: fpsText
+                color: "#bebebe"
+                height: parent.height
+                verticalAlignment: Text.AlignVCenter
+
+                Timer {
+                    running: fpsText.visible && !feed.paused
+                    interval: 500
+                    repeat: true
+                    triggeredOnStart: true
+
+                    onTriggered: parent.text = feed.fps + "<span style='color:#8e8e8e'>fps</span>"
+                }
+
+                states: State {
+                    name: "paused"
+                    when: feed.paused
+
+                    PropertyChanges {
+                        target: fpsText
+                        color: "#ffdf6e"
+                        text: "Paused"
                     }
                 }
             }
