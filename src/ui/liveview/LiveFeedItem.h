@@ -77,6 +77,8 @@ public slots:
     void ptzPresetSave();
     void ptzPresetWindow();
 
+    void showFpsMenu(QDeclarativeItem *sourceItem = 0);
+
 signals:
     void cameraChanged(const DVRCamera &camera);
     void cameraNameChanged(const QString &cameraName);
@@ -87,6 +89,7 @@ signals:
     void recordingStateChanged();
 
 protected:
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
     virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
     virtual void wheelEvent(QGraphicsSceneWheelEvent *event);
 
@@ -102,6 +105,9 @@ private:
 
     /* Caller is responsible for deleting */
     QMenu *ptzMenu();
+    QMenu *fpsMenu();
+
+    QPoint globalPosForItem(QDeclarativeItem *item);
 };
 
 #endif // LIVEFEEDITEM_H

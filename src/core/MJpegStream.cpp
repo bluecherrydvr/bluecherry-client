@@ -156,6 +156,7 @@ void MJpegStream::stop()
     m_activityTimer.stop();
     m_fpsRecvTs = 0;
     m_fpsRecvNo = 0;
+    m_receivedFps = 0;
 }
 
 void MJpegStream::setOnline(bool online)

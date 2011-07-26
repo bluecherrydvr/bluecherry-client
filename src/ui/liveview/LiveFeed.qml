@@ -120,6 +120,27 @@ LiveFeedBase {
                         text: "Paused"
                     }
                 }
+
+                MouseArea {
+                    id: fpsMouseArea
+                    anchors.fill: fpsText
+                    anchors.leftMargin: -4
+                    anchors.rightMargin: -5
+                    hoverEnabled: true
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+
+                    onPressed: feedItem.showFpsMenu(fpsMouseArea);
+                }
+
+                Rectangle {
+                    anchors.fill: fpsText
+                    anchors.leftMargin: -4
+                    anchors.rightMargin: -5
+                    z: -1
+
+                    color: "#77000000"
+                    visible: fpsMouseArea.containsMouse
+                }
             }
         }
 

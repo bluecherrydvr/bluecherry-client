@@ -25,6 +25,7 @@
 LiveFeedItem::LiveFeedItem(QDeclarativeItem *parent)
     : QDeclarativeItem(parent), m_customCursor(DefaultCursor)
 {
+    setAcceptedMouseButtons(acceptedMouseButtons() | Qt::RightButton);
 }
 
 void LiveFeedItem::setCamera(const DVRCamera &camera)
@@ -144,9 +145,26 @@ void LiveFeedItem::saveSnapshot(const QString &ifile)
     }
 }
 
+/* contextMenuEvent will arrive after right clicks that were captured within QML.
+ * To avoid this, we need a bit of a hack to tell when a context menu event was
+ * caused by a right click, and only allow it if we saw the click (i.e. it wasn't
+ * handled by QML). There are no reentrancy issues here. */
+static bool allowNextContextMenu = false;
+
+void LiveFeedItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (event->button() == Qt::RightButton)
+        allowNextContextMenu = true;
+
+    QDeclarativeItem::mousePressEvent(event);
+}
+
 void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
     event->accept();
+    if (event->reason() == QGraphicsSceneContextMenuEvent::Mouse && !allowNextContextMenu)
+        return;
+    allowNextContextMenu = false;
 
     QMenu menu(event->widget());
 
@@ -173,31 +191,8 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
         }
     }
 
-    QMenu *frmenu = menu.addMenu(tr("Frame rate"));
-    frmenu->setEnabled(m_camera && m_camera.mjpegStream());
-    frmenu->addAction(tr("Full"), this, SLOT(setIntervalFromAction()))->setData(1);
-    frmenu->addAction(tr("Half"), this, SLOT(setIntervalFromAction()))->setData(2);
-    frmenu->addAction(tr("Quarter"), this, SLOT(setIntervalFromAction()))->setData(4);
-    frmenu->addAction(tr("Eighth"), this, SLOT(setIntervalFromAction()))->setData(8);
-    frmenu->addSeparator();
-    frmenu->addAction(tr("1 FPS"), this, SLOT(setIntervalFromAction()))->setData(0);
-
-    foreach (QAction *a, frmenu->actions())
-    {
-        if (a->isSeparator())
-            continue;
-        a->setCheckable(true);
-        if (a->data().toInt() == mjpeg->interval())
-        {
-            a->setChecked(true);
-            break;
-        }
-    }
-
-    QAction *a = menu.addAction(mjpeg->isPaused() ? tr("Paused") : tr("Pause"), mjpeg, SLOT(togglePaused()));
-    a->setCheckable(true);
-    a->setChecked(mjpeg->isPaused());
-    a->setEnabled(m_camera && (m_camera.mjpegStream() || a->isChecked()));
+    QMenu *fpsmenu = fpsMenu();
+    menu.addMenu(fpsmenu);
 
     menu.addSeparator();
     menu.addAction(tr("Open in window"), this, SLOT(openNewWindow()));
@@ -209,6 +204,7 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
     menu.exec(event->screenPos());
     delete ptzmenu;
+    delete fpsmenu;
 }
 
 void LiveFeedItem::setIntervalFromAction()
@@ -352,22 +348,63 @@ QMenu *LiveFeedItem::ptzMenu()
     return menu;
 }
 
+QMenu *LiveFeedItem::fpsMenu()
+{
+    QMenu *menu = new QMenu;
+    menu->setTitle(tr("Frame rate"));
+    menu->setEnabled(m_camera && m_camera.mjpegStream());
+
+    MJpegFeedItem *mjpeg = findChild<MJpegFeedItem*>(QLatin1String("mjpegFeed"));
+    if (!mjpeg)
+        return menu;
+    QAction *a = menu->addAction(mjpeg->isPaused() ? tr("Paused") : tr("Pause"), mjpeg, SLOT(togglePaused()));
+    a->setCheckable(true);
+    a->setChecked(mjpeg->isPaused());
+
+    menu->addSeparator();
+
+    menu->addAction(tr("Full"), this, SLOT(setIntervalFromAction()))->setData(1);
+    menu->addAction(tr("Half"), this, SLOT(setIntervalFromAction()))->setData(2);
+    menu->addAction(tr("Quarter"), this, SLOT(setIntervalFromAction()))->setData(4);
+    menu->addAction(tr("Eighth"), this, SLOT(setIntervalFromAction()))->setData(8);
+    menu->addSeparator();
+    menu->addAction(tr("1 FPS"), this, SLOT(setIntervalFromAction()))->setData(0);
+
+    foreach (QAction *a, menu->actions())
+    {
+        if (a->isSeparator())
+            continue;
+        a->setCheckable(true);
+        if (a->data().toInt() == mjpeg->interval())
+        {
+            a->setChecked(true);
+            break;
+        }
+    }
+
+    return menu;
+}
+
+QPoint LiveFeedItem::globalPosForItem(QDeclarativeItem *item)
+{
+    QPoint pos = QCursor::pos();
+    if (item)
+    {
+        QGraphicsView *view = item->scene()->views().value(0);
+        Q_ASSERT(view && item->scene()->views().size() == 1);
+        if (view)
+            pos = view->mapToGlobal(view->mapFromScene(item->mapToScene(0, item->height())));
+    }
+    return pos;
+}
+
 void LiveFeedItem::showPtzMenu(QDeclarativeItem *sourceItem)
 {
     if (!m_ptz)
         return;
 
+    QPoint pos = globalPosForItem(sourceItem);
     QMenu *menu = ptzMenu();
-
-    QPoint pos = QCursor::pos();
-    if (sourceItem)
-    {
-        QGraphicsView *view = sourceItem->scene()->views().value(0);
-        Q_ASSERT(view && sourceItem->scene()->views().size() == 1);
-        if (view)
-            pos = view->mapToGlobal(view->mapFromScene(sourceItem->mapToScene(0, sourceItem->height())));
-    }
-
     menu->exec(pos);
     delete menu;
 }
@@ -407,4 +444,12 @@ void LiveFeedItem::ptzPresetWindow()
     }
 
     window->show();
+}
+
+void LiveFeedItem::showFpsMenu(QDeclarativeItem *sourceItem)
+{
+    QPoint pos = globalPosForItem(sourceItem);
+    QMenu *menu = fpsMenu();
+    menu->exec(pos);
+    delete menu;
 }
