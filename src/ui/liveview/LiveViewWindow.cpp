@@ -2,6 +2,7 @@
 #include "LiveViewArea.h"
 #include "LiveViewLayout.h"
 #include "ui/SavedLayoutsModel.h"
+#include "ui/MainWindow.h"
 #include "core/BluecherryApp.h"
 #include <QBoxLayout>
 #include <QToolBar>
@@ -61,15 +62,10 @@ LiveViewWindow::LiveViewWindow(QWidget *parent, bool openfs, Qt::WindowFlags f)
 
     QToolBar *toolBar = new QToolBar;
     toolBar->setIconSize(QSize(16, 16));
+    toolBar->setMovable(false);
 
-#ifdef Q_OS_MAC
-    if (qobject_cast<QMacStyle*>(style()))
-    {
-        //m_cameraArea->setFrameStyle(QFrame::NoFrame);
-        //cameraContainer->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-    }
-#else
-    toolBar->setStyleSheet(QLatin1String("QToolBar { border: none; }"));
+#ifndef Q_OS_MAC
+    //toolBar->setStyleSheet(QLatin1String("QToolBar { border: none; }"));
 #endif
 
     m_liveView = new LiveViewArea;
@@ -155,7 +151,11 @@ LiveViewWindow::LiveViewWindow(QWidget *parent, bool openfs, Qt::WindowFlags f)
 
     connect(m_liveView->layout(), SIGNAL(layoutChanged()), SLOT(saveLayout()));
 
-    layout->addWidget(toolBar);
+    QMainWindow *wnd = qobject_cast<QMainWindow*>(window());
+    if (wnd)
+        wnd->addToolBar(Qt::TopToolBarArea, toolBar);
+    else
+        layout->addWidget(toolBar);
     layout->addWidget(m_liveView);
 }
 

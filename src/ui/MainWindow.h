@@ -46,6 +46,7 @@ private slots:
     void trayActivated(QSystemTrayIcon::ActivationReason);
     void queryLivePaused();
     void liveViewLayoutChanged(const QString &layout);
+    void updateToolbarWidth();
 
     void eventsContextMenu(const QPoint &pos);
 
@@ -61,9 +62,10 @@ private:
     DVRServersView *m_sourcesList;
     EventsView *m_eventsView;
     LiveViewWindow *m_liveView;
-    QSplitter *m_centerSplit;
+    QSplitter *m_centerSplit, *m_leftSplit;
     QAction *menuServerName;
     QSystemTrayIcon *m_trayIcon;
+    QToolBar *m_mainToolbar;
 
     void createMenu();
 

@@ -11,6 +11,7 @@
 #include "EventsView.h"
 #include "EventViewWindow.h"
 #include "SetupWizard.h"
+#include "MacSplitter.h"
 #include "core/DVRServer.h"
 #include "core/BluecherryApp.h"
 #include <QBoxLayout>
@@ -34,72 +35,80 @@
 #include <QShowEvent>
 #include <QSystemTrayIcon>
 #include <QHeaderView>
+#include <QPainter>
+#include <QToolBar>
+#include <QToolButton>
+#include <QStatusBar>
+#include <QLinearGradient>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), m_trayIcon(0)
 {
+    bcApp->mainWindow = this;
+
+    setUnifiedTitleAndToolBarOnMac(true);
     setWindowTitle(tr("Bluecherry"));
     resize(1100, 750);
     createMenu();
     updateTrayIcon();
 
-    QWidget *centerWidget = new QWidget;
-    QBoxLayout *mainLayout = new QHBoxLayout(centerWidget);
-    mainLayout->setSpacing(5);
+#ifdef Q_OS_MAC
+    statusBar()->setSizeGripEnabled(false);
+    if (style()->inherits("QMacStyle"))
+        statusBar()->setFixedHeight(24);
+#endif
 
-    /* Create left side */
-    QBoxLayout *leftLayout = new QVBoxLayout;
-    leftLayout->setMargin(0);
+    /* Experimental toolbar */
+    m_mainToolbar = new QToolBar;
+    m_mainToolbar->setMovable(false);
+    m_mainToolbar->addAction(tr("Events"), this, SLOT(showEventsWindow()));
+    addToolBar(Qt::TopToolBarArea, m_mainToolbar);
 
-    leftLayout->addWidget(createSourcesList());
+    /* Splitters */
+    m_leftSplit = new MacSplitter(Qt::Horizontal);
+    m_centerSplit = new MacSplitter(Qt::Vertical);
 
-    //leftLayout->addWidget(createServerBox());
-
-    mainLayout->addLayout(leftLayout);
-
-    /* Middle */
-    m_centerSplit = new QSplitter(Qt::Vertical);
-    mainLayout->addWidget(m_centerSplit, 1);
-
-    QFrame *cameraContainer = new QFrame;
-    m_centerSplit->addWidget(cameraContainer);
-
-    QBoxLayout *middleLayout = new QVBoxLayout(cameraContainer);
-    middleLayout->setSpacing(0);
-    middleLayout->setMargin(0);
-
-    /* Controls area */
-    QBoxLayout *controlLayout = new QHBoxLayout;
-    controlLayout->setMargin(0);
-    controlLayout->setSpacing(0);
-    middleLayout->addLayout(controlLayout);
-
+    /* Live view */
     m_liveView = new LiveViewWindow(this);
-    middleLayout->addWidget(m_liveView, 1);
-
-    QPushButton *eventsBtn = new QPushButton(tr("Search Events"));
-    connect(eventsBtn, SIGNAL(clicked()), SLOT(showEventsWindow()));
-    leftLayout->addWidget(eventsBtn, 0, Qt::AlignCenter);
 
     /* Recent events */
     QWidget *eventsWidget = createRecentEvents();
+
+    /* Layouts */
+    m_leftSplit->addWidget(createSourcesList());
+    m_leftSplit->addWidget(m_centerSplit);
+    m_leftSplit->setStretchFactor(1, 1);
+    m_centerSplit->addWidget(m_liveView);
     m_centerSplit->addWidget(eventsWidget);
     m_centerSplit->setStretchFactor(0, 1);
 
     /* Set center widget */
-    setCentralWidget(centerWidget);
+    setCentralWidget(m_leftSplit);
 
     QSettings settings;
     restoreGeometry(settings.value(QLatin1String("ui/main/geometry")).toByteArray());
     if (!m_centerSplit->restoreState(settings.value(QLatin1String("ui/main/centerSplit")).toByteArray()))
     {
-        m_centerSplit->setSizes(QList<int>() << 1000 << 100);
+        m_centerSplit->setSizes(QList<int>() << 1000 << 130);
     }
+    if (!m_leftSplit->restoreState(settings.value(QLatin1String("ui/main/leftSplit")).toByteArray()))
+    {
+#ifdef Q_OS_MAC
+        m_leftSplit->setSizes(QList<int>() << 210 << 1000);
+#else
+        m_leftSplit->setSizes(QList<int>() << 190 << 1000);
+#endif
+    }
+
+    m_leftSplit->setHandleWidth(2);
+    m_centerSplit->setHandleWidth(2);
 
     QString lastLayout = settings.value(QLatin1String("ui/cameraArea/lastLayout"), tr("Default")).toString();
     m_liveView->setLayout(lastLayout);
 
     connect(m_liveView, SIGNAL(layoutChanged(QString)), SLOT(liveViewLayoutChanged(QString)));
+    connect(m_leftSplit, SIGNAL(splitterMoved(int,int)), SLOT(updateToolbarWidth()));
+    updateToolbarWidth();
 
     connect(bcApp, SIGNAL(sslConfirmRequired(DVRServer*,QList<QSslError>,QSslConfiguration)),
             SLOT(sslConfirmRequired(DVRServer*,QList<QSslError>,QSslConfiguration)));
@@ -108,6 +117,11 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    QSettings settings;
+    settings.setValue(QLatin1String("ui/main/geometry"), saveGeometry());
+    settings.setValue(QLatin1String("ui/main/centerSplit"), m_centerSplit->saveState());
+    settings.setValue(QLatin1String("ui/main/leftSplit"), m_leftSplit->saveState());
+    settings.setValue(QLatin1String("ui/main/eventsView"), m_eventsView->header()->saveState());
 }
 
 void MainWindow::showEvent(QShowEvent *event)
@@ -148,10 +162,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 
     emit closing();
-
-    settings.setValue(QLatin1String("ui/main/geometry"), saveGeometry());
-    settings.setValue(QLatin1String("ui/main/centerSplit"), m_centerSplit->saveState());
-    settings.setValue(QLatin1String("ui/main/eventsView"), m_eventsView->header()->saveState());
     QMainWindow::closeEvent(event);
 }
 
@@ -241,7 +251,24 @@ QWidget *MainWindow::createSourcesList()
 {
     m_sourcesList = new DVRServersView;
     m_sourcesList->setMinimumHeight(220);
-    m_sourcesList->setFixedWidth(170);
+    m_sourcesList->setFrameStyle(QFrame::NoFrame);
+    m_sourcesList->setAttribute(Qt::WA_MacShowFocusRect, false);
+    m_sourcesList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_sourcesList->setMinimumWidth(140);
+
+#ifdef Q_OS_MAC
+    if (style()->inherits("QMacStyle"))
+    {
+        QLinearGradient grd(0, 0, 0, 1);
+        grd.setCoordinateMode(QGradient::ObjectBoundingMode);
+        grd.setColorAt(0, QColor(233, 237, 241));
+        grd.setColorAt(1, QColor(209, 216, 223));
+
+        QPalette p = m_sourcesList->palette();
+        p.setBrush(QPalette::Base, QBrush(grd));
+        m_sourcesList->setPalette(p);
+    }
+#endif
 
     return m_sourcesList;
 }
@@ -260,6 +287,8 @@ QWidget *MainWindow::createRecentEvents()
 {
     m_eventsView = new EventsView;
     m_eventsView->setContextMenuPolicy(Qt::CustomContextMenu);
+    m_eventsView->setFrameStyle(QFrame::NoFrame);
+    m_eventsView->setAttribute(Qt::WA_MacShowFocusRect, false);
 
     EventsModel *model = new EventsModel(m_eventsView);
     m_eventsView->setModel(model);
@@ -482,4 +511,17 @@ void MainWindow::liveViewLayoutChanged(const QString &layout)
 {
     QSettings settings;
     settings.setValue(QLatin1String("ui/cameraArea/lastLayout"), layout);
+}
+
+void MainWindow::updateToolbarWidth()
+{
+#ifdef Q_OS_MAC
+    if (style()->inherits("QMacStyle"))
+    {
+        m_mainToolbar->setFixedWidth(m_sourcesList->width()-20);
+        return;
+    }
+#endif
+
+    m_mainToolbar->setFixedWidth(m_sourcesList->width()+1);
 }

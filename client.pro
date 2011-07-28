@@ -147,7 +147,8 @@ SOURCES += src/main.cpp \
     src/ui/liveview/LiveViewGradients.cpp \
     src/ui/SetupWizard.cpp \
     src/video/MediaDownload.cpp \
-    src/utils/RangeMap.cpp
+    src/utils/RangeMap.cpp \
+    src/ui/MacSplitter.cpp
 
 HEADERS  += src/ui/MainWindow.h \
     src/ui/OptionsDialog.h \
@@ -201,7 +202,8 @@ HEADERS  += src/ui/MainWindow.h \
     src/ui/SetupWizard_p.h \
     src/video/MediaDownload.h \
     src/utils/RangeMap.h \
-    src/video/MediaDownload_p.h
+    src/video/MediaDownload_p.h \
+    src/ui/MacSplitter.h
 
 RESOURCES += \
     res/resources.qrc \

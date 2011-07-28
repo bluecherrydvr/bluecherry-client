@@ -69,8 +69,6 @@ int main(int argc, char *argv[])
     }
 
     MainWindow w;
-    bcApp->mainWindow = &w;
-
     w.show();
 
 #ifdef BC_CUTOFF_DATE
