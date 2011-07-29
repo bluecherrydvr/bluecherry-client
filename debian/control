@@ -1,7 +1,7 @@
 Source: bluecherry-client
 Section: admin
 Priority: optional
-Maintainer: Ben Collins <bcollins@bluecherry.com>
+Maintainer: Bluecherry <maintainers@bluecherry.net>
 Build-Depends: debhelper (>= 7), libgstreamer0.10-dev, libgstreamer-plugins-base0.10-dev
 Standards-Version: 3.8.4
 

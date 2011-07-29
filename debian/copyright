@@ -1,10 +1,9 @@
 Format-Specification: http://dep.debian.net/deps/dep5/
-Name: Bluecherry DVR Server
-Maintainer: Ben Collins <bcollins@bluecherry.net>
-Source: http://launchpad.net/...
+Name: Bluecherry DVR Client
+Maintainer: Bluecherry <maintainers@bluecherry.net>
 
 Files: *
-Copyright: 2010, Bluecherry, LLC
+Copyright: 2011, Bluecherry, LLC
 License: Proprietary-BC
 
 License: Proprietary-BC
