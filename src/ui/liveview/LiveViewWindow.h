@@ -12,7 +12,7 @@ class LiveViewWindow : public QWidget
     Q_OBJECT
 
 public:
-    explicit LiveViewWindow(QWidget *parent = 0, bool fullscreen = false);
+    explicit LiveViewWindow(QWidget *parent = 0, bool fullscreen = false, Qt::WindowFlags windowFlags = 0);
 
     /* Note that the returned window has the Qt::WA_DeleteOnClose attribute set.
      * If you intend to save this pointer long-term, put it in a guard (QWeakPointer) or
@@ -46,7 +46,7 @@ private slots:
     void doAutoResize();
 
 private:
-    LiveViewArea * const m_liveView;
+    LiveViewArea *m_liveView;
     QComboBox * const m_savedLayouts;
     QAction *aRenameLayout, *aDelLayout;
     int m_lastLayoutIndex;

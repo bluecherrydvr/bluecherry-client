@@ -74,7 +74,7 @@ MainWindow::MainWindow(QWidget *parent)
     controlLayout->setSpacing(0);
     middleLayout->addLayout(controlLayout);
 
-    m_liveView = new LiveViewWindow;
+    m_liveView = new LiveViewWindow(this);
     middleLayout->addWidget(m_liveView, 1);
 
     QPushButton *eventsBtn = new QPushButton(tr("Search Events"));

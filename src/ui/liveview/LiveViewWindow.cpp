@@ -41,8 +41,7 @@ static QToolButton *createGridButton(const char *icon, const QString &text, QWid
 
 LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, bool fullscreen, const DVRCamera &camera)
 {
-    LiveViewWindow *window = new LiveViewWindow(parent, fullscreen);
-    window->setWindowFlags(Qt::Window);
+    LiveViewWindow *window = new LiveViewWindow(parent, fullscreen, Qt::Window);
     window->setAutoSized(true);
     window->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -52,8 +51,8 @@ LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, bool fullscreen, con
     return window;
 }
 
-LiveViewWindow::LiveViewWindow(QWidget *parent, bool openfs)
-    : QWidget(parent), m_liveView(new LiveViewArea), m_savedLayouts(new QComboBox), m_lastLayoutIndex(-1), m_autoSized(false),
+LiveViewWindow::LiveViewWindow(QWidget *parent, bool openfs, Qt::WindowFlags f)
+    : QWidget(parent, f), m_liveView(0), m_savedLayouts(new QComboBox), m_lastLayoutIndex(-1), m_autoSized(false),
       m_isLayoutChanging(false), m_fsSetWindow(false), m_wasOpenedFs(openfs)
 {
     QBoxLayout *layout = new QVBoxLayout(this);
@@ -73,6 +72,7 @@ LiveViewWindow::LiveViewWindow(QWidget *parent, bool openfs)
     toolBar->setStyleSheet(QLatin1String("QToolBar { border: none; }"));
 #endif
 
+    m_liveView = new LiveViewArea;
     LiveViewLayout *viewLayout = m_liveView->layout();
 
     /* Saved layouts box */
