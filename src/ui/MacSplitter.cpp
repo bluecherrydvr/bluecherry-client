@@ -5,7 +5,7 @@
 #include <QMouseEvent>
 
 MacSplitterHandle::MacSplitterHandle(Qt::Orientation o, QSplitter *parent)
-    : QSplitterHandle(o, parent)
+    : QSplitterHandle(o, parent), isMouseGrabbed(false)
 {
     setMouseTracking(true);
 }
@@ -42,9 +42,13 @@ void MacSplitterHandle::paintEvent(QPaintEvent *)
 
 void MacSplitterHandle::enterEvent(QEvent *e)
 {
+    if (isMouseGrabbed)
+        return;
+
     Qt::CursorShape cursor = (orientation() == Qt::Horizontal) ? Qt::SplitHCursor : Qt::SplitVCursor;
     grabMouse(cursor);
     qApp->setOverrideCursor(cursor);
+    isMouseGrabbed = true;
 }
 
 void MacSplitterHandle::mouseMoveEvent(QMouseEvent *e)
@@ -57,6 +61,7 @@ void MacSplitterHandle::mouseMoveEvent(QMouseEvent *e)
     {
         releaseMouse();
         qApp->restoreOverrideCursor();
+        isMouseGrabbed = false;
     }
 }
 
@@ -65,4 +70,5 @@ void MacSplitterHandle::mouseReleaseEvent(QMouseEvent *e)
     QSplitterHandle::mouseReleaseEvent(e);
     releaseMouse();
     qApp->restoreOverrideCursor();
+    isMouseGrabbed = false;
 }

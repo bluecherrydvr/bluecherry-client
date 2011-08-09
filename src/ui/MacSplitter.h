@@ -15,6 +15,9 @@ protected:
     virtual void enterEvent(QEvent *e);
     virtual void mouseReleaseEvent(QMouseEvent *e);
     virtual void mouseMoveEvent(QMouseEvent *e);
+
+private:
+    bool isMouseGrabbed;
 };
 
 class MacSplitter : public QSplitter
