@@ -9,6 +9,10 @@
 #include <QGLFormat>
 #include <QImageReader>
 
+#ifdef Q_OS_WIN
+#include <utils/explorerstyle.h>
+#endif
+
 #ifdef QT_STATIC
 Q_IMPORT_PLUGIN(qjpeg)
 Q_IMPORT_PLUGIN(qgif)
@@ -32,6 +36,10 @@ int main(int argc, char *argv[])
     a.setApplicationVersion(QLatin1String("2.0.0-beta6"));
 
 #ifdef Q_OS_WIN
+    /* Use explorer style for fancier toolbars */
+    if (a.style()->inherits("QWindowsXPStyle"))
+        a.setStyle(new ExplorerStyle);
+    /* Don't use the registry. */
     QSettings::setDefaultFormat(QSettings::IniFormat);
 #endif
 

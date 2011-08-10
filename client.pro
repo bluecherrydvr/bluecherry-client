@@ -211,6 +211,9 @@ RESOURCES += \
 win32:RC_FILE = res/windows.rc
 ICON = res/bluecherry.icns
 
+win32:SOURCES += src/utils/explorerstyle.cpp
+win32:HEADERS += src/utils/explorerstyle.h
+
 macx:OBJECTIVE_SOURCES += src/utils/PlatformOSX.mm
 macx:LIBS += -framework CoreServices
 
