@@ -42,8 +42,12 @@ static QToolButton *createGridButton(const char *icon, const QString &text, QWid
 
 LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, bool fullscreen, const DVRCamera &camera)
 {
+#ifdef Q_WS_MAC
+    /* Child windows are undesirable on Mac, and cause problems (QTBUG-20652) */
+    parent = 0;
+#endif
     LiveViewWindow *window = new LiveViewWindow(parent, fullscreen, Qt::Window);
-    window->setAutoSized(true);
+    window->setAutoSized(!fullscreen);
     window->setAttribute(Qt::WA_DeleteOnClose);
 
     if (camera)
@@ -53,8 +57,9 @@ LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, bool fullscreen, con
 }
 
 LiveViewWindow::LiveViewWindow(QWidget *parent, bool openfs, Qt::WindowFlags f)
-    : QWidget(parent, f), m_liveView(0), m_savedLayouts(new QComboBox), m_lastLayoutIndex(-1), m_autoSized(false),
-      m_isLayoutChanging(false), m_fsSetWindow(false), m_wasOpenedFs(openfs)
+    : QWidget(parent, f), m_liveView(0), m_savedLayouts(new QComboBox),
+      m_lastLayoutIndex(-1), m_autoSized(false), m_isLayoutChanging(false),
+      m_wasOpenedFs(openfs)
 {
     QBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
@@ -360,21 +365,27 @@ void LiveViewWindow::setFullScreen(bool on)
     {
         if (!isWindow())
         {
-            setWindowFlags(windowFlags() | Qt::Window);
-            m_fsSetWindow = true;
+            LiveViewWindow *wnd = LiveViewWindow::openWindow(this, true);
+            wnd->setLayout(currentLayout());
+            wnd->showFullScreen();
+            m_fsSetWindow = wnd;
+            connect(wnd, SIGNAL(layoutChanged(QString)), SLOT(setLayout(QString)));
+            connect(wnd, SIGNAL(destroyed()), SLOT(show()));
+            setVisible(false);
         }
-
-        showFullScreen();
+        else
+            showFullScreen();
     }
     else
     {
         if (m_fsSetWindow)
         {
-            setWindowFlags(windowFlags() & ~Qt::Window);
-            m_fsSetWindow = false;
+            setVisible(true);
+            m_fsSetWindow.data()->close();
+            m_fsSetWindow.clear();
         }
-
-        showNormal();
+        else
+            showNormal();
     }
 
     QSettings settings;

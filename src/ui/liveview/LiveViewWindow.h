@@ -2,6 +2,7 @@
 #define LIVEVIEWWINDOW_H
 
 #include <QWidget>
+#include <QWeakPointer>
 #include "core/DVRCamera.h"
 
 class LiveViewArea;
@@ -23,6 +24,8 @@ public:
     QString currentLayout() const;
 
     void setAutoSized(bool autoSized);
+
+    bool isFullScreen() const { return QWidget::isFullScreen() || m_fsSetWindow; }
 
 public slots:
     void showSingleCamera(const DVRCamera &camera);
@@ -49,8 +52,9 @@ private:
     LiveViewArea *m_liveView;
     QComboBox * const m_savedLayouts;
     QAction *aRenameLayout, *aDelLayout;
+    QWeakPointer<LiveViewWindow> m_fsSetWindow;
     int m_lastLayoutIndex;
-    bool m_autoSized, m_isLayoutChanging, m_fsSetWindow, m_wasOpenedFs;
+    bool m_autoSized, m_isLayoutChanging, m_wasOpenedFs;
 };
 
 #endif // LIVEVIEWWINDOW_H

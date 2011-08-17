@@ -163,6 +163,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
     emit closing();
     QMainWindow::closeEvent(event);
+    QApplication::quit();
 }
 
 void MainWindow::updateTrayIcon()
