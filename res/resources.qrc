@@ -39,5 +39,6 @@
         <file>exclamation-red.png</file>
         <file>control-double.png</file>
         <file>control-double-180.png</file>
+        <file>cassette.png</file>
     </qresource>
 </RCC>

@@ -61,7 +61,8 @@ MainWindow::MainWindow(QWidget *parent)
     /* Experimental toolbar */
     m_mainToolbar = new QToolBar;
     m_mainToolbar->setMovable(false);
-    m_mainToolbar->addAction(tr("Events"), this, SLOT(showEventsWindow()));
+    m_mainToolbar->setIconSize(QSize(16, 16));
+    m_mainToolbar->addAction(QIcon(QLatin1String(":/icons/cassette.png")), tr("Events"), this, SLOT(showEventsWindow()));
     addToolBar(Qt::TopToolBarArea, m_mainToolbar);
 
     /* Splitters */
