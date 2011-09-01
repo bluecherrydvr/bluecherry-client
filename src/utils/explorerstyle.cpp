@@ -88,8 +88,8 @@ void ExplorerStyle::drawPrimitive(PrimitiveElement element, const QStyleOption *
                     topreg += rect;
                 }
 
-                drawRebarBackground(topreg.boundingRect(), painter);
-                topreg = QRegion();
+                /*drawRebarBackground(topreg.boundingRect(), painter);
+                topreg = QRegion();*/
 
                 //We need the bounding rect for all toolbars
                 QList<QToolBar*> toolbars = qFindChildren<QToolBar*>(window);
