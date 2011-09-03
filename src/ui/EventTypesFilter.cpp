@@ -7,8 +7,8 @@ EventTypesFilter::EventTypesFilter(QWidget *parent)
 {
     header()->hide();
 
-    addItem(tr("Camera"), EventType::MinCamera, EventType::MaxCamera);
-    addItem(tr("System"), EventType::MinSystem, EventType::MaxSystem);
+    addItem(tr("Camera"), EventType::MinCamera, EventType::CameraNotFound);
+    //addItem(tr("System"), EventType::MinSystem, EventType::MaxSystem);
 
     connect(this, SIGNAL(itemChanged(QTreeWidgetItem*,int)), SLOT(checkStateChanged(QTreeWidgetItem*)));
 }

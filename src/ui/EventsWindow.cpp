@@ -53,17 +53,17 @@ EventsWindow::EventsWindow(QWidget *parent)
 
     createDateFilter(filtersLayout);
 
+#if 0 /* This is not useful currently. */
     QLabel *label = new QLabel(tr("Minimum Level"));
     label->setStyleSheet(QLatin1String("font-weight:bold;"));
     filtersLayout->addWidget(label);
     filtersLayout->addWidget(createLevelFilter());
+#endif
 
-#if 0 /* The server currently only implements Motion events, so this is just confusing. */
-    label = new QLabel(tr("Type"));
+    QLabel *label = new QLabel(tr("Type"));
     label->setStyleSheet(QLatin1String("font-weight:bold;"));
     filtersLayout->addWidget(label);
     filtersLayout->addWidget(createTypeFilter());
-#endif
 
 #if 0 /* Tags are not fully implemented yet */
     label = new QLabel(tr("Tags"));
@@ -202,6 +202,7 @@ QWidget *EventsWindow::createTypeFilter()
 {
     m_typeFilter = new EventTypesFilter;
     m_typeFilter->setMaximumWidth(180);
+    m_typeFilter->setMaximumHeight(100);
 
     connect(m_typeFilter, SIGNAL(checkedTypesChanged(QBitArray)), m_resultsView->eventsModel(), SLOT(setFilterTypes(QBitArray)));
 
