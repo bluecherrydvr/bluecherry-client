@@ -431,6 +431,10 @@ void MediaDownloadTask::read()
 
     emit dataRead(data, m_writePos);
     m_writePos += data.size();
+
+    /* Very carefully threadsafe: bcApp and the globalRate pointer are
+     * const, and 'addSampleValue' is threadsafe and lockfree for the common case. */
+    bcApp->globalRate->addSampleValue(data.size());
 }
 
 void MediaDownloadTask::requestFinished()

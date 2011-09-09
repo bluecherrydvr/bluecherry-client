@@ -14,7 +14,8 @@
 BluecherryApp *bcApp = 0;
 
 BluecherryApp::BluecherryApp()
-    : nam(new QNetworkAccessManager(this)), m_maxServerId(-1), m_livePaused(false), m_inPauseQuery(false),
+    : nam(new QNetworkAccessManager(this)), globalRate(new TransferRateCalculator(this)),
+      m_maxServerId(-1), m_livePaused(false), m_inPauseQuery(false),
       m_screensaverInhibited(false)
 {
     Q_ASSERT(!bcApp);

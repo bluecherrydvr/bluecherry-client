@@ -281,6 +281,7 @@ void MJpegStream::readable()
     for (;;)
     {
         qint64 avail = m_httpReply->bytesAvailable();
+        bcApp->globalRate->addSampleValue(avail);
         if (avail < 1)
             break;
 

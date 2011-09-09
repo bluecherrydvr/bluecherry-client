@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QList>
 #include <QIcon>
+#include "core/TransferRateCalculator.h"
 
 class DVRServer;
 class QNetworkAccessManager;
@@ -21,6 +22,7 @@ public:
     QNetworkAccessManager * const nam;
     MainWindow *mainWindow;
     QIcon appIcon;
+    TransferRateCalculator * const globalRate;
 
     explicit BluecherryApp();
 
