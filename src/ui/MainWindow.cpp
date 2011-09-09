@@ -12,6 +12,7 @@
 #include "EventViewWindow.h"
 #include "SetupWizard.h"
 #include "MacSplitter.h"
+#include "StatusBandwidthWidget.h"
 #include "core/DVRServer.h"
 #include "core/BluecherryApp.h"
 #include <QBoxLayout>
@@ -40,6 +41,7 @@
 #include <QToolButton>
 #include <QStatusBar>
 #include <QLinearGradient>
+#include <QAction>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), m_trayIcon(0)
@@ -52,6 +54,8 @@ MainWindow::MainWindow(QWidget *parent)
     createMenu();
     updateTrayIcon();
 
+    statusBar()->addPermanentWidget(new StatusBandwidthWidget);
+
 #ifdef Q_OS_MAC
     statusBar()->setSizeGripEnabled(false);
     if (style()->inherits("QMacStyle"))
@@ -63,6 +67,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_mainToolbar->setMovable(false);
     m_mainToolbar->setIconSize(QSize(16, 16));
     m_mainToolbar->addAction(QIcon(QLatin1String(":/icons/cassette.png")), tr("Events"), this, SLOT(showEventsWindow()));
+    m_mainToolbar->addAction(QIcon(QLatin1String(":/icons/system-monitor.png")), tr("Connection"));
     addToolBar(Qt::TopToolBarArea, m_mainToolbar);
 
     /* Splitters */
@@ -84,7 +89,26 @@ MainWindow::MainWindow(QWidget *parent)
     m_centerSplit->setStretchFactor(0, 1);
 
     /* Set center widget */
-    setCentralWidget(m_leftSplit);
+    QWidget *center = new QWidget;
+    QBoxLayout *centerLayout = new QVBoxLayout(center);
+    centerLayout->setMargin(0);
+    centerLayout->setSpacing(0);
+    centerLayout->addWidget(m_leftSplit, 1);
+    setCentralWidget(center);
+
+#ifdef Q_OS_WIN
+    /* There is no top border on the statusbar on Windows, and we need one. */
+    if (style()->inherits("QWindowsStyle"))
+    {
+        QFrame *line = new QFrame;
+        line->setFrameStyle(QFrame::Plain | QFrame::HLine);
+        QPalette p = line->palette();
+        p.setColor(QPalette::WindowText, QColor(171, 175, 183));
+        line->setPalette(p);
+        line->setFixedHeight(1);
+        centerLayout->addWidget(line);
+    }
+#endif
 
     QSettings settings;
     restoreGeometry(settings.value(QLatin1String("ui/main/geometry")).toByteArray());

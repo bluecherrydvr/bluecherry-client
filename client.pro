@@ -148,7 +148,10 @@ SOURCES += src/main.cpp \
     src/ui/SetupWizard.cpp \
     src/video/MediaDownload.cpp \
     src/utils/RangeMap.cpp \
-    src/ui/MacSplitter.cpp
+    src/ui/MacSplitter.cpp \
+    src/core/TransferRateCalculator.cpp \
+    src/ui/StatusBandwidthWidget.cpp \
+    src/utils/StringUtils.cpp
 
 HEADERS  += src/ui/MainWindow.h \
     src/ui/OptionsDialog.h \
@@ -203,7 +206,10 @@ HEADERS  += src/ui/MainWindow.h \
     src/video/MediaDownload.h \
     src/utils/RangeMap.h \
     src/video/MediaDownload_p.h \
-    src/ui/MacSplitter.h
+    src/ui/MacSplitter.h \
+    src/core/TransferRateCalculator.h \
+    src/ui/StatusBandwidthWidget.h \
+    src/utils/StringUtils.h
 
 RESOURCES += \
     res/resources.qrc \
@@ -222,3 +228,9 @@ OTHER_FILES += mac/Info.plist "linux/Bluecherry Client.desktop" \
     src/ui/liveview/LiveFeed.qml \
     src/utils/PlatformOSX.mm \
     src/ui/liveview/HeaderPTZControl.qml
+
+
+
+
+
+

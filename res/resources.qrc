@@ -40,5 +40,6 @@
         <file>control-double.png</file>
         <file>control-double-180.png</file>
         <file>cassette.png</file>
+        <file>system-monitor.png</file>
     </qresource>
 </RCC>

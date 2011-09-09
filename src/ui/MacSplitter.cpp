@@ -23,19 +23,30 @@ void MacSplitterHandle::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    QColor topColor(167, 167, 167);
-    QColor bottomColor(131, 131, 131);
+#ifdef Q_OS_WIN
+    QColor baseColor(171, 175, 183);
+#else
+    QColor baseColor(182, 182, 182);
+#endif
 
     if (orientation() == Qt::Horizontal)
     {
+#ifdef Q_OS_MAC
+        QColor topColor(167, 167, 167);
+        QColor bottomColor(131, 131, 131);
+
         QLinearGradient linearGrad(QPointF(0, 0), QPointF(0, height()));
         linearGrad.setColorAt(0, topColor);
         linearGrad.setColorAt(1, bottomColor);
         painter.fillRect(QRect(0, 0, 1, height()), QBrush(linearGrad));
+#else
+        painter.setPen(baseColor);
+        painter.drawLine(0, 0, 0, height());
+#endif
     }
     else
     {
-        painter.setPen(QColor(182, 182, 182));
+        painter.setPen(baseColor);
         painter.drawLine(0, 0, width()-1, 0);
     }
 }
