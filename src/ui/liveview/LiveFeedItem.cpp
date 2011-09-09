@@ -372,7 +372,7 @@ QMenu *LiveFeedItem::fpsMenu()
 
     foreach (QAction *a, menu->actions())
     {
-        if (a->isSeparator())
+        if (a->isSeparator() || a->isCheckable())
             continue;
         a->setCheckable(true);
         if (a->data().toInt() == mjpeg->interval())
