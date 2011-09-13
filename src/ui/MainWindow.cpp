@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent)
     createMenu();
     updateTrayIcon();
 
-    statusBar()->addPermanentWidget(new StatusBandwidthWidget);
+    statusBar()->addPermanentWidget(new StatusBandwidthWidget(statusBar()));
 
 #ifdef Q_OS_MAC
     statusBar()->setSizeGripEnabled(false);

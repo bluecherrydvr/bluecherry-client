@@ -150,9 +150,10 @@ SOURCES += src/main.cpp \
     src/utils/RangeMap.cpp \
     src/ui/MacSplitter.cpp \
     src/core/TransferRateCalculator.cpp \
-    src/ui/StatusBandwidthWidget.cpp \
     src/utils/StringUtils.cpp \
     src/core/LiveViewManager.cpp
+
+!macx:SOURCES += src/ui/StatusBandwidthWidget.cpp
 
 HEADERS  += src/ui/MainWindow.h \
     src/ui/OptionsDialog.h \
@@ -222,19 +223,13 @@ ICON = res/bluecherry.icns
 win32:SOURCES += src/utils/explorerstyle.cpp
 win32:HEADERS += src/utils/explorerstyle.h
 
-macx:OBJECTIVE_SOURCES += src/utils/PlatformOSX.mm
-macx:LIBS += -framework CoreServices
+macx:OBJECTIVE_SOURCES += src/utils/PlatformOSX.mm \
+    src/ui/StatusBandwidthWidget_mac.mm
+macx:LIBS += -framework CoreServices -framework AppKit
 
 OTHER_FILES += mac/Info.plist "linux/Bluecherry Client.desktop" \
     src/ui/liveview/LiveView.qml \
     src/ui/liveview/LiveFeed.qml \
     src/utils/PlatformOSX.mm \
-    src/ui/liveview/HeaderPTZControl.qml
-
-
-
-
-
-
-
-
+    src/ui/liveview/HeaderPTZControl.qml \
+    src/ui/StatusBandwidthWidget_mac.mm

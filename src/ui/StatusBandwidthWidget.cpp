@@ -3,6 +3,10 @@
 #include "core/LiveViewManager.h"
 #include "utils/StringUtils.h"
 #include <QMenu>
+#include <QStyle>
+#include <QPainter>
+#include <QStyleOptionToolButton>
+#include <QToolButton>
 
 StatusBandwidthWidget::StatusBandwidthWidget(QWidget *parent)
     : QToolButton(parent)
@@ -24,6 +28,7 @@ StatusBandwidthWidget::StatusBandwidthWidget(QWidget *parent)
     setMenu(menu);
 
     connect(this, SIGNAL(pressed()), SLOT(showMenu()));
+
     connect(bcApp->globalRate, SIGNAL(rateUpdated(unsigned)), SLOT(rateUpdated(unsigned)));
     connect(bcApp->liveView, SIGNAL(globalIntervalChanged(int)), SLOT(globalIntervalChanged(int)));
     rateUpdated(bcApp->globalRate->currentRate());
