@@ -32,8 +32,8 @@ void MacSplitterHandle::paintEvent(QPaintEvent *)
     if (orientation() == Qt::Horizontal)
     {
 #ifdef Q_OS_MAC
-        QColor topColor(167, 167, 167);
-        QColor bottomColor(131, 131, 131);
+        QColor topColor(105, 105, 105);
+        QColor bottomColor(111, 111, 111);
 
         QLinearGradient linearGrad(QPointF(0, 0), QPointF(0, height()));
         linearGrad.setColorAt(0, topColor);
