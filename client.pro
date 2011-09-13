@@ -151,7 +151,8 @@ SOURCES += src/main.cpp \
     src/ui/MacSplitter.cpp \
     src/core/TransferRateCalculator.cpp \
     src/ui/StatusBandwidthWidget.cpp \
-    src/utils/StringUtils.cpp
+    src/utils/StringUtils.cpp \
+    src/core/LiveViewManager.cpp
 
 HEADERS  += src/ui/MainWindow.h \
     src/ui/OptionsDialog.h \
@@ -209,7 +210,8 @@ HEADERS  += src/ui/MainWindow.h \
     src/ui/MacSplitter.h \
     src/core/TransferRateCalculator.h \
     src/ui/StatusBandwidthWidget.h \
-    src/utils/StringUtils.h
+    src/utils/StringUtils.h \
+    src/core/LiveViewManager.h
 
 RESOURCES += \
     res/resources.qrc \
@@ -228,6 +230,8 @@ OTHER_FILES += mac/Info.plist "linux/Bluecherry Client.desktop" \
     src/ui/liveview/LiveFeed.qml \
     src/utils/PlatformOSX.mm \
     src/ui/liveview/HeaderPTZControl.qml
+
+
 
 
 

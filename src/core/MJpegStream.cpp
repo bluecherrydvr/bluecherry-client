@@ -1,5 +1,6 @@
 #include "BluecherryApp.h"
 #include "MJpegStream.h"
+#include "LiveViewManager.h"
 #include "utils/ImageDecodeTask.h"
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
@@ -16,6 +17,7 @@ MJpegStream::MJpegStream(QObject *parent)
       m_parserState(ParserBoundary), m_recordingState(DVRCamera::NoRecording), m_autoStart(false),
       m_paused(false), m_interval(1)
 {
+    bcApp->liveView->addStream(this);
     connect(&m_activityTimer, SIGNAL(timeout()), SLOT(checkActivity()));
 }
 
@@ -25,6 +27,7 @@ MJpegStream::MJpegStream(const QUrl &url, QObject *parent)
       m_parserState(ParserBoundary), m_recordingState(DVRCamera::NoRecording), m_autoStart(false),
       m_paused(false), m_interval(1)
 {
+    bcApp->liveView->addStream(this);
     setUrl(url);
     connect(&m_activityTimer, SIGNAL(timeout()), SLOT(checkActivity()));
 }
@@ -36,6 +39,8 @@ MJpegStream::~MJpegStream()
         m_recordingState = DVRCamera::NoRecording;
         emit recordingStateChanged(m_recordingState);
     }
+
+    bcApp->liveView->removeStream(this);
 
     if (m_httpReply)
         m_httpReply->deleteLater();

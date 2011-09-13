@@ -1,5 +1,6 @@
 #include "BluecherryApp.h"
 #include "DVRServer.h"
+#include "LiveViewManager.h"
 #include <QSettings>
 #include <QStringList>
 #include <QNetworkAccessManager>
@@ -14,7 +15,8 @@
 BluecherryApp *bcApp = 0;
 
 BluecherryApp::BluecherryApp()
-    : nam(new QNetworkAccessManager(this)), globalRate(new TransferRateCalculator(this)),
+    : nam(new QNetworkAccessManager(this)), liveView(new LiveViewManager(this)),
+      globalRate(new TransferRateCalculator(this)),
       m_maxServerId(-1), m_livePaused(false), m_inPauseQuery(false),
       m_screensaverInhibited(false)
 {

@@ -7,6 +7,7 @@
 #include "ui/MainWindow.h"
 #include "utils/FileUtils.h"
 #include "core/DVRServer.h"
+#include "core/LiveViewManager.h"
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QGraphicsSceneContextMenuEvent>
@@ -363,24 +364,12 @@ QMenu *LiveFeedItem::fpsMenu()
 
     menu->addSeparator();
 
-    menu->addAction(tr("Full"), this, SLOT(setIntervalFromAction()))->setData(1);
-    menu->addAction(tr("Half"), this, SLOT(setIntervalFromAction()))->setData(2);
-    menu->addAction(tr("Quarter"), this, SLOT(setIntervalFromAction()))->setData(4);
-    menu->addAction(tr("Eighth"), this, SLOT(setIntervalFromAction()))->setData(8);
-    menu->addSeparator();
-    menu->addAction(tr("1 FPS"), this, SLOT(setIntervalFromAction()))->setData(0);
+    QList<QAction*> fps = bcApp->liveView->fpsActions(mjpeg->isPaused() ? -1 : mjpeg->interval(),
+                                                      this, SLOT(setIntervalFromAction()));
+    foreach (QAction *a, fps)
+        a->setParent(menu);
 
-    foreach (QAction *a, menu->actions())
-    {
-        if (a->isSeparator() || a->isCheckable())
-            continue;
-        a->setCheckable(true);
-        if (a->data().toInt() == mjpeg->interval())
-        {
-            a->setChecked(true);
-            break;
-        }
-    }
+    menu->addActions(fps);
 
     return menu;
 }

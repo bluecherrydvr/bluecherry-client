@@ -13,6 +13,7 @@ class QNetworkReply;
 class QSslError;
 class QSslConfiguration;
 class QTimer;
+class LiveViewManager;
 
 class BluecherryApp : public QObject
 {
@@ -22,6 +23,7 @@ public:
     QNetworkAccessManager * const nam;
     MainWindow *mainWindow;
     QIcon appIcon;
+    LiveViewManager * const liveView;
     TransferRateCalculator * const globalRate;
 
     explicit BluecherryApp();
