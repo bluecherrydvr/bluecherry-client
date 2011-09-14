@@ -67,7 +67,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_mainToolbar->setMovable(false);
     m_mainToolbar->setIconSize(QSize(16, 16));
     m_mainToolbar->addAction(QIcon(QLatin1String(":/icons/cassette.png")), tr("Events"), this, SLOT(showEventsWindow()));
-    m_mainToolbar->addAction(QIcon(QLatin1String(":/icons/system-monitor.png")), tr("Connection"));
     addToolBar(Qt::TopToolBarArea, m_mainToolbar);
 
     /* Splitters */
