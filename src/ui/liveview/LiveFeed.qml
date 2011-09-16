@@ -44,8 +44,7 @@ LiveFeedBase {
         Text {
             id: headerText
             anchors.left: parent.left
-            anchors.leftMargin: 4
-            anchors.right: parent.right
+            anchors.leftMargin: 5
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 1
@@ -54,13 +53,14 @@ LiveFeedBase {
             verticalAlignment: Text.AlignVCenter
             height: parent.height
             text: feedItem.cameraName
-            //elide: Text.ElideRight
         }
 
         Row {
             id: headerItems
-            x: headerText.x + headerText.paintedWidth + 10
-            width: parent.width - x
+            x: {
+                var l = headerText.x + headerText.width + 10;
+                return l + Math.max(0, (header.width - l) - width - 5);
+            }
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 1
@@ -87,12 +87,10 @@ LiveFeedBase {
                 }
             }
 
-            Text {
-                color: "#75c0ff"
+            HeaderPTZControl {
+                id: headerPtzElement
                 height: parent.height
-                verticalAlignment: Text.AlignVCenter
-                text: "PTZ"
-                visible: feedItem.hasPtz
+                visible: feedItem.hasPtz && !feed.paused
             }
 
             Text {
@@ -140,41 +138,6 @@ LiveFeedBase {
 
                     color: "#77000000"
                     visible: fpsMouseArea.containsMouse
-                }
-            }
-        }
-
-        HeaderPTZControl {
-            id: headerPtzElement
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            anchors.left: parent.right
-            clip: true
-            visible: false
-
-            states: State {
-                name: "enabled"
-                when: feedItem.ptz != null
-
-                PropertyChanges {
-                    target: headerPtzElement
-                    visible: true
-                }
-
-                AnchorChanges {
-                    target: headerPtzElement
-                    anchors.left: undefined
-                    anchors.right: parent.right
-                }
-
-                PropertyChanges {
-                    target: headerItems
-                    width: header.width - x - headerPtzElement.width
-                }
-
-                AnchorChanges {
-                    target: headerText
-                    anchors.right: headerPtzElement.left
                 }
             }
         }

@@ -1,68 +1,33 @@
 import Bluecherry 1.0
 import Qt 4.7
 
-Image {
+Rectangle {
     id: headerPtzElement
-    width: 30 + ptzText.paintedWidth
-
-    source: "image://liveviewgradients/ptzHeader"
-    sourceSize: Qt.size(1, height)
-    fillMode: Image.TileHorizontally
-
-    transitions: [
-        Transition {
-            to: "enabled"
-
-            AnchorAnimation {
-                duration: 400
-                easing.type: Easing.OutQuad
-            }
-        },
-        Transition {
-            to: ""
-
-            SequentialAnimation {
-                AnchorAnimation {
-                    duration: 400
-                    easing.type: Easing.InQuad
-                }
-                PropertyAction {
-                    target: headerPtzElement
-                    property: "visible"
-                }
-            }
-        }
-    ]
-
-    Behavior on width {
-        SmoothedAnimation {
-            velocity: 250
-        }
-    }
+    width: 12 + ptzText.width
+    color: mouseArea.containsMouse ? "#77000000" : "transparent"
 
     Text {
         id: ptzText
 
         anchors.left: parent.left
-        anchors.leftMargin: 8
+        anchors.leftMargin: 6
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         verticalAlignment: Qt.AlignVCenter
-        color: "#75c0ff"
-        text: (feedItem.ptz == null || feedItem.ptz.currentPreset < 0) ? "PTZ Enabled" : ("PTZ: " + feedItem.ptz.currentPresetName)
-    }
-
-    Image {
-        anchors.left: ptzText.right
-        anchors.leftMargin: 6
-        anchors.verticalCenter: parent.verticalCenter
-
-        source: ":/icons/down-arrow.png"
+        color: (feedItem.ptz == null) ? "#8e8e8e" : "#75c0ff"
+        text: {
+            if (feedItem.ptz == null || feedItem.ptz.currentPreset < 0)
+                return "PTZ"
+            else
+                return "PTZ: <b>" + feedItem.ptz.currentPresetName + "</b>"
+        }
     }
 
     MouseArea {
+        id: mouseArea
         acceptedButtons: MouseArea.Left | MouseArea.Right
         anchors.fill: parent
+        hoverEnabled: true
 
         onPressed: feedItem.showPtzMenu(headerPtzElement)
     }

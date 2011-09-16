@@ -179,16 +179,16 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     QMenu *ptzmenu = 0;
     if (camera().hasPtz())
     {
-        QAction *a = menu.addAction(tr("Pan / Tilt / Zoom"), this, SLOT(togglePtzEnabled()));
-        a->setCheckable(true);
-        a->setChecked(ptz());
-
         if (m_ptz)
         {
             ptzmenu = ptzMenu();
-            ptzmenu->setTitle(tr("PTZ"));
-            menu.addMenu(ptzmenu);
-            menu.addSeparator();
+            QAction *a = menu.addMenu(ptzmenu);
+            a->setCheckable(true);
+            a->setChecked(ptz());
+        }
+        else
+        {
+            menu.addAction(tr("Pan / Tilt / Zoom"), this, SLOT(togglePtzEnabled()));
         }
     }
 
@@ -318,33 +318,40 @@ void LiveFeedItem::wheelEvent(QGraphicsSceneWheelEvent *event)
 QMenu *LiveFeedItem::ptzMenu()
 {
     QMenu *menu = new QMenu;
+    menu->setTitle(tr("Pan / Tilt / Zoom"));
 
-    QMenu *presetsMenu = menu->addMenu(tr("Presets"));
-    QSignalMapper *mapper = new QSignalMapper(presetsMenu);
-    connect(mapper, SIGNAL(mapped(int)), m_ptz.data(), SLOT(moveToPreset(int)));
+    menu->addAction(m_ptz ? tr("Disable PTZ") : tr("Enable PTZ"),
+                    this, SLOT(togglePtzEnabled()));
 
-    const QMap<int,QString> &presets = m_ptz->presets();
-    for (QMap<int,QString>::ConstIterator it = presets.constBegin(); it != presets.constEnd(); ++it)
+    if (m_ptz)
     {
-        /* Necessary to avoid mnemonics (issue #730) */
-        QString text = it.value();
-        text.replace(QLatin1Char('&'), QLatin1String("&&"));
-        QAction *a = presetsMenu->addAction(text, mapper, SLOT(map()));
-        mapper->setMapping(a, it.key());
+        menu->addSeparator();
+
+        QMenu *presetsMenu = menu->addMenu(tr("Presets"));
+        QSignalMapper *mapper = new QSignalMapper(presetsMenu);
+        connect(mapper, SIGNAL(mapped(int)), m_ptz.data(), SLOT(moveToPreset(int)));
+
+        const QMap<int,QString> &presets = m_ptz->presets();
+        for (QMap<int,QString>::ConstIterator it = presets.constBegin(); it != presets.constEnd(); ++it)
+        {
+            /* Necessary to avoid mnemonics (issue #730) */
+            QString text = it.value();
+            text.replace(QLatin1Char('&'), QLatin1String("&&"));
+            QAction *a = presetsMenu->addAction(text, mapper, SLOT(map()));
+            mapper->setMapping(a, it.key());
+        }
+
+        presetsMenu->addSeparator();
+        presetsMenu->addAction(tr("Edit presets..."), this, SLOT(ptzPresetWindow()));
+
+        menu->addAction(tr("Edit presets..."), this, SLOT(ptzPresetWindow()));
+        menu->addAction(tr("Save preset..."), this, SLOT(ptzPresetSave()));
+
+        menu->addSeparator();
+        QAction *a = menu->addAction(tr("Cancel actions"), m_ptz.data(), SLOT(cancelAll()));
+        a->setEnabled(m_ptz->hasPendingActions());
+        connect(m_ptz.data(), SIGNAL(hasPendingActionsChanged(bool)), a, SLOT(setEnabled(bool)));
     }
-
-    presetsMenu->addSeparator();
-    presetsMenu->addAction(tr("Edit presets..."), this, SLOT(ptzPresetWindow()));
-
-    menu->addAction(tr("Edit presets..."), this, SLOT(ptzPresetWindow()));
-    menu->addAction(tr("Save preset..."), this, SLOT(ptzPresetSave()));
-
-    menu->addSeparator();
-    QAction *a = menu->addAction(tr("Cancel actions"), m_ptz.data(), SLOT(cancelAll()));
-    a->setEnabled(m_ptz->hasPendingActions());
-    connect(m_ptz.data(), SIGNAL(hasPendingActionsChanged(bool)), a, SLOT(setEnabled(bool)));
-    menu->addSeparator();
-    menu->addAction(tr("Disable PTZ"), this, SLOT(togglePtzEnabled()));
 
     return menu;
 }
@@ -389,9 +396,6 @@ QPoint LiveFeedItem::globalPosForItem(QDeclarativeItem *item)
 
 void LiveFeedItem::showPtzMenu(QDeclarativeItem *sourceItem)
 {
-    if (!m_ptz)
-        return;
-
     QPoint pos = globalPosForItem(sourceItem);
     QMenu *menu = ptzMenu();
     menu->exec(pos);
