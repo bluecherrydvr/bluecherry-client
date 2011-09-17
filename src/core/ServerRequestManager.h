@@ -44,6 +44,7 @@ signals:
     void loginError(const QString &message);
     void disconnected();
     void statusChanged(int status);
+    void onlineChanged(bool online);
 
 public slots:
     void logout();

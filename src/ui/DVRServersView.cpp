@@ -58,15 +58,26 @@ DVRServer *DVRServersView::currentServer() const
 
 void DVRServersView::contextMenuEvent(QContextMenuEvent *event)
 {
+    QModelIndex index = indexAt(event->pos());
+    DVRServer *server = index.data(DVRServersModel::ServerPtrRole).value<DVRServer*>();
+    DVRCamera camera = index.data(DVRServersModel::DVRCameraRole).value<DVRCamera>();
+
+    /* For servers, we prefer the checkable menu over the server controls menu,
+     * due to the way they're used specifically. Somewhat unclean. */
+    if (server && !(index.flags() & Qt::ItemIsUserCheckable))
+    {
+        /* Use the shared context menu for servers */
+        QMenu *menu = bcApp->mainWindow->serverMenu(server);
+        menu->exec(event->globalPos());
+        return;
+    }
+
     QMenu menu(this);
 
     QAction *aConnect = 0, *aRefreshDevices = 0, *aEditServer = 0, *aServerConfig = 0, *aOptions = 0, *aAddServer = 0;
     QAction *aSelectOnly = 0, *aSelectElse = 0;
     QAction *aAddFeed = 0, *aOpenWin = 0, *aOpenFull = 0, *aCamRename = 0;
 
-    QModelIndex index = indexAt(event->pos());
-    DVRServer *server = index.data(DVRServersModel::ServerPtrRole).value<DVRServer*>();
-    DVRCamera camera = index.data(DVRServersModel::DVRCameraRole).value<DVRCamera>();
     if (index.isValid())
     {
         if (index.flags() & Qt::ItemIsUserCheckable)
@@ -81,16 +92,7 @@ void DVRServersView::contextMenuEvent(QContextMenuEvent *event)
             menu.addSeparator();
         }
 
-        if (server)
-        {
-            aConnect = server->api->isOnline() ? menu.addAction(tr("Disconnect")) : menu.addAction(tr("Connect"));
-            menu.addSeparator();
-            aRefreshDevices = menu.addAction(tr("Refresh devices"));
-            menu.addSeparator();
-            aServerConfig = menu.addAction(tr("Configure server"));
-            aEditServer = menu.addAction(tr("Edit server"));
-        }
-        else if (camera)
+        if (camera)
         {
             aAddFeed = menu.addAction(tr("Add to view"));
             menu.addSeparator();
@@ -103,46 +105,21 @@ void DVRServersView::contextMenuEvent(QContextMenuEvent *event)
     }
     else
     {
-        aAddServer = menu.addAction(tr("Add new server..."));
-        aOptions = menu.addAction(tr("Client options"));
+        aAddServer = menu.addAction(tr("Add another server"));
+        aOptions = menu.addAction(tr("Options"));
     }
 
     QAction *action = menu.exec(event->globalPos());
     if (!action)
         return;
 
-    if (action == aConnect)
+    if (action == aOptions)
     {
-        if (!server->api->isOnline())
-            server->login();
-        else
-            server->api->logout();
+        bcApp->mainWindow->showOptionsDialog();
     }
-    else if (action == aRefreshDevices)
+    else if (action == aAddServer)
     {
-        server->updateCameras();
-    }
-    else if (action == aEditServer || action == aAddServer || action == aOptions)
-    {
-        /* Open the options dialog and modify appropriately */
-        OptionsDialog *dlg = new OptionsDialog(this);
-        dlg->showPage(OptionsDialog::ServerPage);
-        dlg->setAttribute(Qt::WA_DeleteOnClose);
-
-        OptionsServerPage *pg = static_cast<OptionsServerPage*>(dlg->pageWidget(OptionsDialog::ServerPage));
-
-        if (action == aEditServer)
-            pg->setCurrentServer(server);
-        else if (action == aAddServer)
-            pg->addNewServer();
-
-        dlg->show();
-    }
-    else if (action == aServerConfig)
-    {
-        ServerConfigWindow::instance()->setServer(server);
-        ServerConfigWindow::instance()->show();
-        ServerConfigWindow::instance()->raise();
+        bcApp->mainWindow->addServer();
     }
     else if (action == aAddFeed)
     {

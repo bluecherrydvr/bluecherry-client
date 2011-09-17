@@ -239,24 +239,17 @@ void MainWindow::showFront()
 
 void MainWindow::createMenu()
 {
-    QMenu *appMenu = menuBar()->addMenu(tr("&Application"));
-    appMenu->addAction(tr("Add new &server..."), this, SLOT(addServer()));
+    QMenu *appMenu = menuBar()->addMenu(tr("&Bluecherry"));
+    appMenu->addAction(tr("Add another server"), this, SLOT(addServer()));
     appMenu->addAction(tr("&Options"), this, SLOT(showOptionsDialog()));
     appMenu->addSeparator();
     appMenu->addAction(tr("&Quit"), qApp, SLOT(quit()));
 
-    QMenu *serverMenu = menuBar()->addMenu(tr("&Server"));
-    menuServerName = serverMenu->addAction(QString());
-    QFont f;
-    f.setBold(true);
-    menuServerName->setFont(f);
-    serverMenu->addSeparator();
-    serverMenu->addAction(tr("&Configuration"), this, SLOT(openServerConfig()));
-    serverMenu->addAction(tr("&Refresh devices"), this, SLOT(refreshServerDevices()));
-    serverMenu->addSeparator();
-    serverMenu->addAction(tr("&Edit Server"), this, SLOT(editCurrentServer()));
+    m_serversMenu = menuBar()->addMenu(QString());
+    updateServersMenu();
 
-    connect(serverMenu, SIGNAL(aboutToShow()), SLOT(showServersMenu()));
+    connect(bcApp, SIGNAL(serverAdded(DVRServer*)), SLOT(updateServersMenu()));
+    connect(bcApp, SIGNAL(serverRemoved(DVRServer*)), SLOT(updateServersMenu()));
 
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(tr("&Documentation"), this, SLOT(openDocumentation()));
@@ -266,10 +259,79 @@ void MainWindow::createMenu()
     helpMenu->addAction(tr("&About Bluecherry DVR"), this, SLOT(openAbout()));
 }
 
-void MainWindow::showServersMenu()
+QMenu *MainWindow::serverMenu(DVRServer *server)
 {
-    DVRServer *server = m_sourcesList->currentServer();
-    menuServerName->setText(server ? server->displayName() : tr("No Server"));
+    QMenu *m = static_cast<QMenu*>(server->property("uiMenu").value<QObject*>());
+    if (m)
+        return m;
+
+    m = new QMenu(server->displayName());
+
+    m->addAction(tr("Connect"), server, SLOT(toggleOnline()))->setObjectName(QLatin1String("aConnect"));
+    m->addSeparator();
+
+    QAction *a = m->addAction(tr("Configure"), this, SLOT(openServerConfig()));
+    a->setProperty("associatedServer", QVariant::fromValue<QObject*>(server));
+    a->setEnabled(server->api->isOnline());
+    connect(server->api, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
+
+    a = m->addAction(tr("Refresh devices"), server, SLOT(updateCameras()));
+    a->setEnabled(server->api->isOnline());
+    connect(server->api, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
+
+    m->addSeparator();
+    a = m->addAction(tr("Settings"), this, SLOT(openServerSettings()));
+    a->setProperty("associatedServer", QVariant::fromValue<QObject*>(server));
+
+    connect(server, SIGNAL(changed()), SLOT(updateMenuForServer()));
+    connect(server->api, SIGNAL(statusChanged(int)), SLOT(updateMenuForServer()));
+
+    server->setProperty("uiMenu", QVariant::fromValue<QObject*>(m));
+    updateMenuForServer(server);
+
+    return m;
+}
+
+void MainWindow::updateMenuForServer(DVRServer *server)
+{
+    if (!server)
+    {
+        server = qobject_cast<DVRServer*>(sender());
+        /* Handle ServerRequestManager signals by testing the object's parent as well */
+        if (!server && (!sender() || !(server = qobject_cast<DVRServer*>(sender()->parent()))))
+            return;
+    }
+
+    QMenu *m = serverMenu(server);
+    m->setTitle(server->displayName());
+    m->setIcon(QIcon(server->api->isOnline() ? QLatin1String(":/icons/status.png") :
+                                               QLatin1String(":/icons/status-offline.png")));
+
+    QAction *connect = m->findChild<QAction*>(QLatin1String("aConnect"));
+    Q_ASSERT(connect);
+    if (connect)
+        connect->setText(server->api->isOnline() ? tr("Disconnect") : tr("Connect"));
+}
+
+void MainWindow::updateServersMenu()
+{
+    m_serversMenu->clear();
+
+    QList<DVRServer*> servers = bcApp->servers();
+    m_serversMenu->setTitle((servers.size() > 1) ? tr("&Servers") : tr("&Server"));
+
+    if (servers.size() == 1)
+    {
+        QMenu *sm = serverMenu(servers.first());
+        m_serversMenu->addActions(sm->actions());
+    }
+    else
+    {
+        foreach (DVRServer *s, servers)
+        {
+            m_serversMenu->addMenu(serverMenu(s));
+        }
+    }
 }
 
 QWidget *MainWindow::createSourcesList()
@@ -389,9 +451,11 @@ void MainWindow::addServer()
     dlg->show();
 }
 
-void MainWindow::editCurrentServer()
+void MainWindow::openServerSettings()
 {
-    DVRServer *server = m_sourcesList->currentServer();
+    DVRServer *server = 0;
+    if (sender())
+        server = qobject_cast<DVRServer*>(sender()->property("associatedServer").value<QObject*>());
     if (!server)
         return;
 
@@ -407,7 +471,9 @@ void MainWindow::editCurrentServer()
 
 void MainWindow::openServerConfig()
 {
-    DVRServer *server = m_sourcesList->currentServer();
+    DVRServer *server = 0;
+    if (sender())
+        server = qobject_cast<DVRServer*>(sender()->property("associatedServer").value<QObject*>());
     if (!server)
         return;
 

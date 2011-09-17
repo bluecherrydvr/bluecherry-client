@@ -51,6 +51,7 @@ public slots:
     void removeServer();
 
     void login();
+    void toggleOnline();
     void updateCameras();
 
 signals:

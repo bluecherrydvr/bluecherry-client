@@ -22,6 +22,8 @@ public:
 
     LiveViewWindow *liveView() const { return m_liveView; }
 
+    QMenu *serverMenu(DVRServer *server);
+
     void updateTrayIcon();
 
 public slots:
@@ -30,7 +32,7 @@ public slots:
 
     void addServer();
     void openServerConfig();
-    void editCurrentServer();
+    void openServerSettings();
     void refreshServerDevices();
 
     void openDocumentation();
@@ -41,7 +43,8 @@ public slots:
     void showFront();
 
 private slots:
-    void showServersMenu();
+    void updateMenuForServer(DVRServer *server = 0);
+    void updateServersMenu();
     void sslConfirmRequired(DVRServer *server, const QList<QSslError> &errors, const QSslConfiguration &config);
     void trayActivated(QSystemTrayIcon::ActivationReason);
     void queryLivePaused();
@@ -63,7 +66,7 @@ private:
     EventsView *m_eventsView;
     LiveViewWindow *m_liveView;
     QSplitter *m_centerSplit, *m_leftSplit;
-    QAction *menuServerName;
+    QMenu *m_serversMenu;
     QSystemTrayIcon *m_trayIcon;
     QToolBar *m_mainToolbar;
 

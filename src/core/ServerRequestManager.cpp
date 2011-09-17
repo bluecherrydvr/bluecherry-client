@@ -34,13 +34,17 @@ void ServerRequestManager::setStatus(Status s, const QString &errmsg)
         break;
     case Online:
         emit loginSuccessful();
+        emit onlineChanged(true);
         break;
     default:
         break;
     }
 
     if (old == Online && m_status < Online)
+    {
         emit disconnected();
+        emit onlineChanged(false);
+    }
 }
 
 QUrl ServerRequestManager::serverUrl() const

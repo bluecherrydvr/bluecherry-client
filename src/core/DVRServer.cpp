@@ -71,6 +71,14 @@ void DVRServer::login()
     api->login(username(), password());
 }
 
+void DVRServer::toggleOnline()
+{
+    if (api->isOnline())
+        api->logout();
+    else
+        login();
+}
+
 void DVRServer::updateCameras()
 {
     if (!api->isOnline())
