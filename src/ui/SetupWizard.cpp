@@ -344,8 +344,8 @@ SetupFinishPage::SetupFinishPage()
                      "layouts - even with cameras from multiple servers!<br></li>"
                      "<li>Double-click on a server to open its configuration page in a new "
                      "window, where you can configure cameras and recordings<br></li>"
-                     "<li>Click 'Search Events' to open the event viewer and browse and watch "
-                     "events and recordings<br></li>"
+                     "<li>Click the events icon ( <img src=':/icons/cassette.png'> ) to open the "
+                     "event browser and watch or save recordings<br></li>"
                      "</ul>"
                      ));
     text->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);

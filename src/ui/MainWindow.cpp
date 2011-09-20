@@ -15,6 +15,7 @@
 #include "StatusBandwidthWidget.h"
 #include "core/DVRServer.h"
 #include "core/BluecherryApp.h"
+#include "core/LiveViewManager.h"
 #include <QBoxLayout>
 #include <QTreeView>
 #include <QGroupBox>
@@ -240,6 +241,8 @@ void MainWindow::showFront()
 void MainWindow::createMenu()
 {
     QMenu *appMenu = menuBar()->addMenu(tr("&Bluecherry"));
+    appMenu->addAction(tr("Browse &events"), this, SLOT(showEventsWindow()));
+    appMenu->addSeparator();
     appMenu->addAction(tr("Add another server"), this, SLOT(addServer()));
     appMenu->addAction(tr("&Options"), this, SLOT(showOptionsDialog()));
     appMenu->addSeparator();
@@ -251,12 +254,27 @@ void MainWindow::createMenu()
     connect(bcApp, SIGNAL(serverAdded(DVRServer*)), SLOT(updateServersMenu()));
     connect(bcApp, SIGNAL(serverRemoved(DVRServer*)), SLOT(updateServersMenu()));
 
+    QMenu *liveMenu = menuBar()->addMenu(tr("&Live"));
+    liveMenu->addAction(tr("New window"), this, SLOT(openLiveWindow()));
+    liveMenu->addSeparator();
+    QMenu *fpsMenu = liveMenu->addMenu(tr("Frame rate"));
+    fpsMenu->setObjectName(QLatin1String("globalLiveFpsMenu"));
+
+    QList<QAction*> fpsActions = bcApp->liveView->fpsActions(bcApp->liveView->globalInterval(),
+                                                             bcApp->liveView,
+                                                             SLOT(setGlobalIntervalFromAction()));
+    foreach (QAction *a, fpsActions)
+        a->setParent(fpsMenu);
+    fpsMenu->addActions(fpsActions);
+
+    connect(bcApp->liveView, SIGNAL(globalIntervalChanged(int)), SLOT(globalIntervalChanged(int)));
+
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(tr("&Documentation"), this, SLOT(openDocumentation()));
     helpMenu->addAction(tr("Bluecherry &support"), this, SLOT(openSupport()));
     helpMenu->addAction(tr("Suggest a &feature"), this, SLOT(openIdeas()));
     helpMenu->addSeparator();
-    helpMenu->addAction(tr("&About Bluecherry DVR"), this, SLOT(openAbout()));
+    helpMenu->addAction(tr("&About Bluecherry"), this, SLOT(openAbout()));
 }
 
 QMenu *MainWindow::serverMenu(DVRServer *server)
@@ -270,19 +288,25 @@ QMenu *MainWindow::serverMenu(DVRServer *server)
     m->addAction(tr("Connect"), server, SLOT(toggleOnline()))->setObjectName(QLatin1String("aConnect"));
     m->addSeparator();
 
-    QAction *a = m->addAction(tr("Configure"), this, SLOT(openServerConfig()));
+    QAction *a = m->addAction(tr("Browse &events"), this, SLOT(showEventsWindow()));
+    a->setEnabled(server->api->isOnline());
+    connect(server->api, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
+
+    a = m->addAction(tr("&Configure server"), this, SLOT(openServerConfig()));
     a->setProperty("associatedServer", QVariant::fromValue<QObject*>(server));
     a->setEnabled(server->api->isOnline());
     connect(server->api, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
+
+    m->addSeparator();
 
     a = m->addAction(tr("Refresh devices"), server, SLOT(updateCameras()));
     a->setEnabled(server->api->isOnline());
     connect(server->api, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
 
-    m->addSeparator();
     a = m->addAction(tr("Settings"), this, SLOT(openServerSettings()));
     a->setProperty("associatedServer", QVariant::fromValue<QObject*>(server));
 
+    connect(server, SIGNAL(serverRemoved(DVRServer*)), m, SLOT(deleteLater()));
     connect(server, SIGNAL(changed()), SLOT(updateMenuForServer()));
     connect(server->api, SIGNAL(statusChanged(int)), SLOT(updateMenuForServer()));
 
@@ -320,7 +344,11 @@ void MainWindow::updateServersMenu()
     QList<DVRServer*> servers = bcApp->servers();
     m_serversMenu->setTitle((servers.size() > 1) ? tr("&Servers") : tr("&Server"));
 
-    if (servers.size() == 1)
+    if (servers.isEmpty())
+    {
+        m_serversMenu->addAction(tr("Add a server"), this, SLOT(addServer()));
+    }
+    else if (servers.size() == 1)
     {
         QMenu *sm = serverMenu(servers.first());
         m_serversMenu->addActions(sm->actions());
@@ -441,6 +469,11 @@ void MainWindow::openSupport()
     bool ok = QDesktopServices::openUrl(url);
     if (!ok)
         QMessageBox::critical(this, tr("Error"), tr("An error occurred while opening %1").arg(url.toString()));
+}
+
+void MainWindow::openLiveWindow()
+{
+    LiveViewWindow::openWindow(this, false)->show();
 }
 
 void MainWindow::addServer()
@@ -615,4 +648,16 @@ void MainWindow::updateToolbarWidth()
 #endif
 
     m_mainToolbar->setFixedWidth(m_sourcesList->width()+1);
+}
+
+void MainWindow::globalIntervalChanged(int interval)
+{
+    QMenu *menu = menuBar()->findChild<QMenu*>(QLatin1String("globalLiveFpsMenu"));
+    foreach (QAction *a, menu->actions())
+    {
+        if (!a->data().isNull() && a->data().toInt() == interval)
+            a->setChecked(true);
+        else
+            a->setChecked(false);
+    }
 }

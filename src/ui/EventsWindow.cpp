@@ -31,7 +31,7 @@ EventsWindow *EventsWindow::m_instance = 0;
 EventsWindow::EventsWindow(QWidget *parent)
     : QWidget(parent, Qt::Window)
 {
-    setWindowTitle(tr("Bluecherry - Event Viewer"));
+    setWindowTitle(tr("Bluecherry - Event Browser"));
     resize(QSize(900, 600));
 
     QBoxLayout *layout = new QHBoxLayout(this);

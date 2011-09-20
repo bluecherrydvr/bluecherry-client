@@ -14,7 +14,6 @@ public:
     explicit StatusBandwidthWidget(QWidget *parent = 0);
 
 private slots:
-    void setGlobalIntervalFromAction();
     void globalIntervalChanged(int interval);
     void rateUpdated(unsigned currentRate);
 };
@@ -35,7 +34,6 @@ public:
     explicit StatusBandwidthWidget(QWidget *parent);
 
 private slots:
-    void setGlobalIntervalFromAction();
     void globalIntervalChanged(int interval);
     void rateUpdated(unsigned currentRate);
 

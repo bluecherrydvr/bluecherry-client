@@ -39,6 +39,7 @@ public slots:
     void openSupport();
     void openIdeas();
     void openAbout();
+    void openLiveWindow();
 
     void showFront();
 
@@ -50,6 +51,7 @@ private slots:
     void queryLivePaused();
     void liveViewLayoutChanged(const QString &layout);
     void updateToolbarWidth();
+    void globalIntervalChanged(int interval);
 
     void eventsContextMenu(const QPoint &pos);
 

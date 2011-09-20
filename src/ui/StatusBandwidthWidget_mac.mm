@@ -22,7 +22,7 @@ StatusBandwidthWidget::StatusBandwidthWidget(QWidget *parent)
     m_titleAction->setIcon(QIcon(QLatin1String(":/icons/system-monitor.png")));
 
     QList<QAction*> fpsActions = bcApp->liveView->fpsActions(bcApp->liveView->globalInterval(),
-                                                             this,
+                                                             bcApp->liveView,
                                                              SLOT(setGlobalIntervalFromAction()));
 
     foreach (QAction *a, fpsActions)
@@ -54,15 +54,6 @@ void StatusBandwidthWidget::rateUpdated(unsigned currentRate)
     rect.size.width -= 26;
     [m_button setFrameSize: rect.size];
     setFixedSize(rect.size.width + 2, rect.size.height);
-}
-
-void StatusBandwidthWidget::setGlobalIntervalFromAction()
-{
-    QAction *a = qobject_cast<QAction*>(sender());
-    if (!a || a->data().isNull())
-        return;
-
-    bcApp->liveView->setGlobalInterval(a->data().toInt());
 }
 
 void StatusBandwidthWidget::globalIntervalChanged(int interval)

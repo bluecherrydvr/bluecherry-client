@@ -58,3 +58,13 @@ QList<QAction*> LiveViewManager::fpsActions(int cv, QObject *target,
     re << separator << createAction(tr("1 FPS"), 0, cv, target, slot);
     return re;
 }
+
+void LiveViewManager::setGlobalIntervalFromAction()
+{
+    QAction *a = qobject_cast<QAction*>(sender());
+    Q_ASSERT(a && !a->data().isNull());
+    if (!a || a->data().isNull())
+        return;
+
+    setGlobalInterval(a->data().toInt());
+}

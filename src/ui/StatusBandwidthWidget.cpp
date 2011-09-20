@@ -18,7 +18,7 @@ StatusBandwidthWidget::StatusBandwidthWidget(QWidget *parent)
 
     QMenu *menu = new QMenu(this);
     QList<QAction*> fpsActions = bcApp->liveView->fpsActions(bcApp->liveView->globalInterval(),
-                                                             this,
+                                                             bcApp->liveView,
                                                              SLOT(setGlobalIntervalFromAction()));
 
     foreach (QAction *a, fpsActions)
@@ -37,15 +37,6 @@ StatusBandwidthWidget::StatusBandwidthWidget(QWidget *parent)
 void StatusBandwidthWidget::rateUpdated(unsigned currentRate)
 {
     setText(byteSizeString(currentRate, BytesPerSecond));
-}
-
-void StatusBandwidthWidget::setGlobalIntervalFromAction()
-{
-    QAction *a = qobject_cast<QAction*>(sender());
-    if (!a || a->data().isNull())
-        return;
-
-    bcApp->liveView->setGlobalInterval(a->data().toInt());
 }
 
 void StatusBandwidthWidget::globalIntervalChanged(int interval)

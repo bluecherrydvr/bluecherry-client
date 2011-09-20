@@ -27,6 +27,7 @@ public:
 
 public slots:
     void setGlobalInterval(int interval);
+    void setGlobalIntervalFromAction();
 
 signals:
     void globalIntervalChanged(int interval);
