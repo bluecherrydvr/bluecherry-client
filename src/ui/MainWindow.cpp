@@ -639,15 +639,14 @@ void MainWindow::liveViewLayoutChanged(const QString &layout)
 
 void MainWindow::updateToolbarWidth()
 {
-#ifdef Q_OS_MAC
+    /* Magic numbers used to align the live view toolbar with the separator
+     * in most cases */
     if (style()->inherits("QMacStyle"))
-    {
         m_mainToolbar->setFixedWidth(m_sourcesList->width()-20);
-        return;
-    }
-#endif
-
-    m_mainToolbar->setFixedWidth(m_sourcesList->width()+1);
+    else if (style()->inherits("QWindowsXPStyle"))
+        m_mainToolbar->setFixedWidth(m_sourcesList->width()+1);
+    else
+        m_mainToolbar->setFixedWidth(m_sourcesList->width() - (2*style()->pixelMetric(QStyle::PM_ToolBarItemMargin)) - 1);
 }
 
 void MainWindow::globalIntervalChanged(int interval)
