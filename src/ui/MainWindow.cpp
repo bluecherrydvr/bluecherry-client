@@ -138,6 +138,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(bcApp, SIGNAL(sslConfirmRequired(DVRServer*,QList<QSslError>,QSslConfiguration)),
             SLOT(sslConfirmRequired(DVRServer*,QList<QSslError>,QSslConfiguration)));
     connect(bcApp, SIGNAL(queryLivePaused()), SLOT(queryLivePaused()));
+
+    m_sourcesList->setFocus(Qt::OtherFocusReason);
 }
 
 MainWindow::~MainWindow()
