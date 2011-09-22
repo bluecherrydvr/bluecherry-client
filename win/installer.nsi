@@ -1,6 +1,6 @@
 !include MUI2.nsh
 
-!define QT_PATH "C:\Qt\4.7-msvc32-shared\bin"
+!define QT_PATH "C:\Qt\4.7-32bit-stable\bin"
 
 Name "Bluecherry Client"
 OutFile "SetupBluecherryClient.exe"
@@ -38,12 +38,14 @@ Section
         File "${QT_PATH}\QtDeclarative4.dll"
         File "${QT_PATH}\QtScript4.dll"
         File "${QT_PATH}\QtSql4.dll" # required by QtDeclarative
+        File "${QT_PATH}\QtXmlPatterns4.dll" # QtDeclarative
         File "${QT_PATH}\phonon4.dll"
         File "${QT_PATH}\ssleay32.dll"
         File "${QT_PATH}\libeay32.dll"
         
         # MSVC 2010 CRT
-        File "$%PROGRAMFILES(X86)%\Microsoft Visual Studio 10.0\VC\redist\x86\Microsoft.VC100.CRT\*.*"
+        File "msvcp100.dll"
+        File "msvcr100.dll"
         
         SetOutPath "$INSTDIR\imageformats"
         # Normally qjpeg4.dll, but we use an accelerated version
