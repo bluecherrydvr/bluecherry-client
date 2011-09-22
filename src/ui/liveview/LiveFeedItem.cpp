@@ -217,6 +217,8 @@ void LiveFeedItem::setIntervalFromAction()
 
     int interval = a->data().toInt();
     mjpeg->setInterval(interval);
+    if (mjpeg->isPaused())
+        mjpeg->setPaused(false);
 }
 
 void LiveFeedItem::saveState(QDataStream *stream)

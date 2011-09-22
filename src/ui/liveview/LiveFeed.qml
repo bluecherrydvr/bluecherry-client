@@ -72,7 +72,7 @@ LiveFeedBase {
                 color: "#8e8e8e"
                 height: parent.height
                 verticalAlignment: Text.AlignVCenter
-                text: "No Recording"
+                text: "Not Recording"
                 visible: !feed.paused
 
                 states: State {
