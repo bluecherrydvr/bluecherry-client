@@ -6,16 +6,16 @@
 override_dh_auto_install:
 	dh_auto_install
 	mkdir -p debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib
-	cp -a /usr/lib/bluecherry/qt4.7/lib/libQtCore.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib/
-	cp -a /usr/lib/bluecherry/qt4.7/lib/libQtGui.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib/
-	cp -a /usr/lib/bluecherry/qt4.7/lib/libQtDeclarative.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib/
-	cp -a /usr/lib/bluecherry/qt4.7/lib/libQtNetwork.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib/
-	cp -a /usr/lib/bluecherry/qt4.7/lib/libQtOpenGL.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib/
-	cp -a /usr/lib/bluecherry/qt4.7/lib/libQtScript.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib/
-	cp -a /usr/lib/bluecherry/qt4.7/lib/libQtSql.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib/
-	cp -a /usr/lib/bluecherry/qt4.7/lib/libQtWebKit.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib/
-	cp -a /usr/lib/bluecherry/qt4.7/lib/libQtSvg.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib/
-	cp -a /usr/lib/bluecherry/qt4.7/lib/libphonon.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib/
+	cp -a /usr/lib/bluecherry/qt4.7/lib/libQtCore*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib/
+	cp -a /usr/lib/bluecherry/qt4.7/lib/libQtGui*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib/
+	cp -a /usr/lib/bluecherry/qt4.7/lib/libQtDeclarative*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib/
+	cp -a /usr/lib/bluecherry/qt4.7/lib/libQtNetwork*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib/
+	cp -a /usr/lib/bluecherry/qt4.7/lib/libQtOpenGL*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib/
+	cp -a /usr/lib/bluecherry/qt4.7/lib/libQtScript*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib/
+	cp -a /usr/lib/bluecherry/qt4.7/lib/libQtSql*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib/
+	cp -a /usr/lib/bluecherry/qt4.7/lib/libQtWebKit*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib/
+	cp -a /usr/lib/bluecherry/qt4.7/lib/libQtSvg*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib/
+	cp -a /usr/lib/bluecherry/qt4.7/lib/libQtXmlPatterns*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.7/lib/
 	mkdir -p debian/bluecherry-client/usr/lib/bluecherry/qt4.7/plugins/imageformats
 	cp -a /usr/lib/bluecherry/qt4.7/plugins/imageformats/libqjpeg-turbo.so debian/bluecherry-client/usr/lib/bluecherry/qt4.7/plugins/imageformats
 	cp -a /usr/lib/bluecherry/qt4.7/plugins/imageformats/libqgif.so debian/bluecherry-client/usr/lib/bluecherry/qt4.7/plugins/imageformats
