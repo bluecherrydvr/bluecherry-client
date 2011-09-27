@@ -10,6 +10,15 @@ MacSplitterHandle::MacSplitterHandle(Qt::Orientation o, QSplitter *parent)
     setMouseTracking(true);
 }
 
+MacSplitterHandle::~MacSplitterHandle()
+{
+    if (isMouseGrabbed)
+    {
+        qApp->restoreOverrideCursor();
+        qApp->removeEventFilter(this);
+    }
+}
+
 QSize MacSplitterHandle::sizeHint() const
 {
     QSize parent = QSplitterHandle::sizeHint();
@@ -57,29 +66,50 @@ void MacSplitterHandle::enterEvent(QEvent *e)
         return;
 
     Qt::CursorShape cursor = (orientation() == Qt::Horizontal) ? Qt::SplitHCursor : Qt::SplitVCursor;
-    grabMouse(cursor);
     qApp->setOverrideCursor(cursor);
+    qApp->installEventFilter(this);
     isMouseGrabbed = true;
 }
 
-void MacSplitterHandle::mouseMoveEvent(QMouseEvent *e)
+bool MacSplitterHandle::eventFilter(QObject *obj, QEvent *e)
 {
-    QSplitterHandle::mouseMoveEvent(e);
+    QMouseEvent *me;
+    QPoint p;
 
-    QPoint p = e->pos();
-    if (!(e->buttons() & Qt::LeftButton) &&
-        (p.x() <= -5 || p.y() <= -5 || (p.x()-width() > 5) || (p.y()-height() > 5)))
+    switch (e->type())
     {
-        releaseMouse();
-        qApp->restoreOverrideCursor();
-        isMouseGrabbed = false;
-    }
-}
+    case QEvent::MouseButtonPress:
+    case QEvent::MouseButtonDblClick:
+        return true;
 
-void MacSplitterHandle::mouseReleaseEvent(QMouseEvent *e)
-{
-    QSplitterHandle::mouseReleaseEvent(e);
-    releaseMouse();
-    qApp->restoreOverrideCursor();
-    isMouseGrabbed = false;
+    case QEvent::MouseMove:
+        me = static_cast<QMouseEvent*>(e);
+        p = mapFromGlobal(me->globalPos());
+        if (me->buttons() & Qt::LeftButton)
+        {
+            QPoint sp = parentWidget()->mapFromGlobal(me->globalPos());
+            if (orientation() == Qt::Horizontal)
+                moveSplitter(sp.x());
+            else
+                moveSplitter(sp.y());
+        }
+        else if (p.x() <= -7 || p.y() <= -7 || (p.x()-width() > 7) || (p.y()-height() > 7))
+        {
+            qApp->restoreOverrideCursor();
+            qApp->removeEventFilter(this);
+            isMouseGrabbed = false;
+            break;
+        }
+        return true;
+
+    case QEvent::MouseButtonRelease:
+        qApp->restoreOverrideCursor();
+        qApp->removeEventFilter(this);
+        isMouseGrabbed = false;
+        if (e->type() == QEvent::Leave)
+            break;
+        return true;
+    }
+
+    return false;
 }
