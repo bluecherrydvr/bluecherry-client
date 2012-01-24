@@ -39,7 +39,7 @@ DVRCamera::PtzProtocol DVRCamera::parseProtocol(const QString &protocol)
 {
     if (protocol == QLatin1String("none") || protocol.isEmpty())
         return NoPtz;
-    else if (protocol == QLatin1String("PELCO"))
+    else if (protocol.startsWith(QLatin1String("PELCO")))
         return PelcoPtz;
     else
         return UnknownProtocol;

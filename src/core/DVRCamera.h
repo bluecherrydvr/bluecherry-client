@@ -60,8 +60,8 @@ class DVRCamera
 
 public:
     enum PtzProtocol {
-        UnknownProtocol = -1,
         NoPtz,
+        UnknownProtocol,
         PelcoPtz
     };
 
