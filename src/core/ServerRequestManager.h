@@ -30,6 +30,7 @@ public:
     QString errorMessage() const { return m_errorMessage; }
 
     void login(const QString &username, const QString &password);
+    void setError(const QString &message) { setStatus(ServerError, message); }
 
     QUrl serverUrl() const;
     QNetworkRequest buildRequest(const QUrl &relativeUrl);

@@ -201,7 +201,10 @@ void BluecherryApp::sslErrors(QNetworkReply *reply, const QList<QSslError> &erro
         emit sslConfirmRequired(server, errors, reply->sslConfiguration());
         /* If the user accepted, this should now be a known certificate */
         if (!server->isKnownCertificate(reply->sslConfiguration().peerCertificate()))
+        {
+            server->api->setError(tr("Unrecognized SSL certificate"));
             return;
+        }
     }
 
     reply->ignoreSslErrors();
