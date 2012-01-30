@@ -11,6 +11,7 @@
 #include <QSslConfiguration>
 #include <QSslCertificate>
 #include <QApplication>
+#include <QThread>
 
 BluecherryApp *bcApp = 0;
 
@@ -139,6 +140,8 @@ void BluecherryApp::onServerRemoved(DVRServer *server)
 
 void BluecherryApp::sslErrors(QNetworkReply *reply, const QList<QSslError> &errors)
 {
+    Q_ASSERT(QThread::currentThread() == thread());
+
     foreach (const QSslError &err, errors)
     {
         switch (err.error())

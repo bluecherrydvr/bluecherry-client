@@ -535,6 +535,9 @@ void MainWindow::sslConfirmRequired(DVRServer *server, const QList<QSslError> &e
     Q_ASSERT(server);
     Q_ASSERT(!config.peerCertificate().isNull());
 
+    if (server->property("ssl_verify_dialog").value<QObject*>())
+        return;
+
     QByteArray digest = config.peerCertificate().digest(QCryptographicHash::Sha1);
     QString fingerprint = QString::fromLatin1(digest.toHex()).toUpper();
     for (int i = 4; i < fingerprint.size(); i += 5)
@@ -548,12 +551,14 @@ void MainWindow::sslConfirmRequired(DVRServer *server, const QList<QSslError> &e
                                           "this certificate in the future?")
                                        .arg(Qt::escape(server->displayName()), server->api->serverUrl().toString(),
                                             fingerprint));
+    server->setProperty("ssl_verify_dialog", QVariant::fromValue<QObject*>(dlg));
     QPushButton *ab = dlg->addButton(tr("Accept Certificate"), QMessageBox::AcceptRole);
     dlg->setDefaultButton(dlg->addButton(QMessageBox::Cancel));
     dlg->setParent(this);
     dlg->setWindowModality(Qt::WindowModal);
 
     dlg->exec();
+    server->setProperty("ssl_verify_dialog", QVariant());
     if (dlg->clickedButton() != ab)
         return;
 
