@@ -285,7 +285,10 @@ void SetupServerPage::testLogin()
     queryData.addQueryItem(QLatin1String("password"), password);
     queryData.addQueryItem(QLatin1String("from_client"), QLatin1String("true"));
 
-    loginReply = bcApp->nam->post(QNetworkRequest(url), queryData.encodedQuery());
+    QNetworkRequest req(url);
+    req.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/x-www-form-urlencoded"));
+
+    loginReply = bcApp->nam->post(req, queryData.encodedQuery());
     loginReply->ignoreSslErrors();
     connect(loginReply, SIGNAL(finished()), SLOT(loginRequestFinished()));
 }

@@ -86,6 +86,7 @@ void ServerRequestManager::login(const QString &username, const QString &passwor
      * necessary there too. */
 
     QNetworkRequest req = buildRequest(QLatin1String("/ajax/login.php"));
+    req.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/x-www-form-urlencoded"));
     if (req.url().scheme() == QLatin1String("https") && !QSslSocket::supportsSsl())
     {
         setStatus(ServerError, QLatin1String("SSL support is not enabled"));
