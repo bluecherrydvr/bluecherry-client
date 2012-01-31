@@ -107,7 +107,7 @@ EventsWindow *EventsWindow::instance()
 {
     if (!m_instance)
     {
-        m_instance = new EventsWindow(bcApp->mainWindow);
+        m_instance = new EventsWindow(bcApp->globalParentWindow());
         m_instance->setAttribute(Qt::WA_DeleteOnClose);
     }
 

@@ -71,7 +71,7 @@ EventViewWindow *EventViewWindow::open(const EventData &event)
         }
     }
 
-    EventViewWindow *evw = new EventViewWindow(bcApp->mainWindow);
+    EventViewWindow *evw = new EventViewWindow(bcApp->globalParentWindow());
     evw->setAttribute(Qt::WA_DeleteOnClose);
     evw->setEvent(event);
     evw->show();

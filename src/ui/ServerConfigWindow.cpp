@@ -13,7 +13,7 @@ ServerConfigWindow *ServerConfigWindow::instance()
 {
     if (!m_instance)
     {
-        m_instance = new ServerConfigWindow(bcApp->mainWindow);
+        m_instance = new ServerConfigWindow(bcApp->globalParentWindow());
         m_instance->setAttribute(Qt::WA_DeleteOnClose);
     }
 
