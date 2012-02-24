@@ -19,6 +19,9 @@ macx:QMAKE_POST_LINK += cp $${_PRO_FILE_PWD_}/mac/Info.plist $${OUT_PWD}/$${TARG
 DEFINES += QT_NO_CAST_FROM_ASCII QT_NO_CAST_TO_ASCII
 INCLUDEPATH += src
 
+INCLUDEPATH += "/Users/jbrooks/Development/libav/include"
+LIBS += -L"/Users/jbrooks/Development/libav/lib" -lavcodec -lavformat -lavutil -lswscale -framework QuartzCore -framework VideoDecodeAcceleration
+
 win32-msvc2008|win32-msvc2010 {
     # Qt defaults to setting this, breakpad defaults to not. Qt doesn't use wchar_t in the
     # public API, so we can use a different setting. Otherwise, it would cause linker errors.
@@ -151,7 +154,9 @@ SOURCES += src/main.cpp \
     src/ui/MacSplitter.cpp \
     src/core/TransferRateCalculator.cpp \
     src/utils/StringUtils.cpp \
-    src/core/LiveViewManager.cpp
+    src/core/LiveViewManager.cpp \
+    src/core/LiveStream.cpp \
+    src/core/LiveStreamWorker.cpp
 
 !macx:SOURCES += src/ui/StatusBandwidthWidget.cpp
 
@@ -212,7 +217,9 @@ HEADERS  += src/ui/MainWindow.h \
     src/core/TransferRateCalculator.h \
     src/ui/StatusBandwidthWidget.h \
     src/utils/StringUtils.h \
-    src/core/LiveViewManager.h
+    src/core/LiveViewManager.h \
+    src/core/LiveStream.h \
+    src/core/LiveStreamWorker.h
 
 RESOURCES += \
     res/resources.qrc \

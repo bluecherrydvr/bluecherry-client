@@ -1,4 +1,5 @@
 #include "core/BluecherryApp.h"
+#include "core/LiveStream.h"
 #include "ui/MainWindow.h"
 #include "ui/CrashReportDialog.h"
 #include <QApplication>
@@ -75,6 +76,8 @@ int main(int argc, char *argv[])
         jpegFormatName = "jpeg-turbo";
         qDebug("Using qjpeg-turbo");
     }
+
+    LiveStream::init();
 
     MainWindow w;
     w.show();
