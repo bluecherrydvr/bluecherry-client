@@ -2,7 +2,9 @@
 #define LIVESTREAMWORKER_H
 
 #include <QObject>
-#include <QImage>
+#include <QAtomicPointer>
+
+struct AVFrame;
 
 class LiveStreamWorker : public QObject
 {
@@ -13,18 +15,19 @@ public:
 
     void setUrl(const QByteArray &url);
 
+    AVFrame *takeFrame();
+
 public slots:
     void run();
     void stop();
-
-signals:
-    void frame(const QImage &image);
 
 private:
     struct AVFormatContext *ctx;
     struct SwsContext *sws;
     QByteArray url;
     bool cancelFlag;
+
+    QAtomicPointer<struct AVFrame> videoFrame;
 
     bool setup();
     void destroy();

@@ -131,15 +131,29 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
                                stream->codec->width, stream->codec->height, fmt, SWS_BICUBIC,
                                NULL, NULL, NULL);
 
-    QImage image = QImage(stream->codec->width, stream->codec->height, QImage::Format_RGB32);
+    int bufSize = avpicture_get_size(fmt, stream->codec->width, stream->codec->height);
+    uint8_t *buf = (uint8_t*) av_malloc(bufSize);
 
-    AVFrame frame;
-    avcodec_get_frame_defaults(&frame);
-    avpicture_fill((AVPicture*)&frame, (uint8_t*)image.bits(), fmt, stream->codec->width, stream->codec->height);
+    AVFrame *frame = avcodec_alloc_frame();
+    avpicture_fill((AVPicture*)frame, buf, fmt, stream->codec->width, stream->codec->height);
     sws_scale(sws, (const uint8_t**)rawFrame->data, rawFrame->linesize, 0, stream->codec->height,
-              frame.data, frame.linesize);
+              frame->data, frame->linesize);
 
-    emit this->frame(image);
+    frame->width = stream->codec->width;
+    frame->height = stream->codec->height;
+
+    AVFrame *oldFrame = videoFrame.fetchAndStoreOrdered(frame);
+    if (oldFrame)
+    {
+        qDebug() << "LiveStream: discarded frame";
+        av_free(oldFrame->data[0]);
+        av_free(oldFrame);
+    }
+}
+
+AVFrame *LiveStreamWorker::takeFrame()
+{
+    return videoFrame.fetchAndStoreOrdered(0);
 }
 
 void LiveStreamWorker::stop()

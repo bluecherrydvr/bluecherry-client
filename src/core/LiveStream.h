@@ -40,6 +40,9 @@ public slots:
 
     void setOnline(bool online);
 
+    /* Update the frame from the decoding thread; returns true if redraw is needed */
+    bool updateFrame();
+
 signals:
     void stateChanged(int newState);
     void streamRunning();
@@ -47,14 +50,14 @@ signals:
     void streamSizeChanged(const QSize &size);
     void updated();
 
-private slots:
-    void updateFrame(const QImage &image);
-
 private:
+    static QTimer *renderTimer;
+
     DVRCamera camera;
     QThread *thread;
     LiveStreamWorker *worker;
     QImage m_currentFrame;
+    struct AVFrame *m_frameData;
     QString m_errorMessage;
     State m_state;
     bool m_autoStart;

@@ -2,6 +2,8 @@
 #include "LiveStreamWorker.h"
 #include <QMutex>
 #include <QMetaObject>
+#include <QTimer>
+#include <QDebug>
 
 extern "C" {
 #include "libavcodec/avcodec.h"
@@ -28,15 +30,38 @@ static int bc_av_lockmgr(void **mutex, enum AVLockOp op)
     return 1;
 }
 
+class AutoTimer : public QTimer
+{
+protected:
+    virtual void connectNotify(const char *signal)
+    {
+        if (!strcmp(signal, SIGNAL(timeout())))
+            start();
+    }
+
+    virtual void disconnectNotify(const char *signal)
+    {
+        Q_UNUSED(signal);
+        if (!receivers(SIGNAL(timeout())))
+            stop();
+    }
+};
+
+QTimer *LiveStream::renderTimer = 0;
+
 void LiveStream::init()
 {
     av_lockmgr_register(bc_av_lockmgr);
     av_register_all();
     avformat_network_init();
+
+    renderTimer = new AutoTimer;
+    renderTimer->setInterval(33);
+    renderTimer->setSingleShot(false);
 }
 
 LiveStream::LiveStream(const DVRCamera &c, QObject *parent)
-    : QObject(parent), camera(c), thread(0), worker(0), m_state(NotConnected), m_autoStart(false)
+    : QObject(parent), camera(c), thread(0), worker(0), m_frameData(0), m_state(NotConnected), m_autoStart(false)
 {
 }
 
@@ -86,7 +111,7 @@ void LiveStream::start()
     connect(worker, SIGNAL(destroyed()), thread, SLOT(quit()));
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
 
-    connect(worker, SIGNAL(frame(QImage)), SLOT(updateFrame(QImage)));
+    connect(renderTimer, SIGNAL(timeout()), SLOT(updateFrame()));
 
     setState(Connecting);
     thread->start();
@@ -101,6 +126,8 @@ void LiveStream::stop()
         worker = 0;
         thread = 0;
     }
+
+    disconnect(renderTimer, SIGNAL(timeout()), this, SLOT(updateFrame()));
 
     if (state() > NotConnected)
     {
@@ -125,17 +152,32 @@ void LiveStream::setOnline(bool online)
     }
 }
 
-void LiveStream::updateFrame(const QImage &image)
+bool LiveStream::updateFrame()
 {
     if (state() < Connecting)
-        return;
-    else if (state() == Connecting)
+        return false;
+
+    AVFrame *newFrame = worker->takeFrame();
+    if (!newFrame)
+        return false;
+
+    if (state() == Connecting)
         setState(Streaming);
 
-    bool sizeChanged = (image.size() != m_currentFrame.size());
+    bool sizeChanged = (m_currentFrame.width() != newFrame->width ||
+                        m_currentFrame.height() != newFrame->height);
+    if (m_frameData)
+    {
+        av_free(m_frameData->data[0]);
+        av_free(m_frameData);
+    }
+    m_frameData = newFrame;
 
-    m_currentFrame = image;
+    m_currentFrame = QImage(m_frameData->data[0], m_frameData->width, m_frameData->height,
+                            m_frameData->linesize[0], QImage::Format_RGB32);
+
     if (sizeChanged)
-        emit streamSizeChanged(image.size());
+        emit streamSizeChanged(m_currentFrame.size());
     emit updated();
+    return true;
 }
