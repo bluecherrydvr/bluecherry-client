@@ -80,6 +80,8 @@ void LiveStream::start()
     thread = new QThread;
     worker = new LiveStreamWorker;
     worker->moveToThread(thread);
+    worker->setUrl(camera.streamUrl());
+
     connect(thread, SIGNAL(started()), worker, SLOT(run()));
     connect(worker, SIGNAL(destroyed()), thread, SLOT(quit()));
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
@@ -96,7 +98,6 @@ void LiveStream::stop()
     {
         /* Worker will delete itself, which will then destroy the thread */
         worker->staticMetaObject.invokeMethod(worker, "stop");
-        worker->stop();
         worker = 0;
         thread = 0;
     }

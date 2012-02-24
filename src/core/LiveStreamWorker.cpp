@@ -13,6 +13,11 @@ LiveStreamWorker::LiveStreamWorker(QObject *parent)
 {
 }
 
+void LiveStreamWorker::setUrl(const QByteArray &url)
+{
+    this->url = url;
+}
+
 void LiveStreamWorker::run()
 {
     if (!setup()) {
@@ -68,7 +73,7 @@ void LiveStreamWorker::run()
 bool LiveStreamWorker::setup()
 {
     int re;
-    if ((re = avformat_open_input(&ctx, "rtsp://192.168.0.15/live_41", NULL, NULL)) != 0)
+    if ((re = avformat_open_input(&ctx, url.constData(), NULL, NULL)) != 0)
     {
         char error[512];
         av_strerror(re, error, sizeof(error));

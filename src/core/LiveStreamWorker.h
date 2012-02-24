@@ -11,6 +11,8 @@ class LiveStreamWorker : public QObject
 public:
     explicit LiveStreamWorker(QObject *parent = 0);
 
+    void setUrl(const QByteArray &url);
+
 public slots:
     void run();
     void stop();
@@ -21,6 +23,7 @@ signals:
 private:
     struct AVFormatContext *ctx;
     struct SwsContext *sws;
+    QByteArray url;
     bool cancelFlag;
 
     bool setup();

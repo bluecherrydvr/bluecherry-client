@@ -86,9 +86,11 @@ bool DVRCamera::parseXML(QXmlStreamReader &xml)
         name = QString::fromLatin1("#%2").arg(uniqueId());
 
     d->displayName = name;
-    QUrl url(QLatin1String("/media/mjpeg.php?multipart"));
-    url.addQueryItem(QLatin1String("id"), QString::number(d->uniqueID));
-    d->streamUrl = server()->api->serverUrl().resolved(url).toString().toLatin1();
+    QUrl url;
+    url.setScheme(QLatin1String("rtsp"));
+    url.setHost(server()->api->serverUrl().host());
+    url.setPath(QString::fromLatin1("live_") + QString::number(d->uniqueID));
+    d->streamUrl = url.toString().toLatin1();
     d->isLoaded = true;
 
     d->doDataUpdated();
@@ -103,7 +105,7 @@ QSharedPointer<LiveStream> DVRCamera::liveStream()
     {
         if (d && !d->streamUrl.isEmpty())
         {
-            re = QSharedPointer<LiveStream>(new LiveStream(*this, d.data()));//QUrl(QString::fromLatin1(d->streamUrl))));
+            re = QSharedPointer<LiveStream>(new LiveStream(*this, d.data()));
             QObject::connect(d.data(), SIGNAL(onlineChanged(bool)), re.data(), SLOT(setOnline(bool)));
             QObject::connect(re.data(), SIGNAL(recordingStateChanged(int)), d.data(), SLOT(setRecordingState(int)));
             d->liveStream = re;
