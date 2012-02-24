@@ -9,7 +9,7 @@
 #include <QMetaType>
 
 class DVRServer;
-class MJpegStream;
+class LiveStream;
 class QMimeData;
 
 /* There is one DVRCameraData per server+ID; it is shared among many instances of
@@ -29,7 +29,7 @@ public:
     const int uniqueID;
     QString displayName;
     QByteArray streamUrl;
-    QWeakPointer<MJpegStream> mjpegStream;
+    QWeakPointer<LiveStream> liveStream;
     bool isLoaded, isOnline, isDisabled;
     qint8 ptzProtocol;
     qint8 recordingState;
@@ -103,7 +103,7 @@ public:
     bool isOnline() const { return d && d->isOnline && !d->isDisabled; }
     bool isDisabled() const { return d && d->isDisabled; }
     bool canStream() const { return d && !d->streamUrl.isEmpty() && isOnline(); }
-    QSharedPointer<MJpegStream> mjpegStream();
+    QSharedPointer<LiveStream> liveStream();
 
     PtzProtocol ptzProtocol() const { return d ? static_cast<PtzProtocol>(d->ptzProtocol) : NoPtz; }
     bool hasPtz() const { return d ? (d->ptzProtocol > 0) : false; }

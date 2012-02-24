@@ -2,6 +2,7 @@
 #include "DVRServer.h"
 #include "BluecherryApp.h"
 #include "MJpegStream.h"
+#include "LiveStream.h"
 #include <QXmlStreamReader>
 #include <QMimeData>
 #include <QSettings>
@@ -94,22 +95,22 @@ bool DVRCamera::parseXML(QXmlStreamReader &xml)
     return true;
 }
 
-QSharedPointer<MJpegStream> DVRCamera::mjpegStream()
+QSharedPointer<LiveStream> DVRCamera::liveStream()
 {
-    QSharedPointer<MJpegStream> re;
+    QSharedPointer<LiveStream> re;
 
-    if (!d || d->mjpegStream.isNull())
+    if (!d || d->liveStream.isNull())
     {
         if (d && !d->streamUrl.isEmpty())
         {
-            re = QSharedPointer<MJpegStream>(new MJpegStream(QUrl(QString::fromLatin1(d->streamUrl))));
+            re = QSharedPointer<LiveStream>(new LiveStream(*this, d.data()));//QUrl(QString::fromLatin1(d->streamUrl))));
             QObject::connect(d.data(), SIGNAL(onlineChanged(bool)), re.data(), SLOT(setOnline(bool)));
             QObject::connect(re.data(), SIGNAL(recordingStateChanged(int)), d.data(), SLOT(setRecordingState(int)));
-            d->mjpegStream = re;
+            d->liveStream = re;
         }
     }
     else
-        re = d->mjpegStream.toStrongRef();
+        re = d->liveStream.toStrongRef();
 
     return re;
 }

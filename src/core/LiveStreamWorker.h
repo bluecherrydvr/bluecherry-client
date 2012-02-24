@@ -13,6 +13,7 @@ public:
 
 public slots:
     void run();
+    void stop();
 
 signals:
     void frame(const QImage &image);
@@ -20,6 +21,7 @@ signals:
 private:
     struct AVFormatContext *ctx;
     struct SwsContext *sws;
+    bool cancelFlag;
 
     bool setup();
     void destroy();

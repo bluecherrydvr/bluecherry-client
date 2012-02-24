@@ -1,5 +1,4 @@
 #include "MJpegFeedItem.h"
-#include "core/MJpegStream.h"
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
@@ -9,7 +8,7 @@ MJpegFeedItem::MJpegFeedItem(QDeclarativeItem *parent)
     this->setFlag(QGraphicsItem::ItemHasNoContents, false);
 }
 
-void MJpegFeedItem::setStream(const QSharedPointer<MJpegStream> &stream)
+void MJpegFeedItem::setStream(const QSharedPointer<LiveStream> &stream)
 {
     if (stream == m_stream)
         return;
@@ -21,13 +20,11 @@ void MJpegFeedItem::setStream(const QSharedPointer<MJpegStream> &stream)
 
     if (m_stream)
     {
-        connect(m_stream.data(), SIGNAL(updateFrame(MJpegFrame,QVector<QImage>)), SLOT(updateFrame()));
+        connect(m_stream.data(), SIGNAL(updated()), SLOT(updateFrame()));
         connect(m_stream.data(), SIGNAL(streamSizeChanged(QSize)), SLOT(updateFrameSize()));
         connect(m_stream.data(), SIGNAL(stateChanged(int)), SLOT(streamStateChanged(int)));
         connect(m_stream.data(), SIGNAL(pausedChanged(bool)), SIGNAL(pausedChanged(bool)));
         m_stream->start();
-
-        streamStateChanged(m_stream->state());
     }
     else
         emit errorTextChanged(tr("No<br>Video"));
@@ -42,47 +39,48 @@ void MJpegFeedItem::setStream(const QSharedPointer<MJpegStream> &stream)
 
 void MJpegFeedItem::clear()
 {
-    setStream(QSharedPointer<MJpegStream>());
+    setStream(QSharedPointer<LiveStream>());
 }
 
 bool MJpegFeedItem::isPaused() const
 {
-    return m_stream ? m_stream->isPaused() : false;
+    return /*m_stream ? m_stream->isPaused() :*/ false;
 }
 
 void MJpegFeedItem::setPaused(bool paused)
 {
-    if (m_stream)
-        m_stream->setPaused(paused);
+    //if (m_stream)
+    //    m_stream->setPaused(paused);
 }
 
 bool MJpegFeedItem::isConnected() const
 {
-    return m_stream ? (m_stream->state() >= MJpegStream::Streaming || m_stream->state() == MJpegStream::Paused) : false;
+    //return m_stream ? (m_stream->state() >= LiveStream::Streaming || m_stream->state() == LiveStream::Paused) : false;
+    return true;
 }
 
 int MJpegFeedItem::interval() const
 {
-    return m_stream ? m_stream->interval() : 1;
+    return /*m_stream ? m_stream->interval() :*/ 1;
 }
 
 int MJpegFeedItem::fps() const
 {
-    return m_stream ? qRound(m_stream->receivedFps()) : 0;
+    return /*m_stream ? qRound(m_stream->receivedFps()) :*/ 0;
 }
 
 void MJpegFeedItem::setInterval(int interval)
 {
     if (m_stream)
     {
-        m_stream->setInterval(interval);
+        //m_stream->setInterval(interval);
         emit intervalChanged(interval);
     }
 }
 
 void MJpegFeedItem::clearInterval()
 {
-    m_stream->clearInterval();
+//    m_stream->clearInterval();
     emit intervalChanged(interval());
 }
 
@@ -121,21 +119,18 @@ void MJpegFeedItem::streamStateChanged(int state)
 
     switch (state)
     {
-    case MJpegStream::Error:
+    case LiveStream::Error:
         emit errorTextChanged(tr("<span style='color:#ff0000;'>Error</span>"));
         //setToolTip(m_stream->errorMessage());
         break;
-    case MJpegStream::StreamOffline:
+    case LiveStream::StreamOffline:
         emit errorTextChanged(tr("Offline"));
         break;
-    case MJpegStream::NotConnected:
+    case LiveStream::NotConnected:
         emit errorTextChanged(tr("Disconnected"));
         break;
-    case MJpegStream::Connecting:
+    case LiveStream::Connecting:
         emit errorTextChanged(tr("Connecting..."));
-        break;
-    case MJpegStream::Buffering:
-        emit errorTextChanged(tr("Buffering..."));
         break;
     default:
         emit errorTextChanged(QString());

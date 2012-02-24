@@ -82,9 +82,9 @@ void LiveFeedItem::cameraDataUpdated()
         }
     }
 
-    QSharedPointer<MJpegStream> nstream = m_camera.mjpegStream();
+    QSharedPointer<LiveStream> nstream = m_camera.liveStream();
     if (nstream != mjpeg->stream())
-        mjpeg->setStream(m_camera.mjpegStream());
+        mjpeg->setStream(m_camera.liveStream());
 }
 
 void LiveFeedItem::setStatusText(const QString &text)
@@ -116,7 +116,7 @@ void LiveFeedItem::saveSnapshot(const QString &ifile)
         return;
 
     /* Grab the current frame, so the user gets what they expect regardless of the time taken by the dialog */
-    MJpegFrame frame = m_camera.mjpegStream()->currentFrame();
+    MJpegFrame frame = m_camera.liveStream()->currentFrame();
     if (frame.isNull())
         return;
 
@@ -362,7 +362,7 @@ QMenu *LiveFeedItem::fpsMenu()
 {
     QMenu *menu = new QMenu;
     menu->setTitle(tr("Frame rate"));
-    menu->setEnabled(m_camera && m_camera.mjpegStream());
+    menu->setEnabled(m_camera && m_camera.liveStream());
 
     MJpegFeedItem *mjpeg = findChild<MJpegFeedItem*>(QLatin1String("mjpegFeed"));
     if (!mjpeg)

@@ -4,12 +4,13 @@
 #include <QDeclarativeItem>
 #include <QSharedPointer>
 #include "core/MJpegStream.h"
+#include "core/LiveStream.h"
 
 class MJpegFeedItem : public QDeclarativeItem
 {
     Q_OBJECT
 
-    Q_PROPERTY(QSharedPointer<MJpegStream> stream READ stream WRITE setStream NOTIFY streamChanged)
+    Q_PROPERTY(QSharedPointer<LiveStream> stream READ stream WRITE setStream NOTIFY streamChanged)
     Q_PROPERTY(QSizeF frameSize READ frameSize NOTIFY frameSizeChanged)
     Q_PROPERTY(bool paused READ isPaused WRITE setPaused NOTIFY pausedChanged)
     Q_PROPERTY(bool connected READ isConnected NOTIFY connectedChanged)
@@ -21,8 +22,8 @@ public:
 
     virtual void paint(QPainter *, const QStyleOptionGraphicsItem *, QWidget *);
 
-    QSharedPointer<MJpegStream> stream() const { return m_stream; }
-    void setStream(const QSharedPointer<MJpegStream> &stream);
+    QSharedPointer<LiveStream> stream() const { return m_stream; }
+    void setStream(const QSharedPointer<LiveStream> &stream);
     void clear();
 
     QSizeF frameSize() const { return m_stream ? m_stream->streamSize() : QSize(0, 0); }
@@ -39,7 +40,7 @@ public slots:
     void clearInterval();
 
 signals:
-    void streamChanged(const QSharedPointer<MJpegStream> &stream);
+    void streamChanged(const QSharedPointer<LiveStream> &stream);
     void frameSizeChanged(const QSizeF &frameSize);
     void errorTextChanged(const QString &errorText);
     void pausedChanged(bool paused);
@@ -61,7 +62,7 @@ private slots:
     void streamStateChanged(int state);
 
 private:
-    QSharedPointer<MJpegStream> m_stream;
+    QSharedPointer<LiveStream> m_stream;
 };
 
 #endif // MJPEGSTREAMITEM_H

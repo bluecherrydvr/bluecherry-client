@@ -1,6 +1,7 @@
 #include "LiveStream.h"
 #include "LiveStreamWorker.h"
 #include <QMutex>
+#include <QMetaObject>
 
 extern "C" {
 #include "libavcodec/avcodec.h"
@@ -35,18 +36,105 @@ void LiveStream::init()
 }
 
 LiveStream::LiveStream(const DVRCamera &c, QObject *parent)
-    : QObject(parent), camera(c)
+    : QObject(parent), camera(c), thread(0), worker(0), m_state(NotConnected), m_autoStart(false)
 {
-    thread = new QThread(this);
+}
+
+LiveStream::~LiveStream()
+{
+    stop();
+}
+
+void LiveStream::setState(State newState)
+{
+    if (m_state == newState)
+        return;
+
+    State oldState = m_state;
+    m_state = newState;
+
+    if (m_state != Error)
+        m_errorMessage.clear();
+
+    emit stateChanged(newState);
+
+    if (newState >= Streaming && oldState < Streaming)
+        emit streamRunning();
+    else if (oldState >= Streaming && newState < Streaming)
+        emit streamStopped();
+}
+
+void LiveStream::start()
+{
+    if (state() >= Connecting)
+        return;
+
+    if (state() == StreamOffline)
+    {
+        m_autoStart = true;
+        return;
+    }
+
+    Q_ASSERT(!thread && !worker);
+
+    thread = new QThread;
     worker = new LiveStreamWorker;
     worker->moveToThread(thread);
     connect(thread, SIGNAL(started()), worker, SLOT(run()));
+    connect(worker, SIGNAL(destroyed()), thread, SLOT(quit()));
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+
     connect(worker, SIGNAL(frame(QImage)), SLOT(updateFrame(QImage)));
+
+    setState(Connecting);
     thread->start();
+}
+
+void LiveStream::stop()
+{
+    if (worker)
+    {
+        /* Worker will delete itself, which will then destroy the thread */
+        worker->staticMetaObject.invokeMethod(worker, "stop");
+        worker->stop();
+        worker = 0;
+        thread = 0;
+    }
+
+    if (state() > NotConnected)
+    {
+        setState(NotConnected);
+        m_autoStart = false;
+    }
+}
+
+void LiveStream::setOnline(bool online)
+{
+    if (!online && state() != StreamOffline)
+    {
+        m_autoStart = (m_autoStart || state() >= Connecting);
+        setState(StreamOffline);
+        stop();
+    }
+    else if (online && state() == StreamOffline)
+    {
+        setState(NotConnected);
+        if (m_autoStart)
+            start();
+    }
 }
 
 void LiveStream::updateFrame(const QImage &image)
 {
+    if (state() < Connecting)
+        return;
+    else if (state() == Connecting)
+        setState(Streaming);
+
+    bool sizeChanged = (image.size() != m_currentFrame.size());
+
     m_currentFrame = image;
+    if (sizeChanged)
+        emit streamSizeChanged(image.size());
     emit updated();
 }

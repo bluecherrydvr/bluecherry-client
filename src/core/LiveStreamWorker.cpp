@@ -1,5 +1,6 @@
 #include "LiveStreamWorker.h"
 #include <QDebug>
+#include <QCoreApplication>
 
 extern "C" {
 #include "libavcodec/avcodec.h"
@@ -8,7 +9,7 @@ extern "C" {
 }
 
 LiveStreamWorker::LiveStreamWorker(QObject *parent)
-    : QObject(parent), ctx(0), sws(0)
+    : QObject(parent), ctx(0), sws(0), cancelFlag(false)
 {
 }
 
@@ -22,7 +23,7 @@ void LiveStreamWorker::run()
     AVPacket packet;
     AVFrame *frame = avcodec_alloc_frame();
 
-    for (;;)
+    while (!cancelFlag)
     {
         int re = av_read_frame(ctx, &packet);
         if (re < 0)
@@ -54,7 +55,11 @@ void LiveStreamWorker::run()
         }
 
         av_free_packet(&packet);
+
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
+
+    qDebug() << "LiveStream: Ending thread";
 
     av_free(frame);
     destroy();
@@ -130,4 +135,10 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
               frame.data, frame.linesize);
 
     emit this->frame(image);
+}
+
+void LiveStreamWorker::stop()
+{
+    cancelFlag = true;
+    deleteLater();
 }
