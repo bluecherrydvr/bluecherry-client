@@ -1,5 +1,7 @@
 #include "LiveStream.h"
 #include "LiveStreamWorker.h"
+#include "BluecherryApp.h"
+#include "LiveViewManager.h"
 #include <QMutex>
 #include <QMetaObject>
 #include <QTimer>
@@ -61,13 +63,16 @@ void LiveStream::init()
 }
 
 LiveStream::LiveStream(const DVRCamera &c, QObject *parent)
-    : QObject(parent), camera(c), thread(0), worker(0), m_frameData(0), m_state(NotConnected), m_autoStart(false)
+    : QObject(parent), camera(c), thread(0), worker(0), m_frameData(0), m_state(NotConnected),
+      m_autoStart(false), m_fpsUpdateCnt(0), m_fpsUpdateHits(0)
 {
+    bcApp->liveView->addStream(this);
 }
 
 LiveStream::~LiveStream()
 {
     stop();
+    bcApp->liveView->removeStream(this);
 }
 
 void LiveStream::setState(State newState)

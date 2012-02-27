@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-class MJpegStream;
+class LiveStream;
 class QAction;
 
 class LiveViewManager : public QObject
@@ -15,9 +15,9 @@ class LiveViewManager : public QObject
 public:
     explicit LiveViewManager(QObject *parent = 0);
 
-    QList<MJpegStream*> mjpegStreams() const;
+    QList<LiveStream*> streams() const;
 
-    /* Global interval has the same semantics as MJpegStream intervals;
+    /* Global interval has the same semantics as LiveStream intervals;
      * we receive only every Nth frame from the source. It may also be the
      * special value '0', which is a static 1 FPS stream. */
     int globalInterval() const { return m_globalInterval; }
@@ -33,12 +33,12 @@ signals:
     void globalIntervalChanged(int interval);
 
 private:
-    QList<MJpegStream*> m_mjpegStreams;
+    QList<LiveStream*> m_streams;
     int m_globalInterval;
 
-    friend class MJpegStream;
-    void addStream(MJpegStream *stream);
-    void removeStream(MJpegStream *stream);
+    friend class LiveStream;
+    void addStream(LiveStream *stream);
+    void removeStream(LiveStream *stream);
 };
 
 #endif // LIVEVIEWMANAGER_H

@@ -40,6 +40,8 @@ public slots:
 
     void setOnline(bool online);
 
+    void setInterval(int interval) { }
+
     /* Update the frame from the decoding thread; returns true if redraw is needed */
     bool updateFrame();
 

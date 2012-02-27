@@ -1,5 +1,5 @@
 #include "LiveViewManager.h"
-#include "MJpegStream.h"
+#include "LiveStream.h"
 #include <QAction>
 
 LiveViewManager::LiveViewManager(QObject *parent)
@@ -7,16 +7,16 @@ LiveViewManager::LiveViewManager(QObject *parent)
 {
 }
 
-void LiveViewManager::addStream(MJpegStream *stream)
+void LiveViewManager::addStream(LiveStream *stream)
 {
-    m_mjpegStreams.append(stream);
+    m_streams.append(stream);
     connect(this, SIGNAL(globalIntervalChanged(int)), stream, SLOT(setInterval(int)));
     stream->setInterval(globalInterval());
 }
 
-void LiveViewManager::removeStream(MJpegStream *stream)
+void LiveViewManager::removeStream(LiveStream *stream)
 {
-    m_mjpegStreams.removeOne(stream);
+    m_streams.removeOne(stream);
 }
 
 void LiveViewManager::setGlobalInterval(int interval)

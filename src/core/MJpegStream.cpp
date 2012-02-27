@@ -17,7 +17,7 @@ MJpegStream::MJpegStream(QObject *parent)
       m_parserState(ParserBoundary), m_recordingState(DVRCamera::NoRecording), m_autoStart(false),
       m_paused(false), m_interval(1)
 {
-    bcApp->liveView->addStream(this);
+    //bcApp->liveView->addStream(this);
     connect(&m_activityTimer, SIGNAL(timeout()), SLOT(checkActivity()));
 }
 
@@ -27,7 +27,7 @@ MJpegStream::MJpegStream(const QUrl &url, QObject *parent)
       m_parserState(ParserBoundary), m_recordingState(DVRCamera::NoRecording), m_autoStart(false),
       m_paused(false), m_interval(1)
 {
-    bcApp->liveView->addStream(this);
+    //bcApp->liveView->addStream(this);
     setUrl(url);
     connect(&m_activityTimer, SIGNAL(timeout()), SLOT(checkActivity()));
 }
@@ -40,7 +40,7 @@ MJpegStream::~MJpegStream()
         emit recordingStateChanged(m_recordingState);
     }
 
-    bcApp->liveView->removeStream(this);
+    //bcApp->liveView->removeStream(this);
 
     if (m_httpReply)
         m_httpReply->deleteLater();
