@@ -44,15 +44,16 @@ public slots:
 
     void setInterval(int interval) { }
 
-    /* Update the frame from the decoding thread; returns true if redraw is needed */
-    bool updateFrame();
-
 signals:
     void stateChanged(int newState);
     void streamRunning();
     void streamStopped();
     void streamSizeChanged(const QSize &size);
     void updated();
+
+private slots:
+    bool updateFrame();
+    void fatalError(const QString &message);
 
 private:
     static QTimer *renderTimer;

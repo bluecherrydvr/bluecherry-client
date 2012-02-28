@@ -106,21 +106,30 @@ void LiveStream::start()
         return;
     }
 
-    Q_ASSERT(!thread && !worker);
+    if (!worker)
+    {
+        Q_ASSERT(!thread);
+        thread = new QThread;
+        worker = new LiveStreamWorker;
+        worker->moveToThread(thread);
+        worker->setUrl(camera.streamUrl());
 
-    thread = new QThread;
-    worker = new LiveStreamWorker;
-    worker->moveToThread(thread);
-    worker->setUrl(camera.streamUrl());
+        connect(thread, SIGNAL(started()), worker, SLOT(run()));
+        connect(worker, SIGNAL(destroyed()), thread, SLOT(quit()));
+        connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
 
-    connect(thread, SIGNAL(started()), worker, SLOT(run()));
-    connect(worker, SIGNAL(destroyed()), thread, SLOT(quit()));
-    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+        connect(renderTimer, SIGNAL(timeout()), SLOT(updateFrame()));
 
-    connect(renderTimer, SIGNAL(timeout()), SLOT(updateFrame()));
+        connect(worker, SIGNAL(fatalError(QString)), SLOT(fatalError(QString)));
 
-    setState(Connecting);
-    thread->start();
+        setState(Connecting);
+        thread->start();
+    }
+    else
+    {
+        setState(Connecting);
+        worker->metaObject()->invokeMethod(worker, "run");
+    }
 }
 
 void LiveStream::stop()
@@ -193,4 +202,11 @@ bool LiveStream::updateFrame()
         emit streamSizeChanged(m_currentFrame.size());
     emit updated();
     return true;
+}
+
+void LiveStream::fatalError(const QString &message)
+{
+    m_errorMessage = message;
+    setState(Error);
+    QTimer::singleShot(15000, this, SLOT(start()));
 }

@@ -21,6 +21,9 @@ public slots:
     void run();
     void stop();
 
+signals:
+    void fatalError(const QString &message);
+
 private:
     struct AVFormatContext *ctx;
     struct SwsContext *sws;
