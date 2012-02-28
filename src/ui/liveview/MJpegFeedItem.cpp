@@ -66,7 +66,7 @@ int MJpegFeedItem::interval() const
 
 int MJpegFeedItem::fps() const
 {
-    return /*m_stream ? qRound(m_stream->receivedFps()) :*/ 0;
+    return m_stream ? qRound(m_stream->receivedFps()) : 0;
 }
 
 void MJpegFeedItem::setInterval(int interval)

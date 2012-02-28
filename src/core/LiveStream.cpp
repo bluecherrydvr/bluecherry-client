@@ -50,6 +50,7 @@ protected:
 };
 
 QTimer *LiveStream::renderTimer = 0;
+static const int renderTimerFps = 30;
 
 void LiveStream::init()
 {
@@ -58,13 +59,13 @@ void LiveStream::init()
     avformat_network_init();
 
     renderTimer = new AutoTimer;
-    renderTimer->setInterval(33);
+    renderTimer->setInterval(1000 / renderTimerFps);
     renderTimer->setSingleShot(false);
 }
 
 LiveStream::LiveStream(const DVRCamera &c, QObject *parent)
     : QObject(parent), camera(c), thread(0), worker(0), m_frameData(0), m_state(NotConnected),
-      m_autoStart(false), m_fpsUpdateCnt(0), m_fpsUpdateHits(0)
+      m_autoStart(false), m_fpsUpdateCnt(0), m_fpsUpdateHits(0), m_fps(0)
 {
     bcApp->liveView->addStream(this);
 }
@@ -162,9 +163,16 @@ bool LiveStream::updateFrame()
     if (state() < Connecting)
         return false;
 
+    if (++m_fpsUpdateCnt == int(1.5*renderTimerFps)) {
+        m_fps = m_fpsUpdateHits/1.5;
+        m_fpsUpdateCnt = m_fpsUpdateHits = 0;
+    }
+
     AVFrame *newFrame = worker->takeFrame();
     if (!newFrame)
         return false;
+
+    m_fpsUpdateHits++;
 
     if (state() == Connecting)
         setState(Streaming);

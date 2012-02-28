@@ -34,6 +34,8 @@ public:
     QImage currentFrame() const { return m_currentFrame; }
     QSize streamSize() const { return m_currentFrame.size(); }
 
+    float receivedFps() const { return m_fps; }
+
 public slots:
     void start();
     void stop();
@@ -63,6 +65,10 @@ private:
     QString m_errorMessage;
     State m_state;
     bool m_autoStart;
+
+    int m_fpsUpdateCnt;
+    int m_fpsUpdateHits;
+    float m_fps;
 
     void setState(State newState);
 };
