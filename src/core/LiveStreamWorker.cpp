@@ -84,21 +84,28 @@ bool LiveStreamWorker::setup()
 {
     ASSERT_WORKER_THREAD();
 
+    AVDictionary *opt = 0;
+    av_dict_set(&opt, "threads", "1", 0);
+    av_dict_set(&opt, "allowed_media_types", "-audio-data", 0);
+    av_dict_set(&opt, "max_delay", QByteArray::number(qint64(0.3*AV_TIME_BASE)).constData(), 0);
+
     int re;
-    if ((re = avformat_open_input(&ctx, url.constData(), NULL, NULL)) != 0)
+    if ((re = avformat_open_input(&ctx, url.constData(), NULL, &opt)) != 0)
     {
         char error[512];
         av_strerror(re, error, sizeof(error));
         emit fatalError(QString::fromLatin1(error));
+        av_dict_free(&opt);
         return false;
     }
 
-    if ((re = avformat_find_stream_info(ctx, NULL)) < 0)
+    if ((re = avformat_find_stream_info(ctx, &opt)) < 0)
     {
         char error[512];
         av_strerror(re, error, sizeof(error));
         emit fatalError(QString::fromLatin1(error));
         av_close_input_file(ctx);
+        av_dict_free(&opt);
         return false;
     }
 
@@ -106,7 +113,7 @@ bool LiveStreamWorker::setup()
     {
         char info[512];
         AVCodec *codec = avcodec_find_decoder(ctx->streams[i]->codec->codec_id);
-        if ((re = avcodec_open2(ctx->streams[i]->codec, codec, NULL)) < 0)
+        if ((re = avcodec_open2(ctx->streams[i]->codec, codec, &opt)) < 0)
         {
             qDebug() << "LiveStream: cannot find decoder for stream" << i << "codec" <<
                         ctx->streams[i]->codec->codec_id;
@@ -117,6 +124,7 @@ bool LiveStreamWorker::setup()
         qDebug() << "LiveStream: stream #" << i << ":" << info;
     }
 
+    av_dict_free(&opt);
     return true;
 }
 
