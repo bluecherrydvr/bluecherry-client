@@ -179,6 +179,7 @@ bool LiveStream::updateFrame()
         m_fpsUpdateCnt = m_fpsUpdateHits = 0;
     }
 
+    QMutexLocker l(&worker->frameLock);
     StreamFrame *sf = worker->frameHead;
     if (!sf)
         return false;
@@ -208,8 +209,10 @@ bool LiveStream::updateFrame()
 
         if (sf == m_frame)
             return false;
-        worker->frameHead.fetchAndStoreOrdered(sf);
+        worker->frameHead = sf;
     }
+
+    l.unlock();
 
     /* XXX better m_frame maintainence and oddity handling */
     m_frame = sf;

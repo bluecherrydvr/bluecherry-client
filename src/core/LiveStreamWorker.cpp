@@ -12,7 +12,7 @@ extern "C" {
 #define ASSERT_WORKER_THREAD() Q_ASSERT(QThread::currentThread() == thread())
 
 LiveStreamWorker::LiveStreamWorker(QObject *parent)
-    : QObject(parent), ctx(0), sws(0), cancelFlag(false), frameTail(0)
+    : QObject(parent), ctx(0), sws(0), cancelFlag(false), frameHead(0), frameTail(0)
 {
 }
 
@@ -182,7 +182,6 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
     frame->width  = stream->codec->width;
     frame->height = stream->codec->height;
     frame->pts    = rawFrame->pkt_pts;
-
 #if 0
     static QDateTime start = QDateTime::currentDateTime();
     static int frames = 0;
@@ -210,13 +209,29 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
     sf->d    = frame;
     sf->next = 0;
 
+    frameLock.lock();
     if (!frameTail) {
-        frameHead.fetchAndStoreOrdered(sf);
+        frameHead = sf;
         frameTail = sf;
     } else {
+        sf->d->display_picture_number = frameTail->d->display_picture_number+1;
         frameTail->next = sf;
         frameTail = sf;
+
+        /* If necessary, drop frames to avoid exploding memory. This will only happen if
+         * the UI thread cannot keep up enough to do is own PTS-based framedropping.
+         * It is NEVER safe to drop frameHead; only the UI thread may do that. */
+        if (frameTail->d->display_picture_number - frameHead->next->d->display_picture_number >= 30)
+        {
+            for (StreamFrame *f = frameHead->next, *n = f->next; f && f != frameTail; f = n, n = f->next)
+            {
+                f->free();
+                delete f;
+            }
+            frameHead->next = frameTail;
+        }
     }
+    frameLock.unlock();
 }
 
 AVFrame *LiveStreamWorker::takeFrame()

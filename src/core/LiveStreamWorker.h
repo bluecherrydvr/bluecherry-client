@@ -2,7 +2,7 @@
 #define LIVESTREAMWORKER_H
 
 #include <QObject>
-#include <QAtomicPointer>
+#include <QMutex>
 
 struct AVFrame;
 
@@ -40,8 +40,8 @@ private:
 
     public:
     QAtomicPointer<struct AVFrame> videoFrame;
-    QAtomicPointer<StreamFrame> frameHead;
-    StreamFrame *frameTail;
+    QMutex frameLock;
+    StreamFrame *frameHead, *frameTail;
     private:
 
     bool setup();
