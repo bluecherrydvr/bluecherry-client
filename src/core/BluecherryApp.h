@@ -28,7 +28,7 @@ public:
 
     explicit BluecherryApp();
 
-    QWidget *globalParentWindow() const;
+    MainWindow *globalParentWindow() const;
 
     QList<DVRServer*> servers() const { return m_servers; }
     DVRServer *addNewServer(const QString &name);
@@ -87,7 +87,7 @@ private:
 
 extern BluecherryApp *bcApp;
 
-inline QWidget *BluecherryApp::globalParentWindow() const
+inline MainWindow *BluecherryApp::globalParentWindow() const
 {
 #ifdef Q_WS_MAC
     return 0;
