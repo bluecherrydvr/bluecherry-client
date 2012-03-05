@@ -10,6 +10,7 @@
 extern "C" {
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
+#include "libavutil/mathematics.h"
 }
 
 static int bc_av_lockmgr(void **mutex, enum AVLockOp op)
@@ -65,7 +66,7 @@ void LiveStream::init()
 
 LiveStream::LiveStream(const DVRCamera &c, QObject *parent)
     : QObject(parent), camera(c), thread(0), worker(0), m_frameData(0), m_state(NotConnected),
-      m_autoStart(false), m_fpsUpdateCnt(0), m_fpsUpdateHits(0), m_fps(0)
+      m_autoStart(false), m_fpsUpdateCnt(0), m_fpsUpdateHits(0), m_fps(0), m_ptsBase(AV_NOPTS_VALUE)
 {
     bcApp->liveView->addStream(this);
 }
@@ -172,14 +173,46 @@ bool LiveStream::updateFrame()
     if (state() < Connecting)
         return false;
 
-    if (++m_fpsUpdateCnt == int(1.5*renderTimerFps)) {
+    if (++m_fpsUpdateCnt == int(1.5*renderTimerFps))
+    {
         m_fps = m_fpsUpdateHits/1.5;
         m_fpsUpdateCnt = m_fpsUpdateHits = 0;
     }
 
-    AVFrame *newFrame = worker->takeFrame();
-    if (!newFrame)
+    StreamFrame *sf = worker->frameHead;
+    if (!sf)
         return false;
+
+    if (sf == m_frame)
+    {
+        if (!(sf = sf->next))
+            return false;
+        qint64 rescale = av_rescale_q(m_frame->d->pts - m_ptsBase, (AVRational){1,90000}, AV_TIME_BASE_Q);
+        qint64 now     = m_ptsTimer.elapsed()*1000;
+        qDebug() << "current" << m_frame->d->pts << "new" << sf->d->pts << "rescale" << rescale << "now" << now << "delta" << (rescale - now);
+
+        /* XXX test the next frame(s) too, to handle dropping */
+        /* XXX we still need decode thread dropping too. */
+
+        if (rescale - now > 16000) {
+            qDebug() << "wait" << rescale - now << "for frame";
+            return false;
+        }
+
+        worker->frameHead.fetchAndStoreOrdered(sf);
+        m_frame->free();
+        delete m_frame;
+    }
+
+    /* XXX better m_frame maintainence and oddity handling */
+    m_frame = sf;
+    if (m_ptsBase == AV_NOPTS_VALUE)
+    {
+        m_ptsBase = m_frame->d->pts;
+        m_ptsTimer.restart();
+    }
+
+    AVFrame *newFrame = sf->d;
 
     m_fpsUpdateHits++;
 
@@ -188,11 +221,6 @@ bool LiveStream::updateFrame()
 
     bool sizeChanged = (m_currentFrame.width() != newFrame->width ||
                         m_currentFrame.height() != newFrame->height);
-    if (m_frameData)
-    {
-        av_free(m_frameData->data[0]);
-        av_free(m_frameData);
-    }
     m_frameData = newFrame;
 
     m_currentFrame = QImage(m_frameData->data[0], m_frameData->width, m_frameData->height,

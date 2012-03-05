@@ -6,6 +6,14 @@
 
 struct AVFrame;
 
+struct StreamFrame
+{
+    StreamFrame *next;
+    AVFrame *d;
+
+    void free();
+};
+
 class LiveStreamWorker : public QObject
 {
     Q_OBJECT
@@ -30,7 +38,11 @@ private:
     QByteArray url;
     bool cancelFlag;
 
+    public:
     QAtomicPointer<struct AVFrame> videoFrame;
+    QAtomicPointer<StreamFrame> frameHead;
+    StreamFrame *frameTail;
+    private:
 
     bool setup();
     void destroy();

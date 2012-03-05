@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QThread>
 #include <QImage>
+#include <QElapsedTimer>
 #include "DVRCamera.h"
 
 class LiveStreamWorker;
@@ -63,6 +64,7 @@ private:
     LiveStreamWorker *worker;
     QImage m_currentFrame;
     struct AVFrame *m_frameData;
+    struct StreamFrame *m_frame;
     QString m_errorMessage;
     State m_state;
     bool m_autoStart;
@@ -70,6 +72,9 @@ private:
     int m_fpsUpdateCnt;
     int m_fpsUpdateHits;
     float m_fps;
+
+    qint64 m_ptsBase;
+    QElapsedTimer m_ptsTimer;
 
     void setState(State newState);
 };

@@ -12,7 +12,7 @@ extern "C" {
 #define ASSERT_WORKER_THREAD() Q_ASSERT(QThread::currentThread() == thread())
 
 LiveStreamWorker::LiveStreamWorker(QObject *parent)
-    : QObject(parent), ctx(0), sws(0), cancelFlag(false)
+    : QObject(parent), ctx(0), sws(0), cancelFlag(false), frameTail(0)
 {
 }
 
@@ -49,6 +49,7 @@ void LiveStreamWorker::run()
 
         uint8_t *data = packet.data;
 
+        int in_packet = 0;
         while (packet.size > 0)
         {
             int got_picture = 0;
@@ -63,6 +64,7 @@ void LiveStreamWorker::run()
             if (got_picture)
             {
                 processVideo(ctx->streams[0], frame);
+                in_packet++;
             }
 
             packet.size -= re;
@@ -158,6 +160,9 @@ void LiveStreamWorker::destroy()
     ctx = 0;
 }
 
+#include <QDateTime>
+#include <QElapsedTimer>
+
 void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *rawFrame)
 {
     const PixelFormat fmt = PIX_FMT_BGRA;
@@ -166,7 +171,7 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
                                stream->codec->width, stream->codec->height, fmt, SWS_BICUBIC,
                                NULL, NULL, NULL);
 
-    int bufSize = avpicture_get_size(fmt, stream->codec->width, stream->codec->height);
+    int bufSize  = avpicture_get_size(fmt, stream->codec->width, stream->codec->height);
     uint8_t *buf = (uint8_t*) av_malloc(bufSize);
 
     AVFrame *frame = avcodec_alloc_frame();
@@ -174,15 +179,43 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
     sws_scale(sws, (const uint8_t**)rawFrame->data, rawFrame->linesize, 0, stream->codec->height,
               frame->data, frame->linesize);
 
-    frame->width = stream->codec->width;
+    frame->width  = stream->codec->width;
     frame->height = stream->codec->height;
+    frame->pts    = rawFrame->pkt_pts;
+
+#if 0
+    static QDateTime start = QDateTime::currentDateTime();
+    static int frames = 0;
+    static QElapsedTimer timer;
+    frames++;
+
+    qDebug() << "time since frame:" << timer.elapsed() << "pts" << rawFrame->pts << rawFrame->pkt_pts;
+    timer.restart();
 
     AVFrame *oldFrame = videoFrame.fetchAndStoreOrdered(frame);
     if (oldFrame)
     {
-        qDebug() << "LiveStream: discarded frame";
+        qDebug() << "LiveStream: discarded frame with pts" << oldFrame->pts;
         av_free(oldFrame->data[0]);
         av_free(oldFrame);
+    }
+
+    if (!(frames % 30)) {
+        int duration = start.secsTo(QDateTime::currentDateTime());
+        qDebug() << frames << "frames in" << duration << "seconds =" << (double(frames)/duration) << "fps";
+    }
+#endif
+
+    StreamFrame *sf = new StreamFrame;
+    sf->d    = frame;
+    sf->next = 0;
+
+    if (!frameTail) {
+        frameHead.fetchAndStoreOrdered(sf);
+        frameTail = sf;
+    } else {
+        frameTail->next = sf;
+        frameTail = sf;
     }
 }
 
@@ -195,4 +228,10 @@ void LiveStreamWorker::stop()
 {
     cancelFlag = true;
     deleteLater();
+}
+
+void StreamFrame::free()
+{
+    av_free(d->data[0]);
+    av_free(d);
 }
