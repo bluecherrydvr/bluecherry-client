@@ -185,23 +185,30 @@ bool LiveStream::updateFrame()
 
     if (sf == m_frame)
     {
-        if (!(sf = sf->next))
-            return false;
-        qint64 rescale = av_rescale_q(m_frame->d->pts - m_ptsBase, (AVRational){1,90000}, AV_TIME_BASE_Q);
-        qint64 now     = m_ptsTimer.elapsed()*1000;
-        qDebug() << "current" << m_frame->d->pts << "new" << sf->d->pts << "rescale" << rescale << "now" << now << "delta" << (rescale - now);
+        qint64 now = m_ptsTimer.elapsed()*1000;
+        StreamFrame *next;
 
-        /* XXX test the next frame(s) too, to handle dropping */
-        /* XXX we still need decode thread dropping too. */
+        /* XXX unreasonable PTS/time difference handling */
 
-        if (rescale - now > 16000) {
-            qDebug() << "wait" << rescale - now << "for frame";
-            return false;
+        while ((next = sf->next))
+        {
+            qint64 rescale = av_rescale_q(next->d->pts - m_ptsBase, (AVRational){1,90000}, AV_TIME_BASE_Q);
+            if (now >= rescale || (rescale - now) <= AV_TIME_BASE/(renderTimerFps*2)) {
+                /* Target rendering time is in the past, or is less than half a repaint interval in
+                 * the future, so it's time to draw this frame. */
+                sf->free();
+                delete sf;
+                sf = next;
+            }
+            else
+                break;
         }
 
+        /* XXX we still need decode thread dropping too. */
+
+        if (sf == m_frame)
+            return false;
         worker->frameHead.fetchAndStoreOrdered(sf);
-        m_frame->free();
-        delete m_frame;
     }
 
     /* XXX better m_frame maintainence and oddity handling */
