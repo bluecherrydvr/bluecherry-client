@@ -116,7 +116,7 @@ void LiveFeedItem::saveSnapshot(const QString &ifile)
         return;
 
     /* Grab the current frame, so the user gets what they expect regardless of the time taken by the dialog */
-    MJpegFrame frame = m_camera.liveStream()->currentFrame();
+    QImage frame = m_camera.liveStream()->currentFrame();
     if (frame.isNull())
         return;
 

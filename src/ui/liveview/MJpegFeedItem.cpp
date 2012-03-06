@@ -91,7 +91,7 @@ void MJpegFeedItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWid
     if (!m_stream)
         return;
 
-    MJpegFrame frame = m_stream->currentFrame();
+    QImage frame = m_stream->currentFrame();
 
     if (!frame.isNull())
     {
@@ -99,7 +99,7 @@ void MJpegFeedItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWid
         //p->setRenderHint(QPainter::SmoothPixmapTransform);
         p->setCompositionMode(QPainter::CompositionMode_Source);
 
-#ifdef MJPEGFRAME_IS_PIXMAP
+#if 0//def MJPEGFRAME_IS_PIXMAP
         p->drawPixmap(opt->rect, frame);
 #else
         p->drawImage(opt->rect, frame);
