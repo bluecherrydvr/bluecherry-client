@@ -11,7 +11,8 @@ struct StreamFrame
     StreamFrame *next;
     AVFrame *d;
 
-    void free();
+    StreamFrame() : next(0), d(0) { }
+    ~StreamFrame();
 };
 
 class LiveStreamWorker : public QObject
@@ -23,8 +24,6 @@ public:
 
     void setUrl(const QByteArray &url);
 
-    AVFrame *takeFrame();
-
 public slots:
     void run();
     void stop();
@@ -33,16 +32,15 @@ signals:
     void fatalError(const QString &message);
 
 private:
+    friend class LiveStream;
+
     struct AVFormatContext *ctx;
     struct SwsContext *sws;
     QByteArray url;
     bool cancelFlag;
 
-    public:
-    QAtomicPointer<struct AVFrame> videoFrame;
     QMutex frameLock;
     StreamFrame *frameHead, *frameTail;
-    private:
 
     bool setup();
     void destroy();

@@ -63,7 +63,6 @@ private:
     QThread *thread;
     LiveStreamWorker *worker;
     QImage m_currentFrame;
-    struct AVFrame *m_frameData;
     struct StreamFrame *m_frame;
     QString m_errorMessage;
     State m_state;

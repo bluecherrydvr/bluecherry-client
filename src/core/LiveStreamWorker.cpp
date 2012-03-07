@@ -143,12 +143,14 @@ void LiveStreamWorker::destroy()
         sws = 0;
     }
 
-    AVFrame *frame = takeFrame();
-    if (frame)
+    frameLock.lock();
+    for (StreamFrame *f = frameHead, *n; f; f = n)
     {
-        av_free(frame->data[0]);
-        av_free(frame);
+        n = f->next;
+        delete f;
     }
+    frameHead = frameTail = 0;
+    frameLock.unlock();
 
     for (int i = 0; i < ctx->nb_streams; ++i)
     {
@@ -159,9 +161,6 @@ void LiveStreamWorker::destroy()
     av_close_input_file(ctx);
     ctx = 0;
 }
-
-#include <QDateTime>
-#include <QElapsedTimer>
 
 void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *rawFrame)
 {
@@ -182,32 +181,9 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
     frame->width  = stream->codec->width;
     frame->height = stream->codec->height;
     frame->pts    = rawFrame->pkt_pts;
-#if 0
-    static QDateTime start = QDateTime::currentDateTime();
-    static int frames = 0;
-    static QElapsedTimer timer;
-    frames++;
-
-    qDebug() << "time since frame:" << timer.elapsed() << "pts" << rawFrame->pts << rawFrame->pkt_pts;
-    timer.restart();
-
-    AVFrame *oldFrame = videoFrame.fetchAndStoreOrdered(frame);
-    if (oldFrame)
-    {
-        qDebug() << "LiveStream: discarded frame with pts" << oldFrame->pts;
-        av_free(oldFrame->data[0]);
-        av_free(oldFrame);
-    }
-
-    if (!(frames % 30)) {
-        int duration = start.secsTo(QDateTime::currentDateTime());
-        qDebug() << frames << "frames in" << duration << "seconds =" << (double(frames)/duration) << "fps";
-    }
-#endif
 
     StreamFrame *sf = new StreamFrame;
     sf->d    = frame;
-    sf->next = 0;
 
     frameLock.lock();
     if (!frameTail) {
@@ -224,19 +200,11 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
         if (frameTail->d->display_picture_number - frameHead->next->d->display_picture_number >= 30)
         {
             for (StreamFrame *f = frameHead->next, *n = f->next; f && f != frameTail; f = n, n = f->next)
-            {
-                f->free();
                 delete f;
-            }
             frameHead->next = frameTail;
         }
     }
     frameLock.unlock();
-}
-
-AVFrame *LiveStreamWorker::takeFrame()
-{
-    return videoFrame.fetchAndStoreOrdered(0);
 }
 
 void LiveStreamWorker::stop()
@@ -245,8 +213,11 @@ void LiveStreamWorker::stop()
     deleteLater();
 }
 
-void StreamFrame::free()
+StreamFrame::~StreamFrame()
 {
-    av_free(d->data[0]);
-    av_free(d);
+    if (d)
+    {
+        av_free(d->data[0]);
+        av_free(d);
+    }
 }

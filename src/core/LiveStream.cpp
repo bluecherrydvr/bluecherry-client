@@ -65,7 +65,7 @@ void LiveStream::init()
 }
 
 LiveStream::LiveStream(const DVRCamera &c, QObject *parent)
-    : QObject(parent), camera(c), thread(0), worker(0), m_frameData(0), m_state(NotConnected),
+    : QObject(parent), camera(c), thread(0), worker(0), m_frame(0), m_state(NotConnected),
       m_autoStart(false), m_fpsUpdateCnt(0), m_fpsUpdateHits(0), m_fps(0), m_ptsBase(AV_NOPTS_VALUE)
 {
     bcApp->liveView->addStream(this);
@@ -137,11 +137,16 @@ void LiveStream::stop()
 {
     if (worker)
     {
+        /* Worker will free m_frame (and all other frames) */
+        m_frame = 0;
         /* Worker will delete itself, which will then destroy the thread */
         worker->staticMetaObject.invokeMethod(worker, "stop");
         worker = 0;
         thread = 0;
     }
+
+    Q_ASSERT(!m_frame);
+    Q_ASSERT(!thread);
 
     disconnect(renderTimer, SIGNAL(timeout()), this, SLOT(updateFrame()));
 
@@ -189,23 +194,26 @@ bool LiveStream::updateFrame()
         qint64 now = m_ptsTimer.elapsed()*1000;
         StreamFrame *next;
 
-        /* XXX unreasonable PTS/time difference handling */
-
         while ((next = sf->next))
         {
             qint64 rescale = av_rescale_q(next->d->pts - m_ptsBase, (AVRational){1,90000}, AV_TIME_BASE_Q);
-            if (now >= rescale || (rescale - now) <= AV_TIME_BASE/(renderTimerFps*2)) {
+            if (next == m_frame->next && abs(rescale - now) >= AV_TIME_BASE)
+            {
+                m_ptsBase = next->d->pts;
+                m_ptsTimer.restart();
+                now = rescale = 0;
+            }
+
+            if (now >= rescale || (rescale - now) <= AV_TIME_BASE/(renderTimerFps*2))
+            {
                 /* Target rendering time is in the past, or is less than half a repaint interval in
                  * the future, so it's time to draw this frame. */
-                sf->free();
                 delete sf;
                 sf = next;
             }
             else
                 break;
         }
-
-        /* XXX we still need decode thread dropping too. */
 
         if (sf == m_frame)
             return false;
@@ -214,7 +222,6 @@ bool LiveStream::updateFrame()
 
     l.unlock();
 
-    /* XXX better m_frame maintainence and oddity handling */
     m_frame = sf;
     if (m_ptsBase == AV_NOPTS_VALUE)
     {
@@ -222,19 +229,16 @@ bool LiveStream::updateFrame()
         m_ptsTimer.restart();
     }
 
-    AVFrame *newFrame = sf->d;
-
     m_fpsUpdateHits++;
 
     if (state() == Connecting)
         setState(Streaming);
 
-    bool sizeChanged = (m_currentFrame.width() != newFrame->width ||
-                        m_currentFrame.height() != newFrame->height);
-    m_frameData = newFrame;
+    bool sizeChanged = (m_currentFrame.width() != sf->d->width ||
+                        m_currentFrame.height() != sf->d->height);
 
-    m_currentFrame = QImage(m_frameData->data[0], m_frameData->width, m_frameData->height,
-                            m_frameData->linesize[0], QImage::Format_RGB32);
+    m_currentFrame = QImage(sf->d->data[0], sf->d->width, sf->d->height,
+                            sf->d->linesize[0], QImage::Format_RGB32);
 
     if (sizeChanged)
         emit streamSizeChanged(m_currentFrame.size());
