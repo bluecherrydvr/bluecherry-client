@@ -16,11 +16,9 @@ unix:!macx {
 
 macx:QMAKE_POST_LINK += cp $${_PRO_FILE_PWD_}/mac/Info.plist $${OUT_PWD}/$${TARGET}.app/Contents/;
 
-DEFINES += QT_NO_CAST_FROM_ASCII QT_NO_CAST_TO_ASCII
+# __STDC_CONSTANT_MACROS is necessary for libav on Linux
+DEFINES += QT_NO_CAST_FROM_ASCII QT_NO_CAST_TO_ASCII __STDC_CONSTANT_MACROS
 INCLUDEPATH += src
-
-INCLUDEPATH += "/Users/jbrooks/Development/libav/include"
-LIBS += -L"/Users/jbrooks/Development/libav/lib" -lavcodec -lavformat -lavutil -lswscale -framework QuartzCore -framework VideoDecodeAcceleration
 
 win32-msvc2008|win32-msvc2010 {
     # Qt defaults to setting this, breakpad defaults to not. Qt doesn't use wchar_t in the
@@ -29,6 +27,12 @@ win32-msvc2008|win32-msvc2010 {
     QMAKE_CXXFLAGS_RELEASE += -Zi
     QMAKE_LFLAGS_RELEASE += /DEBUG /OPT:REF,ICF
 }
+
+isEmpty(LIBAV_PATH):error(Set LIBAV_PATH to the libav installed prefix)
+INCLUDEPATH += "$$LIBAV_PATH/include"
+LIBS += -L"$$LIBAV_PATH/lib" -lavformat -lavcodec -lavutil -lswscale
+# Is this necessary with shared libav?
+macx:LIBS += -framework QuartzCore -framework VideoDecodeAcceleration
 
 unix:!macx {
     # GStreamer
