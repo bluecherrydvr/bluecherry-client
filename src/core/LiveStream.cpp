@@ -219,6 +219,8 @@ bool LiveStream::updateFrame()
             return false;
         worker->frameHead = sf;
     }
+    else if (m_frame)
+        delete m_frame;
 
     l.unlock();
 
