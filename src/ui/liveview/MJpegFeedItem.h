@@ -19,6 +19,7 @@ class MJpegFeedItem : public QDeclarativeItem
 
 public:
     explicit MJpegFeedItem(QDeclarativeItem *parent = 0);
+    virtual ~MJpegFeedItem();
 
     virtual void paint(QPainter *, const QStyleOptionGraphicsItem *, QWidget *);
 
@@ -60,9 +61,13 @@ private slots:
     }
 
     void streamStateChanged(int state);
+    void updateSettings();
 
 private:
     QSharedPointer<LiveStream> m_stream;
+    bool m_useAdvancedGL;
+    unsigned m_texId;
+    const uchar *m_texDataPtr;
 };
 
 #endif // MJPEGSTREAMITEM_H

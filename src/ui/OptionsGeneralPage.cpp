@@ -32,6 +32,13 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     m_liveHwAccel->setToolTip(tr("Disable hardware acceleration only if you do not see anything in the live view area."));
     layout->addWidget(m_liveHwAccel);
 
+    m_advancedOpengl = new QCheckBox(tr("Use advanced OpenGL features"));
+    m_advancedOpengl->setEnabled(m_liveHwAccel->isChecked());
+    connect(m_liveHwAccel, SIGNAL(toggled(bool)), m_advancedOpengl, SLOT(setEnabled(bool)));
+    m_advancedOpengl->setChecked(!settings.value(QLatin1String("ui/liveview/disableAdvancedOpengl"), false).toBool());
+    m_advancedOpengl->setToolTip(tr("Disable advanced OpenGL features if live video doesn't appear correctly"));
+    layout->addWidget(m_advancedOpengl);
+
     m_deinterlace = new QCheckBox(tr("Automatic deinterlacing"));
     m_deinterlace->setChecked(!settings.value(QLatin1String("ui/liveview/disableDeinterlacing"), false).toBool());
     layout->addWidget(m_deinterlace);
@@ -89,6 +96,7 @@ void OptionsGeneralPage::saveChanges()
     settings.setValue(QLatin1String("ui/main/closeToTray"), m_closeToTray->isChecked());
     bcApp->mainWindow->updateTrayIcon();
     settings.setValue(QLatin1String("ui/liveview/disableHardwareAcceleration"), !m_liveHwAccel->isChecked());
+    settings.setValue(QLatin1String("ui/liveview/disableAdvancedOpengl"), !m_advancedOpengl->isChecked());
     settings.setValue(QLatin1String("ui/liveview/disableDeinterlacing"), !m_deinterlace->isChecked());
 
     if (m_ssFullscreen && m_ssVideo && m_ssNever)
