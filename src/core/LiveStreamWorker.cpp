@@ -107,6 +107,7 @@ bool LiveStreamWorker::setup()
     av_dict_set(&opt, "threads", "1", 0);
     av_dict_set(&opt, "allowed_media_types", "-audio-data", 0);
     av_dict_set(&opt, "max_delay", QByteArray::number(qint64(0.3*AV_TIME_BASE)).constData(), 0);
+    av_dict_set(&opt, "analyzeduration", QByteArray::number(qint64(1.5*AV_TIME_BASE)).constData(), 0);
 
     int re;
     if ((re = avformat_open_input(&ctx, url.constData(), NULL, &opt)) != 0)
