@@ -137,7 +137,7 @@ void LiveStream::stop()
 {
     if (worker)
     {
-        /* Worker will free m_frame (and all other frames) */
+        /* See LiveStreamWorker's destructor for how this frame is freed */
         m_frame = 0;
         /* Worker will delete itself, which will then destroy the thread */
         worker->staticMetaObject.invokeMethod(worker, "stop");

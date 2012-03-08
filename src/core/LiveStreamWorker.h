@@ -21,6 +21,7 @@ class LiveStreamWorker : public QObject
 
 public:
     explicit LiveStreamWorker(QObject *parent = 0);
+    virtual ~LiveStreamWorker();
 
     void setUrl(const QByteArray &url);
 

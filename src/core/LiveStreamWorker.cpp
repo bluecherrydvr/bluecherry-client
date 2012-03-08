@@ -16,6 +16,23 @@ LiveStreamWorker::LiveStreamWorker(QObject *parent)
 {
 }
 
+LiveStreamWorker::~LiveStreamWorker()
+{
+    Q_ASSERT(!ctx);
+
+    /* This is a little quirky; The frame in frameHead can be used by the LiveStream
+     * at ANY point, including during or after destroy(), so we can't delete it, but
+     * we can't guarantee that LiveStream ever saw it, or even still exists. However,
+     * we can guarantee that, once this object destructs, LiveStream no longer has
+     * any interest in this object or the frame, so this is the only time when it's
+     * finally safe to free that frame that cannot leak. */
+    for (StreamFrame *f = frameHead, *n; f; f = n)
+    {
+        n = f->next;
+        delete f;
+    }
+}
+
 void LiveStreamWorker::setUrl(const QByteArray &url)
 {
     this->url = url;
@@ -144,12 +161,17 @@ void LiveStreamWorker::destroy()
     }
 
     frameLock.lock();
-    for (StreamFrame *f = frameHead, *n; f; f = n)
+    if (frameHead)
     {
-        n = f->next;
-        delete f;
+        /* Even now, we cannot touch frameHead. It might be used by the other thread. */
+        for (StreamFrame *f = frameHead->next, *n; f; f = n)
+        {
+            n = f->next;
+            delete f;
+        }
+        frameHead->next = 0;
     }
-    frameHead = frameTail = 0;
+    frameTail = frameHead;
     frameLock.unlock();
 
     for (int i = 0; i < ctx->nb_streams; ++i)
