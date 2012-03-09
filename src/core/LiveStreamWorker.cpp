@@ -217,23 +217,13 @@ void LiveStreamWorker::destroy()
 void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *rawFrame)
 {
     const PixelFormat fmt = PIX_FMT_BGRA;
-    /* Frame with the picture data; equal to rawFrame except for deinterlacing */
-    AVFrame *srcFrame = rawFrame;
 
     if (rawFrame->interlaced_frame)
     {
-        int bufSize = avpicture_get_size(stream->codec->pix_fmt, stream->codec->width, stream->codec->height);
-        uint8_t *buf = (uint8_t*) av_malloc(bufSize);
-        srcFrame = avcodec_alloc_frame();
-        avpicture_fill((AVPicture*)srcFrame, buf, stream->codec->pix_fmt, stream->codec->width, stream->codec->height);
-
-        if (avpicture_deinterlace((AVPicture*)srcFrame, (AVPicture*)rawFrame, stream->codec->pix_fmt,
+        if (avpicture_deinterlace((AVPicture*)rawFrame, (AVPicture*)rawFrame, stream->codec->pix_fmt,
                                   stream->codec->width, stream->codec->height) < 0)
         {
             qDebug("deinterlacing failed");
-            av_free(srcFrame);
-            av_free(buf);
-            srcFrame = rawFrame;
         }
     }
 
@@ -246,18 +236,12 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
 
     AVFrame *frame = avcodec_alloc_frame();
     avpicture_fill((AVPicture*)frame, buf, fmt, stream->codec->width, stream->codec->height);
-    sws_scale(sws, (const uint8_t**)srcFrame->data, srcFrame->linesize, 0, stream->codec->height,
+    sws_scale(sws, (const uint8_t**)rawFrame->data, rawFrame->linesize, 0, stream->codec->height,
               frame->data, frame->linesize);
 
     frame->width  = stream->codec->width;
     frame->height = stream->codec->height;
     frame->pts    = rawFrame->pkt_pts;
-
-    if (srcFrame != rawFrame)
-    {
-        av_free(srcFrame->data[0]);
-        av_free(srcFrame);
-    }
 
     StreamFrame *sf = new StreamFrame;
     sf->d    = frame;
