@@ -6,6 +6,7 @@
 #include <QMetaObject>
 #include <QTimer>
 #include <QDebug>
+#include <QSettings>
 
 extern "C" {
 #include "libavcodec/avcodec.h"
@@ -69,6 +70,7 @@ LiveStream::LiveStream(const DVRCamera &c, QObject *parent)
       m_autoStart(false), m_fpsUpdateCnt(0), m_fpsUpdateHits(0), m_fps(0), m_ptsBase(AV_NOPTS_VALUE)
 {
     bcApp->liveView->addStream(this);
+    connect(bcApp, SIGNAL(settingsChanged()), SLOT(updateSettings()));
 }
 
 LiveStream::~LiveStream()
@@ -123,6 +125,7 @@ void LiveStream::start()
 
         connect(worker, SIGNAL(fatalError(QString)), SLOT(fatalError(QString)));
 
+        updateSettings();
         setState(Connecting);
         thread->start();
     }
@@ -253,4 +256,13 @@ void LiveStream::fatalError(const QString &message)
     m_errorMessage = message;
     setState(Error);
     QTimer::singleShot(15000, this, SLOT(start()));
+}
+
+void LiveStream::updateSettings()
+{
+    if (!worker)
+        return;
+
+    QSettings settings;
+    worker->setAutoDeinterlacing(!settings.value(QLatin1String("ui/liveview/disableDeinterlacing"), false).toBool());
 }

@@ -12,7 +12,7 @@ extern "C" {
 #define ASSERT_WORKER_THREAD() Q_ASSERT(QThread::currentThread() == thread())
 
 LiveStreamWorker::LiveStreamWorker(QObject *parent)
-    : QObject(parent), ctx(0), sws(0), cancelFlag(false), frameHead(0), frameTail(0)
+    : QObject(parent), ctx(0), sws(0), cancelFlag(false), autoDeinterlacing(true), frameHead(0), frameTail(0)
 {
 }
 
@@ -36,6 +36,11 @@ LiveStreamWorker::~LiveStreamWorker()
 void LiveStreamWorker::setUrl(const QByteArray &url)
 {
     this->url = url;
+}
+
+void LiveStreamWorker::setAutoDeinterlacing(bool enabled)
+{
+    autoDeinterlacing = enabled;
 }
 
 void LiveStreamWorker::run()
@@ -220,9 +225,10 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
 
     /* Assume that H.264 D1-resolution video is interlaced, to work around a solo(?) bug
      * that results in interlaced_frame not being set for videos from solo6110. */
-    if (rawFrame->interlaced_frame || (stream->codec->codec_id == CODEC_ID_H264 &&
-                                       ((stream->codec->width == 704 && stream->codec->height == 480) ||
-                                        (stream->codec->width == 720 && stream->codec->height == 576))))
+    if (autoDeinterlacing && (rawFrame->interlaced_frame ||
+                              (stream->codec->codec_id == CODEC_ID_H264 &&
+                               ((stream->codec->width == 704 && stream->codec->height == 480) ||
+                                (stream->codec->width == 720 && stream->codec->height == 576)))))
     {
         if (avpicture_deinterlace((AVPicture*)rawFrame, (AVPicture*)rawFrame, stream->codec->pix_fmt,
                                   stream->codec->width, stream->codec->height) < 0)

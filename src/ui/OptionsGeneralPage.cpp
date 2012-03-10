@@ -32,6 +32,10 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     m_liveHwAccel->setToolTip(tr("Disable hardware acceleration only if you do not see anything in the live view area."));
     layout->addWidget(m_liveHwAccel);
 
+    m_deinterlace = new QCheckBox(tr("Automatic deinterlacing"));
+    m_deinterlace->setChecked(!settings.value(QLatin1String("ui/liveview/disableDeinterlacing"), false).toBool());
+    layout->addWidget(m_deinterlace);
+
 #if defined(Q_OS_WIN) || defined(Q_OS_MAC)
     m_ssFullscreen = new QCheckBox(tr("Viewing live or recorded video in fullscreen"));
     m_ssVideo = new QCheckBox(tr("Playing recorded video"));
@@ -45,6 +49,8 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     connect(m_ssVideo, SIGNAL(toggled(bool)), SLOT(ssUpdateForOthers(bool)));
     connect(m_ssNever, SIGNAL(toggled(bool)), SLOT(ssUpdateForNever()));
     ssUpdateForNever();
+
+    layout->addSpacing(10);
 
     QGroupBox *screensaverSettings = new QGroupBox(tr("Prevent the computer from going to sleep when..."));
     layout->addWidget(screensaverSettings);
@@ -83,6 +89,7 @@ void OptionsGeneralPage::saveChanges()
     settings.setValue(QLatin1String("ui/main/closeToTray"), m_closeToTray->isChecked());
     bcApp->mainWindow->updateTrayIcon();
     settings.setValue(QLatin1String("ui/liveview/disableHardwareAcceleration"), !m_liveHwAccel->isChecked());
+    settings.setValue(QLatin1String("ui/liveview/disableDeinterlacing"), !m_deinterlace->isChecked());
 
     if (m_ssFullscreen && m_ssVideo && m_ssNever)
     {

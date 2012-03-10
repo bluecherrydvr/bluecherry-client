@@ -28,6 +28,7 @@ public:
 public slots:
     void run();
     void stop();
+    void setAutoDeinterlacing(bool enabled);
 
 signals:
     void fatalError(const QString &message);
@@ -39,6 +40,7 @@ private:
     struct SwsContext *sws;
     QByteArray url;
     bool cancelFlag;
+    bool autoDeinterlacing;
 
     QMutex frameLock;
     StreamFrame *frameHead, *frameTail;

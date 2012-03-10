@@ -55,6 +55,7 @@ signals:
 private slots:
     bool updateFrame();
     void fatalError(const QString &message);
+    void updateSettings();
 
 private:
     static QTimer *renderTimer;
