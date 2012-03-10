@@ -102,6 +102,7 @@ void LiveStreamWorker::run()
 bool LiveStreamWorker::setup()
 {
     ASSERT_WORKER_THREAD();
+    bool ok = false;
 
     AVDictionary *opt = 0;
     av_dict_set(&opt, "threads", "1", 0);
@@ -109,43 +110,71 @@ bool LiveStreamWorker::setup()
     av_dict_set(&opt, "max_delay", QByteArray::number(qint64(0.3*AV_TIME_BASE)).constData(), 0);
     av_dict_set(&opt, "analyzeduration", QByteArray::number(qint64(1.5*AV_TIME_BASE)).constData(), 0);
 
+    AVDictionary **opt_si = 0;
+    AVDictionary *opt_cpy = 0;
+    av_dict_copy(&opt_cpy, opt, 0);
+
     int re;
-    if ((re = avformat_open_input(&ctx, url.constData(), NULL, &opt)) != 0)
+    if ((re = avformat_open_input(&ctx, url.constData(), NULL, &opt_cpy)) != 0)
     {
         char error[512];
         av_strerror(re, error, sizeof(error));
         emit fatalError(QString::fromLatin1(error));
-        av_dict_free(&opt);
-        return false;
+        goto end;
     }
 
-    if ((re = avformat_find_stream_info(ctx, &opt)) < 0)
+    av_dict_free(&opt_cpy);
+
+    /* avformat_find_stream_info takes an array of AVDictionary ptrs for each stream */
+    opt_si = new AVDictionary*[ctx->nb_streams];
+    for (int i = 0; i < ctx->nb_streams; ++i)
+    {
+        opt_si[i] = 0;
+        av_dict_copy(&opt_si[i], opt, 0);
+    }
+
+    if ((re = avformat_find_stream_info(ctx, opt_si)) < 0)
     {
         char error[512];
         av_strerror(re, error, sizeof(error));
         emit fatalError(QString::fromLatin1(error));
-        av_close_input_file(ctx);
-        av_dict_free(&opt);
-        return false;
+        goto end;
     }
 
     for (int i = 0; i < ctx->nb_streams; ++i)
     {
         char info[512];
         AVCodec *codec = avcodec_find_decoder(ctx->streams[i]->codec->codec_id);
-        if ((re = avcodec_open2(ctx->streams[i]->codec, codec, &opt)) < 0)
+        av_dict_copy(&opt_cpy, opt, 0);
+        if (!ctx->streams[i]->codec->codec &&
+            (re = avcodec_open2(ctx->streams[i]->codec, codec, &opt_cpy)) < 0)
         {
             qDebug() << "LiveStream: cannot find decoder for stream" << i << "codec" <<
                         ctx->streams[i]->codec->codec_id;
+            av_dict_free(&opt_cpy);
             continue;
         }
-
+        av_dict_free(&opt_cpy);
         avcodec_string(info, sizeof(info), ctx->streams[i]->codec, 0);
         qDebug() << "LiveStream: stream #" << i << ":" << info;
     }
 
+    ok = true;
+end:
     av_dict_free(&opt);
-    return true;
+    if (opt_si)
+    {
+        for (int i = 0; i < ctx->nb_streams; ++i)
+            av_dict_free(&opt_si[i]);
+        delete[] opt_si;
+    }
+    if (!ok && ctx)
+    {
+        av_close_input_file(ctx);
+        ctx = 0;
+    }
+
+    return ok;
 }
 
 void LiveStreamWorker::destroy()
