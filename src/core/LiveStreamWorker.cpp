@@ -1,4 +1,5 @@
 #include "LiveStreamWorker.h"
+#include "BluecherryApp.h"
 #include <QDebug>
 #include <QCoreApplication>
 #include <QThread>
@@ -70,6 +71,7 @@ void LiveStreamWorker::run()
         }
 
         uint8_t *data = packet.data;
+        bcApp->globalRate->addSampleValue(packet.size);
 
         int in_packet = 0;
         while (packet.size > 0)
