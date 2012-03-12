@@ -7,6 +7,9 @@
 StatusBandwidthWidget::StatusBandwidthWidget(QWidget *parent)
     : QMacCocoaViewContainer(0, parent)
 {
+    /* Work around Qt 4.8.0 bug (causing the widget to not appear) */
+    setAttribute(Qt::WA_NativeWindow);
+
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
     m_button = [[NSPopUpButton alloc] init];
