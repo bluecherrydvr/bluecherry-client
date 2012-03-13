@@ -96,6 +96,9 @@ void LiveStream::setState(State newState)
         emit streamRunning();
     else if (oldState >= Streaming && newState < Streaming)
         emit streamStopped();
+
+    if (oldState == Paused || newState == Paused)
+        emit pausedChanged(isPaused());
 }
 
 void LiveStream::start()
@@ -164,7 +167,7 @@ void LiveStream::setOnline(bool online)
 {
     if (!online && state() != StreamOffline)
     {
-        m_autoStart = (m_autoStart || state() >= Connecting);
+        m_autoStart = (state() >= Connecting);
         setState(StreamOffline);
         stop();
     }
@@ -174,6 +177,18 @@ void LiveStream::setOnline(bool online)
         if (m_autoStart)
             start();
     }
+}
+
+void LiveStream::setPaused(bool pause)
+{
+    if (pause == (state() == Paused) || state() < Streaming || !worker)
+        return;
+
+    worker->metaObject()->invokeMethod(worker, "setPaused", Q_ARG(bool, pause));
+    if (pause)
+        setState(Paused);
+    else
+        setState(Streaming);
 }
 
 bool LiveStream::updateFrame()

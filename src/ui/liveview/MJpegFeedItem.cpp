@@ -60,13 +60,13 @@ void MJpegFeedItem::clear()
 
 bool MJpegFeedItem::isPaused() const
 {
-    return /*m_stream ? m_stream->isPaused() :*/ false;
+    return m_stream ? m_stream->isPaused() : false;
 }
 
 void MJpegFeedItem::setPaused(bool paused)
 {
-    //if (m_stream)
-    //    m_stream->setPaused(paused);
+    if (m_stream)
+        m_stream->setPaused(paused);
 }
 
 bool MJpegFeedItem::isConnected() const

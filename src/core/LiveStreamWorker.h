@@ -5,6 +5,7 @@
 #include <QMutex>
 
 struct AVFrame;
+class QEventLoop;
 
 struct StreamFrame
 {
@@ -28,6 +29,8 @@ public:
 public slots:
     void run();
     void stop();
+
+    void setPaused(bool pause);
     void setAutoDeinterlacing(bool enabled);
 
 signals:
@@ -40,7 +43,9 @@ private:
     struct SwsContext *sws;
     QByteArray url;
     bool cancelFlag;
+    bool paused;
     bool autoDeinterlacing;
+    QEventLoop *blockingLoop;
 
     QMutex frameLock;
     StreamFrame *frameHead, *frameTail;

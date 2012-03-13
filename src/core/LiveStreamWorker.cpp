@@ -13,7 +13,8 @@ extern "C" {
 #define ASSERT_WORKER_THREAD() Q_ASSERT(QThread::currentThread() == thread())
 
 LiveStreamWorker::LiveStreamWorker(QObject *parent)
-    : QObject(parent), ctx(0), sws(0), cancelFlag(false), autoDeinterlacing(true), frameHead(0), frameTail(0)
+    : QObject(parent), ctx(0), sws(0), cancelFlag(false), paused(false), autoDeinterlacing(true),
+      blockingLoop(0), frameHead(0), frameTail(0)
 {
 }
 
@@ -282,8 +283,35 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
 
 void LiveStreamWorker::stop()
 {
+    ASSERT_WORKER_THREAD();
     cancelFlag = true;
+    if (blockingLoop)
+        blockingLoop->exit();
     deleteLater();
+}
+
+void LiveStreamWorker::setPaused(bool v)
+{
+    ASSERT_WORKER_THREAD();
+    if (!ctx || v == paused)
+        return;
+
+    paused = v;
+    if (paused)
+    {
+        av_read_pause(ctx);
+        QEventLoop loop;
+        blockingLoop = &loop;
+        loop.exec();
+        blockingLoop = 0;
+    }
+    else
+    {
+        av_read_play(ctx);
+        Q_ASSERT(blockingLoop);
+        if (blockingLoop)
+            blockingLoop->exit();
+    }
 }
 
 StreamFrame::~StreamFrame()
