@@ -141,7 +141,7 @@ void MJpegFeedItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWid
             glGenTextures(1, (GLuint*)&m_texId);
             Q_ASSERT(m_texId);
             glBindTexture(GL_TEXTURE_2D, m_texId);
-            glTexParameterf(m_texId, GL_TEXTURE_PRIORITY, 1.0);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, 1.0);
             glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
