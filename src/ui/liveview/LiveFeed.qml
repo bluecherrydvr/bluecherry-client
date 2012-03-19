@@ -67,6 +67,8 @@ LiveFeedBase {
             spacing: 10
             visible: feed.connected
 
+            /* Disabled due to no support from RTP streams yet */
+/*
             Text {
                 id: feedRecording
                 color: "#8e8e8e"
@@ -86,6 +88,7 @@ LiveFeedBase {
                     }
                 }
             }
+*/
 
             HeaderPTZControl {
                 id: headerPtzElement
