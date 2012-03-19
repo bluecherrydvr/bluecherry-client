@@ -279,5 +279,5 @@ void LiveStream::updateSettings()
         return;
 
     QSettings settings;
-    worker->setAutoDeinterlacing(!settings.value(QLatin1String("ui/liveview/disableDeinterlacing"), false).toBool());
+    worker->setAutoDeinterlacing(settings.value(QLatin1String("ui/liveview/autoDeinterlace"), false).toBool());
 }

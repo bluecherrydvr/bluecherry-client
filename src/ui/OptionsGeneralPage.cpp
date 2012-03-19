@@ -25,6 +25,7 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     m_eventsPauseLive->setChecked(settings.value(QLatin1String("eventPlayer/pauseLive"), false).toBool());
     m_eventsPauseLive->setToolTip(tr("Pausing live feeds can speed up video downloads over "
                                      "slow internet connections"));
+    m_eventsPauseLive->setVisible(false); // Currently not functional
     layout->addWidget(m_eventsPauseLive);
 
     m_liveHwAccel = new QCheckBox(tr("Use hardware acceleration (OpenGL)"));
@@ -40,7 +41,7 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     layout->addWidget(m_advancedOpengl);
 
     m_deinterlace = new QCheckBox(tr("Automatic deinterlacing"));
-    m_deinterlace->setChecked(!settings.value(QLatin1String("ui/liveview/disableDeinterlacing"), false).toBool());
+    m_deinterlace->setChecked(settings.value(QLatin1String("ui/liveview/autoDeinterlace"), false).toBool());
     layout->addWidget(m_deinterlace);
 
 #if defined(Q_OS_WIN) || defined(Q_OS_MAC)
@@ -97,7 +98,7 @@ void OptionsGeneralPage::saveChanges()
     bcApp->mainWindow->updateTrayIcon();
     settings.setValue(QLatin1String("ui/liveview/disableHardwareAcceleration"), !m_liveHwAccel->isChecked());
     settings.setValue(QLatin1String("ui/liveview/disableAdvancedOpengl"), !m_advancedOpengl->isChecked());
-    settings.setValue(QLatin1String("ui/liveview/disableDeinterlacing"), !m_deinterlace->isChecked());
+    settings.setValue(QLatin1String("ui/liveview/autoDeinterlace"), m_deinterlace->isChecked());
 
     if (m_ssFullscreen && m_ssVideo && m_ssNever)
     {
