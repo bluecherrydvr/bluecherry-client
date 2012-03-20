@@ -14,7 +14,7 @@ class MJpegFeedItem : public QDeclarativeItem
     Q_PROPERTY(QSizeF frameSize READ frameSize NOTIFY frameSizeChanged)
     Q_PROPERTY(bool paused READ isPaused WRITE setPaused NOTIFY pausedChanged)
     Q_PROPERTY(bool connected READ isConnected NOTIFY connectedChanged)
-    Q_PROPERTY(int interval READ interval WRITE setInterval RESET clearInterval NOTIFY intervalChanged)
+    Q_PROPERTY(int bandwidthMode READ bandwidthMode WRITE setBandwidthMode NOTIFY bandwidthModeChanged)
     Q_PROPERTY(int fps READ fps CONSTANT)
 
 public:
@@ -31,14 +31,13 @@ public:
 
     bool isPaused() const;
     bool isConnected() const;
-    int interval() const;
+    int bandwidthMode() const;
     int fps() const;
 
 public slots:
     void setPaused(bool paused);
     void togglePaused() { setPaused(!isPaused()); }
-    void setInterval(int interval);
-    void clearInterval();
+    void setBandwidthMode(int bandwidthMode);
 
 signals:
     void streamChanged(const QSharedPointer<LiveStream> &stream);
@@ -46,7 +45,7 @@ signals:
     void errorTextChanged(const QString &errorText);
     void pausedChanged(bool paused);
     void connectedChanged(bool connected);
-    void intervalChanged(int interval);
+    void bandwidthModeChanged(int bandwidthMode);
     void fpsChanged();
 
 private slots:

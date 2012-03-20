@@ -24,9 +24,9 @@ StatusBandwidthWidget::StatusBandwidthWidget(QWidget *parent)
     m_titleAction = m_menu->addAction(QString());
     m_titleAction->setIcon(QIcon(QLatin1String(":/icons/system-monitor.png")));
 
-    QList<QAction*> fpsActions = bcApp->liveView->fpsActions(bcApp->liveView->globalInterval(),
-                                                             bcApp->liveView,
-                                                             SLOT(setGlobalIntervalFromAction()));
+    QList<QAction*> fpsActions = bcApp->liveView->bandwidthActions(bcApp->liveView->bandwidthMode(),
+                                                                   bcApp->liveView,
+                                                                   SLOT(setBandwidthModeFromAction()));
 
     foreach (QAction *a, fpsActions)
         a->setParent(m_menu);
@@ -40,7 +40,7 @@ StatusBandwidthWidget::StatusBandwidthWidget(QWidget *parent)
     [pool release];
 
     connect(bcApp->globalRate, SIGNAL(rateUpdated(unsigned)), SLOT(rateUpdated(unsigned)));
-    connect(bcApp->liveView, SIGNAL(globalIntervalChanged(int)), SLOT(globalIntervalChanged(int)));
+    connect(bcApp->liveView, SIGNAL(bandwidthModeChanged(int)), SLOT(bandwidthModeChanged(int)));
     rateUpdated(bcApp->globalRate->currentRate());
 }
 
@@ -59,13 +59,10 @@ void StatusBandwidthWidget::rateUpdated(unsigned currentRate)
     setFixedSize(rect.size.width + 2, rect.size.height);
 }
 
-void StatusBandwidthWidget::globalIntervalChanged(int interval)
+void StatusBandwidthWidget::bandwidthModeChanged(int value)
 {
     foreach (QAction *a, m_menu->actions())
     {
-        if (!a->data().isNull() && a->data().toInt() == interval)
-            a->setChecked(true);
-        else
-            a->setChecked(false);
+        a->setChecked(value == a->data().toInt());
     }
 }

@@ -42,7 +42,7 @@ void MJpegFeedItem::setStream(const QSharedPointer<LiveStream> &stream)
 
     emit pausedChanged(isPaused());
     emit connectedChanged(isConnected());
-    emit intervalChanged(interval());
+    emit bandwidthModeChanged(bandwidthMode());
 
     updateFrameSize();
     updateFrame();
@@ -74,9 +74,9 @@ bool MJpegFeedItem::isConnected() const
     return m_stream ? (m_stream->state() >= LiveStream::Streaming) : false;
 }
 
-int MJpegFeedItem::interval() const
+int MJpegFeedItem::bandwidthMode() const
 {
-    return (m_stream && m_stream->keyframeOnly()) ? 0 : 1;
+    return m_stream ? m_stream->bandwidthMode() : 0;
 }
 
 int MJpegFeedItem::fps() const
@@ -84,19 +84,13 @@ int MJpegFeedItem::fps() const
     return m_stream ? qRound(m_stream->receivedFps()) : 0;
 }
 
-void MJpegFeedItem::setInterval(int interval)
+void MJpegFeedItem::setBandwidthMode(int mode)
 {
     if (m_stream)
     {
-        m_stream->setKeyframeOnly(interval == 0);
-        emit intervalChanged(interval);
+        m_stream->setBandwidthMode(mode);
+        emit bandwidthModeChanged(mode);
     }
-}
-
-void MJpegFeedItem::clearInterval()
-{
-    m_stream->setKeyframeOnly(false);
-    emit intervalChanged(interval());
 }
 
 void MJpegFeedItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWidget *widget)

@@ -51,8 +51,7 @@ private slots:
     void queryLivePaused();
     void liveViewLayoutChanged(const QString &layout);
     void updateToolbarWidth();
-    void globalIntervalChanged(int interval);
-
+    void bandwidthModeChanged(int value);
     void eventsContextMenu(const QPoint &pos);
 
 signals:

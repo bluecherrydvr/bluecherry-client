@@ -262,14 +262,14 @@ void MainWindow::createMenu()
     QMenu *fpsMenu = liveMenu->addMenu(tr("Frame rate"));
     fpsMenu->setObjectName(QLatin1String("globalLiveFpsMenu"));
 
-    QList<QAction*> fpsActions = bcApp->liveView->fpsActions(bcApp->liveView->globalInterval(),
-                                                             bcApp->liveView,
-                                                             SLOT(setGlobalIntervalFromAction()));
+    QList<QAction*> fpsActions = bcApp->liveView->bandwidthActions(bcApp->liveView->bandwidthMode(),
+                                                                   bcApp->liveView,
+                                                                   SLOT(setBandwidthModeFromAction()));
     foreach (QAction *a, fpsActions)
         a->setParent(fpsMenu);
     fpsMenu->addActions(fpsActions);
 
-    connect(bcApp->liveView, SIGNAL(globalIntervalChanged(int)), SLOT(globalIntervalChanged(int)));
+    connect(bcApp->liveView, SIGNAL(bandwidthModeChanged(int)), SLOT(bandwidthModeChanged(int)));
 
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(tr("&Documentation"), this, SLOT(openDocumentation()));
@@ -659,14 +659,11 @@ void MainWindow::updateToolbarWidth()
         m_mainToolbar->setFixedWidth(m_sourcesList->width() - (2*style()->pixelMetric(QStyle::PM_ToolBarItemMargin)) - 1);
 }
 
-void MainWindow::globalIntervalChanged(int interval)
+void MainWindow::bandwidthModeChanged(int value)
 {
     QMenu *menu = menuBar()->findChild<QMenu*>(QLatin1String("globalLiveFpsMenu"));
     foreach (QAction *a, menu->actions())
     {
-        if (!a->data().isNull() && a->data().toInt() == interval)
-            a->setChecked(true);
-        else
-            a->setChecked(false);
+        a->setChecked(a->data().toInt() == value);
     }
 }

@@ -95,7 +95,7 @@ protected:
 
 private slots:
     void cameraDataUpdated();
-    void setIntervalFromAction();
+    void setBandwidthModeFromAction();
 
 private:
     DVRCamera m_camera;
@@ -105,7 +105,7 @@ private:
 
     /* Caller is responsible for deleting */
     QMenu *ptzMenu();
-    QMenu *fpsMenu();
+    QList<QAction*> bandwidthActions();
 
     QPoint globalPosForItem(QDeclarativeItem *item);
 };

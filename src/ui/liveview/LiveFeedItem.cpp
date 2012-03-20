@@ -192,8 +192,10 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
         }
     }
 
-    QMenu *fpsmenu = fpsMenu();
-    menu.addMenu(fpsmenu);
+    QList<QAction*> bw = bandwidthActions();
+    foreach (QAction *a, bw)
+        a->setParent(&menu);
+    menu.addActions(bw);
 
     menu.addSeparator();
     menu.addAction(tr("Open in window"), this, SLOT(openNewWindow()));
@@ -205,18 +207,17 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
     menu.exec(event->screenPos());
     delete ptzmenu;
-    delete fpsmenu;
 }
 
-void LiveFeedItem::setIntervalFromAction()
+void LiveFeedItem::setBandwidthModeFromAction()
 {
     QAction *a = qobject_cast<QAction*>(sender());
     MJpegFeedItem *mjpeg = findChild<MJpegFeedItem*>(QLatin1String("mjpegFeed"));
     if (!a || a->data().isNull() || !mjpeg)
         return;
 
-    int interval = a->data().toInt();
-    mjpeg->setInterval(interval);
+    int mode = a->data().toInt();
+    mjpeg->setBandwidthMode(mode);
     if (mjpeg->isPaused())
         mjpeg->setPaused(false);
 }
@@ -358,29 +359,21 @@ QMenu *LiveFeedItem::ptzMenu()
     return menu;
 }
 
-QMenu *LiveFeedItem::fpsMenu()
+QList<QAction*> LiveFeedItem::bandwidthActions()
 {
-    QMenu *menu = new QMenu;
-    menu->setTitle(tr("Frame rate"));
-    menu->setEnabled(m_camera && m_camera.liveStream());
-
+    QList<QAction*> actions;
     MJpegFeedItem *mjpeg = findChild<MJpegFeedItem*>(QLatin1String("mjpegFeed"));
     if (!mjpeg)
-        return menu;
-    QAction *a = menu->addAction(mjpeg->isPaused() ? tr("Paused") : tr("Pause"), mjpeg, SLOT(togglePaused()));
+        return actions;
+    QAction *a = new QAction(mjpeg->isPaused() ? tr("Paused") : tr("Pause"), this);
+    connect(a, SIGNAL(triggered()), mjpeg, SLOT(togglePaused()));
     a->setCheckable(true);
     a->setChecked(mjpeg->isPaused());
+    actions << a;
 
-    menu->addSeparator();
-
-    QList<QAction*> fps = bcApp->liveView->fpsActions(mjpeg->isPaused() ? -1 : mjpeg->interval(),
-                                                      this, SLOT(setIntervalFromAction()));
-    foreach (QAction *a, fps)
-        a->setParent(menu);
-
-    menu->addActions(fps);
-
-    return menu;
+    actions << bcApp->liveView->bandwidthActions(mjpeg->isPaused() ? -1 : mjpeg->bandwidthMode(),
+                                                 this, SLOT(setBandwidthModeFromAction()));
+    return actions;
 }
 
 QPoint LiveFeedItem::globalPosForItem(QDeclarativeItem *item)
@@ -444,7 +437,10 @@ void LiveFeedItem::ptzPresetWindow()
 void LiveFeedItem::showFpsMenu(QDeclarativeItem *sourceItem)
 {
     QPoint pos = globalPosForItem(sourceItem);
-    QMenu *menu = fpsMenu();
-    menu->exec(pos);
-    delete menu;
+    QMenu menu;
+    QList<QAction*> actions = bandwidthActions();
+    foreach (QAction *a, actions)
+        a->setParent(&menu);
+    menu.addActions(actions);
+    menu.exec(pos);
 }

@@ -6,6 +6,7 @@
 #include <QImage>
 #include <QElapsedTimer>
 #include "DVRCamera.h"
+#include "LiveViewManager.h"
 
 class LiveStreamWorker;
 
@@ -15,7 +16,7 @@ class LiveStream : public QObject
     Q_ENUMS(State)
 
     Q_PROPERTY(bool paused READ isPaused WRITE setPaused NOTIFY pausedChanged)
-    Q_PROPERTY(bool keyframeOnly READ keyframeOnly WRITE setKeyframeOnly NOTIFY keyframeOnlyChanged)
+    Q_PROPERTY(int bandwidthMode READ bandwidthMode WRITE setBandwidthMode NOTIFY bandwidthModeChanged)
 
 public:
     enum State
@@ -34,8 +35,7 @@ public:
 
     QByteArray url() const;
 
-    bool keyframeOnly() const { return m_keyframeOnly; }
-    void setKeyframeOnly(bool keyframeOnly);
+    int bandwidthMode() const { return m_bandwidthMode; }
 
     State state() const { return m_state; }
     QString errorMessage() const { return m_errorMessage; }
@@ -53,13 +53,12 @@ public slots:
 
     void setPaused(bool paused);
     void setOnline(bool online);
-
-    void setInterval(int interval) { }
+    void setBandwidthMode(int bandwidthMode);
 
 signals:
     void stateChanged(int newState);
     void pausedChanged(bool paused);
-    void keyframeOnlyChanged(bool keyframeOnly);
+    void bandwidthModeChanged(int mode);
 
     void streamRunning();
     void streamStopped();
@@ -82,7 +81,7 @@ private:
     QString m_errorMessage;
     State m_state;
     bool m_autoStart;
-    bool m_keyframeOnly;
+    LiveViewManager::BandwidthMode m_bandwidthMode;
 
     int m_fpsUpdateCnt;
     int m_fpsUpdateHits;
