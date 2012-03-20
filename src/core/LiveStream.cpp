@@ -67,7 +67,8 @@ void LiveStream::init()
 
 LiveStream::LiveStream(const DVRCamera &c, QObject *parent)
     : QObject(parent), camera(c), thread(0), worker(0), m_frame(0), m_state(NotConnected),
-      m_autoStart(false), m_fpsUpdateCnt(0), m_fpsUpdateHits(0), m_fps(0), m_ptsBase(AV_NOPTS_VALUE)
+      m_autoStart(false), m_keyframeOnly(false), m_fpsUpdateCnt(0), m_fpsUpdateHits(0),
+      m_fps(0), m_ptsBase(AV_NOPTS_VALUE)
 {
     bcApp->liveView->addStream(this);
     connect(bcApp, SIGNAL(settingsChanged()), SLOT(updateSettings()));
@@ -101,6 +102,26 @@ void LiveStream::setState(State newState)
         emit pausedChanged(isPaused());
 }
 
+QByteArray LiveStream::url() const
+{
+    QByteArray re = camera.streamUrl();
+    if (m_keyframeOnly)
+        re.append("/mode=keyframe");
+    return re;
+}
+
+void LiveStream::setKeyframeOnly(bool value)
+{
+    if (value == m_keyframeOnly)
+        return;
+
+    m_keyframeOnly = value;
+    emit keyframeOnlyChanged(value);
+
+    stop();
+    start();
+}
+
 void LiveStream::start()
 {
     if (state() >= Connecting)
@@ -118,7 +139,7 @@ void LiveStream::start()
         thread = new QThread;
         worker = new LiveStreamWorker;
         worker->moveToThread(thread);
-        worker->setUrl(camera.streamUrl());
+        worker->setUrl(url());
 
         connect(thread, SIGNAL(started()), worker, SLOT(run()));
         connect(worker, SIGNAL(destroyed()), thread, SLOT(quit()));

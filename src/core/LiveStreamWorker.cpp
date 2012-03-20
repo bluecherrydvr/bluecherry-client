@@ -116,7 +116,9 @@ bool LiveStreamWorker::setup()
     av_dict_set(&opt, "threads", "1", 0);
     av_dict_set(&opt, "allowed_media_types", "-audio-data", 0);
     av_dict_set(&opt, "max_delay", QByteArray::number(qint64(0.3*AV_TIME_BASE)).constData(), 0);
-    av_dict_set(&opt, "analyzeduration", QByteArray::number(qint64(1.5*AV_TIME_BASE)).constData(), 0);
+    /* Because the server always starts streams on a keyframe, we don't need any time here.
+     * If the first frame is not a keyframe, this could result in failures or corruption. */
+    av_dict_set(&opt, "analyzeduration", "0", 0);
 
     AVDictionary **opt_si = 0;
     AVDictionary *opt_cpy = 0;

@@ -71,13 +71,12 @@ void MJpegFeedItem::setPaused(bool paused)
 
 bool MJpegFeedItem::isConnected() const
 {
-    //return m_stream ? (m_stream->state() >= LiveStream::Streaming || m_stream->state() == LiveStream::Paused) : false;
-    return true;
+    return m_stream ? (m_stream->state() >= LiveStream::Streaming) : false;
 }
 
 int MJpegFeedItem::interval() const
 {
-    return /*m_stream ? m_stream->interval() :*/ 1;
+    return (m_stream && m_stream->keyframeOnly()) ? 0 : 1;
 }
 
 int MJpegFeedItem::fps() const
@@ -89,14 +88,14 @@ void MJpegFeedItem::setInterval(int interval)
 {
     if (m_stream)
     {
-        //m_stream->setInterval(interval);
+        m_stream->setKeyframeOnly(interval == 0);
         emit intervalChanged(interval);
     }
 }
 
 void MJpegFeedItem::clearInterval()
 {
-//    m_stream->clearInterval();
+    m_stream->setKeyframeOnly(false);
     emit intervalChanged(interval());
 }
 
