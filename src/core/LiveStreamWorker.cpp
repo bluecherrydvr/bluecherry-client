@@ -120,6 +120,9 @@ bool LiveStreamWorker::setup()
      * If the first frame is not a keyframe, this could result in failures or corruption. */
     av_dict_set(&opt, "analyzeduration", "0", 0);
 
+    /* Only TCP is supported currently; speed up connection by trying that first */
+    av_dict_set(&opt, "rtsp_transport", "tcp", 0);
+
     AVDictionary **opt_si = 0;
     AVDictionary *opt_cpy = 0;
     av_dict_copy(&opt_cpy, opt, 0);
