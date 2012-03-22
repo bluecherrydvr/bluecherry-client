@@ -276,7 +276,7 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
         /* If necessary, drop frames to avoid exploding memory. This will only happen if
          * the UI thread cannot keep up enough to do is own PTS-based framedropping.
          * It is NEVER safe to drop frameHead; only the UI thread may do that. */
-        if (frameTail->d->display_picture_number - frameHead->next->d->display_picture_number >= 30)
+        if (frameTail->d->display_picture_number - frameHead->next->d->display_picture_number >= 6)
         {
             for (StreamFrame *f = frameHead->next, *n = f->next; f && f != frameTail; f = n, n = f->next)
                 delete f;
