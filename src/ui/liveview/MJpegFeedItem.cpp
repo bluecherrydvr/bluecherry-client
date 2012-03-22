@@ -154,7 +154,7 @@ void MJpegFeedItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWid
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-            glTexImage2D(GL_TEXTURE_2D, 0, 3, frame.width(), frame.height(), 0,
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, frame.width(), frame.height(), 0,
                          GL_BGRA, GL_UNSIGNED_BYTE, frame.constBits());
             m_texDataPtr = frame.constBits();
         }
