@@ -259,15 +259,14 @@ void MainWindow::createMenu()
     QMenu *liveMenu = menuBar()->addMenu(tr("&Live"));
     liveMenu->addAction(tr("New window"), this, SLOT(openLiveWindow()));
     liveMenu->addSeparator();
-    QMenu *fpsMenu = liveMenu->addMenu(tr("Frame rate"));
-    fpsMenu->setObjectName(QLatin1String("globalLiveFpsMenu"));
+    liveMenu->setObjectName(QLatin1String("globalLiveMenu"));
 
     QList<QAction*> fpsActions = bcApp->liveView->bandwidthActions(bcApp->liveView->bandwidthMode(),
                                                                    bcApp->liveView,
                                                                    SLOT(setBandwidthModeFromAction()));
     foreach (QAction *a, fpsActions)
-        a->setParent(fpsMenu);
-    fpsMenu->addActions(fpsActions);
+        a->setParent(liveMenu);
+    liveMenu->addActions(fpsActions);
 
     connect(bcApp->liveView, SIGNAL(bandwidthModeChanged(int)), SLOT(bandwidthModeChanged(int)));
 
@@ -661,9 +660,10 @@ void MainWindow::updateToolbarWidth()
 
 void MainWindow::bandwidthModeChanged(int value)
 {
-    QMenu *menu = menuBar()->findChild<QMenu*>(QLatin1String("globalLiveFpsMenu"));
+    QMenu *menu = menuBar()->findChild<QMenu*>(QLatin1String("globalLiveMenu"));
     foreach (QAction *a, menu->actions())
     {
-        a->setChecked(a->data().toInt() == value);
+        if (!a->data().isNull())
+            a->setChecked(a->data().toInt() == value);
     }
 }
