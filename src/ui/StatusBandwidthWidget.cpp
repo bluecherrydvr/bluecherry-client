@@ -19,7 +19,7 @@ StatusBandwidthWidget::StatusBandwidthWidget(QWidget *parent)
     QMenu *menu = new QMenu(this);
     QList<QAction*> fpsActions = bcApp->liveView->bandwidthActions(bcApp->liveView->bandwidthMode(),
                                                                    bcApp->liveView,
-                                                                   SLOT(setBandwidthMode(int)));
+                                                                   SLOT(setBandwidthModeFromAction()));
 
     foreach (QAction *a, fpsActions)
         a->setParent(menu);
@@ -30,7 +30,7 @@ StatusBandwidthWidget::StatusBandwidthWidget(QWidget *parent)
     connect(this, SIGNAL(pressed()), SLOT(showMenu()));
 
     connect(bcApp->globalRate, SIGNAL(rateUpdated(unsigned)), SLOT(rateUpdated(unsigned)));
-    connect(bcApp->liveView, SIGNAL(lowBandwidthChanged(bool)), SLOT(lowBandwidthChanged(bool)));
+    connect(bcApp->liveView, SIGNAL(bandwidthModeChanged(int)), SLOT(bandwidthModeChanged(int)));
     rateUpdated(bcApp->globalRate->currentRate());
 }
 
