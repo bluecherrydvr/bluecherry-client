@@ -235,7 +235,9 @@ bool LiveStream::updateFrame()
 
         while ((next = sf->next))
         {
-            qint64 rescale = av_rescale_q(next->d->pts - m_ptsBase, (AVRational){1,90000}, AV_TIME_BASE_Q);
+            /* Cannot use the (AVRational){1,90000} syntax due to MSVC */
+            AVRational r = {1, 90000}, tb = {1, AV_TIME_BASE};
+            qint64 rescale = av_rescale_q(next->d->pts - m_ptsBase, r, tb);
             if (next == m_frame->next && abs(rescale - now) >= AV_TIME_BASE)
             {
                 m_ptsBase = next->d->pts;

@@ -5,6 +5,19 @@
 #include <QSettings>
 #include <QGLContext>
 
+#ifndef Q_UNLIKELY
+#define Q_UNLIKELY(x) x
+#define Q_LIKELY(x) x
+#endif
+
+#if defined(Q_OS_WIN) && !defined(GL_CLAMP_TO_EDGE)
+#define GL_CLAMP_TO_EDGE 0x812F
+#endif
+
+#if defined(Q_OS_WIN) && !defined(GL_BGRA)
+#define GL_BGRA GL_BGRA_EXT
+#endif
+
 MJpegFeedItem::MJpegFeedItem(QDeclarativeItem *parent)
     : QDeclarativeItem(parent), m_useAdvancedGL(true), m_texId(0), m_texDataPtr(0)
 {
