@@ -174,7 +174,6 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
         return;
 
     menu.addAction(tr("Snapshot"), this, SLOT(saveSnapshot()))->setEnabled(mjpeg->stream() && !mjpeg->stream()->currentFrame().isNull());
-    menu.addSeparator();
 
     QMenu *ptzmenu = 0;
     if (camera().hasPtz())
@@ -191,6 +190,8 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
             menu.addAction(tr("Pan / Tilt / Zoom"), this, SLOT(togglePtzEnabled()));
         }
     }
+
+    menu.addSeparator();
 
     QList<QAction*> bw = bandwidthActions();
     foreach (QAction *a, bw)
