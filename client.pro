@@ -25,7 +25,10 @@ win32-msvc2008|win32-msvc2010 {
     # public API, so we can use a different setting. Otherwise, it would cause linker errors.
     QMAKE_CXXFLAGS -= -Zc:wchar_t-
     QMAKE_CXXFLAGS_RELEASE += -Zi
-    QMAKE_LFLAGS_RELEASE += /DEBUG /OPT:REF,ICF
+    # We want REF,ICF, but as of now (MSVC 2010, beta8), doing so results in
+    # a binary that expects g_free to be in avformat-54.dll, not glib-2.0-0.dll.
+    # Once gstreamer (and thus, glib) is gone, this can be re-enabled.
+    QMAKE_LFLAGS_RELEASE += /DEBUG #/OPT:REF,ICF
 }
 
 isEmpty(LIBAV_PATH):error(Set LIBAV_PATH to the libav installed prefix)
