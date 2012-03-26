@@ -1,25 +1,25 @@
 bluecherry-client (2.0.0-0beta8-1) lucid; urgency=low
 
- * RTP live streaming
- * Minor fixes
+  * RTP live streaming
+  * Minor fixes
 
  -- John Brooks <john.brooks@bluecherry.net>  Fri, 23 Mar 2012 15:35:00 -0600
 
 bluecherry-client (2.0.0-0beta7-1) lucid; urgency=low
 
- * Bug #885: Labels Getting Messed Up
- * Bug #895: Application freeze when saving live snapshot in some situations
- * Bug #896: OS X crash at shutdown
- * Bug #939: Qt linking issues on some Linux systems with conflicting installs
- * Feature #390: Show current bandwidth usage in status bar
- * Feature #846: Client: Support low bandwidth mode
- * Feature #862: Show recording status on live view
- * Feature #881: Strip spaces on hostname in 'Add new server' section
- * Feature #892: Put version numbers in filenames for OS X and Windows installers
- * Feature #893: Improve seeking with the mouse in event videos
- * Feature #901: Display actual FPS of live feeds
- * Feature #904: Improve appearance and convenience of the main UI window
- * Feature #945: Update to Qt 4.7.4 for all platforms
+  * Bug #885: Labels Getting Messed Up
+  * Bug #895: Application freeze when saving live snapshot in some situations
+  * Bug #896: OS X crash at shutdown
+  * Bug #939: Qt linking issues on some Linux systems with conflicting installs
+  * Feature #390: Show current bandwidth usage in status bar
+  * Feature #846: Client: Support low bandwidth mode
+  * Feature #862: Show recording status on live view
+  * Feature #881: Strip spaces on hostname in 'Add new server' section
+  * Feature #892: Put version numbers in filenames for OS X and Windows installers
+  * Feature #893: Improve seeking with the mouse in event videos
+  * Feature #901: Display actual FPS of live feeds
+  * Feature #904: Improve appearance and convenience of the main UI window
+  * Feature #945: Update to Qt 4.7.4 for all platforms
 
 bluecherry-client (2.0.0-0beta6-1) lucid; urgency=low
 
