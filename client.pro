@@ -12,6 +12,9 @@ unix:!macx {
     resources.path = /usr/share/bluecherry-client
     resources.files = "res/bluecherry.png"
     INSTALLS += target shortcut resources
+
+    # XXX
+    LIBAV_PATH = /usr/lib/bluecherry/client
 }
 
 macx:QMAKE_POST_LINK += cp $${_PRO_FILE_PWD_}/mac/Info.plist $${OUT_PWD}/$${TARGET}.app/Contents/;
@@ -34,7 +37,7 @@ win32-msvc2008|win32-msvc2010 {
 isEmpty(LIBAV_PATH):error(Set LIBAV_PATH to the libav installed prefix)
 INCLUDEPATH += "$$LIBAV_PATH/include"
 win32:LIBS += -L"$$LIBAV_PATH/bin"
-unix:!macx:LIBS += -Wl,-rpath "$$LIBAV_PATH/lib"
+unix:!macx:LIBS += -Wl,-rpath,"$$LIBAV_PATH/lib"
 LIBS += -L"$$LIBAV_PATH/lib" -lavformat -lavcodec -lavutil -lswscale
 # Is this necessary with shared libav?
 macx:LIBS += -framework QuartzCore -framework VideoDecodeAcceleration
