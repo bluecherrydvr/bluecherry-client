@@ -40,7 +40,6 @@ Section
         File "${QT_PATH}\QtScript4.dll"
         File "${QT_PATH}\QtSql4.dll" # required by QtDeclarative
         File "${QT_PATH}\QtXmlPatterns4.dll" # QtDeclarative
-        File "${QT_PATH}\phonon4.dll"
         File "${QT_PATH}\ssleay32.dll"
         File "${QT_PATH}\libeay32.dll"
 	File "${LIBAV_PATH}\avcodec-54.dll"
