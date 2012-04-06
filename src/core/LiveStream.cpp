@@ -53,6 +53,7 @@ protected:
 
 QTimer *LiveStream::renderTimer = 0;
 static const int renderTimerFps = 30;
+QTimer *LiveStream::stateTimer = 0;
 
 void LiveStream::init()
 {
@@ -63,6 +64,10 @@ void LiveStream::init()
     renderTimer = new AutoTimer;
     renderTimer->setInterval(1000 / renderTimerFps);
     renderTimer->setSingleShot(false);
+
+    stateTimer = new AutoTimer;
+    stateTimer->setInterval(15000);
+    stateTimer->setSingleShot(false);
 }
 
 LiveStream::LiveStream(const DVRCamera &c, QObject *parent)
@@ -72,6 +77,7 @@ LiveStream::LiveStream(const DVRCamera &c, QObject *parent)
 {
     bcApp->liveView->addStream(this);
     connect(bcApp, SIGNAL(settingsChanged()), SLOT(updateSettings()));
+    connect(stateTimer, SIGNAL(timeout()), SLOT(checkState()));
 }
 
 LiveStream::~LiveStream()
@@ -132,6 +138,8 @@ void LiveStream::start()
         m_autoStart = true;
         return;
     }
+
+    m_frameInterval.start();
 
     if (!worker)
     {
@@ -210,6 +218,7 @@ void LiveStream::setPaused(bool pause)
         setState(Paused);
     else
         setState(Streaming);
+    m_frameInterval.restart();
 }
 
 bool LiveStream::updateFrame()
@@ -276,6 +285,7 @@ bool LiveStream::updateFrame()
 
     if (state() == Connecting)
         setState(Streaming);
+    m_frameInterval.restart();
 
     bool sizeChanged = (m_currentFrame.width() != sf->d->width ||
                         m_currentFrame.height() != sf->d->height);
@@ -293,7 +303,20 @@ void LiveStream::fatalError(const QString &message)
 {
     m_errorMessage = message;
     setState(Error);
-    QTimer::singleShot(15000, this, SLOT(start()));
+    /* stateTimer will handle reconnection */
+}
+
+void LiveStream::checkState()
+{
+    if (state() == Error)
+        start();
+
+    if ((state() == Streaming || state() == Connecting) &&
+        m_frameInterval.elapsed() >= 10000)
+    {
+        fatalError(QLatin1String("Stream timeout"));
+        stop();
+    }
 }
 
 void LiveStream::updateSettings()

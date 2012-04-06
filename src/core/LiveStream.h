@@ -69,9 +69,10 @@ private slots:
     bool updateFrame();
     void fatalError(const QString &message);
     void updateSettings();
+    void checkState();
 
 private:
-    static QTimer *renderTimer;
+    static QTimer *renderTimer, *stateTimer;
 
     DVRCamera camera;
     QThread *thread;
@@ -89,6 +90,7 @@ private:
 
     qint64 m_ptsBase;
     QElapsedTimer m_ptsTimer;
+    QElapsedTimer m_frameInterval;
 
     void setState(State newState);
 };
