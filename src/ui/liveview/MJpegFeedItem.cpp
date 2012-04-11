@@ -106,6 +106,17 @@ void MJpegFeedItem::setBandwidthMode(int mode)
     }
 }
 
+void MJpegFeedItem::updateFrameSize()
+{
+    if (m_texId)
+    {
+        glDeleteTextures(1, (GLuint*)&m_texId);
+        m_texId = 0;
+    }
+
+    emit frameSizeChanged(frameSize());
+}
+
 void MJpegFeedItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWidget *widget)
 {
     Q_UNUSED(widget);

@@ -54,11 +54,7 @@ private slots:
         update();
     }
 
-    void updateFrameSize()
-    {
-        emit frameSizeChanged(frameSize());
-    }
-
+    void updateFrameSize();
     void streamStateChanged(int state);
     void updateSettings();
 
