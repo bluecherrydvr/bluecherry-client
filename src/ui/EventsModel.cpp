@@ -461,12 +461,21 @@ void EventsModel::clearFilters()
         m_filter.types.isNull() && m_filter.level == EventLevel::Info)
         return;
 
+    bool reload = !m_filter.dateBegin.isNull() || !m_filter.dateEnd.isNull();
+
     m_filter.sources.clear();
     m_filter.dateBegin = m_filter.dateEnd = QDateTime();
     m_filter.types.clear();
     m_filter.level = EventLevel::Info;
 
-    applyFilters();
+    if (reload)
+    {
+        beginResetModel();
+        items.clear();
+        updateServers();
+        endResetModel();
+    } else
+        applyFilters();
 }
 
 void EventsModel::setFilterDates(const QDateTime &begin, const QDateTime &end)
@@ -480,7 +489,10 @@ void EventsModel::setFilterDates(const QDateTime &begin, const QDateTime &end)
     m_filter.dateBegin = begin;
     m_filter.dateEnd = end;
 
-    applyFilters(!fast);
+    beginResetModel();
+    items.clear();
+    updateServers();
+    endResetModel();
 }
 
 void EventsModel::setFilterLevel(EventLevel minimum)
@@ -605,12 +617,10 @@ void EventsModel::updateServer(DVRServer *server)
 
     QUrl url(QLatin1String("/events/"));
     url.addQueryItem(QLatin1String("limit"), QString::number(serverEventsLimit));
-#if 0
     if (!m_filter.dateBegin.isNull())
         url.addQueryItem(QLatin1String("startDate"), QString::number(m_filter.dateBegin.toTime_t()));
     if (!m_filter.dateEnd.isNull())
         url.addQueryItem(QLatin1String("endDate"), QString::number(m_filter.dateEnd.toTime_t()));
-#endif
 
     updatingServers.insert(server);
     if (updatingServers.size() == 1)

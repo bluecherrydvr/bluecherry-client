@@ -181,8 +181,13 @@ void EventsWindow::setEndDateEnabled(bool enabled)
 
 void EventsWindow::setEndDateMinimum(const QDateTime &date)
 {
-    m_endDate->setMinimumDate(date.date());
-    m_endDate->setTime(QTime(23, 59, 59, 999));
+    if (date.isValid())
+    {
+        m_endDate->setMinimumDate(date.date());
+        m_endDate->setTime(QTime(23, 59, 59, 999));
+    }
+    else
+        m_endDate->clearMinimumDateTime();
 }
 
 QWidget *EventsWindow::createLevelFilter()
