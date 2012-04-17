@@ -136,6 +136,8 @@ void LiveFeedItem::saveSnapshot(const QString &ifile)
 
         if (file.isEmpty())
             return;
+        if (!file.endsWith(QLatin1String(".jpg"), Qt::CaseInsensitive))
+            file.append(QLatin1String(".jpg"));
     }
 
     if (!frame.save(file, "jpeg"))

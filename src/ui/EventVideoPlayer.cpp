@@ -498,8 +498,11 @@ void EventVideoPlayer::saveVideo(const QString &path)
 
         QString upath = QFileDialog::getSaveFileName(this, tr("Save event video"), QString(),
                                      tr("Matroska Video (*.mkv)"));
-        if (!upath.isEmpty())
+        if (!upath.isEmpty()) {
+            if (!upath.endsWith(QLatin1String(".mkv"), Qt::CaseInsensitive))
+                upath.append(QLatin1String(".mkv"));
             saveVideo(upath);
+        }
 
         if (restart)
             m_video->play();
@@ -537,6 +540,8 @@ void EventVideoPlayer::saveSnapshot(const QString &ifile)
 
         if (file.isEmpty())
             return;
+        if (!file.endsWith(QLatin1String(".jpg"), Qt::CaseInsensitive))
+            file.append(QLatin1String(".jpg"));
     }
 
     if (!frame.save(file, "jpeg"))
