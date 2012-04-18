@@ -138,21 +138,24 @@ void EventsWindow::createDateFilter(QBoxLayout *layout)
     connect(m_startDate, SIGNAL(dateTimeChanged(QDateTime)), SLOT(setEndDateMinimum(QDateTime)));
     title->setChecked(false);
 
-    title = new QCheckBox(tr("Date before..."));
-    title->setStyleSheet(QLatin1String("font-weight:bold;"));
-    layout->addWidget(title);
-    connect(title, SIGNAL(clicked(bool)), SLOT(setEndDateEnabled(bool)));
+    /* Start date disabled in favor of setFilterDay for now. */
+    title->hide();
+    m_startDate->hide();
+
+    QLabel *title2 = new QLabel(tr("Date"));
+    title2->setStyleSheet(QLatin1String("font-weight:bold;"));
+    layout->addWidget(title2);
 
     m_endDate = new QDateEdit(QDate::currentDate());
     m_endDate->setCalendarPopup(true);
     m_endDate->setMaximumDate(QDate::currentDate());
-    m_endDate->setDisplayFormat(QLatin1String("dddd, MMM dd, yyyy"));
+    m_endDate->setDisplayFormat(QLatin1String("ddd, MMM dd, yyyy"));
     m_endDate->setTime(QTime(23, 59, 59, 999));
-    m_endDate->setVisible(false);
+    m_endDate->setFixedWidth(m_sourcesView->width());
     layout->addWidget(m_endDate);
 
     connect(m_endDate, SIGNAL(dateTimeChanged(QDateTime)), m_resultsView->eventsModel(),
-            SLOT(setFilterEndDate(QDateTime)));
+            SLOT(setFilterDay(QDateTime)));
 }
 
 void EventsWindow::setStartDateEnabled(bool enabled)

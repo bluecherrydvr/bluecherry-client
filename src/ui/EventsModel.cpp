@@ -480,12 +480,6 @@ void EventsModel::clearFilters()
 
 void EventsModel::setFilterDates(const QDateTime &begin, const QDateTime &end)
 {
-    bool fast = false;
-    if (begin >= m_filter.dateBegin && end <= m_filter.dateEnd &&
-        (m_filter.dateBegin.isNull() || !begin.isNull()) &&
-        (m_filter.dateEnd.isNull() || !end.isNull()))
-        fast = true;
-
     m_filter.dateBegin = begin;
     m_filter.dateEnd = end;
 
@@ -493,6 +487,11 @@ void EventsModel::setFilterDates(const QDateTime &begin, const QDateTime &end)
     items.clear();
     updateServers();
     endResetModel();
+}
+
+void EventsModel::setFilterDay(const QDateTime &date)
+{
+    setFilterDates(QDateTime(date.date(), QTime(0, 0)), QDateTime(date.date(), QTime(23, 59, 59, 999)));
 }
 
 void EventsModel::setFilterLevel(EventLevel minimum)
