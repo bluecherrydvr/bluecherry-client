@@ -24,9 +24,18 @@
 #include <QDesktopWidget>
 
 LiveFeedItem::LiveFeedItem(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent), m_customCursor(DefaultCursor)
+    : QDeclarativeItem(parent), m_customCursor(DefaultCursor), m_streamItem(0)
 {
     setAcceptedMouseButtons(acceptedMouseButtons() | Qt::RightButton);
+}
+
+void LiveFeedItem::setStreamItem(LiveStreamItem *item)
+{
+    if (item == m_streamItem)
+        return;
+
+    Q_ASSERT(!m_streamItem);
+    m_streamItem = item;
 }
 
 void LiveFeedItem::setCamera(const DVRCamera &camera)
@@ -34,15 +43,10 @@ void LiveFeedItem::setCamera(const DVRCamera &camera)
     if (camera == m_camera)
         return;
 
-    LiveStreamItem *mjpeg = findChild<LiveStreamItem*>(QLatin1String("mjpegFeed"));
-    Q_ASSERT(mjpeg);
-    if (!mjpeg)
-        return;
-
     if (m_camera)
     {
         static_cast<QObject*>(m_camera)->disconnect(this);
-        mjpeg->clear();
+        m_streamItem->clear();
     }
 
     m_camera = camera;
@@ -64,27 +68,25 @@ void LiveFeedItem::cameraDataUpdated()
     emit cameraNameChanged(cameraName());
     emit hasPtzChanged();
 
-    LiveStreamItem *mjpeg = findChild<LiveStreamItem*>(QLatin1String("mjpegFeed"));
-
     if (!m_camera.isOnline())
     {
         if (m_camera.isDisabled())
         {
-            mjpeg->clear();
+            m_streamItem->clear();
             setStatusText(tr("<span style='color:#444444'>Disabled</span>"));
             return;
         }
-        else if (!mjpeg->stream() || mjpeg->stream()->currentFrame().isNull())
+        else if (!m_streamItem->stream() || m_streamItem->stream()->currentFrame().isNull())
         {
-            mjpeg->clear();
+            m_streamItem->clear();
             setStatusText(tr("<span style='color:#444444'>Offline</span>"));
             return;
         }
     }
 
     QSharedPointer<LiveStream> nstream = m_camera.liveStream();
-    if (nstream != mjpeg->stream())
-        mjpeg->setStream(m_camera.liveStream());
+    if (nstream != m_streamItem->stream())
+        m_streamItem->setStream(m_camera.liveStream());
 }
 
 void LiveFeedItem::setStatusText(const QString &text)
@@ -171,11 +173,8 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
     QMenu menu(event->widget());
 
-    LiveStreamItem *mjpeg = findChild<LiveStreamItem*>(QLatin1String("mjpegFeed"));
-    if (!mjpeg)
-        return;
-
-    menu.addAction(tr("Snapshot"), this, SLOT(saveSnapshot()))->setEnabled(mjpeg->stream() && !mjpeg->stream()->currentFrame().isNull());
+    QAction *a = menu.addAction(tr("Snapshot"), this, SLOT(saveSnapshot()));
+    a->setEnabled(m_streamItem->stream() && !m_streamItem->stream()->currentFrame().isNull());
 
     QMenu *ptzmenu = 0;
     if (camera().hasPtz())
@@ -215,33 +214,27 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 void LiveFeedItem::setBandwidthModeFromAction()
 {
     QAction *a = qobject_cast<QAction*>(sender());
-    LiveStreamItem *mjpeg = findChild<LiveStreamItem*>(QLatin1String("mjpegFeed"));
-    if (!a || a->data().isNull() || !mjpeg)
+    if (!a || a->data().isNull())
         return;
 
     int mode = a->data().toInt();
-    mjpeg->setBandwidthMode(mode);
-    if (mjpeg->isPaused())
-        mjpeg->setPaused(false);
+    m_streamItem->setBandwidthMode(mode);
+    m_streamItem->setPaused(false);
 }
 
 /* Version (in LiveViewLayout) must be bumped for any change to
  * this format, and loadState must support old versions. */
 void LiveFeedItem::saveState(QDataStream *stream)
 {
-    LiveStreamItem *mjpeg = findChild<LiveStreamItem*>(QLatin1String("mjpegFeed"));
     Q_ASSERT(stream);
-    Q_ASSERT(mjpeg);
 
     *stream << m_camera;
-    *stream << mjpeg->bandwidthMode();
+    *stream << m_streamItem->bandwidthMode();
 }
 
 void LiveFeedItem::loadState(QDataStream *stream, int version)
 {
     Q_ASSERT(stream);
-    LiveStreamItem *mjpeg = findChild<LiveStreamItem*>(QLatin1String("mjpegFeed"));
-    Q_ASSERT(mjpeg);
 
     DVRCamera c;
     *stream >> c;
@@ -250,7 +243,7 @@ void LiveFeedItem::loadState(QDataStream *stream, int version)
     if (version >= 1) {
         int bandwidth_mode = LiveViewManager::FullBandwidth;
         *stream >> bandwidth_mode;
-        mjpeg->setBandwidthMode(bandwidth_mode);
+        m_streamItem->setBandwidthMode(bandwidth_mode);
     }
 }
 
@@ -378,16 +371,13 @@ QMenu *LiveFeedItem::ptzMenu()
 QList<QAction*> LiveFeedItem::bandwidthActions()
 {
     QList<QAction*> actions;
-    LiveStreamItem *mjpeg = findChild<LiveStreamItem*>(QLatin1String("mjpegFeed"));
-    if (!mjpeg)
-        return actions;
-    QAction *a = new QAction(mjpeg->isPaused() ? tr("Paused") : tr("Pause"), this);
-    connect(a, SIGNAL(triggered()), mjpeg, SLOT(togglePaused()));
+    QAction *a = new QAction(m_streamItem->isPaused() ? tr("Paused") : tr("Pause"), this);
+    connect(a, SIGNAL(triggered()), m_streamItem, SLOT(togglePaused()));
     a->setCheckable(true);
-    a->setChecked(mjpeg->isPaused());
+    a->setChecked(m_streamItem->isPaused());
     actions << a;
 
-    actions << bcApp->liveView->bandwidthActions(mjpeg->isPaused() ? -1 : mjpeg->bandwidthMode(),
+    actions << bcApp->liveView->bandwidthActions(m_streamItem->isPaused() ? -1 : m_streamItem->bandwidthMode(),
                                                  this, SLOT(setBandwidthModeFromAction()));
     return actions;
 }

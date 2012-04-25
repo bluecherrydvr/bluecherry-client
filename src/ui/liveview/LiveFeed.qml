@@ -7,15 +7,17 @@ LiveFeedBase {
     height: 150
     z: LiveViewLayout.isDragItem ? 10 : (LiveViewLayout.isDropTarget ? 1 : 0)
 
-    LiveViewLayout.sizeHint: feed.frameSize
+    LiveViewLayout.sizeHint: stream.frameSize
     LiveViewLayout.sizePadding: Qt.size(0, header.height)
     LiveViewLayout.fixedAspectRatio: false
+
+    streamItem: stream
 
     Image {
         id: header
         anchors.top: parent.top
-        anchors.left: feed.left
-        anchors.right: feed.right
+        anchors.left: stream.left
+        anchors.right: stream.right
         height: Math.max(20, headerText.paintedHeight)
         clip: true
 
@@ -65,7 +67,7 @@ LiveFeedBase {
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 1
             spacing: 10
-            visible: feed.connected
+            visible: stream.connected
 
             /* Disabled due to no support from RTP streams yet */
 /*
@@ -93,7 +95,7 @@ LiveFeedBase {
             HeaderPTZControl {
                 id: headerPtzElement
                 height: parent.height
-                visible: feedItem.hasPtz && !feed.paused
+                visible: feedItem.hasPtz && !stream.paused
             }
 
             Text {
@@ -103,17 +105,17 @@ LiveFeedBase {
                 verticalAlignment: Text.AlignVCenter
 
                 Timer {
-                    running: fpsText.visible && !feed.paused
+                    running: fpsText.visible && !stream.paused
                     interval: 500
                     repeat: true
                     triggeredOnStart: true
 
-                    onTriggered: parent.text = feed.fps + "<span style='color:#8e8e8e'>fps</span>"
+                    onTriggered: parent.text = stream.fps + "<span style='color:#8e8e8e'>fps</span>"
                 }
 
                 states: State {
                     name: "paused"
-                    when: feed.paused
+                    when: stream.paused
 
                     PropertyChanges {
                         target: fpsText
@@ -147,14 +149,12 @@ LiveFeedBase {
     }
 
     LiveStream {
-        id: feed
+        id: stream
 
         anchors.top: header.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-
-        objectName: "mjpegFeed"
 
         onErrorTextChanged: feedItem.setStatusText(errorText)
     }
@@ -165,7 +165,7 @@ LiveFeedBase {
     }
 
     MouseArea {
-        anchors.fill: feed
+        anchors.fill: stream
 
         hoverEnabled: feedItem.ptz != null
 
@@ -287,7 +287,7 @@ LiveFeedBase {
         id: statusOverlay
 
         color: "#BE000000"
-        anchors.fill: feed
+        anchors.fill: stream
         opacity: 0
         clip: true
 

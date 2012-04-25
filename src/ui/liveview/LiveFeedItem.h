@@ -9,12 +9,14 @@
 
 class QDataStream;
 class CameraPtzControl;
+class LiveStreamItem;
 
 class LiveFeedItem : public QDeclarativeItem
 {
     Q_OBJECT
     Q_ENUMS(CustomCursor RecordingState)
 
+    Q_PROPERTY(LiveStreamItem* streamItem READ streamItem WRITE setStreamItem)
     Q_PROPERTY(DVRCamera camera READ camera WRITE setCamera NOTIFY cameraChanged)
     Q_PROPERTY(QString cameraName READ cameraName NOTIFY cameraNameChanged)
     Q_PROPERTY(QString statusText READ statusText NOTIFY statusTextChanged)
@@ -45,6 +47,9 @@ public:
     };
 
     explicit LiveFeedItem(QDeclarativeItem *parent = 0);
+
+    LiveStreamItem *streamItem() const { return m_streamItem; }
+    void setStreamItem(LiveStreamItem *item);
 
     DVRCamera camera() const { return m_camera; }
     QString cameraName() const { return m_camera ? m_camera.displayName() : QLatin1String(" "); }
@@ -98,6 +103,7 @@ private slots:
     void setBandwidthModeFromAction();
 
 private:
+    LiveStreamItem *m_streamItem;
     DVRCamera m_camera;
     QString m_statusText;
     QSharedPointer<CameraPtzControl> m_ptz;
