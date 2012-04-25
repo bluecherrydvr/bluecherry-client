@@ -225,20 +225,33 @@ void LiveFeedItem::setBandwidthModeFromAction()
         mjpeg->setPaused(false);
 }
 
+/* Version (in LiveViewLayout) must be bumped for any change to
+ * this format, and loadState must support old versions. */
 void LiveFeedItem::saveState(QDataStream *stream)
 {
+    MJpegFeedItem *mjpeg = findChild<MJpegFeedItem*>(QLatin1String("mjpegFeed"));
     Q_ASSERT(stream);
+    Q_ASSERT(mjpeg);
 
     *stream << m_camera;
+    *stream << mjpeg->bandwidthMode();
 }
 
-void LiveFeedItem::loadState(QDataStream *stream)
+void LiveFeedItem::loadState(QDataStream *stream, int version)
 {
     Q_ASSERT(stream);
+    MJpegFeedItem *mjpeg = findChild<MJpegFeedItem*>(QLatin1String("mjpegFeed"));
+    Q_ASSERT(mjpeg);
 
     DVRCamera c;
     *stream >> c;
     setCamera(c);
+
+    if (version >= 1) {
+        int bandwidth_mode = LiveViewManager::FullBandwidth;
+        *stream >> bandwidth_mode;
+        mjpeg->setBandwidthMode(bandwidth_mode);
+    }
 }
 
 void LiveFeedItem::setCustomCursor(CustomCursor cursor)

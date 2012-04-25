@@ -56,7 +56,7 @@ public:
     RecordingState recordingState() const { return m_camera ? RecordingState(m_camera.recordingState()) : NoRecording; }
 
     Q_INVOKABLE void saveState(QDataStream *stream);
-    Q_INVOKABLE void loadState(QDataStream *stream);
+    Q_INVOKABLE void loadState(QDataStream *stream, int version);
 
 public slots:
     void setCamera(const DVRCamera &camera);

@@ -180,6 +180,8 @@ void MainWindow::queryLivePaused()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    liveView()->saveLayout();
+
     QSettings settings;
     if (settings.value(QLatin1String("ui/main/closeToTray"), false).toBool())
     {

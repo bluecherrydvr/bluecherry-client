@@ -684,6 +684,8 @@ QByteArray LiveViewLayout::saveLayout() const
     QDataStream data(&re, QIODevice::WriteOnly);
     data.setVersion(QDataStream::Qt_4_5);
 
+    /* -1, then version */
+    data << -1 << 1;
     data << m_rows << m_columns;
     foreach (QDeclarativeItem *item, m_items)
     {
@@ -707,8 +709,18 @@ bool LiveViewLayout::loadLayout(const QByteArray &buf)
     QDataStream data(buf);
     data.setVersion(QDataStream::Qt_4_5);
 
-    int rc, cc;
-    data >> rc >> cc;
+    /* Legacy format is [rc][cc][...]
+     * Newer format is [-1][version][rc][cc][...] */
+    int rc = 0, cc = 0, version = 0;
+    data >> rc;
+    if (rc < 0)
+        data >> version;
+
+    if (version == 0)
+        data >> cc;
+    else if (version > 0)
+        data >> rc >> cc;
+
     if (data.status() != QDataStream::Ok)
         return false;
 
@@ -730,7 +742,9 @@ bool LiveViewLayout::loadLayout(const QByteArray &buf)
                 data.device()->seek(pos);
 
                 item = createNewItem();
-                if (!item->metaObject()->invokeMethod(item, "loadState", Qt::DirectConnection, Q_ARG(QDataStream*,&data)))
+                if (!item->metaObject()->invokeMethod(item, "loadState", Qt::DirectConnection,
+                                                      Q_ARG(QDataStream*,&data),
+                                                      Q_ARG(int,version)))
                 {
                     qWarning() << "Failed to load LiveViewLayout state";
                     delete item;
