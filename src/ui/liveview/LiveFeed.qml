@@ -146,7 +146,7 @@ LiveFeedBase {
         }
     }
 
-    MJpegFeed {
+    LiveStream {
         id: feed
 
         anchors.top: header.bottom

@@ -1,4 +1,4 @@
-#include "MJpegFeedItem.h"
+#include "LiveStreamItem.h"
 #include "core/BluecherryApp.h"
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
@@ -18,21 +18,22 @@
 #define GL_BGRA GL_BGRA_EXT
 #endif
 
-MJpegFeedItem::MJpegFeedItem(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent), m_useAdvancedGL(true), m_texId(0), m_texDataPtr(0)
+LiveStreamItem::LiveStreamItem(QDeclarativeItem *parent)
+    : QDeclarativeItem(parent), m_useAdvancedGL(true), m_texId(0), m_texDataPtr(0),
+      m_bandwidthMode(LiveViewManager::FullBandwidth)
 {
     this->setFlag(QGraphicsItem::ItemHasNoContents, false);
     updateSettings();
     connect(bcApp, SIGNAL(settingsChanged()), SLOT(updateSettings()));
 }
 
-MJpegFeedItem::~MJpegFeedItem()
+LiveStreamItem::~LiveStreamItem()
 {
     if (m_texId)
         glDeleteTextures(1, (GLuint*)&m_texId);
 }
 
-void MJpegFeedItem::setStream(const QSharedPointer<LiveStream> &stream)
+void LiveStreamItem::setStream(const QSharedPointer<LiveStream> &stream)
 {
     if (stream == m_stream)
         return;
@@ -61,7 +62,7 @@ void MJpegFeedItem::setStream(const QSharedPointer<LiveStream> &stream)
     updateFrame();
 }
 
-void MJpegFeedItem::clear()
+void LiveStreamItem::clear()
 {
     setStream(QSharedPointer<LiveStream>());
     if (m_texId)
@@ -71,33 +72,33 @@ void MJpegFeedItem::clear()
     }
 }
 
-bool MJpegFeedItem::isPaused() const
+bool LiveStreamItem::isPaused() const
 {
     return m_stream ? m_stream->isPaused() : false;
 }
 
-void MJpegFeedItem::setPaused(bool paused)
+void LiveStreamItem::setPaused(bool paused)
 {
     if (m_stream)
         m_stream->setPaused(paused);
 }
 
-bool MJpegFeedItem::isConnected() const
+bool LiveStreamItem::isConnected() const
 {
     return m_stream ? (m_stream->state() >= LiveStream::Streaming) : false;
 }
 
-int MJpegFeedItem::bandwidthMode() const
+int LiveStreamItem::bandwidthMode() const
 {
     return m_stream ? m_stream->bandwidthMode() : 0;
 }
 
-int MJpegFeedItem::fps() const
+int LiveStreamItem::fps() const
 {
     return m_stream ? qRound(m_stream->receivedFps()) : 0;
 }
 
-void MJpegFeedItem::setBandwidthMode(int mode)
+void LiveStreamItem::setBandwidthMode(int mode)
 {
     if (m_stream)
     {
@@ -106,7 +107,7 @@ void MJpegFeedItem::setBandwidthMode(int mode)
     }
 }
 
-void MJpegFeedItem::updateFrameSize()
+void LiveStreamItem::updateFrameSize()
 {
     if (m_texId)
     {
@@ -117,7 +118,7 @@ void MJpegFeedItem::updateFrameSize()
     emit frameSizeChanged(frameSize());
 }
 
-void MJpegFeedItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWidget *widget)
+void LiveStreamItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWidget *widget)
 {
     Q_UNUSED(widget);
     if (!m_stream)
@@ -198,7 +199,7 @@ void MJpegFeedItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWid
     }
 }
 
-void MJpegFeedItem::streamStateChanged(int state)
+void LiveStreamItem::streamStateChanged(int state)
 {
     Q_ASSERT(m_stream);
 
@@ -225,7 +226,7 @@ void MJpegFeedItem::streamStateChanged(int state)
     }
 }
 
-void MJpegFeedItem::updateSettings()
+void LiveStreamItem::updateSettings()
 {
     QSettings settings;
     m_useAdvancedGL = !settings.value(QLatin1String("ui/liveview/disableAdvancedOpengl"), false).toBool();

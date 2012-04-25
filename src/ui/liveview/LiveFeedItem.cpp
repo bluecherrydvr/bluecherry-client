@@ -1,5 +1,5 @@
 #include "LiveFeedItem.h"
-#include "MJpegFeedItem.h"
+#include "LiveStreamItem.h"
 #include "PtzPresetsWindow.h"
 #include "core/BluecherryApp.h"
 #include "core/CameraPtzControl.h"
@@ -34,7 +34,7 @@ void LiveFeedItem::setCamera(const DVRCamera &camera)
     if (camera == m_camera)
         return;
 
-    MJpegFeedItem *mjpeg = findChild<MJpegFeedItem*>(QLatin1String("mjpegFeed"));
+    LiveStreamItem *mjpeg = findChild<LiveStreamItem*>(QLatin1String("mjpegFeed"));
     Q_ASSERT(mjpeg);
     if (!mjpeg)
         return;
@@ -64,7 +64,7 @@ void LiveFeedItem::cameraDataUpdated()
     emit cameraNameChanged(cameraName());
     emit hasPtzChanged();
 
-    MJpegFeedItem *mjpeg = findChild<MJpegFeedItem*>(QLatin1String("mjpegFeed"));
+    LiveStreamItem *mjpeg = findChild<LiveStreamItem*>(QLatin1String("mjpegFeed"));
 
     if (!m_camera.isOnline())
     {
@@ -171,7 +171,7 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
     QMenu menu(event->widget());
 
-    MJpegFeedItem *mjpeg = findChild<MJpegFeedItem*>(QLatin1String("mjpegFeed"));
+    LiveStreamItem *mjpeg = findChild<LiveStreamItem*>(QLatin1String("mjpegFeed"));
     if (!mjpeg)
         return;
 
@@ -215,7 +215,7 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 void LiveFeedItem::setBandwidthModeFromAction()
 {
     QAction *a = qobject_cast<QAction*>(sender());
-    MJpegFeedItem *mjpeg = findChild<MJpegFeedItem*>(QLatin1String("mjpegFeed"));
+    LiveStreamItem *mjpeg = findChild<LiveStreamItem*>(QLatin1String("mjpegFeed"));
     if (!a || a->data().isNull() || !mjpeg)
         return;
 
@@ -229,7 +229,7 @@ void LiveFeedItem::setBandwidthModeFromAction()
  * this format, and loadState must support old versions. */
 void LiveFeedItem::saveState(QDataStream *stream)
 {
-    MJpegFeedItem *mjpeg = findChild<MJpegFeedItem*>(QLatin1String("mjpegFeed"));
+    LiveStreamItem *mjpeg = findChild<LiveStreamItem*>(QLatin1String("mjpegFeed"));
     Q_ASSERT(stream);
     Q_ASSERT(mjpeg);
 
@@ -240,7 +240,7 @@ void LiveFeedItem::saveState(QDataStream *stream)
 void LiveFeedItem::loadState(QDataStream *stream, int version)
 {
     Q_ASSERT(stream);
-    MJpegFeedItem *mjpeg = findChild<MJpegFeedItem*>(QLatin1String("mjpegFeed"));
+    LiveStreamItem *mjpeg = findChild<LiveStreamItem*>(QLatin1String("mjpegFeed"));
     Q_ASSERT(mjpeg);
 
     DVRCamera c;
@@ -378,7 +378,7 @@ QMenu *LiveFeedItem::ptzMenu()
 QList<QAction*> LiveFeedItem::bandwidthActions()
 {
     QList<QAction*> actions;
-    MJpegFeedItem *mjpeg = findChild<MJpegFeedItem*>(QLatin1String("mjpegFeed"));
+    LiveStreamItem *mjpeg = findChild<LiveStreamItem*>(QLatin1String("mjpegFeed"));
     if (!mjpeg)
         return actions;
     QAction *a = new QAction(mjpeg->isPaused() ? tr("Paused") : tr("Pause"), this);

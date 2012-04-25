@@ -1,7 +1,7 @@
 #include "LiveViewArea.h"
 #include "LiveViewLayout.h"
 #include "LiveFeedItem.h"
-#include "MJpegFeedItem.h"
+#include "LiveStreamItem.h"
 #include "LiveViewGradients.h"
 #include "core/CameraPtzControl.h"
 #include "core/BluecherryApp.h"
@@ -18,7 +18,7 @@ LiveViewArea::LiveViewArea(QWidget *parent)
     connect(bcApp, SIGNAL(settingsChanged()), SLOT(settingsChanged()));
 
     qmlRegisterType<LiveViewLayout>("Bluecherry", 1, 0, "LiveViewLayout");
-    qmlRegisterType<MJpegFeedItem>("Bluecherry", 1, 0, "MJpegFeed");
+    qmlRegisterType<LiveStreamItem>("Bluecherry", 1, 0, "LiveStream");
     qmlRegisterType<LiveFeedItem>("Bluecherry", 1, 0, "LiveFeedBase");
     qmlRegisterUncreatableType<CameraPtzControl>("Bluecherry", 1, 0, "CameraPtzControl", QLatin1String(""));
 

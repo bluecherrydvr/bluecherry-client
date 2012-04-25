@@ -1,12 +1,12 @@
-#ifndef MJPEGSTREAMITEM_H
-#define MJPEGSTREAMITEM_H
+#ifndef LIVESTREAMITEM_H
+#define LIVESTREAMITEM_H
 
 #include <QDeclarativeItem>
 #include <QSharedPointer>
 #include "core/MJpegStream.h"
 #include "core/LiveStream.h"
 
-class MJpegFeedItem : public QDeclarativeItem
+class LiveStreamItem : public QDeclarativeItem
 {
     Q_OBJECT
 
@@ -18,8 +18,8 @@ class MJpegFeedItem : public QDeclarativeItem
     Q_PROPERTY(int fps READ fps CONSTANT)
 
 public:
-    explicit MJpegFeedItem(QDeclarativeItem *parent = 0);
-    virtual ~MJpegFeedItem();
+    explicit LiveStreamItem(QDeclarativeItem *parent = 0);
+    virtual ~LiveStreamItem();
 
     virtual void paint(QPainter *, const QStyleOptionGraphicsItem *, QWidget *);
 
@@ -63,6 +63,7 @@ private:
     bool m_useAdvancedGL;
     unsigned m_texId;
     const uchar *m_texDataPtr;
+    int m_bandwidthMode;
 };
 
-#endif // MJPEGSTREAMITEM_H
+#endif // LIVESTREAMITEM_H
