@@ -63,8 +63,8 @@ void LiveFeedItem::setCamera(const DVRCamera &camera)
         connect(m_camera, SIGNAL(recordingStateChanged(int)), SIGNAL(recordingStateChanged()));
     }
 
-    emit cameraChanged(camera);
     cameraDataUpdated();
+    emit cameraChanged(camera);
     emit recordingStateChanged();
 }
 
@@ -73,26 +73,8 @@ void LiveFeedItem::cameraDataUpdated()
     emit cameraNameChanged(cameraName());
     emit hasPtzChanged();
 
-    if (!m_camera.isOnline())
-    {
-        if (m_camera.isDisabled())
-        {
-            setStatusText(tr("<span style='color:#444444'>Disabled</span>"));
-        }
-        else if (!m_streamItem->stream() || m_streamItem->stream()->currentFrame().isNull())
-        {
-            setStatusText(tr("<span style='color:#444444'>Offline</span>"));
-        }
-    }
-
     QSharedPointer<LiveStream> nstream = m_camera.liveStream();
     m_streamItem->setStream(nstream);
-}
-
-void LiveFeedItem::setStatusText(const QString &text)
-{
-    m_statusText = text;
-    emit statusTextChanged(m_statusText);
 }
 
 void LiveFeedItem::openNewWindow()
@@ -219,7 +201,7 @@ void LiveFeedItem::setBandwidthModeFromAction()
 
     int mode = a->data().toInt();
     stream()->setBandwidthMode(mode);
-    m_streamItem->setPaused(false);
+    stream()->setPaused(false);
 }
 
 /* Version (in LiveViewLayout) must be bumped for any change to
@@ -371,14 +353,16 @@ QMenu *LiveFeedItem::ptzMenu()
 
 QList<QAction*> LiveFeedItem::bandwidthActions()
 {
+    bool paused = stream() ? stream()->isPaused() : false;
+
     QList<QAction*> actions;
-    QAction *a = new QAction(m_streamItem->isPaused() ? tr("Paused") : tr("Pause"), this);
-    connect(a, SIGNAL(triggered()), m_streamItem, SLOT(togglePaused()));
+    QAction *a = new QAction(paused ? tr("Paused") : tr("Pause"), this);
+    connect(a, SIGNAL(triggered()), stream(), SLOT(togglePaused()));
     a->setCheckable(true);
-    a->setChecked(m_streamItem->isPaused());
+    a->setChecked(paused);
     actions << a;
 
-    actions << bcApp->liveView->bandwidthActions((m_streamItem->isPaused() || !stream()) ? -1 : stream()->bandwidthMode(),
+    actions << bcApp->liveView->bandwidthActions((paused || !stream()) ? -1 : stream()->bandwidthMode(),
                                                  this, SLOT(setBandwidthModeFromAction()));
     return actions;
 }

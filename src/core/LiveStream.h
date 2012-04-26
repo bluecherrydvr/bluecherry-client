@@ -15,14 +15,18 @@ class LiveStream : public QObject
     Q_OBJECT
     Q_ENUMS(State)
 
+    Q_PROPERTY(bool connected READ isConnected NOTIFY stateChanged)
     Q_PROPERTY(bool paused READ isPaused WRITE setPaused NOTIFY pausedChanged)
     Q_PROPERTY(int bandwidthMode READ bandwidthMode WRITE setBandwidthMode NOTIFY bandwidthModeChanged)
+    Q_PROPERTY(float receivedFps READ receivedFps CONSTANT)
+    Q_PROPERTY(QSize streamSize READ streamSize NOTIFY streamSizeChanged)
+    Q_PROPERTY(State state READ state NOTIFY stateChanged)
 
 public:
     enum State
     {
-        Error = -3,
-        StreamOffline = -2,
+        Error,
+        StreamOffline,
         NotConnected,
         Connecting,
         Streaming,
@@ -46,12 +50,14 @@ public:
     float receivedFps() const { return m_fps; }
 
     bool isPaused() { return state() == Paused; }
+    bool isConnected() { return state() > Connecting; }
 
 public slots:
     void start();
     void stop();
 
     void setPaused(bool paused);
+    void togglePaused() { setPaused(!isPaused()); }
     void setOnline(bool online);
     void setBandwidthMode(int bandwidthMode);
 

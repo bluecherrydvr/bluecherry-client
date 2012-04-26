@@ -21,7 +21,6 @@ class LiveFeedItem : public QDeclarativeItem
     Q_PROPERTY(DVRCamera camera READ camera WRITE setCamera NOTIFY cameraChanged)
 
     Q_PROPERTY(QString cameraName READ cameraName NOTIFY cameraNameChanged)
-    Q_PROPERTY(QString statusText READ statusText NOTIFY statusTextChanged)
     Q_PROPERTY(CustomCursor customCursor READ customCursor WRITE setCustomCursor)
     Q_PROPERTY(CameraPtzControl* ptz READ ptz NOTIFY ptzChanged)
     Q_PROPERTY(bool hasPtz READ hasPtz NOTIFY hasPtzChanged)
@@ -57,7 +56,6 @@ public:
 
     DVRCamera camera() const { return m_camera; }
     QString cameraName() const { return m_camera ? m_camera.displayName() : QLatin1String(" "); }
-    QString statusText() const { return m_statusText; }
 
     CustomCursor customCursor() const { return m_customCursor; }
     CameraPtzControl *ptz() const { return m_ptz.data(); }
@@ -77,7 +75,6 @@ public slots:
     void openFullScreen();
     void saveSnapshot(const QString &file = QString());
 
-    void setStatusText(const QString &text);
     void setCustomCursor(CustomCursor cursor);
     void setPtzEnabled(bool ptzEnabled);
     void togglePtzEnabled() { setPtzEnabled(!ptz()); }
@@ -92,7 +89,6 @@ signals:
     void cameraChanged(const DVRCamera &camera);
     void cameraNameChanged(const QString &cameraName);
     void pausedChanged(bool isPaused);
-    void statusTextChanged(const QString &statusText);
     void ptzChanged(CameraPtzControl *ptz);
     void hasPtzChanged();
     void recordingStateChanged();
@@ -109,7 +105,6 @@ private slots:
 private:
     LiveStreamItem *m_streamItem;
     DVRCamera m_camera;
-    QString m_statusText;
     QSharedPointer<CameraPtzControl> m_ptz;
     CustomCursor m_customCursor;
 

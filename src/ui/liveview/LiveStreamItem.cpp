@@ -46,15 +46,8 @@ void LiveStreamItem::setStream(const QSharedPointer<LiveStream> &stream)
     {
         connect(m_stream.data(), SIGNAL(updated()), SLOT(updateFrame()));
         connect(m_stream.data(), SIGNAL(streamSizeChanged(QSize)), SLOT(updateFrameSize()));
-        connect(m_stream.data(), SIGNAL(stateChanged(int)), SLOT(streamStateChanged(int)));
-        connect(m_stream.data(), SIGNAL(pausedChanged(bool)), SIGNAL(pausedChanged(bool)));
         m_stream->start();
     }
-    else
-        emit errorTextChanged(tr("No<br>Video"));
-
-    emit pausedChanged(isPaused());
-    emit connectedChanged(isConnected());
 
     updateFrameSize();
     updateFrame();
@@ -68,27 +61,6 @@ void LiveStreamItem::clear()
         glDeleteTextures(1, (GLuint*)&m_texId);
         m_texId = 0;
     }
-}
-
-bool LiveStreamItem::isPaused() const
-{
-    return m_stream ? m_stream->isPaused() : false;
-}
-
-void LiveStreamItem::setPaused(bool paused)
-{
-    if (m_stream)
-        m_stream->setPaused(paused);
-}
-
-bool LiveStreamItem::isConnected() const
-{
-    return m_stream ? (m_stream->state() >= LiveStream::Streaming) : false;
-}
-
-int LiveStreamItem::fps() const
-{
-    return m_stream ? qRound(m_stream->receivedFps()) : 0;
 }
 
 void LiveStreamItem::updateFrameSize()
@@ -180,34 +152,6 @@ void LiveStreamItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWi
         p->setCompositionMode(QPainter::CompositionMode_Source);
         p->drawImage(opt->rect, frame);
         p->restore();
-    }
-}
-
-void LiveStreamItem::streamStateChanged(int state)
-{
-    Q_ASSERT(m_stream);
-
-    emit connectedChanged(isConnected());
-
-    switch (state)
-    {
-    case LiveStream::Error:
-        qDebug() << "Live stream error:" << m_stream->errorMessage();
-        emit errorTextChanged(tr("<span style='color:#ff0000;'>Error</span>"));
-        //setToolTip(m_stream->errorMessage());
-        break;
-    case LiveStream::StreamOffline:
-        emit errorTextChanged(tr("Offline"));
-        break;
-    case LiveStream::NotConnected:
-        emit errorTextChanged(tr("Disconnected"));
-        break;
-    case LiveStream::Connecting:
-        emit errorTextChanged(tr("Connecting..."));
-        break;
-    default:
-        emit errorTextChanged(QString());
-        break;
     }
 }
 

@@ -18,9 +18,10 @@ LiveViewArea::LiveViewArea(QWidget *parent)
     connect(bcApp, SIGNAL(settingsChanged()), SLOT(settingsChanged()));
 
     qmlRegisterType<LiveViewLayout>("Bluecherry", 1, 0, "LiveViewLayout");
-    qmlRegisterType<LiveStreamItem>("Bluecherry", 1, 0, "LiveStream");
+    qmlRegisterType<LiveStreamItem>("Bluecherry", 1, 0, "LiveStreamDisplay");
     qmlRegisterType<LiveFeedItem>("Bluecherry", 1, 0, "LiveFeedBase");
     qmlRegisterUncreatableType<CameraPtzControl>("Bluecherry", 1, 0, "CameraPtzControl", QLatin1String(""));
+    qmlRegisterUncreatableType<LiveStream>("Bluecherry", 1, 0, "LiveStream", QLatin1String(""));
 
     QSettings settings;
     if (!settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration"), false).toBool())

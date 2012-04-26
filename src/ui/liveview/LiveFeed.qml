@@ -7,17 +7,18 @@ LiveFeedBase {
     height: 150
     z: LiveViewLayout.isDragItem ? 10 : (LiveViewLayout.isDropTarget ? 1 : 0)
 
-    LiveViewLayout.sizeHint: stream.frameSize
+    /* Qt.size is necessary to convert from QSize to QSizeF */
+    LiveViewLayout.sizeHint: Qt.size(stream.streamSize.width, stream.streamSize.height)
     LiveViewLayout.sizePadding: Qt.size(0, header.height)
     LiveViewLayout.fixedAspectRatio: false
 
-    streamItem: stream
+    streamItem: videoArea
 
     Image {
         id: header
         anchors.top: parent.top
-        anchors.left: stream.left
-        anchors.right: stream.right
+        anchors.left: videoArea.left
+        anchors.right: videoArea.right
         height: Math.max(20, headerText.paintedHeight)
         clip: true
 
@@ -110,7 +111,7 @@ LiveFeedBase {
                     repeat: true
                     triggeredOnStart: true
 
-                    onTriggered: parent.text = stream.fps + "<span style='color:#8e8e8e'>fps</span>"
+                    onTriggered: parent.text = Math.round(stream.receivedFps) + "<span style='color:#8e8e8e'>fps</span>"
                 }
 
                 states: State {
@@ -148,15 +149,13 @@ LiveFeedBase {
         }
     }
 
-    LiveStream {
-        id: stream
+    LiveStreamDisplay {
+        id: videoArea
 
         anchors.top: header.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-
-        onErrorTextChanged: feedItem.setStatusText(errorText)
     }
 
     onPtzChanged: {
@@ -165,7 +164,7 @@ LiveFeedBase {
     }
 
     MouseArea {
-        anchors.fill: stream
+        anchors.fill: videoArea
 
         hoverEnabled: feedItem.ptz != null
 
@@ -283,17 +282,27 @@ LiveFeedBase {
         visible: feedItem.activeFocus && (feedItem.parent.rows > 1 || feedItem.parent.columns > 1)
     }
 
+    function statusOverlayMessage(state) {
+        switch (state) {
+            case LiveStream.Error: return "<span style='color:#ff0000'>Error</span>";
+            case LiveStream.StreamOffline: return "<span style='color:#888888'>Offline</span>";
+            case LiveStream.NotConnected: return "Disconnected";
+            case LiveStream.Connecting: return "Connecting...";
+            default: return "";
+        }
+    }
+
     Rectangle {
         id: statusOverlay
 
         color: "#BE000000"
-        anchors.fill: stream
+        anchors.fill: videoArea
         opacity: 0
         clip: true
 
         states: State {
             name: "active"
-            when: feedItem.statusText
+            when: statusText.text
 
             PropertyChanges { target: statusOverlay; visible: true; opacity: 1; }
         }
@@ -310,13 +319,14 @@ LiveFeedBase {
         }
 
         Text {
+            id: statusText
             anchors.centerIn: parent
             font.pointSize: 14
             horizontalAlignment: Qt.AlignHCenter
 
             color: "white"
 
-            text: feedItem.statusText
+            text: statusOverlayMessage(stream.state)
         }
     }
 }
