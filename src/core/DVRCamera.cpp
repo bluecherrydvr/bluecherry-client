@@ -33,7 +33,7 @@ void DVRCamera::setOnline(bool on)
         return;
 
     d->isOnline = on;
-    emit d->onlineChanged(on);
+    emit d->onlineChanged(isOnline());
 }
 
 DVRCamera::PtzProtocol DVRCamera::parseProtocol(const QString &protocol)
@@ -97,21 +97,24 @@ bool DVRCamera::parseXML(QXmlStreamReader &xml)
     d->isLoaded = true;
 
     d->doDataUpdated();
+    /* Changing stream URL or disabled flag will change online state */
+    emit d->onlineChanged(isOnline());
     return true;
 }
 
 QSharedPointer<LiveStream> DVRCamera::liveStream()
 {
     QSharedPointer<LiveStream> re;
+    if (!d)
+        return re;
 
-    if (!d || d->liveStream.isNull())
+    if (d->liveStream.isNull())
     {
-        if (d && !d->streamUrl.isEmpty())
-        {
-            re = QSharedPointer<LiveStream>(new LiveStream(*this, d.data()));
-            QObject::connect(d.data(), SIGNAL(onlineChanged(bool)), re.data(), SLOT(setOnline(bool)));
-            d->liveStream = re;
-        }
+        qDebug("creating");
+        re = QSharedPointer<LiveStream>(new LiveStream(*this));
+        QObject::connect(d.data(), SIGNAL(onlineChanged(bool)), re.data(), SLOT(setOnline(bool)));
+        re->setOnline(isOnline());
+        d->liveStream = re;
     }
     else
         re = d->liveStream.toStrongRef();

@@ -100,7 +100,7 @@ public:
     int uniqueId() const { return d ? d->uniqueID : -1; }
     QString displayName() const { return d ? d->displayName : QString(); }
     QByteArray streamUrl() const { return d ? d->streamUrl : QByteArray(); }
-    bool isOnline() const { return d && d->isOnline && !d->isDisabled; }
+    bool isOnline() const { return d && d->isOnline && !d->isDisabled && !d->streamUrl.isEmpty(); }
     bool isDisabled() const { return d && d->isDisabled; }
     bool canStream() const { return d && !d->streamUrl.isEmpty() && isOnline(); }
     QSharedPointer<LiveStream> liveStream();

@@ -24,7 +24,7 @@
 #include <QDesktopWidget>
 
 LiveFeedItem::LiveFeedItem(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent), m_customCursor(DefaultCursor), m_streamItem(0)
+    : QDeclarativeItem(parent), m_streamItem(0), m_customCursor(DefaultCursor)
 {
     setAcceptedMouseButtons(acceptedMouseButtons() | Qt::RightButton);
 }
@@ -36,6 +36,11 @@ void LiveFeedItem::setStreamItem(LiveStreamItem *item)
 
     Q_ASSERT(!m_streamItem);
     m_streamItem = item;
+}
+
+LiveStream *LiveFeedItem::stream() const
+{
+    return m_streamItem ? m_streamItem->stream().data() : 0;
 }
 
 void LiveFeedItem::setCamera(const DVRCamera &camera)
@@ -72,21 +77,16 @@ void LiveFeedItem::cameraDataUpdated()
     {
         if (m_camera.isDisabled())
         {
-            m_streamItem->clear();
             setStatusText(tr("<span style='color:#444444'>Disabled</span>"));
-            return;
         }
         else if (!m_streamItem->stream() || m_streamItem->stream()->currentFrame().isNull())
         {
-            m_streamItem->clear();
             setStatusText(tr("<span style='color:#444444'>Offline</span>"));
-            return;
         }
     }
 
     QSharedPointer<LiveStream> nstream = m_camera.liveStream();
-    if (nstream != m_streamItem->stream())
-        m_streamItem->setStream(m_camera.liveStream());
+    m_streamItem->setStream(nstream);
 }
 
 void LiveFeedItem::setStatusText(const QString &text)
@@ -214,36 +214,37 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 void LiveFeedItem::setBandwidthModeFromAction()
 {
     QAction *a = qobject_cast<QAction*>(sender());
-    if (!a || a->data().isNull())
+    if (!a || a->data().isNull() || !stream())
         return;
 
     int mode = a->data().toInt();
-    m_streamItem->setBandwidthMode(mode);
+    stream()->setBandwidthMode(mode);
     m_streamItem->setPaused(false);
 }
 
 /* Version (in LiveViewLayout) must be bumped for any change to
  * this format, and loadState must support old versions. */
-void LiveFeedItem::saveState(QDataStream *stream)
+void LiveFeedItem::saveState(QDataStream *data)
 {
-    Q_ASSERT(stream);
+    Q_ASSERT(data);
 
-    *stream << m_camera;
-    *stream << m_streamItem->bandwidthMode();
+    *data << m_camera;
+    *data << (stream() ? stream()->bandwidthMode() : 0);
 }
 
-void LiveFeedItem::loadState(QDataStream *stream, int version)
+void LiveFeedItem::loadState(QDataStream *data, int version)
 {
-    Q_ASSERT(stream);
+    Q_ASSERT(data);
 
     DVRCamera c;
-    *stream >> c;
+    *data >> c;
     setCamera(c);
 
     if (version >= 1) {
-        int bandwidth_mode = LiveViewManager::FullBandwidth;
-        *stream >> bandwidth_mode;
-        m_streamItem->setBandwidthMode(bandwidth_mode);
+        int bandwidth_mode = 0;
+        *data >> bandwidth_mode;
+        Q_ASSERT(stream());
+        stream()->setBandwidthMode(bandwidth_mode);
     }
 }
 
@@ -377,7 +378,7 @@ QList<QAction*> LiveFeedItem::bandwidthActions()
     a->setChecked(m_streamItem->isPaused());
     actions << a;
 
-    actions << bcApp->liveView->bandwidthActions(m_streamItem->isPaused() ? -1 : m_streamItem->bandwidthMode(),
+    actions << bcApp->liveView->bandwidthActions((m_streamItem->isPaused() || !stream()) ? -1 : stream()->bandwidthMode(),
                                                  this, SLOT(setBandwidthModeFromAction()));
     return actions;
 }

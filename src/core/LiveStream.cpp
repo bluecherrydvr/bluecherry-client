@@ -124,8 +124,11 @@ void LiveStream::setBandwidthMode(int value)
     m_bandwidthMode = (LiveViewManager::BandwidthMode)value;
     emit bandwidthModeChanged(value);
 
-    stop();
-    start();
+    if (state() >= Connecting)
+    {
+        stop();
+        start();
+    }
 }
 
 void LiveStream::start()

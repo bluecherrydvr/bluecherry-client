@@ -17,7 +17,9 @@ class LiveFeedItem : public QDeclarativeItem
     Q_ENUMS(CustomCursor RecordingState)
 
     Q_PROPERTY(LiveStreamItem* streamItem READ streamItem WRITE setStreamItem)
+    Q_PROPERTY(LiveStream* stream READ stream NOTIFY cameraChanged)
     Q_PROPERTY(DVRCamera camera READ camera WRITE setCamera NOTIFY cameraChanged)
+
     Q_PROPERTY(QString cameraName READ cameraName NOTIFY cameraNameChanged)
     Q_PROPERTY(QString statusText READ statusText NOTIFY statusTextChanged)
     Q_PROPERTY(CustomCursor customCursor READ customCursor WRITE setCustomCursor)
@@ -50,6 +52,8 @@ public:
 
     LiveStreamItem *streamItem() const { return m_streamItem; }
     void setStreamItem(LiveStreamItem *item);
+
+    LiveStream *stream() const;
 
     DVRCamera camera() const { return m_camera; }
     QString cameraName() const { return m_camera ? m_camera.displayName() : QLatin1String(" "); }

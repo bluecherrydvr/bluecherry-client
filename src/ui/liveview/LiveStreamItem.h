@@ -14,7 +14,6 @@ class LiveStreamItem : public QDeclarativeItem
     Q_PROPERTY(QSizeF frameSize READ frameSize NOTIFY frameSizeChanged)
     Q_PROPERTY(bool paused READ isPaused WRITE setPaused NOTIFY pausedChanged)
     Q_PROPERTY(bool connected READ isConnected NOTIFY connectedChanged)
-    Q_PROPERTY(int bandwidthMode READ bandwidthMode WRITE setBandwidthMode NOTIFY bandwidthModeChanged)
     Q_PROPERTY(int fps READ fps CONSTANT)
 
 public:
@@ -31,13 +30,11 @@ public:
 
     bool isPaused() const;
     bool isConnected() const;
-    int bandwidthMode() const;
     int fps() const;
 
 public slots:
     void setPaused(bool paused);
     void togglePaused() { setPaused(!isPaused()); }
-    void setBandwidthMode(int bandwidthMode);
 
 signals:
     void streamChanged(const QSharedPointer<LiveStream> &stream);
@@ -45,7 +42,6 @@ signals:
     void errorTextChanged(const QString &errorText);
     void pausedChanged(bool paused);
     void connectedChanged(bool connected);
-    void bandwidthModeChanged(int bandwidthMode);
     void fpsChanged();
 
 private slots:
@@ -63,7 +59,6 @@ private:
     bool m_useAdvancedGL;
     unsigned m_texId;
     const uchar *m_texDataPtr;
-    int m_bandwidthMode;
 };
 
 #endif // LIVESTREAMITEM_H

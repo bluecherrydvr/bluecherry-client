@@ -19,8 +19,7 @@
 #endif
 
 LiveStreamItem::LiveStreamItem(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent), m_useAdvancedGL(true), m_texId(0), m_texDataPtr(0),
-      m_bandwidthMode(LiveViewManager::FullBandwidth)
+    : QDeclarativeItem(parent), m_useAdvancedGL(true), m_texId(0), m_texDataPtr(0)
 {
     this->setFlag(QGraphicsItem::ItemHasNoContents, false);
     updateSettings();
@@ -56,7 +55,6 @@ void LiveStreamItem::setStream(const QSharedPointer<LiveStream> &stream)
 
     emit pausedChanged(isPaused());
     emit connectedChanged(isConnected());
-    emit bandwidthModeChanged(bandwidthMode());
 
     updateFrameSize();
     updateFrame();
@@ -88,23 +86,9 @@ bool LiveStreamItem::isConnected() const
     return m_stream ? (m_stream->state() >= LiveStream::Streaming) : false;
 }
 
-int LiveStreamItem::bandwidthMode() const
-{
-    return m_stream ? m_stream->bandwidthMode() : 0;
-}
-
 int LiveStreamItem::fps() const
 {
     return m_stream ? qRound(m_stream->receivedFps()) : 0;
-}
-
-void LiveStreamItem::setBandwidthMode(int mode)
-{
-    if (m_stream)
-    {
-        m_stream->setBandwidthMode(mode);
-        emit bandwidthModeChanged(mode);
-    }
 }
 
 void LiveStreamItem::updateFrameSize()
@@ -208,6 +192,7 @@ void LiveStreamItem::streamStateChanged(int state)
     switch (state)
     {
     case LiveStream::Error:
+        qDebug() << "Live stream error:" << m_stream->errorMessage();
         emit errorTextChanged(tr("<span style='color:#ff0000;'>Error</span>"));
         //setToolTip(m_stream->errorMessage());
         break;
