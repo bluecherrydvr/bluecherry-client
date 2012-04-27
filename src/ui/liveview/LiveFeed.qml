@@ -7,12 +7,31 @@ LiveFeedBase {
     height: 150
     z: LiveViewLayout.isDragItem ? 10 : (LiveViewLayout.isDropTarget ? 1 : 0)
 
-    /* Qt.size is necessary to convert from QSize to QSizeF */
-    LiveViewLayout.sizeHint: Qt.size(stream.streamSize.width, stream.streamSize.height)
     LiveViewLayout.sizePadding: Qt.size(0, header.height)
     LiveViewLayout.fixedAspectRatio: false
 
     streamItem: videoArea
+
+    states: State {
+        name: "ready"
+        when: stream !== null
+
+        PropertyChanges {
+            target: feedItem
+            /* Qt.size is necessary to convert from QSize to QSizeF */
+            LiveViewLayout.sizeHint: Qt.size(stream.streamSize.width, stream.streamSize.height)
+        }
+
+        PropertyChanges {
+            target: statusText
+            text: statusOverlayMessage(stream.state)
+        }
+
+        PropertyChanges {
+            target: headerItems
+            visible: stream.connected
+        }
+    }
 
     Image {
         id: header
@@ -68,7 +87,7 @@ LiveFeedBase {
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 1
             spacing: 10
-            visible: stream.connected
+            visible: false
 
             /* Disabled due to no support from RTP streams yet */
 /*
@@ -96,7 +115,7 @@ LiveFeedBase {
             HeaderPTZControl {
                 id: headerPtzElement
                 height: parent.height
-                visible: feedItem.hasPtz && !stream.paused
+                visible: feedItem.hasPtz && parent.visible && !stream.paused
             }
 
             Text {
@@ -106,24 +125,36 @@ LiveFeedBase {
                 verticalAlignment: Text.AlignVCenter
 
                 Timer {
-                    running: fpsText.visible && !stream.paused
+                    id: fpsTimer
                     interval: 500
                     repeat: true
                     triggeredOnStart: true
+                    running: false
 
                     onTriggered: parent.text = Math.round(stream.receivedFps) + "<span style='color:#8e8e8e'>fps</span>"
                 }
 
-                states: State {
-                    name: "paused"
-                    when: stream.paused
+                states: [
+                    State {
+                        name: "paused"
+                        when: stream && stream.paused
 
-                    PropertyChanges {
-                        target: fpsText
-                        color: "#ffdf6e"
-                        text: "Paused"
+                        PropertyChanges {
+                            target: fpsText
+                            color: "#ffdf6e"
+                            text: "Paused"
+                        }
+                    },
+                    State {
+                        name: "active"
+                        when: stream && !stream.paused
+
+                        PropertyChanges {
+                            target: fpsTimer
+                            running: fpsText.visible
+                        }
                     }
-                }
+                ]
 
                 MouseArea {
                     id: fpsMouseArea
@@ -325,8 +356,6 @@ LiveFeedBase {
             horizontalAlignment: Qt.AlignHCenter
 
             color: "white"
-
-            text: statusOverlayMessage(stream.state)
         }
     }
 }
