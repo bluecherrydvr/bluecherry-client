@@ -12,7 +12,7 @@
 #include <QFutureWatcher>
 
 EventsModel::EventsModel(QObject *parent)
-    : QAbstractItemModel(parent), serverEventsLimit(-1)
+    : QAbstractItemModel(parent), serverEventsLimit(-1), incompleteEventsFirst(false)
 {
     connect(bcApp, SIGNAL(serverAdded(DVRServer*)), SLOT(serverAdded(DVRServer*)));
     connect(bcApp, SIGNAL(serverRemoved(DVRServer*)), SLOT(clearServerEvents(DVRServer*)));
@@ -238,15 +238,24 @@ class EventSort
 public:
     const int column;
     const bool lessThan;
+    const bool incompleteFirst;
 
-    EventSort(int c, bool l)
-        : column(c), lessThan(l)
+    EventSort(int c, bool l, bool incomplete = false)
+        : column(c), lessThan(l), incompleteFirst(incomplete)
     {
     }
 
     bool operator()(const EventData *e1, const EventData *e2)
     {
         bool re;
+
+        if (incompleteFirst)
+        {
+            if (e1->duration < 0 && e2->duration >= 0)
+                return true;
+            else if (e2->duration < 0 && e1->duration >= 0)
+                return false;
+        }
 
         switch (column)
         {
@@ -280,6 +289,14 @@ public:
     }
 };
 
+void EventsModel::setIncompleteEventsFirst(bool enabled)
+{
+    if (incompleteEventsFirst == enabled)
+        return;
+    incompleteEventsFirst = enabled;
+    resort();
+}
+
 void EventsModel::sort(int column, Qt::SortOrder order)
 {
     this->sortColumn = column;
@@ -287,7 +304,7 @@ void EventsModel::sort(int column, Qt::SortOrder order)
 
     emit layoutAboutToBeChanged();
     bool lessThan = order == Qt::AscendingOrder;
-    qSort(items.begin(), items.end(), EventSort(column, lessThan));
+    qSort(items.begin(), items.end(), EventSort(column, lessThan, incompleteEventsFirst));
     emit layoutChanged();
 }
 

@@ -424,6 +424,7 @@ QWidget *MainWindow::createRecentEvents()
     QSettings settings;
     model->setUpdateInterval(settings.value(QLatin1String("ui/main/eventRefreshInterval"), 10000).toInt());
     model->setEventLimit(50);
+    model->setIncompleteEventsFirst(true);
 
     m_eventsView->header()->restoreState(settings.value(QLatin1String("ui/main/eventsView")).toByteArray());
 

@@ -78,6 +78,8 @@ public slots:
     void setUpdateInterval(int ms);
     void stopUpdates() { setUpdateInterval(-1); }
 
+    void setIncompleteEventsFirst(bool enabled);
+
 signals:
     void filtersChanged();
     void loadingStarted();
@@ -111,6 +113,7 @@ private:
     int serverEventsLimit;
     int sortColumn;
     Qt::SortOrder sortOrder;
+    bool incompleteEventsFirst;
 
     void resort() { sort(sortColumn, sortOrder); }
 
