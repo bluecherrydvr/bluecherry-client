@@ -53,6 +53,7 @@ private slots:
     void updateToolbarWidth();
     void bandwidthModeChanged(int value);
     void eventsContextMenu(const QPoint &pos);
+    void saveSettings();
 
 signals:
     void closing();

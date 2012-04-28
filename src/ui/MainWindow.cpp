@@ -139,16 +139,14 @@ MainWindow::MainWindow(QWidget *parent)
             SLOT(sslConfirmRequired(DVRServer*,QList<QSslError>,QSslConfiguration)));
     connect(bcApp, SIGNAL(queryLivePaused()), SLOT(queryLivePaused()));
 
+    connect(qApp, SIGNAL(aboutToQuit()), SLOT(saveSettings()));
+
     m_sourcesList->setFocus(Qt::OtherFocusReason);
 }
 
 MainWindow::~MainWindow()
 {
-    QSettings settings;
-    settings.setValue(QLatin1String("ui/main/geometry"), saveGeometry());
-    settings.setValue(QLatin1String("ui/main/centerSplit"), m_centerSplit->saveState());
-    settings.setValue(QLatin1String("ui/main/leftSplit"), m_leftSplit->saveState());
-    settings.setValue(QLatin1String("ui/main/eventsView"), m_eventsView->header()->saveState());
+    saveSettings();
 }
 
 void MainWindow::showEvent(QShowEvent *event)
@@ -178,9 +176,21 @@ void MainWindow::queryLivePaused()
         bcApp->pauseLive();
 }
 
+void MainWindow::saveSettings()
+{
+    if (liveView())
+        liveView()->saveLayout();
+
+    QSettings settings;
+    settings.setValue(QLatin1String("ui/main/geometry"), saveGeometry());
+    settings.setValue(QLatin1String("ui/main/centerSplit"), m_centerSplit->saveState());
+    settings.setValue(QLatin1String("ui/main/leftSplit"), m_leftSplit->saveState());
+    settings.setValue(QLatin1String("ui/main/eventsView"), m_eventsView->header()->saveState());
+}
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    liveView()->saveLayout();
+    saveSettings();
 
     QSettings settings;
     if (settings.value(QLatin1String("ui/main/closeToTray"), false).toBool())
