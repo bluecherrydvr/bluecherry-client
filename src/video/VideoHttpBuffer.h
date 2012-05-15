@@ -41,12 +41,12 @@ signals:
 
     /* Emitted when buffering starts, i.e. upon start() */
     void bufferingStarted();
+    /* Emitted when there is data ready in the buffer for the first time */
+    void bufferingReady();
     /* Emitted when buffering stops for any reason, including errors */
     void bufferingStopped();
     /* Emitted when buffering is finished, and the entire file is cached locally */
     void bufferingFinished();
-    /* Emitted when new data has been added to the buffer */
-    void bufferUpdated();
 
 private slots:
     void fileSizeChanged(unsigned fileSize);
