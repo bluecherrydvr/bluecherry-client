@@ -8,6 +8,7 @@
 #include <QThread>
 #include <QDir>
 #include <QApplication>
+#include <QTextDocument>
 #include <QDebug>
 
 /* Minimum number of bytes delta between the current write position
@@ -317,6 +318,7 @@ void MediaDownload::taskError(const QString &message)
 {
     /* We probably want some smart retrying behavior for tasks */
     qDebug() << "MediaDownload: Task reports error:" << message;
+    m_isFinished = true;
     sendError(message);
 }
 
@@ -433,7 +435,7 @@ void MediaDownloadTask::metaDataReady()
         if (m_reply->error() != QNetworkReply::NoError)
             emit error(m_reply->errorString());
         else
-            emit error(m_reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString());
+            emit error(Qt::escape(m_reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString()));
         disconnect(m_reply, 0, this, 0);
         m_reply->deleteLater();
         m_reply = 0;

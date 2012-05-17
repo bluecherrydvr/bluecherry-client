@@ -390,10 +390,9 @@ void EventVideoPlayer::updateBufferStatus()
 
 void EventVideoPlayer::bufferingStopped()
 {
-    qDebug("bufferingstopped");
     bcApp->releaseLive();
 
-    if (!m_video || m_video->videoBuffer()->isBufferingFinished())
+    if (!m_video || (m_video->videoBuffer()->isBufferingFinished() && m_video->state() > VideoPlayerBackend::Error))
         m_statusText->clear();
 
     if (!uiRefreshNeeded())
@@ -426,6 +425,12 @@ void EventVideoPlayer::stateChanged(int state)
         updatePosition();
         if (!uiRefreshNeeded())
             m_uiTimer.stop();
+    }
+
+    if (state == VideoPlayerBackend::Error || state == VideoPlayerBackend::PermanentError)
+    {
+        m_statusText->setText(QLatin1String("<span style='color:red;font-weight:bold'>") +
+                              m_video->errorMessage() + QLatin1String("</span>"));
     }
 
     QSettings settings;
