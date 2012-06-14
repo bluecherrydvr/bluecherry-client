@@ -463,7 +463,7 @@ void MediaDownloadTask::read()
 
 void MediaDownloadTask::requestFinished()
 {
-    if (m_reply->error() != QNetworkReply::NoError)
+    if (m_reply->error() != QNetworkReply::NoError && m_reply->error() != QNetworkReply::UnknownNetworkError)
         emit error(m_reply->errorString());
     else
         emit finished();
