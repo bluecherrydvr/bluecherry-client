@@ -74,7 +74,7 @@ void DVRServersView::contextMenuEvent(QContextMenuEvent *event)
 
     QMenu menu(this);
 
-    QAction *aConnect = 0, *aRefreshDevices = 0, *aEditServer = 0, *aServerConfig = 0, *aOptions = 0, *aAddServer = 0;
+    QAction *aOptions = 0, *aAddServer = 0;
     QAction *aSelectOnly = 0, *aSelectElse = 0;
     QAction *aAddFeed = 0, *aOpenWin = 0, *aOpenFull = 0, *aCamRename = 0;
 
