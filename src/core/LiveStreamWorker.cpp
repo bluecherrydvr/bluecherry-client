@@ -183,7 +183,7 @@ end:
     }
     if (!ok && ctx)
     {
-        av_close_input_file(ctx);
+        avformat_close_input(&ctx);
         ctx = 0;
     }
 
@@ -223,7 +223,7 @@ void LiveStreamWorker::destroy()
         av_freep(ctx->streams[i]);
     }
 
-    av_close_input_file(ctx);
+    avformat_close_input(&ctx);
     ctx = 0;
 }
 
