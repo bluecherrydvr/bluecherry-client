@@ -62,6 +62,8 @@ void MacSplitterHandle::paintEvent(QPaintEvent *)
 
 void MacSplitterHandle::enterEvent(QEvent *e)
 {
+    Q_UNUSED(e);
+
     if (isMouseGrabbed)
         return;
 
@@ -73,6 +75,8 @@ void MacSplitterHandle::enterEvent(QEvent *e)
 
 bool MacSplitterHandle::eventFilter(QObject *obj, QEvent *e)
 {
+    Q_UNUSED(obj);
+
     QMouseEvent *me;
     QPoint p;
 

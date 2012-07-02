@@ -88,6 +88,8 @@ void EventsView::loadingFinished()
 
 bool EventsView::eventFilter(QObject *obj, QEvent *ev)
 {
+    Q_UNUSED(obj);
+
     Q_ASSERT(obj == viewport());
     if (ev->type() == QEvent::Resize && loadingIndicator)
     {

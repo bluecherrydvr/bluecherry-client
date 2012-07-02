@@ -224,6 +224,8 @@ void DVRServersView::dataChanged(const QModelIndex &topLeft, const QModelIndex &
 
 void DVRServersView::rowsAboutToBeInserted(const QModelIndex &parent, int start, int end)
 {
+    Q_UNUSED(start);
+    Q_UNUSED(end);
     if (!model()->hasChildren(parent))
         setExpanded(parent, true);
 }

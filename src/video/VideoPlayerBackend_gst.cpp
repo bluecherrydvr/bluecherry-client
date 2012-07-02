@@ -477,6 +477,7 @@ void VideoPlayerBackend::decodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean
 GstBusSyncReply VideoPlayerBackend::busHandler(GstBus *bus, GstMessage *msg, bool isSynchronous)
 {
     Q_UNUSED(bus);
+    Q_UNUSED(isSynchronous);
 
     switch (GST_MESSAGE_TYPE(msg))
     {

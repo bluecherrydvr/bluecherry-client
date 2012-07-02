@@ -114,6 +114,8 @@ QImage GstSinkWidget::currentFrame()
 
 void GstSinkWidget::paintEvent(QPaintEvent *ev)
 {
+    Q_UNUSED(ev);
+
     QPainter p(this);
     p.setRenderHint(QPainter::SmoothPixmapTransform);
     p.setBackground(QColor(Qt::black));

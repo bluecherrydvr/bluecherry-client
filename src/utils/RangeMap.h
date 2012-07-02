@@ -46,6 +46,7 @@ inline QDebug operator<<(QDebug d, const RangeMap &r)
                     + QString::number(n.end) + QLatin1String("; "));
     return (d << text);
 #else
+    Q_UNUSED(r);
     return d;
 #endif
 }
