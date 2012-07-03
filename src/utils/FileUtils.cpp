@@ -43,7 +43,7 @@ QString sanitizeFilename(const QString &filename)
 
     for (int i = 0; i < re.size(); ++i)
     {
-        for (int j = 0; j < (sizeof(forbidden) / sizeof(QChar)); ++j)
+        for (unsigned int j = 0; j < (sizeof(forbidden) / sizeof(QChar)); ++j)
         {
             if (re[i] == forbidden[j])
             {

@@ -278,7 +278,7 @@ bool LiveStream::updateFrame()
     l.unlock();
 
     m_frame = sf;
-    if (m_ptsBase == AV_NOPTS_VALUE)
+    if (m_ptsBase == (int64_t)AV_NOPTS_VALUE)
     {
         m_ptsBase = m_frame->d->pts;
         m_ptsTimer.restart();

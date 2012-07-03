@@ -140,7 +140,7 @@ bool LiveStreamWorker::setup()
 
     /* avformat_find_stream_info takes an array of AVDictionary ptrs for each stream */
     opt_si = new AVDictionary*[ctx->nb_streams];
-    for (int i = 0; i < ctx->nb_streams; ++i)
+    for (unsigned int i = 0; i < ctx->nb_streams; ++i)
     {
         opt_si[i] = 0;
         av_dict_copy(&opt_si[i], opt, 0);
@@ -154,7 +154,7 @@ bool LiveStreamWorker::setup()
         goto end;
     }
 
-    for (int i = 0; i < ctx->nb_streams; ++i)
+    for (unsigned int i = 0; i < ctx->nb_streams; ++i)
     {
         char info[512];
         AVCodec *codec = avcodec_find_decoder(ctx->streams[i]->codec->codec_id);
@@ -177,7 +177,7 @@ end:
     av_dict_free(&opt);
     if (opt_si)
     {
-        for (int i = 0; i < ctx->nb_streams; ++i)
+        for (unsigned int i = 0; i < ctx->nb_streams; ++i)
             av_dict_free(&opt_si[i]);
         delete[] opt_si;
     }
@@ -217,7 +217,7 @@ void LiveStreamWorker::destroy()
     frameTail = frameHead;
     frameLock.unlock();
 
-    for (int i = 0; i < ctx->nb_streams; ++i)
+    for (unsigned int i = 0; i < ctx->nb_streams; ++i)
     {
         avcodec_close(ctx->streams[i]->codec);
         av_freep(ctx->streams[i]);
