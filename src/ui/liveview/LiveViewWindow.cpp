@@ -25,21 +25,6 @@
 #include <QMacStyle>
 #endif
 
-static QToolButton *createGridButton(const char *icon, const QString &text, QWidget *target, const char *slot)
-{
-    QToolButton *btn = new QToolButton;
-    btn->setIcon(QIcon(QLatin1String(icon)));
-    btn->setText(text);
-    btn->setToolTip(text);
-    btn->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    btn->setAutoRaise(true);
-
-    if (target && slot)
-        QObject::connect(btn, SIGNAL(clicked()), target, slot);
-
-    return btn;
-}
-
 LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, bool fullscreen, const DVRCamera &camera)
 {
 #ifdef Q_WS_MAC
