@@ -65,7 +65,7 @@ void EventTypesFilter::checkStateChanged(QTreeWidgetItem *item)
             Qt::CheckState itemState = (Qt::CheckState)child->data(0, Qt::CheckStateRole).toInt();
 
             if ((itemState == Qt::Checked && parentState == Qt::Unchecked) ||
-                (itemState == Qt::Unchecked) && parentState == Qt::Checked)
+                (itemState == Qt::Unchecked && parentState == Qt::Checked))
             {
                 parentState = Qt::PartiallyChecked;
                 break;

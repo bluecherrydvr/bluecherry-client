@@ -113,6 +113,9 @@ bool MacSplitterHandle::eventFilter(QObject *obj, QEvent *e)
         if (e->type() == QEvent::Leave)
             break;
         return true;
+
+    default:
+	    break;
     }
 
     return false;
