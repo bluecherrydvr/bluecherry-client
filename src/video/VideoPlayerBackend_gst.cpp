@@ -251,7 +251,8 @@ bool VideoPlayerBackend::start(const QUrl &url)
 
     /* Move the pipeline into the PLAYING state. This call may block for a very long time
      * (up to several seconds), because it will block until the pipeline has completed that move. */
-    play();
+    gst_element_set_state(m_pipeline, GST_STATE_READY);
+    connect(m_videoBuffer, SIGNAL(bufferingReady()), SLOT(playIfReady()));
     return true;
 }
 
@@ -288,6 +289,7 @@ void VideoPlayerBackend::clear()
 
     if (m_videoBuffer)
     {
+        disconnect(m_videoBuffer, 0, this, 0);
         if (m_videoBuffer->parent() == this)
             m_videoBuffer->deleteLater();
         m_videoBuffer = new VideoHttpBuffer(this);
@@ -311,6 +313,16 @@ void VideoPlayerBackend::streamError(const QString &message)
     if (m_pipeline)
         gst_element_set_state(m_pipeline, GST_STATE_NULL);
     setError(true, message);
+}
+
+void VideoPlayerBackend::playIfReady()
+{
+    if (!m_pipeline)
+        return;
+    GstState c, p;
+    gst_element_get_state(m_pipeline, &c, &p, 0);
+    if (c == GST_STATE_READY)
+        play();
 }
 
 void VideoPlayerBackend::play()

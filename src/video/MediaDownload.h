@@ -91,7 +91,7 @@ private:
     unsigned m_fileSize, m_downloadedSize, m_readPos, m_writePos;
     RangeMap m_bufferRanges;
     QAtomicInt m_refCount;
-    bool m_isFinished;
+    bool m_isFinished, m_hasError;
 
     /* size may be 0, which will continue to the end of the file */
     Q_INVOKABLE void startRequest(unsigned position, unsigned size);
