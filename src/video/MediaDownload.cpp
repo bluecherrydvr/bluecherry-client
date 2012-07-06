@@ -8,6 +8,7 @@
 #include <QThread>
 #include <QDir>
 #include <QApplication>
+#include <QTextDocument>
 #include <QDebug>
 
 /* Minimum number of bytes delta between the current write position
@@ -20,7 +21,7 @@ QThreadStorage<QNetworkAccessManager*> MediaDownloadTask::threadNAM;
 
 MediaDownload::MediaDownload(QObject *parent)
     : QObject(parent), m_thread(0), m_task(0), m_fileSize(0), m_downloadedSize(0),
-      m_readPos(0), m_writePos(0), m_refCount(0), m_isFinished(false)
+      m_readPos(0), m_writePos(0), m_refCount(0), m_isFinished(false), m_hasError(false)
 {
 }
 
@@ -87,8 +88,10 @@ void MediaDownload::cancel()
 void MediaDownload::sendError(const QString &message)
 {
     qDebug() << "MediaDownload: sending error:" << message;
+    m_hasError = true;
     emit error(message);
     emit stopped();
+    m_bufferWait.wakeAll();
 }
 
 bool MediaDownload::openFiles()
@@ -120,6 +123,9 @@ QString MediaDownload::bufferFilePath() const
 bool MediaDownload::seek(unsigned offset)
 {
     QMutexLocker l(&m_bufferLock);
+    if (m_hasError)
+        return false;
+
     if (offset > m_fileSize)
     {
         qDebug() << "MediaDownload: seek offset" << offset << "is past the end of filesize" << m_fileSize;
@@ -153,6 +159,9 @@ bool MediaDownload::seek(unsigned offset)
 int MediaDownload::read(unsigned position, char *buffer, int reqSize)
 {
     QMutexLocker l(&m_bufferLock);
+    if (m_hasError)
+        return -1;
+
     unsigned oldRdPos = m_readPos;
     int size = qMin(reqSize, (m_fileSize >= position) ? int(m_fileSize - position) : 0);
 
@@ -164,6 +173,8 @@ int MediaDownload::read(unsigned position, char *buffer, int reqSize)
             /* reading stream has seeked, abort this read */
             return 0;
         }
+        if (m_hasError)
+            return -1;
 
         size = qMin(reqSize, (m_fileSize >= position) ? int(m_fileSize - position) : 0);
     }
@@ -307,6 +318,7 @@ void MediaDownload::taskError(const QString &message)
 {
     /* We probably want some smart retrying behavior for tasks */
     qDebug() << "MediaDownload: Task reports error:" << message;
+    m_isFinished = true;
     sendError(message);
 }
 
@@ -418,6 +430,18 @@ void MediaDownloadTask::abort()
 
 void MediaDownloadTask::metaDataReady()
 {
+    int status = m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    if (m_reply->error() != QNetworkReply::NoError || status < 200 || status > 299) {
+        if (m_reply->error() != QNetworkReply::NoError)
+            emit error(m_reply->errorString());
+        else
+            emit error(Qt::escape(m_reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString()));
+        disconnect(m_reply, 0, this, 0);
+        m_reply->deleteLater();
+        m_reply = 0;
+        return;
+    }
+
     unsigned size = m_reply->header(QNetworkRequest::ContentLengthHeader).toUInt();
     if (size)
         emit requestReady(m_writePos + size);
@@ -439,7 +463,7 @@ void MediaDownloadTask::read()
 
 void MediaDownloadTask::requestFinished()
 {
-    if (m_reply->error() != QNetworkReply::NoError)
+    if (m_reply->error() != QNetworkReply::NoError && m_reply->error() != QNetworkReply::UnknownNetworkError)
         emit error(m_reply->errorString());
     else
         emit finished();

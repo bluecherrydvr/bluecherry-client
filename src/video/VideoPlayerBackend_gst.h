@@ -51,6 +51,7 @@ public slots:
     void clear();
 
     void play();
+    void playIfReady();
     void pause();
     bool seek(qint64 position);
     bool setSpeed(double speed);

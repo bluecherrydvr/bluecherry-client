@@ -342,6 +342,9 @@ void EventsWindow::timelineZoomRangeChanged(int min, int max)
 void EventsWindow::showEvent(const QModelIndex &index)
 {
     EventData *data = index.data(EventsModel::EventDataPtr).value<EventData*>();
+    if (!data->hasMedia())
+        return;
+
     m_eventViewer->setEvent(*data);
 
     /* Hack to ensure that the video area isn't collapsed */
