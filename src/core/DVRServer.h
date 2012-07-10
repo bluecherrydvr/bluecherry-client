@@ -25,6 +25,7 @@ public:
 
     QString hostname() const;
     int serverPort() const;
+    int rtspPort() const;
     QString username() const;
     QString password() const;
 
@@ -83,6 +84,11 @@ inline int DVRServer::serverPort() const
     bool ok = false;
     int r = readSetting("port").toInt(&ok);
     return ok ? r : 7001;
+}
+
+inline int DVRServer::rtspPort() const
+{
+    return serverPort() + 1;
 }
 
 inline QString DVRServer::username() const

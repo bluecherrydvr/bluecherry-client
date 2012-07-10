@@ -91,7 +91,7 @@ bool DVRCamera::parseXML(QXmlStreamReader &xml)
     url.setUserName(server()->username());
     url.setPassword(server()->password());
     url.setHost(server()->api->serverUrl().host());
-    url.setPort(7002);
+    url.setPort(server()->rtspPort());
     url.setPath(QString::fromLatin1("live/") + QString::number(d->uniqueID));
     d->streamUrl = url.toString().toLatin1();
     d->isLoaded = true;
