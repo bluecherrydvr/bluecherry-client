@@ -13,6 +13,7 @@
 #include "SetupWizard.h"
 #include "MacSplitter.h"
 #include "StatusBandwidthWidget.h"
+#include "StatusBarServerAlert.h"
 #include "core/DVRServer.h"
 #include "core/BluecherryApp.h"
 #include "core/LiveViewManager.h"
@@ -56,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
     updateTrayIcon();
 
     statusBar()->addPermanentWidget(new StatusBandwidthWidget(statusBar()));
+    statusBar()->addWidget(new StatusBarServerAlert(statusBar()));
 
 #ifdef Q_OS_MAC
     statusBar()->setSizeGripEnabled(false);

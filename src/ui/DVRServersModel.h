@@ -55,7 +55,7 @@ private:
     };
 
     QVector<Item> items;
-    QIcon statusIcon, statusErrorIcon;
+    QIcon statusIcon, statusErrorIcon, statusAlertIcon;
     bool m_offlineDisabled;
 };
 

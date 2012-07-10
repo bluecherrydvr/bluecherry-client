@@ -11,6 +11,7 @@ class QSplitter;
 class DVRServer;
 class QSslError;
 class QSslConfiguration;
+class QLabel;
 
 class MainWindow : public QMainWindow
 {
@@ -73,6 +74,8 @@ private:
     QMenu *m_serversMenu;
     QSystemTrayIcon *m_trayIcon;
     QToolBar *m_mainToolbar;
+    QWidget *serverAlertWidget;
+    QLabel *serverAlertText;
 
     void createMenu();
 
