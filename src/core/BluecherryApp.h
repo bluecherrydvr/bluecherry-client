@@ -35,6 +35,8 @@ public:
     DVRServer *findServerID(int id);
     bool serverExists(DVRServer *server) { return m_servers.contains(server); }
 
+    QList<DVRServer*> serverAlerts() const;
+
     /* Used to create other QNAM instances, for use on other threads.
      * Keeps the correct SSL verification behavior, although changes in fingerprints
      * will error rather than prompting the user on any but the default (GUI thread). */
@@ -58,6 +60,7 @@ public slots:
 signals:
     void serverAdded(DVRServer *server);
     void serverRemoved(DVRServer *server);
+    void serverAlertsChanged();
 
     void sslConfirmRequired(DVRServer *server, const QList<QSslError> &errors, const QSslConfiguration &config);
 

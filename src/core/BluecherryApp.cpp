@@ -85,6 +85,7 @@ void BluecherryApp::loadServers()
 
         DVRServer *server = new DVRServer(id, this);
         connect(server, SIGNAL(serverRemoved(DVRServer*)), SLOT(onServerRemoved(DVRServer*)));
+        connect(server, SIGNAL(statusAlertMessageChanged(QString)), SIGNAL(serverAlertsChanged()));
 
         m_servers.append(server);
         m_maxServerId = qMax(m_maxServerId, id);
@@ -116,6 +117,7 @@ DVRServer *BluecherryApp::addNewServer(const QString &name)
     DVRServer *server = new DVRServer(id, this);
     m_servers.append(server);
     connect(server, SIGNAL(serverRemoved(DVRServer*)), SLOT(onServerRemoved(DVRServer*)));
+    connect(server, SIGNAL(statusAlertMessageChanged(QString)), SLOT(serverAlertsChanged()));
 
     emit serverAdded(server);
     return server;
@@ -228,6 +230,17 @@ void BluecherryApp::releaseLive()
 
     if (!m_livePaused)
         emit livePausedChanged(false);
+}
+
+QList<DVRServer*> BluecherryApp::serverAlerts() const
+{
+    QList<DVRServer*> re;
+    for (QList<DVRServer*>::ConstIterator it = m_servers.begin(); it != m_servers.end(); ++it)
+    {
+        if (!(*it)->statusAlertMessage().isEmpty())
+            re.append(*it);
+    }
+    return re;
 }
 
 #ifdef Q_OS_WIN

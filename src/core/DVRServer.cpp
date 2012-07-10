@@ -93,6 +93,9 @@ void DVRServer::updateCameras()
     qDebug() << "DVRServer: Requesting cameras list";
     QNetworkReply *reply = api->sendRequest(QUrl(QLatin1String("/ajax/devices.php?XML=1")));
     connect(reply, SIGNAL(finished()), SLOT(updateCamerasReply()));
+
+    reply = api->sendRequest(QUrl(QLatin1String("/ajax/stats.php")));
+    connect(reply, SIGNAL(finished()), SLOT(updateStatsReply()));
 }
 
 void DVRServer::updateCamerasReply()
@@ -197,6 +200,61 @@ void DVRServer::updateCamerasReply()
     }
 }
 
+void DVRServer::updateStatsReply()
+{
+    QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
+    if (!reply)
+        return;
+
+    reply->deleteLater();
+
+    QString message;
+
+    if (reply->error() != QNetworkReply::NoError)
+    {
+        message = tr("Status request error: %1").arg(reply->errorString());
+    }
+    else
+    {
+        QByteArray data = reply->readAll();
+        QXmlStreamReader xml(data);
+
+        bool hadMessageElement = false;
+        while (xml.readNextStartElement())
+        {
+            if (xml.name() == QLatin1String("stats"))
+            {
+                while (xml.readNext() != QXmlStreamReader::Invalid)
+                {
+                    if (xml.tokenType() == QXmlStreamReader::EndElement && xml.name() == QLatin1String("stats"))
+                        break;
+                    else if (xml.tokenType() != QXmlStreamReader::StartElement)
+                        continue;
+
+                    if (xml.name() == QLatin1String("message"))
+                    {
+                        hadMessageElement = true;
+                        QString text = xml.readElementText();
+                        if (!text.isEmpty())
+                            message = text;
+                    }
+                    else if (xml.name() == QLatin1String("bc-server-running") &&
+                             xml.readElementText().trimmed() == QLatin1String("down"))
+                        message = tr("Server process stopped");
+                }
+            }
+        }
+
+        if (!hadMessageElement)
+            message = tr("Status request error: invalid server response");
+    }
+
+    if (message != m_statusAlertMessage) {
+        m_statusAlertMessage = message;
+        emit statusAlertMessageChanged(message);
+    }
+}
+
 void DVRServer::disconnected()
 {
     while (!m_cameras.isEmpty())
@@ -207,6 +265,8 @@ void DVRServer::disconnected()
         c.removed();
     }
     devicesLoaded = false;
+    m_statusAlertMessage.clear();
+    emit statusAlertMessageChanged(QString());
 }
 
 bool DVRServer::isKnownCertificate(const QSslCertificate &certificate) const
