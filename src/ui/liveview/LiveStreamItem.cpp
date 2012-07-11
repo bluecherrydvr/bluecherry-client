@@ -19,7 +19,8 @@
 #endif
 
 LiveStreamItem::LiveStreamItem(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent), m_useAdvancedGL(true), m_texId(0), m_texDataPtr(0)
+    : QDeclarativeItem(parent), m_useAdvancedGL(true), m_texId(0), m_texLastContext(0), m_texInvalidate(false),
+      m_texDataPtr(0)
 {
     this->setFlag(QGraphicsItem::ItemHasNoContents, false);
     updateSettings();
@@ -28,8 +29,47 @@ LiveStreamItem::LiveStreamItem(QDeclarativeItem *parent)
 
 LiveStreamItem::~LiveStreamItem()
 {
+    clearTexture();
+}
+
+/* This is odd and hackish logic to manage deletion of textures. The problem here is
+ * that QDeclarativeItem (or QGraphicsItem) is technically divorced from the actual
+ * painting surface (our GL context), but we need to bind a persistent texture in that
+ * context. There is no notification when the context has changed or been deleted, but
+ * we this can cover any existing case without leaking. Note that the deletion of the
+ * context will implicitly free textures, so missing deletion from the destructor is likely
+ * not a problem (since that almost always precedes destruction of a LiveViewArea).
+ *
+ * The only significant leak risk I can see is if the item is somehow deleted (without
+ * deleting the entire view) without the relevant context being current. That will at
+ * least warn, but it's unavoidable without creating some connection between LiveViewArea
+ * and this item.
+ *
+ * Bug #1118 revealed the problem, which was caused by deleting textures in the wrong context.
+ */
+void LiveStreamItem::clearTexture()
+{
     if (m_texId)
+    {
+        Q_ASSERT(m_texLastContext);
+        if (m_texLastContext && QGLContext::currentContext() != m_texLastContext)
+        {
+            qDebug() << "LiveStreamItem: Current context" << QGLContext::currentContext() <<
+                        "does not match texture context" << (void*)m_texLastContext << "- cannot "
+                        "delete old texture. This could leak, but most likely the context was "
+                        "destroyed or we will delete the texture later.";
+            m_texInvalidate = true;
+            return;
+        }
+
+        if (m_texInvalidate)
+            qDebug() << "LiveStreamItem: Texture invalidation successful";
+
         glDeleteTextures(1, (GLuint*)&m_texId);
+        m_texId = 0;
+        m_texLastContext = 0;
+        m_texInvalidate = false;
+    }
 }
 
 void LiveStreamItem::setStream(const QSharedPointer<LiveStream> &stream)
@@ -56,21 +96,12 @@ void LiveStreamItem::setStream(const QSharedPointer<LiveStream> &stream)
 void LiveStreamItem::clear()
 {
     setStream(QSharedPointer<LiveStream>());
-    if (m_texId)
-    {
-        glDeleteTextures(1, (GLuint*)&m_texId);
-        m_texId = 0;
-    }
+    clearTexture();
 }
 
 void LiveStreamItem::updateFrameSize()
 {
-    if (m_texId)
-    {
-        glDeleteTextures(1, (GLuint*)&m_texId);
-        m_texId = 0;
-    }
-
+    clearTexture();
     emit frameSizeChanged(frameSize());
 }
 
@@ -88,6 +119,12 @@ void LiveStreamItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWi
         return;
     }
 
+    /* For advanced GL textures that were invalidated (deleted when the relevant context
+     * was not current), attempt to delete them here if appropriate. */
+    const bool glContextChanged = QGLContext::currentContext() != m_texLastContext;
+    if (m_texId && (glContextChanged || m_texInvalidate))
+        clearTexture();
+
     if (m_useAdvancedGL && p->paintEngine()->type() == QPaintEngine::OpenGL2)
     {
         static int c = 1;
@@ -100,7 +137,7 @@ void LiveStreamItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWi
         p->beginNativePainting();
         glEnable(GL_TEXTURE_2D);
 
-        if (Q_LIKELY(m_texId))
+        if (Q_LIKELY(m_texId && !m_texInvalidate))
         {
             glBindTexture(GL_TEXTURE_2D, m_texId);
             if (frame.constBits() != m_texDataPtr)
@@ -112,8 +149,14 @@ void LiveStreamItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWi
         }
         else
         {
+            if (m_texInvalidate)
+                qDebug() << "LiveStreamItem: Replacing invalidated texture; potential leak, but context was probably deleted.";
+
             glGenTextures(1, (GLuint*)&m_texId);
+            m_texLastContext = QGLContext::currentContext();
+            m_texInvalidate = false;
             Q_ASSERT(m_texId);
+
             glBindTexture(GL_TEXTURE_2D, m_texId);
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, 1.0);
             glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -147,6 +190,10 @@ void LiveStreamItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWi
     }
     else
     {
+        m_texId = 0;
+        m_texInvalidate = 0;
+        m_texLastContext = 0;
+
         p->save();
         //p->setRenderHint(QPainter::SmoothPixmapTransform);
         p->setCompositionMode(QPainter::CompositionMode_Source);
@@ -160,8 +207,5 @@ void LiveStreamItem::updateSettings()
     QSettings settings;
     m_useAdvancedGL = !settings.value(QLatin1String("ui/liveview/disableAdvancedOpengl"), false).toBool();
     if (!m_useAdvancedGL && m_texId)
-    {
-        glDeleteTextures(1, (GLuint*)&m_texId);
-        m_texId = 0;
-    }
+        clearTexture();
 }

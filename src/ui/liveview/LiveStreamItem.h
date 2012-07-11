@@ -6,6 +6,8 @@
 #include "core/MJpegStream.h"
 #include "core/LiveStream.h"
 
+class QGLContext;
+
 class LiveStreamItem : public QDeclarativeItem
 {
     Q_OBJECT
@@ -42,7 +44,11 @@ private:
     QSharedPointer<LiveStream> m_stream;
     bool m_useAdvancedGL;
     unsigned m_texId;
+    const QGLContext *m_texLastContext;
+    bool m_texInvalidate;
     const uchar *m_texDataPtr;
+
+    void clearTexture();
 };
 
 #endif // LIVESTREAMITEM_H
