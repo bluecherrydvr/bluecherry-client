@@ -38,6 +38,18 @@ LiveViewArea::LiveViewArea(QWidget *parent)
     Q_ASSERT(m_layout);
 }
 
+LiveViewArea::~LiveViewArea()
+{
+    /* For GL viewports, make that context current prior to clearing the scene
+     * to allow items a chance to clean up GL resources properly, though this is
+     * non-critical because the context destruction would implicitly free them.
+     * See LiveStreamItem. */
+    QGLWidget *gl = qobject_cast<QGLWidget*>(viewport());
+    if (gl)
+        gl->makeCurrent();
+    scene()->clear();
+}
+
 bool LiveViewArea::isHardwareAccelerated() const
 {
     return viewport()->inherits("QGLWidget");

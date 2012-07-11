@@ -12,6 +12,7 @@ class LiveViewArea : public QDeclarativeView
 
 public:
     explicit LiveViewArea(QWidget *parent = 0);
+    virtual ~LiveViewArea();
 
     LiveViewLayout *layout() const { return m_layout; }
 
