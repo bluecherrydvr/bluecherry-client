@@ -92,7 +92,7 @@ extern BluecherryApp *bcApp;
 
 inline MainWindow *BluecherryApp::globalParentWindow() const
 {
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MAC
     return 0;
 #else
     return mainWindow;

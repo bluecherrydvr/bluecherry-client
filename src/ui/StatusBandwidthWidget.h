@@ -3,7 +3,7 @@
 
 #include <QtGlobal>
 
-#ifndef Q_WS_MAC
+#ifndef Q_OS_MAC
 #include <QToolButton>
 
 class StatusBandwidthWidget : public QToolButton
@@ -18,7 +18,7 @@ private slots:
     void rateUpdated(unsigned currentRate);
 };
 
-#else /* Q_WS_MAC */
+#else /* Q_OS_MAC */
 
 #include <QMacCocoaViewContainer>
 
