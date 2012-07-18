@@ -138,6 +138,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(bcApp, SIGNAL(sslConfirmRequired(DVRServer*,QList<QSslError>,QSslConfiguration)),
             SLOT(sslConfirmRequired(DVRServer*,QList<QSslError>,QSslConfiguration)));
     connect(bcApp, SIGNAL(queryLivePaused()), SLOT(queryLivePaused()));
+    connect(bcApp, SIGNAL(serverAdded(DVRServer*)), SLOT(onServerAdded(DVRServer*)));
+
+    foreach (DVRServer *s, bcApp->servers())
+        onServerAdded(s);
 
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(saveSettings()));
 
@@ -678,5 +682,43 @@ void MainWindow::bandwidthModeChanged(int value)
     {
         if (!a->data().isNull())
             a->setChecked(a->data().toInt() == value);
+    }
+}
+
+void MainWindow::onServerAdded(DVRServer *server)
+{
+    connect(server, SIGNAL(devicesReady()), SLOT(serverDevicesLoaded()));
+}
+
+void MainWindow::serverDevicesLoaded()
+{
+    DVRServer *server = qobject_cast<DVRServer*>(sender());
+    if (!server)
+        return;
+
+    if (server->cameras().isEmpty())
+    {
+        /* On OS X, trying to open this modal dialog while another modal dialog is open
+         * (such as the setup wizard) causes both to become impossible to use; work around
+         * by parenting this to the current modal widget if there is one, which in practice
+         * is likely the setup wizard. As a result, the configuration dialog will come up
+         * before the wizard has ended, but that isn't much of a problem. */
+        QMessageBox msg(qApp->activeModalWidget() ? qApp->activeModalWidget() : this);
+        if (bcApp->servers().count() > 1)
+            msg.setText(tr("%1 hasn't been configured yet").arg(Qt::escape(server->displayName())));
+        else
+            msg.setText(tr("The server hasn't been configured yet"));
+        msg.setInformativeText(tr("You can access configuration at any time by double-clicking on the server.<br><br>Do you want to configure devices for this server now?"));
+        QPushButton *yes = msg.addButton(tr("Configure"), QMessageBox::YesRole);
+        msg.addButton(tr("Later"), QMessageBox::NoRole);
+        msg.setDefaultButton(yes);
+        msg.setWindowModality(Qt::WindowModal);
+        msg.exec();
+        if (msg.clickedButton() == yes)
+        {
+            ServerConfigWindow::instance()->setServer(server);
+            ServerConfigWindow::instance()->show();
+            ServerConfigWindow::instance()->raise();
+        }
     }
 }

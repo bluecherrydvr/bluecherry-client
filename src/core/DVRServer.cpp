@@ -9,7 +9,7 @@
 #include <QDebug>
 
 DVRServer::DVRServer(int id, QObject *parent)
-    : QObject(parent), configId(id)
+    : QObject(parent), configId(id), devicesLoaded(false)
 {
     m_displayName = readSetting("displayName").toString();
     api = new ServerRequestManager(this);
@@ -116,11 +116,15 @@ void DVRServer::updateCamerasReply()
     QXmlStreamReader xml(data);
 
     QSet<int> idSet;
+    bool hasDevicesElement = false;
+    bool wasEmpty = m_cameras.isEmpty();
 
     while (xml.readNextStartElement())
     {
         if (xml.name() == QLatin1String("devices"))
         {
+            hasDevicesElement = true;
+
             while (xml.readNext() != QXmlStreamReader::Invalid)
             {
                 if (xml.tokenType() == QXmlStreamReader::EndElement && xml.name() == QLatin1String("devices"))
@@ -164,6 +168,9 @@ void DVRServer::updateCamerasReply()
             xml.skipCurrentElement();
     }
 
+    if (!hasDevicesElement)
+        xml.raiseError(QLatin1String("Invalid format: no devices element"));
+
     if (xml.hasError())
     {
         qWarning() << "DVRServer: Error while parsing camera list:" << xml.errorString();
@@ -182,6 +189,12 @@ void DVRServer::updateCamerasReply()
             --i;
         }
     }
+
+    if (!devicesLoaded || (wasEmpty && !m_cameras.isEmpty()))
+    {
+        devicesLoaded = true;
+        emit devicesReady();
+    }
 }
 
 void DVRServer::disconnected()
@@ -193,6 +206,7 @@ void DVRServer::disconnected()
         emit cameraRemoved(c);
         c.removed();
     }
+    devicesLoaded = false;
 }
 
 bool DVRServer::isKnownCertificate(const QSslCertificate &certificate) const
