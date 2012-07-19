@@ -57,6 +57,8 @@ public slots:
 
 signals:
     void changed();
+    void devicesReady();
+
     void serverRemoved(DVRServer *server);
 
     void cameraAdded(const DVRCamera &camera);
@@ -70,6 +72,7 @@ private:
     QList<DVRCamera> m_cameras;
     QString m_displayName;
     QTimer m_refreshTimer;
+    bool devicesLoaded;
 };
 
 Q_DECLARE_METATYPE(DVRServer*)

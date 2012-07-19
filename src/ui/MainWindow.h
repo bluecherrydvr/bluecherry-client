@@ -54,6 +54,8 @@ private slots:
     void bandwidthModeChanged(int value);
     void eventsContextMenu(const QPoint &pos);
     void saveSettings();
+    void onServerAdded(DVRServer *server);
+    void serverDevicesLoaded();
 
 signals:
     void closing();
