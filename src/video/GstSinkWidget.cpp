@@ -1,67 +1,77 @@
 #include "GstSinkWidget.h"
+#include "core/BluecherryApp.h"
 #include <QPaintEvent>
 #include <QPainter>
 #include <QDebug>
 #include <QTimer>
 #include <QThread>
 #include <QApplication>
+#include <QGLWidget>
+#include <QSettings>
 #include <gst/gst.h>
 #include <gst/app/gstappsink.h>
 
 GstSinkWidget::GstSinkWidget(QWidget *parent)
-    : QGLWidget(parent), m_framePtr(0), m_frameWidth(-1), m_frameHeight(-1)
+    : QFrame(parent), m_viewport(0), m_element(0), m_framePtr(0), m_frameWidth(-1),
+      m_frameHeight(-1), m_normalFrameStyle(0)
 {
     setAutoFillBackground(false);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    setAttribute(Qt::WA_OpaquePaintEvent);
 
-    m_element = GST_APP_SINK(gst_element_factory_make("appsink", "sinkwidget"));
-    if (!m_element)
+    setMinimumSize(320, 240);
+    setFrameStyle(QFrame::Sunken | QFrame::Panel);
+    QPalette p = palette();
+    p.setColor(QPalette::Window, Qt::black);
+    p.setColor(QPalette::WindowText, Qt::white);
+    setPalette(p);
+
+    QSettings settings;
+    if (!settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration"), false).toBool())
+        setViewport(new QGLWidget);
+    else
     {
-        qWarning() << "GstSinkWidget: Creating appsink element failed";
-        return;
+        qDebug("Hardware-accelerated video output is DISABLED");
+        setViewport(new QWidget);
     }
 
-    g_object_ref(m_element);
-
-    GstCaps *caps = gst_caps_new_simple("video/x-raw-rgb",
-                                        "red_mask", G_TYPE_INT, 0xff00,
-                                        "blue_mask", G_TYPE_INT, 0xff000000,
-                                        "green_mask", G_TYPE_INT, 0xff0000,
-                                        NULL);
-    gst_app_sink_set_caps(m_element, caps);
-    gst_caps_unref(caps);
-
-    GstAppSinkCallbacks callbacks;
-    memset(&callbacks, 0, sizeof(callbacks));
-    callbacks.eos = &GstSinkWidget::wrapEos;
-    callbacks.new_buffer = &GstSinkWidget::wrapNewBuffer;
-    callbacks.new_preroll = &GstSinkWidget::wrapNewPreroll;
-    gst_app_sink_set_callbacks(m_element, &callbacks, this, NULL);
+    connect(bcApp, SIGNAL(settingsChanged()), SLOT(settingsChanged()));
 }
 
 GstSinkWidget::~GstSinkWidget()
 {
-    qDebug("gstreamer: Destroying sink widget");
+    destroyElement();
+}
 
-    /* Changing to NULL should always be synchronous; assertation should verify this. */
-    GstStateChangeReturn re = gst_element_set_state(GST_ELEMENT(m_element), GST_STATE_NULL);
-    Q_UNUSED(re);
-    Q_ASSERT(re == GST_STATE_CHANGE_SUCCESS);
-
-    /* At this point, it should not be possible to receive any more signals from the element,
-     * and the pipeline (if it still exists) is broken. */
-    g_object_unref(m_element);
-    m_element = 0;
-
-    m_frameLock.lock();
-    if (m_framePtr)
+void GstSinkWidget::setViewport(QWidget *w)
+{
+    if (m_viewport)
     {
-        /* Corresponding to the ref done in updateFrame prior to setting the value */
-        gst_buffer_unref(m_framePtr);
-        m_framePtr = 0;
+        m_viewport->removeEventFilter(this);
+        m_viewport->deleteLater();
     }
-    m_frameLock.unlock();
+
+    m_viewport = w;
+    m_viewport->setParent(this);
+    m_viewport->setGeometry(contentsRect());
+    m_viewport->setAutoFillBackground(false);
+    m_viewport->setAttribute(Qt::WA_OpaquePaintEvent);
+    m_viewport->installEventFilter(this);
+    m_viewport->show();
+}
+
+void GstSinkWidget::settingsChanged()
+{
+    QSettings settings;
+    bool hwaccel = !settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration"), false).toBool();
+    bool old = m_viewport->inherits("QGLWidget");
+    if (hwaccel != old)
+    {
+        qDebug("%s hardware acceleration for video", hwaccel ? "Enabled" : "Disabled");
+        if (hwaccel)
+            setViewport(new QGLWidget);
+        else
+            setViewport(new QWidget);
+    }
 }
 
 QSize GstSinkWidget::sizeHint() const
@@ -83,8 +93,117 @@ void GstSinkWidget::setBufferStatus(int percent)
     Q_ASSERT(QThread::currentThread() == qApp->thread());
     if (percent == 100)
         clearOverlayMessage();
-    //else
-      //  setOverlayMessage(tr("Buffering\n%1%").arg(percent));
+}
+
+void GstSinkWidget::setFullScreen(bool on)
+{
+    if (on)
+    {
+        setWindowFlags(windowFlags() | Qt::Window);
+        m_normalFrameStyle = frameStyle();
+        setFrameStyle(QFrame::NoFrame);
+        showFullScreen();
+    }
+    else
+    {
+        setWindowFlags(windowFlags() & ~Qt::Window);
+        setFrameStyle(m_normalFrameStyle);
+        showNormal();
+    }
+
+    QSettings settings;
+    if (settings.value(QLatin1String("ui/disableScreensaver/onFullscreen")).toBool())
+        bcApp->setScreensaverInhibited(on);
+}
+
+void GstSinkWidget::resizeEvent(QResizeEvent *ev)
+{
+    QFrame::resizeEvent(ev);
+    m_viewport->setGeometry(contentsRect());
+}
+
+void GstSinkWidget::mouseDoubleClickEvent(QMouseEvent *ev)
+{
+    ev->accept();
+    toggleFullScreen();
+}
+
+void GstSinkWidget::keyPressEvent(QKeyEvent *ev)
+{
+    if (ev->modifiers() != 0)
+        return;
+
+    switch (ev->key())
+    {
+    case Qt::Key_Escape:
+        setFullScreen(false);
+        break;
+    default:
+        return;
+    }
+
+    ev->accept();
+}
+
+GstElement *GstSinkWidget::createElement()
+{
+    Q_ASSERT(!m_element);
+    if (m_element)
+        return GST_ELEMENT(m_element);
+
+    m_element = GST_APP_SINK(gst_element_factory_make("appsink", "sinkwidget"));
+    if (!m_element)
+    {
+        qWarning() << "GstSinkWidget: Creating appsink element failed";
+        return NULL;
+    }
+
+    g_object_ref(m_element);
+
+    GstCaps *caps = gst_caps_new_simple("video/x-raw-rgb",
+                                        "red_mask", G_TYPE_INT, 0xff00,
+                                        "blue_mask", G_TYPE_INT, 0xff000000,
+                                        "green_mask", G_TYPE_INT, 0xff0000,
+                                        NULL);
+    gst_app_sink_set_caps(m_element, caps);
+    gst_caps_unref(caps);
+
+    GstAppSinkCallbacks callbacks;
+    memset(&callbacks, 0, sizeof(callbacks));
+    callbacks.eos = &GstSinkWidget::wrapEos;
+    callbacks.new_buffer = &GstSinkWidget::wrapNewBuffer;
+    callbacks.new_preroll = &GstSinkWidget::wrapNewPreroll;
+    gst_app_sink_set_callbacks(m_element, &callbacks, this, NULL);
+
+    return GST_ELEMENT(m_element);
+}
+
+void GstSinkWidget::destroyElement()
+{
+    qDebug("gstreamer: Destroying sink widget");
+
+    /* Changing to NULL should always be synchronous; assertation should verify this. */
+    GstStateChangeReturn re = gst_element_set_state(GST_ELEMENT(m_element), GST_STATE_NULL);
+    Q_UNUSED(re);
+    Q_ASSERT(re == GST_STATE_CHANGE_SUCCESS);
+
+    /* At this point, it should not be possible to receive any more signals from the element,
+     * and the pipeline (if it still exists) is broken. */
+    g_object_unref(m_element);
+    m_element = 0;
+
+    m_frameLock.lock();
+    if (m_framePtr)
+    {
+        /* Corresponding to the ref done in updateFrame prior to setting the value */
+        gst_buffer_unref(m_framePtr);
+        m_framePtr = 0;
+    }
+    m_frameLock.unlock();
+
+    m_frameWidth = -1;
+    m_frameHeight = -1;
+    clearOverlayMessage();
 }
 
 QImage GstSinkWidget::currentFrame()
@@ -108,16 +227,16 @@ QImage GstSinkWidget::currentFrame()
     return re;
 }
 
-/* It is technically possible to draw into QGLWidget from another thread, if things are changed
- * to protect the context. This would provide a big benefit in terms of latency and CPU usage
- * here. */
-
-void GstSinkWidget::paintEvent(QPaintEvent *ev)
+bool GstSinkWidget::eventFilter(QObject *obj, QEvent *ev)
 {
-    Q_UNUSED(ev);
+    Q_ASSERT(obj == m_viewport);
 
-    QPainter p(this);
-    p.setRenderHint(QPainter::SmoothPixmapTransform);
+    if (ev->type() != QEvent::Paint)
+        return QFrame::eventFilter(obj, ev);
+
+    QPainter p(m_viewport);
+    if (p.device()->paintEngine()->type() == QPaintEngine::OpenGL2)
+        p.setRenderHint(QPainter::SmoothPixmapTransform);
     p.setBackground(QColor(Qt::black));
 
     m_frameLock.lock();
@@ -129,7 +248,7 @@ void GstSinkWidget::paintEvent(QPaintEvent *ev)
     if (!buffer)
     {
         p.fillRect(rect(), Qt::black);
-        return;
+        return true;
     }
 
     QImage frame = QImage(GST_BUFFER_DATA(buffer), m_frameWidth, m_frameHeight, QImage::Format_RGB32);
@@ -163,6 +282,8 @@ void GstSinkWidget::paintEvent(QPaintEvent *ev)
         p.setRenderHint(QPainter::TextAntialiasing);
         p.drawText(textRect, Qt::AlignCenter, m_overlayMsg);
     }
+
+    return true;
 }
 
 void GstSinkWidget::endOfStream()

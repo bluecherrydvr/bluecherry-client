@@ -14,7 +14,6 @@ class QPushButton;
 class QSlider;
 class QLabel;
 class GstSinkWidget;
-class VideoContainer;
 class QThread;
 struct EventData;
 
@@ -58,7 +57,6 @@ private:
     EventData *m_event;
     QThread *m_videoThread;
     VideoPlayerBackend *m_video;
-    VideoContainer *m_videoContainer;
     GstSinkWidget *m_videoWidget;
     QToolButton *m_playBtn, *m_restartBtn, *m_fastBtn, *m_slowBtn;
     QPushButton *m_saveBtn;

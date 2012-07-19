@@ -1,6 +1,5 @@
 #include "EventVideoPlayer.h"
 #include "EventVideoDownload.h"
-#include "video/VideoContainer.h"
 #include "video/GstSinkWidget.h"
 #include "video/VideoHttpBuffer.h"
 #include "core/BluecherryApp.h"
@@ -26,6 +25,7 @@
 #include <QDesktopServices>
 #include <QNetworkAccessManager>
 #include <QNetworkCookieJar>
+#include <QMouseEvent>
 #include <math.h>
 
 /* Hack to disable the "page step" behavior for left click on non-Mac. For seeking, especially in
@@ -67,11 +67,11 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     QBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
 
-    m_videoContainer = new VideoContainer;
-    m_videoContainer->setFrameStyle(QFrame::NoFrame);
-    m_videoContainer->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(m_videoContainer, SIGNAL(customContextMenuRequested(QPoint)), SLOT(videoContextMenu(QPoint)));
-    layout->addWidget(m_videoContainer, 1);
+    m_videoWidget = new GstSinkWidget;
+    m_videoWidget->setFrameStyle(QFrame::NoFrame);
+    m_videoWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_videoWidget, SIGNAL(customContextMenuRequested(QPoint)), SLOT(videoContextMenu(QPoint)));
+    layout->addWidget(m_videoWidget, 1);
 
     QBoxLayout *controlsLayout = new QVBoxLayout;
     controlsLayout->setContentsMargins(style()->pixelMetric(QStyle::PM_LayoutLeftMargin), 0,
@@ -137,19 +137,19 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     btnLayout->addWidget(m_saveBtn);
     connect(m_saveBtn, SIGNAL(clicked()), SLOT(saveVideo()));
 
-    QShortcut *sc = new QShortcut(QKeySequence(Qt::Key_Space), m_videoContainer);
+    QShortcut *sc = new QShortcut(QKeySequence(Qt::Key_Space), m_videoWidget);
     connect(sc, SIGNAL(activated()), SLOT(playPause()));
 
-    sc = new QShortcut(QKeySequence(Qt::Key_F), m_videoContainer);
-    connect(sc, SIGNAL(activated()), m_videoContainer, SLOT(toggleFullScreen()));
+    sc = new QShortcut(QKeySequence(Qt::Key_F), m_videoWidget);
+    connect(sc, SIGNAL(activated()), m_videoWidget, SLOT(toggleFullScreen()));
 
-    sc = new QShortcut(QKeySequence(Qt::Key_R), m_videoContainer);
+    sc = new QShortcut(QKeySequence(Qt::Key_R), m_videoWidget);
     connect(sc, SIGNAL(activated()), SLOT(restart()));
 
-    sc = new QShortcut(QKeySequence::Save, m_videoContainer);
+    sc = new QShortcut(QKeySequence::Save, m_videoWidget);
     connect(sc, SIGNAL(activated()), SLOT(saveVideo()));
 
-    sc = new QShortcut(QKeySequence(Qt::Key_F5), m_videoContainer);
+    sc = new QShortcut(QKeySequence(Qt::Key_F5), m_videoWidget);
     connect(sc, SIGNAL(activated()), SLOT(saveSnapshot()));
 
     setControlsEnabled(false);
@@ -200,9 +200,9 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     connect(m_video, SIGNAL(endOfStream()), SLOT(durationChanged()));
     connect(m_video, SIGNAL(playbackSpeedChanged(double)), SLOT(playbackSpeedChanged(double)));
 
-    m_videoWidget = new GstSinkWidget;
-    m_videoContainer->setInnerWidget(m_videoWidget);
-    m_video->setSink(m_videoWidget->gstElement());
+    GstElement *sink = m_videoWidget->createElement();
+    Q_ASSERT(sink);
+    m_video->setSink(sink);
 
     connect(m_video, SIGNAL(bufferingStatus(int)), m_videoWidget, SLOT(setBufferStatus(int)));
     connect(m_video->videoBuffer(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()), Qt::QueuedConnection);
@@ -248,7 +248,7 @@ void EventVideoPlayer::clearVideo()
     m_statusText->clear();
     m_rateText->clear();
     m_uiTimer.stop();
-    m_videoContainer->setInnerWidget(0);
+    m_videoWidget->destroyElement();
     setControlsEnabled(false);
 }
 
@@ -580,9 +580,9 @@ void EventVideoPlayer::videoContextMenu(const QPoint &rpos)
     menu.addSeparator();
 
     if (m_videoWidget->isFullScreen())
-        menu.addAction(tr("Exit &full screen"), m_videoContainer, SLOT(toggleFullScreen()));
+        menu.addAction(tr("Exit &full screen"), m_videoWidget, SLOT(toggleFullScreen()));
     else
-        menu.addAction(tr("&Full screen"), m_videoContainer, SLOT(toggleFullScreen()));
+        menu.addAction(tr("&Full screen"), m_videoWidget, SLOT(toggleFullScreen()));
 
     menu.addSeparator();
 
