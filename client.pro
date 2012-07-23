@@ -6,10 +6,10 @@ TEMPLATE = app
 
 unix:!macx {
     TARGET = bluecherry-client
-    target.path = /usr/bin
-    shortcut.path = /usr/share/applications
+    target.path = ${DESTDIR}/usr/bin
+    shortcut.path = ${DESTDIR}/usr/share/applications
     shortcut.files = "linux/Bluecherry Client.desktop"
-    resources.path = /usr/share/bluecherry-client
+    resources.path = ${DESTDIR}/usr/share/bluecherry-client
     resources.files = "res/bluecherry.png"
     INSTALLS += target shortcut resources
 
