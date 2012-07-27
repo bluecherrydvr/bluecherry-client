@@ -1,3 +1,20 @@
+bluecherry-client (1:2.0.0-1) lucid; urgency=low
+
+  * Bug #628: Event search does not scale to servers with many events
+  * Bug #1085: Video playback fails on systems with no OpenGL support
+  * Bug #1096: Timeout RTP connections when no frames arrive
+  * Bug #1101: Advanced OpenGL doesn't handle resolution changes
+  * Bug #1104: Linux client does not append .mkv extension in 'Save event video' dialog
+  * Bug #1118: Video goes blank when closing second live view window
+  * Feature #991: Retain live view bandwidth settings
+  * Feature #1006: Alert the user if a server is not functional
+  * Feature #1045: Show active (in progress) events above all others in live event view
+  * Feature #1065: Detect if a server isn't configured and offer to configure it
+  * Feature #1122: Client-side configuration of RTSP port
+  * Other misc. changes
+
+ -- John Brooks <john.brooks@bluecherry.net>  Fri, 27 Jul 2012 18:10:00 -0400
+
 bluecherry-client (2.0.0-0beta8.1-1) lucid; urgency=low
 
   * Bug #1094: Event browser does not work on some platforms
