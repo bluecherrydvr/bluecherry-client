@@ -85,7 +85,7 @@ void GstSinkWidget::setOverlayMessage(const QString &message)
         return;
 
     m_overlayMsg = message;
-    update();
+    m_viewport->update();
 }
 
 void GstSinkWidget::setBufferStatus(int percent)
@@ -238,7 +238,7 @@ bool GstSinkWidget::eventFilter(QObject *obj, QEvent *ev)
         return QFrame::eventFilter(obj, ev);
 
     QPainter p(m_viewport);
-    if (p.device()->paintEngine()->type() == QPaintEngine::OpenGL2)
+    if (p.device() && p.device()->paintEngine() && p.device()->paintEngine()->type() == QPaintEngine::OpenGL2)
         p.setRenderHint(QPainter::SmoothPixmapTransform);
     p.setBackground(QColor(Qt::black));
 
@@ -308,7 +308,7 @@ void GstSinkWidget::updateFrame(GstBuffer *buffer)
     m_framePtr = buffer;
     m_frameLock.unlock();
 
-    QMetaObject::invokeMethod(this, "repaint", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(m_viewport, "update", Qt::QueuedConnection);
 }
 
 GstFlowReturn GstSinkWidget::newPreroll()
