@@ -41,5 +41,7 @@
         <file>control-double-180.png</file>
         <file>cassette.png</file>
         <file>system-monitor.png</file>
+        <file>status-alert.png</file>
+        <file>exclamation-yellow.png</file>
     </qresource>
 </RCC>

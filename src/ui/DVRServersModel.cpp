@@ -17,6 +17,8 @@ DVRServersModel::DVRServersModel(QObject *parent)
     statusErrorIcon = QIcon(QLatin1String(":/icons/status-error.png"));
     statusErrorIcon.addPixmap(statusErrorIcon.pixmap(16), QIcon::Disabled);
 
+    statusAlertIcon = QIcon(QLatin1String(":/icons/status-alert.png"));
+
     connect(bcApp, SIGNAL(serverAdded(DVRServer*)), SLOT(serverAdded(DVRServer*)));
     connect(bcApp, SIGNAL(serverRemoved(DVRServer*)), SLOT(serverRemoved(DVRServer*)));
 
@@ -43,6 +45,7 @@ void DVRServersModel::serverAdded(DVRServer *server)
     connect(server->api, SIGNAL(statusChanged(int)), SLOT(serverDataChanged()));
     connect(server, SIGNAL(cameraAdded(DVRCamera)), SLOT(cameraAdded(DVRCamera)));
     connect(server, SIGNAL(cameraRemoved(DVRCamera)), SLOT(cameraRemoved(DVRCamera)));
+    connect(server, SIGNAL(statusAlertMessageChanged(QString)), SLOT(serverDataChanged()));
 }
 
 void DVRServersModel::serverRemoved(DVRServer *server)
@@ -265,6 +268,9 @@ QVariant DVRServersModel::data(const QModelIndex &index, int role) const
             {
                 if (server->api->status() == ServerRequestManager::LoginError)
                     return statusErrorIcon;
+
+                if (!server->statusAlertMessage().isEmpty())
+                    return statusAlertIcon;
 
                 if (m_offlineDisabled)
                     return statusIcon;

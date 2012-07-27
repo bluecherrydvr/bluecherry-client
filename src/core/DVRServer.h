@@ -32,6 +32,8 @@ public:
     QList<DVRCamera> cameras() const { return m_cameras; }
     DVRCamera findCamera(int id) { return DVRCamera::getCamera(this, id); }
 
+    QString statusAlertMessage() const { return m_statusAlertMessage; }
+
     /* Settings */
     QVariant readSetting(const QString &key, const QVariant &def = QVariant()) const;
     QVariant readSetting(const char *key, const QVariant &def = QVariant()) const { return readSetting(QLatin1String(key), def); }
@@ -64,13 +66,17 @@ signals:
     void cameraAdded(const DVRCamera &camera);
     void cameraRemoved(const DVRCamera &camera);
 
+    void statusAlertMessageChanged(const QString &message);
+
 private slots:
     void updateCamerasReply();
+    void updateStatsReply();
     void disconnected();
 
 private:
     QList<DVRCamera> m_cameras;
     QString m_displayName;
+    QString m_statusAlertMessage;
     QTimer m_refreshTimer;
     bool devicesLoaded;
 };
