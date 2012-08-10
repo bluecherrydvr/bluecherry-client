@@ -37,6 +37,11 @@ BluecherryApp::BluecherryApp()
     /* Don't use the system CAs to verify certificates */
     QSslConfiguration sslConfig = QSslConfiguration::defaultConfiguration();
     sslConfig.setCaCertificates(QList<QSslCertificate>());
+#if QT_VERSION >= 0x040800
+    /* SNI breaks connections (before sslError, even) when the hostname does
+     * not match the server. */
+    sslConfig.setSslOption(QSsl::SslOptionDisableServerNameIndication, true);
+#endif
     QSslConfiguration::setDefaultConfiguration(sslConfig);
 
     loadServers();
