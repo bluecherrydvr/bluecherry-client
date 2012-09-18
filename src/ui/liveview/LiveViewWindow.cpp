@@ -27,7 +27,7 @@
 
 LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, bool fullscreen, const DVRCamera &camera)
 {
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MAC
     /* Child windows are undesirable on Mac, and cause problems (QTBUG-20652) */
     parent = 0;
 #endif

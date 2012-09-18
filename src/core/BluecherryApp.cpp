@@ -12,6 +12,8 @@
 #include <QSslCertificate>
 #include <QApplication>
 #include <QThread>
+#include <QMessageBox>
+#include <QDesktopServices>
 
 BluecherryApp *bcApp = 0;
 
@@ -19,7 +21,8 @@ BluecherryApp::BluecherryApp()
     : nam(new QNetworkAccessManager(this)), liveView(new LiveViewManager(this)),
       globalRate(new TransferRateCalculator(this)),
       m_maxServerId(-1), m_livePaused(false), m_inPauseQuery(false),
-      m_screensaverInhibited(false)
+      m_screensaverInhibited(false),
+      m_doingUpdateCheck(false)
 {
     Q_ASSERT(!bcApp);
     bcApp = this;
@@ -46,6 +49,100 @@ BluecherryApp::BluecherryApp()
 
     loadServers();
     sendSettingsChanged();
+
+    performVersionCheck();
+
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), SLOT(performVersionCheck()));
+    timer->setInterval(60 * 60 * 24 * 1000);
+    timer->start();
+}
+
+void BluecherryApp::performVersionCheck()
+{
+    qDebug() << Q_FUNC_INFO << "Performing update check";
+
+    // we don't want multiple "upgrade?" dialogs
+    if (m_doingUpdateCheck) {
+        qDebug() << Q_FUNC_INFO << "Check in progress; ignoring";
+        return;
+    }
+
+    /* perform update check */
+    QNetworkRequest versionCheck(QString::fromLatin1("http://keycheck.bluecherrydvr.com/client_version/?v=") + QApplication::applicationVersion());
+    QNetworkReply *versionReply = nam->get(versionCheck);
+
+    /* lack of error handling here is deliberate; we really don't care if it
+     * fails. a stupid error dialog popping up because the user didn't have
+     * internet connectivity (for instance) is worse than being a bit out of date.
+     */
+    connect(versionReply, SIGNAL(finished()), SLOT(versionInfoReceived()));
+}
+
+void BluecherryApp::versionInfoReceived()
+{
+    QNetworkReply *reply = static_cast<QNetworkReply *>(sender());
+    reply->deleteLater();
+
+    if (reply->error() != QNetworkReply::NoError)
+    {
+        qDebug() << Q_FUNC_INFO << "Error from server: " << reply->errorString();
+        return;
+    }
+
+    QByteArray versionXmlData = reply->readAll();
+    QXmlStreamReader xmlStream(versionXmlData);
+
+    if (xmlStream.hasError() || !xmlStream.readNextStartElement() || xmlStream.name() != QLatin1String("response"))
+    {
+        qDebug() << Q_FUNC_INFO << "Malformed version info from server";
+        qDebug() << versionXmlData;
+        qDebug() << xmlStream.errorString();
+        return;
+    }
+
+    forever {
+        if (xmlStream.tokenType() == QXmlStreamReader::StartElement &&
+            xmlStream.name() == QLatin1String("version"))
+            break;
+
+        if (!xmlStream.readNext()) {
+            qWarning() << "Didn't find valid version info";
+            return;
+        }
+    }
+
+    QString latest = xmlStream.attributes().value(QLatin1String("latest")).toString();
+
+    qDebug() << Q_FUNC_INFO << "Latest version info: " << latest;
+
+    if (latest != QApplication::applicationVersion()) {
+        qDebug() << Q_FUNC_INFO << "Version differs:";
+        qDebug() << Q_FUNC_INFO << "Current: " << QApplication::applicationVersion();
+        qDebug() << Q_FUNC_INFO << "New: " << latest;
+
+        /* slight hack to work around timers triggering while a dialog is
+         * potentially open: tell the update requester that we're busy so it
+         * doesn't go and ask for the latest version again while the dialog is
+         * already open.
+         *
+         * this is only a problem if people don't close the dialog once a day,
+         * (and don't upgrade) but we might as well.
+         */
+        m_doingUpdateCheck = true;
+
+        QMessageBox messageBox;
+        messageBox.setText(tr("A new version is available."));
+        messageBox.setInformativeText(tr("Would you like to download version %2?").arg(latest));
+        messageBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+
+        if (messageBox.exec() == QMessageBox::Ok) {
+            qDebug() << Q_FUNC_INFO << "Upgrading";
+            QDesktopServices::openUrl(QString::fromLatin1("http://www.bluecherrydvr.com/downloads/?v=%1").arg(QApplication::applicationVersion()));
+        }
+
+        m_doingUpdateCheck = false;
+    }
 }
 
 void BluecherryApp::aboutToQuit()
