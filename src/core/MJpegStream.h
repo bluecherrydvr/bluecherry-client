@@ -7,7 +7,7 @@
 #include <QTimer>
 #include "DVRCamera.h"
 
-#if defined(Q_WS_MAC) || defined(Q_OS_WIN)
+#if defined(Q_OS_MAC) || defined(Q_OS_WIN)
 /* On mac, it is very expensive to convert between QImage and QPixmap, and
  * QImage is required when uploading textures to OpenGL. We can save significantly
  * by never using pixmaps in this case. */

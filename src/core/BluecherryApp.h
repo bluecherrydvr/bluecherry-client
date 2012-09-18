@@ -70,6 +70,8 @@ signals:
     void settingsChanged();
 
 private slots:
+    void performVersionCheck();
+    void versionInfoReceived();
     void onServerRemoved(DVRServer *server);
     void sslErrors(QNetworkReply *reply, const QList<QSslError> &errors);
     void aboutToQuit();
@@ -84,6 +86,7 @@ private:
 #else
     QTimer *m_screensaveTimer;
 #endif
+    bool m_doingUpdateCheck;
 
     void loadServers();
 };
@@ -92,7 +95,7 @@ extern BluecherryApp *bcApp;
 
 inline MainWindow *BluecherryApp::globalParentWindow() const
 {
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MAC
     return 0;
 #else
     return mainWindow;
