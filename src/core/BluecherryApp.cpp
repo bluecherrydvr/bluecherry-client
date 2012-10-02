@@ -1,6 +1,7 @@
 #include "BluecherryApp.h"
 #include "DVRServer.h"
 #include "LiveViewManager.h"
+#include "ui/MainWindow.h"
 #include <QSettings>
 #include <QStringList>
 #include <QNetworkAccessManager>
@@ -14,6 +15,7 @@
 #include <QThread>
 #include <QMessageBox>
 #include <QDesktopServices>
+#include <QAbstractButton>
 
 BluecherryApp *bcApp = 0;
 
@@ -131,10 +133,13 @@ void BluecherryApp::versionInfoReceived()
          */
         m_doingUpdateCheck = true;
 
-        QMessageBox messageBox;
-        messageBox.setText(tr("A new version is available."));
-        messageBox.setInformativeText(tr("Would you like to download version %2?").arg(latest));
+        QMessageBox messageBox(mainWindow);
+        messageBox.setWindowTitle(tr("Bluecherry"));
+        messageBox.setText(tr("A new Bluecherry client update is available"));
+        messageBox.setInformativeText(tr("Would you like to download version %2 now?").arg(latest));
         messageBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+        messageBox.button(QMessageBox::Ok)->setText(tr("Download"));
+        messageBox.button(QMessageBox::Cancel)->setText(tr("Remind Me Later"));
 
         if (messageBox.exec() == QMessageBox::Ok) {
             qDebug() << Q_FUNC_INFO << "Upgrading";
