@@ -79,17 +79,13 @@ private:
     VideoState m_state;
     QString m_errorMessage;
     double m_playbackSpeed;
-#ifdef Q_OS_LINUX
-    unsigned int m_busWatchId;
-#endif
 
     void setError(bool permanent, const QString &message);
 
-    GstBusSyncReply busHandler(GstBus *bus, GstMessage *msg, bool isSynchronous);
+    GstBusSyncReply busHandler(GstBus *bus, GstMessage *msg);
     void decodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast);
 
     static GstBusSyncReply staticBusHandler(GstBus *bus, GstMessage *msg, gpointer data);
-    static gboolean staticAsyncBusHandler(GstBus *bus, GstMessage *msg, gpointer data);
     static void staticDecodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast, gpointer user_data);
 };
 

@@ -132,14 +132,7 @@ bool VideoPlayerBackend::initGStreamer(QString *errorMessage)
 GstBusSyncReply VideoPlayerBackend::staticBusHandler(GstBus *bus, GstMessage *msg, gpointer data)
 {
     Q_ASSERT(data);
-    return ((VideoPlayerBackend*)data)->busHandler(bus, msg, true);
-}
-
-gboolean VideoPlayerBackend::staticAsyncBusHandler(GstBus *bus, GstMessage *msg, gpointer data)
-{
-    Q_ASSERT(data);
-    ((VideoPlayerBackend*)data)->busHandler(bus, msg, false);
-    return TRUE;
+    return ((VideoPlayerBackend*)data)->busHandler(bus, msg);
 }
 
 void VideoPlayerBackend::staticDecodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast, gpointer user_data)
@@ -244,9 +237,6 @@ bool VideoPlayerBackend::start(const QUrl &url)
     Q_ASSERT(bus);
     gst_bus_enable_sync_message_emission(bus);
     gst_bus_set_sync_handler(bus, staticBusHandler, this);
-#ifdef Q_OS_LINUX
-    m_busWatchId = gst_bus_add_watch(bus, staticAsyncBusHandler, this);
-#endif
     gst_object_unref(bus);
 
     /* Move the pipeline into the PLAYING state. This call may block for a very long time
@@ -269,12 +259,6 @@ void VideoPlayerBackend::clear()
         GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(m_pipeline));
         Q_ASSERT(bus);
         gst_bus_disable_sync_message_emission(bus);
-
-#ifdef Q_OS_LINUX
-        gboolean ok = g_source_remove(m_busWatchId);
-        Q_UNUSED(ok);
-        Q_ASSERT(ok == TRUE);
-#endif
 
         gst_object_unref(bus);
 
@@ -486,10 +470,9 @@ void VideoPlayerBackend::decodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean
  * not be excessively delayed, deadlocked, or used for anything GUI-related. Primarily,
  * we want to emit signals (which will result in queued slot calls) or do queued method
  * invocation to handle GUI updates. */
-GstBusSyncReply VideoPlayerBackend::busHandler(GstBus *bus, GstMessage *msg, bool isSynchronous)
+GstBusSyncReply VideoPlayerBackend::busHandler(GstBus *bus, GstMessage *msg)
 {
     Q_UNUSED(bus);
-    Q_UNUSED(isSynchronous);
 
     switch (GST_MESSAGE_TYPE(msg))
     {
