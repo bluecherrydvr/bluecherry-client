@@ -501,8 +501,14 @@ void EventVideoPlayer::saveVideo(const QString &path)
             restart = true;
         }
 
-        QString upath = QFileDialog::getSaveFileName(this, tr("Save event video"), QString(),
-                                     tr("Matroska Video (*.mkv)"));
+        QString baseFileName = m_event->baseFileName();
+        // extension must be added here
+        // if baseFileName contains dot an extension is not added then
+        // all content after last dot will be lost
+        QString mkvFileName = QString::fromLatin1("%1.mkv").arg(baseFileName);
+        QString upath = QFileDialog::getSaveFileName(this, tr("Save event video"), mkvFileName,
+                                                     tr("Matroska Video (*.mkv)"));
+
         if (!upath.isEmpty()) {
             if (!upath.endsWith(QLatin1String(".mkv"), Qt::CaseInsensitive))
                 upath.append(QLatin1String(".mkv"));

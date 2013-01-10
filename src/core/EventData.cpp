@@ -1,6 +1,7 @@
 #include "EventData.h"
 #include "core/DVRServer.h"
 #include "core/DVRCamera.h"
+#include "utils/FileUtils.h"
 #include <QApplication>
 #include <QXmlStreamReader>
 #include <QDebug>
@@ -139,6 +140,16 @@ QString EventData::uiLocation(DVRServer *server, int locationId)
         return QApplication::translate("EventData", "System");
     else
         return QString::fromLatin1("camera-%1").arg(locationId);
+}
+
+QString EventData::baseFileName() const
+{
+    QString fileName = QString::fromLatin1("%1.%2.%3")
+        .arg(uiServer())
+        .arg(uiLocation())
+        .arg(date.toString(QLatin1String("yyyy-MM-dd hh-mm-ss")));
+
+    return sanitizeFilename(fileName);
 }
 
 /* XXX not properly translatable right now */
