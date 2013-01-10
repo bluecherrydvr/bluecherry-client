@@ -31,7 +31,8 @@ QString sanitizeFilename(const QString &filename)
 {
     QChar forbidden[] = { QLatin1Char('/'), QLatin1Char('\\'), QLatin1Char('?'),
                           QLatin1Char('"'), QLatin1Char(':'), QLatin1Char('*'),
-                          QLatin1Char('<'), QLatin1Char('>'), QLatin1Char('|') };
+                          QLatin1Char('<'), QLatin1Char('>'), QLatin1Char('|'),
+                          QLatin1Char('#') };
 
     /* This does not prevent all invalid filenames; notably, it does not check for control
      * characters, Windows reserved filenames (e.g. NUL), and several other obscure situations.
