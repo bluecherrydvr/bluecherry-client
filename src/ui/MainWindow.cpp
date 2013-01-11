@@ -70,6 +70,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_mainToolbar->setMovable(false);
     m_mainToolbar->setIconSize(QSize(16, 16));
     m_mainToolbar->addAction(QIcon(QLatin1String(":/icons/cassette.png")), tr("Events"), this, SLOT(showEventsWindow()));
+    QAction *collapseAllServersAction = m_mainToolbar->addAction(style()->standardIcon(QStyle::SP_ArrowUp), tr("Collapse All Servers"));
     addToolBar(Qt::TopToolBarArea, m_mainToolbar);
 
     /* Splitters */
@@ -148,6 +149,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(saveSettings()));
 
     m_sourcesList->setFocus(Qt::OtherFocusReason);
+
+    connect(collapseAllServersAction, SIGNAL(triggered()), m_sourcesList, SLOT(collapseAll()));
 }
 
 MainWindow::~MainWindow()
