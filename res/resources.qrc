@@ -43,5 +43,6 @@
         <file>system-monitor.png</file>
         <file>status-alert.png</file>
         <file>exclamation-yellow.png</file>
+        <file>collapse-all.png</file>
     </qresource>
 </RCC>
