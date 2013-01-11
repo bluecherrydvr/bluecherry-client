@@ -50,7 +50,7 @@ LiveViewWindow::LiveViewWindow(QWidget *parent, bool openfs, Qt::WindowFlags f)
     layout->setMargin(0);
     layout->setSpacing(0);
 
-    QToolBar *toolBar = new QToolBar;
+    QToolBar *toolBar = new QToolBar(tr("Live View"));
     toolBar->setIconSize(QSize(16, 16));
     toolBar->setMovable(false);
 
