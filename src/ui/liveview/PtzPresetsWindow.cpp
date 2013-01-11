@@ -32,7 +32,7 @@ PtzPresetsWindow::PtzPresetsWindow(CameraPtzControl *ptzControl, QWidget *parent
     m_presetsModel->setPtzController(ptzControl);
     m_presetsView->setModel(m_presetsModel);
 
-    QToolBar *tb = new QToolBar;
+    QToolBar *tb = new QToolBar(tr("Presets"));
     tb->setIconSize(QSize(20, 20));
     tb->setStyleSheet(QLatin1String("QToolBar { border: none; }"));
 
