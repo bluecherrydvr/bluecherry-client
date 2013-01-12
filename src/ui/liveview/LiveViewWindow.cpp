@@ -88,19 +88,19 @@ LiveViewWindow::LiveViewWindow(QWidget *parent, bool openfs, Qt::WindowFlags f)
     connect(m_savedLayouts, SIGNAL(currentIndexChanged(int)), SLOT(savedLayoutChanged(int)));
     connect(m_savedLayouts, SIGNAL(customContextMenuRequested(QPoint)), SLOT(showLayoutMenu(QPoint)));
 
-    toolBar->addAction(QIcon(QLatin1String(":/icons/layout-split-vertical.png")),
-                       tr("Add Row"), viewLayout, SLOT(appendRow()));
-    toolBar->addAction(QIcon(QLatin1String(":/icons/layout-join-vertical.png")),
-                       tr("Remove Row"), viewLayout, SLOT(removeRow()));
+    m_addRowAction = toolBar->addAction(QIcon(QLatin1String(":/icons/layout-split-vertical.png")),
+                     tr("Add Row"), viewLayout, SLOT(appendRow()));
+    m_removeRowAction = toolBar->addAction(QIcon(QLatin1String(":/icons/layout-join-vertical.png")),
+                        tr("Remove Row"), viewLayout, SLOT(removeRow()));
 
     spacer = new QWidget;
     spacer->setFixedWidth(16);
     toolBar->addWidget(spacer);
 
-    toolBar->addAction(QIcon(QLatin1String(":/icons/layout-split.png")),
-                       tr("Add Column"), viewLayout, SLOT(appendColumn()));
-    toolBar->addAction(QIcon(QLatin1String(":/icons/layout-join.png")),
-                       tr("Remove Column"), viewLayout, SLOT(removeColumn()));
+    m_addColumnAction = toolBar->addAction(QIcon(QLatin1String(":/icons/layout-split.png")),
+                        tr("Add Column"), viewLayout, SLOT(appendColumn()));
+    m_removeColumnAction = toolBar->addAction(QIcon(QLatin1String(":/icons/layout-join.png")),
+                           tr("Remove Column"), viewLayout, SLOT(removeColumn()));
 
     spacer = new QWidget;
     spacer->setFixedWidth(16);
@@ -139,6 +139,7 @@ LiveViewWindow::LiveViewWindow(QWidget *parent, bool openfs, Qt::WindowFlags f)
     else
         new QShortcut(Qt::Key_Escape, this, SLOT(exitFullScreen()), 0, Qt::WindowShortcut);
 
+    connect(m_liveView->layout(), SIGNAL(layoutChanged()), SLOT(updateLayoutActionStates()));
     connect(m_liveView->layout(), SIGNAL(layoutChanged()), SLOT(saveLayout()));
 
     QMainWindow *wnd = qobject_cast<QMainWindow*>(window());
@@ -147,6 +148,8 @@ LiveViewWindow::LiveViewWindow(QWidget *parent, bool openfs, Qt::WindowFlags f)
     else
         layout->addWidget(toolBar);
     layout->addWidget(m_liveView);
+
+    updateLayoutActionStates();
 }
 
 void LiveViewWindow::setAutoSized(bool autoSized)
@@ -376,4 +379,13 @@ void LiveViewWindow::setFullScreen(bool on)
     QSettings settings;
     if (settings.value(QLatin1String("ui/disableScreensaver/onFullscreen")).toBool())
         bcApp->setScreensaverInhibited(on);
+}
+
+void LiveViewWindow::updateLayoutActionStates()
+{
+    LiveViewLayout *liveLayout = m_liveView->layout();
+    m_addRowAction->setEnabled(liveLayout->rows() < LiveViewLayout::maxRows());
+    m_removeRowAction->setEnabled(liveLayout->rows() > 1);
+    m_addColumnAction->setEnabled(liveLayout->columns() < LiveViewLayout::maxColumns());
+    m_removeColumnAction->setEnabled(liveLayout->columns() > 1);
 }

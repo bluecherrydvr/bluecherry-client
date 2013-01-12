@@ -47,11 +47,14 @@ private slots:
     void savedLayoutChanged(int index);
     void showLayoutMenu(const QPoint &pos, int index = -1);
     void doAutoResize();
+    void updateLayoutActionStates();
 
 private:
     LiveViewArea *m_liveView;
     QComboBox * const m_savedLayouts;
     QAction *aRenameLayout, *aDelLayout;
+    QAction *m_addRowAction, *m_removeRowAction;
+    QAction *m_addColumnAction, *m_removeColumnAction;
     QWeakPointer<LiveViewWindow> m_fsSetWindow;
     int m_lastLayoutIndex;
     bool m_autoSized, m_isLayoutChanging, m_wasOpenedFs;

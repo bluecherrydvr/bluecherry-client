@@ -12,6 +12,9 @@
 #include <QGraphicsScene>
 #include <math.h>
 
+#define MAX_ROWS 16
+#define MAX_COLUMNS 16
+
 struct LiveViewLayout::DragDropData
 {
     QDeclarativeItem *item;
@@ -39,6 +42,16 @@ LiveViewLayout::~LiveViewLayout()
 {
     if (drag)
         delete drag;
+}
+
+int LiveViewLayout::maxRows()
+{
+    return MAX_ROWS;
+}
+
+int LiveViewLayout::maxColumns()
+{
+    return MAX_COLUMNS;
 }
 
 QDeclarativeItem *LiveViewLayout::createNewItem()
