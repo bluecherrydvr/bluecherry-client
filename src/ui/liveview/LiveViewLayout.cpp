@@ -346,6 +346,24 @@ void LiveViewLayout::removeColumn(int column)
     scheduleLayout(DoItemsLayout | EmitLayoutChanged);
 }
 
+bool LiveViewLayout::isRowEmpty(int rowIndex) const
+{
+    for (int c = 0; c < m_columns; ++c)
+        if (at(rowIndex, c))
+            return false;
+
+    return true;
+}
+
+bool LiveViewLayout::isColumnEmpty(int columnIndex) const
+{
+    for (int r = 0; r < m_rows; ++r)
+        if (at(r, columnIndex))
+            return false;
+
+    return true;
+}
+
 void LiveViewLayout::setGridSize(int rows, int columns)
 {
     rows = qMax(1, rows);
@@ -362,17 +380,7 @@ void LiveViewLayout::setGridSize(int rows, int columns)
         /* If there are any empty rows, remove those first */
         for (int r = 0; r < m_rows; ++r)
         {
-            bool empty = true;
-            for (int c = 0; c < m_columns; ++c)
-            {
-                if (at(r, c))
-                {
-                    empty = false;
-                    break;
-                }
-            }
-
-            if (empty)
+            if (isRowEmpty(r))
             {
                 removeRow(r);
                 if (!--remove)
@@ -394,17 +402,8 @@ void LiveViewLayout::setGridSize(int rows, int columns)
 
         for (int c = 0; c < m_columns; ++c)
         {
-            bool empty = true;
-            for (int r = 0; r < m_rows; ++r)
-            {
-                if (at(r, c))
-                {
-                    empty = false;
-                    break;
-                }
-            }
-
-            if (empty)
+            /* If there are any empty columns, remove those first */
+            if (isColumnEmpty(c))
             {
                 removeColumn(c);
                 if (!--remove)
@@ -413,6 +412,7 @@ void LiveViewLayout::setGridSize(int rows, int columns)
             }
         }
 
+        /* Otherwise, take columns from the right */
         for (int c = m_columns-1; remove && c >= 0; --c, --remove)
             removeColumn(c);
 
