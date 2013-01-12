@@ -35,6 +35,10 @@ public:
 
     int rows() const { return m_rows; }
     int columns() const { return m_columns; }
+
+    static int maxRows();
+    static int maxColumns();
+
     void setGridSize(int rows, int columns);
     void gridPos(const QPointF &pos, int *row, int *column);
     bool gridPos(QDeclarativeItem *item, int *row, int *column);
