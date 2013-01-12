@@ -408,8 +408,8 @@ void LiveViewLayout::removeColumns(int remove)
 
 void LiveViewLayout::setGridSize(int rows, int columns)
 {
-    rows = qMax(1, rows);
-    columns = qMax(1, columns);
+    rows = qBound(1, rows, maxRows());
+    columns = qBound(1, columns, maxColumns());
     if (rows == m_rows && columns == m_columns)
         return;
 
@@ -435,7 +435,7 @@ void LiveViewLayout::set(int row, int col, QDeclarativeItem *item)
     if (row >= m_rows || col >= m_columns || (item == at(row, col)))
         return;
 
-    QDeclarativeItem *&ip = m_items[(row * m_columns) + col];
+    QDeclarativeItem *&ip = m_items[coordinatesToIndex(row, col)];
     if (ip == item)
         return;
 
@@ -467,12 +467,15 @@ QDeclarativeItem *LiveViewLayout::addItemAuto()
     {
         /* Add a row or a column to make space, whichever has fewer */
         if (columns() < rows())
-            setGridSize(qMax(1, rows()), qMax(1, columns())+1);
+            appendColumn();
         else
-            setGridSize(qMax(1, rows()+1), qMax(1, columns()));
+            appendRow();
 
         index = m_items.indexOf(0);
-        Q_ASSERT(index >= 0);
+        // it is possible that no item was added as grid has its maximum size already
+        // and all grid items are already filled
+        if (index < 0)
+            return 0;
     }
 
     m_items[index] = createNewItem();
@@ -490,7 +493,11 @@ QDeclarativeItem *LiveViewLayout::addItem(int row, int column)
 
     setGridSize(qMax(row, rows()), qMax(column, columns()));
 
-    QDeclarativeItem *re = m_items[(row * columns()) + column] = createNewItem();
+    // if row or column values are too big
+    if (row < rows() - 1 || column < columns() - 1)
+        return 0;
+
+    QDeclarativeItem *re = m_items[coordinatesToIndex(row, column)] = createNewItem();
 
     scheduleLayout(EmitLayoutChanged);
     doLayout();
@@ -503,7 +510,7 @@ QDeclarativeItem *LiveViewLayout::takeItem(int row, int column)
     if (row < 0 || column < 0 || row >= m_rows || column >= m_columns)
         return 0;
 
-    int i = (row * m_columns) + column;
+    int i = coordinatesToIndex(row, column);
     QDeclarativeItem *item = m_items[i];
     m_items[i] = 0;
 
@@ -741,6 +748,10 @@ bool LiveViewLayout::loadLayout(const QByteArray &buf)
 
     setGridSize(rc, cc);
 
+    // update rc, cc values if were invalid
+    rc = rows();
+    cc = columns();
+
     for (int r = 0; r < rc; ++r)
     {
         for (int c = 0; c < cc; ++c)
@@ -772,6 +783,16 @@ bool LiveViewLayout::loadLayout(const QByteArray &buf)
     }
 
     return (data.status() == QDataStream::Ok);
+}
+
+
+int LiveViewLayout::coordinatesToIndex(int row, int column) const
+{
+    int index = row * m_columns + column;
+    if (index < 0 || index >= m_items.size())
+        return -1;
+    else
+        return index;
 }
 
 void LiveViewLayoutProps::setFixedAspectRatio(bool v)

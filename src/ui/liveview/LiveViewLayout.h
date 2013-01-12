@@ -48,7 +48,7 @@ public:
 
     QSize idealSize() const;
 
-    QDeclarativeItem *at(int row, int col) const { return m_items[row * m_columns + col]; }
+    QDeclarativeItem *at(int row, int col) const { return m_items[coordinatesToIndex(row, col)]; }
     Q_INVOKABLE void set(int row, int col, QDeclarativeItem *item);
 
     /* Add a new item, automatically placing it in the best available position */
@@ -126,6 +126,8 @@ private:
     void doLayout();
 
     QDeclarativeItem *createNewItem();
+
+    int coordinatesToIndex(int row, int column) const;
 
     void removeRows(int remove);
     void removeColumns(int remove);

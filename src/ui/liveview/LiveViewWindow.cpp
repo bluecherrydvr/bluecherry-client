@@ -194,7 +194,8 @@ void LiveViewWindow::showSingleCamera(const DVRCamera &camera)
 {
     m_liveView->layout()->setGridSize(1, 1);
     QDeclarativeItem *item = m_liveView->layout()->addItem(0, 0);
-    item->setProperty("camera", QVariant::fromValue(camera));
+    if (item)
+        item->setProperty("camera", QVariant::fromValue(camera));
 }
 
 bool LiveViewWindow::setLayout(const QString &layout)
