@@ -364,6 +364,48 @@ bool LiveViewLayout::isColumnEmpty(int columnIndex) const
     return true;
 }
 
+void LiveViewLayout::removeRows(int remove)
+{
+    /* If there are any empty rows, remove those first */
+    for (int r = 0; r < m_rows; ++r)
+    {
+        if (isRowEmpty(r))
+        {
+            removeRow(r);
+            if (!--remove)
+                break;
+            --r;
+        }
+    }
+
+    /* Otherwise, take rows from the bottom */
+    for (int r = m_rows-1; remove && r >= 0; --r, --remove)
+        removeRow(r);
+
+    Q_ASSERT(!remove);
+}
+
+void LiveViewLayout::removeColumns(int remove)
+{
+    for (int c = 0; c < m_columns; ++c)
+    {
+        /* If there are any empty columns, remove those first */
+        if (isColumnEmpty(c))
+        {
+            removeColumn(c);
+            if (!--remove)
+                break;
+            --c;
+        }
+    }
+
+    /* Otherwise, take columns from the right */
+    for (int c = m_columns-1; remove && c >= 0; --c, --remove)
+        removeColumn(c);
+
+    Q_ASSERT(!remove);
+}
+
 void LiveViewLayout::setGridSize(int rows, int columns)
 {
     rows = qMax(1, rows);
@@ -374,50 +416,10 @@ void LiveViewLayout::setGridSize(int rows, int columns)
     Q_ASSERT(m_items.size() == (m_rows*m_columns));
 
     if (m_rows > rows)
-    {
-        int remove = m_rows - rows;
-
-        /* If there are any empty rows, remove those first */
-        for (int r = 0; r < m_rows; ++r)
-        {
-            if (isRowEmpty(r))
-            {
-                removeRow(r);
-                if (!--remove)
-                    break;
-                --r;
-            }
-        }
-
-        /* Otherwise, take rows from the bottom */
-        for (int r = m_rows-1; remove && r >= 0; --r, --remove)
-            removeRow(r);
-
-        Q_ASSERT(!remove);
-    }
+        removeRows(m_rows - rows);
 
     if (m_columns > columns)
-    {
-        int remove = m_columns - columns;
-
-        for (int c = 0; c < m_columns; ++c)
-        {
-            /* If there are any empty columns, remove those first */
-            if (isColumnEmpty(c))
-            {
-                removeColumn(c);
-                if (!--remove)
-                    break;
-                --c;
-            }
-        }
-
-        /* Otherwise, take columns from the right */
-        for (int c = m_columns-1; remove && c >= 0; --c, --remove)
-            removeColumn(c);
-
-        Q_ASSERT(!remove);
-    }
+        removeColumns(m_columns - columns);
 
     while (m_columns < columns)
         insertColumn(m_columns);

@@ -127,6 +127,9 @@ private:
 
     QDeclarativeItem *createNewItem();
 
+    void removeRows(int remove);
+    void removeColumns(int remove);
+
 private slots:
     void scheduleLayout(int changes = DoItemsLayout);
     void updateIdealSize();
