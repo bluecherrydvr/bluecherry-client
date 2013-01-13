@@ -9,6 +9,7 @@ class DVRServer;
 class QModelIndex;
 class QLabel;
 class QCheckBox;
+class WebRtpPortCheckerWidget;
 
 class OptionsServerPage : public OptionsDialogPage
 {
@@ -27,6 +28,7 @@ public slots:
 
 private slots:
     void currentServerChanged(const QModelIndex &newIndex, const QModelIndex &oldIndex);
+    void checkServer();
 
     void deleteServer();
 
@@ -38,6 +40,7 @@ private:
     QTreeView *m_serversView;
     QLabel *m_connectionStatus;
     QLineEdit *m_nameEdit, *m_hostnameEdit, *m_portEdit, *m_usernameEdit, *m_passwordEdit;
+    WebRtpPortCheckerWidget *m_portChecker;
     QCheckBox *m_autoConnect;
 };
 
