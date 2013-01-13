@@ -171,7 +171,8 @@ SOURCES += src/main.cpp \
     src/ui/liveview/LiveStreamItem.cpp \
     src/ui/StatusBarServerAlert.cpp \
     src/network/SocketError.cpp \
-    src/network/RemotePortChecker.cpp
+    src/network/RemotePortChecker.cpp \
+    src/ui/RemotePortCheckerWidget.cpp
 
 !macx:SOURCES += src/ui/StatusBandwidthWidget.cpp
 
@@ -236,7 +237,8 @@ HEADERS  += src/ui/MainWindow.h \
     src/ui/liveview/LiveStreamItem.h \
     src/ui/StatusBarServerAlert.h \
     src/network/SocketError.h \
-    src/network/RemotePortChecker.h
+    src/network/RemotePortChecker.h \
+    src/ui/RemotePortCheckerWidget.h
 
 RESOURCES += \
     res/resources.qrc \
