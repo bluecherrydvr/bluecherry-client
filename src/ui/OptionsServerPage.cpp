@@ -2,6 +2,7 @@
 #include "DVRServersModel.h"
 #include "core/BluecherryApp.h"
 #include "core/DVRServer.h"
+#include "ui/WebRtpPortCheckerWidget.h"
 #include <QTreeView>
 #include <QHeaderView>
 #include <QBoxLayout>
@@ -60,6 +61,9 @@ OptionsServerPage::OptionsServerPage(QWidget *parent)
     m_portEdit->setFixedWidth(50);
     hnLayout->addWidget(m_portEdit);
 
+    m_portChecker = new WebRtpPortCheckerWidget;
+    hnLayout->addWidget(m_portChecker);
+
     editsLayout->addLayout(hnLayout, 1, 1);
 
     label = new QLabel(tr("Username:"));
@@ -109,6 +113,9 @@ OptionsServerPage::OptionsServerPage(QWidget *parent)
     applyBtn->setAutoDefault(false);
     connect(applyBtn, SIGNAL(clicked()), SLOT(saveChanges()));
     btnLayout->addWidget(applyBtn);
+
+    connect(m_hostnameEdit, SIGNAL(editingFinished()), this, SLOT(checkServer()));
+    connect(m_portEdit, SIGNAL(editingFinished()), this, SLOT(checkServer()));
 }
 
 void OptionsServerPage::setCurrentServer(DVRServer *server)
@@ -151,12 +158,19 @@ void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const 
     connect(server->api, SIGNAL(loginError(QString)), SLOT(setLoginError(QString)));
     connect(server->api, SIGNAL(loginRequestStarted()), SLOT(setLoginConnecting()));
 
+    checkServer();
+
     if (server->api->isOnline())
         setLoginSuccessful();
     else if (server->api->isLoginPending())
         setLoginConnecting();
     else if (!server->api->errorMessage().isEmpty())
         setLoginError(server->api->errorMessage());
+}
+
+void OptionsServerPage::checkServer()
+{
+    m_portChecker->check(m_hostnameEdit->text(), m_portEdit->text().toUInt());
 }
 
 void OptionsServerPage::addNewServer()
