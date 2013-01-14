@@ -66,10 +66,12 @@ MainWindow::MainWindow(QWidget *parent)
 #endif
 
     /* Experimental toolbar */
-    m_mainToolbar = new QToolBar;
+    m_mainToolbar = new QToolBar(tr("Experimental"));
     m_mainToolbar->setMovable(false);
     m_mainToolbar->setIconSize(QSize(16, 16));
     m_mainToolbar->addAction(QIcon(QLatin1String(":/icons/cassette.png")), tr("Events"), this, SLOT(showEventsWindow()));
+    QAction *expandAllServersAction = m_mainToolbar->addAction(QIcon(QLatin1String(":/icons/expand-all.png")), tr("Expand All Servers"));
+    QAction *collapseAllServersAction = m_mainToolbar->addAction(QIcon(QLatin1String(":/icons/collapse-all.png")), tr("Collapse All Servers"));
     addToolBar(Qt::TopToolBarArea, m_mainToolbar);
 
     /* Splitters */
@@ -148,6 +150,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(saveSettings()));
 
     m_sourcesList->setFocus(Qt::OtherFocusReason);
+
+    connect(expandAllServersAction, SIGNAL(triggered()), m_sourcesList, SLOT(expandAll()));
+    connect(collapseAllServersAction, SIGNAL(triggered()), m_sourcesList, SLOT(collapseAll()));
 }
 
 MainWindow::~MainWindow()
