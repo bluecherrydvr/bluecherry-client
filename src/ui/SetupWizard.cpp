@@ -2,6 +2,7 @@
 #include "SetupWizard_p.h"
 #include "core/BluecherryApp.h"
 #include "core/DVRServer.h"
+#include "ui/WebRtpPortCheckerWidget.h"
 #include <QLabel>
 #include <QBoxLayout>
 #include <QGridLayout>
@@ -80,16 +81,19 @@ SetupServerPage::SetupServerPage()
     layout->addWidget(hostEdit, row, 1);
 
     QLineEdit *portEdit = new QLineEdit;
-    portEdit->setValidator(new QIntValidator(1, 65535, portEdit));
+    portEdit->setValidator(new QIntValidator(1, 65534, portEdit)); // we need 65535 for rtp
     portEdit->setText(QLatin1String("7001"));
     portEdit->setFixedWidth(75);
     layout->addWidget(new QLabel(tr("Port:")), row, 2);
     layout->addWidget(portEdit, row, 3, 1, 1, Qt::AlignRight | Qt::AlignVCenter);
 
+    portChecker = new WebRtpPortCheckerWidget;
+    layout->addWidget(portChecker, row, 4);
+
     row++;
     nameEdit = new QLineEdit;
     layout->addWidget(new QLabel(tr("Name:")), row, 0);
-    layout->addWidget(nameEdit, row, 1, 1, 3);
+    layout->addWidget(nameEdit, row, 1, 1, 4);
 
     row++;
     layout->setRowMinimumHeight(row, 16);
@@ -102,7 +106,7 @@ SetupServerPage::SetupServerPage()
     QLabel *loginDefault = new QLabel(QLatin1String("<a href='default'>") + tr("Use Default")
                                       + QLatin1String("</a>"));
     loginDefault->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    layout->addWidget(loginDefault, row, 2, 1, 2, Qt::AlignRight | Qt::AlignVCenter);
+    layout->addWidget(loginDefault, row, 2, 1, 3, Qt::AlignRight | Qt::AlignVCenter);
 
     row++;
     QLineEdit *passwordEdit = new QLineEdit;
@@ -111,12 +115,12 @@ SetupServerPage::SetupServerPage()
     QCheckBox *passSaveChk = new QCheckBox(tr("Save password"));
     passSaveChk->setChecked(true);
     passSaveChk->setEnabled(false); // not implemented yet (#565)
-    layout->addWidget(passSaveChk, row, 2, 1, 2, Qt::AlignRight | Qt::AlignVCenter);
+    layout->addWidget(passSaveChk, row, 2, 1, 3, Qt::AlignRight | Qt::AlignVCenter);
 
     row++;
     QCheckBox *autoConnectChk = new QCheckBox(tr("Connect automatically at startup"));
     autoConnectChk->setChecked(true);
-    layout->addWidget(autoConnectChk, row, 1, 1, 3);
+    layout->addWidget(autoConnectChk, row, 1, 1, 4);
 
     row++;
     layout->setRowMinimumHeight(row, 8);
@@ -132,7 +136,7 @@ SetupServerPage::SetupServerPage()
     testResultText->setStyleSheet(QLatin1String("font-weight:bold"));
     loadingLayout->addWidget(testResultText, 0, Qt::AlignLeft);
 
-    layout->addLayout(loadingLayout, row, 0, 1, 4, Qt::AlignHCenter);
+    layout->addLayout(loadingLayout, row, 0, 1, 5, Qt::AlignHCenter);
 
     registerField(QLatin1String("serverName*"), nameEdit);
     registerField(QLatin1String("serverHostname*"), hostEdit);
@@ -142,6 +146,8 @@ SetupServerPage::SetupServerPage()
     registerField(QLatin1String("serverPasswordSaved"), passSaveChk);
     registerField(QLatin1String("serverAutoConnect"), autoConnectChk);
 
+    connect(hostEdit, SIGNAL(editingFinished()), SLOT(serverChanged()));
+    connect(portEdit, SIGNAL(editingFinished()), SLOT(serverChanged()));
     connect(hostEdit, SIGNAL(textChanged(QString)), SLOT(hostTextChanged(QString)));
     connect(loginDefault, SIGNAL(linkActivated(QString)), SLOT(setDefaultLogin()));
 
@@ -213,6 +219,14 @@ void SetupServerPage::cleanupPage()
     QWizardPage::cleanupPage();
     wizard()->button(QWizard::CustomButton1)->setVisible(false);
     wizard()->setOptions(wizard()->options() & ~QWizard::HaveCustomButton1);
+}
+
+void SetupServerPage::serverChanged()
+{
+    QString serverHostname = field(QLatin1String("serverHostname")).toString();
+    int serverPort = field(QLatin1String("serverPort")).toUInt();
+
+    portChecker->check(serverHostname, serverPort);
 }
 
 void SetupServerPage::hostTextChanged(const QString &host)
