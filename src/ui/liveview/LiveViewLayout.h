@@ -35,13 +35,20 @@ public:
 
     int rows() const { return m_rows; }
     int columns() const { return m_columns; }
+
+    static int maxRows();
+    static int maxColumns();
+
+    bool isRowEmpty(int rowIndex) const;
+    bool isColumnEmpty(int rowIndex) const;
+
     void setGridSize(int rows, int columns);
     void gridPos(const QPointF &pos, int *row, int *column);
     bool gridPos(QDeclarativeItem *item, int *row, int *column);
 
     QSize idealSize() const;
 
-    QDeclarativeItem *at(int row, int col) const { return m_items[row * m_columns + col]; }
+    QDeclarativeItem *at(int row, int col) const { return m_items[coordinatesToIndex(row, col)]; }
     Q_INVOKABLE void set(int row, int col, QDeclarativeItem *item);
 
     /* Add a new item, automatically placing it in the best available position */
@@ -119,6 +126,11 @@ private:
     void doLayout();
 
     QDeclarativeItem *createNewItem();
+
+    int coordinatesToIndex(int row, int column) const;
+
+    void removeRows(int remove);
+    void removeColumns(int remove);
 
 private slots:
     void scheduleLayout(int changes = DoItemsLayout);

@@ -225,8 +225,12 @@ void LiveFeedItem::loadState(QDataStream *data, int version)
     if (version >= 1) {
         int bandwidth_mode = 0;
         *data >> bandwidth_mode;
-        Q_ASSERT(stream());
-        stream()->setBandwidthMode(bandwidth_mode);
+        // this assert assumes that configuration file is always valid
+        // but this is thing we cannot be sure of
+        // Q_ASSERT(stream());
+
+        if (stream())
+            stream()->setBandwidthMode(bandwidth_mode);
     }
 }
 
