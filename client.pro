@@ -174,7 +174,8 @@ SOURCES += src/main.cpp \
     src/network/RemotePortChecker.cpp \
     src/ui/RemotePortCheckerWidget.cpp \
     src/ui/WebRtpPortCheckerWidget.cpp \
-    src/events/EventsLoader.cpp
+    src/events/EventsLoader.cpp \
+    src/events/EventsCursor.cpp
 
 !macx:SOURCES += src/ui/StatusBandwidthWidget.cpp
 
@@ -242,7 +243,8 @@ HEADERS  += src/ui/MainWindow.h \
     src/network/RemotePortChecker.h \
     src/ui/RemotePortCheckerWidget.h \
     src/ui/WebRtpPortCheckerWidget.h \
-    src/events/EventsLoader.h
+    src/events/EventsLoader.h \
+    src/events/EventsCursor.h
 
 RESOURCES += \
     res/resources.qrc \
