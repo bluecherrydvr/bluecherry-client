@@ -19,6 +19,7 @@ class QDateTime;
 class QTabWidget;
 class EventViewWindow;
 class QSplitter;
+class ModelEventsCursor;
 
 class EventsWindow : public QWidget
 {
@@ -41,6 +42,7 @@ private slots:
     void setEndDateMinimum(const QDateTime &date);
     void levelFilterChanged();
     void updateResultTitle();
+    void cursorIndexUpdated();
 
     void timelineZoomChanged(int value);
     void timelineZoomRangeChanged(int min, int max);
@@ -77,6 +79,7 @@ private:
     /* Playback */
     QSplitter *m_videoSplitter;
     EventViewWindow *m_eventViewer;
+    ModelEventsCursor *m_modelEventsCursor;
 
     void createDateFilter(QBoxLayout *layout);
     QWidget *createLevelFilter();
