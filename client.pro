@@ -170,7 +170,8 @@ SOURCES += src/main.cpp \
     src/core/LiveStreamWorker.cpp \
     src/ui/liveview/LiveStreamItem.cpp \
     src/ui/StatusBarServerAlert.cpp \
-    src/events/EventsLoader.cpp
+    src/events/EventsLoader.cpp \
+    src/events/EventsCursor.cpp
 
 !macx:SOURCES += src/ui/StatusBandwidthWidget.cpp
 
@@ -234,7 +235,8 @@ HEADERS  += src/ui/MainWindow.h \
     src/core/LiveStreamWorker.h \
     src/ui/liveview/LiveStreamItem.h \
     src/ui/StatusBarServerAlert.h \
-    src/events/EventsLoader.h
+    src/events/EventsLoader.h \
+    src/events/EventsCursor.h
 
 RESOURCES += \
     res/resources.qrc \
