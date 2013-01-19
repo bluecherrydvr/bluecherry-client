@@ -17,6 +17,7 @@
 #include "core/DVRServer.h"
 #include "core/BluecherryApp.h"
 #include "core/LiveViewManager.h"
+#include "events/ModelEventsCursor.h"
 #include <QBoxLayout>
 #include <QTreeView>
 #include <QGroupBox>
@@ -424,13 +425,13 @@ QWidget *MainWindow::createRecentEvents()
     m_eventsView->setFrameStyle(QFrame::NoFrame);
     m_eventsView->setAttribute(Qt::WA_MacShowFocusRect, false);
 
-    EventsModel *model = new EventsModel(m_eventsView);
-    m_eventsView->setModel(model);
+    m_eventsModel = new EventsModel(m_eventsView);
+    m_eventsView->setModel(m_eventsModel);
 
     QSettings settings;
-    model->setUpdateInterval(settings.value(QLatin1String("ui/main/eventRefreshInterval"), 10000).toInt());
-    model->setEventLimit(50);
-    model->setIncompleteEventsFirst(true);
+    m_eventsModel->setUpdateInterval(settings.value(QLatin1String("ui/main/eventRefreshInterval"), 10000).toInt());
+    m_eventsModel->setEventLimit(50);
+    m_eventsModel->setIncompleteEventsFirst(true);
 
     m_eventsView->header()->restoreState(settings.value(QLatin1String("ui/main/eventsView")).toByteArray());
 
@@ -587,6 +588,7 @@ void MainWindow::eventsContextMenu(const QPoint &pos)
 {
     Q_ASSERT(sender() == m_eventsView);
 
+    int currentRow = m_eventsView->currentIndex().row();
     EventData *eventPtr = m_eventsView->currentIndex().data(EventsModel::EventDataPtr).value<EventData*>();
     if (!eventPtr)
         return;
@@ -627,8 +629,14 @@ void MainWindow::eventsContextMenu(const QPoint &pos)
     QAction *act = menu.exec(m_eventsView->mapToGlobal(pos));
     if (!act)
         return;
-    else if (act == aOpen)
-        EventViewWindow::open(event);
+    if (act == aOpen)
+    {
+        ModelEventsCursor *modelEventsCursor = new ModelEventsCursor();
+        modelEventsCursor->setModel(m_eventsModel);
+        modelEventsCursor->setCameraFilter(event.locationCamera());
+        modelEventsCursor->setIndex(currentRow);
+        EventViewWindow::open(event, modelEventsCursor);
+    }
     else if (act == aViewLive)
         LiveViewWindow::openWindow(this, false, event.locationCamera())->show();
 #if 0
