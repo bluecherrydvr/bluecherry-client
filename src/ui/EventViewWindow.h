@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "core/EventData.h"
+#include "events/EventsCursor.h"
 
 class QSplitter;
 class QLabel;
@@ -14,6 +15,7 @@ class EventTagsView;
 class EventCommentsWidget;
 class EventVideoPlayer;
 class ExpandingTextEdit;
+class SwitchEventsWidget;
 
 class EventViewWindow : public QWidget
 {
@@ -22,9 +24,15 @@ class EventViewWindow : public QWidget
 public:
     explicit EventViewWindow(QWidget *parent = 0);
 
-    static EventViewWindow *open(const EventData &event);
+    static EventViewWindow *open(const EventData &event, EventsCursor *eventsCursor);
 
     void setEvent(const EventData &event);
+
+    void setEventsCursor(EventsCursor *eventsCursor);
+    EventsCursor * eventsCursor() const { return m_eventsCursor.data(); }
+
+public:
+    void showEvent();
 
 protected:
     virtual void closeEvent(QCloseEvent *event);
@@ -32,6 +40,7 @@ protected:
 private slots:
     void commentInputChanged();
     void postComment();
+    void setEvent(EventData *event);
 
 private:
     EventData m_event;
@@ -45,6 +54,8 @@ private:
     QPushButton *m_commentBtn;
 
     EventVideoPlayer *m_videoPlayer;
+    QSharedPointer<EventsCursor> m_eventsCursor;
+    SwitchEventsWidget *m_switchEventsWidget;
 
     QWidget *createInfoArea();
     QWidget *createPlaybackArea();
