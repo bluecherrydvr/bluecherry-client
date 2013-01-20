@@ -550,6 +550,8 @@ void EventsModel::setFilterSources(const QMap<DVRServer*, QList<int> > &sources)
                 break;
         }
     }
+    else if (m_filter.sources.isEmpty())
+        fast = true;
 
     m_filter.sources.clear();
     for (QMap<DVRServer*, QList<int> >::ConstIterator nit = sources.begin(); nit != sources.end(); ++nit)
