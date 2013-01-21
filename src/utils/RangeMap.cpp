@@ -19,8 +19,6 @@
 #include <QtAlgorithms>
 #include <QDebug>
 
-#undef RANGEMAP_DEBUG
-
 RangeMap::RangeMap()
 {
 }
@@ -38,7 +36,11 @@ bool RangeMap::contains(unsigned position, unsigned size) const
     Range range = { position, position+size-1 };
     QList<Range>::ConstIterator it = qLowerBound(ranges.begin(), ranges.end(), range, rangeStartLess);
     if (it == ranges.end() || it->start > position)
+    {
+        if (it == ranges.begin())
+            return false;
         --it;
+    }
 
     /* Position is 1, size is 1; last pos required is 1 */
     Q_ASSERT(it->start <= position);
