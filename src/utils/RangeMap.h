@@ -29,7 +29,6 @@ public:
     RangeMap();
 
     void insert(unsigned position, unsigned size);
-    void remove(unsigned position, unsigned size);
 
     bool contains(unsigned position, unsigned size = 1) const;
 
