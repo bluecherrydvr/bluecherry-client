@@ -182,7 +182,7 @@ int MediaDownload::read(unsigned position, char *buffer, int reqSize)
     unsigned oldRdPos = m_readPos;
     int size = qMin(reqSize, (m_fileSize >= position) ? int(m_fileSize - position) : 0);
 
-    while (!m_bufferRanges.contains(position, size))
+    while (!m_bufferRanges.contains(Range::fromStartSize(position, size)))
     {
         m_bufferWait.wait(&m_bufferLock);
         if (oldRdPos != m_readPos)
@@ -345,9 +345,9 @@ void MediaDownload::taskFinished()
 
     /* These should both be true or both be false, anything else is a logic error.
      * This test does assume that we will never download the same byte twice. */
-    Q_ASSERT(!(m_bufferRanges.contains(0, m_fileSize) ^ (m_downloadedSize >= m_fileSize)));
+    Q_ASSERT(!(m_bufferRanges.contains(Range::fromStartSize(0, m_fileSize)) ^ (m_downloadedSize >= m_fileSize)));
 
-    if (m_bufferRanges.contains(0, m_fileSize))
+    if (m_bufferRanges.contains(Range::fromStartSize(0, m_fileSize)))
     {
         qDebug() << "MediaDownload: Media finished";
         m_isFinished = true;

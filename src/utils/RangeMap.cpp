@@ -28,27 +28,41 @@ inline bool RangeMap::rangeStartLess(const Range &a, const Range &b)
     return a.start() < b.start();
 }
 
-bool RangeMap::contains(unsigned position, unsigned size) const
+bool RangeMap::contains(const Range &range)
 {
     if (ranges.isEmpty())
         return false;
 
-    Range range = Range::fromStartSize(position, size);
+    QList<Range>::Iterator it = findContainingRange(range.start());
+    return it != ranges.end() && it->includes(range);
+}
 
-    QList<Range>::ConstIterator it = qLowerBound(ranges.begin(), ranges.end(), range, rangeStartLess);
-    if (it == ranges.end() || it->start() > position)
+QList<Range>::Iterator RangeMap::findContainingRange(unsigned value)
+{
+    if (ranges.begin()->start() > value)
+        return ranges.end();
+    if ((ranges.end() - 1)->end() < value)
+        return ranges.end();
+
+    QList<Range>::Iterator from = ranges.begin();
+    QList<Range>::Iterator to = ranges.end();
+
+    while (true)
     {
-        if (it == ranges.begin())
-            return false;
-        --it;
+        int half = (to - from) / 2;
+        QList<Range>::Iterator i = from + half;
+        if (i->includes(value))
+            return i;
+        if (from == to)
+            return ranges.end();
+        if (i->start() > value)
+            to = i - 1;
+        else if (i->end() < value)
+            from = i + 1;
     }
 
-    /* Position is 1, size is 1; last pos required is 1 */
-    Q_ASSERT(it->start() <= position);
-    if (it != ranges.end() && it->end() >= range.end())
-        return true;
-
-    return false;
+    Q_ASSERT(false);
+    return ranges.end();
 }
 
 bool RangeMap::nextMissingRange(unsigned startPosition, unsigned totalSize, unsigned &position, unsigned &size)

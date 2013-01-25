@@ -31,7 +31,7 @@ public:
 
     void insert(unsigned position, unsigned size);
 
-    bool contains(unsigned position, unsigned size = 1) const;
+    bool contains(const Range &range);
 
     /* Return the position and size of the next sequential range that is not included,
      * starting from startPosition (inclusive). Returns true if there is a gap, or
@@ -41,6 +41,8 @@ public:
     bool nextMissingRange(unsigned startPosition, unsigned totalSize, unsigned &position, unsigned &size);
 private:
     static bool rangeStartLess(const Range &a, const Range &b);
+
+    QList<Range>::Iterator findContainingRange(unsigned value);
 
 #ifndef QT_NO_DEBUG
     void debugTestConsistency();
