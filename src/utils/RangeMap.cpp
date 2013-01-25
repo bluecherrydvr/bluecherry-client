@@ -23,9 +23,9 @@ RangeMap::RangeMap()
 {
 }
 
-inline bool RangeMap::rangeStartLess(const RangeMap::Range &a, const RangeMap::Range &b)
+inline bool RangeMap::rangeStartLess(const Range &a, const Range &b)
 {
-    return a.start < b.start;
+    return a.start() < b.start();
 }
 
 bool RangeMap::contains(unsigned position, unsigned size) const
@@ -33,9 +33,10 @@ bool RangeMap::contains(unsigned position, unsigned size) const
     if (ranges.isEmpty())
         return false;
 
-    Range range = { position, position+size-1 };
+    Range range = Range::fromStartSize(position, size);
+
     QList<Range>::ConstIterator it = qLowerBound(ranges.begin(), ranges.end(), range, rangeStartLess);
-    if (it == ranges.end() || it->start > position)
+    if (it == ranges.end() || it->start() > position)
     {
         if (it == ranges.begin())
             return false;
@@ -43,8 +44,8 @@ bool RangeMap::contains(unsigned position, unsigned size) const
     }
 
     /* Position is 1, size is 1; last pos required is 1 */
-    Q_ASSERT(it->start <= position);
-    if (it != ranges.end() && it->end >= range.end)
+    Q_ASSERT(it->start() <= position);
+    if (it != ranges.end() && it->end() >= range.end())
         return true;
 
     return false;
@@ -60,7 +61,8 @@ bool RangeMap::nextMissingRange(unsigned startPosition, unsigned totalSize, unsi
     }
 
     /* Find the range inclusive of or less than startPosition */
-    Range r = { startPosition, startPosition };
+    Range r = Range::fromValue(startPosition);
+
     QList<Range>::ConstIterator it = qLowerBound(ranges.begin(), ranges.end(), r, rangeStartLess);
     if (it == ranges.end())
     {
@@ -69,13 +71,13 @@ bool RangeMap::nextMissingRange(unsigned startPosition, unsigned totalSize, unsi
         return true;
     }
 
-    if (it->start > startPosition)
+    if (it->start() > startPosition)
     {
         if (it == ranges.begin())
         {
             position = startPosition;
-            if (startPosition + totalSize - 1 > it->start)
-                size = it->start - startPosition;
+            if (startPosition + totalSize - 1 > it->start())
+                size = it->start() - startPosition;
             else
                 size = totalSize;
             return true;
@@ -83,16 +85,16 @@ bool RangeMap::nextMissingRange(unsigned startPosition, unsigned totalSize, unsi
         --it;
     }
 
-    Q_ASSERT(it->start <= startPosition);
+    Q_ASSERT(it->start() <= startPosition);
 
-    position = qMax(startPosition, it->end + 1);
+    position = qMax(startPosition, it->end() + 1);
     unsigned reducedSize = totalSize - (position - startPosition);
     int end = startPosition + totalSize - 1;
 
     if (it + 1 == ranges.end())
         size = reducedSize;
-    else if ((it + 1)->start < end)
-        size = reducedSize - (end - (it + 1)->start) - 1;
+    else if ((it + 1)->start() < end)
+        size = reducedSize - (end - (it + 1)->start()) - 1;
     else
         size = reducedSize;
 
@@ -101,7 +103,7 @@ bool RangeMap::nextMissingRange(unsigned startPosition, unsigned totalSize, unsi
 
 void RangeMap::insert(unsigned position, unsigned size)
 {
-    Range range = { position, position + size - 1 };
+    Range range = Range::fromStartSize(position, size);
     if (ranges.isEmpty())
     {
         ranges.append(range);
@@ -110,34 +112,34 @@ void RangeMap::insert(unsigned position, unsigned size)
 
     /* Item with a position LESS THAN OR EQUAL TO the BEGINNING of the inserted range */
     QList<Range>::Iterator lower = qLowerBound(ranges.begin(), ranges.end(), range, rangeStartLess);
-    if (!ranges.isEmpty() && (lower == ranges.end() || lower->start > position))
+    if (!ranges.isEmpty() && (lower == ranges.end() || lower->start() > position))
         lower--;
     /* Item with a position GREATER THAN the END of the inserted range */
-    Range r2 = { range.end+1, range.end+1 };
+    Range r2 = Range::fromValue(range.end() + 1);
     QList<Range>::Iterator upper = qUpperBound(lower, ranges.end(), r2, rangeStartLess);
 
-    Q_ASSERT(lower == ranges.end() || lower->start <= position);
+    Q_ASSERT(lower == ranges.end() || lower->start() <= position);
 
     /* Intersection at the beginning */
-    if (lower != ranges.end() && position <= lower->end+1)
+    if (lower != ranges.end() && position <= lower->end() + 1)
     {
         /* The beginning of the new range intersects the range in 'lower'.
          * Extend this range, and merge ranges after it as needed. */
 
-        Q_ASSERT(lower->start <= position);
-        lower->end = qMax(range.end, (upper-1)->end);
+        Q_ASSERT(lower->start() <= position);
+        *lower = Range::fromStartEnd(lower->start(), qMax(range.end(), (upper-1)->end()));
 
         if ((upper-1) != lower)
             ranges.erase(lower+1, upper);
     }
-    else if (lower != ranges.end() && range.end <= (upper-1)->end)
+    else if (lower != ranges.end() && range.end() <= (upper-1)->end())
     {
         /* The end of the new range intersects the range in 'upper'.
          * Extend this range. Merging is unnecessary, because any case
          * where that would be possible is included in the prior one. */
 
         upper--;
-        upper->start = position;
+        *upper = Range::fromStartEnd(position, upper->end());
     }
     else
     {
@@ -156,7 +158,7 @@ void RangeMap::insert(unsigned position, unsigned size)
 #ifndef QT_NO_DEBUG
 void RangeMap::debugTestConsistency()
 {
-    Range last = { 0, 0 };
+    Range last = Range::fromValue(0);
     for (QList<Range>::Iterator it = ranges.begin(); it != ranges.end(); ++it)
     {
         const Range &current = *it;
@@ -164,14 +166,14 @@ void RangeMap::debugTestConsistency()
 
         /* End is after start; these are both inclusive, so they may be equal (in the case
          * of a range of one). */
-        Q_ASSERT(current.start <= current.end);
+        Q_ASSERT(current.start() <= current.end());
 
         if (!isFirst)
         {
             /* Sequentially ordered */
-            Q_ASSERT(current.start > last.end);
+            Q_ASSERT(current.start() > last.end());
             /* There is a gap of at least one between ranges (otherwise, they would be the same range) */
-            Q_ASSERT(current.start - last.end > 1);
+            Q_ASSERT(current.start() - last.end() > 1);
         }
 
         last = current;

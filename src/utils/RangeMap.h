@@ -18,6 +18,7 @@
 #ifndef RANGEMAP_H
 #define RANGEMAP_H
 
+#include "utils/Range.h"
 #include <QMap>
 #include <QDebug>
 
@@ -39,11 +40,6 @@ public:
      * will be zero. */
     bool nextMissingRange(unsigned startPosition, unsigned totalSize, unsigned &position, unsigned &size);
 private:
-    struct Range {
-        unsigned start; /* First index, inclusive */
-        unsigned end; /* Last index, inclusive; size is (end-start+1) */
-    };
-
     static bool rangeStartLess(const Range &a, const Range &b);
 
 #ifndef QT_NO_DEBUG
@@ -57,9 +53,9 @@ inline QDebug operator<<(QDebug d, const RangeMap &r)
 {
 #ifndef QT_NO_DEBUG
     QString text = QLatin1String("Range: ");
-    foreach (const RangeMap::Range &n, r.ranges)
-        text.append(QString::number(n.start) + QLatin1String(" - ")
-                    + QString::number(n.end) + QLatin1String("; "));
+    foreach (const Range &n, r.ranges)
+        text.append(QString::number(n.start()) + QLatin1String(" - ")
+                    + QString::number(n.end()) + QLatin1String("; "));
     return (d << text);
 #else
     Q_UNUSED(r);
