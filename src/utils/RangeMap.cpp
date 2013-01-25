@@ -62,23 +62,51 @@ bool RangeMap::nextMissingRange(unsigned startPosition, unsigned totalSize, unsi
     /* Find the range inclusive of or less than startPosition */
     Range r = { startPosition, startPosition };
     QList<Range>::ConstIterator it = qLowerBound(ranges.begin(), ranges.end(), r, rangeStartLess);
-    if (it == ranges.end() || it->start > startPosition)
+    if (it == ranges.end())
+    {
+        position = startPosition;
+        size = totalSize;
+        return true;
+    }
+
+    if (it->start > startPosition)
+    {
+        if (it == ranges.begin())
+        {
+            position = startPosition;
+            if (startPosition + totalSize - 1 > it->start)
+                size = it->start - startPosition;
+            else
+                size = totalSize;
+            return true;
+        }
         --it;
+    }
 
     Q_ASSERT(it->start <= startPosition);
 
-    position = qMax(startPosition, it->end+1);
-    size = qMin((it+1 == ranges.end()) ? (totalSize - position) : ((it+1)->start - position - 1),
-                totalSize - position);
+    position = qMax(startPosition, it->end + 1);
+    unsigned reducedSize = totalSize - (position - startPosition);
+    int end = startPosition + totalSize - 1;
 
-    Q_ASSERT(size == 0 || (position+size) == totalSize || (position+size)+1 == (it+1)->start);
+    if (it + 1 == ranges.end())
+        size = reducedSize;
+    else if ((it + 1)->start < end)
+        size = reducedSize - (end - (it + 1)->start) - 1;
+    else
+        size = reducedSize;
 
     return size != 0;
 }
 
 void RangeMap::insert(unsigned position, unsigned size)
 {
-    Range range = { position, position+size-1 };
+    Range range = { position, position + size - 1 };
+    if (ranges.isEmpty())
+    {
+        ranges.append(range);
+        return;
+    }
 
     /* Item with a position LESS THAN OR EQUAL TO the BEGINNING of the inserted range */
     QList<Range>::Iterator lower = qLowerBound(ranges.begin(), ranges.end(), range, rangeStartLess);
