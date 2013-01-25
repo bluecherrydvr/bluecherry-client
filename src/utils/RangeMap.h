@@ -36,7 +36,7 @@ public:
        May return empty range if it is contained. */
     Range nextMissingRange(const Range &search);
 private:
-    int size() const { return ranges.size(); }
+    int size() const { return m_ranges.size(); }
 
     unsigned firstNotInRange(QList<Range>::Iterator rangeIterator);
     unsigned lastNotInRange(QList<Range>::Iterator rangeIterator);
@@ -52,14 +52,14 @@ private:
     void debugTestConsistency();
 #endif
 
-    QList<Range> ranges;
+    QList<Range> m_ranges;
 };
 
 inline QDebug operator<<(QDebug d, const RangeMap &r)
 {
 #ifndef QT_NO_DEBUG
     QString text = QLatin1String("Range: ");
-    foreach (const Range &n, r.ranges)
+    foreach (const Range &n, r.m_ranges)
         text.append(QString::number(n.start()) + QLatin1String(" - ")
                     + QString::number(n.end()) + QLatin1String("; "));
     return (d << text);
