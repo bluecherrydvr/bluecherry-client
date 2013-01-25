@@ -203,7 +203,7 @@ bool VideoPlayerBackend::start(const QUrl &url)
     }
 
     connect(m_videoBuffer, SIGNAL(streamError(QString)), SLOT(streamError(QString)));
-    m_videoBuffer->start(url);
+    m_videoBuffer->startBuffering(url);
 
     /* Decoder */
     GstElement *decoder = gst_element_factory_make("decodebin2", "decoder");

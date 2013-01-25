@@ -92,7 +92,7 @@ void VideoHttpBuffer::setCookies(const QList<QNetworkCookie> &cookies)
     m_cookies = cookies;
 }
 
-bool VideoHttpBuffer::start(const QUrl &url)
+bool VideoHttpBuffer::startBuffering(const QUrl &url)
 {
     Q_ASSERT(!media);
 

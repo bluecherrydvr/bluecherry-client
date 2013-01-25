@@ -50,7 +50,7 @@ public:
     void setCookies(const QList<QNetworkCookie> &cookies);
 
 public slots:
-    bool start(const QUrl &url);
+    bool startBuffering(const QUrl &url);
     void clearPlayback();
 
 signals:
