@@ -36,7 +36,6 @@ public:
        May return empty range if it is contained. */
     Range nextMissingRange(const Range &search);
 private:
-    static bool rangeStartLess(const Range &a, const Range &b);
     int size() const { return ranges.size(); }
 
     unsigned firstNotInRange(QList<Range>::Iterator rangeIterator);

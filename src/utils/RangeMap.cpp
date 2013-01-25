@@ -23,11 +23,6 @@ RangeMap::RangeMap()
 {
 }
 
-inline bool RangeMap::rangeStartLess(const Range &a, const Range &b)
-{
-    return a.start() < b.start();
-}
-
 bool RangeMap::contains(const Range &range)
 {
     if (ranges.isEmpty())
