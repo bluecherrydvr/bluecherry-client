@@ -25,6 +25,7 @@
 class RangeMap
 {
     friend QDebug operator<<(QDebug d, const RangeMap &r);
+    friend class RangeMapTestCase;
 
 public:
     RangeMap();
