@@ -32,14 +32,15 @@ public:
     void insert(const Range &range);
     bool contains(const Range &range);
 
-    /* Return the position and size of the next sequential range that is not included,
-     * starting from startPosition (inclusive). Returns true if there is a gap, or
-     * false if there are no gaps before the end of the range. In the latter case,
-     * position will be set to one past the largest position in the range, and size
-     * will be zero. */
-    bool nextMissingRange(unsigned startPosition, unsigned totalSize, unsigned &position, unsigned &size);
+    /* Return the first subrange of search that is not included in this RangeMap.
+       May return empty range if it is contained. */
+    Range nextMissingRange(const Range &search);
 private:
     static bool rangeStartLess(const Range &a, const Range &b);
+    int size() const { return ranges.size(); }
+
+    unsigned firstNotInRange(QList<Range>::Iterator rangeIterator);
+    unsigned lastNotInRange(QList<Range>::Iterator rangeIterator);
 
     QList<Range>::Iterator findContainingRange(unsigned value);
     QList<Range>::Iterator findContainingOrPrecedingRange(unsigned value);

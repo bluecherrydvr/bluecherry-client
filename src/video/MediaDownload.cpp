@@ -154,18 +154,18 @@ bool MediaDownload::seek(unsigned offset)
 
     m_readPos = offset;
 
-    unsigned npos, nsize;
-    if (m_bufferRanges.nextMissingRange(m_readPos - qMin(m_readPos, seekMinimumSkip), m_fileSize, npos, nsize))
+    Range missingRange = m_bufferRanges.nextMissingRange(Range::fromStartSize(m_readPos - qMin(m_readPos, seekMinimumSkip), m_fileSize));
+    if (missingRange.isValid())
     {
-        if (npos >= m_writePos && npos - m_writePos < seekMinimumSkip)
+        if (missingRange.start() >= m_writePos && missingRange.start() - m_writePos < seekMinimumSkip)
         {
             /* We're already downloading at the correct position; nothing to do */
         }
         else
         {
             qDebug() << "MediaDownload: launching new request after seek";
-            m_writePos = npos;
-            startRequest(npos, nsize);
+            m_writePos = missingRange.start();
+            startRequest(missingRange.start(), missingRange.size());
         }
     }
 
@@ -361,25 +361,11 @@ void MediaDownload::taskFinished()
     {
         /* Launch a new task to fill in gaps. Prioritize anything that is missing and is closest
          * to the current read position. */
-        unsigned npos, nsize;
-        if (!m_bufferRanges.nextMissingRange(m_readPos, m_fileSize, npos, nsize))
-        {
-            if (npos >= m_fileSize && !m_bufferRanges.nextMissingRange(0, m_fileSize, npos, nsize))
-            {
-                /* Should not be possible; this would mean that 0-m_fileSize is included. */
-                Q_ASSERT_X(false, "RangeMap", "Impossible conflict between nextMissingRange and contains");
-                m_isFinished = true;
-                bool ok = metaObject()->invokeMethod(this, "finished", Qt::QueuedConnection);
-                Q_ASSERT(ok);
-                ok = metaObject()->invokeMethod(this, "stopped", Qt::QueuedConnection);
-                Q_ASSERT(ok);
-                Q_UNUSED(ok);
-                return;
-            }
-        }
+        Range missingRange = m_bufferRanges.nextMissingRange(Range::fromStartSize(m_readPos, m_fileSize));
+        Q_ASSERT(missingRange.isValid());
 
-        m_writePos = npos;
-        startRequest(npos, nsize);
+        m_writePos = missingRange.start();
+        startRequest(missingRange.start(), missingRange.size());
     }
 }
 

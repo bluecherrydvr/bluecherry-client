@@ -101,54 +101,35 @@ QList<Range>::Iterator RangeMap::findContainingOrPrecedingRange(unsigned value)
     return ranges.end();
 }
 
-bool RangeMap::nextMissingRange(unsigned startPosition, unsigned totalSize, unsigned &position, unsigned &size)
+unsigned RangeMap::firstNotInRange(QList<Range>::Iterator rangeIterator)
+{
+    if (rangeIterator == ranges.end())
+        return 0;
+    else
+        return rangeIterator->end() + 1;
+}
+
+unsigned RangeMap::lastNotInRange(QList<Range>::Iterator rangeIterator)
+{
+    if (rangeIterator == ranges.end())
+        return UINT_MAX;
+    else if (rangeIterator->start() == 0)
+        return 0;
+    else
+        return rangeIterator->start() - 1;
+}
+
+Range RangeMap::nextMissingRange(const Range &search)
 {
     if (ranges.isEmpty())
-    {
-        position = startPosition;
-        size = totalSize;
-        return true;
-    }
+        return search;
 
-    /* Find the range inclusive of or less than startPosition */
-    Range r = Range::fromValue(startPosition);
+    QList<Range>::Iterator precedingRange = findContainingOrPrecedingRange(search.start());
+    QList<Range>::Iterator followingRange = nextRange(precedingRange);
 
-    QList<Range>::ConstIterator it = qLowerBound(ranges.begin(), ranges.end(), r, rangeStartLess);
-    if (it == ranges.end())
-    {
-        position = startPosition;
-        size = totalSize;
-        return true;
-    }
-
-    if (it->start() > startPosition)
-    {
-        if (it == ranges.begin())
-        {
-            position = startPosition;
-            if (startPosition + totalSize - 1 > it->start())
-                size = it->start() - startPosition;
-            else
-                size = totalSize;
-            return true;
-        }
-        --it;
-    }
-
-    Q_ASSERT(it->start() <= startPosition);
-
-    position = qMax(startPosition, it->end() + 1);
-    unsigned reducedSize = totalSize - (position - startPosition);
-    int end = startPosition + totalSize - 1;
-
-    if (it + 1 == ranges.end())
-        size = reducedSize;
-    else if ((it + 1)->start() < end)
-        size = reducedSize - (end - (it + 1)->start()) - 1;
-    else
-        size = reducedSize;
-
-    return size != 0;
+    return Range::fromStartEnd(
+        qMax(search.start(), firstNotInRange(precedingRange)),
+        qMin(search.end(), lastNotInRange(followingRange)));
 }
 
 QList<Range>::Iterator RangeMap::nextRange(QList<Range>::Iterator range)
