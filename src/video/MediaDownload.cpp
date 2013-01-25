@@ -316,7 +316,7 @@ void MediaDownload::incomingData(const QByteArray &data, unsigned position)
 
     Q_ASSERT(re == data.size());
 
-    m_bufferRanges.insert(position, re);
+    m_bufferRanges.insert(Range::fromStartSize(position, re));
 
     if (m_writePos == position)
         m_writePos += re;

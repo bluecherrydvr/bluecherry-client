@@ -29,8 +29,7 @@ class RangeMap
 public:
     RangeMap();
 
-    void insert(unsigned position, unsigned size);
-
+    void insert(const Range &range);
     bool contains(const Range &range);
 
     /* Return the position and size of the next sequential range that is not included,
@@ -43,6 +42,11 @@ private:
     static bool rangeStartLess(const Range &a, const Range &b);
 
     QList<Range>::Iterator findContainingRange(unsigned value);
+    QList<Range>::Iterator findContainingOrPrecedingRange(unsigned value);
+    QList<Range>::Iterator nextRange(QList<Range>::Iterator range);
+
+    QList<Range>::Iterator findFirstMergingRange(unsigned value);
+    QList<Range>::Iterator findLastMergingRange(unsigned value);
 
 #ifndef QT_NO_DEBUG
     void debugTestConsistency();

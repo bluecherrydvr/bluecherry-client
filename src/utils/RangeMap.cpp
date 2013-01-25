@@ -65,6 +65,42 @@ QList<Range>::Iterator RangeMap::findContainingRange(unsigned value)
     return ranges.end();
 }
 
+QList<Range>::Iterator RangeMap::findContainingOrPrecedingRange(unsigned value)
+{
+    if (ranges.isEmpty())
+        return ranges.end();
+    if (ranges.begin()->start() > value)
+        return ranges.end();
+    if ((ranges.end() - 1)->start() <= value)
+        return ranges.end() - 1;
+
+    QList<Range>::Iterator from = ranges.begin();
+    QList<Range>::Iterator to = ranges.end();
+
+    while (true)
+    {
+        int half = (to - from) / 2;
+        QList<Range>::Iterator i = from + half;
+        if (i->includes(value))
+            return i;
+        if (from == to)
+            return from;
+        if (i->start() > value)
+            to = i - 1;
+        else if (i->end() < value)
+        {
+            QList<Range>::Iterator next = i + 1;
+            if (next == ranges.end() || next->start() > value) {
+                return i;
+            }
+            from = i + 1;
+        }
+    }
+
+    Q_ASSERT(false);
+    return ranges.end();
+}
+
 bool RangeMap::nextMissingRange(unsigned startPosition, unsigned totalSize, unsigned &position, unsigned &size)
 {
     if (ranges.isEmpty())
@@ -115,58 +151,72 @@ bool RangeMap::nextMissingRange(unsigned startPosition, unsigned totalSize, unsi
     return size != 0;
 }
 
-void RangeMap::insert(unsigned position, unsigned size)
+QList<Range>::Iterator RangeMap::nextRange(QList<Range>::Iterator range)
 {
-    Range range = Range::fromStartSize(position, size);
+    if (range == ranges.end()) // for no-range next is first
+        return ranges.begin();
+    else
+        return range + 1;
+}
+
+QList<Range>::Iterator RangeMap::findFirstMergingRange(unsigned value)
+{
+    QList<Range>::Iterator precedingRange = findContainingOrPrecedingRange(value);
+    if (precedingRange == ranges.end())
+        return precedingRange;
+    if (precedingRange->includes(value))
+        return precedingRange;
+
+    if (precedingRange->end() + 1 != value)
+        return precedingRange + 1;
+    else
+        return precedingRange;
+}
+
+QList<Range>::Iterator RangeMap::findLastMergingRange(unsigned value)
+{
+    QList<Range>::Iterator precedingRange = findContainingOrPrecedingRange(value);
+    QList<Range>::Iterator followingRange = nextRange(precedingRange);
+    if (followingRange == ranges.end())
+        return precedingRange;
+
+    if (followingRange->start() - 1 == value)
+        return followingRange;
+    else
+        return precedingRange;
+}
+
+void RangeMap::insert(const Range &range)
+{
+    if (!range.isValid())
+        return;
+
     if (ranges.isEmpty())
     {
         ranges.append(range);
         return;
     }
 
-    /* Item with a position LESS THAN OR EQUAL TO the BEGINNING of the inserted range */
-    QList<Range>::Iterator lower = qLowerBound(ranges.begin(), ranges.end(), range, rangeStartLess);
-    if (!ranges.isEmpty() && (lower == ranges.end() || lower->start() > position))
-        lower--;
-    /* Item with a position GREATER THAN the END of the inserted range */
-    Range r2 = Range::fromValue(range.end() + 1);
-    QList<Range>::Iterator upper = qUpperBound(lower, ranges.end(), r2, rangeStartLess);
+    QList<Range>::Iterator firstMergingRange = findFirstMergingRange(range.start());
+    QList<Range>::Iterator lastMergingRange = findLastMergingRange(range.end());
 
-    Q_ASSERT(lower == ranges.end() || lower->start() <= position);
-
-    /* Intersection at the beginning */
-    if (lower != ranges.end() && position <= lower->end() + 1)
+    if (firstMergingRange > lastMergingRange)
     {
-        /* The beginning of the new range intersects the range in 'lower'.
-         * Extend this range, and merge ranges after it as needed. */
-
-        Q_ASSERT(lower->start() <= position);
-        *lower = Range::fromStartEnd(lower->start(), qMax(range.end(), (upper-1)->end()));
-
-        if ((upper-1) != lower)
-            ranges.erase(lower+1, upper);
-    }
-    else if (lower != ranges.end() && range.end() <= (upper-1)->end())
-    {
-        /* The end of the new range intersects the range in 'upper'.
-         * Extend this range. Merging is unnecessary, because any case
-         * where that would be possible is included in the prior one. */
-
-        upper--;
-        *upper = Range::fromStartEnd(position, upper->end());
-    }
-    else
-    {
-        /* Create a new range item */
-        ranges.insert(upper, range);
+        ranges.insert(firstMergingRange, range);
+        return;
     }
 
-#ifdef RANGEMAP_DEBUG
-    qDebug() << "Rangemap insert" << position << size << ":" << *this;
-#endif
-#ifndef QT_NO_DEBUG
-    debugTestConsistency();
-#endif
+    if (firstMergingRange == ranges.end())
+    {
+        ranges.prepend(range);
+        return;
+    }
+
+    Range finalRange = Range::fromStartEnd(
+                qMin(range.start(), firstMergingRange->start()),
+                qMax(range.end(), lastMergingRange->end()));
+    ranges.erase(firstMergingRange, lastMergingRange);
+    *lastMergingRange = finalRange;
 }
 
 #ifndef QT_NO_DEBUG
