@@ -16,7 +16,9 @@
  */
 
 #include "EventVideoDownload.h"
+#include "core/BluecherryApp.h"
 #include "video/MediaDownload.h"
+#include "network/MediaDownloadManager.h"
 #include <QProgressDialog>
 #include <QtConcurrentRun>
 #include <QFutureWatcher>
@@ -30,26 +32,13 @@ EventVideoDownload::EventVideoDownload(QObject *parent)
 
 EventVideoDownload::~EventVideoDownload()
 {
-    if (m_media)
-        setMediaDownload(0);
+    stop();
 }
 
-void EventVideoDownload::setMediaDownload(MediaDownload *media)
+void EventVideoDownload::setVideoUrl(const QUrl &url)
 {
-    Q_ASSERT(!m_dialog || !media);
-
-    if (m_media)
-    {
-        m_tempFilePath.clear();
-
-        m_media->disconnect(this);
-        m_media->deref();
-    }
-
-    m_media = media;
-
-    if (m_media)
-        m_media->ref();
+    m_url = url;
+    m_media = bcApp->mediaDownloadManager()->acquireMediaDownload(m_url);
 }
 
 void EventVideoDownload::setFilePath(const QString &path)
@@ -81,6 +70,15 @@ void EventVideoDownload::start(QWidget *parentWindow)
     {
         connect(m_media, SIGNAL(finished()), SLOT(startCopy()));
         m_progressTimer.start(1000);
+    }
+}
+
+void EventVideoDownload::stop()
+{
+    if (m_media)
+    {
+        bcApp->mediaDownloadManager()->releaseMediaDownload(m_url);
+        m_media = 0;
     }
 }
 
@@ -156,13 +154,13 @@ void EventVideoDownload::copyFinished()
     m_futureWatch->deleteLater();
     m_futureWatch = 0;
 
-    setMediaDownload(0);
+    stop();
 }
 
 void EventVideoDownload::cancel()
 {
     if (m_media)
-        setMediaDownload(0);
+        stop();
 
     m_dialog->close();
     m_dialog->deleteLater();

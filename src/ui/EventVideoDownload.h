@@ -18,9 +18,9 @@
 #ifndef EVENTVIDEODOWNLOAD_H
 #define EVENTVIDEODOWNLOAD_H
 
-#include <QObject>
 #include <QFutureWatcher>
 #include <QTimer>
+#include <QUrl>
 
 class QProgressDialog;
 class MediaDownload;
@@ -33,10 +33,11 @@ public:
     explicit EventVideoDownload(QObject *parent = 0);
     ~EventVideoDownload();
 
-    void setMediaDownload(MediaDownload *download);
+    void setVideoUrl(const QUrl &url);
     void setFilePath(const QString &path);
 
     void start(QWidget *parentWindow = 0);
+    void stop();
 
 private slots:
     void startCopy();
@@ -45,6 +46,7 @@ private slots:
     void cancel();
 
 private:
+    QUrl m_url;
     QProgressDialog *m_dialog;
     QFutureWatcher<bool> *m_futureWatch;
     MediaDownload *m_media;

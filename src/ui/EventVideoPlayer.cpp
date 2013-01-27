@@ -537,7 +537,7 @@ void EventVideoPlayer::saveVideo(const QString &path)
 
     EventVideoDownload *dl = new EventVideoDownload(bcApp->mainWindow);
     dl->setFilePath(path);
-    dl->setMediaDownload(m_video->videoBuffer()->mediaDownload());
+    dl->setVideoUrl(m_video->videoBuffer()->url());
     dl->start(bcApp->mainWindow);
 }
 

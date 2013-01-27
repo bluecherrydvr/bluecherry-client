@@ -38,8 +38,6 @@ public:
      * but not linked. */
     GstElement *setupSrcElement(GstElement *pipeline);
 
-    MediaDownload *mediaDownload() const { return media; }
-
     bool isBuffering() const { return media && !media->isFinished(); }
 
     qint64 fileSize() const { return media ? media->fileSize() : 0; }
@@ -47,6 +45,8 @@ public:
     int bufferedPercent() const;
     bool isBufferingFinished() const { return media && media->isFinished(); }
     bool startBuffering();
+
+    QUrl url() const { return m_url; }
 
 public slots:
     void clearPlayback();
