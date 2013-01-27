@@ -16,7 +16,7 @@
  */
 
 #include "EventVideoDownload.h"
-#include "video/VideoHttpBuffer.h"
+#include "video/MediaDownload.h"
 #include <QProgressDialog>
 #include <QtConcurrentRun>
 #include <QFutureWatcher>
