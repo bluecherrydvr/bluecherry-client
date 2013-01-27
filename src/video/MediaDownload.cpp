@@ -36,9 +36,9 @@ static const unsigned seekMinimumSkip = 96000;
 
 QThreadStorage<QNetworkAccessManager*> MediaDownloadTask::threadNAM;
 
-MediaDownload::MediaDownload(QObject *parent)
-    : QObject(parent), m_thread(0), m_task(0), m_fileSize(0), m_downloadedSize(0),
-      m_readPos(0), m_writePos(0), m_refCount(0), m_isFinished(false), m_hasError(false)
+MediaDownload::MediaDownload(const QUrl &url, const QList<QNetworkCookie> &cookies, QObject *parent)
+    : QObject(parent), m_url(url), m_cookies(cookies), m_thread(0), m_task(0), m_fileSize(0),
+      m_downloadedSize(0), m_readPos(0), m_writePos(0), m_refCount(0), m_isFinished(false), m_hasError(false)
 {
 }
 
@@ -75,9 +75,9 @@ bool MediaDownload::deref()
     return false;
 }
 
-void MediaDownload::start(const QUrl &url, const QList<QNetworkCookie> &cookies)
+void MediaDownload::start()
 {
-    Q_ASSERT(!m_thread && !m_url.isValid());
+    Q_ASSERT(!m_thread && m_url.isValid());
 
     m_bufferFile.setFileTemplate(QDir::tempPath() + QLatin1String("/bc_vbuf_XXXXXX.mkv"));
 
@@ -90,10 +90,8 @@ void MediaDownload::start(const QUrl &url, const QList<QNetworkCookie> &cookies)
     m_thread = new QThread(this);
     m_thread->start();
 
-    qDebug() << "MediaDownload: started for" << url;
+    qDebug() << "MediaDownload: started for" << m_url;
 
-    m_url = url;
-    m_cookies = cookies;
     startRequest(0, 0);
 }
 

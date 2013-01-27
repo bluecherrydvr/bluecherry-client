@@ -87,23 +87,18 @@ GstElement *VideoHttpBuffer::setupSrcElement(GstElement *pipeline)
     return GST_ELEMENT(m_element);
 }
 
-void VideoHttpBuffer::setCookies(const QList<QNetworkCookie> &cookies)
-{
-    m_cookies = cookies;
-}
-
 bool VideoHttpBuffer::startBuffering(const QUrl &url)
 {
     Q_ASSERT(!media);
 
-    media = new MediaDownload;
+    media = new MediaDownload(url, bcApp->nam->cookieJar()->cookiesForUrl(url));
     media->ref();
     connect(media, SIGNAL(fileSizeChanged(uint)), SLOT(fileSizeChanged(uint)), Qt::DirectConnection);
     connect(media, SIGNAL(finished()), SIGNAL(bufferingFinished()));
     connect(media, SIGNAL(stopped()), SIGNAL(bufferingStopped()));
     connect(media, SIGNAL(error(QString)), SLOT(sendStreamError(QString)));
 
-    media->start(url, m_cookies);
+    media->start();
 
     qDebug("VideoHttpBuffer: started");
     emit bufferingStarted();

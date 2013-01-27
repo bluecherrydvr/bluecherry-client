@@ -47,8 +47,6 @@ public:
     int bufferedPercent() const;
     bool isBufferingFinished() const { return media && media->isFinished(); }
 
-    void setCookies(const QList<QNetworkCookie> &cookies);
-
 public slots:
     bool startBuffering(const QUrl &url);
     void clearPlayback();
@@ -73,7 +71,6 @@ private:
     MediaDownload *media;
     GstAppSrc *m_element;
     GstElement *m_pipeline;
-    QList<QNetworkCookie> m_cookies;
 
     static void needDataWrap(GstAppSrc *, unsigned, void*);
     static int seekDataWrap(GstAppSrc *, quint64, void*);

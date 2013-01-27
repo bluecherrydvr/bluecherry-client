@@ -225,8 +225,6 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     connect(m_video->videoBuffer(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()), Qt::QueuedConnection);
     connect(m_video->videoBuffer(), SIGNAL(bufferingStarted()), SLOT(bufferingStarted()));
 
-    m_video->videoBuffer()->setCookies(bcApp->nam->cookieJar()->cookiesForUrl(url));
-
     bool ok = m_video->metaObject()->invokeMethod(m_video, "start", Qt::QueuedConnection, Q_ARG(QUrl, url));
     Q_ASSERT(ok);
     Q_UNUSED(ok);
