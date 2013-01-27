@@ -30,11 +30,8 @@ class EventVideoDownload : public QObject
     Q_OBJECT
 
 public:
-    explicit EventVideoDownload(QObject *parent = 0);
+    explicit EventVideoDownload(const QUrl &fromUrl, const QString &toFilePath, QObject *parent = 0);
     ~EventVideoDownload();
-
-    void setVideoUrl(const QUrl &url);
-    void setFilePath(const QString &path);
 
     void start(QWidget *parentWindow = 0);
     void stop();
@@ -46,12 +43,12 @@ private slots:
     void cancel();
 
 private:
-    QUrl m_url;
+    QUrl m_fromUrl;
+    QString m_finalPath;
     QProgressDialog *m_dialog;
     QFutureWatcher<bool> *m_futureWatch;
     MediaDownload *m_media;
     QString m_tempFilePath;
-    QString m_finalPath;
     QTimer m_progressTimer;
 };
 

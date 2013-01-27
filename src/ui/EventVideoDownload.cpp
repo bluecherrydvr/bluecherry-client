@@ -24,26 +24,17 @@
 #include <QFutureWatcher>
 #include <QProgressBar>
 
-EventVideoDownload::EventVideoDownload(QObject *parent)
-    : QObject(parent), m_dialog(0), m_futureWatch(0), m_media(0)
+EventVideoDownload::EventVideoDownload(const QUrl &fromUrl, const QString &toFilePath, QObject *parent)
+    : QObject(parent), m_fromUrl(fromUrl), m_finalPath(toFilePath), m_dialog(0), m_futureWatch(0), m_media(0)
 {
     connect(&m_progressTimer, SIGNAL(timeout()), SLOT(updateBufferProgress()));
+
+    m_media = bcApp->mediaDownloadManager()->acquireMediaDownload(m_fromUrl);
 }
 
 EventVideoDownload::~EventVideoDownload()
 {
     stop();
-}
-
-void EventVideoDownload::setVideoUrl(const QUrl &url)
-{
-    m_url = url;
-    m_media = bcApp->mediaDownloadManager()->acquireMediaDownload(m_url);
-}
-
-void EventVideoDownload::setFilePath(const QString &path)
-{
-    m_finalPath = path;
 }
 
 void EventVideoDownload::start(QWidget *parentWindow)
@@ -77,7 +68,7 @@ void EventVideoDownload::stop()
 {
     if (m_media)
     {
-        bcApp->mediaDownloadManager()->releaseMediaDownload(m_url);
+        bcApp->mediaDownloadManager()->releaseMediaDownload(m_fromUrl);
         m_media = 0;
     }
 }
