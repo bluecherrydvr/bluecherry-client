@@ -41,8 +41,8 @@ gboolean VideoHttpBuffer::seekDataWrap(GstAppSrc *src, quint64 offset, gpointer 
     return static_cast<VideoHttpBuffer*>(user_data)->seekData(offset) ? TRUE : FALSE;
 }
 
-VideoHttpBuffer::VideoHttpBuffer(QObject *parent)
-    : QObject(parent), media(0), m_element(0), m_pipeline(0)
+VideoHttpBuffer::VideoHttpBuffer(const QUrl &url, QObject *parent)
+    : QObject(parent), m_url(url), media(0), m_element(0), m_pipeline(0)
 {
 }
 
@@ -87,11 +87,11 @@ GstElement *VideoHttpBuffer::setupSrcElement(GstElement *pipeline)
     return GST_ELEMENT(m_element);
 }
 
-bool VideoHttpBuffer::startBuffering(const QUrl &url)
+bool VideoHttpBuffer::startBuffering()
 {
     Q_ASSERT(!media);
 
-    media = new MediaDownload(url, bcApp->nam->cookieJar()->cookiesForUrl(url));
+    media = new MediaDownload(m_url, bcApp->nam->cookieJar()->cookiesForUrl(m_url));
     media->ref();
     connect(media, SIGNAL(fileSizeChanged(uint)), SLOT(fileSizeChanged(uint)), Qt::DirectConnection);
     connect(media, SIGNAL(finished()), SIGNAL(bufferingFinished()));

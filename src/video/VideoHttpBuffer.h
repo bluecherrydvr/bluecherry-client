@@ -31,7 +31,7 @@ class VideoHttpBuffer : public QObject
     Q_OBJECT
 
 public:
-    explicit VideoHttpBuffer(QObject *parent = 0);
+    explicit VideoHttpBuffer(const QUrl &url, QObject *parent = 0);
     ~VideoHttpBuffer();
 
     /* Create and prepare a source element; the element will be added to the pipeline,
@@ -46,9 +46,9 @@ public:
     qint64 bufferedSize() const { return media ? media->downloadedSize() : 0; }
     int bufferedPercent() const;
     bool isBufferingFinished() const { return media && media->isFinished(); }
+    bool startBuffering();
 
 public slots:
-    bool startBuffering(const QUrl &url);
     void clearPlayback();
 
 signals:
@@ -68,6 +68,7 @@ private slots:
     void sendStreamError(const QString &message);
 
 private:
+    QUrl m_url;
     MediaDownload *media;
     GstAppSrc *m_element;
     GstElement *m_pipeline;

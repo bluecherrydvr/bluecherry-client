@@ -208,7 +208,7 @@ bool VideoPlayerBackend::start(const QUrl &url)
     }
 
     /* Buffered HTTP source */
-    setVideoBuffer(new VideoHttpBuffer());
+    setVideoBuffer(new VideoHttpBuffer(url));
 
     GstElement *source = m_videoBuffer->setupSrcElement(m_pipeline);
     if (!source)
@@ -218,7 +218,7 @@ bool VideoPlayerBackend::start(const QUrl &url)
         return false;
     }
 
-    m_videoBuffer->startBuffering(url);
+    m_videoBuffer->startBuffering();
 
     /* Decoder */
     GstElement *decoder = gst_element_factory_make("decodebin2", "decoder");
