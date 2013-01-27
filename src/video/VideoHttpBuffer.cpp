@@ -17,12 +17,12 @@
 
 #include "VideoHttpBuffer.h"
 #include "core/BluecherryApp.h"
+#include "network/MediaDownloadManager.h"
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QDebug>
 #include <QDir>
 #include <QThread>
-#include <QNetworkCookieJar>
 #include <QApplication>
 
 #include <gst/gst.h>
@@ -50,7 +50,10 @@ VideoHttpBuffer::~VideoHttpBuffer()
 {
     clearPlayback();
     if (media)
-        media->deref();
+    {
+        bcApp->mediaDownloadManager()->releaseMediaDownload(m_url);
+        media = 0;
+    }
 }
 
 GstElement *VideoHttpBuffer::setupSrcElement(GstElement *pipeline)
@@ -91,8 +94,7 @@ bool VideoHttpBuffer::startBuffering()
 {
     Q_ASSERT(!media);
 
-    media = new MediaDownload(m_url, bcApp->nam->cookieJar()->cookiesForUrl(m_url));
-    media->ref();
+    media = bcApp->mediaDownloadManager()->acquireMediaDownload(m_url);
     connect(media, SIGNAL(fileSizeChanged(uint)), SLOT(fileSizeChanged(uint)), Qt::DirectConnection);
     connect(media, SIGNAL(finished()), SIGNAL(bufferingFinished()));
     connect(media, SIGNAL(stopped()), SIGNAL(bufferingStopped()));
