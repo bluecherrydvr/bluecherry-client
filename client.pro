@@ -194,7 +194,8 @@ SOURCES += src/main.cpp \
     src/events/EventsLoader.cpp \
     src/events/EventsCursor.cpp \
     src/events/ModelEventsCursor.cpp \
-    src/ui/SwitchEventsWidget.cpp
+    src/ui/SwitchEventsWidget.cpp \
+    src/network/MediaDownloadManager.cpp
 
 !macx:SOURCES += src/ui/StatusBandwidthWidget.cpp
 
@@ -265,7 +266,8 @@ HEADERS  += src/ui/MainWindow.h \
     src/events/EventsLoader.h \
     src/events/EventsCursor.h \
     src/events/ModelEventsCursor.h \
-    src/ui/SwitchEventsWidget.h
+    src/ui/SwitchEventsWidget.h \
+    src/network/MediaDownloadManager.h
 
 RESOURCES += \
     res/resources.qrc \

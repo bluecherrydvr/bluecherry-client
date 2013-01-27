@@ -31,6 +31,7 @@ class QSslError;
 class QSslConfiguration;
 class QTimer;
 class LiveViewManager;
+class MediaDownloadManager;
 
 class BluecherryApp : public QObject
 {
@@ -58,6 +59,8 @@ public:
      * Keeps the correct SSL verification behavior, although changes in fingerprints
      * will error rather than prompting the user on any but the default (GUI thread). */
     QNetworkAccessManager *createNam();
+
+    MediaDownloadManager * mediaDownloadManager() const { return m_mediaDownloadManager; }
 
     /* Temporarily pause live feeds to free up bandwidth for other intensive transfers
      * (particularly event video buffering). The live feed can be paused with pauseLive(),
@@ -95,6 +98,7 @@ private slots:
     void resetSystemActivity();
 
 private:
+    MediaDownloadManager *m_mediaDownloadManager;
     QList<DVRServer*> m_servers;
     int m_maxServerId;
     bool m_livePaused, m_inPauseQuery, m_screensaverInhibited;
