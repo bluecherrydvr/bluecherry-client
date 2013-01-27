@@ -100,6 +100,7 @@ private:
     double m_playbackSpeed;
 
     void setError(bool permanent, const QString &message);
+    void setVideoBuffer(VideoHttpBuffer *videoHttpBuffer);
 
     GstBusSyncReply busHandler(GstBus *bus, GstMessage *msg);
     void decodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast);
