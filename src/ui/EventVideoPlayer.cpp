@@ -222,8 +222,8 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     m_video->setSink(sink);
 
     connect(m_video, SIGNAL(bufferingStatus(int)), m_videoWidget, SLOT(setBufferStatus(int)));
-    connect(m_video->videoBuffer(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()), Qt::QueuedConnection);
-    connect(m_video->videoBuffer(), SIGNAL(bufferingStarted()), SLOT(bufferingStarted()));
+    connect(m_video, SIGNAL(bufferingStopped()), SLOT(bufferingStopped()), Qt::QueuedConnection);
+    connect(m_video, SIGNAL(bufferingStarted()), SLOT(bufferingStarted()));
 
     bool ok = m_video->metaObject()->invokeMethod(m_video, "start", Qt::QueuedConnection, Q_ARG(QUrl, url));
     Q_ASSERT(ok);
@@ -376,7 +376,7 @@ void EventVideoPlayer::queryLivePaused()
 
 bool EventVideoPlayer::uiRefreshNeeded() const
 {
-    return m_video && (m_video->videoBuffer()->isBuffering() || m_video->state() == VideoPlayerBackend::Playing);
+    return m_video && (m_video->videoBuffer()) && (m_video->videoBuffer()->isBuffering() || m_video->state() == VideoPlayerBackend::Playing);
 }
 
 void EventVideoPlayer::updateUI()
@@ -396,7 +396,7 @@ void EventVideoPlayer::bufferingStarted()
 
 void EventVideoPlayer::updateBufferStatus()
 {
-    if (!m_video || m_video->videoBuffer()->isBufferingFinished())
+    if (!m_video || !m_video->videoBuffer() || m_video->videoBuffer()->isBufferingFinished())
         return;
 
     int pcnt = m_video->videoBuffer()->bufferedPercent();
@@ -407,7 +407,7 @@ void EventVideoPlayer::bufferingStopped()
 {
     bcApp->releaseLive();
 
-    if (!m_video || (m_video->videoBuffer()->isBufferingFinished() && m_video->state() > VideoPlayerBackend::Error))
+    if (!m_video || !m_video->videoBuffer() || (m_video->videoBuffer()->isBufferingFinished() && m_video->state() > VideoPlayerBackend::Error))
         m_statusText->clear();
 
     if (!uiRefreshNeeded())

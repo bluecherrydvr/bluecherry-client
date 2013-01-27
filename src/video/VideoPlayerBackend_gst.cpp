@@ -31,6 +31,8 @@ VideoPlayerBackend::VideoPlayerBackend(QObject *parent)
       m_playbackSpeed(1.0)
 {
     m_videoBuffer = new VideoHttpBuffer(this);
+    connect(m_videoBuffer, SIGNAL(bufferingStarted()), this, SIGNAL(bufferingStarted()));
+    connect(m_videoBuffer, SIGNAL(bufferingStopped()), this, SIGNAL(bufferingStopped()));
 
     if (!initGStreamer(&m_errorMessage))
         setError(true, m_errorMessage);
