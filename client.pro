@@ -199,7 +199,8 @@ SOURCES += src/main.cpp \
     src/event/EventVideoDownload.cpp \
     src/event/EventList.cpp \
     src/event/EventFilter.cpp \
-    src/event/MediaEventFilter.cpp
+    src/event/MediaEventFilter.cpp \
+    src/event/CameraEventFilter.cpp
 
 !macx:SOURCES += src/ui/StatusBandwidthWidget.cpp
 
@@ -275,7 +276,8 @@ HEADERS  += src/ui/MainWindow.h \
     src/event/EventVideoDownload.h \
     src/event/EventList.h \
     src/event/EventFilter.h \
-    src/event/MediaEventFilter.h
+    src/event/MediaEventFilter.h \
+    src/event/CameraEventFilter.h
 
 RESOURCES += \
     res/resources.qrc \
