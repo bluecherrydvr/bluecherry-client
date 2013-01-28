@@ -10,6 +10,7 @@ class EventList : public QList<EventData>
 {
 public:
     EventList filter(const EventFilter &eventFilter) const;
+    QSet<DVRCamera> cameras() const;
 };
 
 #endif // EVENTLIST_H
