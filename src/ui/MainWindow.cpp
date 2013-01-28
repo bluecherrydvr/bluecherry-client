@@ -17,6 +17,10 @@
 
 #include "MainWindow.h"
 #include "liveview/LiveViewWindow.h"
+#include "event/CameraEventFilter.h"
+#include "event/EventDownloadManager.h"
+#include "event/EventList.h"
+#include "event/MediaEventFilter.h"
 #include "DVRServersView.h"
 #include "OptionsDialog.h"
 #include "EventsWindow.h"
@@ -610,22 +614,19 @@ void MainWindow::eventsContextMenu(const QPoint &pos)
 {
     Q_ASSERT(sender() == m_eventsView);
 
-    int currentRow = m_eventsView->currentIndex().row();
-    EventData *eventPtr = m_eventsView->currentIndex().data(EventsModel::EventDataPtr).value<EventData*>();
-    if (!eventPtr)
-        return;
-
-    /* Make a copy of the event data, because it could be refreshed during QMenu::exec */
-    EventData event(*eventPtr);
+    EventList selectedEvents = m_eventsView->selectedEvents();
+    EventList selectedMediaEvents = selectedEvents.filter(MediaEventFilter());
+    EventList selectedCameraEvents = selectedEvents.filter(CameraEventFilter());
 
     QMenu menu(m_eventsView);
 
-    QAction *aOpen = menu.addAction(event.hasMedia() ? tr("Play video") : tr("Open"));
+    QAction *aOpen = menu.addAction(tr("Play video"));
+    aOpen->setEnabled(selectedMediaEvents.size() == 1);
     menu.setDefaultAction(aOpen);
 
     QAction *aViewLive = 0;
-    if (event.isCamera())
-        aViewLive = menu.addAction(tr("View camera live"));
+    aViewLive = menu.addAction(tr("View camera live"));
+    aViewLive->setEnabled(!selectedCameraEvents.isEmpty());
 
     menu.addSeparator();
 
@@ -644,23 +645,37 @@ void MainWindow::eventsContextMenu(const QPoint &pos)
     QAction *aBrowseHour = searchMenu->addAction(tr("Within one hour"));
 
     menu.addSeparator();
-    if (event.hasMedia())
-        menu.addAction(tr("Save video"));
 #endif
+
+    QAction *aSaveVideo = 0;
+    aSaveVideo = menu.addAction(tr("Save video"));
+    aSaveVideo->setEnabled(!selectedMediaEvents.isEmpty());
 
     QAction *act = menu.exec(m_eventsView->mapToGlobal(pos));
     if (!act)
         return;
     if (act == aOpen)
     {
+        EventData event(selectedMediaEvents.at(0));
         ModelEventsCursor *modelEventsCursor = new ModelEventsCursor();
         modelEventsCursor->setModel(m_eventsModel);
         modelEventsCursor->setCameraFilter(event.locationCamera());
-        modelEventsCursor->setIndex(currentRow);
+        modelEventsCursor->setIndex(m_eventsView->currentIndex().row());
         EventViewWindow::open(event, modelEventsCursor);
     }
     else if (act == aViewLive)
-        LiveViewWindow::openWindow(this, false, event.locationCamera())->show();
+    {
+        QSet<DVRCamera> cameras = selectedCameraEvents.cameras();
+        foreach (const DVRCamera &camera, cameras)
+            LiveViewWindow::openWindow(this, false, camera)->show();
+    }
+    else if (act == aSaveVideo)
+    {
+        if (selectedMediaEvents.size() == 1)
+            bcApp->eventDownloadManager()->startEventDownload(selectedMediaEvents.at(0));
+        else
+            bcApp->eventDownloadManager()->startMultipleEventDownloads(selectedMediaEvents);
+    }
 #if 0
     else if (act->parentWidget() == searchMenu)
     {
