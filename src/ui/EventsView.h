@@ -20,6 +20,7 @@
 
 #include <QTreeView>
 
+class EventData;
 class EventsModel;
 class QLabel;
 
@@ -33,6 +34,8 @@ public:
     EventsModel *eventsModel() const;
 
     void setModel(EventsModel *model);
+
+    QList<EventData> selectedEvents() const;
 
 private slots:
     void openEvent(const QModelIndex &index);

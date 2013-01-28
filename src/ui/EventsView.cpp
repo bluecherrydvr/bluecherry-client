@@ -18,6 +18,7 @@
 #include "EventsView.h"
 #include "EventsModel.h"
 #include "EventViewWindow.h"
+#include "core/EventData.h"
 #include <QHeaderView>
 #include <QMovie>
 #include <QLabel>
@@ -55,6 +56,22 @@ void EventsView::setModel(EventsModel *model)
 
     if (model->isLoading())
         loadingStarted();
+}
+
+
+QList<EventData> EventsView::selectedEvents() const
+{
+    QList<EventData> result;
+
+    const QModelIndexList &selectedItems = selectionModel()->selectedRows();
+    foreach (const QModelIndex &selectedItem, selectedItems)
+    {
+        EventData *eventData = selectedItem.data(EventsModel::EventDataPtr).value<EventData*>();
+        if (eventData)
+            result.append(*eventData);
+    }
+
+    return result;
 }
 
 EventsModel *EventsView::eventsModel() const
