@@ -27,6 +27,7 @@ EventsView::EventsView(QWidget *parent)
     : QTreeView(parent), loadingIndicator(0)
 {
     setRootIsDecorated(false);
+    setSelectionMode(QAbstractItemView::ExtendedSelection);
     setUniformRowHeights(true);
 
     viewport()->installEventFilter(this);
