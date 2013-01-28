@@ -19,6 +19,7 @@
 #include "EventsModel.h"
 #include "EventViewWindow.h"
 #include "core/EventData.h"
+#include "event/EventList.h"
 #include <QHeaderView>
 #include <QMovie>
 #include <QLabel>
@@ -59,9 +60,9 @@ void EventsView::setModel(EventsModel *model)
 }
 
 
-QList<EventData> EventsView::selectedEvents() const
+EventList EventsView::selectedEvents() const
 {
-    QList<EventData> result;
+    EventList result;
 
     const QModelIndexList &selectedItems = selectionModel()->selectedRows();
     foreach (const QModelIndex &selectedItem, selectedItems)
