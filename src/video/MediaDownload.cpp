@@ -40,6 +40,7 @@ MediaDownload::MediaDownload(const QUrl &url, const QList<QNetworkCookie> &cooki
     : QObject(parent), m_url(url), m_cookies(cookies), m_thread(0), m_task(0), m_fileSize(0),
       m_downloadedSize(0), m_readPos(0), m_writePos(0), m_refCount(0), m_isFinished(false), m_hasError(false)
 {
+    Q_ASSERT(m_url.isValid());
 }
 
 MediaDownload::~MediaDownload()
@@ -77,7 +78,8 @@ bool MediaDownload::deref()
 
 void MediaDownload::start()
 {
-    Q_ASSERT(!m_thread && m_url.isValid());
+    if (m_thread)
+        return; // already started
 
     m_bufferFile.setFileTemplate(QDir::tempPath() + QLatin1String("/bc_vbuf_XXXXXX.mkv"));
 
