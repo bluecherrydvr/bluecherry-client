@@ -61,6 +61,7 @@ void EventVideoDownload::start(QWidget *parentWindow)
     {
         connect(m_media, SIGNAL(finished()), SLOT(startCopy()));
         m_progressTimer.start(1000);
+        m_media->start();
     }
 }
 
