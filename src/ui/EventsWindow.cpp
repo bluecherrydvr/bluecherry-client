@@ -28,6 +28,10 @@
 #include "core/BluecherryApp.h"
 #include "events/ModelEventsCursor.h"
 #include "ui/MainWindow.h"
+#include "event/CameraEventFilter.h"
+#include "event/EventDownloadManager.h"
+#include "event/EventList.h"
+#include "event/MediaEventFilter.h"
 #include <QBoxLayout>
 #include <QGridLayout>
 #include <QDateEdit>
@@ -391,45 +395,68 @@ void EventsWindow::showEvent(const QModelIndex &index)
     m_modelEventsCursor->setIndex(index.row());
 }
 
+void EventsWindow::showEvent(const EventData &eventData)
+{
+    if (!eventData.hasMedia())
+        return;
+
+    m_eventViewer->setEvent(eventData);
+
+    /* Hack to ensure that the video area isn't collapsed */
+    if (m_videoSplitter->sizes()[1] == 0)
+        m_videoSplitter->setSizes(QList<int>() << m_videoSplitter->sizes()[0] << 1);
+    m_eventViewer->show();
+}
+
 void EventsWindow::eventContextMenu(const QPoint &pos)
 {
-    QAbstractItemView *view = qobject_cast<QAbstractItemView*>(sender());
+    EventsView *view = qobject_cast<EventsView*>(sender());
     if (!view)
         return;
 
-    QModelIndex idx = view->indexAt(pos);
-    EventData *data = idx.data(EventsModel::EventDataPtr).value<EventData*>();
-    if (!data)
-        return;
+    EventList selectedEvents = view->selectedEvents();
+    EventList selectedMediaEvents = selectedEvents.filter(MediaEventFilter());
+    EventList selectedCameraEvents = selectedEvents.filter(CameraEventFilter());
 
     QMenu menu(view);
 
     QAction *aPlay = menu.addAction(tr("Play video"));
+    aPlay->setEnabled(selectedMediaEvents.size() == 1);
     menu.setDefaultAction(aPlay);
 
     QAction *aPlayWindow = menu.addAction(tr("Play in a new window"));
+    aPlayWindow->setEnabled(selectedMediaEvents.size() == 1);
     menu.addSeparator();
 
-    QAction *aSelectOnly = 0, *aSelectElse = 0;
-    if (data->isCamera())
-    {
-        aSelectOnly = menu.addAction(tr("Show only this camera"));
-        aSelectElse = menu.addAction(tr("Exclude this camera"));
-    }
+    QAction *aSave = menu.addAction(tr("Save video"));
+    aSave->setEnabled(!selectedMediaEvents.isEmpty());
+    menu.addSeparator();
+
+    QAction *aSelectOnly = menu.addAction(tr("Show only this camera"));
+    aSelectOnly->setEnabled(!selectedCameraEvents.isEmpty());
+    QAction *aSelectElse = menu.addAction(tr("Exclude this camera"));
+    aSelectElse->setEnabled(!selectedCameraEvents.isEmpty());
 
     QAction *act = menu.exec(view->mapToGlobal(pos));
 
     if (!act)
         return;
     else if (act == aPlay)
-        showEvent(idx);
+        showEvent(selectedMediaEvents.at(0));
     else if (act == aPlayWindow)
     {
         ModelEventsCursor *modelEventsCursor = new ModelEventsCursor();
         modelEventsCursor->setModel(view->model());
-        modelEventsCursor->setCameraFilter(data->locationCamera());
-        modelEventsCursor->setIndex(idx.row());
-        EventViewWindow::open(*data, modelEventsCursor);
+        modelEventsCursor->setCameraFilter(selectedMediaEvents.at(0).locationCamera());
+        modelEventsCursor->setIndex(view->currentIndex().row());
+        EventViewWindow::open(selectedMediaEvents.at(0), modelEventsCursor);
+    }
+    else if (act == aSave)
+    {
+        if (selectedMediaEvents.size() == 1)
+            bcApp->eventDownloadManager()->startEventDownload(selectedMediaEvents.at(0));
+        else
+            bcApp->eventDownloadManager()->startMultipleEventDownloads(selectedMediaEvents);
     }
     else if (act == aSelectOnly || act == aSelectElse)
     {
@@ -438,13 +465,19 @@ void EventsWindow::eventContextMenu(const QPoint &pos)
         if (!sModel)
             return;
 
-        QModelIndex sIdx = sModel->indexOfCamera(data->locationCamera());
-        if (!sIdx.isValid())
-            return;
+        QSet<DVRCamera> cameras = selectedCameraEvents.cameras();
+        QModelIndex sIdx = sModel->indexOfCamera(*cameras.begin());
 
         if (act == aSelectOnly)
-            m_sourcesView->checkOnlyIndex(sIdx);
+        {
+            m_sourcesView->checkOnlyIndex(sIdx); // uncheck all, some kind of temporary hack
+            foreach (const DVRCamera &camera, cameras)
+                sModel->setData(sModel->indexOfCamera(camera), Qt::Checked, Qt::CheckStateRole);
+        }
         else
-            sModel->setData(sIdx, Qt::Unchecked, Qt::CheckStateRole);
+        {
+            foreach (const DVRCamera &camera, cameras)
+                sModel->setData(sModel->indexOfCamera(camera), Qt::Unchecked, Qt::CheckStateRole);
+        }
     }
 }
