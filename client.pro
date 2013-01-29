@@ -159,7 +159,6 @@ SOURCES += src/main.cpp \
     src/ui/EventVideoPlayer.cpp \
     src/video/VideoPlayerBackend_gst.cpp \
     src/video/VideoHttpBuffer.cpp \
-    src/ui/EventVideoDownload.cpp \
     src/ui/ServerConfigWindow.cpp \
     src/ui/AboutDialog.cpp \
     src/ui/SavedLayoutsModel.cpp \
@@ -196,7 +195,8 @@ SOURCES += src/main.cpp \
     src/events/ModelEventsCursor.cpp \
     src/ui/SwitchEventsWidget.cpp \
     src/network/MediaDownloadManager.cpp \
-    src/event/EventDownloadManager.cpp
+    src/event/EventDownloadManager.cpp \
+    src/event/EventVideoDownload.cpp
 
 !macx:SOURCES += src/ui/StatusBandwidthWidget.cpp
 
@@ -229,7 +229,6 @@ HEADERS  += src/ui/MainWindow.h \
     src/ui/EventVideoPlayer.h \
     src/video/VideoPlayerBackend_gst.h \
     src/video/VideoHttpBuffer.h \
-    src/ui/EventVideoDownload.h \
     src/ui/ServerConfigWindow.h \
     src/ui/AboutDialog.h \
     src/ui/SavedLayoutsModel.h \
@@ -269,7 +268,8 @@ HEADERS  += src/ui/MainWindow.h \
     src/events/ModelEventsCursor.h \
     src/ui/SwitchEventsWidget.h \
     src/network/MediaDownloadManager.h \
-    src/event/EventDownloadManager.h
+    src/event/EventDownloadManager.h \
+    src/event/EventVideoDownload.h
 
 RESOURCES += \
     res/resources.qrc \

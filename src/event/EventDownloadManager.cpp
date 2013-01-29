@@ -2,7 +2,7 @@
 #include "core/BluecherryApp.h"
 #include "core/EventData.h"
 #include "core/DVRServer.h"
-#include "ui/EventVideoDownload.h"
+#include "event/EventVideoDownload.h"
 #include "ui/MainWindow.h"
 #include "utils/StringUtils.h"
 #include <QFileDialog>
