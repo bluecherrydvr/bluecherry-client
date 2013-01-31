@@ -15,6 +15,7 @@ public:
 class QLineEdit;
 class QNetworkReply;
 class QLabel;
+class WebRtpPortCheckerWidget;
 
 class SetupServerPage : public QWizardPage
 {
@@ -30,6 +31,7 @@ public slots:
     void save();
 
 private slots:
+    void serverChanged();
     void hostTextChanged(const QString &host);
     void setDefaultLogin();
 
@@ -42,6 +44,7 @@ protected:
 
 private:
     QLineEdit *nameEdit;
+    WebRtpPortCheckerWidget *portChecker;
     QLabel *testResultIcon;
     QLabel *testResultText;
     QNetworkReply *loginReply;
