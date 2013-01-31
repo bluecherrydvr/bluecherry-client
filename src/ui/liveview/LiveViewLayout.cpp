@@ -12,6 +12,9 @@
 #include <QGraphicsScene>
 #include <math.h>
 
+#define MAX_ROWS 16
+#define MAX_COLUMNS 16
+
 struct LiveViewLayout::DragDropData
 {
     QDeclarativeItem *item;
@@ -39,6 +42,16 @@ LiveViewLayout::~LiveViewLayout()
 {
     if (drag)
         delete drag;
+}
+
+int LiveViewLayout::maxRows()
+{
+    return MAX_ROWS;
+}
+
+int LiveViewLayout::maxColumns()
+{
+    return MAX_COLUMNS;
 }
 
 QDeclarativeItem *LiveViewLayout::createNewItem()
@@ -333,78 +346,80 @@ void LiveViewLayout::removeColumn(int column)
     scheduleLayout(DoItemsLayout | EmitLayoutChanged);
 }
 
+bool LiveViewLayout::isRowEmpty(int rowIndex) const
+{
+    for (int c = 0; c < m_columns; ++c)
+        if (at(rowIndex, c))
+            return false;
+
+    return true;
+}
+
+bool LiveViewLayout::isColumnEmpty(int columnIndex) const
+{
+    for (int r = 0; r < m_rows; ++r)
+        if (at(r, columnIndex))
+            return false;
+
+    return true;
+}
+
+void LiveViewLayout::removeRows(int remove)
+{
+    /* If there are any empty rows, remove those first */
+    for (int r = 0; r < m_rows; ++r)
+    {
+        if (isRowEmpty(r))
+        {
+            removeRow(r);
+            if (!--remove)
+                break;
+            --r;
+        }
+    }
+
+    /* Otherwise, take rows from the bottom */
+    for (int r = m_rows-1; remove && r >= 0; --r, --remove)
+        removeRow(r);
+
+    Q_ASSERT(!remove);
+}
+
+void LiveViewLayout::removeColumns(int remove)
+{
+    for (int c = 0; c < m_columns; ++c)
+    {
+        /* If there are any empty columns, remove those first */
+        if (isColumnEmpty(c))
+        {
+            removeColumn(c);
+            if (!--remove)
+                break;
+            --c;
+        }
+    }
+
+    /* Otherwise, take columns from the right */
+    for (int c = m_columns-1; remove && c >= 0; --c, --remove)
+        removeColumn(c);
+
+    Q_ASSERT(!remove);
+}
+
 void LiveViewLayout::setGridSize(int rows, int columns)
 {
-    rows = qMax(1, rows);
-    columns = qMax(1, columns);
+    rows = qBound(1, rows, maxRows());
+    columns = qBound(1, columns, maxColumns());
     if (rows == m_rows && columns == m_columns)
         return;
 
     Q_ASSERT(m_items.size() == (m_rows*m_columns));
 
     if (m_rows > rows)
-    {
-        int remove = m_rows - rows;
-
-        /* If there are any empty rows, remove those first */
-        for (int r = 0; r < m_rows; ++r)
-        {
-            bool empty = true;
-            for (int c = 0; c < m_columns; ++c)
-            {
-                if (at(r, c))
-                {
-                    empty = false;
-                    break;
-                }
-            }
-
-            if (empty)
-            {
-                removeRow(r);
-                if (!--remove)
-                    break;
-                --r;
-            }
-        }
-
-        /* Otherwise, take rows from the bottom */
-        for (int r = m_rows-1; remove && r >= 0; --r, --remove)
-            removeRow(r);
-
-        Q_ASSERT(!remove);
-    }
+        removeRows(m_rows - rows);
 
     if (m_columns > columns)
-    {
-        int remove = m_columns - columns;
-
-        for (int c = 0; c < m_columns; ++c)
-        {
-            bool empty = true;
-            for (int r = 0; r < m_rows; ++r)
-            {
-                if (at(r, c))
-                {
-                    empty = false;
-                    break;
-                }
-            }
-
-            if (empty)
-            {
-                removeColumn(c);
-                if (!--remove)
-                    break;
-                --c;
-            }
-        }
-
-        for (int c = m_columns-1; remove && c >= 0; --c, --remove)
-            removeColumn(c);
-
-        Q_ASSERT(!remove);
-    }
+        removeColumns(m_columns - columns);
 
     while (m_columns < columns)
         insertColumn(m_columns);
@@ -420,7 +435,7 @@ void LiveViewLayout::set(int row, int col, QDeclarativeItem *item)
     if (row >= m_rows || col >= m_columns || (item == at(row, col)))
         return;
 
-    QDeclarativeItem *&ip = m_items[(row * m_columns) + col];
+    QDeclarativeItem *&ip = m_items[coordinatesToIndex(row, col)];
     if (ip == item)
         return;
 
@@ -452,12 +467,15 @@ QDeclarativeItem *LiveViewLayout::addItemAuto()
     {
         /* Add a row or a column to make space, whichever has fewer */
         if (columns() < rows())
-            setGridSize(qMax(1, rows()), qMax(1, columns())+1);
+            appendColumn();
         else
-            setGridSize(qMax(1, rows()+1), qMax(1, columns()));
+            appendRow();
 
         index = m_items.indexOf(0);
-        Q_ASSERT(index >= 0);
+        // it is possible that no item was added as grid has its maximum size already
+        // and all grid items are already filled
+        if (index < 0)
+            return 0;
     }
 
     m_items[index] = createNewItem();
@@ -475,7 +493,11 @@ QDeclarativeItem *LiveViewLayout::addItem(int row, int column)
 
     setGridSize(qMax(row, rows()), qMax(column, columns()));
 
-    QDeclarativeItem *re = m_items[(row * columns()) + column] = createNewItem();
+    // if row or column values are too big
+    if (row < rows() - 1 || column < columns() - 1)
+        return 0;
+
+    QDeclarativeItem *re = m_items[coordinatesToIndex(row, column)] = createNewItem();
 
     scheduleLayout(EmitLayoutChanged);
     doLayout();
@@ -488,7 +510,7 @@ QDeclarativeItem *LiveViewLayout::takeItem(int row, int column)
     if (row < 0 || column < 0 || row >= m_rows || column >= m_columns)
         return 0;
 
-    int i = (row * m_columns) + column;
+    int i = coordinatesToIndex(row, column);
     QDeclarativeItem *item = m_items[i];
     m_items[i] = 0;
 
@@ -726,6 +748,10 @@ bool LiveViewLayout::loadLayout(const QByteArray &buf)
 
     setGridSize(rc, cc);
 
+    // update rc, cc values if were invalid
+    rc = rows();
+    cc = columns();
+
     for (int r = 0; r < rc; ++r)
     {
         for (int c = 0; c < cc; ++c)
@@ -757,6 +783,16 @@ bool LiveViewLayout::loadLayout(const QByteArray &buf)
     }
 
     return (data.status() == QDataStream::Ok);
+}
+
+
+int LiveViewLayout::coordinatesToIndex(int row, int column) const
+{
+    int index = row * m_columns + column;
+    if (index < 0 || index >= m_items.size())
+        return -1;
+    else
+        return index;
 }
 
 void LiveViewLayoutProps::setFixedAspectRatio(bool v)
