@@ -6,8 +6,10 @@
 #include "EventVideoPlayer.h"
 #include "ExpandingTextEdit.h"
 #include "ui/MainWindow.h"
+#include "ui/SwitchEventsWidget.h"
 #include "core/DVRServer.h"
 #include "core/BluecherryApp.h"
+#include "events/EventsCursor.h"
 #include <QBoxLayout>
 #include <QSplitter>
 #include <QFrame>
@@ -23,6 +25,7 @@
 #include <QComboBox>
 #include <QLineEdit>
 #include <QApplication>
+#include <QDebug>
 
 EventViewWindow::EventViewWindow(QWidget *parent)
     : QWidget(parent, Qt::Window)
@@ -38,9 +41,10 @@ EventViewWindow::EventViewWindow(QWidget *parent)
                                0
 #endif
                                );
-#if 0
+
+#if 1
     m_splitter = new QSplitter(Qt::Horizontal, this);
-    layout->addWidget(m_splitter);
+    layout->addWidget(m_splitter, 100);
 
     m_splitter->addWidget(createPlaybackArea());
     m_splitter->addWidget(createInfoArea());
@@ -48,7 +52,18 @@ EventViewWindow::EventViewWindow(QWidget *parent)
     m_splitter->setChildrenCollapsible(false);
 #else
     createInfoArea();
-    layout->addWidget(createPlaybackArea());
+
+    QWidget *topWidget = new QWidget();
+    QHBoxLayout *topLayout = new QHBoxLayout(topWidget);
+    topLayout->addStretch(1);
+
+    m_switchEventsWidget = new SwitchEventsWidget();
+    topLayout->addWidget(m_switchEventsWidget, 1);
+
+    layout->addWidget(topWidget);
+
+    layout->addWidget(topWidget, 1);
+    layout->addWidget(createPlaybackArea(), 100);
 #endif
 
     QSettings settings;
@@ -59,7 +74,7 @@ EventViewWindow::EventViewWindow(QWidget *parent)
 #endif
 }
 
-EventViewWindow *EventViewWindow::open(const EventData &event)
+EventViewWindow *EventViewWindow::open(const EventData &event, EventsCursor *eventsCursor)
 {
     foreach (QWidget *w, QApplication::topLevelWidgets())
     {
@@ -74,6 +89,7 @@ EventViewWindow *EventViewWindow::open(const EventData &event)
     EventViewWindow *evw = new EventViewWindow(bcApp->globalParentWindow());
     evw->setAttribute(Qt::WA_DeleteOnClose);
     evw->setEvent(event);
+    evw->setEventsCursor(eventsCursor);
     evw->show();
 
     return evw;
@@ -100,7 +116,7 @@ void EventViewWindow::setEvent(const EventData &event)
                          .arg(Qt::escape(event.uiLocation()))
                          .arg(Qt::escape(event.uiType()))
                          .arg(Qt::escape(event.uiLevel()))
-                         .arg(event.date.toString()));
+                         .arg(event.serverLocalDate().toString()));
 
     if (m_event.hasMedia() && m_event.mediaId >= 0)
     {
@@ -112,6 +128,25 @@ void EventViewWindow::setEvent(const EventData &event)
         m_videoPlayer->clearVideo();
 }
 
+void EventViewWindow::setEvent(EventData *event)
+{
+    if (event)
+        setEvent(*event);
+}
+
+void EventViewWindow::setEventsCursor(EventsCursor *eventsCursor)
+{
+    if (m_eventsCursor.data())
+        disconnect(m_eventsCursor.data(), 0, this, 0);
+
+    m_eventsCursor = QSharedPointer<EventsCursor>(eventsCursor);
+
+    if (m_eventsCursor.data())
+        connect(m_eventsCursor.data(), SIGNAL(eventSwitched(EventData*)), this, SLOT(setEvent(EventData*)));
+
+    m_switchEventsWidget->setEventsCursor(m_eventsCursor);
+}
+
 QWidget *EventViewWindow::createInfoArea()
 {
     QFrame *container = new QFrame;
@@ -120,6 +155,9 @@ QWidget *EventViewWindow::createInfoArea()
 
     QBoxLayout *layout = new QVBoxLayout(container);
     layout->setMargin(0);
+
+    m_switchEventsWidget = new SwitchEventsWidget();
+    layout->addWidget(m_switchEventsWidget);
 
     m_infoLabel = new QLabel;
     m_infoLabel->setWordWrap(true);
