@@ -71,6 +71,8 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), m_trayIcon(0)
 {
     bcApp->mainWindow = this;
+    connect(bcApp->eventDownloadManager(), SIGNAL(eventVideoDownloadAdded(EventVideoDownload*)),
+            this, SLOT(showDownloadsWindow()));
 
     setUnifiedTitleAndToolBarOnMac(true);
     setWindowTitle(tr("Bluecherry"));
@@ -285,10 +287,23 @@ void MainWindow::showFront()
     show();
 }
 
+void MainWindow::showDownloadsWindow()
+{
+    if (!m_eventVideoDownloadsWindow)
+    {
+        m_eventVideoDownloadsWindow = new EventVideoDownloadsWindow();
+        m_eventVideoDownloadsWindow.data()->setEventDownloadManager(bcApp->eventDownloadManager());
+    }
+
+    m_eventVideoDownloadsWindow.data()->show();
+    m_eventVideoDownloadsWindow.data()->raise();
+}
+
 void MainWindow::createMenu()
 {
     QMenu *appMenu = menuBar()->addMenu(tr("&Bluecherry"));
     appMenu->addAction(tr("Browse &events"), this, SLOT(showEventsWindow()));
+    appMenu->addAction(tr("Show &download manager"), this, SLOT(showDownloadsWindow()));
     appMenu->addSeparator();
     appMenu->addAction(tr("Add another server"), this, SLOT(addServer()));
     appMenu->addAction(tr("&Options"), this, SLOT(showOptionsDialog()));

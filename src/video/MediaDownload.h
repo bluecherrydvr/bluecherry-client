@@ -66,6 +66,8 @@ public:
 
     void start();
 
+    QUrl url() const { return m_url; }
+
 public slots:
     void cancel();
     /* Seek the stream to a specific byte offset

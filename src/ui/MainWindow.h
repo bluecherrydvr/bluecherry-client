@@ -20,6 +20,7 @@
 
 #include <QMainWindow>
 #include <QSystemTrayIcon>
+#include "ui/EventVideoDownloadsWindow.h"
 
 class DVRServersView;
 class LiveViewWindow;
@@ -61,6 +62,7 @@ public slots:
     void openLiveWindow();
 
     void showFront();
+    void showDownloadsWindow();
 
 private slots:
     void updateMenuForServer(DVRServer *server = 0);
@@ -95,6 +97,7 @@ private:
     QToolBar *m_mainToolbar;
     QWidget *serverAlertWidget;
     QLabel *serverAlertText;
+    QWeakPointer<EventVideoDownloadsWindow> m_eventVideoDownloadsWindow;
 
     void createMenu();
 
