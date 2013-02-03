@@ -64,10 +64,7 @@ void EventDownloadManager::startEventDownload(const EventData &event, const QStr
     QString saveFileName = absoluteFileName(withSuffix(fileName, QLatin1String(".mkv")));
     updateLastSaveDirectory(saveFileName);
 
-    QUrl url = event.server->api->serverUrl().resolved(QUrl(QLatin1String("/media/request.php")));
-    url.addQueryItem(QLatin1String("id"), QString::number(event.mediaId));
-
-    EventVideoDownload *dl = new EventVideoDownload(url, saveFileName, bcApp->mainWindow);
+    EventVideoDownload *dl = new EventVideoDownload(event, saveFileName, bcApp->mainWindow);
     m_eventVideoDownloadQueue.append(dl);
 
     m_eventVideoDownloadList.append(dl);

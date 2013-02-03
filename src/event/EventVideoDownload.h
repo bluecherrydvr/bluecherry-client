@@ -18,6 +18,7 @@
 #ifndef EVENTVIDEODOWNLOAD_H
 #define EVENTVIDEODOWNLOAD_H
 
+#include "core/EventData.h"
 #include <QFutureWatcher>
 #include <QTimer>
 #include <QUrl>
@@ -30,26 +31,43 @@ class EventVideoDownload : public QObject
     Q_OBJECT
 
 public:
-    explicit EventVideoDownload(const QUrl &fromUrl, const QString &toFilePath, QObject *parent = 0);
+    enum DownloadStatus
+    {
+        NotStarted,
+        InProgress,
+        CopyingFile,
+        Finished,
+        Failed
+    };
+
+    static QString statusToString(DownloadStatus status);
+
+    explicit EventVideoDownload(const EventData &event, const QString &toFilePath, QObject *parent = 0);
     ~EventVideoDownload();
 
-    void start(QWidget *parentWindow = 0);
-    void stop();
+    void start();
+
+    EventData eventData() const { return m_event; }
+    MediaDownload * media() const { return m_mediaDownload; }
+    DownloadStatus status() const { return m_status; }
+
+signals:
+    void statusChanged(EventVideoDownload::DownloadStatus status);
+    void finished(EventVideoDownload *eventVideoDownload);
 
 private slots:
     void startCopy();
     void copyFinished();
-    void updateBufferProgress();
-    void cancel();
 
 private:
-    QUrl m_fromUrl;
+    EventData m_event;
+    MediaDownload *m_mediaDownload;
+    DownloadStatus m_status;
     QString m_finalPath;
-    QProgressDialog *m_dialog;
     QFutureWatcher<bool> *m_futureWatch;
-    MediaDownload *m_media;
     QString m_tempFilePath;
-    QTimer m_progressTimer;
+
+    void changeStatus(DownloadStatus status);
 };
 
 #endif // EVENTVIDEODOWNLOAD_H
