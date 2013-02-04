@@ -31,6 +31,7 @@ class QSslError;
 class QSslConfiguration;
 class QTimer;
 class LiveViewManager;
+class EventDownloadManager;
 class MediaDownloadManager;
 
 class BluecherryApp : public QObject
@@ -61,6 +62,7 @@ public:
     QNetworkAccessManager *createNam();
 
     MediaDownloadManager * mediaDownloadManager() const { return m_mediaDownloadManager; }
+    EventDownloadManager * eventDownloadManager() const { return m_eventDownloadManager; }
 
     /* Temporarily pause live feeds to free up bandwidth for other intensive transfers
      * (particularly event video buffering). The live feed can be paused with pauseLive(),
@@ -99,6 +101,7 @@ private slots:
 
 private:
     MediaDownloadManager *m_mediaDownloadManager;
+    EventDownloadManager *m_eventDownloadManager;
     QList<DVRServer*> m_servers;
     int m_maxServerId;
     bool m_livePaused, m_inPauseQuery, m_screensaverInhibited;
