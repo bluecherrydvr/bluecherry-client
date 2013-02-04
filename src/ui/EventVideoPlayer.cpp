@@ -17,6 +17,7 @@
 
 #include "EventVideoPlayer.h"
 #include "EventVideoDownload.h"
+#include "event/EventDownloadManager.h"
 #include "video/GstSinkWidget.h"
 #include "video/VideoHttpBuffer.h"
 #include "core/BluecherryApp.h"
@@ -502,42 +503,9 @@ void EventVideoPlayer::updatePosition()
     }
 }
 
-void EventVideoPlayer::saveVideo(const QString &path)
+void EventVideoPlayer::saveVideo()
 {
-    if (!m_video)
-        return;
-
-    if (path.isEmpty())
-    {
-        bool restart = false;
-        if (m_video->state() == VideoPlayerBackend::Playing)
-        {
-            m_video->pause();
-            restart = true;
-        }
-
-        QString baseFileName = m_event->baseFileName();
-        // extension must be added here
-        // if baseFileName contains dot an extension is not added then
-        // all content after last dot will be lost
-        QString mkvFileName = QString::fromLatin1("%1.mkv").arg(baseFileName);
-        QString upath = QFileDialog::getSaveFileName(this, tr("Save event video"), mkvFileName,
-                                                     tr("Matroska Video (*.mkv)"));
-
-        if (!upath.isEmpty()) {
-            if (!upath.endsWith(QLatin1String(".mkv"), Qt::CaseInsensitive))
-                upath.append(QLatin1String(".mkv"));
-            saveVideo(upath);
-        }
-
-        if (restart)
-            m_video->play();
-        return;
-    }
-
-    QUrl fromUrl = m_video->videoBuffer()->url();
-    EventVideoDownload *dl = new EventVideoDownload(fromUrl, path, bcApp->mainWindow);
-    dl->start(bcApp->mainWindow);
+    bcApp->eventDownloadManager()->startEventDownload(*m_event);
 }
 
 void EventVideoPlayer::saveSnapshot(const QString &ifile)
