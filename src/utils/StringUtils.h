@@ -26,5 +26,6 @@ enum ByteSizeFormat {
 };
 
 QString byteSizeString(quint64 bytes, ByteSizeFormat format);
+QString withSuffix(const QString &string, const QString &suffix);
 
 #endif // STRINGUTILS_H
