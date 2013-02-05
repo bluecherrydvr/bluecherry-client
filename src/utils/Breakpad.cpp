@@ -77,6 +77,7 @@ void initBreakpad()
 #elif defined(Q_OS_MAC) || defined(Q_OS_LINUX)
 /* Shared code for Mac OS X and Linux */
 #include <limits.h>
+#include <unistd.h>
 static QByteArray executablePath;
 
 bool breakpadDumpCallback(const char *dump_path, const char *minidump_id, void *, bool succeeded)
