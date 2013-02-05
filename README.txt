@@ -1,6 +1,10 @@
-Note:  It is assumed that you have some experience in compiling Qt applications under your operating system.  If you do not have Qt development experience it is recommended that you download the binaries from www.bluecherrydvr.com/downloads
+Note:  It is assumed that you have some experience in compiling Qt applications under your operating system.  
+If you do not have Qt development experience it is recommended that you download the binaries from 
+www.bluecherrydvr.com/downloads
 
-If you have general questions about features of the client feel free to post on community.bluecherrydvr.com.  If you find a bug or want to discuss a pending feature, feel free to use the 'Issues' tab on github.com/bluecherrydvr/bluecherry-client.  Occasional support can be found on irc.bluecherry.net/bluecherry
+If you have general questions about features of the client feel free to post on community.bluecherrydvr.com.  
+If you find a bug or want to discuss a pending feature, feel free to use the 'Issues' tab on 
+github.com/bluecherrydvr/bluecherry-client.  Occasional support can be found on irc.bluecherry.net/bluecherry
 
 ---------
 
