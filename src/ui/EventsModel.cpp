@@ -20,13 +20,11 @@
 #include "core/DVRServer.h"
 #include "core/DVRCamera.h"
 #include "core/EventData.h"
+#include "events/EventsLoader.h"
 #include <QTextDocument>
 #include <QColor>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
 #include <QDebug>
 #include <QtConcurrentRun>
-#include <QFutureWatcher>
 
 EventsModel::EventsModel(QObject *parent)
     : QAbstractItemModel(parent), serverEventsLimit(-1), incompleteEventsFirst(false)
@@ -569,6 +567,8 @@ void EventsModel::setFilterSources(const QMap<DVRServer*, QList<int> > &sources)
                 break;
         }
     }
+    else if (m_filter.sources.isEmpty())
+        fast = true;
 
     m_filter.sources.clear();
     for (QMap<DVRServer*, QList<int> >::ConstIterator nit = sources.begin(); nit != sources.end(); ++nit)
@@ -648,83 +648,36 @@ void EventsModel::updateServer(DVRServer *server)
     if (!server->api->isOnline() || updatingServers.contains(server))
         return;
 
-    QUrl url(QLatin1String("/events/"));
-    url.addQueryItem(QLatin1String("limit"), QString::number(serverEventsLimit));
-    if (!m_filter.dateBegin.isNull())
-        url.addQueryItem(QLatin1String("startDate"), QString::number(m_filter.dateBegin.toTime_t()));
-    if (!m_filter.dateEnd.isNull())
-        url.addQueryItem(QLatin1String("endDate"), QString::number(m_filter.dateEnd.toTime_t()));
-
     updatingServers.insert(server);
     if (updatingServers.size() == 1)
         emit loadingStarted();
 
-    QNetworkRequest req = server->api->buildRequest(url);
-    req.setOriginatingObject(server);
-    QNetworkReply *reply = server->api->sendRequest(req);
-    connect(reply, SIGNAL(finished()), SLOT(requestFinished()));
+    EventsLoader *eventsLoader = new EventsLoader(server);
+    eventsLoader->setLimit(serverEventsLimit);
+    eventsLoader->setStartTime(m_filter.dateBegin);
+    eventsLoader->setEndTime(m_filter.dateEnd);
+    connect(eventsLoader, SIGNAL(eventsLoaded(bool,QList<EventData*>)), this, SLOT(eventsLoaded(bool,QList<EventData*>)));
+    eventsLoader->loadEvents();
 }
 
-void EventsModel::requestFinished()
+void EventsModel::eventsLoaded(bool ok, const QList<EventData *> &events)
 {
-    QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
-    if (!reply)
-        return;
+    EventsLoader *eventsLoader = qobject_cast<EventsLoader *>(sender());
+    Q_ASSERT(eventsLoader);
 
-    reply->deleteLater();
-
-    DVRServer *server = static_cast<DVRServer*>(reply->request().originatingObject());
-    if (!bcApp->serverExists(server))
-        return;
-
-    Q_ASSERT(updatingServers.contains(server));
-
-    if (reply->error() != QNetworkReply::NoError)
-    {
-        qWarning() << "Event request error:" << reply->errorString();
-        /* TODO: Handle errors properly */
-        if (updatingServers.remove(server) && updatingServers.isEmpty())
-            emit loadingFinished();
-        return;
-    }
-
-    int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-    if (statusCode < 200 || statusCode >= 300)
-    {
-        qWarning() << "Event request error: HTTP code" << statusCode;
-        if (updatingServers.remove(server) && updatingServers.isEmpty())
-            emit loadingFinished();
-        return;
-    }
-
-    QByteArray data = reply->readAll();
-
-    QFuture<QList<EventData*> > future = QtConcurrent::run(&EventData::parseEvents, server, data);
-
-    QFutureWatcher<QList<EventData*> > *qfw = new QFutureWatcher<QList<EventData*> >(this);
-    qfw->setProperty("server", QVariant::fromValue(server));
-    connect(qfw, SIGNAL(finished()), SLOT(eventParseFinished()));
-    qfw->setFuture(future);
-}
-
-void EventsModel::eventParseFinished()
-{
-    Q_ASSERT(sender() && sender()->inherits("QFutureWatcherBase"));
-    QFutureWatcher<QList<EventData*> > *qfw = static_cast<QFutureWatcher<QList<EventData*> >*>(sender());
-    qfw->deleteLater();
-
-    DVRServer *server = qfw->property("server").value<DVRServer*>();
+    DVRServer *server = eventsLoader->server();
     if (!server || !bcApp->serverExists(server))
         return;
 
-    QList<EventData*> events = qfw->result();
-    qDebug() << "EventsModel: Parsed event data into" << events.size() << "events";
+    if (ok)
+    {
+        QList<EventData*> &cache = cachedEvents[server];
+        qDeleteAll(cache);
+        cache = events;
 
-    QList<EventData*> &cache = cachedEvents[server];
-    qDeleteAll(cache);
-    cache = events;
+        applyFilters();
+    }
 
-    applyFilters();
     if (updatingServers.remove(server) && updatingServers.isEmpty())
         emit loadingFinished();
 }

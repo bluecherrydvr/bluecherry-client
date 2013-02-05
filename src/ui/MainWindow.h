@@ -23,6 +23,7 @@
 
 class DVRServersView;
 class LiveViewWindow;
+class EventsModel;
 class EventsView;
 class QSplitter;
 class DVRServer;
@@ -85,6 +86,7 @@ protected:
 
 private:
     DVRServersView *m_sourcesList;
+    EventsModel *m_eventsModel;
     EventsView *m_eventsView;
     LiveViewWindow *m_liveView;
     QSplitter *m_centerSplit, *m_leftSplit;
