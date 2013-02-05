@@ -104,8 +104,7 @@ signals:
 
 private slots:
     void serverAdded(DVRServer *server);
-    void requestFinished();
-    void eventParseFinished();
+    void eventsLoaded(bool ok, const QList<EventData *> &events);
 
     void clearServerEvents(DVRServer *server = 0);
 

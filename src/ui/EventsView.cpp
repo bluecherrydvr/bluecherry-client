@@ -68,7 +68,7 @@ void EventsView::openEvent(const QModelIndex &index)
     if (!event)
         return;
 
-    EventViewWindow::open(*event);
+    EventViewWindow::open(*event, 0);
 }
 
 void EventsView::loadingStarted()

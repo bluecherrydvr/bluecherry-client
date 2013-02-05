@@ -26,6 +26,7 @@
 #include "EventTagsModel.h"
 #include "EventsModel.h"
 #include "core/BluecherryApp.h"
+#include "events/ModelEventsCursor.h"
 #include "ui/MainWindow.h"
 #include <QBoxLayout>
 #include <QGridLayout>
@@ -107,6 +108,11 @@ EventsWindow::EventsWindow(QWidget *parent)
     m_eventViewer->layout()->setMargin(0);
     m_eventViewer->hide();
     m_videoSplitter->addWidget(m_eventViewer);
+
+    m_modelEventsCursor = new ModelEventsCursor();
+    m_modelEventsCursor->setModel(m_resultsView->model());
+    m_eventViewer->setEventsCursor(m_modelEventsCursor);
+    connect(m_modelEventsCursor, SIGNAL(indexUpdated()), this, SLOT(cursorIndexUpdated()));
 
     /* Settings */
     QSettings settings;
@@ -339,6 +345,18 @@ void EventsWindow::updateResultTitle()
     m_resultTitle->setText(m_resultsView->eventsModel()->filterDescription());
 }
 
+void EventsWindow::cursorIndexUpdated()
+{
+    const int row = m_modelEventsCursor->index();
+
+    QItemSelectionModel *selectionModel = m_resultsView->selectionModel();
+    const QModelIndexList selectedIndexes = selectionModel->selectedIndexes();
+    if (selectedIndexes.count() == 1 && selectedIndexes.at(0).row() == row)
+        return;
+
+    selectionModel->select(m_resultsView->model()->index(row, 0), QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+}
+
 void EventsWindow::timelineZoomChanged(int value)
 {
     m_timelineZoom->setValue(m_timelineZoom->maximum() - (value - m_timelineZoom->minimum()));
@@ -368,6 +386,9 @@ void EventsWindow::showEvent(const QModelIndex &index)
     if (m_videoSplitter->sizes()[1] == 0)
         m_videoSplitter->setSizes(QList<int>() << m_videoSplitter->sizes()[0] << 1);
     m_eventViewer->show();
+
+    m_modelEventsCursor->setCameraFilter(data->locationCamera());
+    m_modelEventsCursor->setIndex(index.row());
 }
 
 void EventsWindow::eventContextMenu(const QPoint &pos)
@@ -403,7 +424,13 @@ void EventsWindow::eventContextMenu(const QPoint &pos)
     else if (act == aPlay)
         showEvent(idx);
     else if (act == aPlayWindow)
-        EventViewWindow::open(*data);
+    {
+        ModelEventsCursor *modelEventsCursor = new ModelEventsCursor();
+        modelEventsCursor->setModel(view->model());
+        modelEventsCursor->setCameraFilter(data->locationCamera());
+        modelEventsCursor->setIndex(idx.row());
+        EventViewWindow::open(*data, modelEventsCursor);
+    }
     else if (act == aSelectOnly || act == aSelectElse)
     {
         EventSourcesModel *sModel = qobject_cast<EventSourcesModel*>(m_sourcesView->model());
