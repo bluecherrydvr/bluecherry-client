@@ -8,6 +8,16 @@ github.com/bluecherrydvr/bluecherry-client.  Occasional support can be found on 
 
 ---------
 
+Requirements (Ubuntu 12.04 LTS 32 & 64):
+    qt4-qmake
+    libqt4-dev
+    libgstreamer0.10-dev
+    gstreamer0.10-plugins-good
+    libgstreamer-plugins-base0.10-dev
+    libavcodec-dev
+    libavformat-dev
+    libswscale-dev
+
 Building:
     mkdir build; cd build
     qmake ../client.pro
