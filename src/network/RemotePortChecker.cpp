@@ -30,8 +30,10 @@ void RemotePortChecker::checkNow()
         m_tcpSocket->disconnect(this);
 
     m_tcpSocket.reset(new QTcpSocket());
-    connect(m_tcpSocket.data(), SIGNAL(connected()), this, SLOT(socketConnected()));
-    connect(m_tcpSocket.data(), SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(socketError(QAbstractSocket::SocketError)));
+    connect(m_tcpSocket.data(), SIGNAL(connected()),
+            this, SLOT(socketConnected()), Qt::QueuedConnection);
+    connect(m_tcpSocket.data(), SIGNAL(error(QAbstractSocket::SocketError)),
+            this, SLOT(socketError(QAbstractSocket::SocketError)), Qt::QueuedConnection);
     m_tcpSocket->connectToHost(m_name, m_port);
 }
 
