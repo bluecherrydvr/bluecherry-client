@@ -33,6 +33,9 @@ unix:!macx {
     # XXX
     LIBAV_PATH = /usr/lib/bluecherry/client
 }
+win32 {
+    LIBAV_PATH = $$(LIBAV_PATH)
+}
 
 macx:QMAKE_POST_LINK += cp $${_PRO_FILE_PWD_}/mac/Info.plist $${OUT_PWD}/$${TARGET}.app/Contents/;
 
@@ -98,7 +101,7 @@ win32 {
     SOURCES += src/utils/Breakpad.cpp
 
     unix:QMAKE_CXXFLAGS_RELEASE += -gstabs
-    
+
     unix:!macx {
         BREAKPAD_LIB = "$$PWD/breakpad/src/client/linux/libbreakpad.a"
         BREAKPAD_DUMPSYMS = "$$PWD/breakpad/src/tools/linux/dump_syms/dump_syms"
