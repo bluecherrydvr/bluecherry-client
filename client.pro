@@ -309,4 +309,5 @@ OTHER_FILES += mac/Info.plist "linux/Bluecherry Client.desktop" \
     src/ui/StatusBandwidthWidget_mac.mm \
     win/installer.nsi \
     README.txt \
-    COPYING
+    COPYING \
+    BUILD-WINDOWS.txt
