@@ -306,4 +306,7 @@ OTHER_FILES += mac/Info.plist "linux/Bluecherry Client.desktop" \
     src/ui/liveview/LiveFeed.qml \
     src/utils/PlatformOSX.mm \
     src/ui/liveview/HeaderPTZControl.qml \
-    src/ui/StatusBandwidthWidget_mac.mm
+    src/ui/StatusBandwidthWidget_mac.mm \
+    win/installer.nsi \
+    README.txt \
+    COPYING
