@@ -19,6 +19,8 @@
 #include "DVRServer.h"
 #include "LiveViewManager.h"
 #include "ui/MainWindow.h"
+#include "event/EventDownloadManager.h"
+#include "network/MediaDownloadManager.h"
 #include <QSettings>
 #include <QStringList>
 #include <QNetworkAccessManager>
@@ -75,6 +77,11 @@ BluecherryApp::BluecherryApp()
     connect(timer, SIGNAL(timeout()), SLOT(performVersionCheck()));
     timer->setInterval(60 * 60 * 24 * 1000);
     timer->start();
+
+    m_mediaDownloadManager = new MediaDownloadManager(this);
+    m_mediaDownloadManager->setCookieJar(nam->cookieJar());
+
+    m_eventDownloadManager = new EventDownloadManager(this);
 }
 
 void BluecherryApp::performVersionCheck()

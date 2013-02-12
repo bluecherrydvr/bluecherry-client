@@ -15,17 +15,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef STRINGUTILS_H
-#define STRINGUTILS_H
+#ifndef EVENTLIST_H
+#define EVENTLIST_H
 
-#include <QString>
+#include "core/EventData.h"
+#include <QList>
 
-enum ByteSizeFormat {
-    Bytes,
-    BytesPerSecond
+class EventFilter;
+
+class EventList : public QList<EventData>
+{
+public:
+    EventList filter(const EventFilter &eventFilter) const;
+    QSet<DVRCamera> cameras() const;
 };
 
-QString byteSizeString(quint64 bytes, ByteSizeFormat format);
-QString withSuffix(const QString &string, const QString &suffix);
-
-#endif // STRINGUTILS_H
+#endif // EVENTLIST_H

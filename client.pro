@@ -159,7 +159,6 @@ SOURCES += src/main.cpp \
     src/ui/EventVideoPlayer.cpp \
     src/video/VideoPlayerBackend_gst.cpp \
     src/video/VideoHttpBuffer.cpp \
-    src/ui/EventVideoDownload.cpp \
     src/ui/ServerConfigWindow.cpp \
     src/ui/AboutDialog.cpp \
     src/ui/SavedLayoutsModel.cpp \
@@ -194,7 +193,16 @@ SOURCES += src/main.cpp \
     src/events/EventsLoader.cpp \
     src/events/EventsCursor.cpp \
     src/events/ModelEventsCursor.cpp \
-    src/ui/SwitchEventsWidget.cpp
+    src/ui/SwitchEventsWidget.cpp \
+    src/network/MediaDownloadManager.cpp \
+    src/event/EventDownloadManager.cpp \
+    src/event/EventVideoDownload.cpp \
+    src/event/EventList.cpp \
+    src/event/EventFilter.cpp \
+    src/event/MediaEventFilter.cpp \
+    src/event/CameraEventFilter.cpp \
+    src/ui/EventVideoDownloadWidget.cpp \
+    src/ui/EventVideoDownloadsWindow.cpp
 
 !macx:SOURCES += src/ui/StatusBandwidthWidget.cpp
 
@@ -227,7 +235,6 @@ HEADERS  += src/ui/MainWindow.h \
     src/ui/EventVideoPlayer.h \
     src/video/VideoPlayerBackend_gst.h \
     src/video/VideoHttpBuffer.h \
-    src/ui/EventVideoDownload.h \
     src/ui/ServerConfigWindow.h \
     src/ui/AboutDialog.h \
     src/ui/SavedLayoutsModel.h \
@@ -265,7 +272,16 @@ HEADERS  += src/ui/MainWindow.h \
     src/events/EventsLoader.h \
     src/events/EventsCursor.h \
     src/events/ModelEventsCursor.h \
-    src/ui/SwitchEventsWidget.h
+    src/ui/SwitchEventsWidget.h \
+    src/network/MediaDownloadManager.h \
+    src/event/EventDownloadManager.h \
+    src/event/EventVideoDownload.h \
+    src/event/EventList.h \
+    src/event/EventFilter.h \
+    src/event/MediaEventFilter.h \
+    src/event/CameraEventFilter.h \
+    src/ui/EventVideoDownloadWidget.h \
+    src/ui/EventVideoDownloadsWindow.h
 
 RESOURCES += \
     res/resources.qrc \

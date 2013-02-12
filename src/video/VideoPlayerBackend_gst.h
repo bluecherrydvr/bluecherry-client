@@ -83,6 +83,8 @@ signals:
      * The size of this buffer depends on how it's configured in decodebin2, currently 10 seconds of
      * playback. */
     void bufferingStatus(int percent);
+    void bufferingStarted();
+    void bufferingStopped();
     void nonFatalError(const QString &message);
 
 private slots:
@@ -98,6 +100,7 @@ private:
     double m_playbackSpeed;
 
     void setError(bool permanent, const QString &message);
+    void setVideoBuffer(VideoHttpBuffer *videoHttpBuffer);
 
     GstBusSyncReply busHandler(GstBus *bus, GstMessage *msg);
     void decodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast);

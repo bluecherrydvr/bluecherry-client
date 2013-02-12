@@ -67,6 +67,7 @@ private slots:
 
     void eventContextMenu(const QPoint &pos);
     void showEvent(const QModelIndex &index);
+    void showEvent(const EventData &eventData);
 
 private:
     static EventsWindow *m_instance;

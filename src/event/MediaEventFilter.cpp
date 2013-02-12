@@ -15,17 +15,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef STRINGUTILS_H
-#define STRINGUTILS_H
+#include "MediaEventFilter.h"
+#include "core/EventData.h"
 
-#include <QString>
+MediaEventFilter::MediaEventFilter()
+{
+}
 
-enum ByteSizeFormat {
-    Bytes,
-    BytesPerSecond
-};
+MediaEventFilter::~MediaEventFilter()
+{
+}
 
-QString byteSizeString(quint64 bytes, ByteSizeFormat format);
-QString withSuffix(const QString &string, const QString &suffix);
-
-#endif // STRINGUTILS_H
+bool MediaEventFilter::accept(const EventData &event) const
+{
+    return event.hasMedia();
+}

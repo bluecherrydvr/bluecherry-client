@@ -30,17 +30,33 @@ VideoPlayerBackend::VideoPlayerBackend(QObject *parent)
     : QObject(parent), m_pipeline(0), m_videoLink(0), m_sink(0), m_videoBuffer(0), m_state(Stopped),
       m_playbackSpeed(1.0)
 {
-    m_videoBuffer = new VideoHttpBuffer(this);
-
     if (!initGStreamer(&m_errorMessage))
         setError(true, m_errorMessage);
 }
 
 VideoPlayerBackend::~VideoPlayerBackend()
 {
-    if (m_videoBuffer)
-        m_videoBuffer->clearPlayback();
     clear();
+}
+
+void VideoPlayerBackend::setVideoBuffer(VideoHttpBuffer *videoHttpBuffer)
+{
+    if (m_videoBuffer)
+    {
+        disconnect(m_videoBuffer, 0, this, 0);
+        m_videoBuffer->clearPlayback();
+        m_videoBuffer->deleteLater();
+    }
+
+    m_videoBuffer = videoHttpBuffer;
+
+    if (m_videoBuffer)
+    {
+        connect(m_videoBuffer, SIGNAL(bufferingStarted()), this, SIGNAL(bufferingStarted()));
+        connect(m_videoBuffer, SIGNAL(bufferingStopped()), this, SIGNAL(bufferingStopped()));
+        connect(m_videoBuffer, SIGNAL(bufferingReady()), SLOT(playIfReady()));
+        connect(m_videoBuffer, SIGNAL(streamError(QString)), SLOT(streamError(QString)));
+    }
 }
 
 bool VideoPlayerBackend::initGStreamer(QString *errorMessage)
@@ -192,18 +208,17 @@ bool VideoPlayerBackend::start(const QUrl &url)
     }
 
     /* Buffered HTTP source */
-    Q_ASSERT(m_videoBuffer);
+    setVideoBuffer(new VideoHttpBuffer(url));
+
     GstElement *source = m_videoBuffer->setupSrcElement(m_pipeline);
     if (!source)
     {
         setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("source")));
-        delete m_videoBuffer;
-        m_videoBuffer = 0;
+        setVideoBuffer(0);
         return false;
     }
 
-    connect(m_videoBuffer, SIGNAL(streamError(QString)), SLOT(streamError(QString)));
-    m_videoBuffer->start(url);
+    m_videoBuffer->startBuffering();
 
     /* Decoder */
     GstElement *decoder = gst_element_factory_make("decodebin2", "decoder");
@@ -259,7 +274,6 @@ bool VideoPlayerBackend::start(const QUrl &url)
     /* Move the pipeline into the PLAYING state. This call may block for a very long time
      * (up to several seconds), because it will block until the pipeline has completed that move. */
     gst_element_set_state(m_pipeline, GST_STATE_READY);
-    connect(m_videoBuffer, SIGNAL(bufferingReady()), SLOT(playIfReady()));
     return true;
 }
 
@@ -288,13 +302,7 @@ void VideoPlayerBackend::clear()
 
     m_pipeline = m_videoLink = m_sink = 0;
 
-    if (m_videoBuffer)
-    {
-        disconnect(m_videoBuffer, 0, this, 0);
-        if (m_videoBuffer->parent() == this)
-            m_videoBuffer->deleteLater();
-        m_videoBuffer = new VideoHttpBuffer(this);
-    }
+    setVideoBuffer(0);
 
     m_state = Stopped;
     m_errorMessage.clear();
