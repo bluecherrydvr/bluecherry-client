@@ -3,3 +3,4 @@
 moc_*.cpp
 qrc_*.cpp
 /Makefile
+tests-build-*

@@ -19,129 +19,201 @@
 #include <QtAlgorithms>
 #include <QDebug>
 
-#undef RANGEMAP_DEBUG
-
 RangeMap::RangeMap()
 {
 }
 
-inline bool RangeMap::rangeStartLess(const RangeMap::Range &a, const RangeMap::Range &b)
+bool RangeMap::contains(const Range &range)
 {
-    return a.start < b.start;
-}
-
-bool RangeMap::contains(unsigned position, unsigned size) const
-{
-    if (ranges.isEmpty())
+    if (m_ranges.isEmpty())
         return false;
 
-    Range range = { position, position+size-1 };
-    QList<Range>::ConstIterator it = qLowerBound(ranges.begin(), ranges.end(), range, rangeStartLess);
-    if (it == ranges.end() || it->start > position)
-        --it;
-
-    /* Position is 1, size is 1; last pos required is 1 */
-    Q_ASSERT(it->start <= position);
-    if (it != ranges.end() && it->end >= range.end)
-        return true;
-
-    return false;
+    QList<Range>::Iterator it = findContainingRange(range.start());
+    return it != m_ranges.end() && it->includes(range);
 }
 
-bool RangeMap::nextMissingRange(unsigned startPosition, unsigned totalSize, unsigned &position, unsigned &size)
+QList<Range>::Iterator RangeMap::findContainingRange(unsigned value)
 {
-    if (ranges.isEmpty())
+    if (m_ranges.begin()->start() > value)
+        return m_ranges.end();
+    if ((m_ranges.end() - 1)->end() < value)
+        return m_ranges.end();
+
+    QList<Range>::Iterator from = m_ranges.begin();
+    QList<Range>::Iterator to = m_ranges.end();
+
+    while (true)
     {
-        position = startPosition;
-        size = totalSize;
-        return true;
+        int half = (to - from) / 2;
+        QList<Range>::Iterator i = from + half;
+        if (i->includes(value))
+            return i;
+        if (from == to)
+            return m_ranges.end();
+        if (i->start() > value)
+            to = i - 1;
+        else if (i->end() < value)
+            from = i + 1;
     }
 
-    /* Find the range inclusive of or less than startPosition */
-    Range r = { startPosition, startPosition };
-    QList<Range>::ConstIterator it = qLowerBound(ranges.begin(), ranges.end(), r, rangeStartLess);
-    if (it == ranges.end() || it->start > startPosition)
-        --it;
-
-    Q_ASSERT(it->start <= startPosition);
-
-    position = qMax(startPosition, it->end+1);
-    size = qMin((it+1 == ranges.end()) ? (totalSize - position) : ((it+1)->start - position - 1),
-                totalSize - position);
-
-    Q_ASSERT(size == 0 || (position+size) == totalSize || (position+size)+1 == (it+1)->start);
-
-    return size != 0;
+    Q_ASSERT(false);
+    return m_ranges.end();
 }
 
-void RangeMap::insert(unsigned position, unsigned size)
+QList<Range>::Iterator RangeMap::findContainingOrPrecedingRange(unsigned value)
 {
-    Range range = { position, position+size-1 };
+    if (m_ranges.isEmpty())
+        return m_ranges.end();
+    if (m_ranges.begin()->start() > value)
+        return m_ranges.end();
+    if ((m_ranges.end() - 1)->start() <= value)
+        return m_ranges.end() - 1;
 
-    /* Item with a position LESS THAN OR EQUAL TO the BEGINNING of the inserted range */
-    QList<Range>::Iterator lower = qLowerBound(ranges.begin(), ranges.end(), range, rangeStartLess);
-    if (!ranges.isEmpty() && (lower == ranges.end() || lower->start > position))
-        lower--;
-    /* Item with a position GREATER THAN the END of the inserted range */
-    Range r2 = { range.end+1, range.end+1 };
-    QList<Range>::Iterator upper = qUpperBound(lower, ranges.end(), r2, rangeStartLess);
+    QList<Range>::Iterator from = m_ranges.begin();
+    QList<Range>::Iterator to = m_ranges.end();
 
-    Q_ASSERT(lower == ranges.end() || lower->start <= position);
-
-    /* Intersection at the beginning */
-    if (lower != ranges.end() && position <= lower->end+1)
+    while (true)
     {
-        /* The beginning of the new range intersects the range in 'lower'.
-         * Extend this range, and merge ranges after it as needed. */
-
-        Q_ASSERT(lower->start <= position);
-        lower->end = qMax(range.end, (upper-1)->end);
-
-        if ((upper-1) != lower)
-            ranges.erase(lower+1, upper);
+        int half = (to - from) / 2;
+        QList<Range>::Iterator i = from + half;
+        if (i->includes(value))
+            return i;
+        if (from == to)
+            return from;
+        if (i->start() > value)
+            to = i - 1;
+        else if (i->end() < value)
+        {
+            QList<Range>::Iterator next = i + 1;
+            if (next == m_ranges.end() || next->start() > value) {
+                return i;
+            }
+            from = i + 1;
+        }
     }
-    else if (lower != ranges.end() && range.end <= (upper-1)->end)
-    {
-        /* The end of the new range intersects the range in 'upper'.
-         * Extend this range. Merging is unnecessary, because any case
-         * where that would be possible is included in the prior one. */
 
-        upper--;
-        upper->start = position;
-    }
+    Q_ASSERT(false);
+    return m_ranges.end();
+}
+
+unsigned RangeMap::firstNotInRange(QList<Range>::Iterator rangeIterator)
+{
+    if (rangeIterator == m_ranges.end())
+        return 0;
     else
+        return rangeIterator->end() + 1;
+}
+
+unsigned RangeMap::lastNotInRange(QList<Range>::Iterator rangeIterator)
+{
+    if (rangeIterator == m_ranges.end())
+        return UINT_MAX;
+    else if (rangeIterator->start() == 0)
+        return 0;
+    else
+        return rangeIterator->start() - 1;
+}
+
+Range RangeMap::nextMissingRange(const Range &search)
+{
+    if (m_ranges.isEmpty())
+        return search;
+
+    QList<Range>::Iterator precedingRange = findContainingOrPrecedingRange(search.start());
+    QList<Range>::Iterator followingRange = nextRange(precedingRange);
+
+    return Range::fromStartEnd(
+        qMax(search.start(), firstNotInRange(precedingRange)),
+        qMin(search.end(), lastNotInRange(followingRange)));
+}
+
+QList<Range>::Iterator RangeMap::nextRange(QList<Range>::Iterator range)
+{
+    if (range == m_ranges.end()) // for no-range next is first
+        return m_ranges.begin();
+    else
+        return range + 1;
+}
+
+QList<Range>::Iterator RangeMap::findFirstMergingRange(unsigned value)
+{
+    QList<Range>::Iterator precedingRange = findContainingOrPrecedingRange(value);
+    if (precedingRange == m_ranges.end())
+        return precedingRange;
+    if (precedingRange->includes(value))
+        return precedingRange;
+
+    if (precedingRange->end() + 1 != value)
+        return precedingRange + 1;
+    else
+        return precedingRange;
+}
+
+QList<Range>::Iterator RangeMap::findLastMergingRange(unsigned value)
+{
+    QList<Range>::Iterator precedingRange = findContainingOrPrecedingRange(value);
+    QList<Range>::Iterator followingRange = nextRange(precedingRange);
+    if (followingRange == m_ranges.end())
+        return precedingRange;
+
+    if (followingRange->start() - 1 == value)
+        return followingRange;
+    else
+        return precedingRange;
+}
+
+void RangeMap::insert(const Range &range)
+{
+    if (!range.isValid())
+        return;
+
+    if (m_ranges.isEmpty())
     {
-        /* Create a new range item */
-        ranges.insert(upper, range);
+        m_ranges.append(range);
+        return;
     }
 
-#ifdef RANGEMAP_DEBUG
-    qDebug() << "Rangemap insert" << position << size << ":" << *this;
-#endif
-#ifndef QT_NO_DEBUG
-    debugTestConsistency();
-#endif
+    QList<Range>::Iterator firstMergingRange = findFirstMergingRange(range.start());
+    QList<Range>::Iterator lastMergingRange = findLastMergingRange(range.end());
+
+    if (firstMergingRange > lastMergingRange)
+    {
+        m_ranges.insert(firstMergingRange, range);
+        return;
+    }
+
+    if (firstMergingRange == m_ranges.end())
+    {
+        m_ranges.prepend(range);
+        return;
+    }
+
+    Range finalRange = Range::fromStartEnd(
+                qMin(range.start(), firstMergingRange->start()),
+                qMax(range.end(), lastMergingRange->end()));
+    m_ranges.erase(firstMergingRange, lastMergingRange);
+    *lastMergingRange = finalRange;
 }
 
 #ifndef QT_NO_DEBUG
 void RangeMap::debugTestConsistency()
 {
-    Range last = { 0, 0 };
-    for (QList<Range>::Iterator it = ranges.begin(); it != ranges.end(); ++it)
+    Range last = Range::fromValue(0);
+    for (QList<Range>::Iterator it = m_ranges.begin(); it != m_ranges.end(); ++it)
     {
         const Range &current = *it;
-        const bool isFirst = it == ranges.begin();
+        const bool isFirst = it == m_ranges.begin();
 
         /* End is after start; these are both inclusive, so they may be equal (in the case
          * of a range of one). */
-        Q_ASSERT(current.start <= current.end);
+        Q_ASSERT(current.start() <= current.end());
 
         if (!isFirst)
         {
             /* Sequentially ordered */
-            Q_ASSERT(current.start > last.end);
-            /* There is a gap of at least one between ranges (otherwise, they would be the same range) */
-            Q_ASSERT(current.start - last.end > 1);
+            Q_ASSERT(current.start() > last.end());
+            /* There is a gap of at least one between m_ranges (otherwise, they would be the same range) */
+            Q_ASSERT(current.start() - last.end() > 1);
         }
 
         last = current;

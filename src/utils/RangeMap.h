@@ -18,49 +18,51 @@
 #ifndef RANGEMAP_H
 #define RANGEMAP_H
 
+#include "utils/Range.h"
 #include <QMap>
 #include <QDebug>
 
 class RangeMap
 {
     friend QDebug operator<<(QDebug d, const RangeMap &r);
+    friend class RangeMapTestCase;
 
 public:
     RangeMap();
 
-    void insert(unsigned position, unsigned size);
-    void remove(unsigned position, unsigned size);
+    void insert(const Range &range);
+    bool contains(const Range &range);
 
-    bool contains(unsigned position, unsigned size = 1) const;
-
-    /* Return the position and size of the next sequential range that is not included,
-     * starting from startPosition (inclusive). Returns true if there is a gap, or
-     * false if there are no gaps before the end of the range. In the latter case,
-     * position will be set to one past the largest position in the range, and size
-     * will be zero. */
-    bool nextMissingRange(unsigned startPosition, unsigned totalSize, unsigned &position, unsigned &size);
+    /* Return the first subrange of search that is not included in this RangeMap.
+       May return empty range if it is contained. */
+    Range nextMissingRange(const Range &search);
 private:
-    struct Range {
-        unsigned start; /* First index, inclusive */
-        unsigned end; /* Last index, inclusive; size is (end-start+1) */
-    };
+    int size() const { return m_ranges.size(); }
 
-    static bool rangeStartLess(const Range &a, const Range &b);
+    unsigned firstNotInRange(QList<Range>::Iterator rangeIterator);
+    unsigned lastNotInRange(QList<Range>::Iterator rangeIterator);
+
+    QList<Range>::Iterator findContainingRange(unsigned value);
+    QList<Range>::Iterator findContainingOrPrecedingRange(unsigned value);
+    QList<Range>::Iterator nextRange(QList<Range>::Iterator range);
+
+    QList<Range>::Iterator findFirstMergingRange(unsigned value);
+    QList<Range>::Iterator findLastMergingRange(unsigned value);
 
 #ifndef QT_NO_DEBUG
     void debugTestConsistency();
 #endif
 
-    QList<Range> ranges;
+    QList<Range> m_ranges;
 };
 
 inline QDebug operator<<(QDebug d, const RangeMap &r)
 {
 #ifndef QT_NO_DEBUG
     QString text = QLatin1String("Range: ");
-    foreach (const RangeMap::Range &n, r.ranges)
-        text.append(QString::number(n.start) + QLatin1String(" - ")
-                    + QString::number(n.end) + QLatin1String("; "));
+    foreach (const Range &n, r.m_ranges)
+        text.append(QString::number(n.start()) + QLatin1String(" - ")
+                    + QString::number(n.end()) + QLatin1String("; "));
     return (d << text);
 #else
     Q_UNUSED(r);
