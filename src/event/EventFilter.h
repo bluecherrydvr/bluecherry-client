@@ -15,17 +15,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef STRINGUTILS_H
-#define STRINGUTILS_H
+#ifndef EVENTFILTER_H
+#define EVENTFILTER_H
 
-#include <QString>
+class EventData;
 
-enum ByteSizeFormat {
-    Bytes,
-    BytesPerSecond
+class EventFilter
+{
+public:
+    EventFilter();
+    virtual ~EventFilter();
+
+    virtual bool accept(const EventData &event) const = 0;
 };
 
-QString byteSizeString(quint64 bytes, ByteSizeFormat format);
-QString withSuffix(const QString &string, const QString &suffix);
-
-#endif // STRINGUTILS_H
+#endif // EVENTFILTER_H

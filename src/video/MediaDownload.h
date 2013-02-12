@@ -35,7 +35,7 @@ class MediaDownload : public QObject
     Q_OBJECT
 
 public:
-    explicit MediaDownload(QObject *parent = 0);
+    explicit MediaDownload(const QUrl &url, const QList<QNetworkCookie> &cookies, QObject *parent = 0);
     virtual ~MediaDownload();
 
     /* Reference counting used by VideoHttpBuffer and
@@ -64,7 +64,9 @@ public:
      * value is the number of bytes read. */
     int read(unsigned position, char *buffer, int size);
 
-    void start(const QUrl &url, const QList<QNetworkCookie> &cookies);
+    void start();
+
+    QUrl url() const { return m_url; }
 
 public slots:
     void cancel();
@@ -98,13 +100,13 @@ private slots:
 
 private:
     QUrl m_url;
+    QList<QNetworkCookie> m_cookies;
     QThread *m_thread;
     MediaDownloadTask *m_task;
     QMutex m_bufferLock;
     QWaitCondition m_bufferWait;
     QTemporaryFile m_bufferFile;
     QFile m_readFile;
-    QList<QNetworkCookie> m_cookies;
     unsigned m_fileSize, m_downloadedSize, m_readPos, m_writePos;
     RangeMap m_bufferRanges;
     QAtomicInt m_refCount;

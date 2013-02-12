@@ -15,17 +15,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef STRINGUTILS_H
-#define STRINGUTILS_H
+#include "CameraEventFilter.h"
+#include "core/EventData.h"
 
-#include <QString>
+CameraEventFilter::CameraEventFilter()
+{
+}
 
-enum ByteSizeFormat {
-    Bytes,
-    BytesPerSecond
-};
+CameraEventFilter::~CameraEventFilter()
+{
+}
 
-QString byteSizeString(quint64 bytes, ByteSizeFormat format);
-QString withSuffix(const QString &string, const QString &suffix);
-
-#endif // STRINGUTILS_H
+bool CameraEventFilter::accept(const EventData &event) const
+{
+    return event.isCamera();
+}

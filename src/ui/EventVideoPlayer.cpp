@@ -16,7 +16,8 @@
  */
 
 #include "EventVideoPlayer.h"
-#include "EventVideoDownload.h"
+#include "event/EventDownloadManager.h"
+#include "event/EventVideoDownload.h"
 #include "video/GstSinkWidget.h"
 #include "video/VideoHttpBuffer.h"
 #include "core/BluecherryApp.h"
@@ -222,10 +223,8 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     m_video->setSink(sink);
 
     connect(m_video, SIGNAL(bufferingStatus(int)), m_videoWidget, SLOT(setBufferStatus(int)));
-    connect(m_video->videoBuffer(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()), Qt::QueuedConnection);
-    connect(m_video->videoBuffer(), SIGNAL(bufferingStarted()), SLOT(bufferingStarted()));
-
-    m_video->videoBuffer()->setCookies(bcApp->nam->cookieJar()->cookiesForUrl(url));
+    connect(m_video, SIGNAL(bufferingStopped()), SLOT(bufferingStopped()), Qt::QueuedConnection);
+    connect(m_video, SIGNAL(bufferingStarted()), SLOT(bufferingStarted()));
 
     bool ok = m_video->metaObject()->invokeMethod(m_video, "start", Qt::QueuedConnection, Q_ARG(QUrl, url));
     Q_ASSERT(ok);
@@ -378,7 +377,7 @@ void EventVideoPlayer::queryLivePaused()
 
 bool EventVideoPlayer::uiRefreshNeeded() const
 {
-    return m_video && (m_video->videoBuffer()->isBuffering() || m_video->state() == VideoPlayerBackend::Playing);
+    return m_video && (m_video->videoBuffer()) && (m_video->videoBuffer()->isBuffering() || m_video->state() == VideoPlayerBackend::Playing);
 }
 
 void EventVideoPlayer::updateUI()
@@ -398,7 +397,7 @@ void EventVideoPlayer::bufferingStarted()
 
 void EventVideoPlayer::updateBufferStatus()
 {
-    if (!m_video || m_video->videoBuffer()->isBufferingFinished())
+    if (!m_video || !m_video->videoBuffer() || m_video->videoBuffer()->isBufferingFinished())
         return;
 
     int pcnt = m_video->videoBuffer()->bufferedPercent();
@@ -409,7 +408,7 @@ void EventVideoPlayer::bufferingStopped()
 {
     bcApp->releaseLive();
 
-    if (!m_video || (m_video->videoBuffer()->isBufferingFinished() && m_video->state() > VideoPlayerBackend::Error))
+    if (!m_video || !m_video->videoBuffer() || (m_video->videoBuffer()->isBufferingFinished() && m_video->state() > VideoPlayerBackend::Error))
         m_statusText->clear();
 
     if (!uiRefreshNeeded())
@@ -504,43 +503,9 @@ void EventVideoPlayer::updatePosition()
     }
 }
 
-void EventVideoPlayer::saveVideo(const QString &path)
+void EventVideoPlayer::saveVideo()
 {
-    if (!m_video)
-        return;
-
-    if (path.isEmpty())
-    {
-        bool restart = false;
-        if (m_video->state() == VideoPlayerBackend::Playing)
-        {
-            m_video->pause();
-            restart = true;
-        }
-
-        QString baseFileName = m_event->baseFileName();
-        // extension must be added here
-        // if baseFileName contains dot an extension is not added then
-        // all content after last dot will be lost
-        QString mkvFileName = QString::fromLatin1("%1.mkv").arg(baseFileName);
-        QString upath = QFileDialog::getSaveFileName(this, tr("Save event video"), mkvFileName,
-                                                     tr("Matroska Video (*.mkv)"));
-
-        if (!upath.isEmpty()) {
-            if (!upath.endsWith(QLatin1String(".mkv"), Qt::CaseInsensitive))
-                upath.append(QLatin1String(".mkv"));
-            saveVideo(upath);
-        }
-
-        if (restart)
-            m_video->play();
-        return;
-    }
-
-    EventVideoDownload *dl = new EventVideoDownload(bcApp->mainWindow);
-    dl->setFilePath(path);
-    dl->setMediaDownload(m_video->videoBuffer()->mediaDownload());
-    dl->start(bcApp->mainWindow);
+    bcApp->eventDownloadManager()->startEventDownload(*m_event);
 }
 
 void EventVideoPlayer::saveSnapshot(const QString &ifile)

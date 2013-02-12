@@ -17,12 +17,12 @@
 
 #include "VideoHttpBuffer.h"
 #include "core/BluecherryApp.h"
+#include "network/MediaDownloadManager.h"
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QDebug>
 #include <QDir>
 #include <QThread>
-#include <QNetworkCookieJar>
 #include <QApplication>
 
 #include <gst/gst.h>
@@ -41,8 +41,8 @@ gboolean VideoHttpBuffer::seekDataWrap(GstAppSrc *src, quint64 offset, gpointer 
     return static_cast<VideoHttpBuffer*>(user_data)->seekData(offset) ? TRUE : FALSE;
 }
 
-VideoHttpBuffer::VideoHttpBuffer(QObject *parent)
-    : QObject(parent), media(0), m_element(0), m_pipeline(0)
+VideoHttpBuffer::VideoHttpBuffer(const QUrl &url, QObject *parent)
+    : QObject(parent), m_url(url), media(0), m_element(0), m_pipeline(0)
 {
 }
 
@@ -50,7 +50,10 @@ VideoHttpBuffer::~VideoHttpBuffer()
 {
     clearPlayback();
     if (media)
-        media->deref();
+    {
+        bcApp->mediaDownloadManager()->releaseMediaDownload(m_url);
+        media = 0;
+    }
 }
 
 GstElement *VideoHttpBuffer::setupSrcElement(GstElement *pipeline)
@@ -87,23 +90,17 @@ GstElement *VideoHttpBuffer::setupSrcElement(GstElement *pipeline)
     return GST_ELEMENT(m_element);
 }
 
-void VideoHttpBuffer::setCookies(const QList<QNetworkCookie> &cookies)
-{
-    m_cookies = cookies;
-}
-
-bool VideoHttpBuffer::start(const QUrl &url)
+bool VideoHttpBuffer::startBuffering()
 {
     Q_ASSERT(!media);
 
-    media = new MediaDownload;
-    media->ref();
+    media = bcApp->mediaDownloadManager()->acquireMediaDownload(m_url);
     connect(media, SIGNAL(fileSizeChanged(uint)), SLOT(fileSizeChanged(uint)), Qt::DirectConnection);
     connect(media, SIGNAL(finished()), SIGNAL(bufferingFinished()));
     connect(media, SIGNAL(stopped()), SIGNAL(bufferingStopped()));
     connect(media, SIGNAL(error(QString)), SLOT(sendStreamError(QString)));
 
-    media->start(url, m_cookies);
+    media->start();
 
     qDebug("VideoHttpBuffer: started");
     emit bufferingStarted();

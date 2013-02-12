@@ -18,6 +18,8 @@
 #include "EventsView.h"
 #include "EventsModel.h"
 #include "EventViewWindow.h"
+#include "core/EventData.h"
+#include "event/EventList.h"
 #include <QHeaderView>
 #include <QMovie>
 #include <QLabel>
@@ -27,6 +29,7 @@ EventsView::EventsView(QWidget *parent)
     : QTreeView(parent), loadingIndicator(0)
 {
     setRootIsDecorated(false);
+    setSelectionMode(QAbstractItemView::ExtendedSelection);
     setUniformRowHeights(true);
 
     viewport()->installEventFilter(this);
@@ -54,6 +57,22 @@ void EventsView::setModel(EventsModel *model)
 
     if (model->isLoading())
         loadingStarted();
+}
+
+
+EventList EventsView::selectedEvents() const
+{
+    EventList result;
+
+    const QModelIndexList &selectedItems = selectionModel()->selectedRows();
+    foreach (const QModelIndex &selectedItem, selectedItems)
+    {
+        EventData *eventData = selectedItem.data(EventsModel::EventDataPtr).value<EventData*>();
+        if (eventData)
+            result.append(*eventData);
+    }
+
+    return result;
 }
 
 EventsModel *EventsView::eventsModel() const

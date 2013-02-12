@@ -15,17 +15,28 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef STRINGUTILS_H
-#define STRINGUTILS_H
+#include "EventList.h"
+#include "core/DVRCamera.h"
+#include "event/EventFilter.h"
+#include <QSet>
 
-#include <QString>
+EventList EventList::filter(const EventFilter &eventFilter) const
+{
+    EventList result;
+    foreach (const EventData &event, *this)
+        if (eventFilter.accept(event))
+            result.append(event);
+    return result;
+}
 
-enum ByteSizeFormat {
-    Bytes,
-    BytesPerSecond
-};
-
-QString byteSizeString(quint64 bytes, ByteSizeFormat format);
-QString withSuffix(const QString &string, const QString &suffix);
-
-#endif // STRINGUTILS_H
+QSet<DVRCamera> EventList::cameras() const
+{
+    QSet<DVRCamera> result;
+    foreach (const EventData &cameraEventData, *this)
+    {
+        DVRCamera camera = cameraEventData.locationCamera();
+        if (camera)
+            result.insert(camera);
+    }
+    return result;
+}

@@ -15,42 +15,37 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVENTVIDEODOWNLOAD_H
-#define EVENTVIDEODOWNLOAD_H
+#ifndef MEDIADOWNLOADMANAGER_H
+#define MEDIADOWNLOADMANAGER_H
 
+#include <QMap>
+#include <QMutex>
 #include <QObject>
-#include <QFutureWatcher>
-#include <QTimer>
+#include <QUrl>
 
-class QProgressDialog;
 class MediaDownload;
+class QNetworkCookieJar;
 
-class EventVideoDownload : public QObject
+class MediaDownloadManager : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit EventVideoDownload(QObject *parent = 0);
-    ~EventVideoDownload();
+    explicit MediaDownloadManager(QObject *parent = 0);
+    virtual ~MediaDownloadManager();
 
-    void setMediaDownload(MediaDownload *download);
-    void setFilePath(const QString &path);
+    QNetworkCookieJar *cookieJar() const { return m_cookieJar; }
+    void setCookieJar(QNetworkCookieJar *cookieJar);
 
-    void start(QWidget *parentWindow = 0);
-
-private slots:
-    void startCopy();
-    void copyFinished();
-    void updateBufferProgress();
-    void cancel();
+    MediaDownload * acquireMediaDownload(const QUrl &url);
+    void releaseMediaDownload(const QUrl &url);
 
 private:
-    QProgressDialog *m_dialog;
-    QFutureWatcher<bool> *m_futureWatch;
-    MediaDownload *m_media;
-    QString m_tempFilePath;
-    QString m_finalPath;
-    QTimer m_progressTimer;
+    QMap<QUrl, MediaDownload *> m_mediaDownloads;
+    QMutex m_mapMutex;
+    QNetworkCookieJar *m_cookieJar;
+
+    MediaDownload * getOrCreate(const QUrl &url);
 };
 
-#endif // EVENTVIDEODOWNLOAD_H
+#endif // MEDIADOWNLOADMANAGER_H

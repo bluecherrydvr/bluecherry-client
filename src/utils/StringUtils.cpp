@@ -48,3 +48,11 @@ QString byteSizeString(quint64 bytes, ByteSizeFormat format)
 
     return QString::number(v, 'f', 0) + QLatin1Char(' ') + suffix;
 }
+
+QString withSuffix(const QString &string, const QString &suffix)
+{
+    if (string.endsWith(suffix))
+        return string;
+    else
+        return string + suffix;
+}

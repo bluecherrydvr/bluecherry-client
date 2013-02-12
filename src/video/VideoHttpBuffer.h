@@ -31,14 +31,12 @@ class VideoHttpBuffer : public QObject
     Q_OBJECT
 
 public:
-    explicit VideoHttpBuffer(QObject *parent = 0);
+    explicit VideoHttpBuffer(const QUrl &url, QObject *parent = 0);
     ~VideoHttpBuffer();
 
     /* Create and prepare a source element; the element will be added to the pipeline,
      * but not linked. */
     GstElement *setupSrcElement(GstElement *pipeline);
-
-    MediaDownload *mediaDownload() const { return media; }
 
     bool isBuffering() const { return media && !media->isFinished(); }
 
@@ -46,11 +44,11 @@ public:
     qint64 bufferedSize() const { return media ? media->downloadedSize() : 0; }
     int bufferedPercent() const;
     bool isBufferingFinished() const { return media && media->isFinished(); }
+    bool startBuffering();
 
-    void setCookies(const QList<QNetworkCookie> &cookies);
+    QUrl url() const { return m_url; }
 
 public slots:
-    bool start(const QUrl &url);
     void clearPlayback();
 
 signals:
@@ -70,10 +68,10 @@ private slots:
     void sendStreamError(const QString &message);
 
 private:
+    QUrl m_url;
     MediaDownload *media;
     GstAppSrc *m_element;
     GstElement *m_pipeline;
-    QList<QNetworkCookie> m_cookies;
 
     static void needDataWrap(GstAppSrc *, unsigned, void*);
     static int seekDataWrap(GstAppSrc *, quint64, void*);
