@@ -154,18 +154,18 @@ bool MediaDownload::seek(unsigned offset)
 
     m_readPos = offset;
 
-    unsigned npos, nsize;
-    if (m_bufferRanges.nextMissingRange(m_readPos - qMin(m_readPos, seekMinimumSkip), m_fileSize, npos, nsize))
+    Range missingRange = m_bufferRanges.nextMissingRange(Range::fromStartSize(m_readPos - qMin(m_readPos, seekMinimumSkip), m_fileSize));
+    if (missingRange.isValid())
     {
-        if (npos >= m_writePos && npos - m_writePos < seekMinimumSkip)
+        if (missingRange.start() >= m_writePos && missingRange.start() - m_writePos < seekMinimumSkip)
         {
             /* We're already downloading at the correct position; nothing to do */
         }
         else
         {
             qDebug() << "MediaDownload: launching new request after seek";
-            m_writePos = npos;
-            startRequest(npos, nsize);
+            m_writePos = missingRange.start();
+            startRequest(missingRange.start(), missingRange.size());
         }
     }
 
@@ -182,7 +182,7 @@ int MediaDownload::read(unsigned position, char *buffer, int reqSize)
     unsigned oldRdPos = m_readPos;
     int size = qMin(reqSize, (m_fileSize >= position) ? int(m_fileSize - position) : 0);
 
-    while (!m_bufferRanges.contains(position, size))
+    while (!m_bufferRanges.contains(Range::fromStartSize(position, size)))
     {
         m_bufferWait.wait(&m_bufferLock);
         if (oldRdPos != m_readPos)
@@ -316,7 +316,7 @@ void MediaDownload::incomingData(const QByteArray &data, unsigned position)
 
     Q_ASSERT(re == data.size());
 
-    m_bufferRanges.insert(position, re);
+    m_bufferRanges.insert(Range::fromStartSize(position, re));
 
     if (m_writePos == position)
         m_writePos += re;
@@ -345,9 +345,9 @@ void MediaDownload::taskFinished()
 
     /* These should both be true or both be false, anything else is a logic error.
      * This test does assume that we will never download the same byte twice. */
-    Q_ASSERT(!(m_bufferRanges.contains(0, m_fileSize) ^ (m_downloadedSize >= m_fileSize)));
+    Q_ASSERT(!(m_bufferRanges.contains(Range::fromStartSize(0, m_fileSize)) ^ (m_downloadedSize >= m_fileSize)));
 
-    if (m_bufferRanges.contains(0, m_fileSize))
+    if (m_bufferRanges.contains(Range::fromStartSize(0, m_fileSize)))
     {
         qDebug() << "MediaDownload: Media finished";
         m_isFinished = true;
@@ -361,25 +361,11 @@ void MediaDownload::taskFinished()
     {
         /* Launch a new task to fill in gaps. Prioritize anything that is missing and is closest
          * to the current read position. */
-        unsigned npos, nsize;
-        if (!m_bufferRanges.nextMissingRange(m_readPos, m_fileSize, npos, nsize))
-        {
-            if (npos >= m_fileSize && !m_bufferRanges.nextMissingRange(0, m_fileSize, npos, nsize))
-            {
-                /* Should not be possible; this would mean that 0-m_fileSize is included. */
-                Q_ASSERT_X(false, "RangeMap", "Impossible conflict between nextMissingRange and contains");
-                m_isFinished = true;
-                bool ok = metaObject()->invokeMethod(this, "finished", Qt::QueuedConnection);
-                Q_ASSERT(ok);
-                ok = metaObject()->invokeMethod(this, "stopped", Qt::QueuedConnection);
-                Q_ASSERT(ok);
-                Q_UNUSED(ok);
-                return;
-            }
-        }
+        Range missingRange = m_bufferRanges.nextMissingRange(Range::fromStartSize(m_readPos, m_fileSize));
+        Q_ASSERT(missingRange.isValid());
 
-        m_writePos = npos;
-        startRequest(npos, nsize);
+        m_writePos = missingRange.start();
+        startRequest(missingRange.start(), missingRange.size());
     }
 }
 
