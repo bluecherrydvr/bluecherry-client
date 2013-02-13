@@ -5,7 +5,7 @@
 #include <QObject>
 
 class DVRServer;
-class EventData;
+struct EventData;
 
 class EventsLoader : public QObject
 {

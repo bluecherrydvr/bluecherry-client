@@ -4,3 +4,11 @@ moc_*.cpp
 qrc_*.cpp
 /Makefile
 tests-build-*
+*.user
+*.obj
+*.dll
+*.exe
+*.res
+*.ilk
+*.pdb
+*.intermediate.*

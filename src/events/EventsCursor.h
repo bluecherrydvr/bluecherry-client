@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-class EventData;
+struct EventData;
 
 class EventsCursor : public QObject
 {
