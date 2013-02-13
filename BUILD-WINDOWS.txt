@@ -1,0 +1,58 @@
+REQUIREMENTS
+
+To compile bluecherry-client on Windows install following applications and libraries:
+
+* Qt libraries 4.8.4 for Windows (VS 2010)
+  http://releases.qt-project.org/qt4/source/qt-win-opensource-4.8.4-vs2010.exe
+
+* Qt Creator 2.6.2 for Windows
+  http://releases.qt-project.org/qtcreator/2.6.2/qt-creator-windows-opensource-2.6.2.exe
+
+* Microsoft Visual Studio 2008 Express Edition (C++)
+  http://go.microsoft.com/?linkid=9709949
+
+* Microsoft Visual Studio 2008 Express Edition SP1
+  http://www.microsoft.com/en-us/download/confirmation.aspx?id=23691
+
+* libav for Windows
+  http://win32.libav.org/releases/libav-9.1-win32.7z
+  unpack under C:\bluecherry\deps\libav
+
+* msinttypes
+  http://msinttypes.googlecode.com/files/msinttypes-r26.zip
+  unpack only inttypes.h under C:\bluecherry\deps\msinttypes
+
+CONFIGURING Qt Creator
+
+Run Qt Creator and configure Qt Kit:
+- open Options window (Tools -> Options...)
+- select Qt Versions tab (Build & Run -> Qt Versions)
+- add Qt 4.8.4 to system (Add -> C:\Qt\4.8.4\bin\qmake.exe)
+- select Kits tab (Build & Run -> Kits)
+- click Add and fill out form:
+  * Name: Qt 4.8.4
+  * Device type: Desktop
+  * Device: Run locally (default for Desktop)
+  * Compiler: Microsoft Visual C++ Compiler 10.0 (x86)
+  * Qt version:  Qt 4.8.4
+
+CONFIGURING bluecherry-client
+
+Import bluecherry-client to Qt Creator:
+- open client.pro file (File -> Open File or Project...)
+- open Project tab
+- ensure that Qt 4.8.4 is selected
+- click Configure Project
+- go back to Projec tab
+- edit Build Environment by clicking on Details
+- add new setting for LIBAV_PATH: set to C:\bluecherry\deps\libav\win32\usr
+- update setting for INCLUDE: append C:\bluecherry\deps\msinttypes;
+- update setting for PATH: append C:\bluecherry\deps\libav\win32\usr\bin;C:\bluecherry\bluecherry-client-master\gstreamer-bin\win\bin;
+
+BUILDING bluecherry-client
+
+Press Ctrl+B from Qt Creator to build.
+
+EXECUTING bluecherry-client
+
+Press Ctrl+R from Qt Creator to execute.
