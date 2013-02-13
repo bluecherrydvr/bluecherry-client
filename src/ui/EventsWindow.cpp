@@ -381,15 +381,7 @@ void EventsWindow::timelineZoomRangeChanged(int min, int max)
 void EventsWindow::showEvent(const QModelIndex &index)
 {
     EventData *data = index.data(EventsModel::EventDataPtr).value<EventData*>();
-    if (!data->hasMedia())
-        return;
-
-    m_eventViewer->setEvent(*data);
-
-    /* Hack to ensure that the video area isn't collapsed */
-    if (m_videoSplitter->sizes()[1] == 0)
-        m_videoSplitter->setSizes(QList<int>() << m_videoSplitter->sizes()[0] << 1);
-    m_eventViewer->show();
+    showEvent(*data);
 
     m_modelEventsCursor->setCameraFilter(data->locationCamera());
     m_modelEventsCursor->setIndex(index.row());
@@ -442,7 +434,7 @@ void EventsWindow::eventContextMenu(const QPoint &pos)
     if (!act)
         return;
     else if (act == aPlay)
-        showEvent(selectedMediaEvents.at(0));
+        showEvent(view->currentIndex());
     else if (act == aPlayWindow)
     {
         ModelEventsCursor *modelEventsCursor = new ModelEventsCursor();
