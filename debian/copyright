@@ -3,8 +3,16 @@ Name: Bluecherry DVR Client
 Maintainer: Bluecherry <maintainers@bluecherry.net>
 
 Files: *
-Copyright: 2011, Bluecherry, LLC
-License: Proprietary-BC
+Copyright: 2011-2013, Bluecherry, LLC
+License: GPL-2+
 
-License: Proprietary-BC
- All rights reserved. No distribution is permitted.
+Files: */breakpad
+Copyright: 2006, Google Inc.
+Licence: BSD-3-clause
+
+Files: */breakpad-bin
+Copyright: 2006, Google Inc.
+Licence: BSD-3-clause
+
+Files: */gstreamer-bin
+License: GPL-2+
