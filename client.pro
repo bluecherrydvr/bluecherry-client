@@ -315,4 +315,5 @@ OTHER_FILES += mac/Info.plist "linux/Bluecherry Client.desktop" \
     debian/copyright \
     debian/control \
     debian/compat \
-    debian/changelog
+    debian/changelog \
+    scripts/create-source-package.sh
