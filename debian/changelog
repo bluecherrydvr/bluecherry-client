@@ -1,3 +1,16 @@
+bluecherry-client (1:2.1.0-1) lucid; urgency=low
+
+  * Licence changed to GPL2+
+  * Unit tests added
+  * Bug #1138: Crashes related to the configuration file
+  * Feature #1032: Advance to the next video after a video is finished
+  * Feature #1167: Minimize connected servers
+  * Feature #1105: Add server port status indicators during 'Configure a DVR Server'
+  * Feature #1178: Change default file name when saving videos
+  * Feature #1188: Support saving of multiple videos to disk
+
+ -- Rafał Malinowski <rafal.malinowski@corp.bluecherry.net>  Thu, 14 Feb 2013 23:17:57 +0100
+
 bluecherry-client (1:2.0.1-1) lucid; urgency=low
 
   * Bug #1141: Connecting to a hostname can result in 'SSL Handshake Failed'
