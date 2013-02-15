@@ -41,8 +41,7 @@ void EventsLoader::loadEvents()
     }
 
     QUrl url(QLatin1String("/events/"));
-    if (m_limit > 0)
-        url.addQueryItem(QLatin1String("limit"), QString::number(m_limit));
+    url.addQueryItem(QLatin1String("limit"), QString::number(m_limit));
     if (!m_startTime.isNull())
         url.addQueryItem(QLatin1String("startDate"), QString::number(m_startTime.toTime_t()));
     if (!m_endTime.isNull())
