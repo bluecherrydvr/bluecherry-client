@@ -310,4 +310,9 @@ OTHER_FILES += mac/Info.plist "linux/Bluecherry Client.desktop" \
     win/installer.nsi \
     README.txt \
     COPYING \
-    BUILD-WINDOWS.txt
+    BUILD-WINDOWS.txt \
+    debian/rules \
+    debian/copyright \
+    debian/control \
+    debian/compat \
+    debian/changelog
