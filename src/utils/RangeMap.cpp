@@ -48,7 +48,7 @@ QList<Range>::Iterator RangeMap::findContainingRange(unsigned value)
         QList<Range>::Iterator i = from + half;
         if (i->includes(value))
             return i;
-        if (from == to)
+        if (from >= to)
             return m_ranges.end();
         if (i->start() > value)
             to = i - 1;
