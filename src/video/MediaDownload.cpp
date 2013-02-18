@@ -361,7 +361,7 @@ void MediaDownload::taskFinished()
     {
         /* Launch a new task to fill in gaps. Prioritize anything that is missing and is closest
          * to the current read position. */
-        Range missingRange = m_bufferRanges.nextMissingRange(Range::fromStartSize(m_readPos, m_fileSize));
+        Range missingRange = m_bufferRanges.nextMissingRange(Range::fromStartEnd(m_readPos, m_fileSize));
         Q_ASSERT(missingRange.isValid());
 
         m_writePos = missingRange.start();
