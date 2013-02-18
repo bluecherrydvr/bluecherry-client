@@ -154,7 +154,7 @@ bool MediaDownload::seek(unsigned offset)
 
     m_readPos = offset;
 
-    Range missingRange = m_bufferRanges.nextMissingRange(Range::fromStartSize(m_readPos - qMin(m_readPos, seekMinimumSkip), m_fileSize));
+    Range missingRange = m_bufferRanges.nextMissingRange(Range::fromStartEnd(m_readPos - qMin(m_readPos, seekMinimumSkip), m_fileSize));
     if (missingRange.isValid())
     {
         if (missingRange.start() >= m_writePos && missingRange.start() - m_writePos < seekMinimumSkip)
