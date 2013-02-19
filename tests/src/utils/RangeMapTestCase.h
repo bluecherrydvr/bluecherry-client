@@ -20,6 +20,8 @@ private Q_SLOTS:
     void checkMissingRangeEmpty();
     void checkMissingRangeOneItem();
     void checkMissingRangeTwoItems();
+
+    void testStreamingError();
 };
 
 #endif

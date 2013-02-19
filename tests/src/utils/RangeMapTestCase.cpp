@@ -249,3 +249,15 @@ void RangeMapTestCase::checkMissingRangeTwoItems()
     QCOMPARE(result.start(), 50u);
     QCOMPARE(result.size(), 19u);
 }
+
+void RangeMapTestCase::testStreamingError()
+{
+    RangeMap stramingErrorRangeMap;
+    stramingErrorRangeMap.insert(Range::fromStartEnd(0, 81919));
+    stramingErrorRangeMap.insert(Range::fromStartEnd(643425, 651616));
+    stramingErrorRangeMap.insert(Range::fromStartEnd(1382819, 1478850));
+
+    Range missingRange = Range::fromStartEnd(739425, 743520);
+
+    QVERIFY(!stramingErrorRangeMap.contains(missingRange));
+}
