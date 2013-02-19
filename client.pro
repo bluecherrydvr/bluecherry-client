@@ -316,6 +316,11 @@ OTHER_FILES += mac/Info.plist "linux/Bluecherry Client.desktop" \
     debian/control \
     debian/compat \
     debian/changelog \
+    debian/source/format \
     scripts/create-source-package.sh \
     scripts/install-qt.sh \
-    scripts/install-libav.sh
+    scripts/install-libav.sh \
+    scripts/install-libav.sh \
+    scripts/install-qt.sh \
+    scripts/create-debian-package.sh
+
