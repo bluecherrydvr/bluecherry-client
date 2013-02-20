@@ -1,7 +1,10 @@
 !include MUI2.nsh
 
-!define QT_PATH "C:\Qt\32bit-stable\bin"
-!define LIBAV_PATH "C:\Users\Administrator\Development\libav\bin"
+!define BIN_PATH "C:\GitHub\client-build-Qt_4_8_4-Debug\debug"
+!define QT_PATH "C:\Qt\4.8.4\bin"
+!define LIBAV_PATH "C:\bluecherry\deps\libav\win32\usr\bin"
+!define LIBOPENSSL_PATH "C:\bluecherry\deps\openssl\bin"
+!define WINDOWS_DLL_PATH "C:\Windows\System32"
 
 Name "Bluecherry Client"
 OutFile "SetupBluecherryClient.exe"
@@ -27,8 +30,8 @@ SetCompressor /FINAL /SOLID lzma
 Section
         SetOutPath "$INSTDIR"
         SetShellVarContext all
-        
-        File "BluecherryClient.exe"
+
+        File "${BIN_PATH}\BluecherryClient.exe"
         File "..\gstreamer-bin\win\bin\*.*"
         File /r "..\gstreamer-bin\win\plugins"
         File "${QT_PATH}\QtCore4.dll"
@@ -40,24 +43,30 @@ Section
         File "${QT_PATH}\QtScript4.dll"
         File "${QT_PATH}\QtSql4.dll" # required by QtDeclarative
         File "${QT_PATH}\QtXmlPatterns4.dll" # QtDeclarative
-        File "${QT_PATH}\ssleay32.dll"
-        File "${QT_PATH}\libeay32.dll"
-	File "${LIBAV_PATH}\avcodec-54.dll"
-	File "${LIBAV_PATH}\avformat-54.dll"
-	File "${LIBAV_PATH}\avutil-51.dll"
-	File "${LIBAV_PATH}\swscale-2.dll"
-        
+        File "${LIBOPENSSL_PATH}\ssleay32.dll"
+        File "${LIBOPENSSL_PATH}\libeay32.dll"
+        File "${LIBAV_PATH}\avcodec-54.dll"
+        File "${LIBAV_PATH}\avformat-54.dll"
+        File "${LIBAV_PATH}\avutil-52.dll"
+        File "${LIBAV_PATH}\swscale-2.dll"
+        File "${LIBAV_PATH}\libmp3lame-0.dll"
+        File "${LIBAV_PATH}\libvo-aacenc-0.dll"
+        File "${LIBAV_PATH}\libvorbis-0.dll"
+        File "${LIBAV_PATH}\libogg-0.dll"
+        File "${LIBAV_PATH}\libvorbisenc-2.dll"
+        File "${LIBAV_PATH}\libx264-125.dll"
+
         # MSVC 2010 CRT
-        File "msvcp100.dll"
-        File "msvcr100.dll"
-        
+        File "${WINDOWS_DLL_PATH}\msvcp100.dll"
+        File "${WINDOWS_DLL_PATH}\msvcr100.dll"
+
         SetOutPath "$INSTDIR\imageformats"
         File "${QT_PATH}\..\plugins\imageformats\qjpeg4.dll"
         File "${QT_PATH}\..\plugins\imageformats\qgif4.dll"
-        
+
         CreateDirectory "$SMPROGRAMS\Bluecherry"
         CreateShortCut "$SMPROGRAMS\Bluecherry\Bluecherry Client.lnk" "$INSTDIR\BluecherryClient.exe"
-        
+
         WriteRegStr HKLM "Software\Bluecherry Client" "" $INSTDIR
         WriteUninstaller "$INSTDIR\Uninstall.exe"
         WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Bluecherry Client" \
