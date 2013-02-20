@@ -22,7 +22,7 @@
 #include <QQueue>
 
 class QTimer;
-class EventData;
+struct EventData;
 class EventVideoDownload;
 
 class EventDownloadManager : public QObject
