@@ -15,6 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "bluecherry-config.h"
 #include "core/BluecherryApp.h"
 #include "core/LiveStream.h"
 #include "ui/MainWindow.h"

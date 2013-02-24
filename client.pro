@@ -22,19 +22,10 @@ TARGET = BluecherryClient
 TEMPLATE = app
 
 unix:!macx {
-    TARGET = bluecherry-client
-    target.path = /usr/bin
-    shortcut.path = /usr/share/applications
-    shortcut.files = "linux/Bluecherry Client.desktop"
-    resources.path = /usr/share/bluecherry-client
-    resources.files = "res/bluecherry.png"
-    INSTALLS += target shortcut resources
-
-    # XXX
-    LIBAV_PATH = /usr/lib/bluecherry/client
+    error("qMake builds are not supported on Linux anymore, use CMake instead")
 }
 win32 {
-    LIBAV_PATH = $$(LIBAV_PATH)
+    error("qMake builds are not supported on Windows anymore, use CMake instead")
 }
 
 macx:QMAKE_POST_LINK += cp $${_PRO_FILE_PWD_}/mac/Info.plist $${OUT_PWD}/$${TARGET}.app/Contents/;
@@ -56,18 +47,9 @@ win32-msvc2008|win32-msvc2010 {
 
 isEmpty(LIBAV_PATH):error(Set LIBAV_PATH to the libav installed prefix)
 INCLUDEPATH += "$$LIBAV_PATH/include"
-win32:LIBS += -L"$$LIBAV_PATH/bin"
-unix:!macx:LIBS += -Wl,-rpath,"$$LIBAV_PATH/lib"
 LIBS += -L"$$LIBAV_PATH/lib" -lavformat -lavcodec -lavutil -lswscale
 # Is this necessary with shared libav?
 macx:LIBS += -framework QuartzCore -framework VideoDecodeAcceleration
-
-unix:!macx {
-    # GStreamer
-    CONFIG += link_pkgconfig
-    PKGCONFIG += gstreamer-0.10 gstreamer-interfaces-0.10 gstreamer-app-0.10 gstreamer-video-0.10
-    DEFINES += USE_GSTREAMER
-}
 
 macx {
     # Bundled GStreamer
@@ -83,52 +65,16 @@ macx {
     QMAKE_POST_LINK += "; cd - >/dev/null;"
 }
 
-win32 {
-    isEmpty(GSTREAMER_PATH) {
-        message(Using bundled GStreamer)
-        GSTREAMER_PATH = "$$PWD/gstreamer-bin/win"
-    }
-    INCLUDEPATH += "$${GSTREAMER_PATH}/include" "$${GSTREAMER_PATH}/include/gstreamer-0.10" "$${GSTREAMER_PATH}/include/glib-2.0" "$${GSTREAMER_PATH}/include/libxml2"
-    LIBS += -L"$${GSTREAMER_PATH}/lib" gstreamer-0.10.lib gstinterfaces-0.10.lib gstapp-0.10.lib gstvideo-0.10.lib glib-2.0.lib gobject-2.0.lib
-    DEFINES += USE_GSTREAMER
-    CONFIG(debug, debug|release):DEFINES += GSTREAMER_PLUGINS=\\\"$$PWD/gstreamer-bin/win/plugins\\\"
-    CONFIG(release, debug|release):DEFINES += GSTREAMER_PLUGINS=\\\"plugins\\\"
-}
-
 !CONFIG(no-breakpad) {
     DEFINES += USE_BREAKPAD
     INCLUDEPATH += "$$PWD/breakpad/src"
     SOURCES += src/utils/Breakpad.cpp
-
-    unix:QMAKE_CXXFLAGS_RELEASE += -gstabs
-
-    unix:!macx {
-        BREAKPAD_LIB = "$$PWD/breakpad/src/client/linux/libbreakpad.a"
-        BREAKPAD_DUMPSYMS = "$$PWD/breakpad/src/tools/linux/dump_syms/dump_syms"
-        LIBS += $$BREAKPAD_LIB
-
-        breakpad-client.target = $$BREAKPAD_LIB
-        breakpad-client.commands = $(MAKE) -C "$$PWD/breakpad/src/client/linux/"
-        breakpad-dumpsyms.target = $$BREAKPAD_DUMPSYMS
-        breakpad-dumpsyms.commands = $(MAKE) -C "$$PWD/breakpad/src/tools/linux/dump_syms/"
-
-        QMAKE_EXTRA_TARGETS += breakpad-client breakpad-dumpsyms
-        PRE_TARGETDEPS += $$BREAKPAD_LIB $$BREAKPAD_DUMPSYMS
-
-        QMAKE_POST_LINK = python "$$PWD/breakpad-bin/symbolstore.py" "$$BREAKPAD_DUMPSYMS" $${TARGET}.symbols $(TARGET); $$QMAKE_POST_LINK
-    }
 
     macx {
         QMAKE_LFLAGS += -F$$PWD/breakpad-bin/mac
         LIBS += -framework Breakpad
 
         QMAKE_POST_LINK += cd "$$PWD"; breakpad-bin/mac/gather_symbols.sh $${OUT_PWD}/$${TARGET}; cd - >/dev/null;
-    }
-
-    win32 {
-        CONFIG(debug, debug|release):LIBS += -L"$$PWD/breakpad-bin/win/lib-debug"
-        CONFIG(release, debug|release):LIBS += -L"$$PWD/breakpad-bin/win/lib-release"
-        LIBS += common.lib crash_generation_client.lib exception_handler.lib
     }
 }
 

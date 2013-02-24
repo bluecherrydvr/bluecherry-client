@@ -1,5 +1,27 @@
-#include "RangeMapTestCase.h"
 #include "utils/RangeMap.h"
+#include <QtTest/QtTest>
+#include <QDebug>
+
+const char *jpegFormatName = "jpeg"; // hack
+
+class RangeMapTestCase : public QObject
+{
+    Q_OBJECT
+
+private Q_SLOTS:
+    void checkRangeMapInsert();
+    void checkEmptyRange();
+    void checkOneItemRange();
+    void checkTwoItemsRange();
+    void checkMergedRange();
+    void checkOverlappingRange();
+    void checkBigOverlappingRange();
+    void checkMissingRangeEmpty();
+    void checkMissingRangeOneItem();
+    void checkMissingRangeTwoItems();
+
+    void testStreamingError();
+};
 
 void RangeMapTestCase::checkRangeMapInsert()
 {
@@ -261,3 +283,7 @@ void RangeMapTestCase::testStreamingError()
 
     QVERIFY(!stramingErrorRangeMap.contains(missingRange));
 }
+
+QTEST_MAIN(RangeMapTestCase)
+
+#include "RangeMapTestCase.moc"

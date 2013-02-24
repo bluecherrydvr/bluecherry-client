@@ -1,5 +1,19 @@
-#include "RangeTestCase.h"
 #include "utils/Range.h"
+#include <QtTest/QtTest>
+#include <QDebug>
+
+const char *jpegFormatName = "jpeg"; // hack
+
+class RangeTestCase : public QObject
+{
+    Q_OBJECT
+
+private Q_SLOTS:
+    void testInvalidRange();
+    void testValueRange();
+    void testStartEndRange();
+    void testStartSizeRange();
+};
 
 void RangeTestCase::testInvalidRange()
 {
@@ -99,3 +113,7 @@ void RangeTestCase::testStartSizeRange()
     QCOMPARE(startSizeRange.start(), 0u);
     QCOMPARE(startSizeRange.end(), 11u);
 }
+
+QTEST_MAIN(RangeTestCase)
+
+#include "RangeTestCase.moc"

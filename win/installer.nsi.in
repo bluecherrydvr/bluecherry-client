@@ -1,8 +1,10 @@
 !include MUI2.nsh
 
-!define BIN_PATH "C:\GitHub\client-build-Qt_4_8_4-Debug\debug"
-!define QT_PATH "C:\Qt\4.8.4\bin"
-!define LIBAV_PATH "C:\bluecherry\deps\libav\win32\usr\bin"
+!define SRC_PATH "@CMAKE_SOURCE_DIR@"
+!define BIN_PATH "@CMAKE_BINARY_DIR@"
+!define QT_PATH "@QT_BINARY_DIR@"
+!define LIBAV_PATH "@WIN32_LIBAV_DIR@\bin"
+!define GSTREAMER_PATH "@WIN32_GSTREAMER_DIR@\bin"
 !define LIBOPENSSL_PATH "C:\bluecherry\deps\openssl\bin"
 !define WINDOWS_DLL_PATH "C:\Windows\System32"
 
@@ -12,8 +14,8 @@ InstallDir "$PROGRAMFILES\Bluecherry Client"
 InstallDirRegKey HKLM "Software\Bluecherry Client" ""
 RequestExecutionLevel admin
 SetCompressor /FINAL /SOLID lzma
-!define MUI_ICON "..\res\bluecherry.ico"
-!define MUI_UNICON "..\res\bluecherry.ico"
+!define MUI_ICON "${SRC_PATH}\res\bluecherry.ico"
+!define MUI_UNICON "${SRC_PATH}\res\bluecherry.ico"
 
 !insertmacro MUI_PAGE_WELCOME
 #!insertmacro MUI_PAGE_LICENSE "${NSISDIR}\Docs\Modern UI\License.txt"
@@ -31,9 +33,10 @@ Section
         SetOutPath "$INSTDIR"
         SetShellVarContext all
 
-        File "${BIN_PATH}\BluecherryClient.exe"
-        File "..\gstreamer-bin\win\bin\*.*"
-        File /r "..\gstreamer-bin\win\plugins"
+        # Main
+        File /oname=BluecherryClient.exe "${BIN_PATH}\bluecherry-client.exe"
+
+        # Qt
         File "${QT_PATH}\QtCore4.dll"
         File "${QT_PATH}\QtGui4.dll"
         File "${QT_PATH}\QtNetwork4.dll"
@@ -43,8 +46,13 @@ Section
         File "${QT_PATH}\QtScript4.dll"
         File "${QT_PATH}\QtSql4.dll" # required by QtDeclarative
         File "${QT_PATH}\QtXmlPatterns4.dll" # QtDeclarative
-        File "${LIBOPENSSL_PATH}\ssleay32.dll"
-        File "${LIBOPENSSL_PATH}\libeay32.dll"
+
+        SetOutPath "$INSTDIR\imageformats"
+        File "${QT_PATH}\..\plugins\imageformats\qjpeg4.dll"
+        File "${QT_PATH}\..\plugins\imageformats\qgif4.dll"
+        SetOutPath "$INSTDIR"
+
+        # LibAV
         File "${LIBAV_PATH}\avcodec-54.dll"
         File "${LIBAV_PATH}\avformat-54.dll"
         File "${LIBAV_PATH}\avutil-52.dll"
@@ -56,13 +64,42 @@ Section
         File "${LIBAV_PATH}\libvorbisenc-2.dll"
         File "${LIBAV_PATH}\libx264-125.dll"
 
+        # GStreamer
+        File "${GSTREAMER_PATH}\iconv.dll"
+        File "${GSTREAMER_PATH}\libbz2.dll"
+        File "${GSTREAMER_PATH}\libglib-2.0-0.dll"
+        File "${GSTREAMER_PATH}\libgmodule-2.0-0.dll"
+        File "${GSTREAMER_PATH}\libgobject-2.0-0.dll"
+        File "${GSTREAMER_PATH}\libgstapp-0.10.dll"
+        File "${GSTREAMER_PATH}\libgstaudio-0.10.dll"
+        File "${GSTREAMER_PATH}\libgstbase-0.10.dll"
+        File "${GSTREAMER_PATH}\libgstinterfaces-0.10.dll"
+        File "${GSTREAMER_PATH}\libgstpbutils-0.10.dll"
+        File "${GSTREAMER_PATH}\libgstriff-0.10.dll"
+        File "${GSTREAMER_PATH}\libgsttag-0.10.dll"
+        File "${GSTREAMER_PATH}\libgstvideo-0.10.dll"
+        File "${GSTREAMER_PATH}\libgthread-2.0-0.dll"
+        File "${GSTREAMER_PATH}\liboil-0.3-0.dll"
+        File "${GSTREAMER_PATH}\libxml2-2.dll"
+        File "${GSTREAMER_PATH}\z.dll"
+
+        File "${GSTREAMER_PATH}\..\plugins\libgstapp.dll"
+        File "${GSTREAMER_PATH}\..\plugins\libgstautodetect.dll"
+        File "${GSTREAMER_PATH}\..\plugins\libgstcoreelements.dll"
+        File "${GSTREAMER_PATH}\..\plugins\libgstdecodebin2.dll"
+        File "${GSTREAMER_PATH}\..\plugins\libgstdirectsound.dll"
+        File "${GSTREAMER_PATH}\..\plugins\libgstffmpegcolorspace.dll"
+        File "${GSTREAMER_PATH}\..\plugins\libgstffmpeg-lgpl.dll"
+        File "${GSTREAMER_PATH}\..\plugins\libgstmatroska.dll"
+        File "${GSTREAMER_PATH}\..\plugins\libgsttypefindfunctions.dll"
+
+        # OpenSSL
+        File "${LIBOPENSSL_PATH}\ssleay32.dll"
+        File "${LIBOPENSSL_PATH}\libeay32.dll"
+
         # MSVC 2010 CRT
         File "${WINDOWS_DLL_PATH}\msvcp100.dll"
         File "${WINDOWS_DLL_PATH}\msvcr100.dll"
-
-        SetOutPath "$INSTDIR\imageformats"
-        File "${QT_PATH}\..\plugins\imageformats\qjpeg4.dll"
-        File "${QT_PATH}\..\plugins\imageformats\qgif4.dll"
 
         CreateDirectory "$SMPROGRAMS\Bluecherry"
         CreateShortCut "$SMPROGRAMS\Bluecherry\Bluecherry Client.lnk" "$INSTDIR\BluecherryClient.exe"
