@@ -27,6 +27,17 @@ set (USE_BREAKPAD 1)
 if (UNIX)
     set (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -gstabs)
     list (APPEND CMAKE_INCLUDE_PATH ${LINUX_BREAKPAD_DIR})
+
+    set (BREAKPAD_DUMPSYMS ${LINUX_BREAKPAD_DIR}/src/tools/linux/dump_syms/dump_syms)
+
+    add_custom_target (create-symbols
+        COMMAND python
+            ${CMAKE_SOURCE_DIR}/scripts/symbolstore.py
+            ${BREAKPAD_DUMPSYMS}
+            ${CMAKE_BINARY_DIR}/bluecherry-client.symbols
+            ${CMAKE_BINARY_DIR}/bluecherry-client
+        DEPENDS bluecherry-client
+    )
 elseif (WIN32)
     set (CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} /DEBUG)
     list (APPEND CMAKE_INCLUDE_PATH ${WIN32_BREAKPAD_SRC_DIR})
