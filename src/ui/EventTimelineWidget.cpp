@@ -285,7 +285,7 @@ void EventTimelineWidget::scrollTo(const QModelIndex &index, ScrollHint hint)
     if (event->utcStartDate() < viewTimeStart)
         horizontalScrollBar()->setValue(timeStart.secsTo(event->utcStartDate()));
     else if (event->utcStartDate().addSecs(event->durationInSeconds()) > viewTimeEnd)
-        horizontalScrollBar()->setValue(timeStart.secsTo(event->utcStartDate().addSecs(event->durationInSeconds())) - viewSeconds);
+        horizontalScrollBar()->setValue(timeStart.secsTo(event->utcEndDate()) - viewSeconds);
 }
 
 EventData *EventTimelineWidget::eventAt(const QPoint &point) const
@@ -705,7 +705,9 @@ void EventTimelineWidget::addModelRows(int first, int last)
         /* Update time span */
         if (dataTimeStart.isNull() || data->utcStartDate() < dataTimeStart)
             dataTimeStart = data->utcStartDate();
-        QDateTime ed = data->utcStartDate().addSecs(qMax(data->durationInSeconds(), 1));
+        QDateTime ed = data->utcEndDate();
+        if (ed == data->utcStartDate())
+            ed = ed.addSecs(1);
         if (dataTimeEnd.isNull() || ed > dataTimeEnd)
             dataTimeEnd = ed;
     }
