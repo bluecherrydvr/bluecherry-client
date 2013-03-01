@@ -20,7 +20,7 @@
 #include "core/DVRServer.h"
 #include "core/DVRCamera.h"
 #include "core/EventData.h"
-#include "events/EventsLoader.h"
+#include "event/EventsLoader.h"
 #include <QTextDocument>
 #include <QColor>
 #include <QDebug>

@@ -26,7 +26,7 @@
 #include "ui/SwitchEventsWidget.h"
 #include "core/DVRServer.h"
 #include "core/BluecherryApp.h"
-#include "events/EventsCursor.h"
+#include "event/EventsCursor.h"
 #include <QBoxLayout>
 #include <QSplitter>
 #include <QFrame>

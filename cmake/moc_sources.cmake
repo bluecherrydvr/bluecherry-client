@@ -29,11 +29,10 @@ set (bluecherry_client_MOC_SRCS
     src/core/TransferRateCalculator.h
 
     src/event/EventDownloadManager.h
+    src/event/EventsCursor.h
+    src/event/EventsLoader.h
     src/event/EventVideoDownload.h
-
-    src/events/EventsCursor.h
-    src/events/EventsLoader.h
-    src/events/ModelEventsCursor.h
+    src/event/ModelEventsCursor.h
 
     src/network/MediaDownloadManager.h
     src/network/RemotePortChecker.h

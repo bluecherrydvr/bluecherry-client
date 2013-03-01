@@ -26,7 +26,7 @@
 #include "EventTagsModel.h"
 #include "EventsModel.h"
 #include "core/BluecherryApp.h"
-#include "events/ModelEventsCursor.h"
+#include "event/ModelEventsCursor.h"
 #include "ui/MainWindow.h"
 #include "event/CameraEventFilter.h"
 #include "event/EventDownloadManager.h"
