@@ -32,6 +32,7 @@ endif (EXISTS ${CMAKE_SOURCE_DIR}/user.cmake)
 set (bluecherry_client_SRCS "")
 set (bluecherry_client_LIBRARIES "")
 
+include (cmake/version.cmake)
 include (cmake/sources.cmake)
 
 include (cmake/qt.cmake)
@@ -59,7 +60,4 @@ endif (WIN32)
 
 include (cmake/build.cmake)
 include (cmake/install.cmake)
-
-message (STATUS "Bluecherry Client will be built:")
-message (STATUS " * install prefix: ${CMAKE_INSTALL_PREFIX}")
-message (STATUS " * build type: ${CMAKE_BUILD_TYPE}")
+include (cmake/display-status.cmake)
