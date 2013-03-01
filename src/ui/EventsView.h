@@ -20,7 +20,7 @@
 
 #include <QTreeView>
 
-class EventData;
+struct EventData;
 class EventList;
 class EventsModel;
 class QLabel;

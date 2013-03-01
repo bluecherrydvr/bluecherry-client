@@ -8,15 +8,8 @@ github.com/bluecherrydvr/bluecherry-client.  Occasional support can be found on 
 
 ---------
 
-Requirements (Ubuntu 12.04 LTS 32 & 64):
-    qt4-qmake
-    libqt4-dev
-    libgstreamer0.10-dev
-    gstreamer0.10-plugins-good
-    libgstreamer-plugins-base0.10-dev
-    libavcodec-dev
-    libavformat-dev
-    libswscale-dev
+For Ubuntu: see BUILD-UBUNTU.txt
+For Windows: see BUILD-WINDOWS.txt
 
 Building:
     mkdir build; cd build
@@ -26,10 +19,6 @@ Building:
     For a release build, use: qmake ../client.pro 'CONFIG += release'
 
 Without breakpad: qmake ../client.pro 'CONFIG += no-breakpad'
-
-Breakpad (Linux):
-    Build the included copy of breakpad (./configure --disable-shared; make). Do not install.
-    Build the application normally. Breakpad is statically linked.
 
 Breakpad (Windows + MSVC):
     Python is required.

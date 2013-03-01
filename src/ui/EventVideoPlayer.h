@@ -18,6 +18,7 @@
 #ifndef EVENTVIDEOPLAYER_H
 #define EVENTVIDEOPLAYER_H
 
+#include "bluecherry-config.h"
 #include <QWidget>
 #include <QUrl>
 #include <QTimer>

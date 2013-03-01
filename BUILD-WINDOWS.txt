@@ -8,6 +8,9 @@ To compile bluecherry-client on Windows install following applications and libra
 * Qt Creator 2.6.2 for Windows
   http://releases.qt-project.org/qtcreator/2.6.2/qt-creator-windows-opensource-2.6.2.exe
 
+* CMake 2.8 for Windows
+  http://www.cmake.org/files/v2.8/cmake-2.8.10.2-win32-x86.exe
+
 * Microsoft Visual Studio 2008 Express Edition (C++)
   http://go.microsoft.com/?linkid=9709949
 
@@ -28,6 +31,7 @@ Run Qt Creator and configure Qt Kit:
 - open Options window (Tools -> Options...)
 - select Qt Versions tab (Build & Run -> Qt Versions)
 - add Qt 4.8.4 to system (Add -> C:\Qt\4.8.4\bin\qmake.exe)
+- click Apply
 - select Kits tab (Build & Run -> Kits)
 - click Add and fill out form:
   * Name: Qt 4.8.4
@@ -35,19 +39,21 @@ Run Qt Creator and configure Qt Kit:
   * Device: Run locally (default for Desktop)
   * Compiler: Microsoft Visual C++ Compiler 10.0 (x86)
   * Qt version:  Qt 4.8.4
+- click OK
 
 CONFIGURING bluecherry-client
 
 Import bluecherry-client to Qt Creator:
-- open client.pro file (File -> Open File or Project...)
-- open Project tab
-- ensure that Qt 4.8.4 is selected
-- click Configure Project
-- go back to Projec tab
-- edit Build Environment by clicking on Details
-- add new setting for LIBAV_PATH: set to C:\bluecherry\deps\libav\win32\usr
-- update setting for INCLUDE: append C:\bluecherry\deps\msinttypes;
-- update setting for PATH: append C:\bluecherry\deps\libav\win32\usr\bin;C:\bluecherry\bluecherry-client-master\gstreamer-bin\win\bin;
+- copy windows-user.cmake to user.cmake file
+- adjusts paths in user.cmake file, only WIN32_MSINTTYPES_DIR and WIN32_LIBAV_DIR should be adjusted
+- open CMakeLists.txt file (File -> Open File or Project...)
+- click Next
+- select C:\Program Files (x86)\CMake 2.8\bin\cmake.exe
+- click Next
+- enter -DCMAKE_BUILD_TYPE=Release for release build or -DCMAKE_BUILD_TYPE=Debug for Debug build
+- select NMake Generator
+- click Run CMake
+- click Finish
 
 BUILDING bluecherry-client
 
@@ -55,4 +61,5 @@ Press Ctrl+B from Qt Creator to build.
 
 EXECUTING bluecherry-client
 
+Select bluecherry-client from Run Toolbar.
 Press Ctrl+R from Qt Creator to execute.

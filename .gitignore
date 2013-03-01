@@ -12,3 +12,5 @@ tests-build-*
 *.ilk
 *.pdb
 *.intermediate.*
+*kdev4*
+user.cmake

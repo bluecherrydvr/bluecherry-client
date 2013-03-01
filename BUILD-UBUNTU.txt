@@ -1,0 +1,32 @@
+Note:  It is assumed that you have some experience in compiling Qt applications under your operating system.  
+If you do not have Qt development experience it is recommended that you download the binaries from 
+www.bluecherrydvr.com/downloads
+
+If you have general questions about features of the client feel free to post on community.bluecherrydvr.com.  
+If you find a bug or want to discuss a pending feature, feel free to use the 'Issues' tab on 
+github.com/bluecherrydvr/bluecherry-client.  Occasional support can be found on irc.bluecherry.net/bluecherry
+
+---------
+
+Requirements:
+  sudo apt-get install git-core cmake qt4-qmake libqt4-dev libgstreamer0.10-dev gstreamer0.10-plugins-good libgstreamer-plugins-base0.10-dev libavcodec-dev libavformat-dev libswscale-dev
+
+Breakpad is not available in standard installation. To install it use:
+  mkdir -p ~/dev/
+  cd ~/dev/
+  git clone https://github.com/vogel/bluecherry-client-scripts/
+  chmod +x ./bluecherry-client-scripts/dependencies/build-breakpad.sh
+  ./bluecherry-client-scripts/dependencies/build-breakpad.sh
+
+Create user.cmake file pointing to bluecherry:
+  cp linux-user.cmake user.cmake
+
+Update values of user.cmake file if breakpad is installed in non-default location.
+
+Next configure and build application:
+  mkdir build
+  cd build
+  cmake -DCMAKE_INSTALL_PREFIX=/user ../
+  make all
+  make test
+  sudo make install
