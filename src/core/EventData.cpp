@@ -119,9 +119,9 @@ void EventData::setUtcStartDate(const QDateTime utcStartDate)
     m_utcStartDate = utcStartDate;
 }
 
-void EventData::setDuration(int duration)
+void EventData::setDurationInSeconds(int durationInSeconds)
 {
-    m_duration = duration;
+    m_durationInSeconds = durationInSeconds;
 }
 
 void EventData::setLocationId(int locationId)
@@ -223,11 +223,11 @@ static inline void durationWord(QString &s, int n, const char *w)
 
 QString EventData::uiDuration() const
 {
-    if (duration() < 0)
+    if (durationInSeconds() < 0)
         return QApplication::translate("EventData", "In progress");
 
     QString re;
-    int d = qMax(1, duration()), count = 0;
+    int d = qMax(1, durationInSeconds()), count = 0;
 
     if (d >= (60*60*24))
     {
@@ -380,9 +380,9 @@ static EventData *parseEntry(DVRServer *server, QXmlStreamReader &reader)
         {
             QString d = reader.readElementText();
             if (d.isEmpty())
-                data->setDuration(-1);
+                data->setDurationInSeconds(-1);
             else
-                data->setDuration(data->utcStartDate().secsTo(isoToDateTime(d)));
+                data->setDurationInSeconds(data->utcStartDate().secsTo(isoToDateTime(d)));
         }
         else if (reader.name() == QLatin1String("content"))
         {

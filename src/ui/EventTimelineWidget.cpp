@@ -163,7 +163,7 @@ QRect EventTimelineWidget::visualRect(const QModelIndex &index) const
         if (*it != locationData)
             continue;
 
-        QRect re = timeCellRect(event->utcStartDate(), event->duration());
+        QRect re = timeCellRect(event->utcStartDate(), event->durationInSeconds());
         re.translate(itemArea.topLeft());
         re.moveTop(itemArea.top() + (it.key() - verticalScrollBar()->value()));
         re.setHeight(layoutHeightForRow(it));
@@ -284,8 +284,8 @@ void EventTimelineWidget::scrollTo(const QModelIndex &index, ScrollHint hint)
 
     if (event->utcStartDate() < viewTimeStart)
         horizontalScrollBar()->setValue(timeStart.secsTo(event->utcStartDate()));
-    else if (event->utcStartDate().addSecs(event->duration()) > viewTimeEnd)
-        horizontalScrollBar()->setValue(timeStart.secsTo(event->utcStartDate().addSecs(event->duration())) - viewSeconds);
+    else if (event->utcStartDate().addSecs(event->durationInSeconds()) > viewTimeEnd)
+        horizontalScrollBar()->setValue(timeStart.secsTo(event->utcStartDate().addSecs(event->durationInSeconds())) - viewSeconds);
 }
 
 EventData *EventTimelineWidget::eventAt(const QPoint &point) const
@@ -313,7 +313,7 @@ EventData *EventTimelineWidget::eventAt(const QPoint &point) const
     /* This is slow and can likely be improved. */
     for (QList<EventData*>::ConstIterator evit = location->events.begin(); evit != location->events.end(); ++evit)
     {
-        QRect eventRect = timeCellRect((*evit)->utcStartDate(), (*evit)->duration()).translated(itemArea.left(), 0);
+        QRect eventRect = timeCellRect((*evit)->utcStartDate(), (*evit)->durationInSeconds()).translated(itemArea.left(), 0);
         if (point.x() >= eventRect.left() && point.x() <= eventRect.right())
             return *evit;
     }
@@ -386,7 +386,7 @@ void EventTimelineWidget::setSelection(const QRect &irect, QItemSelectionModel::
 
         for (QList<EventData*>::ConstIterator evit = location->events.begin(); evit != location->events.end(); ++evit)
         {
-            QRect eventRect = timeCellRect((*evit)->utcStartDate(), (*evit)->duration()).translated(itemArea.left(), 0);
+            QRect eventRect = timeCellRect((*evit)->utcStartDate(), (*evit)->durationInSeconds()).translated(itemArea.left(), 0);
             if (eventRect.x() >= rect.x())
             {
                 if (eventRect.x() > rect.right())
@@ -494,7 +494,7 @@ void EventTimelineWidget::updateTimeRange(bool fromData)
             QDateTime date = it.key()->utcStartDate();
             if (dataTimeStart.isNull() || date < dataTimeStart)
                 dataTimeStart = date;
-            date = date.addSecs(qMax(it.key()->duration(), 1));
+            date = date.addSecs(qMax(it.key()->durationInSeconds(), 1));
             if (dataTimeEnd.isNull() || date > dataTimeEnd)
                 dataTimeEnd = date;
         }
@@ -705,7 +705,7 @@ void EventTimelineWidget::addModelRows(int first, int last)
         /* Update time span */
         if (dataTimeStart.isNull() || data->utcStartDate() < dataTimeStart)
             dataTimeStart = data->utcStartDate();
-        QDateTime ed = data->utcStartDate().addSecs(qMax(data->duration(), 1));
+        QDateTime ed = data->utcStartDate().addSecs(qMax(data->durationInSeconds(), 1));
         if (dataTimeEnd.isNull() || ed > dataTimeEnd)
             dataTimeEnd = ed;
     }
@@ -1019,13 +1019,13 @@ void EventTimelineWidget::paintRow(QPainter *p, QRect r, LocationData *locationD
     for (QList<EventData*>::Iterator it = locationData->events.begin(); it != locationData->events.end(); ++it)
     {
         EventData *data = *it;
-        if (data->utcStartDate().addSecs(data->duration()) < viewTimeStart)
+        if (data->utcStartDate().addSecs(data->durationInSeconds()) < viewTimeStart)
             continue;
 
         Q_ASSERT(rowsMap.contains(data));
         int modelRow = rowsMap[data];
 
-        QRect cellRect = timeCellRect(data->utcStartDate(), data->duration());
+        QRect cellRect = timeCellRect(data->utcStartDate(), data->durationInSeconds());
         cellRect.setX(qMax(cellRect.x(), 0));
         cellRect.translate(r.x(), r.y());
         cellRect.setHeight(r.height());

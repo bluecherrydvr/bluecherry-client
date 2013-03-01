@@ -166,8 +166,8 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
         if (role == Qt::DisplayRole)
             return data->uiDuration();
         else if (role == Qt::EditRole)
-            return data->duration();
-        else if (role == Qt::FontRole && data->duration() < 0)
+            return data->durationInSeconds();
+        else if (role == Qt::FontRole && data->durationInSeconds() < 0)
         {
             QFont f;
             f.setBold(true);
@@ -266,9 +266,9 @@ public:
 
         if (incompleteFirst)
         {
-            if (e1->duration() < 0 && e2->duration() >= 0)
+            if (e1->durationInSeconds() < 0 && e2->durationInSeconds() >= 0)
                 return true;
-            else if (e2->duration() < 0 && e1->duration() >= 0)
+            else if (e2->durationInSeconds() < 0 && e1->durationInSeconds() >= 0)
                 return false;
         }
 
@@ -284,7 +284,7 @@ public:
             re = QString::localeAwareCompare(e1->uiType(), e2->uiType()) <= 0;
             break;
         case EventsModel::DurationColumn:
-            re = e1->duration() <= e2->duration();
+            re = e1->durationInSeconds() <= e2->durationInSeconds();
             break;
         case EventsModel::LevelColumn:
             re = e1->level() <= e2->level();
