@@ -113,6 +113,7 @@ public:
     void setUtcStartDate(const QDateTime utcStartDate);
 
     int durationInSeconds() const { return m_durationInSeconds; }
+    bool hasDuration() const;
     void setDurationInSeconds(int durationInSeconds);
 
     bool inProgress() const;

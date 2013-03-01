@@ -131,7 +131,7 @@ QDateTime EventData::serverStartDate() const
 
 QDateTime EventData::serverEndDate() const
 {
-    if (durationInSeconds() <= 0)
+    if (!hasDuration())
         return serverStartDate();
 
     int dateTzOffsetSeconds = int(dateTzOffsetMins()) * 60;
@@ -143,6 +143,11 @@ QDateTime EventData::serverEndDate() const
 void EventData::setUtcStartDate(const QDateTime utcStartDate)
 {
     m_utcStartDate = utcStartDate;
+}
+
+bool EventData::hasDuration() const
+{
+    return durationInSeconds() > 0;
 }
 
 void EventData::setDurationInSeconds(int durationInSeconds)
