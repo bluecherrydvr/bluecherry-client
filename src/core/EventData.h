@@ -115,6 +115,9 @@ public:
     int durationInSeconds() const { return m_durationInSeconds; }
     void setDurationInSeconds(int durationInSeconds);
 
+    bool inProgress() const;
+    void setInProgress();
+
     DVRServer * server() const { return m_server; }
 
     int locationId() const { return m_locationId; }

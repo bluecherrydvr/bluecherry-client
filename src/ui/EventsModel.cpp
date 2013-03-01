@@ -167,7 +167,7 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
             return data->uiDuration();
         else if (role == Qt::EditRole)
             return data->durationInSeconds();
-        else if (role == Qt::FontRole && data->durationInSeconds() < 0)
+        else if (role == Qt::FontRole && data->inProgress())
         {
             QFont f;
             f.setBold(true);
@@ -266,9 +266,9 @@ public:
 
         if (incompleteFirst)
         {
-            if (e1->durationInSeconds() < 0 && e2->durationInSeconds() >= 0)
+            if (e1->inProgress() && !e2->inProgress())
                 return true;
-            else if (e2->durationInSeconds() < 0 && e1->durationInSeconds() >= 0)
+            else if (e2->inProgress() && !e1->inProgress())
                 return false;
         }
 

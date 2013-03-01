@@ -150,6 +150,16 @@ void EventData::setDurationInSeconds(int durationInSeconds)
     m_durationInSeconds = durationInSeconds;
 }
 
+bool EventData::inProgress() const
+{
+    return durationInSeconds() < 0;
+}
+
+void EventData::setInProgress()
+{
+    setDurationInSeconds(-1);
+}
+
 void EventData::setLocationId(int locationId)
 {
     m_locationId = locationId;
@@ -249,7 +259,7 @@ static inline void durationWord(QString &s, int n, const char *w)
 
 QString EventData::uiDuration() const
 {
-    if (durationInSeconds() < 0)
+    if (inProgress())
         return QApplication::translate("EventData", "In progress");
 
     QString re;
@@ -406,7 +416,7 @@ static EventData *parseEntry(DVRServer *server, QXmlStreamReader &reader)
         {
             QString d = reader.readElementText();
             if (d.isEmpty())
-                data->setDurationInSeconds(-1);
+                data->setInProgress();
             else
                 data->setDurationInSeconds(data->utcStartDate().secsTo(isoToDateTime(d)));
         }
