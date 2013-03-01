@@ -85,7 +85,7 @@ public:
 
 class EventData
 {
-    QDateTime m_utcDate;
+    QDateTime m_utcStartDate;
     DVRServer *m_server;
     qint64 m_eventId;
     qint64 m_mediaId;
@@ -106,8 +106,8 @@ public:
         return (o.m_server == m_server && o.m_eventId == m_eventId);
     }
 
-    QDateTime utcDate() const { return m_utcDate; }
-    void setUtcDate(const QDateTime utcDate);
+    QDateTime utcStartDate() const { return m_utcStartDate; }
+    void setUtcStartDate(const QDateTime utcStartDate);
 
     int duration() const { return m_duration; }
     void setDuration(int duration);
@@ -136,7 +136,7 @@ public:
 
     bool isSystem() const { return locationId() < 0; }
     bool isCamera() const { return locationId() >= 0; }
-    QDateTime endDate() const { return m_utcDate.addSecs(qMax(0, m_duration)); }
+    QDateTime endDate() const { return m_utcStartDate.addSecs(qMax(0, m_duration)); }
     QDateTime serverLocalDate() const;
     bool hasMedia() const { return m_mediaId >= 0; }
 
@@ -159,9 +159,9 @@ public:
 
 inline QDateTime EventData::serverLocalDate() const
 {
-    Q_ASSERT(m_utcDate.timeSpec() == Qt::UTC);
+    Q_ASSERT(m_utcStartDate.timeSpec() == Qt::UTC);
     int offs = int(dateTzOffsetMins()) * 60;
-    QDateTime r = m_utcDate.addSecs(offs);
+    QDateTime r = m_utcStartDate.addSecs(offs);
     r.setUtcOffset(offs);
     return r;
 }

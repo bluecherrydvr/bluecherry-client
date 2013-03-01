@@ -522,7 +522,7 @@ void EventVideoPlayer::saveSnapshot(const QString &ifile)
         if (m_event)
         {
             filename = QString::fromLatin1("%1 - %2.jpg").arg(m_event->uiLocation(),
-                                                              m_event->utcDate().addSecs(int(m_video->position() / 1000000000))
+                                                              m_event->utcStartDate().addSecs(int(m_video->position() / 1000000000))
                                                               .toString(QLatin1String("yyyy-MM-dd hh-mm-ss")));
         }
 

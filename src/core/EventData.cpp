@@ -114,9 +114,9 @@ EventType &EventType::operator=(const QString &str)
     return *this;
 }
 
-void EventData::setUtcDate(const QDateTime utcDate)
+void EventData::setUtcStartDate(const QDateTime utcStartDate)
 {
-    m_utcDate = utcDate;
+    m_utcStartDate = utcStartDate;
 }
 
 void EventData::setDuration(int duration)
@@ -204,7 +204,7 @@ QString EventData::baseFileName() const
     QString fileName = QString::fromLatin1("%1.%2.%3")
         .arg(uiServer())
         .arg(uiLocation())
-        .arg(utcDate().toString(QLatin1String("yyyy-MM-dd hh-mm-ss")));
+        .arg(utcStartDate().toString(QLatin1String("yyyy-MM-dd hh-mm-ss")));
 
     return sanitizeFilename(fileName);
 }
@@ -373,7 +373,7 @@ static EventData *parseEntry(DVRServer *server, QXmlStreamReader &reader)
         else if (reader.name() == QLatin1String("published"))
         {
             qint16 dateTzOffsetMins;
-            data->setUtcDate(isoToDateTime(reader.readElementText(), &dateTzOffsetMins));
+            data->setUtcStartDate(isoToDateTime(reader.readElementText(), &dateTzOffsetMins));
             data->setDateTzOffsetMins(dateTzOffsetMins);
         }
         else if (reader.name() == QLatin1String("updated"))
@@ -382,7 +382,7 @@ static EventData *parseEntry(DVRServer *server, QXmlStreamReader &reader)
             if (d.isEmpty())
                 data->setDuration(-1);
             else
-                data->setDuration(data->utcDate().secsTo(isoToDateTime(d)));
+                data->setDuration(data->utcStartDate().secsTo(isoToDateTime(d)));
         }
         else if (reader.name() == QLatin1String("content"))
         {
@@ -417,7 +417,7 @@ static EventData *parseEntry(DVRServer *server, QXmlStreamReader &reader)
             reader.raiseError(QLatin1String("Unexpected <entry> element"));
     }
 
-    if (!reader.hasError() && (data->eventId() < 0 || !data->utcDate().isValid()))
+    if (!reader.hasError() && (data->eventId() < 0 || !data->utcStartDate().isValid()))
         reader.raiseError(QLatin1String("Missing required elements for entry"));
 
     return data;

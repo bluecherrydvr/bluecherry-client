@@ -184,7 +184,7 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
         if (role == Qt::DisplayRole)
             return data->serverLocalDate().toString();
         else if (role == Qt::EditRole)
-            return data->utcDate();
+            return data->utcStartDate();
         break;
     }
 
@@ -290,7 +290,7 @@ public:
             re = e1->level() <= e2->level();
             break;
         case EventsModel::DateColumn:
-            re = e1->utcDate() <= e2->utcDate();
+            re = e1->utcStartDate() <= e2->utcStartDate();
             break;
         default:
             Q_ASSERT_X(false, "EventSort", "sorting not implemented for column");
