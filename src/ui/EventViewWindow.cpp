@@ -133,7 +133,7 @@ void EventViewWindow::setEvent(const EventData &event)
                          .arg(Qt::escape(event.uiLocation()))
                          .arg(Qt::escape(event.uiType()))
                          .arg(Qt::escape(event.uiLevel()))
-                         .arg(event.serverLocalDate().toString()));
+                         .arg(event.serverStartDate().toString()));
 
     if (m_event.hasMedia() && m_event.mediaId() >= 0)
     {

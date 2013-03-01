@@ -231,7 +231,7 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     Q_UNUSED(ok);
 
     setControlsEnabled(true);
-    QDateTime evd = event->serverLocalDate();
+    QDateTime evd = event->serverStartDate();
     m_startTime->setText(evd.time().toString());
     if (event->durationInSeconds() > 0)
     {

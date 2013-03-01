@@ -108,6 +108,7 @@ public:
 
     QDateTime utcStartDate() const { return m_utcStartDate; }
     QDateTime utcEndDate() const;
+    QDateTime serverStartDate() const;
     void setUtcStartDate(const QDateTime utcStartDate);
 
     int durationInSeconds() const { return m_durationInSeconds; }
@@ -137,7 +138,6 @@ public:
 
     bool isSystem() const { return locationId() < 0; }
     bool isCamera() const { return locationId() >= 0; }
-    QDateTime serverLocalDate() const;
     bool hasMedia() const { return m_mediaId >= 0; }
 
     QColor uiColor(bool graphical = true) const { return level().uiColor(graphical); }
@@ -156,14 +156,5 @@ public:
 
     static QList<EventData*> parseEvents(DVRServer *server, const QByteArray &input);
 };
-
-inline QDateTime EventData::serverLocalDate() const
-{
-    Q_ASSERT(m_utcStartDate.timeSpec() == Qt::UTC);
-    int offs = int(dateTzOffsetMins()) * 60;
-    QDateTime r = m_utcStartDate.addSecs(offs);
-    r.setUtcOffset(offs);
-    return r;
-}
 
 #endif // EVENTDATA_H

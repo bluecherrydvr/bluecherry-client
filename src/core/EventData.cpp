@@ -119,6 +119,16 @@ QDateTime EventData::utcEndDate() const
     return m_utcStartDate.addSecs(qMax(0, m_durationInSeconds));
 }
 
+QDateTime EventData::serverStartDate() const
+{
+    Q_ASSERT(m_utcStartDate.timeSpec() == Qt::UTC);
+
+    int dateTzOffsetSeconds = int(dateTzOffsetMins()) * 60;
+    QDateTime result = m_utcStartDate.addSecs(dateTzOffsetSeconds);
+    result.setUtcOffset(dateTzOffsetSeconds);
+    return result;
+}
+
 void EventData::setUtcStartDate(const QDateTime utcStartDate)
 {
     m_utcStartDate = utcStartDate;
