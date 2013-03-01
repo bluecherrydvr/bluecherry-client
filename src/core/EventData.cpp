@@ -114,6 +114,11 @@ EventType &EventType::operator=(const QString &str)
     return *this;
 }
 
+QDateTime EventData::utcEndDate() const
+{
+    return m_utcStartDate.addSecs(qMax(0, m_durationInSeconds));
+}
+
 void EventData::setUtcStartDate(const QDateTime utcStartDate)
 {
     m_utcStartDate = utcStartDate;

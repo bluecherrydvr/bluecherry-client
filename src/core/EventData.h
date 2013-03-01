@@ -107,6 +107,7 @@ public:
     }
 
     QDateTime utcStartDate() const { return m_utcStartDate; }
+    QDateTime utcEndDate() const;
     void setUtcStartDate(const QDateTime utcStartDate);
 
     int durationInSeconds() const { return m_durationInSeconds; }
@@ -136,7 +137,6 @@ public:
 
     bool isSystem() const { return locationId() < 0; }
     bool isCamera() const { return locationId() >= 0; }
-    QDateTime endDate() const { return m_utcStartDate.addSecs(qMax(0, m_durationInSeconds)); }
     QDateTime serverLocalDate() const;
     bool hasMedia() const { return m_mediaId >= 0; }
 
