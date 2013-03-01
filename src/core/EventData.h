@@ -83,43 +83,71 @@ public:
     operator Type() const { return type; }
 };
 
-struct EventData
+class EventData
 {
-    QDateTime date; /* UTC */
-    DVRServer *server;
-    qint64 eventId, mediaId;
-    int duration;
-    int locationId;
-    EventLevel level;
-    EventType type;
-    qint16 dateTzOffsetMins; /* Offset in minutes for the server's timezone as of this event */
+    QDateTime m_utcDate;
+    DVRServer *m_server;
+    qint64 m_eventId;
+    qint64 m_mediaId;
+    int m_duration;
+    int m_locationId;
+    EventLevel m_level;
+    EventType m_type;
+    qint16 m_dateTzOffsetMins; /* Offset in minutes for the server's timezone as of this event */
 
+public:
     EventData(DVRServer *s = 0)
-        : server(s), eventId(-1), mediaId(-1), duration(0), locationId(-1), dateTzOffsetMins(0)
+        : m_server(s), m_eventId(-1), m_mediaId(-1), m_duration(0), m_locationId(-1), m_dateTzOffsetMins(0)
     {
     }
 
     bool operator==(const EventData &o)
     {
-        return (o.server == server && o.eventId == eventId);
+        return (o.m_server == m_server && o.m_eventId == m_eventId);
     }
+
+    QDateTime utcDate() const { return m_utcDate; }
+    void setUtcDate(const QDateTime utcDate);
+
+    int duration() const { return m_duration; }
+    void setDuration(int duration);
+
+    DVRServer * server() const { return m_server; }
+
+    int locationId() const { return m_locationId; }
+    void setLocationId(int locationId);
+
+    EventLevel level() const { return m_level; }
+    void setLevel(EventLevel level);
+
+    EventType type() const { return m_type; }
+    void setType(EventType type);
+
+    qint64 eventId() const { return m_eventId; }
+    void setEventId(qint64 eventId);
+
+    qint64 mediaId() const { return m_mediaId; }
+    void setMediaId(qint64 mediaId);
+
+    qint16 dateTzOffsetMins() const { return m_dateTzOffsetMins; }
+    void setDateTzOffsetMins(qint16 dateTzOffsetMins);
 
     void setLocation(const QString &location);
 
-    bool isSystem() const { return locationId < 0; }
-    bool isCamera() const { return locationId >= 0; }
-    QDateTime endDate() const { return date.addSecs(qMax(0, duration)); }
+    bool isSystem() const { return locationId() < 0; }
+    bool isCamera() const { return locationId() >= 0; }
+    QDateTime endDate() const { return m_utcDate.addSecs(qMax(0, m_duration)); }
     QDateTime serverLocalDate() const;
-    bool hasMedia() const { return mediaId >= 0; }
+    bool hasMedia() const { return m_mediaId >= 0; }
 
-    QColor uiColor(bool graphical = true) const { return level.uiColor(graphical); }
-    QString uiLevel() const { return level.uiString(); }
-    QString uiType() const { return type.uiString(); }
+    QColor uiColor(bool graphical = true) const { return level().uiColor(graphical); }
+    QString uiLevel() const { return level().uiString(); }
+    QString uiType() const { return type().uiString(); }
     QString uiDuration() const;
     QString uiServer() const;
-    QString uiLocation() const { return uiLocation(server, locationId); }
+    QString uiLocation() const { return uiLocation(server(), locationId()); }
 
-    DVRCamera locationCamera() const { return locationCamera(server, locationId); }
+    DVRCamera locationCamera() const { return locationCamera(server(), locationId()); }
 
     static QString uiLocation(DVRServer *server, int locationId);
     static DVRCamera locationCamera(DVRServer *server, int locationId);
@@ -131,11 +159,11 @@ struct EventData
 
 inline QDateTime EventData::serverLocalDate() const
 {
-     Q_ASSERT(date.timeSpec() == Qt::UTC);
-     int offs = int(dateTzOffsetMins)*60;
-     QDateTime r = date.addSecs(offs);
-     r.setUtcOffset(offs);
-     return r;
+    Q_ASSERT(m_utcDate.timeSpec() == Qt::UTC);
+    int offs = int(dateTzOffsetMins()) * 60;
+    QDateTime r = m_utcDate.addSecs(offs);
+    r.setUtcOffset(offs);
+    return r;
 }
 
 #endif // EVENTDATA_H

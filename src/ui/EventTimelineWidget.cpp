@@ -163,7 +163,7 @@ QRect EventTimelineWidget::visualRect(const QModelIndex &index) const
         if (*it != locationData)
             continue;
 
-        QRect re = timeCellRect(event->date, event->duration);
+        QRect re = timeCellRect(event->utcDate(), event->duration());
         re.translate(itemArea.topLeft());
         re.moveTop(itemArea.top() + (it.key() - verticalScrollBar()->value()));
         re.setHeight(layoutHeightForRow(it));
@@ -282,10 +282,10 @@ void EventTimelineWidget::scrollTo(const QModelIndex &index, ScrollHint hint)
         break;
     }
 
-    if (event->date < viewTimeStart)
-        horizontalScrollBar()->setValue(timeStart.secsTo(event->date));
-    else if (event->date.addSecs(event->duration) > viewTimeEnd)
-        horizontalScrollBar()->setValue(timeStart.secsTo(event->date.addSecs(event->duration)) - viewSeconds);
+    if (event->utcDate() < viewTimeStart)
+        horizontalScrollBar()->setValue(timeStart.secsTo(event->utcDate()));
+    else if (event->utcDate().addSecs(event->duration()) > viewTimeEnd)
+        horizontalScrollBar()->setValue(timeStart.secsTo(event->utcDate().addSecs(event->duration())) - viewSeconds);
 }
 
 EventData *EventTimelineWidget::eventAt(const QPoint &point) const
@@ -313,7 +313,7 @@ EventData *EventTimelineWidget::eventAt(const QPoint &point) const
     /* This is slow and can likely be improved. */
     for (QList<EventData*>::ConstIterator evit = location->events.begin(); evit != location->events.end(); ++evit)
     {
-        QRect eventRect = timeCellRect((*evit)->date, (*evit)->duration).translated(itemArea.left(), 0);
+        QRect eventRect = timeCellRect((*evit)->utcDate(), (*evit)->duration()).translated(itemArea.left(), 0);
         if (point.x() >= eventRect.left() && point.x() <= eventRect.right())
             return *evit;
     }
@@ -386,7 +386,7 @@ void EventTimelineWidget::setSelection(const QRect &irect, QItemSelectionModel::
 
         for (QList<EventData*>::ConstIterator evit = location->events.begin(); evit != location->events.end(); ++evit)
         {
-            QRect eventRect = timeCellRect((*evit)->date, (*evit)->duration).translated(itemArea.left(), 0);
+            QRect eventRect = timeCellRect((*evit)->utcDate(), (*evit)->duration()).translated(itemArea.left(), 0);
             if (eventRect.x() >= rect.x())
             {
                 if (eventRect.x() > rect.right())
@@ -427,14 +427,14 @@ bool EventTimelineWidget::findEvent(EventData *event, bool create, ServerData **
         *position = -1;
 
     /* Find associated server */
-    QHash<DVRServer*,ServerData*>::ConstIterator it = serversMap.find(event->server);
+    QHash<DVRServer*,ServerData*>::ConstIterator it = serversMap.find(event->server());
     if (it == serversMap.end())
     {
         if (!create)
             return false;
 
         ServerData *serverData = new ServerData;
-        serverData->server = event->server;
+        serverData->server = event->server();
         it = serversMap.insert(serverData->server, serverData);
 
         scheduleDelayedItemsLayout(DoRowsLayout);
@@ -446,14 +446,14 @@ bool EventTimelineWidget::findEvent(EventData *event, bool create, ServerData **
         *server = serverData;
 
     /* Find associated location (within the server) */
-    QHash<int,LocationData*>::ConstIterator lit = serverData->locationsMap.find(event->locationId);
+    QHash<int,LocationData*>::ConstIterator lit = serverData->locationsMap.find(event->locationId());
     if (lit == serverData->locationsMap.end())
     {
         if (!create)
             return false;
 
         LocationData *locationData = new LocationData;
-        locationData->locationId = event->locationId;
+        locationData->locationId = event->locationId();
         locationData->serverData = serverData;
         lit = serverData->locationsMap.insert(locationData->locationId, locationData);
 
@@ -471,7 +471,7 @@ bool EventTimelineWidget::findEvent(EventData *event, bool create, ServerData **
         int p = 0;
         for (int n = locationData->events.size(); p < n; ++p)
         {
-            if (event->date < locationData->events[p]->date)
+            if (event->utcDate() < locationData->events[p]->utcDate())
                 break;
         }
         *position = p;
@@ -491,10 +491,10 @@ void EventTimelineWidget::updateTimeRange(bool fromData)
 
         for (QHash<EventData*,int>::Iterator it = rowsMap.begin(); it != rowsMap.end(); ++it)
         {
-            QDateTime date = it.key()->date;
+            QDateTime date = it.key()->utcDate();
             if (dataTimeStart.isNull() || date < dataTimeStart)
                 dataTimeStart = date;
-            date = date.addSecs(qMax(it.key()->duration,1));
+            date = date.addSecs(qMax(it.key()->duration(), 1));
             if (dataTimeEnd.isNull() || date > dataTimeEnd)
                 dataTimeEnd = date;
         }
@@ -703,9 +703,9 @@ void EventTimelineWidget::addModelRows(int first, int last)
         rowsMap.insert(data, i);
 
         /* Update time span */
-        if (dataTimeStart.isNull() || data->date < dataTimeStart)
-            dataTimeStart = data->date;
-        QDateTime ed = data->date.addSecs(qMax(data->duration,1));
+        if (dataTimeStart.isNull() || data->utcDate() < dataTimeStart)
+            dataTimeStart = data->utcDate();
+        QDateTime ed = data->utcDate().addSecs(qMax(data->duration(), 1));
         if (dataTimeEnd.isNull() || ed > dataTimeEnd)
             dataTimeEnd = ed;
     }
@@ -1019,13 +1019,13 @@ void EventTimelineWidget::paintRow(QPainter *p, QRect r, LocationData *locationD
     for (QList<EventData*>::Iterator it = locationData->events.begin(); it != locationData->events.end(); ++it)
     {
         EventData *data = *it;
-        if (data->date.addSecs(data->duration) < viewTimeStart)
+        if (data->utcDate().addSecs(data->duration()) < viewTimeStart)
             continue;
 
         Q_ASSERT(rowsMap.contains(data));
         int modelRow = rowsMap[data];
 
-        QRect cellRect = timeCellRect(data->date, data->duration);
+        QRect cellRect = timeCellRect(data->utcDate(), data->duration());
         cellRect.setX(qMax(cellRect.x(), 0));
         cellRect.translate(r.x(), r.y());
         cellRect.setHeight(r.height());

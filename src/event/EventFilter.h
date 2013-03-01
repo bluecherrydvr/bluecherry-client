@@ -18,7 +18,7 @@
 #ifndef EVENTFILTER_H
 #define EVENTFILTER_H
 
-struct EventData;
+class EventData;
 
 class EventFilter
 {

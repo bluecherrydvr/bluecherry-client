@@ -33,7 +33,7 @@ class QSlider;
 class QLabel;
 class GstSinkWidget;
 class QThread;
-struct EventData;
+class EventData;
 
 class EventVideoPlayer : public QWidget
 {
