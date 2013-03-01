@@ -129,6 +129,17 @@ QDateTime EventData::serverStartDate() const
     return result;
 }
 
+QDateTime EventData::serverEndDate() const
+{
+    if (durationInSeconds() <= 0)
+        return serverStartDate();
+
+    int dateTzOffsetSeconds = int(dateTzOffsetMins()) * 60;
+    QDateTime result = utcEndDate().addSecs(dateTzOffsetSeconds);
+    result.setUtcOffset(dateTzOffsetSeconds);
+    return result;
+}
+
 void EventData::setUtcStartDate(const QDateTime utcStartDate)
 {
     m_utcStartDate = utcStartDate;

@@ -109,6 +109,7 @@ public:
     QDateTime utcStartDate() const { return m_utcStartDate; }
     QDateTime utcEndDate() const;
     QDateTime serverStartDate() const;
+    QDateTime serverEndDate() const;
     void setUtcStartDate(const QDateTime utcStartDate);
 
     int durationInSeconds() const { return m_durationInSeconds; }
