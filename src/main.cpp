@@ -100,20 +100,5 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
-#ifdef BC_CUTOFF_DATE
-    if (QDateTime::currentDateTime().addDays(3) >= QDateTime::fromTime_t(BC_CUTOFF_DATE))
-    {
-        int days = QDateTime::currentDateTime().daysTo(QDateTime::fromTime_t(BC_CUTOFF_DATE));
-        QMessageBox::critical(&w, a.tr("Bluecherry - Beta Expiration"),
-                              (days > 0) ? a.tr("This beta release of the Bluecherry DVR software will expire in %1 days.\n"
-                                                "After this date, the software will function fully.\n\nPlease download the latest "
-                                                "update from www.bluecherrydvr.com").arg(days)
-                                         :
-                                           a.tr("This beta release of the Bluecherry DVR software has expired.\n\nPlease download "
-                                                "the latest update from www.bluecherrydvr.com")
-                              );
-    }
-#endif
-
     return a.exec();
 }
