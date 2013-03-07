@@ -1,0 +1,4 @@
+#cmakedefine USE_BREAKPAD
+#cmakedefine USE_GSTREAMER
+#define GSTREAMER_PLUGINS "@GSTREAMER_PLUGINS@"
+#define VERSION "@VERSION@"

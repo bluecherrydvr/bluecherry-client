@@ -1,0 +1,113 @@
+#
+# Copyright 2010-2013 Bluecherry
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of
+# the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
+include_directories (src)
+
+set (bluecherry_client_main_SRCS
+    src/core/BluecherryApp.cpp
+    src/core/CameraPtzControl.cpp
+    src/core/DVRCamera.cpp
+    src/core/DVRServer.cpp
+    src/core/EventData.cpp
+    src/core/LiveStream.cpp
+    src/core/LiveStreamWorker.cpp
+    src/core/LiveViewManager.cpp
+    src/core/MJpegStream.cpp
+    src/core/PtzPresetsModel.cpp
+    src/core/ServerRequestManager.cpp
+    src/core/TransferRateCalculator.cpp
+
+    src/event/CameraEventFilter.cpp
+    src/event/EventDownloadManager.cpp
+    src/event/EventFilter.cpp
+    src/event/EventList.cpp
+    src/event/EventVideoDownload.cpp
+    src/event/MediaEventFilter.cpp
+
+    src/events/EventsCursor.cpp
+    src/events/EventsLoader.cpp
+    src/events/ModelEventsCursor.cpp
+
+    src/network/MediaDownloadManager.cpp
+    src/network/RemotePortChecker.cpp
+    src/network/SocketError.cpp
+
+    src/ui/liveview/LiveFeedItem.cpp
+    src/ui/liveview/LiveStreamItem.cpp
+    src/ui/liveview/LiveViewArea.cpp
+    src/ui/liveview/LiveViewGradients.cpp
+    src/ui/liveview/LiveViewLayout.cpp
+    src/ui/liveview/LiveViewWindow.cpp
+    src/ui/liveview/PtzPresetsWindow.cpp
+
+    src/ui/AboutDialog.cpp
+    src/ui/CrashReportDialog.cpp
+    src/ui/DVRServersModel.cpp
+    src/ui/DVRServersView.cpp
+    src/ui/EventCommentsWidget.cpp
+    src/ui/EventsModel.cpp
+    src/ui/EventSourcesModel.cpp
+    src/ui/EventsView.cpp
+    src/ui/EventsWindow.cpp
+    src/ui/EventTagsDelegate.cpp
+    src/ui/EventTagsModel.cpp
+    src/ui/EventTagsView.cpp
+    src/ui/EventTimelineWidget.cpp
+    src/ui/EventTypesFilter.cpp
+    src/ui/EventVideoDownloadsWindow.cpp
+    src/ui/EventVideoDownloadWidget.cpp
+    src/ui/EventVideoPlayer.cpp
+    src/ui/EventViewWindow.cpp
+    src/ui/ExpandingTextEdit.cpp
+    src/ui/MacSplitter.cpp
+    src/ui/MainWindow.cpp
+    src/ui/NumericOffsetWidget.cpp
+    src/ui/OptionsDialog.cpp
+    src/ui/OptionsGeneralPage.cpp
+    src/ui/OptionsServerPage.cpp
+    src/ui/RemotePortCheckerWidget.cpp
+    src/ui/SavedLayoutsModel.cpp
+    src/ui/ServerConfigWindow.cpp
+    src/ui/SetupWizard.cpp
+    src/ui/StatusBandwidthWidget.cpp
+    src/ui/StatusBarServerAlert.cpp
+    src/ui/SwitchEventsWidget.cpp
+    src/ui/WebRtpPortCheckerWidget.cpp
+
+    src/utils/FileUtils.cpp
+    src/utils/ImageDecodeTask.cpp
+    src/utils/Range.cpp
+    src/utils/RangeMap.cpp
+    src/utils/StringUtils.cpp
+    src/utils/ThreadTask.cpp
+    src/utils/ThreadTaskCourier.cpp
+
+    src/video/GstSinkWidget.cpp
+    src/video/MediaDownload.cpp
+    src/video/VideoHttpBuffer.cpp
+    src/video/VideoPlayerBackend_gst.cpp
+)
+
+if (WIN32)
+    list (APPEND bluecherry_client_main_SRCS
+        src/utils/explorerstyle.cpp
+    )
+endif (WIN32)
+
+list (APPEND bluecherry_client_SRCS
+    ${bluecherry_client_main_SRCS}
+)

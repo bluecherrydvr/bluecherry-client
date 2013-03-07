@@ -15,6 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "bluecherry-config.h"
 #include "VideoPlayerBackend_gst.h"
 #include "VideoHttpBuffer.h"
 #include <QUrl>
