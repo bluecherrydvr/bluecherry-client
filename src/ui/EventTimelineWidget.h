@@ -33,7 +33,6 @@ class EventData;
 class EventTimelineWidget : public QAbstractItemView
 {
     Q_OBJECT
-    Q_PROPERTY(double zoomLevel READ zoomLevel WRITE setZoomLevel)
     Q_PROPERTY(int zoomSeconds READ zoomSeconds WRITE setZoomSeconds NOTIFY zoomSecondsChanged)
 
 public:
@@ -46,7 +45,7 @@ public:
     int maxZoomSeconds() const { return visibleTimeRange.maxZoomSeconds(); }
 
     /* Zoom level in the range of 0-100, 0 showing everything with no scroll */
-    double zoomLevel() const;
+    double zoomLevel() const { return visibleTimeRange.zoomLevel(); }
 
     virtual QSize sizeHint() const;
     virtual QRect visualRect(const QModelIndex &index) const;

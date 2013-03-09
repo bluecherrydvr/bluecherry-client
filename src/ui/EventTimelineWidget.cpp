@@ -171,18 +171,6 @@ QRect EventTimelineWidget::visualRect(const QModelIndex &index) const
     return QRect();
 }
 
-double EventTimelineWidget::zoomLevel() const
-{
-    /* Zoom level of 0 indicates that the entire span of time (visibleTimeRange.timeStart to visibleTimeRange.timeEnd) is
-     * visible; visibleTimeRange.timeStart/visibleTimeRange.viewTimeStart and visibleTimeRange.timeEnd/visibleTimeRange.viewTimeEnd are equal. From there, the
-     * span (by number of seconds) is scaled up to 100, with 100 indicating maximum zoom,
-     * which we define as 1 minute for simplicity. In other words, we scale visibleTimeRange.viewSeconds
-     * between 60 and visibleTimeRange.timeSeconds and use the inverse. */
-    if (visibleTimeRange.viewSeconds == visibleTimeRange.timeSeconds)
-        return 0;
-    return 100-((double(visibleTimeRange.viewSeconds-minZoomSeconds())/double(visibleTimeRange.timeSeconds-minZoomSeconds()))*100);
-}
-
 void EventTimelineWidget::setZoomLevel(double level)
 {
     level = (100 - qBound(0.0, level, 100.0))/100.0;

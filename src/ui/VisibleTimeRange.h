@@ -46,6 +46,8 @@ public:
     int minZoomSeconds() const { return qMin(timeSeconds, 60); }
     int maxZoomSeconds() const { return timeSeconds; }
 
+    double zoomLevel() const;
+
 };
 
 #endif // VISIBLETIMERANGE_H
