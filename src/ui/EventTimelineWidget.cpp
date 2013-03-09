@@ -106,10 +106,7 @@ void EventTimelineWidget::clearData()
 
     serversMap.clear();
     rowsMap.clear();
-    visibleTimeRange.timeStart = visibleTimeRange.timeEnd = QDateTime();
-    visibleTimeRange.viewTimeStart = visibleTimeRange.viewTimeEnd = QDateTime();
-    visibleTimeRange.dataTimeStart = visibleTimeRange.dataTimeEnd = QDateTime();
-    visibleTimeRange.timeSeconds = visibleTimeRange.viewSeconds = visibleTimeRange.primaryTickSecs = 0;
+    visibleTimeRange.clear();
 
     clearLeftPadding();
 

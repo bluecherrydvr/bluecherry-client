@@ -21,3 +21,16 @@ VisibleTimeRange::VisibleTimeRange()
     : timeSeconds(0), viewSeconds(0), primaryTickSecs(0)
 {
 }
+
+void VisibleTimeRange::clear()
+{
+    timeStart = QDateTime();
+    timeEnd = QDateTime();
+    viewTimeStart = QDateTime();
+    viewTimeEnd = QDateTime();
+    dataTimeStart = QDateTime();
+    dataTimeEnd = QDateTime();
+    timeSeconds = 0;
+    viewSeconds = 0;
+    primaryTickSecs = 0;
+}

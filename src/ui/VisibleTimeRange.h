@@ -39,6 +39,8 @@ struct VisibleTimeRange
 public:
     explicit VisibleTimeRange();
 
+    void clear();
+
 };
 
 #endif // VISIBLETIMERANGE_H
