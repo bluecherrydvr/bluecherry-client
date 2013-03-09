@@ -171,13 +171,6 @@ QRect EventTimelineWidget::visualRect(const QModelIndex &index) const
     return QRect();
 }
 
-void EventTimelineWidget::setZoomLevel(double level)
-{
-    level = (100 - qBound(0.0, level, 100.0))/100.0;
-    int seconds = qRound((level*visibleTimeRange.timeSeconds)+minZoomSeconds());
-    setZoomSeconds(seconds);
-}
-
 void EventTimelineWidget::setZoomSeconds(int seconds)
 {
     seconds = qBound(minZoomSeconds(), seconds, maxZoomSeconds());

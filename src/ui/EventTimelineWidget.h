@@ -58,7 +58,6 @@ public:
     virtual void doItemsLayout();
 
 public slots:
-    void setZoomLevel(double level);
     void setZoomSeconds(int seconds);
 
 signals:
@@ -111,6 +110,7 @@ private:
     };
     Q_DECLARE_FLAGS(LayoutFlags, LayoutFlag)
     LayoutFlags pendingLayouts;
+
     void scheduleDelayedItemsLayout(LayoutFlags flags);
     void ensureLayout();
 
