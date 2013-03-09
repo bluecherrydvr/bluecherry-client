@@ -41,6 +41,11 @@ public:
 
     void clear();
 
+    /* Zoom in the number of seconds of time visible on screen */
+    int zoomSeconds() const { return viewSeconds; }
+    int minZoomSeconds() const { return qMin(timeSeconds, 60); }
+    int maxZoomSeconds() const { return timeSeconds; }
+
 };
 
 #endif // VISIBLETIMERANGE_H

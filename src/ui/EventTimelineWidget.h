@@ -41,9 +41,9 @@ public:
     ~EventTimelineWidget();
 
     /* Zoom in the number of seconds of time visible on screen */
-    int zoomSeconds() const;
-    int minZoomSeconds() const { return qMin(visibleTimeRange.timeSeconds, 60); }
-    int maxZoomSeconds() const { return visibleTimeRange.timeSeconds; }
+    int zoomSeconds() const { return visibleTimeRange.zoomSeconds(); }
+    int minZoomSeconds() const { return visibleTimeRange.minZoomSeconds(); }
+    int maxZoomSeconds() const { return visibleTimeRange.maxZoomSeconds(); }
 
     /* Zoom level in the range of 0-100, 0 showing everything with no scroll */
     double zoomLevel() const;

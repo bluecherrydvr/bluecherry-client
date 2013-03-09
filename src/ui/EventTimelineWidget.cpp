@@ -190,11 +190,6 @@ void EventTimelineWidget::setZoomLevel(double level)
     setZoomSeconds(seconds);
 }
 
-int EventTimelineWidget::zoomSeconds() const
-{
-    return visibleTimeRange.viewSeconds;
-}
-
 void EventTimelineWidget::setZoomSeconds(int seconds)
 {
     seconds = qBound(minZoomSeconds(), seconds, maxZoomSeconds());
