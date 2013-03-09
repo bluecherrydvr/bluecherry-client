@@ -36,6 +36,9 @@ struct VisibleTimeRange
      * and a minimum width and rounded up to a user-friendly duration in updateTimeRange */
     int primaryTickSecs;
 
+public:
+    explicit VisibleTimeRange();
+
 };
 
 #endif // VISIBLETIMERANGE_H

@@ -87,10 +87,6 @@ EventTimelineWidget::EventTimelineWidget(QWidget *parent)
       cachedLeftPadding(-1), rowsMapUpdateStart(-1), mouseRubberBand(0)
 {
     setAutoFillBackground(false);
-    
-    visibleTimeRange.timeSeconds = 0;
-    visibleTimeRange.viewSeconds = 0;
-    visibleTimeRange.primaryTickSecs = 0;
 
     connect(horizontalScrollBar(), SIGNAL(valueChanged(int)), SLOT(setViewStartOffset(int)));
 }
