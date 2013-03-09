@@ -18,6 +18,7 @@
 #ifndef EVENTTIMELINEWIDGET_H
 #define EVENTTIMELINEWIDGET_H
 
+#include "VisibleTimeRange.h"
 #include <QAbstractItemView>
 #include <QDateTime>
 
@@ -41,8 +42,8 @@ public:
 
     /* Zoom in the number of seconds of time visible on screen */
     int zoomSeconds() const;
-    int minZoomSeconds() const { return qMin(timeSeconds, 60); }
-    int maxZoomSeconds() const { return timeSeconds; }
+    int minZoomSeconds() const { return qMin(visibleTimeRange.timeSeconds, 60); }
+    int maxZoomSeconds() const { return visibleTimeRange.timeSeconds; }
 
     /* Zoom level in the range of 0-100, 0 showing everything with no scroll */
     double zoomLevel() const;
@@ -96,19 +97,7 @@ private:
     QHash<DVRServer*,ServerData*> serversMap;
     QHash<EventData*,int> rowsMap;
 
-    /* Total span of time represented by the timeline, rounded from dataTime */
-    QDateTime timeStart, timeEnd;
-    /* Span of time represented in data; end is inclusive of the duration */
-    QDateTime dataTimeStart, dataTimeEnd;
-    /* Span of time shown in the viewport */
-    QDateTime viewTimeStart, viewTimeEnd;
-    /* Span of seconds between timeStart and timeEnd */
-    int timeSeconds;
-    /* Span of seconds between viewTimeStart and viewTimeEnd */
-    int viewSeconds;
-    /* Seconds of time per primary tick (a x-axis label), derived from the view area
-     * and a minimum width and rounded up to a user-friendly duration in updateTimeRange */
-    int primaryTickSecs;
+    VisibleTimeRange visibleTimeRange;
 
     int cachedTopPadding;
     mutable int cachedLeftPadding;

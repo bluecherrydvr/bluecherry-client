@@ -83,10 +83,14 @@ inline ServerData *RowData::toServer()
 }
 
 EventTimelineWidget::EventTimelineWidget(QWidget *parent)
-    : QAbstractItemView(parent), timeSeconds(0), viewSeconds(0), primaryTickSecs(0), cachedTopPadding(0),
+    : QAbstractItemView(parent), cachedTopPadding(0),
       cachedLeftPadding(-1), rowsMapUpdateStart(-1), mouseRubberBand(0)
 {
     setAutoFillBackground(false);
+    
+    visibleTimeRange.timeSeconds = 0;
+    visibleTimeRange.viewSeconds = 0;
+    visibleTimeRange.primaryTickSecs = 0;
 
     connect(horizontalScrollBar(), SIGNAL(valueChanged(int)), SLOT(setViewStartOffset(int)));
 }
@@ -106,10 +110,10 @@ void EventTimelineWidget::clearData()
 
     serversMap.clear();
     rowsMap.clear();
-    timeStart = timeEnd = QDateTime();
-    viewTimeStart = viewTimeEnd = QDateTime();
-    dataTimeStart = dataTimeEnd = QDateTime();
-    timeSeconds = viewSeconds = primaryTickSecs = 0;
+    visibleTimeRange.timeStart = visibleTimeRange.timeEnd = QDateTime();
+    visibleTimeRange.viewTimeStart = visibleTimeRange.viewTimeEnd = QDateTime();
+    visibleTimeRange.dataTimeStart = visibleTimeRange.dataTimeEnd = QDateTime();
+    visibleTimeRange.timeSeconds = visibleTimeRange.viewSeconds = visibleTimeRange.primaryTickSecs = 0;
 
     clearLeftPadding();
 
@@ -176,64 +180,64 @@ QRect EventTimelineWidget::visualRect(const QModelIndex &index) const
 
 double EventTimelineWidget::zoomLevel() const
 {
-    /* Zoom level of 0 indicates that the entire span of time (timeStart to timeEnd) is
-     * visible; timeStart/viewTimeStart and timeEnd/viewTimeEnd are equal. From there, the
+    /* Zoom level of 0 indicates that the entire span of time (visibleTimeRange.timeStart to visibleTimeRange.timeEnd) is
+     * visible; visibleTimeRange.timeStart/visibleTimeRange.viewTimeStart and visibleTimeRange.timeEnd/visibleTimeRange.viewTimeEnd are equal. From there, the
      * span (by number of seconds) is scaled up to 100, with 100 indicating maximum zoom,
-     * which we define as 1 minute for simplicity. In other words, we scale viewSeconds
-     * between 60 and timeSeconds and use the inverse. */
-    if (viewSeconds == timeSeconds)
+     * which we define as 1 minute for simplicity. In other words, we scale visibleTimeRange.viewSeconds
+     * between 60 and visibleTimeRange.timeSeconds and use the inverse. */
+    if (visibleTimeRange.viewSeconds == visibleTimeRange.timeSeconds)
         return 0;
-    return 100-((double(viewSeconds-minZoomSeconds())/double(timeSeconds-minZoomSeconds()))*100);
+    return 100-((double(visibleTimeRange.viewSeconds-minZoomSeconds())/double(visibleTimeRange.timeSeconds-minZoomSeconds()))*100);
 }
 
 void EventTimelineWidget::setZoomLevel(double level)
 {
     level = (100 - qBound(0.0, level, 100.0))/100.0;
-    int seconds = qRound((level*timeSeconds)+minZoomSeconds());
+    int seconds = qRound((level*visibleTimeRange.timeSeconds)+minZoomSeconds());
     setZoomSeconds(seconds);
 }
 
 int EventTimelineWidget::zoomSeconds() const
 {
-    return viewSeconds;
+    return visibleTimeRange.viewSeconds;
 }
 
 void EventTimelineWidget::setZoomSeconds(int seconds)
 {
     seconds = qBound(minZoomSeconds(), seconds, maxZoomSeconds());
-    if (viewSeconds == seconds)
+    if (visibleTimeRange.viewSeconds == seconds)
         return;
 
-    Q_ASSERT(!viewTimeStart.isNull());
-    Q_ASSERT(viewTimeStart >= timeStart);
+    Q_ASSERT(!visibleTimeRange.viewTimeStart.isNull());
+    Q_ASSERT(visibleTimeRange.viewTimeStart >= visibleTimeRange.timeStart);
 
-    viewSeconds = seconds;
-    viewTimeEnd = viewTimeStart.addSecs(seconds);
-    if (viewTimeEnd > timeEnd)
+    visibleTimeRange.viewSeconds = seconds;
+    visibleTimeRange.viewTimeEnd = visibleTimeRange.viewTimeStart.addSecs(seconds);
+    if (visibleTimeRange.viewTimeEnd > visibleTimeRange.timeEnd)
     {
-        viewTimeStart = viewTimeStart.addSecs(viewTimeEnd.secsTo(timeEnd));
-        viewTimeEnd = timeEnd;
+        visibleTimeRange.viewTimeStart = visibleTimeRange.viewTimeStart.addSecs(visibleTimeRange.viewTimeEnd.secsTo(visibleTimeRange.timeEnd));
+        visibleTimeRange.viewTimeEnd = visibleTimeRange.timeEnd;
     }
 
-    Q_ASSERT(viewTimeEnd > viewTimeStart);
-    Q_ASSERT(viewTimeStart >= timeStart);
-    Q_ASSERT(viewTimeEnd <= timeEnd);
-    Q_ASSERT(viewTimeStart.secsTo(viewTimeEnd) == viewSeconds);
+    Q_ASSERT(visibleTimeRange.viewTimeEnd > visibleTimeRange.viewTimeStart);
+    Q_ASSERT(visibleTimeRange.viewTimeStart >= visibleTimeRange.timeStart);
+    Q_ASSERT(visibleTimeRange.viewTimeEnd <= visibleTimeRange.timeEnd);
+    Q_ASSERT(visibleTimeRange.viewTimeStart.secsTo(visibleTimeRange.viewTimeEnd) == visibleTimeRange.viewSeconds);
 
     scheduleDelayedItemsLayout(DoUpdateTimeRange);
 }
 
 void EventTimelineWidget::setViewStartOffset(int secs)
 {
-    secs = qBound(0, secs, timeSeconds - viewSeconds);
+    secs = qBound(0, secs, visibleTimeRange.timeSeconds - visibleTimeRange.viewSeconds);
 
-    viewTimeStart = timeStart.addSecs(secs);
-    viewTimeEnd = viewTimeStart.addSecs(viewSeconds);
+    visibleTimeRange.viewTimeStart = visibleTimeRange.timeStart.addSecs(secs);
+    visibleTimeRange.viewTimeEnd = visibleTimeRange.viewTimeStart.addSecs(visibleTimeRange.viewSeconds);
 
-    Q_ASSERT(viewSeconds <= timeSeconds);
-    Q_ASSERT(viewSeconds >= minZoomSeconds());
-    Q_ASSERT(viewTimeEnd <= timeEnd);
-    Q_ASSERT(horizontalScrollBar()->maximum() == (timeSeconds - viewSeconds));
+    Q_ASSERT(visibleTimeRange.viewSeconds <= visibleTimeRange.timeSeconds);
+    Q_ASSERT(visibleTimeRange.viewSeconds >= minZoomSeconds());
+    Q_ASSERT(visibleTimeRange.viewTimeEnd <= visibleTimeRange.timeEnd);
+    Q_ASSERT(horizontalScrollBar()->maximum() == (visibleTimeRange.timeSeconds - visibleTimeRange.viewSeconds));
 
     viewport()->update();
 }
@@ -242,8 +246,8 @@ void EventTimelineWidget::updateScrollBars()
 {
     ensureLayout();
 
-    horizontalScrollBar()->setRange(0, qMax(timeSeconds-viewSeconds, 0));
-    horizontalScrollBar()->setPageStep(primaryTickSecs);
+    horizontalScrollBar()->setRange(0, qMax(visibleTimeRange.timeSeconds-visibleTimeRange.viewSeconds, 0));
+    horizontalScrollBar()->setPageStep(visibleTimeRange.primaryTickSecs);
     horizontalScrollBar()->setSingleStep(horizontalScrollBar()->pageStep());
 
     int h = viewportItemArea().height();
@@ -282,10 +286,10 @@ void EventTimelineWidget::scrollTo(const QModelIndex &index, ScrollHint hint)
         break;
     }
 
-    if (event->utcStartDate() < viewTimeStart)
-        horizontalScrollBar()->setValue(timeStart.secsTo(event->utcStartDate()));
-    else if (event->utcStartDate().addSecs(event->durationInSeconds()) > viewTimeEnd)
-        horizontalScrollBar()->setValue(timeStart.secsTo(event->utcEndDate()) - viewSeconds);
+    if (event->utcStartDate() < visibleTimeRange.viewTimeStart)
+        horizontalScrollBar()->setValue(visibleTimeRange.timeStart.secsTo(event->utcStartDate()));
+    else if (event->utcStartDate().addSecs(event->durationInSeconds()) > visibleTimeRange.viewTimeEnd)
+        horizontalScrollBar()->setValue(visibleTimeRange.timeStart.secsTo(event->utcEndDate()) - visibleTimeRange.viewSeconds);
 }
 
 EventData *EventTimelineWidget::eventAt(const QPoint &point) const
@@ -486,25 +490,25 @@ void EventTimelineWidget::updateTimeRange(bool fromData)
 {
     if (fromData)
     {
-        /* Refresh dataTimeStart and dataTimeEnd */
-        dataTimeStart = dataTimeEnd = QDateTime();
+        /* Refresh visibleTimeRange.dataTimeStart and visibleTimeRange.dataTimeEnd */
+        visibleTimeRange.dataTimeStart = visibleTimeRange.dataTimeEnd = QDateTime();
 
         for (QHash<EventData*,int>::Iterator it = rowsMap.begin(); it != rowsMap.end(); ++it)
         {
             QDateTime date = it.key()->utcStartDate();
-            if (dataTimeStart.isNull() || date < dataTimeStart)
-                dataTimeStart = date;
+            if (visibleTimeRange.dataTimeStart.isNull() || date < visibleTimeRange.dataTimeStart)
+                visibleTimeRange.dataTimeStart = date;
             date = date.addSecs(qMax(it.key()->durationInSeconds(), 1));
-            if (dataTimeEnd.isNull() || date > dataTimeEnd)
-                dataTimeEnd = date;
+            if (visibleTimeRange.dataTimeEnd.isNull() || date > visibleTimeRange.dataTimeEnd)
+                visibleTimeRange.dataTimeEnd = date;
         }
     }
 
-    /* Approximate viewSeconds for the tick calculations */
-    if (viewTimeStart.isNull() || viewTimeEnd.isNull())
-        viewSeconds = dataTimeStart.secsTo(dataTimeEnd);
+    /* Approximate visibleTimeRange.viewSeconds for the tick calculations */
+    if (visibleTimeRange.viewTimeStart.isNull() || visibleTimeRange.viewTimeEnd.isNull())
+        visibleTimeRange.viewSeconds = visibleTimeRange.dataTimeStart.secsTo(visibleTimeRange.dataTimeEnd);
     else
-        viewSeconds = qMin(viewSeconds, dataTimeStart.secsTo(dataTimeEnd));
+        visibleTimeRange.viewSeconds = qMin(visibleTimeRange.viewSeconds, visibleTimeRange.dataTimeStart.secsTo(visibleTimeRange.dataTimeEnd));
 
     /* Determine the minimum width for the primary tick (the tick with a label),
      * which is then used to determine its interval. */
@@ -514,65 +518,65 @@ void EventTimelineWidget::updateTimeRange(bool fromData)
     /* Using the minimum tick width, find the minimum number of seconds per tick,
      * and round up to an even and user-friendly duration */
     int areaWidth = viewportItemArea().width();
-    int minTickSecs = qMax(int(viewSeconds / (double(areaWidth) / minTickWidth)), 1);
+    int minTickSecs = qMax(int(visibleTimeRange.viewSeconds / (double(areaWidth) / minTickWidth)), 1);
 
     if (minTickSecs <= 30)
-        primaryTickSecs = 30;
+        visibleTimeRange.primaryTickSecs = 30;
     else if (minTickSecs <= 60)
-        primaryTickSecs = 60;
+        visibleTimeRange.primaryTickSecs = 60;
     else if (minTickSecs <= 300)
-        primaryTickSecs = 300;
+        visibleTimeRange.primaryTickSecs = 300;
     else if (minTickSecs <= 600)
-        primaryTickSecs = 600;
+        visibleTimeRange.primaryTickSecs = 600;
     else if (minTickSecs <= 3600)
-        primaryTickSecs = 3600;
+        visibleTimeRange.primaryTickSecs = 3600;
     else if (minTickSecs <= 7200)
-        primaryTickSecs = 7200;
+        visibleTimeRange.primaryTickSecs = 7200;
     else if (minTickSecs <= 21600)
-        primaryTickSecs = 21600;
+        visibleTimeRange.primaryTickSecs = 21600;
     else if (minTickSecs <= 43200)
-        primaryTickSecs = 43200;
+        visibleTimeRange.primaryTickSecs = 43200;
     else if (minTickSecs <= 86400)
-        primaryTickSecs = 86400;
+        visibleTimeRange.primaryTickSecs = 86400;
     else
-        primaryTickSecs = 604800;
+        visibleTimeRange.primaryTickSecs = 604800;
 
-    /* Set timeStart and timeEnd to rounded values of primaryTickSecs */
-    timeStart = dataTimeStart.addSecs(-int(dataTimeStart.toTime_t()%primaryTickSecs));
-    timeEnd = dataTimeEnd.addSecs(primaryTickSecs-int(dataTimeEnd.toTime_t()%primaryTickSecs));
-    timeSeconds = timeStart.secsTo(timeEnd);
+    /* Set visibleTimeRange.timeStart and visibleTimeRange.timeEnd to rounded values of visibleTimeRange.primaryTickSecs */
+    visibleTimeRange.timeStart = visibleTimeRange.dataTimeStart.addSecs(-int(visibleTimeRange.dataTimeStart.toTime_t()%visibleTimeRange.primaryTickSecs));
+    visibleTimeRange.timeEnd = visibleTimeRange.dataTimeEnd.addSecs(visibleTimeRange.primaryTickSecs-int(visibleTimeRange.dataTimeEnd.toTime_t()%visibleTimeRange.primaryTickSecs));
+    visibleTimeRange.timeSeconds = visibleTimeRange.timeStart.secsTo(visibleTimeRange.timeEnd);
 
     /* Update the view properties */
     emit zoomRangeChanged(minZoomSeconds(), maxZoomSeconds());
     ensureViewTimeSpan();
     updateScrollBars();
-    emit zoomSecondsChanged(viewSeconds);
+    emit zoomSecondsChanged(visibleTimeRange.viewSeconds);
     viewport()->update();
 }
 
 void EventTimelineWidget::ensureViewTimeSpan()
 {
-    if (viewTimeStart.isNull())
-        viewTimeStart = timeStart;
-    if (viewTimeEnd.isNull())
-        viewTimeEnd = timeEnd;
+    if (visibleTimeRange.viewTimeStart.isNull())
+        visibleTimeRange.viewTimeStart = visibleTimeRange.timeStart;
+    if (visibleTimeRange.viewTimeEnd.isNull())
+        visibleTimeRange.viewTimeEnd = visibleTimeRange.timeEnd;
 
-    if (viewTimeStart < timeStart)
+    if (visibleTimeRange.viewTimeStart < visibleTimeRange.timeStart)
     {
-        viewTimeEnd = viewTimeEnd.addSecs(viewTimeStart.secsTo(timeStart));
-        viewTimeStart = timeStart;
+        visibleTimeRange.viewTimeEnd = visibleTimeRange.viewTimeEnd.addSecs(visibleTimeRange.viewTimeStart.secsTo(visibleTimeRange.timeStart));
+        visibleTimeRange.viewTimeStart = visibleTimeRange.timeStart;
     }
 
-    if (viewTimeEnd > timeEnd)
+    if (visibleTimeRange.viewTimeEnd > visibleTimeRange.timeEnd)
     {
-        viewTimeStart = qMax(timeStart, viewTimeStart.addSecs(viewTimeEnd.secsTo(timeEnd)));
-        viewTimeEnd = timeEnd;
+        visibleTimeRange.viewTimeStart = qMax(visibleTimeRange.timeStart, visibleTimeRange.viewTimeStart.addSecs(visibleTimeRange.viewTimeEnd.secsTo(visibleTimeRange.timeEnd)));
+        visibleTimeRange.viewTimeEnd = visibleTimeRange.timeEnd;
     }
 
-    Q_ASSERT(viewTimeStart >= timeStart);
-    Q_ASSERT(viewTimeEnd <= timeEnd);
+    Q_ASSERT(visibleTimeRange.viewTimeStart >= visibleTimeRange.timeStart);
+    Q_ASSERT(visibleTimeRange.viewTimeEnd <= visibleTimeRange.timeEnd);
 
-    viewSeconds = viewTimeStart.secsTo(viewTimeEnd);
+    visibleTimeRange.viewSeconds = visibleTimeRange.viewTimeStart.secsTo(visibleTimeRange.viewTimeEnd);
 }
 
 void EventTimelineWidget::updateRowsMap(int row)
@@ -703,13 +707,13 @@ void EventTimelineWidget::addModelRows(int first, int last)
         rowsMap.insert(data, i);
 
         /* Update time span */
-        if (dataTimeStart.isNull() || data->utcStartDate() < dataTimeStart)
-            dataTimeStart = data->utcStartDate();
-        QDateTime ed = data->utcEndDate();
+        if (visibleTimeRange.dataTimeStart.isNull() || data->utcStartDate() < visibleTimeRange.dataTimeStart)
+            visibleTimeRange.dataTimeStart = data->utcStartDate();
+        QDateTime ed = data->serverEndDate();
         if (ed == data->utcStartDate())
             ed = ed.addSecs(1);
-        if (dataTimeEnd.isNull() || ed > dataTimeEnd)
-            dataTimeEnd = ed;
+        if (visibleTimeRange.dataTimeEnd.isNull() || ed > visibleTimeRange.dataTimeEnd)
+            visibleTimeRange.dataTimeEnd = ed;
     }
 
     updateRowsMapDelayed(last+1);
@@ -829,16 +833,16 @@ QRect EventTimelineWidget::viewportItemArea() const
 
 QRect EventTimelineWidget::timeCellRect(const QDateTime &time, int duration) const
 {
-    Q_ASSERT(time >= timeStart);
-    Q_ASSERT(time <= timeEnd);
+    Q_ASSERT(time >= visibleTimeRange.timeStart);
+    Q_ASSERT(time <= visibleTimeRange.timeEnd);
 
-    double range = qMax(viewSeconds, 1);
+    double range = qMax(visibleTimeRange.viewSeconds, 1);
 
-    /* Save enough room for a zero-duration item at timeEnd */
+    /* Save enough room for a zero-duration item at visibleTimeRange.timeEnd */
     int width = viewportItemArea().width();
 
     QRect r;
-    r.setX(qRound((viewTimeStart.secsTo(time) / range) * width));
+    r.setX(qRound((visibleTimeRange.viewTimeStart.secsTo(time) / range) * width));
     r.setWidth(qMax(cellMinimum(), qRound((duration / range) * width)));
     return r;
 }
@@ -897,9 +901,9 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
 
     bool first = true;
     int numDays = 0;
-    for (QDate date = viewTimeStart.date(), last = viewTimeEnd.date(); date <= last; date = date.addDays(1), ++numDays)
+    for (QDate date = visibleTimeRange.viewTimeStart.date(), last = visibleTimeRange.viewTimeEnd.date(); date <= last; date = date.addDays(1), ++numDays)
     {
-        QDateTime dt = qMax(QDateTime(date), viewTimeStart);
+        QDateTime dt = qMax(QDateTime(date), visibleTimeRange.viewTimeStart);
         QRect dateRect = timeCellRect(dt, dt.secsTo(QDateTime(date.addDays(1))));
         dateRect.setHeight(r.height());
         dateRect.translate(leftPadding(), 0);
@@ -912,7 +916,7 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
         {
             date = date.addDays(1);
             dt = QDateTime(date);
-            QRect nr = timeCellRect(dt, dt.secsTo(qMin(QDateTime(dt.addDays(1)), viewTimeEnd)));
+            QRect nr = timeCellRect(dt, dt.secsTo(qMin(QDateTime(dt.addDays(1)), visibleTimeRange.viewTimeEnd)));
             nr.setHeight(r.height());
             nr.translate(leftPadding(), 0);
             dateRect |= nr;
@@ -925,22 +929,23 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
     }
     p.restore();
 
-    Q_ASSERT(primaryTickSecs);
+    Q_ASSERT(visibleTimeRange.primaryTickSecs);
 
     /* Draw primary ticks and text */
     QVector<QLine> lines;
-    lines.reserve(qCeil(double(viewSeconds)/primaryTickSecs));
+    lines.reserve(qCeil(double(visibleTimeRange.viewSeconds)/visibleTimeRange.primaryTickSecs));
 
     /* Rectangle for each tick area */
     int areaWidth = viewportItemArea().width();
-    QRectF tickRect(leftPadding(), y, (double(primaryTickSecs) / qMax(viewSeconds,1)) * areaWidth, r.height());
+    QRectF tickRect(leftPadding(), y, (double(visibleTimeRange.primaryTickSecs) / qMax(visibleTimeRange.viewSeconds,1)) * areaWidth, r.height());
 
     /* Round to the first tick */
-    int preAreaSecs = int(viewTimeStart.toTime_t() % primaryTickSecs);
+    int preAreaSecs = int(visibleTimeRange.viewTimeStart.toTime_t() % visibleTimeRange.primaryTickSecs);
     if (preAreaSecs)
-        preAreaSecs = primaryTickSecs - preAreaSecs;
-    QDateTime dt = viewTimeStart.addSecs(preAreaSecs);
-    tickRect.translate((double(preAreaSecs)/qMax(viewSeconds,1))*areaWidth, 0);
+        preAreaSecs = visibleTimeRange.primaryTickSecs - preAreaSecs;
+    QDateTime dt = visibleTimeRange.viewTimeStart.addSecs(preAreaSecs).addSecs(visibleTimeRange.dataTimeStart.utcOffset());
+
+    tickRect.translate((double(preAreaSecs)/qMax(visibleTimeRange.viewSeconds,1))*areaWidth, 0);
 
     for (;;)
     {
@@ -955,7 +960,7 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
             break;
 
         tickRect.translate(tickRect.width(), 0);
-        dt = dt.addSecs(primaryTickSecs);
+        dt = dt.addSecs(visibleTimeRange.primaryTickSecs);
     }
 
     y = topPadding();
@@ -1021,7 +1026,7 @@ void EventTimelineWidget::paintRow(QPainter *p, QRect r, LocationData *locationD
     for (QList<EventData*>::Iterator it = locationData->events.begin(); it != locationData->events.end(); ++it)
     {
         EventData *data = *it;
-        if (data->utcStartDate().addSecs(data->durationInSeconds()) < viewTimeStart)
+        if (data->utcStartDate().addSecs(data->durationInSeconds()) < visibleTimeRange.viewTimeStart)
             continue;
 
         Q_ASSERT(rowsMap.contains(data));

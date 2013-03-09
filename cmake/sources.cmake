@@ -85,6 +85,7 @@ set (bluecherry_client_main_SRCS
     src/ui/StatusBandwidthWidget.cpp
     src/ui/StatusBarServerAlert.cpp
     src/ui/SwitchEventsWidget.cpp
+    src/ui/VisibleTimeRange.cpp
     src/ui/WebRtpPortCheckerWidget.cpp
 
     src/utils/FileUtils.cpp
