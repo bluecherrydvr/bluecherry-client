@@ -33,7 +33,6 @@ class EventData;
 class EventTimelineWidget : public QAbstractItemView
 {
     Q_OBJECT
-    Q_PROPERTY(int zoomSeconds READ zoomSeconds WRITE setZoomSeconds NOTIFY zoomSecondsChanged)
 
 public:
     explicit EventTimelineWidget(QWidget *parent = 0);

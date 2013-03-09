@@ -201,6 +201,7 @@ void EventTimelineWidget::setZoomSeconds(int seconds)
     Q_ASSERT(visibleTimeRange.viewTimeStart.secsTo(visibleTimeRange.viewTimeEnd) == visibleTimeRange.viewSeconds);
 
     scheduleDelayedItemsLayout(DoUpdateTimeRange);
+    emit zoomSecondsChanged(seconds);
 }
 
 void EventTimelineWidget::setViewStartOffset(int secs)
