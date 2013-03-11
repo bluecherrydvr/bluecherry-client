@@ -46,3 +46,26 @@ double VisibleTimeRange::zoomLevel() const
         return 0;
     return 100-((double(viewSeconds-minZoomSeconds())/double(timeSeconds-minZoomSeconds()))*100);
 }
+
+void VisibleTimeRange::setZoomSeconds(int seconds)
+{
+    seconds = qBound(minZoomSeconds(), seconds, maxZoomSeconds());
+    if (viewSeconds == seconds)
+        return;
+
+    Q_ASSERT(!viewTimeStart.isNull());
+    Q_ASSERT(viewTimeStart >= timeStart);
+
+    viewSeconds = seconds;
+    viewTimeEnd = viewTimeStart.addSecs(seconds);
+    if (viewTimeEnd > timeEnd)
+    {
+        viewTimeStart = viewTimeStart.addSecs(viewTimeEnd.secsTo(timeEnd));
+        viewTimeEnd = timeEnd;
+    }
+
+    Q_ASSERT(viewTimeEnd > viewTimeStart);
+    Q_ASSERT(viewTimeStart >= timeStart);
+    Q_ASSERT(viewTimeEnd <= timeEnd);
+    Q_ASSERT(viewTimeStart.secsTo(viewTimeEnd) == viewSeconds);
+}

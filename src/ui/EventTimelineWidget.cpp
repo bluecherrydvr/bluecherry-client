@@ -173,25 +173,10 @@ QRect EventTimelineWidget::visualRect(const QModelIndex &index) const
 
 void EventTimelineWidget::setZoomSeconds(int seconds)
 {
-    seconds = qBound(minZoomSeconds(), seconds, maxZoomSeconds());
     if (visibleTimeRange.viewSeconds == seconds)
         return;
 
-    Q_ASSERT(!visibleTimeRange.viewTimeStart.isNull());
-    Q_ASSERT(visibleTimeRange.viewTimeStart >= visibleTimeRange.timeStart);
-
-    visibleTimeRange.viewSeconds = seconds;
-    visibleTimeRange.viewTimeEnd = visibleTimeRange.viewTimeStart.addSecs(seconds);
-    if (visibleTimeRange.viewTimeEnd > visibleTimeRange.timeEnd)
-    {
-        visibleTimeRange.viewTimeStart = visibleTimeRange.viewTimeStart.addSecs(visibleTimeRange.viewTimeEnd.secsTo(visibleTimeRange.timeEnd));
-        visibleTimeRange.viewTimeEnd = visibleTimeRange.timeEnd;
-    }
-
-    Q_ASSERT(visibleTimeRange.viewTimeEnd > visibleTimeRange.viewTimeStart);
-    Q_ASSERT(visibleTimeRange.viewTimeStart >= visibleTimeRange.timeStart);
-    Q_ASSERT(visibleTimeRange.viewTimeEnd <= visibleTimeRange.timeEnd);
-    Q_ASSERT(visibleTimeRange.viewTimeStart.secsTo(visibleTimeRange.viewTimeEnd) == visibleTimeRange.viewSeconds);
+    visibleTimeRange.setZoomSeconds(seconds);
 
     scheduleDelayedItemsLayout(DoUpdateTimeRange);
     emit zoomSecondsChanged(seconds);

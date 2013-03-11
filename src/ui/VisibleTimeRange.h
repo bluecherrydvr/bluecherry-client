@@ -47,6 +47,7 @@ public:
     int maxZoomSeconds() const { return timeSeconds; }
 
     double zoomLevel() const;
+    void setZoomSeconds(int seconds);
 
 };
 
