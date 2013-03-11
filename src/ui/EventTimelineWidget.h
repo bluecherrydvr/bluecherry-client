@@ -110,6 +110,9 @@ private:
     };
     Q_DECLARE_FLAGS(LayoutFlags, LayoutFlag)
     LayoutFlags pendingLayouts;
+    
+    QDateTime earliestDate();
+    QDateTime latestDate();
 
     void scheduleDelayedItemsLayout(LayoutFlags flags);
     void ensureLayout();

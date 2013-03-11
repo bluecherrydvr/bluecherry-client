@@ -433,22 +433,40 @@ bool EventTimelineWidget::findEvent(EventData *event, bool create, ServerData **
     return true;
 }
 
+QDateTime EventTimelineWidget::earliestDate()
+{
+    QDateTime result;
+
+    for (QHash<EventData *, int>::Iterator it = rowsMap.begin(); it != rowsMap.end(); ++it)
+    {
+        QDateTime date = it.key()->utcStartDate();
+        if (result.isNull() || date < result)
+            result = date;
+    }
+
+    return result;
+}
+
+QDateTime EventTimelineWidget::latestDate()
+{
+    QDateTime result;
+
+    for (QHash<EventData *, int>::Iterator it = rowsMap.begin(); it != rowsMap.end(); ++it)
+    {
+        QDateTime date = it.key()->utcEndDate();
+        if (result.isNull() || date > result)
+            result = date;
+    }
+
+    return result;
+}
+
 void EventTimelineWidget::updateTimeRange(bool fromData)
 {
     if (fromData)
     {
-        /* Refresh visibleTimeRange.dataTimeStart and visibleTimeRange.dataTimeEnd */
-        visibleTimeRange.dataTimeStart = visibleTimeRange.dataTimeEnd = QDateTime();
-
-        for (QHash<EventData*,int>::Iterator it = rowsMap.begin(); it != rowsMap.end(); ++it)
-        {
-            QDateTime date = it.key()->utcStartDate();
-            if (visibleTimeRange.dataTimeStart.isNull() || date < visibleTimeRange.dataTimeStart)
-                visibleTimeRange.dataTimeStart = date;
-            date = date.addSecs(qMax(it.key()->durationInSeconds(), 1));
-            if (visibleTimeRange.dataTimeEnd.isNull() || date > visibleTimeRange.dataTimeEnd)
-                visibleTimeRange.dataTimeEnd = date;
-        }
+        visibleTimeRange.dataTimeStart = earliestDate();
+        visibleTimeRange.dataTimeEnd = latestDate();
     }
 
     /* Approximate visibleTimeRange.viewSeconds for the tick calculations */
