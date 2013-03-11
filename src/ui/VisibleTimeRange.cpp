@@ -69,3 +69,15 @@ void VisibleTimeRange::setZoomSeconds(int seconds)
     Q_ASSERT(viewTimeEnd <= timeEnd);
     Q_ASSERT(viewTimeStart.secsTo(viewTimeEnd) == viewSeconds);
 }
+
+void VisibleTimeRange::setViewStartOffset(int secs)
+{
+    secs = qBound(0, secs, timeSeconds - viewSeconds);
+
+    viewTimeStart = timeStart.addSecs(secs);
+    viewTimeEnd = viewTimeStart.addSecs(viewSeconds);
+
+    Q_ASSERT(viewSeconds <= timeSeconds);
+    Q_ASSERT(viewSeconds >= minZoomSeconds());
+    Q_ASSERT(viewTimeEnd <= timeEnd);
+}

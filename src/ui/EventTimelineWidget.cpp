@@ -184,16 +184,8 @@ void EventTimelineWidget::setZoomSeconds(int seconds)
 
 void EventTimelineWidget::setViewStartOffset(int secs)
 {
-    secs = qBound(0, secs, visibleTimeRange.timeSeconds - visibleTimeRange.viewSeconds);
-
-    visibleTimeRange.viewTimeStart = visibleTimeRange.timeStart.addSecs(secs);
-    visibleTimeRange.viewTimeEnd = visibleTimeRange.viewTimeStart.addSecs(visibleTimeRange.viewSeconds);
-
-    Q_ASSERT(visibleTimeRange.viewSeconds <= visibleTimeRange.timeSeconds);
-    Q_ASSERT(visibleTimeRange.viewSeconds >= minZoomSeconds());
-    Q_ASSERT(visibleTimeRange.viewTimeEnd <= visibleTimeRange.timeEnd);
+    visibleTimeRange.setViewStartOffset(secs);
     Q_ASSERT(horizontalScrollBar()->maximum() == (visibleTimeRange.timeSeconds - visibleTimeRange.viewSeconds));
-
     viewport()->update();
 }
 

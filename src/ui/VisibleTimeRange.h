@@ -49,6 +49,8 @@ public:
     double zoomLevel() const;
     void setZoomSeconds(int seconds);
 
+    void setViewStartOffset(int secs);
+
 };
 
 #endif // VISIBLETIMERANGE_H
