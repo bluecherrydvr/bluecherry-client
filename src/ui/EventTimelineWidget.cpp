@@ -17,6 +17,7 @@
 
 #include "EventTimelineWidget.h"
 #include "EventsModel.h"
+#include "TimeRangeScrollBar.h"
 #include "core/EventData.h"
 #include "core/DVRServer.h"
 #include <QPaintEvent>
@@ -88,6 +89,7 @@ EventTimelineWidget::EventTimelineWidget(QWidget *parent)
 {
     setAutoFillBackground(false);
 
+    setHorizontalScrollBar(new TimeRangeScrollBar(this));
     connect(horizontalScrollBar(), SIGNAL(valueChanged(int)), SLOT(setViewStartOffset(int)));
 }
 
