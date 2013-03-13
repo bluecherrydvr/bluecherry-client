@@ -99,9 +99,6 @@ void VisibleTimeRange::setZoomSeconds(int seconds)
     if (m_viewSeconds == seconds)
         return;
 
-    Q_ASSERT(!m_viewTimeStart.isNull());
-    Q_ASSERT(m_viewTimeStart >= m_timeStart);
-
     m_viewSeconds = seconds;
     m_viewTimeEnd = m_viewTimeStart.addSecs(seconds);
     if (m_viewTimeEnd > m_timeEnd)
@@ -109,11 +106,6 @@ void VisibleTimeRange::setZoomSeconds(int seconds)
         m_viewTimeStart = m_viewTimeStart.addSecs(m_viewTimeEnd.secsTo(m_timeEnd));
         m_viewTimeEnd = m_timeEnd;
     }
-
-    Q_ASSERT(m_viewTimeEnd > m_viewTimeStart);
-    Q_ASSERT(m_viewTimeStart >= m_timeStart);
-    Q_ASSERT(m_viewTimeEnd <= m_timeEnd);
-    Q_ASSERT(m_viewTimeStart.secsTo(m_viewTimeEnd) == m_viewSeconds);
 }
 
 void VisibleTimeRange::setViewStartOffset(int secs)
@@ -122,10 +114,6 @@ void VisibleTimeRange::setViewStartOffset(int secs)
 
     m_viewTimeStart = m_timeStart.addSecs(secs);
     m_viewTimeEnd = m_viewTimeStart.addSecs(m_viewSeconds);
-
-    Q_ASSERT(m_viewSeconds <= m_timeSeconds);
-    Q_ASSERT(m_viewSeconds >= minZoomSeconds());
-    Q_ASSERT(m_viewTimeEnd <= m_timeEnd);
 }
 
 int VisibleTimeRange::invisibleSeconds() const
@@ -201,9 +189,6 @@ void VisibleTimeRange::ensureViewTimeSpan()
         m_viewTimeStart = qMax(m_timeStart, m_viewTimeStart.addSecs(m_viewTimeEnd.secsTo(m_timeEnd)));
         m_viewTimeEnd = m_timeEnd;
     }
-
-    Q_ASSERT(m_viewTimeStart >= m_timeStart);
-    Q_ASSERT(m_viewTimeEnd <= m_timeEnd);
 
     m_viewSeconds = m_viewTimeStart.secsTo(viewTimeEnd());
 }
