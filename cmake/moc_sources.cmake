@@ -77,6 +77,7 @@ set (bluecherry_client_MOC_SRCS
     src/ui/StatusBarServerAlert.h
     src/ui/SwitchEventsWidget.h
     src/ui/TimeRangeScrollBar.h
+    src/ui/VisibleTimeRange.h
     src/ui/WebRtpPortCheckerWidget.h
 
     src/utils/ThreadTaskCourier.h

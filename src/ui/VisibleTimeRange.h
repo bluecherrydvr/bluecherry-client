@@ -20,8 +20,10 @@
 
 #include <QDateTime>
 
-class VisibleTimeRange
+class VisibleTimeRange : public QObject
 {
+    Q_OBJECT
+
     /* Total span of time represented by the timeline, rounded from dataTime */
     QDateTime m_timeStart, m_timeEnd;
     /* Span of time represented in data; end is inclusive of the duration */
