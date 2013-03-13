@@ -30,3 +30,9 @@ void TimeRangeScrollBar::setInvisibleSeconds(int invisibleSeconds)
 {
     setRange(0, invisibleSeconds);
 }
+
+void TimeRangeScrollBar::setPrimaryTickSecs(int primaryTickSecs)
+{
+    setPageStep(primaryTickSecs);
+    setSingleStep(primaryTickSecs);
+}

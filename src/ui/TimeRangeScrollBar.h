@@ -30,6 +30,7 @@ public:
 
 public slots:
     void setInvisibleSeconds(int invisibleSeconds);
+    void setPrimaryTickSecs(int primaryTickSecs);
 
 };
 

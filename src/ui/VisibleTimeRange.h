@@ -75,6 +75,7 @@ public:
 
 signals:
     void invisibleSecondsChanged(int invisibleSeconds);
+    void primaryTickSecsChanged(int primaryTickSecs);
 
 };
 

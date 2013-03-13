@@ -81,6 +81,7 @@ void VisibleTimeRange::clear()
     m_primaryTickSecs = 0;
 
     emit invisibleSecondsChanged(invisibleSeconds());
+    emit primaryTickSecsChanged(m_primaryTickSecs);
 }
 
 double VisibleTimeRange::zoomLevel() const
@@ -160,6 +161,8 @@ void VisibleTimeRange::computePrimaryTickSecs(int areaWidth, int minTickWidth)
         m_primaryTickSecs = 86400;
     else
         m_primaryTickSecs = 604800;
+
+    emit primaryTickSecsChanged(m_primaryTickSecs);
 }
 
 void VisibleTimeRange::computeTimeStart()
