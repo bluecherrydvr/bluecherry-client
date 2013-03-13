@@ -73,6 +73,9 @@ public:
     void ensureViewTimeSpan();
     void addDate(const QDateTime &date);
 
+signals:
+    void invisibleSecondsChanged(int invisibleSeconds);
+
 };
 
 #endif // VISIBLETIMERANGE_H

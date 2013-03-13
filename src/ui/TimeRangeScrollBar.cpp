@@ -25,3 +25,8 @@ TimeRangeScrollBar::TimeRangeScrollBar(QWidget *parent)
 TimeRangeScrollBar::~TimeRangeScrollBar()
 {
 }
+
+void TimeRangeScrollBar::setInvisibleSeconds(int invisibleSeconds)
+{
+    setRange(0, invisibleSeconds);
+}

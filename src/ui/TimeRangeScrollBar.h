@@ -28,6 +28,9 @@ public:
     explicit TimeRangeScrollBar(QWidget *parent = 0);
     virtual ~TimeRangeScrollBar();
 
+public slots:
+    void setInvisibleSeconds(int invisibleSeconds);
+
 };
 
 #endif // TIMERANGESCROLLBAR_H

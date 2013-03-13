@@ -79,6 +79,8 @@ void VisibleTimeRange::clear()
     m_timeSeconds = 0;
     m_viewSeconds = 0;
     m_primaryTickSecs = 0;
+
+    emit invisibleSecondsChanged(invisibleSeconds());
 }
 
 double VisibleTimeRange::zoomLevel() const
@@ -106,6 +108,8 @@ void VisibleTimeRange::setZoomSeconds(int seconds)
         m_viewTimeStart = m_viewTimeStart.addSecs(m_viewTimeEnd.secsTo(m_timeEnd));
         m_viewTimeEnd = m_timeEnd;
     }
+
+    emit invisibleSecondsChanged(invisibleSeconds());
 }
 
 void VisibleTimeRange::setViewStartOffset(int secs)
@@ -128,6 +132,8 @@ void VisibleTimeRange::computeViewSeconds()
         m_viewSeconds = m_dataTimeStart.secsTo(m_dataTimeEnd);
     else
         m_viewSeconds = qMin(m_viewSeconds, m_dataTimeStart.secsTo(m_dataTimeEnd));
+
+    emit invisibleSecondsChanged(invisibleSeconds());
 }
 
 void VisibleTimeRange::computePrimaryTickSecs(int areaWidth, int minTickWidth)
@@ -169,6 +175,7 @@ void VisibleTimeRange::computeTimeEnd()
 void VisibleTimeRange::computeTimeSeconds()
 {
     m_timeSeconds = m_timeStart.secsTo(m_timeEnd);
+    emit invisibleSecondsChanged(invisibleSeconds());
 }
 
 void VisibleTimeRange::ensureViewTimeSpan()
@@ -191,6 +198,8 @@ void VisibleTimeRange::ensureViewTimeSpan()
     }
 
     m_viewSeconds = m_viewTimeStart.secsTo(viewTimeEnd());
+
+    emit invisibleSecondsChanged(invisibleSeconds());
 }
 
 void VisibleTimeRange::addDate(const QDateTime& date)

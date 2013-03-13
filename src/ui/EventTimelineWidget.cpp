@@ -89,7 +89,10 @@ EventTimelineWidget::EventTimelineWidget(QWidget *parent)
 {
     setAutoFillBackground(false);
 
-    setHorizontalScrollBar(new TimeRangeScrollBar(this));
+    TimeRangeScrollBar * timeRangeScrollBar = new TimeRangeScrollBar(this);
+    connect(&visibleTimeRange, SIGNAL(invisibleSecondsChanged(int)), timeRangeScrollBar, SLOT(setInvisibleSeconds(int)));
+
+    setHorizontalScrollBar(timeRangeScrollBar);
     connect(horizontalScrollBar(), SIGNAL(valueChanged(int)), SLOT(setViewStartOffset(int)));
 }
 
@@ -187,7 +190,6 @@ void EventTimelineWidget::setZoomSeconds(int seconds)
 void EventTimelineWidget::setViewStartOffset(int secs)
 {
     visibleTimeRange.setViewStartOffset(secs);
-    Q_ASSERT(horizontalScrollBar()->maximum() == visibleTimeRange.invisibleSeconds());
     viewport()->update();
 }
 
@@ -195,7 +197,6 @@ void EventTimelineWidget::updateScrollBars()
 {
     ensureLayout();
 
-    horizontalScrollBar()->setRange(0, visibleTimeRange.invisibleSeconds());
     horizontalScrollBar()->setPageStep(visibleTimeRange.primaryTickSecs());
     horizontalScrollBar()->setSingleStep(horizontalScrollBar()->pageStep());
 
