@@ -101,3 +101,29 @@ void VisibleTimeRange::computeViewSeconds()
     else
         viewSeconds = qMin(viewSeconds, dataTimeStart.secsTo(dataTimeEnd));
 }
+
+void VisibleTimeRange::computePrimaryTickSecs(int areaWidth, int minTickWidth)
+{
+    int minTickSecs = qMax(int(viewSeconds / (double(areaWidth) / minTickWidth)), 1);
+
+    if (minTickSecs <= 30)
+        primaryTickSecs = 30;
+    else if (minTickSecs <= 60)
+        primaryTickSecs = 60;
+    else if (minTickSecs <= 300)
+        primaryTickSecs = 300;
+    else if (minTickSecs <= 600)
+        primaryTickSecs = 600;
+    else if (minTickSecs <= 3600)
+        primaryTickSecs = 3600;
+    else if (minTickSecs <= 7200)
+        primaryTickSecs = 7200;
+    else if (minTickSecs <= 21600)
+        primaryTickSecs = 21600;
+    else if (minTickSecs <= 43200)
+        primaryTickSecs = 43200;
+    else if (minTickSecs <= 86400)
+        primaryTickSecs = 86400;
+    else
+        primaryTickSecs = 604800;
+}

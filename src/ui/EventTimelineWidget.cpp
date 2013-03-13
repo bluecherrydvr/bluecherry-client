@@ -476,28 +476,8 @@ void EventTimelineWidget::updateTimeRange(bool fromData)
     /* Using the minimum tick width, find the minimum number of seconds per tick,
      * and round up to an even and user-friendly duration */
     int areaWidth = viewportItemArea().width();
-    int minTickSecs = qMax(int(visibleTimeRange.viewSeconds / (double(areaWidth) / minTickWidth)), 1);
-
-    if (minTickSecs <= 30)
-        visibleTimeRange.primaryTickSecs = 30;
-    else if (minTickSecs <= 60)
-        visibleTimeRange.primaryTickSecs = 60;
-    else if (minTickSecs <= 300)
-        visibleTimeRange.primaryTickSecs = 300;
-    else if (minTickSecs <= 600)
-        visibleTimeRange.primaryTickSecs = 600;
-    else if (minTickSecs <= 3600)
-        visibleTimeRange.primaryTickSecs = 3600;
-    else if (minTickSecs <= 7200)
-        visibleTimeRange.primaryTickSecs = 7200;
-    else if (minTickSecs <= 21600)
-        visibleTimeRange.primaryTickSecs = 21600;
-    else if (minTickSecs <= 43200)
-        visibleTimeRange.primaryTickSecs = 43200;
-    else if (minTickSecs <= 86400)
-        visibleTimeRange.primaryTickSecs = 86400;
-    else
-        visibleTimeRange.primaryTickSecs = 604800;
+    
+    visibleTimeRange.computePrimaryTickSecs(areaWidth, minTickWidth);
 
     /* Set visibleTimeRange.timeStart and visibleTimeRange.timeEnd to rounded values of visibleTimeRange.primaryTickSecs */
     visibleTimeRange.timeStart = visibleTimeRange.dataTimeStart.addSecs(-int(visibleTimeRange.dataTimeStart.toTime_t()%visibleTimeRange.primaryTickSecs));

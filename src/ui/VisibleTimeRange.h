@@ -54,6 +54,7 @@ public:
     int invisibleSeconds() const;
 
     void computeViewSeconds();
+    void computePrimaryTickSecs(int areaWidth, int minTickWidth);
 
 };
 
