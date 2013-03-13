@@ -39,6 +39,7 @@ struct VisibleTimeRange
 public:
     explicit VisibleTimeRange();
 
+    void setDataRange(const QDateTime &dataStart, const QDateTime &dataEnd);
     void clear();
 
     /* Zoom in the number of seconds of time visible on screen */

@@ -22,6 +22,12 @@ VisibleTimeRange::VisibleTimeRange()
 {
 }
 
+void VisibleTimeRange::setDataRange(const QDateTime &dataStart, const QDateTime& dataEnd)
+{
+    dataTimeStart = dataStart;
+    dataTimeEnd = dataEnd;
+}
+
 void VisibleTimeRange::clear()
 {
     timeStart = QDateTime();

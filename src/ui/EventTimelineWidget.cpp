@@ -464,10 +464,7 @@ QDateTime EventTimelineWidget::latestDate()
 void EventTimelineWidget::updateTimeRange(bool fromData)
 {
     if (fromData)
-    {
-        visibleTimeRange.dataTimeStart = earliestDate();
-        visibleTimeRange.dataTimeEnd = latestDate();
-    }
+        visibleTimeRange.setDataRange(earliestDate(), latestDate());
 
     /* Approximate visibleTimeRange.viewSeconds for the tick calculations */
     if (visibleTimeRange.viewTimeStart.isNull() || visibleTimeRange.viewTimeEnd.isNull())
