@@ -137,3 +137,8 @@ void VisibleTimeRange::computeTimeEnd()
 {
     timeEnd = dataTimeEnd.addSecs(primaryTickSecs - int(dataTimeEnd.toTime_t() % primaryTickSecs));
 }
+
+void VisibleTimeRange::computeTimeSeconds()
+{
+    timeSeconds = timeStart.secsTo(timeEnd);
+}

@@ -57,6 +57,7 @@ public:
     void computePrimaryTickSecs(int areaWidth, int minTickWidth);
     void computeTimeStart();
     void computeTimeEnd();
+    void computeTimeSeconds();
 
 };
 

@@ -480,8 +480,7 @@ void EventTimelineWidget::updateTimeRange(bool fromData)
     visibleTimeRange.computePrimaryTickSecs(areaWidth, minTickWidth);
     visibleTimeRange.computeTimeStart();
     visibleTimeRange.computeTimeEnd();
-
-    visibleTimeRange.timeSeconds = visibleTimeRange.timeStart.secsTo(visibleTimeRange.timeEnd);
+    visibleTimeRange.computeTimeSeconds();
 
     /* Update the view properties */
     emit zoomRangeChanged(minZoomSeconds(), maxZoomSeconds());
