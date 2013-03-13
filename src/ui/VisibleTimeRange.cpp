@@ -142,3 +142,28 @@ void VisibleTimeRange::computeTimeSeconds()
 {
     timeSeconds = timeStart.secsTo(timeEnd);
 }
+
+void VisibleTimeRange::ensureViewTimeSpan()
+{
+    if (viewTimeStart.isNull())
+        viewTimeStart = timeStart;
+    if (viewTimeEnd.isNull())
+        viewTimeEnd = timeEnd;
+
+    if (viewTimeStart < timeStart)
+    {
+        viewTimeEnd = viewTimeEnd.addSecs(viewTimeStart.secsTo(timeStart));
+        viewTimeStart = timeStart;
+    }
+
+    if (viewTimeEnd > timeEnd)
+    {
+        viewTimeStart = qMax(timeStart, viewTimeStart.addSecs(viewTimeEnd.secsTo(timeEnd)));
+        viewTimeEnd = timeEnd;
+    }
+
+    Q_ASSERT(viewTimeStart >= timeStart);
+    Q_ASSERT(viewTimeEnd <= timeEnd);
+
+    viewSeconds = viewTimeStart.secsTo(viewTimeEnd);
+}

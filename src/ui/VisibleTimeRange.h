@@ -59,6 +59,9 @@ public:
     void computeTimeEnd();
     void computeTimeSeconds();
 
+    void ensureViewTimeSpan();
+    void addDate(const QDateTime &date);
+
 };
 
 #endif // VISIBLETIMERANGE_H

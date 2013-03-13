@@ -484,35 +484,10 @@ void EventTimelineWidget::updateTimeRange(bool fromData)
 
     /* Update the view properties */
     emit zoomRangeChanged(minZoomSeconds(), maxZoomSeconds());
-    ensureViewTimeSpan();
+    visibleTimeRange.ensureViewTimeSpan();
     updateScrollBars();
     emit zoomSecondsChanged(visibleTimeRange.viewSeconds);
     viewport()->update();
-}
-
-void EventTimelineWidget::ensureViewTimeSpan()
-{
-    if (visibleTimeRange.viewTimeStart.isNull())
-        visibleTimeRange.viewTimeStart = visibleTimeRange.timeStart;
-    if (visibleTimeRange.viewTimeEnd.isNull())
-        visibleTimeRange.viewTimeEnd = visibleTimeRange.timeEnd;
-
-    if (visibleTimeRange.viewTimeStart < visibleTimeRange.timeStart)
-    {
-        visibleTimeRange.viewTimeEnd = visibleTimeRange.viewTimeEnd.addSecs(visibleTimeRange.viewTimeStart.secsTo(visibleTimeRange.timeStart));
-        visibleTimeRange.viewTimeStart = visibleTimeRange.timeStart;
-    }
-
-    if (visibleTimeRange.viewTimeEnd > visibleTimeRange.timeEnd)
-    {
-        visibleTimeRange.viewTimeStart = qMax(visibleTimeRange.timeStart, visibleTimeRange.viewTimeStart.addSecs(visibleTimeRange.viewTimeEnd.secsTo(visibleTimeRange.timeEnd)));
-        visibleTimeRange.viewTimeEnd = visibleTimeRange.timeEnd;
-    }
-
-    Q_ASSERT(visibleTimeRange.viewTimeStart >= visibleTimeRange.timeStart);
-    Q_ASSERT(visibleTimeRange.viewTimeEnd <= visibleTimeRange.timeEnd);
-
-    visibleTimeRange.viewSeconds = visibleTimeRange.viewTimeStart.secsTo(visibleTimeRange.viewTimeEnd);
 }
 
 void EventTimelineWidget::updateRowsMap(int row)

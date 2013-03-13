@@ -148,8 +148,6 @@ private:
 
     void addModelRows(int first, int last = -1);
     void clearData();
-    /* Ensure that the view time is within the boundaries of the data, changing it (scrolling or zooming) if necessary */
-    void ensureViewTimeSpan();
     /* Update the scroll bar position, which is necessary when viewSeconds has changed */
     void updateScrollBars();
 
