@@ -127,3 +127,8 @@ void VisibleTimeRange::computePrimaryTickSecs(int areaWidth, int minTickWidth)
     else
         primaryTickSecs = 604800;
 }
+
+void VisibleTimeRange::computeTimeStart()
+{
+    timeStart = dataTimeStart.addSecs(-int(dataTimeStart.toTime_t() % primaryTickSecs));
+}

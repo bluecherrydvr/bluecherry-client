@@ -55,6 +55,7 @@ public:
 
     void computeViewSeconds();
     void computePrimaryTickSecs(int areaWidth, int minTickWidth);
+    void computeTimeStart();
 
 };
 
