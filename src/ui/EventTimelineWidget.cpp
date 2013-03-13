@@ -466,11 +466,7 @@ void EventTimelineWidget::updateTimeRange(bool fromData)
     if (fromData)
         visibleTimeRange.setDataRange(earliestDate(), latestDate());
 
-    /* Approximate visibleTimeRange.viewSeconds for the tick calculations */
-    if (visibleTimeRange.viewTimeStart.isNull() || visibleTimeRange.viewTimeEnd.isNull())
-        visibleTimeRange.viewSeconds = visibleTimeRange.dataTimeStart.secsTo(visibleTimeRange.dataTimeEnd);
-    else
-        visibleTimeRange.viewSeconds = qMin(visibleTimeRange.viewSeconds, visibleTimeRange.dataTimeStart.secsTo(visibleTimeRange.dataTimeEnd));
+    visibleTimeRange.computeViewSeconds();
 
     /* Determine the minimum width for the primary tick (the tick with a label),
      * which is then used to determine its interval. */

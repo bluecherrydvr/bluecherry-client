@@ -92,3 +92,12 @@ int VisibleTimeRange::invisibleSeconds() const
 {
     return qMax(timeSeconds - viewSeconds, 0);
 }
+
+void VisibleTimeRange::computeViewSeconds()
+{
+    /* Approximate viewSeconds for the tick calculations */
+    if (viewTimeStart.isNull() || viewTimeEnd.isNull())
+        viewSeconds = dataTimeStart.secsTo(dataTimeEnd);
+    else
+        viewSeconds = qMin(viewSeconds, dataTimeStart.secsTo(dataTimeEnd));
+}

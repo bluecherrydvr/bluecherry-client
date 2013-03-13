@@ -53,6 +53,8 @@ public:
     void setViewStartOffset(int secs);
     int invisibleSeconds() const;
 
+    void computeViewSeconds();
+
 };
 
 #endif // VISIBLETIMERANGE_H
