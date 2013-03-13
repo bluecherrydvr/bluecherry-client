@@ -20,32 +20,41 @@
 
 #include <QDateTime>
 
-struct VisibleTimeRange
+class VisibleTimeRange
 {
     /* Total span of time represented by the timeline, rounded from dataTime */
-    QDateTime timeStart, timeEnd;
+    QDateTime m_timeStart, m_timeEnd;
     /* Span of time represented in data; end is inclusive of the duration */
-    QDateTime dataTimeStart, dataTimeEnd;
+    QDateTime m_dataTimeStart, m_dataTimeEnd;
     /* Span of time shown in the viewport */
-    QDateTime viewTimeStart, viewTimeEnd;
+    QDateTime m_viewTimeStart, m_viewTimeEnd;
     /* Span of seconds between timeStart and timeEnd */
-    int timeSeconds;
+    int m_timeSeconds;
     /* Span of seconds between viewTimeStart and viewTimeEnd */
-    int viewSeconds;
+    int m_viewSeconds;
     /* Seconds of time per primary tick (a x-axis label), derived from the view area
      * and a minimum width and rounded up to a user-friendly duration in updateTimeRange */
-    int primaryTickSecs;
+    int m_primaryTickSecs;
 
 public:
     explicit VisibleTimeRange();
+    
+    int viewSeconds() const;
+    int primaryTickSecs() const;
+    QDateTime viewTimeStart() const;
+    QDateTime timeStart() const;
+    QDateTime dataTimeStart() const;
+    QDateTime viewTimeEnd() const;
+    QDateTime timeEnd() const;
+    QDateTime dataTimeEnd() const;
 
     void setDataRange(const QDateTime &dataStart, const QDateTime &dataEnd);
     void clear();
 
     /* Zoom in the number of seconds of time visible on screen */
-    int zoomSeconds() const { return viewSeconds; }
-    int minZoomSeconds() const { return qMin(timeSeconds, 60); }
-    int maxZoomSeconds() const { return timeSeconds; }
+    int zoomSeconds() const { return m_viewSeconds; }
+    int minZoomSeconds() const { return qMin(m_timeSeconds, 60); }
+    int maxZoomSeconds() const { return m_timeSeconds; }
 
     double zoomLevel() const;
     void setZoomSeconds(int seconds);

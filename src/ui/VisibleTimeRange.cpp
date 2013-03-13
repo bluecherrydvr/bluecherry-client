@@ -18,27 +18,67 @@
 #include "VisibleTimeRange.h"
 
 VisibleTimeRange::VisibleTimeRange()
-    : timeSeconds(0), viewSeconds(0), primaryTickSecs(0)
+    : m_timeSeconds(0), m_viewSeconds(0), m_primaryTickSecs(0)
 {
+}
+
+int VisibleTimeRange::viewSeconds() const
+{
+    return m_viewSeconds;
+}
+
+int VisibleTimeRange::primaryTickSecs() const
+{
+    return m_primaryTickSecs;
+}
+
+QDateTime VisibleTimeRange::viewTimeStart() const
+{
+    return m_viewTimeStart;
+}
+
+QDateTime VisibleTimeRange::timeStart() const
+{
+    return m_timeStart;
+}
+
+QDateTime VisibleTimeRange::dataTimeStart() const
+{
+    return m_dataTimeStart;
+}
+
+QDateTime VisibleTimeRange::viewTimeEnd() const
+{
+    return m_viewTimeEnd;
+}
+
+QDateTime VisibleTimeRange::timeEnd() const
+{
+    return m_timeEnd;
+}
+
+QDateTime VisibleTimeRange::dataTimeEnd() const
+{
+    return m_dataTimeEnd;
 }
 
 void VisibleTimeRange::setDataRange(const QDateTime &dataStart, const QDateTime& dataEnd)
 {
-    dataTimeStart = dataStart;
-    dataTimeEnd = dataEnd;
+    m_dataTimeStart = dataStart;
+    m_dataTimeEnd = dataEnd;
 }
 
 void VisibleTimeRange::clear()
 {
-    timeStart = QDateTime();
-    timeEnd = QDateTime();
-    viewTimeStart = QDateTime();
-    viewTimeEnd = QDateTime();
-    dataTimeStart = QDateTime();
-    dataTimeEnd = QDateTime();
-    timeSeconds = 0;
-    viewSeconds = 0;
-    primaryTickSecs = 0;
+    m_timeStart = QDateTime();
+    m_timeEnd = QDateTime();
+    m_viewTimeStart = QDateTime();
+    m_viewTimeEnd = QDateTime();
+    m_dataTimeStart = QDateTime();
+    m_dataTimeEnd = QDateTime();
+    m_timeSeconds = 0;
+    m_viewSeconds = 0;
+    m_primaryTickSecs = 0;
 }
 
 double VisibleTimeRange::zoomLevel() const
@@ -48,130 +88,130 @@ double VisibleTimeRange::zoomLevel() const
      * span (by number of seconds) is scaled up to 100, with 100 indicating maximum zoom,
      * which we define as 1 minute for simplicity. In other words, we scale visibleTimeRange.viewSeconds
      * between 60 and visibleTimeRange.timeSeconds and use the inverse. */
-    if (viewSeconds == timeSeconds)
+    if (m_viewSeconds == m_timeSeconds)
         return 0;
-    return 100-((double(viewSeconds-minZoomSeconds())/double(timeSeconds-minZoomSeconds()))*100);
+    return 100 - ((double(m_viewSeconds - minZoomSeconds()) / double(m_timeSeconds - minZoomSeconds())) * 100);
 }
 
 void VisibleTimeRange::setZoomSeconds(int seconds)
 {
     seconds = qBound(minZoomSeconds(), seconds, maxZoomSeconds());
-    if (viewSeconds == seconds)
+    if (m_viewSeconds == seconds)
         return;
 
-    Q_ASSERT(!viewTimeStart.isNull());
-    Q_ASSERT(viewTimeStart >= timeStart);
+    Q_ASSERT(!m_viewTimeStart.isNull());
+    Q_ASSERT(m_viewTimeStart >= m_timeStart);
 
-    viewSeconds = seconds;
-    viewTimeEnd = viewTimeStart.addSecs(seconds);
-    if (viewTimeEnd > timeEnd)
+    m_viewSeconds = seconds;
+    m_viewTimeEnd = m_viewTimeStart.addSecs(seconds);
+    if (m_viewTimeEnd > m_timeEnd)
     {
-        viewTimeStart = viewTimeStart.addSecs(viewTimeEnd.secsTo(timeEnd));
-        viewTimeEnd = timeEnd;
+        m_viewTimeStart = m_viewTimeStart.addSecs(m_viewTimeEnd.secsTo(m_timeEnd));
+        m_viewTimeEnd = m_timeEnd;
     }
 
-    Q_ASSERT(viewTimeEnd > viewTimeStart);
-    Q_ASSERT(viewTimeStart >= timeStart);
-    Q_ASSERT(viewTimeEnd <= timeEnd);
-    Q_ASSERT(viewTimeStart.secsTo(viewTimeEnd) == viewSeconds);
+    Q_ASSERT(m_viewTimeEnd > m_viewTimeStart);
+    Q_ASSERT(m_viewTimeStart >= m_timeStart);
+    Q_ASSERT(m_viewTimeEnd <= m_timeEnd);
+    Q_ASSERT(m_viewTimeStart.secsTo(m_viewTimeEnd) == m_viewSeconds);
 }
 
 void VisibleTimeRange::setViewStartOffset(int secs)
 {
-    secs = qBound(0, secs, timeSeconds - viewSeconds);
+    secs = qBound(0, secs, m_timeSeconds - m_viewSeconds);
 
-    viewTimeStart = timeStart.addSecs(secs);
-    viewTimeEnd = viewTimeStart.addSecs(viewSeconds);
+    m_viewTimeStart = m_timeStart.addSecs(secs);
+    m_viewTimeEnd = m_viewTimeStart.addSecs(m_viewSeconds);
 
-    Q_ASSERT(viewSeconds <= timeSeconds);
-    Q_ASSERT(viewSeconds >= minZoomSeconds());
-    Q_ASSERT(viewTimeEnd <= timeEnd);
+    Q_ASSERT(m_viewSeconds <= m_timeSeconds);
+    Q_ASSERT(m_viewSeconds >= minZoomSeconds());
+    Q_ASSERT(m_viewTimeEnd <= m_timeEnd);
 }
 
 int VisibleTimeRange::invisibleSeconds() const
 {
-    return qMax(timeSeconds - viewSeconds, 0);
+    return qMax(m_timeSeconds - m_viewSeconds, 0);
 }
 
 void VisibleTimeRange::computeViewSeconds()
 {
     /* Approximate viewSeconds for the tick calculations */
-    if (viewTimeStart.isNull() || viewTimeEnd.isNull())
-        viewSeconds = dataTimeStart.secsTo(dataTimeEnd);
+    if (m_viewTimeStart.isNull() || m_viewTimeEnd.isNull())
+        m_viewSeconds = m_dataTimeStart.secsTo(m_dataTimeEnd);
     else
-        viewSeconds = qMin(viewSeconds, dataTimeStart.secsTo(dataTimeEnd));
+        m_viewSeconds = qMin(m_viewSeconds, m_dataTimeStart.secsTo(m_dataTimeEnd));
 }
 
 void VisibleTimeRange::computePrimaryTickSecs(int areaWidth, int minTickWidth)
 {
-    int minTickSecs = qMax(int(viewSeconds / (double(areaWidth) / minTickWidth)), 1);
+    int minTickSecs = qMax(int(m_viewSeconds / (double(areaWidth) / minTickWidth)), 1);
 
     if (minTickSecs <= 30)
-        primaryTickSecs = 30;
+        m_primaryTickSecs = 30;
     else if (minTickSecs <= 60)
-        primaryTickSecs = 60;
+        m_primaryTickSecs = 60;
     else if (minTickSecs <= 300)
-        primaryTickSecs = 300;
+        m_primaryTickSecs = 300;
     else if (minTickSecs <= 600)
-        primaryTickSecs = 600;
+        m_primaryTickSecs = 600;
     else if (minTickSecs <= 3600)
-        primaryTickSecs = 3600;
+        m_primaryTickSecs = 3600;
     else if (minTickSecs <= 7200)
-        primaryTickSecs = 7200;
+        m_primaryTickSecs = 7200;
     else if (minTickSecs <= 21600)
-        primaryTickSecs = 21600;
+        m_primaryTickSecs = 21600;
     else if (minTickSecs <= 43200)
-        primaryTickSecs = 43200;
+        m_primaryTickSecs = 43200;
     else if (minTickSecs <= 86400)
-        primaryTickSecs = 86400;
+        m_primaryTickSecs = 86400;
     else
-        primaryTickSecs = 604800;
+        m_primaryTickSecs = 604800;
 }
 
 void VisibleTimeRange::computeTimeStart()
 {
-    timeStart = dataTimeStart.addSecs(-int(dataTimeStart.toTime_t() % primaryTickSecs));
+    m_timeStart = m_dataTimeStart.addSecs(-int(m_dataTimeStart.toTime_t() % m_primaryTickSecs));
 }
 
 void VisibleTimeRange::computeTimeEnd()
 {
-    timeEnd = dataTimeEnd.addSecs(primaryTickSecs - int(dataTimeEnd.toTime_t() % primaryTickSecs));
+    m_timeEnd = m_dataTimeEnd.addSecs(m_primaryTickSecs - int(m_dataTimeEnd.toTime_t() % m_primaryTickSecs));
 }
 
 void VisibleTimeRange::computeTimeSeconds()
 {
-    timeSeconds = timeStart.secsTo(timeEnd);
+    m_timeSeconds = m_timeStart.secsTo(m_timeEnd);
 }
 
 void VisibleTimeRange::ensureViewTimeSpan()
 {
-    if (viewTimeStart.isNull())
-        viewTimeStart = timeStart;
-    if (viewTimeEnd.isNull())
-        viewTimeEnd = timeEnd;
+    if (m_viewTimeStart.isNull())
+        m_viewTimeStart = m_timeStart;
+    if (m_viewTimeEnd.isNull())
+        m_viewTimeEnd = m_timeEnd;
 
-    if (viewTimeStart < timeStart)
+    if (m_viewTimeStart < m_timeStart)
     {
-        viewTimeEnd = viewTimeEnd.addSecs(viewTimeStart.secsTo(timeStart));
-        viewTimeStart = timeStart;
+        m_viewTimeEnd = m_viewTimeEnd.addSecs(m_viewTimeStart.secsTo(m_timeStart));
+        m_viewTimeStart = m_timeStart;
     }
 
-    if (viewTimeEnd > timeEnd)
+    if (m_viewTimeEnd > m_timeEnd)
     {
-        viewTimeStart = qMax(timeStart, viewTimeStart.addSecs(viewTimeEnd.secsTo(timeEnd)));
-        viewTimeEnd = timeEnd;
+        m_viewTimeStart = qMax(m_timeStart, m_viewTimeStart.addSecs(m_viewTimeEnd.secsTo(m_timeEnd)));
+        m_viewTimeEnd = m_timeEnd;
     }
 
-    Q_ASSERT(viewTimeStart >= timeStart);
-    Q_ASSERT(viewTimeEnd <= timeEnd);
+    Q_ASSERT(m_viewTimeStart >= m_timeStart);
+    Q_ASSERT(m_viewTimeEnd <= m_timeEnd);
 
-    viewSeconds = viewTimeStart.secsTo(viewTimeEnd);
+    m_viewSeconds = m_viewTimeStart.secsTo(viewTimeEnd());
 }
 
 void VisibleTimeRange::addDate(const QDateTime& date)
 {
-    if (dataTimeStart.isNull() || date < dataTimeStart)
-        dataTimeStart = date;
-    if (dataTimeEnd.isNull() || date > dataTimeEnd)
-        dataTimeEnd = date;
+    if (m_dataTimeStart.isNull() || date < m_dataTimeStart)
+        m_dataTimeStart = date;
+    if (m_dataTimeEnd.isNull() || date > m_dataTimeEnd)
+        m_dataTimeEnd = date;
 }

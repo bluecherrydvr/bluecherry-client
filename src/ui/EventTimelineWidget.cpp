@@ -173,7 +173,7 @@ QRect EventTimelineWidget::visualRect(const QModelIndex &index) const
 
 void EventTimelineWidget::setZoomSeconds(int seconds)
 {
-    if (visibleTimeRange.viewSeconds == seconds)
+    if (visibleTimeRange.viewSeconds() == seconds)
         return;
 
     visibleTimeRange.setZoomSeconds(seconds);
@@ -194,7 +194,7 @@ void EventTimelineWidget::updateScrollBars()
     ensureLayout();
 
     horizontalScrollBar()->setRange(0, visibleTimeRange.invisibleSeconds());
-    horizontalScrollBar()->setPageStep(visibleTimeRange.primaryTickSecs);
+    horizontalScrollBar()->setPageStep(visibleTimeRange.primaryTickSecs());
     horizontalScrollBar()->setSingleStep(horizontalScrollBar()->pageStep());
 
     int h = viewportItemArea().height();
@@ -233,10 +233,10 @@ void EventTimelineWidget::scrollTo(const QModelIndex &index, ScrollHint hint)
         break;
     }
 
-    if (event->utcStartDate() < visibleTimeRange.viewTimeStart)
-        horizontalScrollBar()->setValue(visibleTimeRange.timeStart.secsTo(event->utcStartDate()));
-    else if (event->utcStartDate().addSecs(event->durationInSeconds()) > visibleTimeRange.viewTimeEnd)
-        horizontalScrollBar()->setValue(visibleTimeRange.timeStart.secsTo(event->utcEndDate()) - visibleTimeRange.viewSeconds);
+    if (event->utcStartDate() < visibleTimeRange.viewTimeStart())
+        horizontalScrollBar()->setValue(visibleTimeRange.timeStart().secsTo(event->utcStartDate()));
+    else if (event->utcStartDate().addSecs(event->durationInSeconds()) > visibleTimeRange.viewTimeEnd())
+        horizontalScrollBar()->setValue(visibleTimeRange.timeStart().secsTo(event->utcEndDate()) - visibleTimeRange.viewSeconds());
 }
 
 EventData *EventTimelineWidget::eventAt(const QPoint &point) const
@@ -486,7 +486,7 @@ void EventTimelineWidget::updateTimeRange(bool fromData)
     emit zoomRangeChanged(minZoomSeconds(), maxZoomSeconds());
     visibleTimeRange.ensureViewTimeSpan();
     updateScrollBars();
-    emit zoomSecondsChanged(visibleTimeRange.viewSeconds);
+    emit zoomSecondsChanged(visibleTimeRange.viewSeconds());
     viewport()->update();
 }
 
@@ -618,8 +618,6 @@ void EventTimelineWidget::addModelRows(int first, int last)
         rowsMap.insert(data, i);
 
         /* Update time span */
-        if (visibleTimeRange.dataTimeStart.isNull() || data->utcStartDate() < visibleTimeRange.dataTimeStart)
-            visibleTimeRange.dataTimeStart = data->utcStartDate();
         visibleTimeRange.addDate(data->utcStartDate());
         QDateTime ed = data->utcEndDate();
         if (ed == data->utcStartDate())
@@ -744,16 +742,16 @@ QRect EventTimelineWidget::viewportItemArea() const
 
 QRect EventTimelineWidget::timeCellRect(const QDateTime &time, int duration) const
 {
-    Q_ASSERT(time >= visibleTimeRange.timeStart);
-    Q_ASSERT(time <= visibleTimeRange.timeEnd);
+    Q_ASSERT(time >= visibleTimeRange.timeStart());
+    Q_ASSERT(time <= visibleTimeRange.timeEnd());
 
-    double range = qMax(visibleTimeRange.viewSeconds, 1);
+    double range = qMax(visibleTimeRange.viewSeconds(), 1);
 
     /* Save enough room for a zero-duration item at visibleTimeRange.timeEnd */
     int width = viewportItemArea().width();
 
     QRect r;
-    r.setX(qRound((visibleTimeRange.viewTimeStart.secsTo(time) / range) * width));
+    r.setX(qRound((visibleTimeRange.viewTimeStart().secsTo(time) / range) * width));
     r.setWidth(qMax(cellMinimum(), qRound((duration / range) * width)));
     return r;
 }
@@ -812,9 +810,9 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
 
     bool first = true;
     int numDays = 0;
-    for (QDate date = visibleTimeRange.viewTimeStart.date(), last = visibleTimeRange.viewTimeEnd.date(); date <= last; date = date.addDays(1), ++numDays)
+    for (QDate date = visibleTimeRange.viewTimeStart().date(), last = visibleTimeRange.viewTimeEnd().date(); date <= last; date = date.addDays(1), ++numDays)
     {
-        QDateTime dt = qMax(QDateTime(date), visibleTimeRange.viewTimeStart);
+        QDateTime dt = qMax(QDateTime(date), visibleTimeRange.viewTimeStart());
         QRect dateRect = timeCellRect(dt, dt.secsTo(QDateTime(date.addDays(1))));
         dateRect.setHeight(r.height());
         dateRect.translate(leftPadding(), 0);
@@ -827,7 +825,7 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
         {
             date = date.addDays(1);
             dt = QDateTime(date);
-            QRect nr = timeCellRect(dt, dt.secsTo(qMin(QDateTime(dt.addDays(1)), visibleTimeRange.viewTimeEnd)));
+            QRect nr = timeCellRect(dt, dt.secsTo(qMin(QDateTime(dt.addDays(1)), visibleTimeRange.viewTimeEnd())));
             nr.setHeight(r.height());
             nr.translate(leftPadding(), 0);
             dateRect |= nr;
@@ -840,23 +838,23 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
     }
     p.restore();
 
-    Q_ASSERT(visibleTimeRange.primaryTickSecs);
+    Q_ASSERT(visibleTimeRange.primaryTickSecs());
 
     /* Draw primary ticks and text */
     QVector<QLine> lines;
-    lines.reserve(qCeil(double(visibleTimeRange.viewSeconds)/visibleTimeRange.primaryTickSecs));
+    lines.reserve(qCeil(double(visibleTimeRange.viewSeconds())/visibleTimeRange.primaryTickSecs()));
 
     /* Rectangle for each tick area */
     int areaWidth = viewportItemArea().width();
-    QRectF tickRect(leftPadding(), y, (double(visibleTimeRange.primaryTickSecs) / qMax(visibleTimeRange.viewSeconds,1)) * areaWidth, r.height());
+    QRectF tickRect(leftPadding(), y, (double(visibleTimeRange.primaryTickSecs()) / qMax(visibleTimeRange.viewSeconds(), 1)) * areaWidth, r.height());
 
     /* Round to the first tick */
-    int preAreaSecs = int(visibleTimeRange.viewTimeStart.toTime_t() % visibleTimeRange.primaryTickSecs);
+    int preAreaSecs = int(visibleTimeRange.viewTimeStart().toTime_t() % visibleTimeRange.primaryTickSecs());
     if (preAreaSecs)
-        preAreaSecs = visibleTimeRange.primaryTickSecs - preAreaSecs;
-    QDateTime dt = visibleTimeRange.viewTimeStart.addSecs(preAreaSecs).addSecs(visibleTimeRange.dataTimeStart.utcOffset());
+        preAreaSecs = visibleTimeRange.primaryTickSecs() - preAreaSecs;
+    QDateTime dt = visibleTimeRange.viewTimeStart().addSecs(preAreaSecs).addSecs(visibleTimeRange.dataTimeStart().utcOffset());
 
-    tickRect.translate((double(preAreaSecs)/qMax(visibleTimeRange.viewSeconds,1))*areaWidth, 0);
+    tickRect.translate((double(preAreaSecs)/qMax(visibleTimeRange.viewSeconds(), 1))*areaWidth, 0);
 
     for (;;)
     {
@@ -871,7 +869,7 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
             break;
 
         tickRect.translate(tickRect.width(), 0);
-        dt = dt.addSecs(visibleTimeRange.primaryTickSecs);
+        dt = dt.addSecs(visibleTimeRange.primaryTickSecs());
     }
 
     y = topPadding();
@@ -937,7 +935,7 @@ void EventTimelineWidget::paintRow(QPainter *p, QRect r, LocationData *locationD
     for (QList<EventData*>::Iterator it = locationData->events.begin(); it != locationData->events.end(); ++it)
     {
         EventData *data = *it;
-        if (data->utcStartDate().addSecs(data->durationInSeconds()) < visibleTimeRange.viewTimeStart)
+        if (data->utcStartDate().addSecs(data->durationInSeconds()) < visibleTimeRange.viewTimeStart())
             continue;
 
         Q_ASSERT(rowsMap.contains(data));
