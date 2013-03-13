@@ -167,3 +167,11 @@ void VisibleTimeRange::ensureViewTimeSpan()
 
     viewSeconds = viewTimeStart.secsTo(viewTimeEnd);
 }
+
+void VisibleTimeRange::addDate(const QDateTime& date)
+{
+    if (dataTimeStart.isNull() || date < dataTimeStart)
+        dataTimeStart = date;
+    if (dataTimeEnd.isNull() || date > dataTimeEnd)
+        dataTimeEnd = date;
+}

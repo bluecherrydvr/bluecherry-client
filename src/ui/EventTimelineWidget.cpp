@@ -620,11 +620,11 @@ void EventTimelineWidget::addModelRows(int first, int last)
         /* Update time span */
         if (visibleTimeRange.dataTimeStart.isNull() || data->utcStartDate() < visibleTimeRange.dataTimeStart)
             visibleTimeRange.dataTimeStart = data->utcStartDate();
-        QDateTime ed = data->serverEndDate();
+        visibleTimeRange.addDate(data->utcStartDate());
+        QDateTime ed = data->utcEndDate();
         if (ed == data->utcStartDate())
             ed = ed.addSecs(1);
-        if (visibleTimeRange.dataTimeEnd.isNull() || ed > visibleTimeRange.dataTimeEnd)
-            visibleTimeRange.dataTimeEnd = ed;
+        visibleTimeRange.addDate(ed);
     }
 
     updateRowsMapDelayed(last+1);
