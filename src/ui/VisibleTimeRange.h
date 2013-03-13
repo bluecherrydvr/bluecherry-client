@@ -50,6 +50,7 @@ public:
     void setZoomSeconds(int seconds);
 
     void setViewStartOffset(int secs);
+    int invisibleSeconds() const;
 
 };
 

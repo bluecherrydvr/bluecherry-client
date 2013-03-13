@@ -81,3 +81,8 @@ void VisibleTimeRange::setViewStartOffset(int secs)
     Q_ASSERT(viewSeconds >= minZoomSeconds());
     Q_ASSERT(viewTimeEnd <= timeEnd);
 }
+
+int VisibleTimeRange::invisibleSeconds() const
+{
+    return qMax(timeSeconds - viewSeconds, 0);
+}
