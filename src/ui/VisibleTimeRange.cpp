@@ -32,7 +32,7 @@ int VisibleTimeRange::primaryTickSecs() const
 void VisibleTimeRange::setDataRange(const QDateTime &dataStart, const QDateTime& dataEnd)
 {
     m_range = DateTimeRange(dataStart, dataEnd);
-    computeVisibleRange();
+    boundVisibleRange(m_range);
     emit invisibleSecondsChanged(invisibleSeconds());
 }
 
@@ -94,7 +94,7 @@ void VisibleTimeRange::computePrimaryTickSecs(int prefferedTickCount)
     emit primaryTickSecsChanged(m_primaryTickSecs);
 }
 
-void VisibleTimeRange::computeVisibleRange()
+void VisibleTimeRange::boundVisibleRange(const DateTimeRange &boundBy)
 {
     if (!m_visibleRange.isNull())
         m_visibleRange = m_visibleRange.boundedBy(m_range);
@@ -149,6 +149,6 @@ void VisibleTimeRange::ensureViewTimeSpan()
 void VisibleTimeRange::addDate(const QDateTime& date)
 {
     m_range.extendTo(date);
-    computeVisibleRange();
+    boundVisibleRange(m_range);
     emit invisibleSecondsChanged(invisibleSeconds());
 }
