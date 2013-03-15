@@ -39,6 +39,8 @@ public:
 
     int lengthInSeconds() const;
 
+    DateTimeRange boundedBy(const DateTimeRange &range);
+
     void extendTo(const QDateTime &dateTime);
 
 };

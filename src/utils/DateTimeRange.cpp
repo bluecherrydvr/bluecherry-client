@@ -64,6 +64,14 @@ int DateTimeRange::lengthInSeconds() const
     return m_start.secsTo(m_end);
 }
 
+DateTimeRange DateTimeRange::boundedBy(const DateTimeRange &range)
+{
+    if (isNull() || range.isNull())
+        return DateTimeRange();
+
+    return DateTimeRange(qMax(m_start, range.m_start), qMin(m_end, range.m_end));
+}
+
 void DateTimeRange::extendTo(const QDateTime &dateTime)
 {
     if (m_start.isNull() || dateTime < m_start)

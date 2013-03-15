@@ -467,8 +467,6 @@ void EventTimelineWidget::updateTimeRange(bool fromData)
     if (fromData)
         visibleTimeRange.setDataRange(earliestDate(), latestDate());
 
-    visibleTimeRange.computeViewSeconds();
-
     /* Determine the minimum width for the primary tick (the tick with a label),
      * which is then used to determine its interval. */
     QFontMetrics fm(font());
@@ -479,7 +477,6 @@ void EventTimelineWidget::updateTimeRange(bool fromData)
     int areaWidth = viewportItemArea().width();
     
     visibleTimeRange.computePrimaryTickSecs(areaWidth, minTickWidth);
-    visibleTimeRange.computeRoundedRange();
     visibleTimeRange.computeTimeSeconds();
 
     /* Update the view properties */
@@ -852,7 +849,7 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
     int preAreaSecs = int(visibleTimeRange.viewTimeStart().toTime_t() % visibleTimeRange.primaryTickSecs());
     if (preAreaSecs)
         preAreaSecs = visibleTimeRange.primaryTickSecs() - preAreaSecs;
-    QDateTime dt = visibleTimeRange.viewTimeStart().addSecs(preAreaSecs).addSecs(visibleTimeRange.dataTimeStart().utcOffset());
+    QDateTime dt = visibleTimeRange.viewTimeStart().addSecs(preAreaSecs).addSecs(visibleTimeRange.timeStart().utcOffset());
 
     tickRect.translate((double(preAreaSecs)/qMax(visibleTimeRange.viewSeconds(), 1))*areaWidth, 0);
 
