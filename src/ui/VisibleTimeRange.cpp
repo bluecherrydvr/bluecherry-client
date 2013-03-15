@@ -63,11 +63,7 @@ void VisibleTimeRange::setZoomLevel(int zoomLevel)
 void VisibleTimeRange::setViewStartOffset(int secs)
 {
     secs = qBound(0, secs, maxVisibleSeconds() - visibleSeconds());
-
-    QDateTime visibleStart = m_range.start().addSecs(secs);
-    QDateTime visibleEnd = visibleStart.addSecs(visibleSeconds());
-
-    m_visibleRange = DateTimeRange(visibleStart, visibleEnd);
+    m_visibleRange = m_visibleRange.moveStart(m_range.start().addSecs(secs)).moveInto(m_range);
 }
 
 int VisibleTimeRange::invisibleSeconds() const
