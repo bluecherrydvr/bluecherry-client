@@ -169,4 +169,6 @@ void VisibleTimeRange::ensureViewTimeSpan()
 void VisibleTimeRange::addDate(const QDateTime& date)
 {
     m_range.extendTo(date);
+    computeVisibleRange();
+    emit invisibleSecondsChanged(invisibleSeconds());
 }
