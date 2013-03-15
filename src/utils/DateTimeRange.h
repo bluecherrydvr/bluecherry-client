@@ -40,9 +40,9 @@ public:
     int lengthInSeconds() const;
     bool contains(const QDateTime &dateTime) const;
 
-    DateTimeRange boundedBy(const DateTimeRange &range);
-
-    void extendTo(const QDateTime &dateTime);
+    DateTimeRange boundedBy(const DateTimeRange &range) const;
+    DateTimeRange extendWith(const QDateTime &dateTime) const;
+    DateTimeRange withLengthInSeconds(int lengthInSeconds) const;
 
 };
 

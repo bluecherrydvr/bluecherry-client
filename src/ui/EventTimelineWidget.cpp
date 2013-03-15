@@ -614,8 +614,8 @@ void EventTimelineWidget::addModelRows(int first, int last)
         locationData->events.insert(pos, data);
         rowsMap.insert(data, i);
 
-        dateTimeRange.extendTo(data->utcStartDate());
-        dateTimeRange.extendTo(data->utcEndDate());
+        dateTimeRange = dateTimeRange.extendWith(data->utcStartDate());
+        dateTimeRange = dateTimeRange.extendWith(data->utcEndDate());
     }
 
     visibleTimeRange.setDateTimeRange(dateTimeRange);

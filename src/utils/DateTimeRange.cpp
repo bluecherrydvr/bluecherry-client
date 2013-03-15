@@ -72,7 +72,7 @@ bool DateTimeRange::contains(const QDateTime &dateTime) const
     return dateTime >= m_start && dateTime <= m_end;
 }
 
-DateTimeRange DateTimeRange::boundedBy(const DateTimeRange &range)
+DateTimeRange DateTimeRange::boundedBy(const DateTimeRange &range) const
 {
     if (isNull() || range.isNull())
         return DateTimeRange();
@@ -80,10 +80,17 @@ DateTimeRange DateTimeRange::boundedBy(const DateTimeRange &range)
     return DateTimeRange(qMax(m_start, range.m_start), qMin(m_end, range.m_end));
 }
 
-void DateTimeRange::extendTo(const QDateTime &dateTime)
+DateTimeRange DateTimeRange::extendWith(const QDateTime &dateTime) const
 {
-    if (m_start.isNull() || dateTime < m_start)
-        m_start = dateTime;
-    if (m_end.isNull() || dateTime > m_end)
-        m_end = dateTime;
+    QDateTime start = (m_start.isNull() || dateTime < m_start) ? dateTime : m_start;
+    QDateTime end = (m_end.isNull() || dateTime > m_end) ? dateTime : m_end;
+    return DateTimeRange(start, end);
+}
+
+DateTimeRange DateTimeRange::withLengthInSeconds(int lengthInSeconds) const
+{
+    if (isNull())
+        return DateTimeRange();
+
+    return DateTimeRange(m_start, m_start.addSecs(lengthInSeconds));
 }
