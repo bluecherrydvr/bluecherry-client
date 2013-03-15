@@ -114,3 +114,11 @@ DateTimeRange DateTimeRange::moveInto(const DateTimeRange &dateTime) const
 
     return DateTimeRange(m_start.addSecs(diff), m_end.addSecs(diff));
 }
+
+DateTimeRange DateTimeRange::moveStart(const QDateTime &start) const
+{
+    if (isNull())
+        return DateTimeRange();
+
+    return DateTimeRange(start, start.addSecs(lengthInSeconds()));
+}

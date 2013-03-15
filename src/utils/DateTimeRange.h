@@ -44,6 +44,7 @@ public:
     DateTimeRange extendWith(const QDateTime &dateTime) const;
     DateTimeRange withLengthInSeconds(int lengthInSeconds) const;
     DateTimeRange moveInto(const DateTimeRange &dateTime) const;
+    DateTimeRange moveStart(const QDateTime &start) const;
 
 };
 
