@@ -39,7 +39,7 @@ QDateTime VisibleTimeRange::viewTimeStart() const
 
 QDateTime VisibleTimeRange::timeStart() const
 {
-    return m_timeStart;
+    return m_roundedRange.start();
 }
 
 QDateTime VisibleTimeRange::dataTimeStart() const
@@ -54,7 +54,7 @@ QDateTime VisibleTimeRange::viewTimeEnd() const
 
 QDateTime VisibleTimeRange::timeEnd() const
 {
-    return m_timeEnd;
+    return m_roundedRange.end();
 }
 
 QDateTime VisibleTimeRange::dataTimeEnd() const
@@ -69,11 +69,10 @@ void VisibleTimeRange::setDataRange(const QDateTime &dataStart, const QDateTime&
 
 void VisibleTimeRange::clear()
 {
-    m_timeStart = QDateTime();
-    m_timeEnd = QDateTime();
     m_viewTimeStart = QDateTime();
     m_viewTimeEnd = QDateTime();
     m_range = DateTimeRange();
+    m_roundedRange = DateTimeRange();
     m_timeSeconds = 0;
     m_viewSeconds = 0;
     m_primaryTickSecs = 0;
@@ -102,10 +101,10 @@ void VisibleTimeRange::setZoomSeconds(int seconds)
 
     m_viewSeconds = seconds;
     m_viewTimeEnd = m_viewTimeStart.addSecs(seconds);
-    if (m_viewTimeEnd > m_timeEnd)
+    if (m_viewTimeEnd > m_roundedRange.start())
     {
-        m_viewTimeStart = m_viewTimeStart.addSecs(m_viewTimeEnd.secsTo(m_timeEnd));
-        m_viewTimeEnd = m_timeEnd;
+        m_viewTimeStart = m_viewTimeStart.addSecs(m_viewTimeEnd.secsTo(m_roundedRange.end()));
+        m_viewTimeEnd = m_roundedRange.end();
     }
 
     emit invisibleSecondsChanged(invisibleSeconds());
@@ -115,7 +114,7 @@ void VisibleTimeRange::setViewStartOffset(int secs)
 {
     secs = qBound(0, secs, m_timeSeconds - m_viewSeconds);
 
-    m_viewTimeStart = m_timeStart.addSecs(secs);
+    m_viewTimeStart = m_roundedRange.start().addSecs(secs);
     m_viewTimeEnd = m_viewTimeStart.addSecs(m_viewSeconds);
 }
 
@@ -163,39 +162,36 @@ void VisibleTimeRange::computePrimaryTickSecs(int areaWidth, int minTickWidth)
     emit primaryTickSecsChanged(m_primaryTickSecs);
 }
 
-void VisibleTimeRange::computeTimeStart()
+void VisibleTimeRange::computeRoundedRange()
 {
-    m_timeStart = m_range.start().addSecs(-int(m_range.start().toTime_t() % m_primaryTickSecs));
-}
-
-void VisibleTimeRange::computeTimeEnd()
-{
-    m_timeEnd = m_range.end().addSecs(m_primaryTickSecs - int(m_range.end().toTime_t() % m_primaryTickSecs));
+    QDateTime roundedStart = m_range.start().addSecs(-int(m_range.start().toTime_t() % m_primaryTickSecs));
+    QDateTime roundedEnd = m_range.end().addSecs(m_primaryTickSecs - int(m_range.end().toTime_t() % m_primaryTickSecs));
+    m_roundedRange = DateTimeRange(roundedStart, roundedEnd);
 }
 
 void VisibleTimeRange::computeTimeSeconds()
 {
-    m_timeSeconds = m_timeStart.secsTo(m_timeEnd);
+    m_timeSeconds = m_roundedRange.lengthInSeconds();
     emit invisibleSecondsChanged(invisibleSeconds());
 }
 
 void VisibleTimeRange::ensureViewTimeSpan()
 {
     if (m_viewTimeStart.isNull())
-        m_viewTimeStart = m_timeStart;
+        m_viewTimeStart = m_roundedRange.start();
     if (m_viewTimeEnd.isNull())
-        m_viewTimeEnd = m_timeEnd;
+        m_viewTimeEnd = m_roundedRange.end();
 
-    if (m_viewTimeStart < m_timeStart)
+    if (m_viewTimeStart < m_roundedRange.start())
     {
-        m_viewTimeEnd = m_viewTimeEnd.addSecs(m_viewTimeStart.secsTo(m_timeStart));
-        m_viewTimeStart = m_timeStart;
+        m_viewTimeEnd = m_viewTimeEnd.addSecs(m_viewTimeStart.secsTo(m_roundedRange.start()));
+        m_viewTimeStart = m_roundedRange.start();
     }
 
-    if (m_viewTimeEnd > m_timeEnd)
+    if (m_viewTimeEnd > m_roundedRange.end())
     {
-        m_viewTimeStart = qMax(m_timeStart, m_viewTimeStart.addSecs(m_viewTimeEnd.secsTo(m_timeEnd)));
-        m_viewTimeEnd = m_timeEnd;
+        m_viewTimeStart = qMax(m_roundedRange.start(), m_viewTimeStart.addSecs(m_viewTimeEnd.secsTo(m_roundedRange.end())));
+        m_viewTimeEnd = m_roundedRange.end();
     }
 
     m_viewSeconds = m_viewTimeStart.secsTo(viewTimeEnd());

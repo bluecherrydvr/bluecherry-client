@@ -25,8 +25,8 @@ class VisibleTimeRange : public QObject
     Q_OBJECT
 
     DateTimeRange m_range;
-    /* Total span of time represented by the timeline, rounded from dataTime */
-    QDateTime m_timeStart, m_timeEnd;
+    DateTimeRange m_roundedRange;
+
     /* Span of time shown in the viewport */
     QDateTime m_viewTimeStart, m_viewTimeEnd;
     /* Span of seconds between timeStart and timeEnd */
@@ -65,8 +65,7 @@ public:
 
     void computeViewSeconds();
     void computePrimaryTickSecs(int areaWidth, int minTickWidth);
-    void computeTimeStart();
-    void computeTimeEnd();
+    void computeRoundedRange();
     void computeTimeSeconds();
 
     void ensureViewTimeSpan();
