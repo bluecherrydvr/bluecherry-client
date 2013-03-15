@@ -89,12 +89,12 @@ double VisibleTimeRange::zoomLevel() const
      * between 60 and visibleTimeRange.timeSeconds and use the inverse. */
     if (m_viewSeconds == m_timeSeconds)
         return 0;
-    return 100 - ((double(m_viewSeconds - minZoomSeconds()) / double(m_timeSeconds - minZoomSeconds())) * 100);
+    return 100 - ((double(m_viewSeconds - minVisibleSeconds()) / double(m_timeSeconds - minVisibleSeconds())) * 100);
 }
 
 void VisibleTimeRange::setZoomSeconds(int seconds)
 {
-    seconds = qBound(minZoomSeconds(), seconds, maxZoomSeconds());
+    seconds = qBound(minVisibleSeconds(), seconds, maxVisibleSeconds());
     if (m_viewSeconds == seconds)
         return;
 

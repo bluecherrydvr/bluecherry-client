@@ -51,10 +51,9 @@ public:
     void setDataRange(const QDateTime &dataStart, const QDateTime &dataEnd);
     void clear();
 
-    /* Zoom in the number of seconds of time visible on screen */
-    int zoomSeconds() const { return m_viewSeconds; }
-    int minZoomSeconds() const { return qMin(m_timeSeconds, 60); }
-    int maxZoomSeconds() const { return m_timeSeconds; }
+    int visibleSeconds() const { return m_viewSeconds; }
+    int minVisibleSeconds() const { return qMin(m_timeSeconds, 60); }
+    int maxVisibleSeconds() const { return m_timeSeconds; }
 
     double zoomLevel() const;
     void setZoomSeconds(int seconds);
