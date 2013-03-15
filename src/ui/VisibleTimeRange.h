@@ -39,10 +39,9 @@ public:
     explicit VisibleTimeRange();
     
     int primaryTickSecs() const;
-    QDateTime viewTimeStart() const;
-    QDateTime timeStart() const;
-    QDateTime viewTimeEnd() const;
-    QDateTime timeEnd() const;
+
+    const DateTimeRange & range() const { return m_range; }
+    const DateTimeRange & visibleRange() const { return m_visibleRange; }
 
     void setDataRange(const QDateTime &dataStart, const QDateTime &dataEnd);
     void clear();

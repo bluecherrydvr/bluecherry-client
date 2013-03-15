@@ -29,26 +29,6 @@ int VisibleTimeRange::primaryTickSecs() const
     return m_primaryTickSecs;
 }
 
-QDateTime VisibleTimeRange::viewTimeStart() const
-{
-    return m_visibleRange.start();
-}
-
-QDateTime VisibleTimeRange::timeStart() const
-{
-    return m_range.start();
-}
-
-QDateTime VisibleTimeRange::viewTimeEnd() const
-{
-    return m_range.end();
-}
-
-QDateTime VisibleTimeRange::timeEnd() const
-{
-    return m_range.end();
-}
-
 void VisibleTimeRange::setDataRange(const QDateTime &dataStart, const QDateTime& dataEnd)
 {
     m_range = DateTimeRange(dataStart, dataEnd);
