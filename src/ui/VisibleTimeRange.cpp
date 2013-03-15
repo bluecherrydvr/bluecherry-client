@@ -100,9 +100,9 @@ int VisibleTimeRange::invisibleSeconds() const
     return qMax(maxVisibleSeconds() - visibleSeconds(), 0);
 }
 
-void VisibleTimeRange::computePrimaryTickSecs(int areaWidth, int minTickWidth)
+void VisibleTimeRange::computePrimaryTickSecs(int prefferedTickCount)
 {
-    int minTickSecs = qMax(int(visibleSeconds() / (double(areaWidth) / minTickWidth)), 1);
+    int minTickSecs = qMax(visibleSeconds() / prefferedTickCount, 1);
 
     if (minTickSecs <= 30)
         m_primaryTickSecs = 30;

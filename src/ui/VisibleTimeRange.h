@@ -54,7 +54,7 @@ public:
     void setViewStartOffset(int secs);
     int invisibleSeconds() const;
 
-    void computePrimaryTickSecs(int areaWidth, int minTickWidth);
+    void computePrimaryTickSecs(int prefferedTickCount);
 
     void ensureViewTimeSpan();
     void addDate(const QDateTime &date);
