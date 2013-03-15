@@ -49,7 +49,6 @@ public:
     int minVisibleSeconds() const;
     int maxVisibleSeconds() const;
 
-    double zoomLevel() const;
     void setZoomSeconds(int seconds);
 
     void setViewStartOffset(int secs);
