@@ -26,9 +26,8 @@ class VisibleTimeRange : public QObject
 
     DateTimeRange m_range;
     DateTimeRange m_roundedRange;
+    DateTimeRange m_visibleRange;
 
-    /* Span of time shown in the viewport */
-    QDateTime m_viewTimeStart, m_viewTimeEnd;
     /* Span of seconds between timeStart and timeEnd */
     int m_timeSeconds;
     /* Span of seconds between viewTimeStart and viewTimeEnd */

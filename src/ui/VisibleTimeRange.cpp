@@ -34,7 +34,7 @@ int VisibleTimeRange::primaryTickSecs() const
 
 QDateTime VisibleTimeRange::viewTimeStart() const
 {
-    return m_viewTimeStart;
+    return m_visibleRange.start();
 }
 
 QDateTime VisibleTimeRange::timeStart() const
@@ -49,7 +49,7 @@ QDateTime VisibleTimeRange::dataTimeStart() const
 
 QDateTime VisibleTimeRange::viewTimeEnd() const
 {
-    return m_viewTimeEnd;
+    return m_visibleRange.end();
 }
 
 QDateTime VisibleTimeRange::timeEnd() const
@@ -69,10 +69,9 @@ void VisibleTimeRange::setDataRange(const QDateTime &dataStart, const QDateTime&
 
 void VisibleTimeRange::clear()
 {
-    m_viewTimeStart = QDateTime();
-    m_viewTimeEnd = QDateTime();
     m_range = DateTimeRange();
     m_roundedRange = DateTimeRange();
+    m_visibleRange = DateTimeRange();
     m_timeSeconds = 0;
     m_viewSeconds = 0;
     m_primaryTickSecs = 0;
@@ -100,12 +99,18 @@ void VisibleTimeRange::setZoomSeconds(int seconds)
         return;
 
     m_viewSeconds = seconds;
-    m_viewTimeEnd = m_viewTimeStart.addSecs(seconds);
-    if (m_viewTimeEnd > m_roundedRange.start())
+
+    QDateTime visibleStart = m_visibleRange.start();
+    QDateTime visibleEnd = m_visibleRange.end();
+
+    visibleEnd = visibleStart.addSecs(seconds);
+    if (visibleEnd > m_roundedRange.start())
     {
-        m_viewTimeStart = m_viewTimeStart.addSecs(m_viewTimeEnd.secsTo(m_roundedRange.end()));
-        m_viewTimeEnd = m_roundedRange.end();
+        visibleStart = visibleStart.addSecs(visibleEnd.secsTo(m_roundedRange.end()));
+        visibleEnd = m_roundedRange.end();
     }
+
+    m_visibleRange = DateTimeRange(visibleStart, visibleEnd);
 
     emit invisibleSecondsChanged(invisibleSeconds());
 }
@@ -114,8 +119,10 @@ void VisibleTimeRange::setViewStartOffset(int secs)
 {
     secs = qBound(0, secs, m_timeSeconds - m_viewSeconds);
 
-    m_viewTimeStart = m_roundedRange.start().addSecs(secs);
-    m_viewTimeEnd = m_viewTimeStart.addSecs(m_viewSeconds);
+    QDateTime visibleStart = m_roundedRange.start().addSecs(secs);
+    QDateTime visibleEnd = visibleStart.addSecs(m_viewSeconds);
+
+    m_visibleRange = DateTimeRange(visibleStart, visibleEnd);
 }
 
 int VisibleTimeRange::invisibleSeconds() const
@@ -126,7 +133,7 @@ int VisibleTimeRange::invisibleSeconds() const
 void VisibleTimeRange::computeViewSeconds()
 {
     /* Approximate viewSeconds for the tick calculations */
-    if (m_viewTimeStart.isNull() || m_viewTimeEnd.isNull())
+    if (m_visibleRange.isNull())
         m_viewSeconds = m_range.lengthInSeconds();
     else
         m_viewSeconds = qMin(m_viewSeconds, m_range.lengthInSeconds());
@@ -177,24 +184,28 @@ void VisibleTimeRange::computeTimeSeconds()
 
 void VisibleTimeRange::ensureViewTimeSpan()
 {
-    if (m_viewTimeStart.isNull())
-        m_viewTimeStart = m_roundedRange.start();
-    if (m_viewTimeEnd.isNull())
-        m_viewTimeEnd = m_roundedRange.end();
+    QDateTime visibleStart = m_visibleRange.start();
+    QDateTime visibleEnd = m_visibleRange.end();
 
-    if (m_viewTimeStart < m_roundedRange.start())
+    if (visibleStart.isNull())
+        visibleStart = m_roundedRange.start();
+    if (visibleEnd.isNull())
+        visibleEnd = m_roundedRange.end();
+
+    if (visibleStart < m_roundedRange.start())
     {
-        m_viewTimeEnd = m_viewTimeEnd.addSecs(m_viewTimeStart.secsTo(m_roundedRange.start()));
-        m_viewTimeStart = m_roundedRange.start();
+        visibleEnd = visibleEnd.addSecs(visibleStart.secsTo(m_roundedRange.start()));
+        visibleStart = m_roundedRange.start();
     }
 
-    if (m_viewTimeEnd > m_roundedRange.end())
+    if (visibleEnd > m_roundedRange.end())
     {
-        m_viewTimeStart = qMax(m_roundedRange.start(), m_viewTimeStart.addSecs(m_viewTimeEnd.secsTo(m_roundedRange.end())));
-        m_viewTimeEnd = m_roundedRange.end();
+        visibleStart = qMax(m_roundedRange.start(), visibleStart.addSecs(visibleEnd.secsTo(m_roundedRange.end())));
+        visibleEnd = m_roundedRange.end();
     }
 
-    m_viewSeconds = m_viewTimeStart.secsTo(viewTimeEnd());
+    m_visibleRange = DateTimeRange(visibleStart, visibleEnd);
+    m_viewSeconds = visibleStart.secsTo(viewTimeEnd());
 
     emit invisibleSecondsChanged(invisibleSeconds());
 }

@@ -41,6 +41,11 @@ DateTimeRange & DateTimeRange::operator=(const DateTimeRange& copyMe)
     return *this;
 }
 
+bool DateTimeRange::isNull() const
+{
+    return m_start.isNull() || m_end.isNull();
+}
+
 QDateTime DateTimeRange::start() const
 {
     return m_start;
@@ -53,7 +58,7 @@ QDateTime DateTimeRange::end() const
 
 int DateTimeRange::lengthInSeconds() const
 {
-    if (m_start.isNull() || m_end.isNull())
+    if (isNull())
         return -1;
 
     return m_start.secsTo(m_end);

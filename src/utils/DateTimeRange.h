@@ -32,6 +32,8 @@ public:
 
     DateTimeRange & operator = (const DateTimeRange &copyMe);
 
+    bool isNull() const;
+
     QDateTime start() const;
     QDateTime end() const;
 
