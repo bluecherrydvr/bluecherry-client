@@ -27,8 +27,6 @@ class VisibleTimeRange : public QObject
     DateTimeRange m_range;
     DateTimeRange m_visibleRange;
 
-    /* Span of seconds between timeStart and timeEnd */
-    int m_timeSeconds;
     /* Seconds of time per primary tick (a x-axis label), derived from the view area
      * and a minimum width and rounded up to a user-friendly duration in updateTimeRange */
     int m_primaryTickSecs;
@@ -48,8 +46,8 @@ public:
     void clear();
 
     int visibleSeconds() const;
-    int minVisibleSeconds() const { return qMin(m_timeSeconds, 60); }
-    int maxVisibleSeconds() const { return m_timeSeconds; }
+    int minVisibleSeconds() const;
+    int maxVisibleSeconds() const;
 
     double zoomLevel() const;
     void setZoomSeconds(int seconds);
@@ -58,7 +56,6 @@ public:
     int invisibleSeconds() const;
 
     void computePrimaryTickSecs(int areaWidth, int minTickWidth);
-    void computeTimeSeconds();
 
     void ensureViewTimeSpan();
     void addDate(const QDateTime &date);

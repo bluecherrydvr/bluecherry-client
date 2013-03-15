@@ -18,7 +18,7 @@
 #include "VisibleTimeRange.h"
 
 VisibleTimeRange::VisibleTimeRange()
-    : m_timeSeconds(0), m_primaryTickSecs(0)
+    : m_primaryTickSecs(0)
 {
 }
 
@@ -51,13 +51,13 @@ void VisibleTimeRange::setDataRange(const QDateTime &dataStart, const QDateTime&
 {
     m_range = DateTimeRange(dataStart, dataEnd);
     computeVisibleRange();
+    emit invisibleSecondsChanged(invisibleSeconds());
 }
 
 void VisibleTimeRange::clear()
 {
     m_range = DateTimeRange();
     m_visibleRange = DateTimeRange();
-    m_timeSeconds = 0;
     m_primaryTickSecs = 0;
 
     emit invisibleSecondsChanged(invisibleSeconds());
@@ -71,9 +71,9 @@ double VisibleTimeRange::zoomLevel() const
      * span (by number of seconds) is scaled up to 100, with 100 indicating maximum zoom,
      * which we define as 1 minute for simplicity. In other words, we scale visibleTimeRange.viewSeconds
      * between 60 and visibleTimeRange.timeSeconds and use the inverse. */
-    if (visibleSeconds() == m_timeSeconds)
+    if (visibleSeconds() == maxVisibleSeconds())
         return 0;
-    return 100 - ((double(visibleSeconds() - minVisibleSeconds()) / double(m_timeSeconds - minVisibleSeconds())) * 100);
+    return 100 - ((double(visibleSeconds() - minVisibleSeconds()) / double(maxVisibleSeconds() - minVisibleSeconds())) * 100);
 }
 
 void VisibleTimeRange::setZoomSeconds(int seconds)
@@ -99,7 +99,7 @@ void VisibleTimeRange::setZoomSeconds(int seconds)
 
 void VisibleTimeRange::setViewStartOffset(int secs)
 {
-    secs = qBound(0, secs, m_timeSeconds - visibleSeconds());
+    secs = qBound(0, secs, maxVisibleSeconds() - visibleSeconds());
 
     QDateTime visibleStart = m_range.start().addSecs(secs);
     QDateTime visibleEnd = visibleStart.addSecs(visibleSeconds());
@@ -109,7 +109,7 @@ void VisibleTimeRange::setViewStartOffset(int secs)
 
 int VisibleTimeRange::invisibleSeconds() const
 {
-    return qMax(m_timeSeconds - visibleSeconds(), 0);
+    return qMax(maxVisibleSeconds() - visibleSeconds(), 0);
 }
 
 void VisibleTimeRange::computePrimaryTickSecs(int areaWidth, int minTickWidth)
@@ -155,10 +155,14 @@ int VisibleTimeRange::visibleSeconds() const
     return m_visibleRange.lengthInSeconds();
 }
 
-void VisibleTimeRange::computeTimeSeconds()
+int VisibleTimeRange::minVisibleSeconds() const
 {
-    m_timeSeconds = m_range.lengthInSeconds();
-    emit invisibleSecondsChanged(invisibleSeconds());
+    return qMin(maxVisibleSeconds(), 60);
+}
+
+int VisibleTimeRange::maxVisibleSeconds() const
+{
+    return m_range.lengthInSeconds();
 }
 
 void VisibleTimeRange::ensureViewTimeSpan()

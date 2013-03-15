@@ -477,7 +477,6 @@ void EventTimelineWidget::updateTimeRange(bool fromData)
     int areaWidth = viewportItemArea().width();
     
     visibleTimeRange.computePrimaryTickSecs(areaWidth, minTickWidth);
-    visibleTimeRange.computeTimeSeconds();
 
     /* Update the view properties */
     emit zoomRangeChanged(minZoomSeconds(), maxZoomSeconds());
