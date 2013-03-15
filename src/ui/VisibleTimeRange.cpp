@@ -52,7 +52,7 @@ void VisibleTimeRange::setZoomLevel(int zoomLevel)
     {
         int maxMinVisibleSecondsDifference = maxVisibleSeconds() - minVisibleSeconds();
         int visibleSeconds = double(maxMinVisibleSecondsDifference) * (1.0 - (double)zoomLevel/100.0) + minVisibleSeconds();
-        m_visibleRange = m_visibleRange.withLengthInSeconds(visibleSeconds);
+        m_visibleRange = m_visibleRange.withLengthInSeconds(visibleSeconds).moveInto(m_range);
     }
     else
         m_visibleRange = m_range;
@@ -110,31 +110,4 @@ int VisibleTimeRange::minVisibleSeconds() const
 int VisibleTimeRange::maxVisibleSeconds() const
 {
     return m_range.lengthInSeconds();
-}
-
-void VisibleTimeRange::ensureViewTimeSpan()
-{
-    QDateTime visibleStart = m_visibleRange.start();
-    QDateTime visibleEnd = m_visibleRange.end();
-
-    if (visibleStart.isNull())
-        visibleStart = m_range.start();
-    if (visibleEnd.isNull())
-        visibleEnd = m_range.end();
-
-    if (visibleStart < m_range.start())
-    {
-        visibleEnd = visibleEnd.addSecs(visibleStart.secsTo(m_range.start()));
-        visibleStart = m_range.start();
-    }
-
-    if (visibleEnd > m_range.end())
-    {
-        visibleStart = qMax(m_range.start(), visibleStart.addSecs(visibleEnd.secsTo(m_range.end())));
-        visibleEnd = m_range.end();
-    }
-
-    m_visibleRange = DateTimeRange(visibleStart, visibleEnd);
-
-    emit invisibleSecondsChanged(invisibleSeconds());
 }

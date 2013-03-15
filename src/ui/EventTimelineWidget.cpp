@@ -470,8 +470,6 @@ void EventTimelineWidget::updateTimeRange(bool fromData)
     
     visibleTimeRange.computePrimaryTickSecs(areaWidth / minTickWidth);
 
-    /* Update the view properties */
-    visibleTimeRange.ensureViewTimeSpan();
     updateScrollBars();
     viewport()->update();
 }

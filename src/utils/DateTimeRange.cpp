@@ -94,3 +94,23 @@ DateTimeRange DateTimeRange::withLengthInSeconds(int lengthInSeconds) const
 
     return DateTimeRange(m_start, m_start.addSecs(lengthInSeconds));
 }
+
+DateTimeRange DateTimeRange::moveInto(const DateTimeRange &dateTime) const
+{
+    if (isNull() || dateTime.isNull())
+        return DateTimeRange();
+
+    if (lengthInSeconds() > dateTime.lengthInSeconds())
+        return dateTime;
+
+    int diff = 0;
+    if (m_start < dateTime.m_start)
+        diff = m_start.secsTo(dateTime.m_start);
+    else if (m_end > dateTime.m_end)
+        diff = m_end.secsTo(dateTime.m_end);
+
+    if (diff == 0)
+        return *this;
+
+    return DateTimeRange(m_start.addSecs(diff), m_end.addSecs(diff));
+}

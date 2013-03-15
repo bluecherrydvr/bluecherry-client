@@ -43,6 +43,7 @@ public:
     DateTimeRange boundedBy(const DateTimeRange &range) const;
     DateTimeRange extendWith(const QDateTime &dateTime) const;
     DateTimeRange withLengthInSeconds(int lengthInSeconds) const;
+    DateTimeRange moveInto(const DateTimeRange &dateTime) const;
 
 };
 

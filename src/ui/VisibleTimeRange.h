@@ -57,8 +57,6 @@ public:
 
     void computePrimaryTickSecs(int prefferedTickCount);
 
-    void ensureViewTimeSpan();
-
 signals:
     void invisibleSecondsChanged(int invisibleSeconds);
     void primaryTickSecsChanged(int primaryTickSecs);
