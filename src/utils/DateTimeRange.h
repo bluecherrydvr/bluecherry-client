@@ -37,6 +37,8 @@ public:
 
     int lengthInSeconds() const;
 
+    void extendTo(const QDateTime &dateTime);
+
 };
 
 #endif // DATETIMERANGE_H

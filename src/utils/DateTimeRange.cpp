@@ -58,3 +58,11 @@ int DateTimeRange::lengthInSeconds() const
 
     return m_start.secsTo(m_end);
 }
+
+void DateTimeRange::extendTo(const QDateTime &dateTime)
+{
+    if (m_start.isNull() || dateTime < m_start)
+        m_start = dateTime;
+    if (m_end.isNull() || dateTime > m_end)
+        m_end = dateTime;
+}
