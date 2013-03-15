@@ -29,9 +29,9 @@ int VisibleTimeRange::primaryTickSecs() const
     return m_primaryTickSecs;
 }
 
-void VisibleTimeRange::setDataRange(const QDateTime &dataStart, const QDateTime& dataEnd)
+void VisibleTimeRange::setDateTimeRange(const DateTimeRange &dateTimeRange)
 {
-    m_range = DateTimeRange(dataStart, dataEnd);
+    m_range = dateTimeRange;
     boundVisibleRange(m_range);
     emit invisibleSecondsChanged(invisibleSeconds());
 }
@@ -143,12 +143,5 @@ void VisibleTimeRange::ensureViewTimeSpan()
 
     m_visibleRange = DateTimeRange(visibleStart, visibleEnd);
 
-    emit invisibleSecondsChanged(invisibleSeconds());
-}
-
-void VisibleTimeRange::addDate(const QDateTime& date)
-{
-    m_range.extendTo(date);
-    boundVisibleRange(m_range);
     emit invisibleSecondsChanged(invisibleSeconds());
 }

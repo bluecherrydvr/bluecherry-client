@@ -43,7 +43,7 @@ public:
     const DateTimeRange & range() const { return m_range; }
     const DateTimeRange & visibleRange() const { return m_visibleRange; }
 
-    void setDataRange(const QDateTime &dataStart, const QDateTime &dataEnd);
+    void setDateTimeRange(const DateTimeRange &dateTimeRange);
     void clear();
 
     int visibleSeconds() const;
@@ -58,7 +58,6 @@ public:
     void computePrimaryTickSecs(int prefferedTickCount);
 
     void ensureViewTimeSpan();
-    void addDate(const QDateTime &date);
 
 signals:
     void invisibleSecondsChanged(int invisibleSeconds);

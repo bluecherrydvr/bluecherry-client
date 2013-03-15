@@ -465,7 +465,7 @@ QDateTime EventTimelineWidget::latestDate()
 void EventTimelineWidget::updateTimeRange(bool fromData)
 {
     if (fromData)
-        visibleTimeRange.setDataRange(earliestDate(), latestDate());
+        visibleTimeRange.setDateTimeRange(DateTimeRange(earliestDate(), latestDate()));
 
     /* Determine the minimum width for the primary tick (the tick with a label),
      * which is then used to determine its interval. */
@@ -600,6 +600,7 @@ void EventTimelineWidget::addModelRows(int first, int last)
     if (last < 0)
         last = model()->rowCount() - 1;
 
+    DateTimeRange dateTimeRange = visibleTimeRange.range();
     for (int i = first; i <= last; ++i)
     {
         EventData *data = rowData(i);
@@ -613,14 +614,11 @@ void EventTimelineWidget::addModelRows(int first, int last)
         locationData->events.insert(pos, data);
         rowsMap.insert(data, i);
 
-        /* Update time span */
-        visibleTimeRange.addDate(data->utcStartDate());
-        QDateTime ed = data->utcEndDate();
-        if (ed == data->utcStartDate())
-            ed = ed.addSecs(1);
-        visibleTimeRange.addDate(ed);
+        dateTimeRange.extendTo(data->utcStartDate());
+        dateTimeRange.extendTo(data->utcEndDate());
     }
 
+    visibleTimeRange.setDateTimeRange(dateTimeRange);
     updateRowsMapDelayed(last+1);
     scheduleDelayedItemsLayout(DoUpdateTimeRange);
 }
