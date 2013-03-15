@@ -44,7 +44,7 @@ QDateTime VisibleTimeRange::timeStart() const
 
 QDateTime VisibleTimeRange::dataTimeStart() const
 {
-    return m_dataTimeStart;
+    return m_range.start();
 }
 
 QDateTime VisibleTimeRange::viewTimeEnd() const
@@ -59,13 +59,12 @@ QDateTime VisibleTimeRange::timeEnd() const
 
 QDateTime VisibleTimeRange::dataTimeEnd() const
 {
-    return m_dataTimeEnd;
+    return m_range.end();
 }
 
 void VisibleTimeRange::setDataRange(const QDateTime &dataStart, const QDateTime& dataEnd)
 {
-    m_dataTimeStart = dataStart;
-    m_dataTimeEnd = dataEnd;
+    m_range = DateTimeRange(dataStart, dataEnd);
 }
 
 void VisibleTimeRange::clear()
@@ -74,8 +73,7 @@ void VisibleTimeRange::clear()
     m_timeEnd = QDateTime();
     m_viewTimeStart = QDateTime();
     m_viewTimeEnd = QDateTime();
-    m_dataTimeStart = QDateTime();
-    m_dataTimeEnd = QDateTime();
+    m_range = DateTimeRange();
     m_timeSeconds = 0;
     m_viewSeconds = 0;
     m_primaryTickSecs = 0;
@@ -130,9 +128,9 @@ void VisibleTimeRange::computeViewSeconds()
 {
     /* Approximate viewSeconds for the tick calculations */
     if (m_viewTimeStart.isNull() || m_viewTimeEnd.isNull())
-        m_viewSeconds = m_dataTimeStart.secsTo(m_dataTimeEnd);
+        m_viewSeconds = m_range.start().secsTo(m_range.end());
     else
-        m_viewSeconds = qMin(m_viewSeconds, m_dataTimeStart.secsTo(m_dataTimeEnd));
+        m_viewSeconds = qMin(m_viewSeconds, m_range.start().secsTo(m_range.end()));
 
     emit invisibleSecondsChanged(invisibleSeconds());
 }
@@ -167,12 +165,12 @@ void VisibleTimeRange::computePrimaryTickSecs(int areaWidth, int minTickWidth)
 
 void VisibleTimeRange::computeTimeStart()
 {
-    m_timeStart = m_dataTimeStart.addSecs(-int(m_dataTimeStart.toTime_t() % m_primaryTickSecs));
+    m_timeStart = m_range.start().addSecs(-int(m_range.start().toTime_t() % m_primaryTickSecs));
 }
 
 void VisibleTimeRange::computeTimeEnd()
 {
-    m_timeEnd = m_dataTimeEnd.addSecs(m_primaryTickSecs - int(m_dataTimeEnd.toTime_t() % m_primaryTickSecs));
+    m_timeEnd = m_range.end().addSecs(m_primaryTickSecs - int(m_range.end().toTime_t() % m_primaryTickSecs));
 }
 
 void VisibleTimeRange::computeTimeSeconds()
@@ -207,8 +205,13 @@ void VisibleTimeRange::ensureViewTimeSpan()
 
 void VisibleTimeRange::addDate(const QDateTime& date)
 {
-    if (m_dataTimeStart.isNull() || date < m_dataTimeStart)
-        m_dataTimeStart = date;
-    if (m_dataTimeEnd.isNull() || date > m_dataTimeEnd)
-        m_dataTimeEnd = date;
+    QDateTime dataTimeStart = m_range.start();
+    QDateTime dataTimeEnd = m_range.end();
+
+    if (dataTimeStart.isNull() || date < dataTimeStart)
+        dataTimeStart = date;
+    if (dataTimeEnd.isNull() || date > dataTimeEnd)
+        dataTimeEnd = date;
+
+    m_range = DateTimeRange(dataTimeStart, dataTimeEnd);
 }

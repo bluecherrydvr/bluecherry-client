@@ -18,16 +18,15 @@
 #ifndef VISIBLETIMERANGE_H
 #define VISIBLETIMERANGE_H
 
-#include <QDateTime>
+#include "utils/DateTimeRange.h"
 
 class VisibleTimeRange : public QObject
 {
     Q_OBJECT
 
+    DateTimeRange m_range;
     /* Total span of time represented by the timeline, rounded from dataTime */
     QDateTime m_timeStart, m_timeEnd;
-    /* Span of time represented in data; end is inclusive of the duration */
-    QDateTime m_dataTimeStart, m_dataTimeEnd;
     /* Span of time shown in the viewport */
     QDateTime m_viewTimeStart, m_viewTimeEnd;
     /* Span of seconds between timeStart and timeEnd */
