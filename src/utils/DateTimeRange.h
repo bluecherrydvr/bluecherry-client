@@ -35,6 +35,8 @@ public:
     QDateTime start() const;
     QDateTime end() const;
 
+    int lengthInSeconds() const;
+
 };
 
 #endif // DATETIMERANGE_H

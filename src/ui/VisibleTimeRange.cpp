@@ -128,9 +128,9 @@ void VisibleTimeRange::computeViewSeconds()
 {
     /* Approximate viewSeconds for the tick calculations */
     if (m_viewTimeStart.isNull() || m_viewTimeEnd.isNull())
-        m_viewSeconds = m_range.start().secsTo(m_range.end());
+        m_viewSeconds = m_range.lengthInSeconds();
     else
-        m_viewSeconds = qMin(m_viewSeconds, m_range.start().secsTo(m_range.end()));
+        m_viewSeconds = qMin(m_viewSeconds, m_range.lengthInSeconds());
 
     emit invisibleSecondsChanged(invisibleSeconds());
 }

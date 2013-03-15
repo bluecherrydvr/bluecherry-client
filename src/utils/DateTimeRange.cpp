@@ -20,6 +20,7 @@
 DateTimeRange::DateTimeRange(const QDateTime &start, const QDateTime &end)
     : m_start(start), m_end(end)
 {
+    Q_ASSERT(m_end >= m_start);
 }
 
 DateTimeRange::DateTimeRange()
@@ -48,4 +49,12 @@ QDateTime DateTimeRange::start() const
 QDateTime DateTimeRange::end() const
 {
     return m_end;
+}
+
+int DateTimeRange::lengthInSeconds() const
+{
+    if (m_start.isNull() || m_end.isNull())
+        return -1;
+
+    return m_start.secsTo(m_end);
 }
