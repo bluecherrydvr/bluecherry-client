@@ -89,6 +89,7 @@ set (bluecherry_client_main_SRCS
     src/ui/VisibleTimeRange.cpp
     src/ui/WebRtpPortCheckerWidget.cpp
 
+    src/utils/DateTimeRange.cpp
     src/utils/FileUtils.cpp
     src/utils/ImageDecodeTask.cpp
     src/utils/Range.cpp
