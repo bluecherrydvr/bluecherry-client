@@ -738,8 +738,7 @@ QRect EventTimelineWidget::viewportItemArea() const
 
 QRect EventTimelineWidget::timeCellRect(const QDateTime &time, int duration) const
 {
-    Q_ASSERT(time >= visibleTimeRange.range().start());
-    Q_ASSERT(time <= visibleTimeRange.range().end());
+    Q_ASSERT(visibleTimeRange.range().contains(time));
 
     double range = qMax(visibleTimeRange.visibleSeconds(), 1);
 

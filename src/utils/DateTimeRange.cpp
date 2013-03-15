@@ -64,6 +64,14 @@ int DateTimeRange::lengthInSeconds() const
     return m_start.secsTo(m_end);
 }
 
+bool DateTimeRange::contains(const QDateTime &dateTime) const
+{
+    if (isNull())
+        return false;
+
+    return dateTime >= m_start && dateTime <= m_end;
+}
+
 DateTimeRange DateTimeRange::boundedBy(const DateTimeRange &range)
 {
     if (isNull() || range.isNull())

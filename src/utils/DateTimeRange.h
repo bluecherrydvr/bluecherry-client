@@ -38,6 +38,7 @@ public:
     QDateTime end() const;
 
     int lengthInSeconds() const;
+    bool contains(const QDateTime &dateTime) const;
 
     DateTimeRange boundedBy(const DateTimeRange &range);
 
