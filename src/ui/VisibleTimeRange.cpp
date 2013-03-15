@@ -18,13 +18,8 @@
 #include "VisibleTimeRange.h"
 
 VisibleTimeRange::VisibleTimeRange()
-    : m_timeSeconds(0), m_viewSeconds(0), m_primaryTickSecs(0)
+    : m_timeSeconds(0), m_primaryTickSecs(0)
 {
-}
-
-int VisibleTimeRange::viewSeconds() const
-{
-    return m_viewSeconds;
 }
 
 int VisibleTimeRange::primaryTickSecs() const
@@ -63,7 +58,6 @@ void VisibleTimeRange::clear()
     m_range = DateTimeRange();
     m_visibleRange = DateTimeRange();
     m_timeSeconds = 0;
-    m_viewSeconds = 0;
     m_primaryTickSecs = 0;
 
     emit invisibleSecondsChanged(invisibleSeconds());
@@ -77,27 +71,26 @@ double VisibleTimeRange::zoomLevel() const
      * span (by number of seconds) is scaled up to 100, with 100 indicating maximum zoom,
      * which we define as 1 minute for simplicity. In other words, we scale visibleTimeRange.viewSeconds
      * between 60 and visibleTimeRange.timeSeconds and use the inverse. */
-    if (m_viewSeconds == m_timeSeconds)
+    if (visibleSeconds() == m_timeSeconds)
         return 0;
-    return 100 - ((double(m_viewSeconds - minVisibleSeconds()) / double(m_timeSeconds - minVisibleSeconds())) * 100);
+    return 100 - ((double(visibleSeconds() - minVisibleSeconds()) / double(m_timeSeconds - minVisibleSeconds())) * 100);
 }
 
 void VisibleTimeRange::setZoomSeconds(int seconds)
 {
     seconds = qBound(minVisibleSeconds(), seconds, maxVisibleSeconds());
-    if (m_viewSeconds == seconds)
+    if (visibleSeconds() == seconds)
         return;
 
-    m_viewSeconds = seconds;
-
     QDateTime visibleStart = m_visibleRange.start();
-    QDateTime visibleEnd = m_visibleRange.end();
+    QDateTime visibleEnd = visibleStart.addSecs(seconds);
 
-    visibleEnd = visibleStart.addSecs(seconds);
-    if (visibleEnd > m_range.start())
+    if (visibleEnd > m_range.end())
     {
-        visibleStart = visibleStart.addSecs(visibleEnd.secsTo(m_range.end()));
         visibleEnd = m_range.end();
+        visibleStart = visibleEnd.addSecs(-seconds);
+        if (visibleStart < m_range.start())
+            visibleStart = m_range.start();
     }
 
     m_visibleRange = DateTimeRange(visibleStart, visibleEnd);
@@ -106,22 +99,22 @@ void VisibleTimeRange::setZoomSeconds(int seconds)
 
 void VisibleTimeRange::setViewStartOffset(int secs)
 {
-    secs = qBound(0, secs, m_timeSeconds - m_viewSeconds);
+    secs = qBound(0, secs, m_timeSeconds - visibleSeconds());
 
     QDateTime visibleStart = m_range.start().addSecs(secs);
-    QDateTime visibleEnd = visibleStart.addSecs(m_viewSeconds);
+    QDateTime visibleEnd = visibleStart.addSecs(visibleSeconds());
 
     m_visibleRange = DateTimeRange(visibleStart, visibleEnd);
 }
 
 int VisibleTimeRange::invisibleSeconds() const
 {
-    return qMax(m_timeSeconds - m_viewSeconds, 0);
+    return qMax(m_timeSeconds - visibleSeconds(), 0);
 }
 
 void VisibleTimeRange::computePrimaryTickSecs(int areaWidth, int minTickWidth)
 {
-    int minTickSecs = qMax(int(m_viewSeconds / (double(areaWidth) / minTickWidth)), 1);
+    int minTickSecs = qMax(int(visibleSeconds() / (double(areaWidth) / minTickWidth)), 1);
 
     if (minTickSecs <= 30)
         m_primaryTickSecs = 30;
@@ -154,8 +147,12 @@ void VisibleTimeRange::computeVisibleRange()
     else
         m_visibleRange = m_range;
 
-    m_viewSeconds = m_visibleRange.lengthInSeconds();
     emit invisibleSecondsChanged(invisibleSeconds());
+}
+
+int VisibleTimeRange::visibleSeconds() const
+{
+    return m_visibleRange.lengthInSeconds();
 }
 
 void VisibleTimeRange::computeTimeSeconds()
@@ -187,7 +184,6 @@ void VisibleTimeRange::ensureViewTimeSpan()
     }
 
     m_visibleRange = DateTimeRange(visibleStart, visibleEnd);
-    m_viewSeconds = visibleStart.secsTo(viewTimeEnd());
 
     emit invisibleSecondsChanged(invisibleSeconds());
 }

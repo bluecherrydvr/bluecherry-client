@@ -29,8 +29,6 @@ class VisibleTimeRange : public QObject
 
     /* Span of seconds between timeStart and timeEnd */
     int m_timeSeconds;
-    /* Span of seconds between viewTimeStart and viewTimeEnd */
-    int m_viewSeconds;
     /* Seconds of time per primary tick (a x-axis label), derived from the view area
      * and a minimum width and rounded up to a user-friendly duration in updateTimeRange */
     int m_primaryTickSecs;
@@ -40,7 +38,6 @@ class VisibleTimeRange : public QObject
 public:
     explicit VisibleTimeRange();
     
-    int viewSeconds() const;
     int primaryTickSecs() const;
     QDateTime viewTimeStart() const;
     QDateTime timeStart() const;
@@ -50,7 +47,7 @@ public:
     void setDataRange(const QDateTime &dataStart, const QDateTime &dataEnd);
     void clear();
 
-    int visibleSeconds() const { return m_viewSeconds; }
+    int visibleSeconds() const;
     int minVisibleSeconds() const { return qMin(m_timeSeconds, 60); }
     int maxVisibleSeconds() const { return m_timeSeconds; }
 
