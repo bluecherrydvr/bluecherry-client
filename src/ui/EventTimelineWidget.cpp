@@ -123,9 +123,6 @@ void EventTimelineWidget::clearData()
 
     verticalScrollBar()->setRange(0, 0);
     viewport()->update();
-
-    emit zoomRangeChanged(0, 0);
-    emit zoomSecondsChanged(0);
 }
 
 void EventTimelineWidget::setModel(QAbstractItemModel *newModel)
@@ -177,15 +174,10 @@ QRect EventTimelineWidget::visualRect(const QModelIndex &index) const
     return QRect();
 }
 
-void EventTimelineWidget::setZoomSeconds(int seconds)
+void EventTimelineWidget::setZoomLevel(int level)
 {
-    if (visibleTimeRange.visibleSeconds() == seconds)
-        return;
-
-    visibleTimeRange.setZoomSeconds(seconds);
-
+    visibleTimeRange.setZoomLevel(level);
     scheduleDelayedItemsLayout(DoUpdateTimeRange);
-    emit zoomSecondsChanged(seconds);
 }
 
 void EventTimelineWidget::setViewStartOffset(int secs)
@@ -479,10 +471,8 @@ void EventTimelineWidget::updateTimeRange(bool fromData)
     visibleTimeRange.computePrimaryTickSecs(areaWidth / minTickWidth);
 
     /* Update the view properties */
-    emit zoomRangeChanged(minZoomSeconds(), maxZoomSeconds());
     visibleTimeRange.ensureViewTimeSpan();
     updateScrollBars();
-    emit zoomSecondsChanged(visibleTimeRange.visibleSeconds());
     viewport()->update();
 }
 

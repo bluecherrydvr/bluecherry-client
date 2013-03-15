@@ -55,11 +55,7 @@ public:
     virtual void doItemsLayout();
 
 public slots:
-    void setZoomSeconds(int seconds);
-
-signals:
-    void zoomSecondsChanged(int zoomSeconds);
-    void zoomRangeChanged(int min, int max);
+    void setZoomLevel(int value);
 
 protected:
     virtual void paintEvent(QPaintEvent *event);
