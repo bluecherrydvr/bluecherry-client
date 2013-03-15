@@ -16,10 +16,12 @@
  */
 
 #include "VisibleTimeRange.h"
+#include <QtAlgorithms>
 
 VisibleTimeRange::VisibleTimeRange()
     : m_primaryTickSecs(0)
 {
+    m_tickSizes << 30 << 60 << 300 << 600 << 3600 << 7200 << 21600 << 43200 << 86400 << 604800;
 }
 
 int VisibleTimeRange::primaryTickSecs() const
@@ -103,27 +105,11 @@ int VisibleTimeRange::invisibleSeconds() const
 void VisibleTimeRange::computePrimaryTickSecs(int prefferedTickCount)
 {
     int minTickSecs = qMax(visibleSeconds() / prefferedTickCount, 1);
-
-    if (minTickSecs <= 30)
-        m_primaryTickSecs = 30;
-    else if (minTickSecs <= 60)
-        m_primaryTickSecs = 60;
-    else if (minTickSecs <= 300)
-        m_primaryTickSecs = 300;
-    else if (minTickSecs <= 600)
-        m_primaryTickSecs = 600;
-    else if (minTickSecs <= 3600)
-        m_primaryTickSecs = 3600;
-    else if (minTickSecs <= 7200)
-        m_primaryTickSecs = 7200;
-    else if (minTickSecs <= 21600)
-        m_primaryTickSecs = 21600;
-    else if (minTickSecs <= 43200)
-        m_primaryTickSecs = 43200;
-    else if (minTickSecs <= 86400)
-        m_primaryTickSecs = 86400;
+    QList<int>::const_iterator tickIterator = qLowerBound(m_tickSizes, minTickSecs);
+    if (tickIterator == m_tickSizes.constEnd())
+        m_primaryTickSecs = *m_tickSizes.end();
     else
-        m_primaryTickSecs = 604800;
+        m_primaryTickSecs = *tickIterator;
 
     emit primaryTickSecsChanged(m_primaryTickSecs);
 }

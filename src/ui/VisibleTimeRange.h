@@ -24,6 +24,8 @@ class VisibleTimeRange : public QObject
 {
     Q_OBJECT
 
+    QList<int> m_tickSizes;
+
     DateTimeRange m_range;
     DateTimeRange m_visibleRange;
 
