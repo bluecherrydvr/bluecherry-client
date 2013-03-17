@@ -722,18 +722,20 @@ QRect EventTimelineWidget::viewportItemArea() const
     return viewport()->rect().adjusted(leftPadding(), topPadding(), 0, 0);
 }
 
+int EventTimelineWidget::timeXOffset(const QDateTime &time) const
+{
+    double range = qMax(visibleTimeRange.visibleSeconds(), 1);
+    int width = viewportItemArea().width();
+    return qMax(0, qRound((visibleTimeRange.visibleRange().start().secsTo(time) / range) * width));
+}
+
 QRect EventTimelineWidget::timeCellRect(const QDateTime &time, int duration) const
 {
     Q_ASSERT(visibleTimeRange.range().contains(time));
 
-    double range = qMax(visibleTimeRange.visibleSeconds(), 1);
-
-    /* Save enough room for a zero-duration item at visibleTimeRange.timeEnd */
-    int width = viewportItemArea().width();
-
     QRect r;
-    r.setX(qRound((visibleTimeRange.visibleRange().start().secsTo(time) / range) * width));
-    r.setWidth(qMax(cellMinimum(), qRound((duration / range) * width)));
+    r.setLeft(timeXOffset(time));
+    r.setRight(timeXOffset(time.addSecs(duration)));
     return r;
 }
 
