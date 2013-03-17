@@ -128,6 +128,8 @@ private:
     /* Mouse events */
     QPoint mouseClickPos;
     QRubberBand *mouseRubberBand;
+    
+    int paintDays(QPainter &p, const QRect &rect, int yPos);
 
     int leftPadding() const;
     int topPadding() const { return cachedTopPadding; }

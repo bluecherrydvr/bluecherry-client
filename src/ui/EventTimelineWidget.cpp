@@ -767,6 +767,49 @@ bool EventTimelineWidget::viewportEvent(QEvent *event)
     return re;
 }
 
+int EventTimelineWidget::paintDays(QPainter &p, const QRect &rect, int yPos)
+{
+    int resultYPos = yPos;
+
+    /* Dates across the top; first one is fully qualified (space permitting) */
+    p.save();
+    QFont font = p.font();
+    font.setBold(true);
+    p.setFont(font);
+
+    bool first = true;
+    int numDays = 0;
+    for (QDate date = visibleTimeRange.visibleRange().start().date(), last = visibleTimeRange.visibleRange().end().date(); date <= last; date = date.addDays(1), ++numDays)
+    {
+        QDateTime dt = qMax(QDateTime(date), visibleTimeRange.visibleRange().start());
+        QRect dateRect = timeCellRect(dt, dt.secsTo(QDateTime(date.addDays(1))));
+        dateRect.setHeight(rect.height());
+        dateRect.translate(leftPadding(), 0);
+        QString dateStr = date.toString(first ? tr("ddd, MMM d yyyy") : tr("ddd, MMM d"));
+
+        /* This is very slow and could be improved dramatically with the use of QTextLayout */
+        QFontMetrics fm(p.font());
+        int w = fm.width(dateStr)+10;
+        if (w > dateRect.width() && date < last)
+        {
+            date = date.addDays(1);
+            dt = QDateTime(date);
+            QRect nr = timeCellRect(dt, dt.secsTo(qMin(QDateTime(dt.addDays(1)), visibleTimeRange.visibleRange().end())));
+            nr.setHeight(rect.height());
+            nr.translate(leftPadding(), 0);
+            dateRect |= nr;
+        }
+
+        p.drawText(dateRect, 0, dateStr, &dateRect);
+        resultYPos = qMax(yPos, dateRect.bottom());
+
+        first = false;
+    }
+    p.restore();
+
+    return resultYPos;
+}
+
 void EventTimelineWidget::paintEvent(QPaintEvent *event)
 {
     ensureLayout();
@@ -783,41 +826,7 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
     /* Draw timeline (x-axis) */
     int y = 0;
 
-    /* Dates across the top; first one is fully qualified (space permitting) */
-    p.save();
-    QFont font = p.font();
-    font.setBold(true);
-    p.setFont(font);
-
-    bool first = true;
-    int numDays = 0;
-    for (QDate date = visibleTimeRange.visibleRange().start().date(), last = visibleTimeRange.visibleRange().end().date(); date <= last; date = date.addDays(1), ++numDays)
-    {
-        QDateTime dt = qMax(QDateTime(date), visibleTimeRange.visibleRange().start());
-        QRect dateRect = timeCellRect(dt, dt.secsTo(QDateTime(date.addDays(1))));
-        dateRect.setHeight(r.height());
-        dateRect.translate(leftPadding(), 0);
-        QString dateStr = date.toString(first ? tr("ddd, MMM d yyyy") : tr("ddd, MMM d"));
-
-        /* This is very slow and could be improved dramatically with the use of QTextLayout */
-        QFontMetrics fm(p.font());
-        int w = fm.width(dateStr)+10;
-        if (w > dateRect.width() && date < last)
-        {
-            date = date.addDays(1);
-            dt = QDateTime(date);
-            QRect nr = timeCellRect(dt, dt.secsTo(qMin(QDateTime(dt.addDays(1)), visibleTimeRange.visibleRange().end())));
-            nr.setHeight(r.height());
-            nr.translate(leftPadding(), 0);
-            dateRect |= nr;
-        }
-
-        p.drawText(dateRect, 0, dateStr, &dateRect);
-        y = qMax(y, dateRect.bottom());
-
-        first = false;
-    }
-    p.restore();
+    y = paintDays(p, r, 0);
 
     Q_ASSERT(visibleTimeRange.primaryTickSecs());
 
