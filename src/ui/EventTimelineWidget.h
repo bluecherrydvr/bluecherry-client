@@ -147,6 +147,8 @@ private:
     void updateScrollBars();
 
     EventData *eventAt(const QPoint &point) const;
+    
+    int utcOffset() const;
 
     /* Area of the viewport containing items */
     QRect viewportItemArea() const;

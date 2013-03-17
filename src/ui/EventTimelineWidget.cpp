@@ -457,7 +457,7 @@ QDateTime EventTimelineWidget::latestDate()
 void EventTimelineWidget::updateTimeRange(bool fromData)
 {
     if (fromData)
-        visibleTimeRange.setDateTimeRange(DateTimeRange(earliestDate(), latestDate()));
+        visibleTimeRange.setDateTimeRange(DateTimeRange(earliestDate().toUTC(), latestDate().toUTC()));
 
     /* Determine the minimum width for the primary tick (the tick with a label),
      * which is then used to determine its interval. */
@@ -814,6 +814,14 @@ int EventTimelineWidget::paintDays(QPainter &p, const QRect &rect, int yPos)
     return resultYPos;
 }
 
+int EventTimelineWidget::utcOffset() const
+{
+    if (rowsMap.isEmpty())
+        return 0;
+
+    return rowsMap.begin().key()->dateTzOffsetMins() * 60;
+}
+
 void EventTimelineWidget::paintEvent(QPaintEvent *event)
 {
     ensureLayout();
@@ -846,8 +854,8 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
     int preAreaSecs = int(visibleTimeRange.visibleRange().start().toTime_t() % visibleTimeRange.primaryTickSecs());
     if (preAreaSecs)
         preAreaSecs = visibleTimeRange.primaryTickSecs() - preAreaSecs;
-    QDateTime dt = visibleTimeRange.visibleRange().start().addSecs(preAreaSecs).addSecs(visibleTimeRange.range().start().utcOffset());
 
+    QDateTime dt = visibleTimeRange.visibleRange().start().toUTC().addSecs(preAreaSecs).addSecs(utcOffset());
     tickRect.translate((double(preAreaSecs)/qMax(visibleTimeRange.visibleSeconds(), 1))*areaWidth, 0);
 
     for (;;)
