@@ -778,8 +778,10 @@ int EventTimelineWidget::paintDays(QPainter &p, const QRect &rect, int yPos)
     p.setFont(font);
 
     bool first = true;
-    int numDays = 0;
-    for (QDate date = visibleTimeRange.visibleRange().start().date(), last = visibleTimeRange.visibleRange().end().date(); date <= last; date = date.addDays(1), ++numDays)
+
+    QDate startDate = visibleTimeRange.visibleRange().start().date();
+    QDate endDate = visibleTimeRange.visibleRange().end().date();
+    for (QDate date = startDate; date <= endDate; date = date.addDays(1))
     {
         QDateTime dt = qMax(QDateTime(date), visibleTimeRange.visibleRange().start());
         QRect dateRect = timeCellRect(dt, dt.secsTo(QDateTime(date.addDays(1))));
@@ -790,7 +792,7 @@ int EventTimelineWidget::paintDays(QPainter &p, const QRect &rect, int yPos)
         /* This is very slow and could be improved dramatically with the use of QTextLayout */
         QFontMetrics fm(p.font());
         int w = fm.width(dateStr)+10;
-        if (w > dateRect.width() && date < last)
+        if (w > dateRect.width() && date < endDate)
         {
             date = date.addDays(1);
             dt = QDateTime(date);
