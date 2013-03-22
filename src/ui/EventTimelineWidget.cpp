@@ -240,6 +240,21 @@ bool rowDataLessThan(const RowData *a, const RowData *b)
     return a->y < b->y;
 }
 
+QList<RowData *>::const_iterator EventTimelineWidget::findLayoutRow(int y) const
+{
+    RowData compareTo(RowData::Server);
+    compareTo.y = y;
+
+    QList<RowData *>::ConstIterator it = qLowerBound(layoutRows.constBegin(), layoutRows.constEnd(), &compareTo, rowDataLessThan);
+    if (it == layoutRows.end() || (*it)->y > y)
+    {
+        Q_ASSERT(it != layoutRows.begin());
+        --it;
+    }
+    
+    return it;
+}
+
 EventData *EventTimelineWidget::eventAt(const QPoint &point) const
 {
     const_cast<EventTimelineWidget*>(this)->ensureLayout();
@@ -250,14 +265,7 @@ EventData *EventTimelineWidget::eventAt(const QPoint &point) const
     if (!itemArea.contains(point) || ry >= layoutRowsBottom || layoutRows.isEmpty())
         return 0;
 
-    RowData compareTo(RowData::Server);
-    compareTo.y = ry;
-    QList<RowData *>::ConstIterator it = qLowerBound(layoutRows.constBegin(), layoutRows.constEnd(), &compareTo, rowDataLessThan);
-    if (it == layoutRows.end() || (*it)->y > ry)
-    {
-        Q_ASSERT(it != layoutRows.begin());
-        --it;
-    }
+    QList<RowData *>::ConstIterator it = findLayoutRow(ry);
 
     if ((*it)->type != RowData::Location)
         return 0;
@@ -324,14 +332,7 @@ void EventTimelineWidget::setSelection(const QRect &irect, QItemSelectionModel::
         return;
 
     /* The y coordinate of rect is now in scroll-invariant inner y, the same as layoutRows */
-    RowData compareTo(RowData::Server);
-    compareTo.y = rect.y();
-    QList<RowData *>::ConstIterator it = qLowerBound(layoutRows.constBegin(), layoutRows.constEnd(), &compareTo, rowDataLessThan);
-    if (it == layoutRows.end() || (*it)->y > rect.y())
-    {
-        Q_ASSERT(it != layoutRows.begin());
-        --it;
-    }
+    QList<RowData *>::ConstIterator it = findLayoutRow(rect.y());
 
     for (; it != layoutRows.end() && (*it)->y <= rect.bottom(); ++it)
     {
@@ -904,15 +905,6 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
     /* Loop servers */
     y = topPadding();
 
-    RowData compareTo(RowData::Server);
-    compareTo.y = verticalScrollBar()->value();
-    QList<RowData *>::ConstIterator it = qLowerBound(layoutRows.constBegin(), layoutRows.constEnd(), &compareTo, rowDataLessThan);
-    if (it == layoutRows.end() || (*it)->y > verticalScrollBar()->value())
-    {
-        Q_ASSERT(it != layoutRows.begin());
-        --it;
-    }
-
     p.save();
     p.setClipRect(0, y+1, r.width(), r.height());
     paintLegend(p, y, r.width());
@@ -928,9 +920,7 @@ void EventTimelineWidget::paintLegend(QPainter& p, int yPos, int width)
     QFont serverFont = p.font();
     serverFont.setBold(true);
 
-    RowData compareTo(RowData::Server);
-    compareTo.y = verticalScrollBar()->value();
-    QList<RowData *>::ConstIterator it = qLowerBound(layoutRows.constBegin(), layoutRows.constEnd(), &compareTo, rowDataLessThan);
+    QList<RowData *>::ConstIterator it = findLayoutRow(verticalScrollBar()->value());
     for (; it != layoutRows.end(); ++it)
     {
         int ry = yPos + ((*it)->y - verticalScrollBar()->value());
@@ -951,9 +941,7 @@ void EventTimelineWidget::paintLegend(QPainter& p, int yPos, int width)
 
 void EventTimelineWidget::paintChart(QPainter& p, int yPos, int width)
 {
-    RowData compareTo(RowData::Server);
-    compareTo.y = verticalScrollBar()->value();
-    QList<RowData *>::ConstIterator it = qLowerBound(layoutRows.constBegin(), layoutRows.constEnd(), &compareTo, rowDataLessThan);
+    QList<RowData *>::ConstIterator it = findLayoutRow(verticalScrollBar()->value());
     for (; it != layoutRows.end(); ++it)
     {
         int ry = yPos + ((*it)->y - verticalScrollBar()->value());
