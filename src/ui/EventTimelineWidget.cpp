@@ -845,6 +845,11 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
 
     /* Rectangle for each tick area */
     int areaWidth = viewportItemArea().width();
+
+    // we dont have to draw anything now
+    if (areaWidth <= 0)
+        return;
+
     QRectF tickRect(leftPadding(), y, (double(visibleTimeRange.primaryTickSecs()) / qMax(visibleTimeRange.visibleSeconds(), 1)) * areaWidth, r.height());
 
     /* Round to the first tick */
