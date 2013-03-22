@@ -899,13 +899,14 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
 
     p.save();
     p.setClipRect(0, y+1, r.width(), r.height());
+    paintLegend(p, y, r.width());
     paintChart(p, y, r.width());
     p.restore();
 
     p.drawLine(leftPadding(), topPadding(), leftPadding(), r.height());
 }
 
-void EventTimelineWidget::paintChart(QPainter& p, int yPos, int width)
+void EventTimelineWidget::paintLegend(QPainter& p, int yPos, int width)
 {
     QRect textRect(2, 0, leftPadding(), rowHeight());
     QFont serverFont = p.font();
@@ -925,10 +926,20 @@ void EventTimelineWidget::paintChart(QPainter& p, int yPos, int width)
             p.restore();
         }
         else
-        {
             p.drawText(textRect.adjusted(6, 0, 0, 0), Qt::AlignLeft | Qt::AlignVCenter,
                        (*it)->toLocation()->uiLocation());
+    }
+}
 
+void EventTimelineWidget::paintChart(QPainter& p, int yPos, int width)
+{
+    QMap<int,RowData*>::ConstIterator it = layoutRows.lowerBound(verticalScrollBar()->value());
+    for (; it != layoutRows.end(); ++it)
+    {
+        int ry = yPos + (it.key() - verticalScrollBar()->value());
+
+        if ((*it)->type != RowData::Server)
+        {
             QRect rowRect(leftPadding(), ry, width, rowHeight());
             paintRow(&p, rowRect, (*it)->toLocation());
         }
