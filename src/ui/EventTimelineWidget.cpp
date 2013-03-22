@@ -916,7 +916,7 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
 
 void EventTimelineWidget::paintLegend(QPainter& p, int yPos, int width)
 {
-    QRect textRect(2, 0, leftPadding(), rowHeight());
+    QRect textRect(16, 0, leftPadding(), rowHeight());
     QFont serverFont = p.font();
     serverFont.setBold(true);
 
@@ -934,7 +934,7 @@ void EventTimelineWidget::paintLegend(QPainter& p, int yPos, int width)
             p.restore();
         }
         else
-            p.drawText(textRect.adjusted(6, 0, 0, 0), Qt::AlignLeft | Qt::AlignVCenter,
+            p.drawText(textRect.adjusted(16, 0, 0, 0), Qt::AlignLeft | Qt::AlignVCenter,
                        (*it)->toLocation()->uiLocation());
     }
 }
@@ -1007,16 +1007,16 @@ int EventTimelineWidget::leftPadding() const
 
     for (QHash<DVRServer*,ServerData*>::ConstIterator it = serversMap.begin(); it != serversMap.end(); ++it)
     {
-        cachedLeftPadding = qMax(cachedLeftPadding, serverfm.width((*it)->server->displayName())+2);
+        cachedLeftPadding = qMax(cachedLeftPadding, serverfm.width((*it)->server->displayName()) + 16);
 
         for (QHash<int,LocationData*>::ConstIterator lit = (*it)->locationsMap.begin();
              lit != (*it)->locationsMap.end(); ++lit)
         {
-            cachedLeftPadding = qMax(cachedLeftPadding, locfm.width((*lit)->uiLocation())+8);
+            cachedLeftPadding = qMax(cachedLeftPadding, locfm.width((*lit)->uiLocation()) + 16);
         }
     }
 
-    cachedLeftPadding += 4;
+    cachedLeftPadding += 16;
     return cachedLeftPadding;
 }
 
