@@ -130,6 +130,7 @@ private:
     QRubberBand *mouseRubberBand;
     
     int paintDays(QPainter &p, const QRect &rect, int yPos);
+    void paintChart(QPainter &p, int yPos, int width);
 
     int leftPadding() const;
     int topPadding() const { return cachedTopPadding; }

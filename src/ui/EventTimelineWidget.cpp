@@ -884,9 +884,6 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
 
     /* Loop servers */
     y = topPadding();
-    QRect textRect(2, 0, leftPadding(), rowHeight());
-    QFont serverFont = p.font();
-    serverFont.setBold(true);
 
     QMap<int,RowData*>::ConstIterator it = layoutRows.lowerBound(verticalScrollBar()->value());
     if (it == layoutRows.end() || it.key() > verticalScrollBar()->value())
@@ -897,10 +894,22 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
 
     p.save();
     p.setClipRect(0, y+1, r.width(), r.height());
+    paintChart(p, y, r.width());
+    p.restore();
 
+    p.drawLine(leftPadding(), topPadding(), leftPadding(), r.height());
+}
+
+void EventTimelineWidget::paintChart(QPainter& p, int yPos, int width)
+{
+    QRect textRect(2, 0, leftPadding(), rowHeight());
+    QFont serverFont = p.font();
+    serverFont.setBold(true);
+
+    QMap<int,RowData*>::ConstIterator it = layoutRows.lowerBound(verticalScrollBar()->value());
     for (; it != layoutRows.end(); ++it)
     {
-        int ry = y + (it.key() - verticalScrollBar()->value());
+        int ry = yPos + (it.key() - verticalScrollBar()->value());
         textRect.moveTop(ry);
 
         if ((*it)->type == RowData::Server)
@@ -915,14 +924,10 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
             p.drawText(textRect.adjusted(6, 0, 0, 0), Qt::AlignLeft | Qt::AlignVCenter,
                        (*it)->toLocation()->uiLocation());
 
-            QRect rowRect(leftPadding(), ry, r.width(), rowHeight());
+            QRect rowRect(leftPadding(), ry, width, rowHeight());
             paintRow(&p, rowRect, (*it)->toLocation());
         }
     }
-
-    p.restore();
-
-    p.drawLine(leftPadding(), topPadding(), leftPadding(), r.height());
 }
 
 void EventTimelineWidget::paintRow(QPainter *p, QRect r, LocationData *locationData)
