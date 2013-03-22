@@ -119,11 +119,11 @@ private:
 
     /* Scroll-invariant inner y-position to row data, suitable for vertical painting and hit tests.
      * First row will be at position 0, which is drawn just below the top padding when scrolled up. */
-    QMap<int, RowData*> layoutRows;
+    QList<RowData *> layoutRows;
     int layoutRowsBottom;
 
     void doRowsLayout();
-    int layoutHeightForRow(const QMap<int,RowData*>::ConstIterator &iterator) const;
+    int layoutHeightForRow(QList<RowData *>::const_iterator it) const;
 
     /* Mouse events */
     QPoint mouseClickPos;
