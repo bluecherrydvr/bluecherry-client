@@ -62,7 +62,6 @@ private slots:
     void cursorIndexUpdated();
 
     void timelineZoomChanged(int value);
-    void timelineZoomRangeChanged(int min, int max);
     void timelineSliderChanged(int value);
 
     void eventContextMenu(const QPoint &pos);

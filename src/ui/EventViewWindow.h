@@ -20,7 +20,7 @@
 
 #include <QWidget>
 #include "core/EventData.h"
-#include "events/EventsCursor.h"
+#include "event/EventsCursor.h"
 
 class QSplitter;
 class QLabel;

@@ -38,7 +38,7 @@
 #include "core/DVRServer.h"
 #include "core/BluecherryApp.h"
 #include "core/LiveViewManager.h"
-#include "events/ModelEventsCursor.h"
+#include "event/ModelEventsCursor.h"
 #include <QBoxLayout>
 #include <QTreeView>
 #include <QGroupBox>

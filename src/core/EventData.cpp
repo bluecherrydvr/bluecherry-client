@@ -114,31 +114,112 @@ EventType &EventType::operator=(const QString &str)
     return *this;
 }
 
+QDateTime EventData::utcEndDate() const
+{
+    return m_utcStartDate.addSecs(qMax(0, m_durationInSeconds));
+}
+
+QDateTime EventData::serverStartDate() const
+{
+    Q_ASSERT(m_utcStartDate.timeSpec() == Qt::UTC);
+
+    int dateTzOffsetSeconds = int(dateTzOffsetMins()) * 60;
+    QDateTime result = m_utcStartDate.addSecs(dateTzOffsetSeconds);
+    result.setUtcOffset(dateTzOffsetSeconds);
+    return result;
+}
+
+QDateTime EventData::serverEndDate() const
+{
+    if (!hasDuration())
+        return serverStartDate();
+
+    int dateTzOffsetSeconds = int(dateTzOffsetMins()) * 60;
+    QDateTime result = utcEndDate().addSecs(dateTzOffsetSeconds);
+    result.setUtcOffset(dateTzOffsetSeconds);
+    return result;
+}
+
+void EventData::setUtcStartDate(const QDateTime utcStartDate)
+{
+    m_utcStartDate = utcStartDate;
+}
+
+bool EventData::hasDuration() const
+{
+    return durationInSeconds() > 0;
+}
+
+void EventData::setDurationInSeconds(int durationInSeconds)
+{
+    m_durationInSeconds = durationInSeconds;
+}
+
+bool EventData::inProgress() const
+{
+    return durationInSeconds() < 0;
+}
+
+void EventData::setInProgress()
+{
+    setDurationInSeconds(-1);
+}
+
+void EventData::setLocationId(int locationId)
+{
+    m_locationId = locationId;
+}
+
+void EventData::setLevel(EventLevel level)
+{
+    m_level = level;
+}
+
+void EventData::setType(EventType type)
+{
+    m_type = type;
+}
+
+void EventData::setEventId(qint64 eventId)
+{
+    m_eventId = eventId;
+}
+
+void EventData::setMediaId(qint64 mediaId)
+{
+    m_mediaId = mediaId;
+}
+
+void EventData::setDateTzOffsetMins(qint16 dateTzOffsetMins)
+{
+    m_dateTzOffsetMins = dateTzOffsetMins;
+}
+
 void EventData::setLocation(const QString &location)
 {
     if (location.startsWith(QLatin1String("camera-")))
     {
         bool ok = false;
-        locationId = location.mid(7).toUInt(&ok);
+        m_locationId = location.mid(7).toUInt(&ok);
 
         if (!ok)
         {
             qWarning() << "Invalid event location" << location;
-            locationId = -1;
+            m_locationId = -1;
         }
     }
     else if (location != QLatin1String("system"))
     {
         qWarning() << "Invalid event location" << location;
-        locationId = -1;
+        m_locationId = -1;
     }
     else
-        locationId = -1;
+        m_locationId = -1;
 }
 
 QString EventData::uiServer() const
 {
-    return server->displayName();
+    return server()->displayName();
 }
 
 DVRCamera EventData::locationCamera(DVRServer *server, int locationId)
@@ -164,7 +245,7 @@ QString EventData::baseFileName() const
     QString fileName = QString::fromLatin1("%1.%2.%3")
         .arg(uiServer())
         .arg(uiLocation())
-        .arg(date.toString(QLatin1String("yyyy-MM-dd hh-mm-ss")));
+        .arg(utcStartDate().toString(QLatin1String("yyyy-MM-dd hh-mm-ss")));
 
     return sanitizeFilename(fileName);
 }
@@ -183,11 +264,11 @@ static inline void durationWord(QString &s, int n, const char *w)
 
 QString EventData::uiDuration() const
 {
-    if (duration < 0)
+    if (inProgress())
         return QApplication::translate("EventData", "In progress");
 
     QString re;
-    int d = qMax(1, duration), count = 0;
+    int d = qMax(1, durationInSeconds()), count = 0;
 
     if (d >= (60*60*24))
     {
@@ -307,7 +388,6 @@ static EventData *parseEntry(DVRServer *server, QXmlStreamReader &reader)
     Q_ASSERT(reader.isStartElement() && reader.name() == QLatin1String("entry"));
 
     EventData *data = new EventData(server);
-    data->duration = 0;
 
     while (reader.readNext() != QXmlStreamReader::Invalid)
     {
@@ -329,19 +409,21 @@ static EventData *parseEntry(DVRServer *server, QXmlStreamReader &reader)
                 continue;
             }
 
-            data->eventId = id;
+            data->setEventId(id);
         }
         else if (reader.name() == QLatin1String("published"))
         {
-            data->date = isoToDateTime(reader.readElementText(), &data->dateTzOffsetMins);
+            qint16 dateTzOffsetMins;
+            data->setUtcStartDate(isoToDateTime(reader.readElementText(), &dateTzOffsetMins));
+            data->setDateTzOffsetMins(dateTzOffsetMins);
         }
         else if (reader.name() == QLatin1String("updated"))
         {
             QString d = reader.readElementText();
             if (d.isEmpty())
-                data->duration = -1;
+                data->setInProgress();
             else
-                data->duration = data->date.secsTo(isoToDateTime(d));
+                data->setDurationInSeconds(data->utcStartDate().secsTo(isoToDateTime(d)));
         }
         else if (reader.name() == QLatin1String("content"))
         {
@@ -349,9 +431,9 @@ static EventData *parseEntry(DVRServer *server, QXmlStreamReader &reader)
             QXmlStreamAttributes attr = reader.attributes();
             if (attr.hasAttribute(QLatin1String("media_id")))
             {
-                data->mediaId = attr.value(QLatin1String("media_id")).toString().toLongLong(&ok);
+                data->setMediaId(attr.value(QLatin1String("media_id")).toString().toLongLong(&ok));
                 if (!ok)
-                    data->mediaId = -1;
+                    data->setMediaId(-1);
             }
         }
         else if (reader.name() == QLatin1String("category"))
@@ -367,16 +449,16 @@ static EventData *parseEntry(DVRServer *server, QXmlStreamReader &reader)
                     continue;
                 }
 
-                data->locationId = cd[0].toInt();
-                data->level = cd[1];
-                data->type = cd[2];
+                data->setLocationId(cd[0].toInt());
+                data->setLevel(cd[1]);
+                data->setType(cd[2]);
             }
         }
         else if (reader.name() == QLatin1String("entry"))
             reader.raiseError(QLatin1String("Unexpected <entry> element"));
     }
 
-    if (!reader.hasError() && (data->eventId < 0 || !data->date.isValid()))
+    if (!reader.hasError() && (data->eventId() < 0 || !data->utcStartDate().isValid()))
         reader.raiseError(QLatin1String("Missing required elements for entry"));
 
     return data;

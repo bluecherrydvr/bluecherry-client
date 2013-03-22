@@ -1,7 +1,7 @@
 #ifndef MODELEVENTSCURSOR_H
 #define MODELEVENTSCURSOR_H
 
-#include "events/EventsCursor.h"
+#include "event/EventsCursor.h"
 #include "core/DVRCamera.h"
 #include <QModelIndex>
 

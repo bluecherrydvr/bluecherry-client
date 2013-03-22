@@ -26,7 +26,7 @@
 #include "ui/SwitchEventsWidget.h"
 #include "core/DVRServer.h"
 #include "core/BluecherryApp.h"
-#include "events/EventsCursor.h"
+#include "event/EventsCursor.h"
 #include <QBoxLayout>
 #include <QSplitter>
 #include <QFrame>
@@ -133,12 +133,12 @@ void EventViewWindow::setEvent(const EventData &event)
                          .arg(Qt::escape(event.uiLocation()))
                          .arg(Qt::escape(event.uiType()))
                          .arg(Qt::escape(event.uiLevel()))
-                         .arg(event.serverLocalDate().toString()));
+                         .arg(event.serverStartDate().toString()));
 
-    if (m_event.hasMedia() && m_event.mediaId >= 0)
+    if (m_event.hasMedia() && m_event.mediaId() >= 0)
     {
-        QUrl url = m_event.server->api->serverUrl().resolved(QUrl(QLatin1String("/media/request.php")));
-        url.addQueryItem(QLatin1String("id"), QString::number(m_event.mediaId));
+        QUrl url = m_event.server()->api->serverUrl().resolved(QUrl(QLatin1String("/media/request.php")));
+        url.addQueryItem(QLatin1String("id"), QString::number(m_event.mediaId()));
         m_videoPlayer->setVideo(url, &m_event);
     }
     else

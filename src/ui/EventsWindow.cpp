@@ -26,7 +26,7 @@
 #include "EventTagsModel.h"
 #include "EventsModel.h"
 #include "core/BluecherryApp.h"
-#include "events/ModelEventsCursor.h"
+#include "event/ModelEventsCursor.h"
 #include "ui/MainWindow.h"
 #include "event/CameraEventFilter.h"
 #include "event/EventDownloadManager.h"
@@ -306,14 +306,11 @@ QWidget *EventsWindow::createTimeline()
     m_timeline->setModel(m_resultsView->eventsModel());
 
     m_timelineZoom = new QSlider(Qt::Horizontal);
-    timelineZoomRangeChanged(m_timeline->minZoomSeconds(), m_timeline->maxZoomSeconds());
-    timelineZoomChanged(m_timeline->zoomSeconds());
+    m_timelineZoom->setRange(0, 100);
+    m_timelineZoom->setValue(0);
 
     connect(m_timeline, SIGNAL(customContextMenuRequested(QPoint)), SLOT(eventContextMenu(QPoint)));
     connect(m_timeline, SIGNAL(doubleClicked(QModelIndex)), SLOT(showEvent(QModelIndex)));
-
-    connect(m_timeline, SIGNAL(zoomSecondsChanged(int)), SLOT(timelineZoomChanged(int)));
-    connect(m_timeline, SIGNAL(zoomRangeChanged(int,int)), SLOT(timelineZoomRangeChanged(int,int)));
 
     connect(m_timelineZoom, SIGNAL(valueChanged(int)), SLOT(timelineSliderChanged(int)));
 
@@ -368,14 +365,7 @@ void EventsWindow::timelineZoomChanged(int value)
 
 void EventsWindow::timelineSliderChanged(int value)
 {
-    m_timeline->setZoomSeconds(m_timelineZoom->maximum() - (value - m_timelineZoom->minimum()));
-}
-
-void EventsWindow::timelineZoomRangeChanged(int min, int max)
-{
-    bool block = m_timelineZoom->blockSignals(true);
-    m_timelineZoom->setRange(min, max);
-    m_timelineZoom->blockSignals(block);
+    m_timeline->setZoomLevel(value);
 }
 
 void EventsWindow::showEvent(const QModelIndex &index)

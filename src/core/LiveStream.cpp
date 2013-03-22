@@ -130,6 +130,7 @@ QByteArray LiveStream::url() const
     QByteArray re = camera.streamUrl();
     if (m_bandwidthMode == LiveViewManager::LowBandwidth)
         re.append("/mode=keyframe");
+    qDebug() << re;
     return re;
 }
 

@@ -20,7 +20,7 @@
 #include "core/DVRServer.h"
 #include "core/DVRCamera.h"
 #include "core/EventData.h"
-#include "events/EventsLoader.h"
+#include "event/EventsLoader.h"
 #include <QTextDocument>
 #include <QColor>
 #include <QDebug>
@@ -139,7 +139,7 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
     else if (role == Qt::ToolTipRole)
     {
         return tr("%1 (%2)<br>%3 on %4<br>%5").arg(data->uiType(), data->uiLevel(), Qt::escape(data->uiLocation()),
-                                                   Qt::escape(data->uiServer()), data->serverLocalDate().toString());
+                                                   Qt::escape(data->uiServer()), data->serverStartDate().toString());
     }
     else if (role == Qt::ForegroundRole)
     {
@@ -150,7 +150,7 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
     {
     case ServerColumn:
         if (role == Qt::DisplayRole)
-            return data->server->displayName();
+            return data->server()->displayName();
         break;
     case LocationColumn:
         if (role == Qt::DisplayRole)
@@ -166,8 +166,8 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
         if (role == Qt::DisplayRole)
             return data->uiDuration();
         else if (role == Qt::EditRole)
-            return data->duration;
-        else if (role == Qt::FontRole && data->duration < 0)
+            return data->durationInSeconds();
+        else if (role == Qt::FontRole && data->inProgress())
         {
             QFont f;
             f.setBold(true);
@@ -178,13 +178,13 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
         if (role == Qt::DisplayRole)
             return data->uiLevel();
         else if (role == Qt::EditRole)
-            return data->level.level;
+            return data->level().level;
         break;
     case DateColumn:
         if (role == Qt::DisplayRole)
-            return data->serverLocalDate().toString();
+            return data->serverStartDate().toString();
         else if (role == Qt::EditRole)
-            return data->date;
+            return data->utcStartDate();
         break;
     }
 
@@ -227,7 +227,7 @@ void EventsModel::clearServerEvents(DVRServer *server)
     int removeFirst = -1;
     for (int i = 0; ; ++i)
     {
-        if (i < items.size() && items[i]->server == server)
+        if (i < items.size() && items[i]->server() == server)
         {
             if (removeFirst < 0)
                 removeFirst = i;
@@ -266,16 +266,16 @@ public:
 
         if (incompleteFirst)
         {
-            if (e1->duration < 0 && e2->duration >= 0)
+            if (e1->inProgress() && !e2->inProgress())
                 return true;
-            else if (e2->duration < 0 && e1->duration >= 0)
+            else if (e2->inProgress() && !e1->inProgress())
                 return false;
         }
 
         switch (column)
         {
         case EventsModel::ServerColumn:
-            re = QString::localeAwareCompare(e1->server->displayName(), e2->server->displayName()) <= 0;
+            re = QString::localeAwareCompare(e1->server()->displayName(), e2->server()->displayName()) <= 0;
             break;
         case EventsModel::LocationColumn:
             re = QString::localeAwareCompare(e1->uiLocation(), e2->uiLocation()) <= 0;
@@ -284,13 +284,13 @@ public:
             re = QString::localeAwareCompare(e1->uiType(), e2->uiType()) <= 0;
             break;
         case EventsModel::DurationColumn:
-            re = e1->duration <= e2->duration;
+            re = e1->durationInSeconds() <= e2->durationInSeconds();
             break;
         case EventsModel::LevelColumn:
-            re = e1->level <= e2->level;
+            re = e1->level() <= e2->level();
             break;
         case EventsModel::DateColumn:
-            re = e1->date <= e2->date;
+            re = e1->utcStartDate() <= e2->utcStartDate();
             break;
         default:
             Q_ASSERT_X(false, "EventSort", "sorting not implemented for column");
@@ -325,14 +325,14 @@ void EventsModel::sort(int column, Qt::SortOrder order)
 
 bool EventsModel::Filter::operator()(const EventData *data) const
 {
-    if (data->level < level ||
-        (!types.isNull() && (int)data->type >= 0 && !types[(int)data->type]) ||
-        (!dateBegin.isNull() && data->serverLocalDate() < dateBegin) ||
-        (!dateEnd.isNull() && data->serverLocalDate() > dateEnd))
+    if (data->level() < level ||
+            (!types.isNull() && (int)data->type() >= 0 && !types[(int)data->type()]) ||
+            (!dateBegin.isNull() && data->serverStartDate() < dateBegin) ||
+            (!dateEnd.isNull() && data->serverStartDate() > dateEnd))
         return false;
 
-    QHash<DVRServer*, QSet<int> >::ConstIterator it = sources.find(data->server);
-    if (!sources.isEmpty() && (it == sources.end() || (!it->isEmpty() && !it->contains(data->locationId))))
+    QHash<DVRServer*, QSet<int> >::ConstIterator it = sources.find(data->server());
+    if (!sources.isEmpty() && (it == sources.end() || (!it->isEmpty() && !it->contains(data->locationId()))))
         return false;
 
     return true;
