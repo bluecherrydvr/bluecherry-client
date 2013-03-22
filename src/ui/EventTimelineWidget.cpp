@@ -778,33 +778,30 @@ int EventTimelineWidget::paintDays(QPainter &p, const QRect &rect, int yPos)
     QFont font = p.font();
     font.setBold(true);
     p.setFont(font);
+    p.setBrush(Qt::NoBrush);
 
     bool first = true;
 
+    QRect lastDateRect;
     QDate startDate = visibleTimeRange.visibleRange().start().date();
     QDate endDate = visibleTimeRange.visibleRange().end().date();
     for (QDate date = startDate; date <= endDate; date = date.addDays(1))
     {
         QDateTime dt = qMax(QDateTime(date), visibleTimeRange.visibleRange().start());
-        QRect dateRect = timeCellRect(dt, dt.secsTo(QDateTime(date.addDays(1))));
-        dateRect.setHeight(rect.height());
-        dateRect.translate(leftPadding(), 0);
+        QRect dateRect;
+        dateRect.setLeft(leftPadding() + timeXOffset(dt));
+        dateRect.setTop(0);
+        dateRect.setRight(rect.right());
+        dateRect.setBottom(rect.bottom());
+
         QString dateStr = date.toString(first ? tr("ddd, MMM d yyyy") : tr("ddd, MMM d"));
 
-        /* This is very slow and could be improved dramatically with the use of QTextLayout */
-        QFontMetrics fm(p.font());
-        int w = fm.width(dateStr)+10;
-        if (w > dateRect.width() && date < endDate)
+        if (lastDateRect.intersect(dateRect).isEmpty())
         {
-            date = date.addDays(1);
-            dt = QDateTime(date);
-            QRect nr = timeCellRect(dt, dt.secsTo(qMin(QDateTime(dt.addDays(1)), visibleTimeRange.visibleRange().end())));
-            nr.setHeight(rect.height());
-            nr.translate(leftPadding(), 0);
-            dateRect |= nr;
+            p.drawText(dateRect, Qt::TextDontClip, dateStr, &dateRect);
+            lastDateRect = dateRect.adjusted(0, 0, 15, 0);
         }
 
-        p.drawText(dateRect, 0, dateStr, &dateRect);
         resultYPos = qMax(yPos, dateRect.bottom());
 
         first = false;
