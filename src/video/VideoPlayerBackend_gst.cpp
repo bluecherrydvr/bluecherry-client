@@ -77,11 +77,8 @@ bool VideoPlayerBackend::initGStreamer(QString *errorMessage)
         return false;
     }
 
-#if defined(Q_OS_LINUX) && !defined(GSTREAMER_PLUGINS)
-    /* Use the system installation of gstreamer on linux, where we don't need to
-     * explicitly load our plugins. */
-    return true;
-#endif
+    if (QString::fromLatin1(GSTREAMER_PLUGINS).isEmpty())
+        return true;
 
 #ifdef Q_OS_WIN
 #define EXT ".dll"
