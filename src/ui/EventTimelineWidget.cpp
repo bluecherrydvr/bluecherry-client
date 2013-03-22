@@ -114,7 +114,7 @@ void EventTimelineWidget::clearData()
     rowsMap.clear();
     visibleTimeRange.clear();
 
-    clearLeftPadding();
+    clearLeftPaddingCache();
 
     layoutRows.clear();
     layoutRowsBottom = 0;
@@ -382,7 +382,7 @@ bool EventTimelineWidget::findEvent(EventData *event, bool create, ServerData **
         it = serversMap.insert(serverData->server, serverData);
 
         scheduleDelayedItemsLayout(DoRowsLayout);
-        clearLeftPadding();
+        clearLeftPaddingCache();
     }
 
     ServerData *serverData = *it;
@@ -402,7 +402,7 @@ bool EventTimelineWidget::findEvent(EventData *event, bool create, ServerData **
         lit = serverData->locationsMap.insert(locationData->locationId, locationData);
 
         scheduleDelayedItemsLayout(DoRowsLayout);
-        clearLeftPadding();
+        clearLeftPaddingCache();
     }
 
     LocationData *locationData = *lit;
@@ -762,7 +762,7 @@ bool EventTimelineWidget::viewportEvent(QEvent *event)
 
         cachedTopPadding = height;
 
-        clearLeftPadding();
+        clearLeftPaddingCache();
         scheduleDelayedItemsLayout(DoUpdateTimeRange);
     }
 
@@ -964,7 +964,7 @@ void EventTimelineWidget::paintRow(QPainter *p, QRect r, LocationData *locationD
     p->restore();
 }
 
-void EventTimelineWidget::clearLeftPadding()
+void EventTimelineWidget::clearLeftPaddingCache()
 {
     cachedLeftPadding = -1;
 }

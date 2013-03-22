@@ -137,7 +137,7 @@ private:
     int rowHeight() const { return 20; }
     int cellMinimum() const { return 8; }
 
-    void clearLeftPadding();
+    void clearLeftPaddingCache();
 
     EventData *rowData(int row) const;
     bool findEvent(EventData *event, bool create, ServerData **server, LocationData **location, int *position);
