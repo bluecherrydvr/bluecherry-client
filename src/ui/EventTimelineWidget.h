@@ -132,6 +132,8 @@ private:
     QPoint mouseClickPos;
     QRubberBand *mouseRubberBand;
     
+    QDateTime firstTickDateTime() const;
+    
     int paintDays(QPainter &p, const QRect &rect, int yPos);
     int paintTickLines(QPainter &p, const QRect &rect, int yPos);
     void paintLegend(QPainter &p, int yPos, int width);
@@ -160,6 +162,7 @@ private:
     QRect viewportItemArea() const;
     /* X-coordinate offset from the edge of the viewport item area for the given time */
     int timeXOffset(const QDateTime &time) const;
+    int pixelsPerSeconds(int seconds) const;
     QRect timeCellRect(const QDateTime &start, int duration, int top = 0, int height = 0) const;
 
     void paintRow(QPainter *p, QRect rect, LocationData *locationData);

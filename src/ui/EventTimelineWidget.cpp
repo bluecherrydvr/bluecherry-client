@@ -744,6 +744,14 @@ int EventTimelineWidget::timeXOffset(const QDateTime &time) const
     return qMax(0, qRound((visibleTimeRange.visibleRange().start().secsTo(time) / range) * width));
 }
 
+int EventTimelineWidget::pixelsPerSeconds(int seconds) const
+{
+    int range = qMax(visibleTimeRange.visibleSeconds(), 1);
+    int width = viewportItemArea().width();
+    double pixelsPerSecond = (double) width / range;
+    return qRound(pixelsPerSecond * seconds);
+}
+
 QRect EventTimelineWidget::timeCellRect(const QDateTime &start, int duration, int top, int height) const
 {
     Q_ASSERT(visibleTimeRange.range().contains(start));
@@ -874,6 +882,16 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
     p.drawLine(leftPadding(), topPadding(), leftPadding(), r.height());
 }
 
+QDateTime EventTimelineWidget::firstTickDateTime() const
+{
+    QDateTime firstTickDateTime = visibleTimeRange.visibleRange().start().addSecs(utcOffset());
+    int preAreaSecs = visibleTimeRange.visibleRange().start().toUTC().toTime_t() % visibleTimeRange.primaryTickSecs();
+    if (preAreaSecs)
+        return firstTickDateTime.addSecs(visibleTimeRange.primaryTickSecs() - preAreaSecs);
+    else
+        return firstTickDateTime;
+}
+
 int EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect, int yPos)
 {
     Q_ASSERT(visibleTimeRange.primaryTickSecs());
@@ -886,13 +904,9 @@ int EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect, int yPos
     double tickWidth = (double(visibleTimeRange.primaryTickSecs()) / qMax(visibleTimeRange.visibleSeconds(), 1)) * areaWidth;
     QRectF tickRect(leftPadding(), yPos, tickWidth, rect.height());
 
-    /* Round to the first tick */
-    int preAreaSecs = visibleTimeRange.visibleRange().start().toTime_t() % visibleTimeRange.primaryTickSecs();
-    if (preAreaSecs)
-        preAreaSecs = visibleTimeRange.primaryTickSecs() - preAreaSecs;
-
-    QDateTime tickDateTime = visibleTimeRange.visibleRange().start().addSecs(preAreaSecs).addSecs(utcOffset());
-    tickRect.translate((double(preAreaSecs)/qMax(visibleTimeRange.visibleSeconds(), 1)) * areaWidth, 0);
+    QDateTime tickDateTime = firstTickDateTime();
+    tickRect.setLeft(leftPadding() + pixelsPerSeconds(visibleTimeRange.visibleRange().start().addSecs(utcOffset()).secsTo(tickDateTime)));
+    tickRect.setWidth(tickWidth);
 
     for (;;)
     {
