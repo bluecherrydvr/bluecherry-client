@@ -878,26 +878,27 @@ int EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect, int yPos
 {
     Q_ASSERT(visibleTimeRange.primaryTickSecs());
 
+    int tickLineCount = qCeil(double(visibleTimeRange.visibleSeconds()) / visibleTimeRange.primaryTickSecs());
+    QVector<QLine> tickLines;
+    tickLines.reserve(tickLineCount);
+
     int areaWidth = viewportItemArea().width();
-
-    QVector<QLine> lines;
-    lines.reserve(qCeil(double(visibleTimeRange.visibleSeconds())/visibleTimeRange.primaryTickSecs()));
-
-    QRectF tickRect(leftPadding(), yPos, (double(visibleTimeRange.primaryTickSecs()) / qMax(visibleTimeRange.visibleSeconds(), 1)) * areaWidth, rect.height());
+    double tickWidth = (double(visibleTimeRange.primaryTickSecs()) / qMax(visibleTimeRange.visibleSeconds(), 1)) * areaWidth;
+    QRectF tickRect(leftPadding(), yPos, tickWidth, rect.height());
 
     /* Round to the first tick */
-    int preAreaSecs = int(visibleTimeRange.visibleRange().start().toTime_t() % visibleTimeRange.primaryTickSecs());
+    int preAreaSecs = visibleTimeRange.visibleRange().start().toTime_t() % visibleTimeRange.primaryTickSecs();
     if (preAreaSecs)
         preAreaSecs = visibleTimeRange.primaryTickSecs() - preAreaSecs;
 
-    QDateTime dt = visibleTimeRange.visibleRange().start().toUTC().addSecs(preAreaSecs).addSecs(utcOffset());
-    tickRect.translate((double(preAreaSecs)/qMax(visibleTimeRange.visibleSeconds(), 1))*areaWidth, 0);
+    QDateTime tickDateTime = visibleTimeRange.visibleRange().start().addSecs(preAreaSecs).addSecs(utcOffset());
+    tickRect.translate((double(preAreaSecs)/qMax(visibleTimeRange.visibleSeconds(), 1)) * areaWidth, 0);
 
     for (;;)
     {
-        lines.append(QLine(qRound(tickRect.x()), 1, qRound(tickRect.x()), rect.bottom()));
+        tickLines.append(QLine(qRound(tickRect.x()), 1, qRound(tickRect.x()), rect.bottom()));
 
-        QString text = dt.toString(tr("h:mm"));
+        QString text = tickDateTime.toString(tr("h:mm"));
         QRectF textRect = tickRect.translated(qRound(tickRect.width()/-2.0), 0);
 
         p.drawText(textRect, Qt::AlignTop | Qt::AlignHCenter, text);
@@ -906,16 +907,16 @@ int EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect, int yPos
             break;
 
         tickRect.translate(tickRect.width(), 0);
-        dt = dt.addSecs(visibleTimeRange.primaryTickSecs());
+        tickDateTime = tickDateTime.addSecs(visibleTimeRange.primaryTickSecs());
     }
 
     int y = topPadding();
-    for (QVector<QLine>::Iterator it = lines.begin(); it != lines.end(); ++it)
+    for (QVector<QLine>::Iterator it = tickLines.begin(); it != tickLines.end(); ++it)
         it->translate(0, y);
 
     p.save();
     p.setPen(QColor(205, 205, 205));
-    p.drawLines(lines);
+    p.drawLines(tickLines);
     p.restore();
 
     return y;
