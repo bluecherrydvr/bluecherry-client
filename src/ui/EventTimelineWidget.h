@@ -159,7 +159,7 @@ private:
     QRect viewportItemArea() const;
     /* X-coordinate offset from the edge of the viewport item area for the given time */
     int timeXOffset(const QDateTime &time) const;
-    QRect timeCellRect(const QDateTime &start, int duration) const;
+    QRect timeCellRect(const QDateTime &start, int duration, int top = 0, int height = 0) const;
 
     void paintRow(QPainter *p, QRect rect, LocationData *locationData);
     void paintEvent(QPainter &p, int boxHeight, EventData *event);

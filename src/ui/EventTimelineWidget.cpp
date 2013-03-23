@@ -744,13 +744,15 @@ int EventTimelineWidget::timeXOffset(const QDateTime &time) const
     return qMax(0, qRound((visibleTimeRange.visibleRange().start().secsTo(time) / range) * width));
 }
 
-QRect EventTimelineWidget::timeCellRect(const QDateTime &time, int duration) const
+QRect EventTimelineWidget::timeCellRect(const QDateTime &start, int duration, int top, int height) const
 {
-    Q_ASSERT(visibleTimeRange.range().contains(time));
+    Q_ASSERT(visibleTimeRange.range().contains(start));
 
     QRect r;
-    r.setLeft(timeXOffset(time));
-    r.setRight(timeXOffset(time.addSecs(duration)));
+    r.setTop(top);
+    r.setHeight(height);
+    r.setLeft(timeXOffset(start));
+    r.setRight(timeXOffset(start.addSecs(duration)));
     return r;
 }
 
@@ -987,8 +989,7 @@ void EventTimelineWidget::paintEvent(QPainter& p, int boxHeight, EventData *even
 
     int modelRow = rowsMap[event];
 
-    QRect cellRect = timeCellRect(event->utcStartDate(), event->durationInSeconds());
-    cellRect.setHeight(boxHeight);
+    QRect cellRect = timeCellRect(event->utcStartDate(), event->durationInSeconds(), 0, boxHeight);
 
     p.setBrush(event->uiColor());
     p.drawRoundedRect(cellRect.adjusted(0, 1, 0, -1), 2, 2);
