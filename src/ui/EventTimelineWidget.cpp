@@ -970,31 +970,35 @@ void EventTimelineWidget::paintRow(QPainter *p, QRect r, LocationData *locationD
     p->setRenderHint(QPainter::Antialiasing, true);
     p->setPen(Qt::NoPen);
 
+    // TODO: what about finding first and last visible event by binary search?
     foreach (EventData *event, locationData->events)
-    {
-        if (!isEventVisible(event))
-            continue;
-
-        Q_ASSERT(rowsMap.contains(event));
-        int modelRow = rowsMap[event];
-
-        QRect cellRect = timeCellRect(event->utcStartDate(), event->durationInSeconds());
-        cellRect.setX(qMax(cellRect.x(), 0));
-        cellRect.translate(r.x(), r.y());
-        cellRect.setHeight(r.height());
-
-        p->setBrush(event->uiColor());
-        p->drawRoundedRect(cellRect.adjusted(0, 1, 0, -1), 2, 2);
-
-        if (selectionModel()->rowIntersectsSelection(modelRow, QModelIndex()))
-        {
-            p->setPen(Qt::red);
-            p->drawRect(cellRect.adjusted(0, 0, -1, -1));
-            p->setPen(Qt::NoPen);
-        }
-    }
+        if (isEventVisible(event))
+            paintEvent(*p, r, event);
 
     p->restore();
+}
+
+void EventTimelineWidget::paintEvent(QPainter& p, const QRect &rect, EventData *event)
+{
+    Q_ASSERT(event);
+    Q_ASSERT(rowsMap.contains(event));
+
+    int modelRow = rowsMap[event];
+
+    QRect cellRect = timeCellRect(event->utcStartDate(), event->durationInSeconds());
+    cellRect.setX(qMax(cellRect.x(), 0));
+    cellRect.translate(rect.x(), rect.y());
+    cellRect.setHeight(rect.height());
+
+    p.setBrush(event->uiColor());
+    p.drawRoundedRect(cellRect.adjusted(0, 1, 0, -1), 2, 2);
+
+    if (selectionModel()->rowIntersectsSelection(modelRow, QModelIndex()))
+    {
+        p.setPen(Qt::red);
+        p.drawRect(cellRect.adjusted(0, 0, -1, -1));
+        p.setPen(Qt::NoPen);
+    }
 }
 
 void EventTimelineWidget::clearLeftPaddingCache()
