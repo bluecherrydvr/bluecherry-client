@@ -810,25 +810,32 @@ int EventTimelineWidget::paintDays(QPainter &p, const QRect &rect, int yPos)
     QRect lastDateRect;
     QDate startDate = visibleTimeRange.visibleRange().start().date();
     QDate endDate = visibleTimeRange.visibleRange().end().date();
-    for (QDate date = startDate; date <= endDate; date = date.addDays(1))
+
+    // because of UTC/local time differences we need to start with previous date
+    for (QDate date = startDate.addDays(-1); date <= endDate; date = date.addDays(1))
     {
-        QDateTime dt = qMax(QDateTime(date), visibleTimeRange.visibleRange().start());
-        QRect dateRect;
-        dateRect.setLeft(leftPadding() + timeXOffset(dt));
-        dateRect.setTop(0);
-        dateRect.setRight(rect.right());
-        dateRect.setBottom(rect.bottom());
+        QDateTime dt = QDateTime(date);
+        dt.setTimeSpec(Qt::UTC);
 
-        QString dateStr = date.toString(first ? tr("ddd, MMM d yyyy") : tr("ddd, MMM d"));
-
-        if (lastDateRect.intersect(dateRect).isEmpty())
+        if (secondsFromVisibleStart(dt.addDays(1)) > 0)
         {
-            p.drawText(dateRect, Qt::TextDontClip, dateStr, &dateRect);
-            lastDateRect = dateRect.adjusted(0, 0, 15, 0);
-            resultYPos = qMax(yPos, dateRect.bottom());
-        }
+            QRect dateRect;
+            dateRect.setLeft(leftPadding() + qMax(0, qRound(pixelsPerSeconds(secondsFromVisibleStart(dt)))));
+            dateRect.setTop(0);
+            dateRect.setRight(rect.right());
+            dateRect.setBottom(rect.bottom());
 
-        first = false;
+            QString dateStr = date.toString(first ? tr("ddd, MMM d yyyy") : tr("ddd, MMM d"));
+
+            if (lastDateRect.intersect(dateRect).isEmpty())
+            {
+                p.drawText(dateRect, Qt::AlignLeft | Qt::TextDontClip, dateStr, &dateRect);
+                lastDateRect = dateRect.adjusted(0, 0, 15, 0);
+                resultYPos = qMax(yPos, dateRect.bottom());
+            }
+
+            first = false;
+        }
     }
     p.restore();
 
@@ -884,7 +891,7 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
 QDateTime EventTimelineWidget::firstTickDateTime() const
 {
     QDateTime firstTickDateTime = visibleTimeRange.visibleRange().start().addSecs(utcOffset());
-    int preAreaSecs = visibleTimeRange.visibleRange().start().toUTC().toTime_t() % visibleTimeRange.primaryTickSecs();
+    int preAreaSecs = visibleTimeRange.visibleRange().start().toTime_t() % visibleTimeRange.primaryTickSecs();
     if (preAreaSecs)
         return firstTickDateTime.addSecs(visibleTimeRange.primaryTickSecs() - preAreaSecs);
     else
