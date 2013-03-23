@@ -970,21 +970,20 @@ void EventTimelineWidget::paintRow(QPainter *p, QRect r, LocationData *locationD
     p->setRenderHint(QPainter::Antialiasing, true);
     p->setPen(Qt::NoPen);
 
-    for (QList<EventData*>::Iterator it = locationData->events.begin(); it != locationData->events.end(); ++it)
+    foreach (EventData *event, locationData->events)
     {
-        EventData *data = *it;
-        if (!isEventVisible(data))
+        if (!isEventVisible(event))
             continue;
 
-        Q_ASSERT(rowsMap.contains(data));
-        int modelRow = rowsMap[data];
+        Q_ASSERT(rowsMap.contains(event));
+        int modelRow = rowsMap[event];
 
-        QRect cellRect = timeCellRect(data->utcStartDate(), data->durationInSeconds());
+        QRect cellRect = timeCellRect(event->utcStartDate(), event->durationInSeconds());
         cellRect.setX(qMax(cellRect.x(), 0));
         cellRect.translate(r.x(), r.y());
         cellRect.setHeight(r.height());
 
-        p->setBrush(data->uiColor());
+        p->setBrush(event->uiColor());
         p->drawRoundedRect(cellRect.adjusted(0, 1, 0, -1), 2, 2);
 
         if (selectionModel()->rowIntersectsSelection(modelRow, QModelIndex()))
