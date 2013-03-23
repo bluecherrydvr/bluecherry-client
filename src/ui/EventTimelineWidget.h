@@ -107,6 +107,8 @@ private:
     QDateTime earliestDate();
     QDateTime latestDate();
 
+    bool isEventVisible(EventData *data) const;
+
     void scheduleDelayedItemsLayout(LayoutFlags flags);
     void ensureLayout();
 

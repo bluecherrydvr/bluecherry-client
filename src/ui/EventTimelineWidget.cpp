@@ -954,6 +954,16 @@ void EventTimelineWidget::paintChart(QPainter& p, int yPos, int width)
     }
 }
 
+bool EventTimelineWidget::isEventVisible(EventData *data) const
+{
+    if (data->utcEndDate() < visibleTimeRange.visibleRange().start())
+        return false;
+    if (data->utcStartDate() > visibleTimeRange.visibleRange().end())
+        return false;
+
+    return true;
+}
+
 void EventTimelineWidget::paintRow(QPainter *p, QRect r, LocationData *locationData)
 {
     p->save();
@@ -963,9 +973,7 @@ void EventTimelineWidget::paintRow(QPainter *p, QRect r, LocationData *locationD
     for (QList<EventData*>::Iterator it = locationData->events.begin(); it != locationData->events.end(); ++it)
     {
         EventData *data = *it;
-        if (data->utcEndDate() < visibleTimeRange.visibleRange().start())
-            continue;
-        if (data->utcStartDate() > visibleTimeRange.visibleRange().end())
+        if (!isEventVisible(data))
             continue;
 
         Q_ASSERT(rowsMap.contains(data));
