@@ -744,12 +744,12 @@ int EventTimelineWidget::timeXOffset(const QDateTime &time) const
     return qMax(0, qRound((visibleTimeRange.visibleRange().start().secsTo(time) / range) * width));
 }
 
-int EventTimelineWidget::pixelsPerSeconds(int seconds) const
+double EventTimelineWidget::pixelsPerSeconds(int seconds) const
 {
     int range = qMax(visibleTimeRange.visibleSeconds(), 1);
     int width = viewportItemArea().width();
     double pixelsPerSecond = (double) width / range;
-    return qRound(pixelsPerSecond * seconds);
+    return pixelsPerSecond * seconds;
 }
 
 QRect EventTimelineWidget::timeCellRect(const QDateTime &start, int duration, int top, int height) const
@@ -905,12 +905,11 @@ int EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect, int yPos
     QVector<QLine> tickLines;
     tickLines.reserve(tickLineCount);
 
-    int areaWidth = viewportItemArea().width();
-    double tickWidth = (double(visibleTimeRange.primaryTickSecs()) / qMax(visibleTimeRange.visibleSeconds(), 1)) * areaWidth;
+    double tickWidth = pixelsPerSeconds(visibleTimeRange.primaryTickSecs());
     QRectF tickRect(leftPadding(), yPos, tickWidth, rect.height());
 
     QDateTime tickDateTime = firstTickDateTime();
-    tickRect.setLeft(leftPadding() + pixelsPerSeconds(secondsFromVisibleStart(tickDateTime)));
+    tickRect.setLeft(leftPadding() + qRound(pixelsPerSeconds(secondsFromVisibleStart(tickDateTime))));
     tickRect.setWidth(tickWidth);
 
     for (;;)

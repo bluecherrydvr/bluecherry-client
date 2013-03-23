@@ -162,7 +162,7 @@ private:
     QRect viewportItemArea() const;
     int secondsFromVisibleStart(const QDateTime &serverTime) const;
     int timeXOffset(const QDateTime &time) const;
-    int pixelsPerSeconds(int seconds) const;
+    double pixelsPerSeconds(int seconds) const;
     QRect timeCellRect(const QDateTime &start, int duration, int top = 0, int height = 0) const;
 
     void paintRow(QPainter *p, QRect rect, LocationData *locationData);
