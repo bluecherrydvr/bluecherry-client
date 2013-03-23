@@ -907,27 +907,22 @@ int EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect, int yPos
 
     QDateTime tickDateTime = firstTickDateTime();
     int tickDateTimeOffset = qRound(pixelsPerSeconds(secondsFromVisibleStart(tickDateTime)));
-    double tickWidth = pixelsPerSeconds(visibleTimeRange.primaryTickSecs());
 
-    QRectF tickRect;
-    tickRect.setTop(yPos);
-    tickRect.setHeight(rect.height());
-    tickRect.setLeft(leftPadding() + tickDateTimeOffset);
-    tickRect.setWidth(tickWidth);
+    double tickPosition = leftPadding() + tickDateTimeOffset;
+    double tickWidth = pixelsPerSeconds(visibleTimeRange.primaryTickSecs());
 
     for (;;)
     {
-        tickLines.append(QLine(qRound(tickRect.x()), 1, qRound(tickRect.x()), rect.bottom()));
+        tickLines.append(QLine(qRound(tickPosition), 1, qRound(tickPosition), rect.bottom()));
 
         QString text = tickDateTime.toString(tr("h:mm"));
-        QRectF textRect = tickRect.translated(qRound(tickRect.width()/-2.0), 0);
-
+        QRectF textRect(tickPosition - tickWidth / 2.0, yPos, tickWidth, rect.height());
         p.drawText(textRect, Qt::AlignTop | Qt::AlignHCenter, text);
 
         if (textRect.right() >= rect.right())
             break;
 
-        tickRect.translate(tickRect.width(), 0);
+        tickPosition += tickWidth;
         tickDateTime = tickDateTime.addSecs(visibleTimeRange.primaryTickSecs());
     }
 
