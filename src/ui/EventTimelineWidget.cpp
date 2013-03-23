@@ -892,6 +892,11 @@ QDateTime EventTimelineWidget::firstTickDateTime() const
         return firstTickDateTime;
 }
 
+int EventTimelineWidget::secondsFromVisibleStart(const QDateTime& serverTime) const
+{
+    return visibleTimeRange.visibleRange().start().addSecs(utcOffset()).secsTo(serverTime);
+}
+
 int EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect, int yPos)
 {
     Q_ASSERT(visibleTimeRange.primaryTickSecs());
@@ -905,7 +910,7 @@ int EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect, int yPos
     QRectF tickRect(leftPadding(), yPos, tickWidth, rect.height());
 
     QDateTime tickDateTime = firstTickDateTime();
-    tickRect.setLeft(leftPadding() + pixelsPerSeconds(visibleTimeRange.visibleRange().start().addSecs(utcOffset()).secsTo(tickDateTime)));
+    tickRect.setLeft(leftPadding() + pixelsPerSeconds(secondsFromVisibleStart(tickDateTime)));
     tickRect.setWidth(tickWidth);
 
     for (;;)
