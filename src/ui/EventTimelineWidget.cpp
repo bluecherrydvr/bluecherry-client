@@ -825,9 +825,8 @@ int EventTimelineWidget::paintDays(QPainter &p, const QRect &rect, int yPos)
         {
             p.drawText(dateRect, Qt::TextDontClip, dateStr, &dateRect);
             lastDateRect = dateRect.adjusted(0, 0, 15, 0);
+            resultYPos = qMax(yPos, dateRect.bottom());
         }
-
-        resultYPos = qMax(yPos, dateRect.bottom());
 
         first = false;
     }
@@ -901,6 +900,7 @@ int EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect, int yPos
 {
     Q_ASSERT(visibleTimeRange.primaryTickSecs());
 
+
     int tickLineCount = qCeil(double(visibleTimeRange.visibleSeconds()) / visibleTimeRange.primaryTickSecs());
     QVector<QLine> tickLines;
     tickLines.reserve(tickLineCount);
@@ -911,7 +911,7 @@ int EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect, int yPos
     double tickPosition = leftPadding() + tickDateTimeOffset;
     double tickWidth = pixelsPerSeconds(visibleTimeRange.primaryTickSecs());
 
-    for (;;)
+    while (true)
     {
         tickLines.append(QLine(qRound(tickPosition), 1, qRound(tickPosition), rect.bottom()));
 
