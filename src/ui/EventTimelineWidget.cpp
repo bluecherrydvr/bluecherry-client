@@ -963,7 +963,9 @@ void EventTimelineWidget::paintRow(QPainter *p, QRect r, LocationData *locationD
     for (QList<EventData*>::Iterator it = locationData->events.begin(); it != locationData->events.end(); ++it)
     {
         EventData *data = *it;
-        if (data->utcStartDate().addSecs(data->durationInSeconds()) < visibleTimeRange.visibleRange().start())
+        if (data->utcEndDate() < visibleTimeRange.visibleRange().start())
+            continue;
+        if (data->utcStartDate() > visibleTimeRange.visibleRange().end())
             continue;
 
         Q_ASSERT(rowsMap.contains(data));
