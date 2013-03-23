@@ -905,11 +905,14 @@ int EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect, int yPos
     QVector<QLine> tickLines;
     tickLines.reserve(tickLineCount);
 
-    double tickWidth = pixelsPerSeconds(visibleTimeRange.primaryTickSecs());
-    QRectF tickRect(leftPadding(), yPos, tickWidth, rect.height());
-
     QDateTime tickDateTime = firstTickDateTime();
-    tickRect.setLeft(leftPadding() + qRound(pixelsPerSeconds(secondsFromVisibleStart(tickDateTime))));
+    int tickDateTimeOffset = qRound(pixelsPerSeconds(secondsFromVisibleStart(tickDateTime)));
+    double tickWidth = pixelsPerSeconds(visibleTimeRange.primaryTickSecs());
+
+    QRectF tickRect;
+    tickRect.setTop(yPos);
+    tickRect.setHeight(rect.height());
+    tickRect.setLeft(leftPadding() + tickDateTimeOffset);
     tickRect.setWidth(tickWidth);
 
     for (;;)
