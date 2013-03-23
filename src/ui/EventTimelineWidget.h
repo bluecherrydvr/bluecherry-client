@@ -162,7 +162,7 @@ private:
     QRect timeCellRect(const QDateTime &start, int duration) const;
 
     void paintRow(QPainter *p, QRect rect, LocationData *locationData);
-    void paintEvent(QPainter &p, const QRect &rect, EventData *event);
+    void paintEvent(QPainter &p, int boxHeight, EventData *event);
 
 };
 

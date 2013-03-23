@@ -975,12 +975,12 @@ void EventTimelineWidget::paintRow(QPainter *p, QRect r, LocationData *locationD
     // TODO: what about finding first and last visible event by binary search?
     foreach (EventData *event, locationData->events)
         if (isEventVisible(event))
-            paintEvent(*p, r, event);
+            paintEvent(*p, r.height(), event);
 
     p->restore();
 }
 
-void EventTimelineWidget::paintEvent(QPainter& p, const QRect &rect, EventData *event)
+void EventTimelineWidget::paintEvent(QPainter& p, int boxHeight, EventData *event)
 {
     Q_ASSERT(event);
     Q_ASSERT(rowsMap.contains(event));
@@ -988,7 +988,7 @@ void EventTimelineWidget::paintEvent(QPainter& p, const QRect &rect, EventData *
     int modelRow = rowsMap[event];
 
     QRect cellRect = timeCellRect(event->utcStartDate(), event->durationInSeconds());
-    cellRect.setHeight(rect.height());
+    cellRect.setHeight(boxHeight);
 
     p.setBrush(event->uiColor());
     p.drawRoundedRect(cellRect.adjusted(0, 1, 0, -1), 2, 2);
