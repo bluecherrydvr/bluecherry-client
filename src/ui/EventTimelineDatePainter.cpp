@@ -53,36 +53,36 @@ int EventTimelineDatePainter::paintDate(QPainter &painter, const QDate &date)
     QDateTime dt = QDateTime(date);
     dt.setTimeSpec(Qt::UTC);
 
-    if (m_visibleTimeStart < dt.addDays(1))
+    if (m_visibleTimeStart >= dt.addDays(1))
+        return -1;
+
+    QString dateStr = date.toString(m_first ? QLatin1String("ddd, MMM d yyyy") : QLatin1String("ddd, MMM d"));
+
+    QRect dateRect;
+    dateRect.setTop(0);
+    dateRect.setLeft(qMax(0, qRound(m_pixelsPerSecondRatio * m_visibleTimeStart.secsTo(dt))));
+    dateRect.setWidth(painter.fontMetrics().width(dateStr) + 15);
+    dateRect.setHeight(painter.fontMetrics().height());
+
+    if (m_lastDrawnDateRect.intersect(dateRect).isEmpty())
     {
-        QString dateStr = date.toString(m_first ? QLatin1String("ddd, MMM d yyyy") : QLatin1String("ddd, MMM d"));
+        painter.drawText(dateRect, Qt::AlignLeft | Qt::TextDontClip, dateStr);
+        m_lastDrawnDateRect = dateRect;
+        result = qMax(result, dateRect.bottom());
 
-        QRect dateRect;
-        dateRect.setTop(0);
-        dateRect.setLeft(qMax(0, qRound(m_pixelsPerSecondRatio * m_visibleTimeStart.secsTo(dt))));
-        dateRect.setWidth(painter.fontMetrics().width(dateStr) + 15);
-        dateRect.setHeight(painter.fontMetrics().height());
+        if (!m_undrawnDateString.isEmpty() && m_undrawnDateRect.intersect(m_lastDrawnDateRect).isEmpty())
+            painter.drawText(m_undrawnDateRect, Qt::AlignLeft | Qt::TextDontClip, m_undrawnDateString);
 
-        if (m_lastDrawnDateRect.intersect(dateRect).isEmpty())
-        {
-            painter.drawText(dateRect, Qt::AlignLeft | Qt::TextDontClip, dateStr);
-            m_lastDrawnDateRect = dateRect;
-            result = qMax(result, dateRect.bottom());
-
-            if (!m_undrawnDateString.isEmpty() && m_undrawnDateRect.intersect(m_lastDrawnDateRect).isEmpty())
-                painter.drawText(m_undrawnDateRect, Qt::AlignLeft | Qt::TextDontClip, m_undrawnDateString);
-
-            m_undrawnDateRect = QRect();
-            m_undrawnDateString.clear();
-        }
-        else
-        {
-            m_undrawnDateRect = dateRect.translated(m_lastDrawnDateRect.right() - dateRect.left(), 0);
-            m_undrawnDateString = dateStr;
-        }
-
-        m_first = false;
+        m_undrawnDateRect = QRect();
+        m_undrawnDateString.clear();
     }
+    else
+    {
+        m_undrawnDateRect = dateRect.translated(m_lastDrawnDateRect.right() - dateRect.left(), 0);
+        m_undrawnDateString = dateStr;
+    }
+
+    m_first = false;
 
     return result;
 }
