@@ -27,18 +27,20 @@ class QPainter;
 class EventTimelineDatePainter
 {
 public:
-    explicit EventTimelineDatePainter();
+    explicit EventTimelineDatePainter(QPainter &painter);
 
     void setStartDate(const QDate &startDate);
     void setEndDate(const QDate &endDate);
     void setVisibleTimeStart(const QDateTime &visibleTimeStart);
     void setPixelsPerSecondRatio(double pixelsPerSecondRatio);
 
-    int paintDates(QPainter &painter, const QRect &rect, int yPos);
+    int paintDates(const QRect &rect, int yPos);
 
 private:
     static QLatin1String longDateFormat;
     static QLatin1String shortDateFormat;
+
+    QPainter &m_painter;
 
     QDate m_startDate;
     QDate m_endDate;
@@ -50,9 +52,9 @@ private:
     QRect m_undrawnDateRect;
     QString m_undrawnDateString;
 
-    int paintDate(QPainter &painter, const QDate &date);
+    int paintDate(const QDate &date);
     QString dateToString(const QDate &date);
-    QRect dateStringToRect(const QDate &date, const QString &dateString, const QFontMetrics &fontMetrics);
+    QRect dateStringToRect(const QDate &date, const QString &dateString);
 
 };
 

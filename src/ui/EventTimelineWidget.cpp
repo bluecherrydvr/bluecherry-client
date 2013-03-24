@@ -797,7 +797,7 @@ bool EventTimelineWidget::viewportEvent(QEvent *event)
 
 int EventTimelineWidget::paintDays(QPainter &p, const QRect &rect, int yPos)
 {
-    EventTimelineDatePainter datePainter;
+    EventTimelineDatePainter datePainter(p);
     datePainter.setStartDate(visibleTimeRange.visibleRange().start().date().addDays(-1));
     datePainter.setEndDate(visibleTimeRange.visibleRange().end().date());
     datePainter.setVisibleTimeStart(visibleTimeRange.visibleRange().start().addSecs(utcOffset()));
@@ -810,7 +810,7 @@ int EventTimelineWidget::paintDays(QPainter &p, const QRect &rect, int yPos)
     p.setBrush(Qt::NoBrush);
     p.translate(leftPadding(), 0);
 
-    int result = datePainter.paintDates(p, rect, yPos);
+    int result = datePainter.paintDates(rect, yPos);
 
     p.restore();
 
