@@ -26,14 +26,13 @@ class QRect;
 class EventTimelineDatePainter
 {
 public:
-    explicit EventTimelineDatePainter(const QDate &startDate, const QDate &endDate, int leftPadding, const QDateTime &visibleTimeStart, double pixelsPerSecondRatio);
+    explicit EventTimelineDatePainter(const QDate &startDate, const QDate &endDate, const QDateTime &visibleTimeStart, double pixelsPerSecondRatio);
 
     int paintDates(QPainter &painter, const QRect &rect, int yPos);
 
 private:
     QDate m_startDate;
     QDate m_endDate;
-    int m_leftPadding;
     QDateTime m_visibleTimeStart;
     double m_pixelsPerSecondRatio;
 

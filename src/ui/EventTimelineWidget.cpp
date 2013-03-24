@@ -799,10 +799,15 @@ int EventTimelineWidget::paintDays(QPainter &p, const QRect &rect, int yPos)
 {
     EventTimelineDatePainter datePainter(visibleTimeRange.visibleRange().start().date(),
                                          visibleTimeRange.visibleRange().end().date(),
-                                         leftPadding(),
                                          visibleTimeRange.visibleRange().start().addSecs(utcOffset()),
                                          pixelsPerSeconds(1));
-    return datePainter.paintDates(p, rect, yPos);
+
+    p.save();
+    p.translate(leftPadding(), 0);
+    int result = datePainter.paintDates(p, rect, yPos);
+    p.restore();
+
+    return result;
 }
 
 int EventTimelineWidget::utcOffset() const

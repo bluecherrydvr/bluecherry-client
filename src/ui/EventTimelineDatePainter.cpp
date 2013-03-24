@@ -20,8 +20,8 @@
 #include <QDateTime>
 #include <QPainter>
 
-EventTimelineDatePainter::EventTimelineDatePainter(const QDate &startDate, const QDate &endDate, int leftPadding, const QDateTime &visibleTimeStart, double pixelsPerSecondRatio)
-    : m_startDate(startDate), m_endDate(endDate), m_leftPadding(leftPadding), m_visibleTimeStart(visibleTimeStart), m_pixelsPerSecondRatio(pixelsPerSecondRatio)
+EventTimelineDatePainter::EventTimelineDatePainter(const QDate &startDate, const QDate &endDate, const QDateTime &visibleTimeStart, double pixelsPerSecondRatio)
+    : m_startDate(startDate), m_endDate(endDate), m_visibleTimeStart(visibleTimeStart), m_pixelsPerSecondRatio(pixelsPerSecondRatio)
 {
 }
 
@@ -54,7 +54,7 @@ int EventTimelineDatePainter::paintDates(QPainter &painter, const QRect &rect, i
 
             QRect dateRect;
             dateRect.setTop(0);
-            dateRect.setLeft(m_leftPadding + qMax(0, qRound(m_pixelsPerSecondRatio * m_visibleTimeStart.secsTo(dt))));
+            dateRect.setLeft(qMax(0, qRound(m_pixelsPerSecondRatio * m_visibleTimeStart.secsTo(dt))));
             dateRect.setWidth(painter.fontMetrics().width(dateStr) + 15);
             dateRect.setHeight(painter.fontMetrics().height());
 
