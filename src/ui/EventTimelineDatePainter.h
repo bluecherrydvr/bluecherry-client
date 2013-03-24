@@ -47,6 +47,7 @@ private:
     QDateTime m_visibleTimeStart;
     double m_pixelsPerSecondRatio;
 
+    int m_fontHeight;
     bool m_useLongDateFormat;
     QRect m_lastDrawnDateRect;
     QRect m_undrawnDateRect;

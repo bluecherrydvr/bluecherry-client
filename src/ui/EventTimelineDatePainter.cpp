@@ -24,7 +24,7 @@ QLatin1String EventTimelineDatePainter::longDateFormat("ddd, MMM d yyyy");
 QLatin1String EventTimelineDatePainter::shortDateFormat("ddd, MMM d");
 
 EventTimelineDatePainter::EventTimelineDatePainter(QPainter &painter)
-    : m_painter(painter)
+    : m_painter(painter), m_fontHeight(m_painter.fontMetrics().height())
 {
 }
 
@@ -110,7 +110,7 @@ QRect EventTimelineDatePainter::dateStringToRect(const QDate &date, const QStrin
     result.setTop(0);
     result.setLeft(qMax(0, qRound(m_pixelsPerSecondRatio * m_visibleTimeStart.secsTo(QDateTime(date, QTime(), Qt::UTC)))));
     result.setWidth(m_painter.fontMetrics().width(dateString) + 15);
-    result.setHeight(m_painter.fontMetrics().height());
+    result.setHeight(m_fontHeight);
 
     return result;
 }
