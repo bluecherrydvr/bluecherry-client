@@ -48,35 +48,28 @@ void EventTimelineDatePainter::setPixelsPerSecondRatio(double pixelsPerSecondRat
     m_pixelsPerSecondRatio = pixelsPerSecondRatio;
 }
 
-
-int EventTimelineDatePainter::paintDates(const QRect &rect, int yPos)
+void EventTimelineDatePainter::paintDates()
 {
-    int resultYPos = yPos;
-
     m_useLongDateFormat = true;
 
     for (QDate date = m_startDate; date <= m_endDate; date = date.addDays(1))
-        resultYPos = qMax(resultYPos, paintDate(date));
-
-    return resultYPos;
+        paintDate(date);
 }
 
-int EventTimelineDatePainter::paintDate(const QDate &date)
+void EventTimelineDatePainter::paintDate(const QDate &date)
 {
     QDateTime dt = QDateTime(date, QTime(), Qt::UTC);
 
     if (m_visibleTimeStart >= dt.addDays(1))
-        return -1;
+        return;
 
     QString dateStr = dateToString(date);
     QRect dateRect = dateStringToRect(date, dateStr);
 
-    int result = -1;
     if (m_lastDrawnDateRect.intersect(dateRect).isEmpty())
     {
         m_painter.drawText(dateRect, Qt::AlignLeft | Qt::TextDontClip, dateStr);
         m_lastDrawnDateRect = dateRect;
-        result = qMax(result, dateRect.bottom());
 
         if (!m_undrawnDateString.isEmpty() && m_undrawnDateRect.intersect(m_lastDrawnDateRect).isEmpty())
             m_painter.drawText(m_undrawnDateRect, Qt::AlignLeft | Qt::TextDontClip, m_undrawnDateString);
@@ -91,8 +84,6 @@ int EventTimelineDatePainter::paintDate(const QDate &date)
     }
 
     m_useLongDateFormat = false;
-
-    return result;
 }
 
 QString EventTimelineDatePainter::dateToString(const QDate &date)

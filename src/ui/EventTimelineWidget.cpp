@@ -795,7 +795,7 @@ bool EventTimelineWidget::viewportEvent(QEvent *event)
     return re;
 }
 
-int EventTimelineWidget::paintDays(QPainter &p, const QRect &rect, int yPos)
+void EventTimelineWidget::paintDays(QPainter &p)
 {
     EventTimelineDatePainter datePainter(p);
     datePainter.setStartDate(visibleTimeRange.visibleRange().start().date().addDays(-1));
@@ -810,11 +810,9 @@ int EventTimelineWidget::paintDays(QPainter &p, const QRect &rect, int yPos)
     p.setBrush(Qt::NoBrush);
     p.translate(leftPadding(), 0);
 
-    int result = datePainter.paintDates(rect, yPos);
+    datePainter.paintDates();
 
     p.restore();
-
-    return result;
 }
 
 int EventTimelineWidget::utcOffset() const
@@ -838,10 +836,9 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
     if (!model || rowsMap.isEmpty())
         return;
 
-    /* Draw timeline (x-axis) */
-    int y = 0;
+    paintDays(p);
 
-    y = paintDays(p, r, 0);
+    int y = p.fontMetrics().height();
 
     // we dont have to draw anything now
     if (viewportItemArea().width() <= 0)

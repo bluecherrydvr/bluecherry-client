@@ -34,7 +34,7 @@ public:
     void setVisibleTimeStart(const QDateTime &visibleTimeStart);
     void setPixelsPerSecondRatio(double pixelsPerSecondRatio);
 
-    int paintDates(const QRect &rect, int yPos);
+    void paintDates();
 
 private:
     static QLatin1String longDateFormat;
@@ -53,7 +53,7 @@ private:
     QRect m_undrawnDateRect;
     QString m_undrawnDateString;
 
-    int paintDate(const QDate &date);
+    void paintDate(const QDate &date);
     QString dateToString(const QDate &date);
     QRect dateStringToRect(const QDate &date, const QString &dateString);
 
