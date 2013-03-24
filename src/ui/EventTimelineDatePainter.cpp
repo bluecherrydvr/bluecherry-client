@@ -48,7 +48,7 @@ int EventTimelineDatePainter::paintDates(QPainter &painter, const QRect &rect, i
         QDateTime dt = QDateTime(date);
         dt.setTimeSpec(Qt::UTC);
 
-        if (m_visibleTimeStart.secsTo(dt.addDays(1)) > 0)
+        if (m_visibleTimeStart < dt.addDays(1))
         {
             QString dateStr = date.toString(first ? QLatin1String("ddd, MMM d yyyy") : QLatin1String("ddd, MMM d"));
 
