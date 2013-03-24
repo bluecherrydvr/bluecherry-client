@@ -48,10 +48,7 @@ int EventTimelineDatePainter::paintDates(QPainter &painter, const QRect &rect, i
 
 int EventTimelineDatePainter::paintDate(QPainter &painter, const QDate &date)
 {
-    int result = -1;
-
-    QDateTime dt = QDateTime(date);
-    dt.setTimeSpec(Qt::UTC);
+    QDateTime dt = QDateTime(date, QTime(), Qt::UTC);
 
     if (m_visibleTimeStart >= dt.addDays(1))
         return -1;
@@ -64,6 +61,7 @@ int EventTimelineDatePainter::paintDate(QPainter &painter, const QDate &date)
     dateRect.setWidth(painter.fontMetrics().width(dateStr) + 15);
     dateRect.setHeight(painter.fontMetrics().height());
 
+    int result = -1;
     if (m_lastDrawnDateRect.intersect(dateRect).isEmpty())
     {
         painter.drawText(dateRect, Qt::AlignLeft | Qt::TextDontClip, dateStr);
