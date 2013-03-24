@@ -41,6 +41,8 @@ private:
     QRect m_undrawnDateRect;
     QString m_undrawnDateString;
 
+    int paintDate(QPainter &painter, const QDate &date);
+
 };
 
 #endif // EVENTTIMELINEDATEPAINTER_H
