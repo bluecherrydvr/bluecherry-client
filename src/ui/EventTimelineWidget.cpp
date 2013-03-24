@@ -16,6 +16,7 @@
  */
 
 #include "EventTimelineWidget.h"
+#include "EventTimelineDatePainter.h"
 #include "EventsModel.h"
 #include "TimeRangeScrollBar.h"
 #include "core/EventData.h"
@@ -796,64 +797,12 @@ bool EventTimelineWidget::viewportEvent(QEvent *event)
 
 int EventTimelineWidget::paintDays(QPainter &p, const QRect &rect, int yPos)
 {
-    int resultYPos = yPos;
-
-    /* Dates across the top; first one is fully qualified (space permitting) */
-    p.save();
-    QFont font = p.font();
-    font.setBold(true);
-    p.setFont(font);
-    p.setBrush(Qt::NoBrush);
-
-    bool first = true;
-
-    QRect lastDrawnDateRect;
-    QRect undrawnDateRect;
-    QString undrawnDateString;
-
-    QDate startDate = visibleTimeRange.visibleRange().start().date();
-    QDate endDate = visibleTimeRange.visibleRange().end().date();
-
-    // because of UTC/local time differences we need to start with previous date
-    for (QDate date = startDate.addDays(-1); date <= endDate; date = date.addDays(1))
-    {
-        QDateTime dt = QDateTime(date);
-        dt.setTimeSpec(Qt::UTC);
-
-        if (secondsFromVisibleStart(dt.addDays(1)) > 0)
-        {
-            QString dateStr = date.toString(first ? tr("ddd, MMM d yyyy") : tr("ddd, MMM d"));
-
-            QRect dateRect;
-            dateRect.setTop(0);
-            dateRect.setLeft(leftPadding() + qMax(0, qRound(pixelsPerSeconds(secondsFromVisibleStart(dt)))));
-            dateRect.setWidth(p.fontMetrics().width(dateStr) + 15);
-            dateRect.setHeight(p.fontMetrics().height());
-
-            if (lastDrawnDateRect.intersect(dateRect).isEmpty())
-            {
-                p.drawText(dateRect, Qt::AlignLeft | Qt::TextDontClip, dateStr);
-                lastDrawnDateRect = dateRect;
-                resultYPos = qMax(yPos, dateRect.bottom());
-
-                if (!undrawnDateString.isEmpty() && undrawnDateRect.intersect(lastDrawnDateRect).isEmpty())
-                    p.drawText(undrawnDateRect, Qt::AlignLeft | Qt::TextDontClip, undrawnDateString);
-
-                undrawnDateRect = QRect();
-                undrawnDateString.clear();
-            }
-            else
-            {
-                undrawnDateRect = dateRect.translated(lastDrawnDateRect.right() - dateRect.left(), 0);
-                undrawnDateString = dateStr;
-            }
-
-            first = false;
-        }
-    }
-    p.restore();
-
-    return resultYPos;
+    EventTimelineDatePainter datePainter(visibleTimeRange.visibleRange().start().date(),
+                                         visibleTimeRange.visibleRange().end().date(),
+                                         leftPadding(),
+                                         visibleTimeRange.visibleRange().start().addSecs(utcOffset()),
+                                         pixelsPerSeconds(1));
+    return datePainter.paintDates(p, rect, yPos);
 }
 
 int EventTimelineWidget::utcOffset() const
