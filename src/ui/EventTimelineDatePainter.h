@@ -56,6 +56,7 @@ private:
     void paintDate(const QDate &date);
     QString dateToString(const QDate &date);
     QRect dateStringToRect(const QDate &date, const QString &dateString);
+    bool isRectUnused(const QRect &rect);
 
 };
 
