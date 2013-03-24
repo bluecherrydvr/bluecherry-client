@@ -57,12 +57,7 @@ int EventTimelineDatePainter::paintDate(QPainter &painter, const QDate &date)
         return -1;
 
     QString dateStr = dateToString(date);
-
-    QRect dateRect;
-    dateRect.setTop(0);
-    dateRect.setLeft(qMax(0, qRound(m_pixelsPerSecondRatio * m_visibleTimeStart.secsTo(dt))));
-    dateRect.setWidth(painter.fontMetrics().width(dateStr) + 15);
-    dateRect.setHeight(painter.fontMetrics().height());
+    QRect dateRect = dateStringToRect(date, dateStr, painter.fontMetrics());
 
     int result = -1;
     if (m_lastDrawnDateRect.intersect(dateRect).isEmpty())
@@ -94,4 +89,16 @@ QString EventTimelineDatePainter::dateToString(const QDate &date)
         return date.toString(longDateFormat);
     else
         return date.toString(shortDateFormat);
+}
+
+QRect EventTimelineDatePainter::dateStringToRect(const QDate &date, const QString &dateString, const QFontMetrics &fontMetrics)
+{
+    QRect result;
+
+    result.setTop(0);
+    result.setLeft(qMax(0, qRound(m_pixelsPerSecondRatio * m_visibleTimeStart.secsTo(QDateTime(date, QTime(), Qt::UTC)))));
+    result.setWidth(fontMetrics.width(dateString) + 15);
+    result.setHeight(fontMetrics.height());
+
+    return result;
 }

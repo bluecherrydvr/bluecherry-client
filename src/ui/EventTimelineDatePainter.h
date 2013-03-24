@@ -21,6 +21,7 @@
 #include <QDate>
 #include <QRect>
 
+class QFontMetrics;
 class QPainter;
 
 class EventTimelineDatePainter
@@ -46,6 +47,7 @@ private:
 
     int paintDate(QPainter &painter, const QDate &date);
     QString dateToString(const QDate &date);
+    QRect dateStringToRect(const QDate &date, const QString &dateString, const QFontMetrics &fontMetrics);
 
 };
 
