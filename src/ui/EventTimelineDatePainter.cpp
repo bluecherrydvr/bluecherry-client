@@ -42,8 +42,7 @@ int EventTimelineDatePainter::paintDates(QPainter &painter, const QRect &rect, i
     QRect undrawnDateRect;
     QString undrawnDateString;
 
-    // because of UTC/local time differences we need to start with previous date
-    for (QDate date = m_startDate.addDays(-1); date <= m_endDate; date = date.addDays(1))
+    for (QDate date = m_startDate; date <= m_endDate; date = date.addDays(1))
     {
         QDateTime dt = QDateTime(date);
         dt.setTimeSpec(Qt::UTC);
