@@ -19,9 +19,9 @@
 #define EVENTTIMELINEDATEPAINTER_H
 
 #include <QDate>
+#include <QRect>
 
 class QPainter;
-class QRect;
 
 class EventTimelineDatePainter
 {
@@ -35,6 +35,11 @@ private:
     QDate m_endDate;
     QDateTime m_visibleTimeStart;
     double m_pixelsPerSecondRatio;
+
+    bool m_first;
+    QRect m_lastDrawnDateRect;
+    QRect m_undrawnDateRect;
+    QString m_undrawnDateString;
 
 };
 
