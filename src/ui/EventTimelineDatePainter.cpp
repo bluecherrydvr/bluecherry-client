@@ -69,9 +69,8 @@ void EventTimelineDatePainter::paintDate(const QDate &date)
     if (isRectUnused(dateRect))
     {
         paintDateString(dateStr, dateRect);
-
-        if (!m_undrawnDateString.isEmpty() && m_undrawnDateRect.intersect(m_lastDrawnDateRect).isEmpty())
-            m_painter.drawText(m_undrawnDateRect, Qt::AlignLeft | Qt::TextDontClip, m_undrawnDateString);
+        if (shouldPaintPreviousDate())
+            paintDateString(m_undrawnDateString, m_undrawnDateRect);
 
         m_undrawnDateRect = QRect();
         m_undrawnDateString.clear();
@@ -114,4 +113,11 @@ void EventTimelineDatePainter::paintDateString(const QString &dateString, const 
 {
     m_painter.drawText(dateRect, Qt::AlignLeft | Qt::TextDontClip, dateString);
     m_lastDrawnDateRect = dateRect;
+}
+
+bool EventTimelineDatePainter::shouldPaintPreviousDate()
+{
+    if (m_undrawnDateString.isEmpty())
+        return false;
+    return isRectUnused(m_undrawnDateRect);
 }
