@@ -803,8 +803,14 @@ int EventTimelineWidget::paintDays(QPainter &p, const QRect &rect, int yPos)
                                          pixelsPerSeconds(1));
 
     p.save();
+    QFont font = p.font();
+    font.setBold(true);
+    p.setFont(font);
+    p.setBrush(Qt::NoBrush);
     p.translate(leftPadding(), 0);
+
     int result = datePainter.paintDates(p, rect, yPos);
+
     p.restore();
 
     return result;

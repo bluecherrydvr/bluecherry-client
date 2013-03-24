@@ -32,19 +32,10 @@ int EventTimelineDatePainter::paintDates(QPainter &painter, const QRect &rect, i
 {
     int resultYPos = yPos;
 
-    /* Dates across the top; first one is fully qualified (space permitting) */
-    painter.save();
-    QFont font = painter.font();
-    font.setBold(true);
-    painter.setFont(font);
-    painter.setBrush(Qt::NoBrush);
-
     m_useLongDateFormat = true;
 
     for (QDate date = m_startDate; date <= m_endDate; date = date.addDays(1))
         resultYPos = qMax(resultYPos, paintDate(painter, date));
-
-    painter.restore();
 
     return resultYPos;
 }
