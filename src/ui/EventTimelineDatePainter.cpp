@@ -69,17 +69,12 @@ void EventTimelineDatePainter::paintDate(const QDate &date)
     if (isRectUnused(dateRect))
     {
         paintDateString(dateStr, dateRect);
-        if (shouldPaintPreviousDate())
+        if (shouldPaintUndrawnDate())
             paintDateString(m_undrawnDateString, m_undrawnDateRect);
-
-        m_undrawnDateRect = QRect();
-        m_undrawnDateString.clear();
+        setUndrawnDateString(QString(), QRect());
     }
     else
-    {
-        m_undrawnDateRect = dateRect.translated(m_lastDrawnDateRect.right() - dateRect.left(), 0);
-        m_undrawnDateString = dateStr;
-    }
+        setUndrawnDateString(dateStr, dateRect.translated(m_lastDrawnDateRect.right() - dateRect.left(), 0));
 
     m_useLongDateFormat = false;
 }
@@ -115,9 +110,15 @@ void EventTimelineDatePainter::paintDateString(const QString &dateString, const 
     m_lastDrawnDateRect = dateRect;
 }
 
-bool EventTimelineDatePainter::shouldPaintPreviousDate()
+bool EventTimelineDatePainter::shouldPaintUndrawnDate()
 {
     if (m_undrawnDateString.isEmpty())
         return false;
     return isRectUnused(m_undrawnDateRect);
+}
+
+void EventTimelineDatePainter::setUndrawnDateString(const QString &dateString, const QRect &dateRect)
+{
+    m_undrawnDateString = dateString;
+    m_undrawnDateRect = dateRect;
 }

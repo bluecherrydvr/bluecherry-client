@@ -58,7 +58,8 @@ private:
     QRect dateStringToRect(const QDate &date, const QString &dateString);
     bool isRectUnused(const QRect &rect);
     void paintDateString(const QString &dateString, const QRect &dateRect);
-    bool shouldPaintPreviousDate();
+    bool shouldPaintUndrawnDate();
+    void setUndrawnDateString(const QString &dateString, const QRect &dateRect);
 
 };
 
