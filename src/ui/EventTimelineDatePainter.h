@@ -54,11 +54,11 @@ private:
     QString m_undrawnDateString;
 
     void paintDate(const QDate &date);
-    QString dateToString(const QDate &date);
-    QRect dateStringToRect(const QDate &date, const QString &dateString);
-    bool isRectUnused(const QRect &rect);
+    QString dateToString(const QDate &date) const;
+    QRect dateStringToRect(const QDate &date, const QString &dateString) const;
+    bool isRectUnused(const QRect &rect) const;
     void paintDateString(const QString &dateString, const QRect &dateRect);
-    bool shouldPaintUndrawnDate();
+    bool shouldPaintUndrawnDate() const;
     void setUndrawnDateString(const QString &dateString, const QRect &dateRect);
 
 };
