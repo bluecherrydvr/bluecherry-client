@@ -23,10 +23,30 @@
 QLatin1String EventTimelineDatePainter::longDateFormat("ddd, MMM d yyyy");
 QLatin1String EventTimelineDatePainter::shortDateFormat("ddd, MMM d");
 
-EventTimelineDatePainter::EventTimelineDatePainter(const QDate &startDate, const QDate &endDate, const QDateTime &visibleTimeStart, double pixelsPerSecondRatio)
-    : m_startDate(startDate), m_endDate(endDate), m_visibleTimeStart(visibleTimeStart), m_pixelsPerSecondRatio(pixelsPerSecondRatio)
+EventTimelineDatePainter::EventTimelineDatePainter()
 {
 }
+
+void EventTimelineDatePainter::setStartDate(const QDate &startDate)
+{
+    m_startDate = startDate;
+}
+
+void EventTimelineDatePainter::setEndDate(const QDate &endDate)
+{
+    m_endDate = endDate;
+}
+
+void EventTimelineDatePainter::setVisibleTimeStart(const QDateTime &visibleTimeStart)
+{
+    m_visibleTimeStart = visibleTimeStart;
+}
+
+void EventTimelineDatePainter::setPixelsPerSecondRatio(double pixelsPerSecondRatio)
+{
+    m_pixelsPerSecondRatio = pixelsPerSecondRatio;
+}
+
 
 int EventTimelineDatePainter::paintDates(QPainter &painter, const QRect &rect, int yPos)
 {

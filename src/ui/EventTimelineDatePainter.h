@@ -27,7 +27,12 @@ class QPainter;
 class EventTimelineDatePainter
 {
 public:
-    explicit EventTimelineDatePainter(const QDate &startDate, const QDate &endDate, const QDateTime &visibleTimeStart, double pixelsPerSecondRatio);
+    explicit EventTimelineDatePainter();
+
+    void setStartDate(const QDate &startDate);
+    void setEndDate(const QDate &endDate);
+    void setVisibleTimeStart(const QDateTime &visibleTimeStart);
+    void setPixelsPerSecondRatio(double pixelsPerSecondRatio);
 
     int paintDates(QPainter &painter, const QRect &rect, int yPos);
 
