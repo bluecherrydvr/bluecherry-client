@@ -20,6 +20,9 @@
 #include <QDateTime>
 #include <QPainter>
 
+QLatin1String EventTimelineDatePainter::longDateFormat("ddd, MMM d yyyy");
+QLatin1String EventTimelineDatePainter::shortDateFormat("ddd, MMM d");
+
 EventTimelineDatePainter::EventTimelineDatePainter(const QDate &startDate, const QDate &endDate, const QDateTime &visibleTimeStart, double pixelsPerSecondRatio)
     : m_startDate(startDate), m_endDate(endDate), m_visibleTimeStart(visibleTimeStart), m_pixelsPerSecondRatio(pixelsPerSecondRatio)
 {
@@ -36,7 +39,7 @@ int EventTimelineDatePainter::paintDates(QPainter &painter, const QRect &rect, i
     painter.setFont(font);
     painter.setBrush(Qt::NoBrush);
 
-    m_first = true;
+    m_useLongDateFormat = true;
 
     for (QDate date = m_startDate; date <= m_endDate; date = date.addDays(1))
         resultYPos = qMax(resultYPos, paintDate(painter, date));
@@ -53,7 +56,7 @@ int EventTimelineDatePainter::paintDate(QPainter &painter, const QDate &date)
     if (m_visibleTimeStart >= dt.addDays(1))
         return -1;
 
-    QString dateStr = date.toString(m_first ? QLatin1String("ddd, MMM d yyyy") : QLatin1String("ddd, MMM d"));
+    QString dateStr = dateToString(date);
 
     QRect dateRect;
     dateRect.setTop(0);
@@ -80,7 +83,15 @@ int EventTimelineDatePainter::paintDate(QPainter &painter, const QDate &date)
         m_undrawnDateString = dateStr;
     }
 
-    m_first = false;
+    m_useLongDateFormat = false;
 
     return result;
+}
+
+QString EventTimelineDatePainter::dateToString(const QDate &date)
+{
+    if (m_useLongDateFormat)
+        return date.toString(longDateFormat);
+    else
+        return date.toString(shortDateFormat);
 }

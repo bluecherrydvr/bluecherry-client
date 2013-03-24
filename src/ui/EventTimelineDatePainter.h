@@ -31,17 +31,21 @@ public:
     int paintDates(QPainter &painter, const QRect &rect, int yPos);
 
 private:
+    static QLatin1String longDateFormat;
+    static QLatin1String shortDateFormat;
+
     QDate m_startDate;
     QDate m_endDate;
     QDateTime m_visibleTimeStart;
     double m_pixelsPerSecondRatio;
 
-    bool m_first;
+    bool m_useLongDateFormat;
     QRect m_lastDrawnDateRect;
     QRect m_undrawnDateRect;
     QString m_undrawnDateString;
 
     int paintDate(QPainter &painter, const QDate &date);
+    QString dateToString(const QDate &date);
 
 };
 
