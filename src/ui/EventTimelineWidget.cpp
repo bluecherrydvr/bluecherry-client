@@ -840,9 +840,8 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
     p.save();
     p.translate(QPoint(0, y));
     paintLegend(p, r.width());
+    paintChart(p, r.width());
     p.restore();
-
-    paintChart(p, y, r.width());
     p.restore();
 
     p.drawLine(leftPadding(), topPadding(), leftPadding(), r.height());
@@ -924,12 +923,12 @@ void EventTimelineWidget::paintLegend(QPainter& p, int width)
     }
 }
 
-void EventTimelineWidget::paintChart(QPainter& p, int yPos, int width)
+void EventTimelineWidget::paintChart(QPainter& p, int width)
 {
     QList<RowData *>::ConstIterator it = findLayoutRow(verticalScrollBar()->value());
     for (; it != layoutRows.end(); ++it)
     {
-        int ry = yPos + ((*it)->y - verticalScrollBar()->value());
+        int ry = (*it)->y - verticalScrollBar()->value();
 
         if ((*it)->type != RowData::Server)
         {
