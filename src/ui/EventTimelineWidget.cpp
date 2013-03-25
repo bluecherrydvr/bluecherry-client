@@ -822,25 +822,20 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
 
     paintDays(p);
 
-    int y = p.fontMetrics().height();
-
     // we dont have to draw anything now
     if (viewportItemArea().width() <= 0)
         return;
 
     p.save();
-    p.translate(QPoint(0, y));
+    p.translate(QPoint(0, p.fontMetrics().height()));
     paintTickLines(p, r);
     p.restore();
 
-    y = topPadding();
+    int y = topPadding();
     p.drawLine(leftPadding(), y, r.width(), y);
 
-    /* Loop servers */
-    y = topPadding();
-
     p.save();
-    p.setClipRect(0, y+1, r.width(), r.height());
+    p.setClipRect(0, y + 1, r.width(), r.height());
     paintLegend(p, y, r.width());
     paintChart(p, y, r.width());
     p.restore();
