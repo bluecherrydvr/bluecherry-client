@@ -86,6 +86,7 @@ private slots:
 private:
     QHash<DVRServer*,ServerData*> serversMap;
     QHash<EventData*,int> rowsMap;
+    int m_rowHeight;
 
     VisibleTimeRange visibleTimeRange;
 
@@ -141,7 +142,7 @@ private:
 
     int leftPadding() const;
     int topPadding() const { return cachedTopPadding; }
-    int rowHeight() const { return 20; }
+    int rowHeight() const { return m_rowHeight; }
     int cellMinimum() const { return 8; }
 
     void clearLeftPaddingCache();

@@ -778,6 +778,8 @@ bool EventTimelineWidget::viewportEvent(QEvent *event)
         /* Top padding for the X-axis label text */
         QFont f = font();
         QFontMetrics fm(font());
+
+        m_rowHeight = fm.height() + 6;
         int height = fm.height();
 
         f.setBold(true);
