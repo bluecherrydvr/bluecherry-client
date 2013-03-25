@@ -835,13 +835,10 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
     p.drawLine(leftPadding(), y, r.width(), y);
 
     p.save();
-    p.setClipRect(0, y + 1, r.width(), r.height());
-
-    p.save();
     p.translate(QPoint(0, y));
+    p.setClipRect(0, 0, r.width(), r.height());
     paintLegend(p, r.width());
     paintChart(p, r.width());
-    p.restore();
     p.restore();
 
     p.drawLine(leftPadding(), topPadding(), leftPadding(), r.height());
