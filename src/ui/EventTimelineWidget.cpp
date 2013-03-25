@@ -230,10 +230,8 @@ void EventTimelineWidget::scrollTo(const QModelIndex &index, ScrollHint hint)
         break;
     }
 
-    if (event->utcStartDate() < visibleTimeRange.visibleRange().start())
+    if (!isEventVisible(event))
         horizontalScrollBar()->setValue(visibleTimeRange.range().start().secsTo(event->utcStartDate()));
-    else if (event->utcEndDate() > visibleTimeRange.visibleRange().end())
-        horizontalScrollBar()->setValue(visibleTimeRange.range().start().secsTo(event->utcEndDate()) - visibleTimeRange.visibleSeconds());
 }
 
 bool rowDataLessThan(const RowData *a, const RowData *b)
