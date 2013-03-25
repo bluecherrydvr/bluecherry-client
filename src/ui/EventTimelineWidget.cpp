@@ -232,7 +232,7 @@ void EventTimelineWidget::scrollTo(const QModelIndex &index, ScrollHint hint)
 
     if (event->utcStartDate() < visibleTimeRange.visibleRange().start())
         horizontalScrollBar()->setValue(visibleTimeRange.range().start().secsTo(event->utcStartDate()));
-    else if (event->utcStartDate().addSecs(event->durationInSeconds()) > visibleTimeRange.visibleRange().end())
+    else if (event->utcEndDate() > visibleTimeRange.visibleRange().end())
         horizontalScrollBar()->setValue(visibleTimeRange.range().start().secsTo(event->utcEndDate()) - visibleTimeRange.visibleSeconds());
 }
 
