@@ -828,7 +828,10 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
     if (viewportItemArea().width() <= 0)
         return;
 
-    paintTickLines(p, r, y);
+    p.save();
+    p.translate(QPoint(0, y));
+    paintTickLines(p, r);
+    p.restore();
 
     y = topPadding();
     p.drawLine(leftPadding(), y, r.width(), y);
@@ -860,7 +863,7 @@ int EventTimelineWidget::secondsFromVisibleStart(const QDateTime& serverTime) co
     return visibleTimeRange.visibleRange().start().addSecs(utcOffset()).secsTo(serverTime);
 }
 
-void EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect, int yPos)
+void EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect)
 {
     Q_ASSERT(visibleTimeRange.primaryTickSecs());
 
@@ -874,12 +877,13 @@ void EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect, int yPo
     double tickPosition = leftPadding() + tickDateTimeOffset;
     double tickWidth = pixelsPerSeconds(visibleTimeRange.primaryTickSecs());
 
+    int lineTop = p.fontMetrics().height() + 1;
     while (true)
     {
-        tickLines.append(QLine(qRound(tickPosition), 1, qRound(tickPosition), rect.bottom()));
+        tickLines.append(QLine(qRound(tickPosition), lineTop, qRound(tickPosition), rect.bottom()));
 
         QString text = tickDateTime.toString(tr("h:mm"));
-        QRectF textRect(tickPosition - tickWidth / 2.0, yPos, tickWidth, rect.height());
+        QRectF textRect(tickPosition - tickWidth / 2.0, 0, tickWidth, rect.height());
         p.drawText(textRect, Qt::AlignTop | Qt::AlignHCenter, text);
 
         if (textRect.right() >= rect.right())
@@ -888,10 +892,6 @@ void EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect, int yPo
         tickPosition += tickWidth;
         tickDateTime = tickDateTime.addSecs(visibleTimeRange.primaryTickSecs());
     }
-
-    int y = topPadding();
-    for (QVector<QLine>::Iterator it = tickLines.begin(); it != tickLines.end(); ++it)
-        it->translate(0, y);
 
     p.save();
     p.setPen(QColor(205, 205, 205));
