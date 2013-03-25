@@ -170,7 +170,7 @@ QRect EventTimelineWidget::visualRect(const QModelIndex &index) const
         QRect re = timeCellRect(event->utcStartDate(), event->durationInSeconds());
         re.translate(itemArea.topLeft());
         re.moveTop(itemArea.top() + ((*it)->y - verticalScrollBar()->value()));
-        re.setHeight(layoutHeightForRow(it));
+        re.setHeight(rowHeight());
 
         return re;
     }
@@ -589,12 +589,6 @@ void EventTimelineWidget::doRowsLayout()
     int h = viewportItemArea().height();
     verticalScrollBar()->setRange(0, qMax(0, layoutRowsBottom-h));
     verticalScrollBar()->setPageStep(h);
-}
-
-int EventTimelineWidget::layoutHeightForRow(QList<RowData* >::const_iterator it) const
-{
-    QList<RowData*>::ConstIterator next = it+1;
-    return ((next == layoutRows.constEnd()) ? layoutRowsBottom : (*next)->y - (*it)->y);
 }
 
 void EventTimelineWidget::addModelRows(int first, int last)

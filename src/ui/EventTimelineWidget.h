@@ -127,7 +127,6 @@ private:
 
     void doRowsLayout();
     QList<RowData *>::const_iterator findLayoutRow(int y) const;
-    int layoutHeightForRow(QList<RowData *>::const_iterator it) const;
 
     /* Mouse events */
     QPoint mouseClickPos;
