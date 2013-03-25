@@ -160,22 +160,12 @@ QRect EventTimelineWidget::visualRect(const QModelIndex &index) const
     const_cast<EventTimelineWidget*>(this)->ensureLayout();
     QRect itemArea = viewportItemArea();
 
-    QList<RowData *>::const_iterator it = layoutRows.constBegin();
-    QList<RowData *>::const_iterator end = layoutRows.constEnd();
-    for (; it != end; ++it)
-    {
-        if ((*it) != locationData)
-            continue;
+    QRect re = timeCellRect(event->utcStartDate(), event->durationInSeconds());
+    re.translate(itemArea.topLeft());
+    re.moveTop(itemArea.top() + locationData->y - verticalScrollBar()->value());
+    re.setHeight(rowHeight());
 
-        QRect re = timeCellRect(event->utcStartDate(), event->durationInSeconds());
-        re.translate(itemArea.topLeft());
-        re.moveTop(itemArea.top() + ((*it)->y - verticalScrollBar()->value()));
-        re.setHeight(rowHeight());
-
-        return re;
-    }
-
-    return QRect();
+    return re;
 }
 
 void EventTimelineWidget::setZoomLevel(int level)
