@@ -787,16 +787,12 @@ void EventTimelineWidget::paintDays(QPainter &p)
     datePainter.setVisibleTimeStart(visibleTimeRange.visibleRange().start().addSecs(utcOffset()));
     datePainter.setPixelsPerSecondRatio(pixelsPerSeconds(1));
 
-    p.save();
     QFont font = p.font();
     font.setBold(true);
     p.setFont(font);
     p.setBrush(Qt::NoBrush);
-    p.translate(leftPadding(), 0);
 
     datePainter.paintDates();
-
-    p.restore();
 }
 
 int EventTimelineWidget::utcOffset() const
@@ -814,34 +810,38 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
     QPainter p(viewport());
     p.eraseRect(event->rect());
 
-    QRect r = viewport()->rect();
-
     QAbstractItemModel *model = this->model();
     if (!model || rowsMap.isEmpty())
         return;
-
-    paintDays(p);
 
     // we dont have to draw anything now
     if (viewportItemArea().width() <= 0)
         return;
 
+    QRect r = viewport()->rect();
+
     p.save();
-    p.translate(QPoint(0, p.fontMetrics().height()));
+    p.translate(leftPadding(), 0);
+    paintDays(p);
+    p.restore();
+
+    p.save();
+    p.translate(QPoint(leftPadding(), p.fontMetrics().height()));
     paintTickLines(p, r);
     p.restore();
 
-    int y = topPadding();
-    p.drawLine(leftPadding(), y, r.width(), y);
-
     p.save();
-    p.translate(QPoint(0, y));
-    p.setClipRect(0, 0, r.width(), r.height());
+    p.translate(QPoint(0, topPadding()));
     paintLegend(p, r.width());
-    paintChart(p, r.width());
     p.restore();
 
-    p.drawLine(leftPadding(), topPadding(), leftPadding(), r.height());
+    p.save();
+    p.translate(QPoint(leftPadding(), topPadding()));
+    p.drawLine(0, 0, r.width(), 0);
+    p.drawLine(0, 0, 0, r.height());
+    p.setClipRect(0, 1, r.width(), r.height());
+    paintChart(p, r.width());
+    p.restore();
 }
 
 QDateTime EventTimelineWidget::firstTickDateTime() const
@@ -870,7 +870,7 @@ void EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect)
     QDateTime tickDateTime = firstTickDateTime();
     int tickDateTimeOffset = qRound(pixelsPerSeconds(secondsFromVisibleStart(tickDateTime)));
 
-    double tickPosition = leftPadding() + tickDateTimeOffset;
+    double tickPosition = tickDateTimeOffset;
     double tickWidth = pixelsPerSeconds(visibleTimeRange.primaryTickSecs());
 
     int lineTop = p.fontMetrics().height() + 1;
@@ -929,7 +929,7 @@ void EventTimelineWidget::paintChart(QPainter& p, int width)
 
         if ((*it)->type != RowData::Server)
         {
-            QRect rowRect(leftPadding(), ry, width, rowHeight());
+            QRect rowRect(0, ry, width, rowHeight());
             paintRow(&p, rowRect, (*it)->toLocation());
         }
     }
@@ -950,7 +950,7 @@ void EventTimelineWidget::paintRow(QPainter *p, QRect r, LocationData *locationD
     p->save();
     p->setRenderHint(QPainter::Antialiasing, true);
     p->setPen(Qt::NoPen);
-    p->setClipRect(r);
+    p->setClipRect(r, Qt::IntersectClip);
     p->translate(r.topLeft());
 
     // TODO: what about finding first and last visible event by binary search?
@@ -961,7 +961,7 @@ void EventTimelineWidget::paintRow(QPainter *p, QRect r, LocationData *locationD
     p->restore();
 }
 
-void EventTimelineWidget::paintEvent(QPainter& p, int boxHeight, EventData *event)
+void EventTimelineWidget::paintEvent(QPainter &p, int boxHeight, EventData *event)
 {
     Q_ASSERT(event);
     Q_ASSERT(rowsMap.contains(event));
