@@ -135,7 +135,7 @@ private:
     QDateTime firstTickDateTime() const;
     
     void paintDays(QPainter &p);
-    int paintTickLines(QPainter &p, const QRect &rect, int yPos);
+    void paintTickLines(QPainter &p, const QRect &rect, int yPos);
     void paintLegend(QPainter &p, int yPos, int width);
     void paintChart(QPainter &p, int yPos, int width);
 

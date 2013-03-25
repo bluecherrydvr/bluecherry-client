@@ -828,8 +828,9 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
     if (viewportItemArea().width() <= 0)
         return;
 
-    y = paintTickLines(p, r, y);
+    paintTickLines(p, r, y);
 
+    y = topPadding();
     p.drawLine(leftPadding(), y, r.width(), y);
 
     /* Loop servers */
@@ -859,10 +860,9 @@ int EventTimelineWidget::secondsFromVisibleStart(const QDateTime& serverTime) co
     return visibleTimeRange.visibleRange().start().addSecs(utcOffset()).secsTo(serverTime);
 }
 
-int EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect, int yPos)
+void EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect, int yPos)
 {
     Q_ASSERT(visibleTimeRange.primaryTickSecs());
-
 
     int tickLineCount = qCeil(double(visibleTimeRange.visibleSeconds()) / visibleTimeRange.primaryTickSecs());
     QVector<QLine> tickLines;
@@ -897,8 +897,6 @@ int EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect, int yPos
     p.setPen(QColor(205, 205, 205));
     p.drawLines(tickLines);
     p.restore();
-
-    return y;
 }
 
 void EventTimelineWidget::paintLegend(QPainter& p, int yPos, int width)
