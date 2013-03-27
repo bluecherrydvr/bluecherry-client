@@ -169,7 +169,7 @@ void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const 
     m_portEdit->setText(QString::number(server->serverPort()));
     m_usernameEdit->setText(server->username());
     m_passwordEdit->setText(server->password());
-    m_autoConnect->setChecked(server->readSetting("autoConnect", true).toBool());
+    m_autoConnect->setChecked(server->autoConnect());
 
     connect(server->api, SIGNAL(loginSuccessful()), SLOT(setLoginSuccessful()));
     connect(server->api, SIGNAL(loginError(QString)), SLOT(setLoginError(QString)));

@@ -45,6 +45,7 @@ public:
     int rtspPort() const;
     QString username() const;
     QString password() const;
+    bool autoConnect() const;
 
     QList<DVRCamera> cameras() const { return m_cameras; }
     DVRCamera findCamera(int id) { return DVRCamera::getCamera(this, id); }

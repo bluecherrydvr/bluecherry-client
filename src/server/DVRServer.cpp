@@ -332,3 +332,8 @@ QString DVRServer::password() const
 {
     return readSetting("password").toString();
 }
+
+bool DVRServer::autoConnect() const
+{
+    return readSetting("autoConnect", true).toBool();
+}
