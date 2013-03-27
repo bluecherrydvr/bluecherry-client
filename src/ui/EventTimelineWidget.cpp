@@ -16,6 +16,7 @@
  */
 
 #include "EventTimelineWidget.h"
+#include "EventTimelineDatePainter.h"
 #include "EventsModel.h"
 #include "TimeRangeScrollBar.h"
 #include "core/EventData.h"
@@ -35,8 +36,9 @@ struct RowData
         Server,
         Location
     } const type : 8;
+    int y;
 
-    RowData(Type t) : type(t) { }
+    RowData(Type t) : type(t), y(0) { }
 
     LocationData *toLocation();
     ServerData *toServer();
@@ -114,7 +116,7 @@ void EventTimelineWidget::clearData()
     rowsMap.clear();
     visibleTimeRange.clear();
 
-    clearLeftPadding();
+    clearLeftPaddingCache();
 
     layoutRows.clear();
     layoutRowsBottom = 0;
@@ -158,20 +160,12 @@ QRect EventTimelineWidget::visualRect(const QModelIndex &index) const
     const_cast<EventTimelineWidget*>(this)->ensureLayout();
     QRect itemArea = viewportItemArea();
 
-    for (QMap<int,RowData*>::ConstIterator it = layoutRows.begin(); it != layoutRows.end(); ++it)
-    {
-        if (*it != locationData)
-            continue;
+    QRect re = timeCellRect(event->utcStartDate(), event->durationInSeconds());
+    re.translate(itemArea.topLeft());
+    re.moveTop(itemArea.top() + locationData->y - verticalScrollBar()->value());
+    re.setHeight(rowHeight());
 
-        QRect re = timeCellRect(event->utcStartDate(), event->durationInSeconds());
-        re.translate(itemArea.topLeft());
-        re.moveTop(itemArea.top() + (it.key() - verticalScrollBar()->value()));
-        re.setHeight(layoutHeightForRow(it));
-
-        return re;
-    }
-
-    return QRect();
+    return re;
 }
 
 void EventTimelineWidget::setZoomLevel(int level)
@@ -226,10 +220,28 @@ void EventTimelineWidget::scrollTo(const QModelIndex &index, ScrollHint hint)
         break;
     }
 
-    if (event->utcStartDate() < visibleTimeRange.visibleRange().start())
+    if (!isEventVisible(event))
         horizontalScrollBar()->setValue(visibleTimeRange.range().start().secsTo(event->utcStartDate()));
-    else if (event->utcStartDate().addSecs(event->durationInSeconds()) > visibleTimeRange.visibleRange().end())
-        horizontalScrollBar()->setValue(visibleTimeRange.range().start().secsTo(event->utcEndDate()) - visibleTimeRange.visibleSeconds());
+}
+
+bool rowDataLessThan(const RowData *a, const RowData *b)
+{
+    return a->y < b->y;
+}
+
+QList<RowData *>::const_iterator EventTimelineWidget::findLayoutRow(int y) const
+{
+    RowData compareTo(RowData::Server);
+    compareTo.y = y;
+
+    QList<RowData *>::ConstIterator it = qLowerBound(layoutRows.constBegin(), layoutRows.constEnd(), &compareTo, rowDataLessThan);
+    if (it == layoutRows.end() || (*it)->y > y)
+    {
+        Q_ASSERT(it != layoutRows.begin());
+        --it;
+    }
+    
+    return it;
 }
 
 EventData *EventTimelineWidget::eventAt(const QPoint &point) const
@@ -242,12 +254,7 @@ EventData *EventTimelineWidget::eventAt(const QPoint &point) const
     if (!itemArea.contains(point) || ry >= layoutRowsBottom || layoutRows.isEmpty())
         return 0;
 
-    QMap<int,RowData*>::ConstIterator it = layoutRows.lowerBound(ry);
-    if (it == layoutRows.end() || it.key() > ry)
-    {
-        Q_ASSERT(it != layoutRows.begin());
-        --it;
-    }
+    QList<RowData *>::ConstIterator it = findLayoutRow(ry);
 
     if ((*it)->type != RowData::Location)
         return 0;
@@ -314,14 +321,9 @@ void EventTimelineWidget::setSelection(const QRect &irect, QItemSelectionModel::
         return;
 
     /* The y coordinate of rect is now in scroll-invariant inner y, the same as layoutRows */
-    QMap<int,RowData*>::ConstIterator it = layoutRows.lowerBound(rect.y());
-    if (it == layoutRows.end() || it.key() > rect.y())
-    {
-        Q_ASSERT(it != layoutRows.begin());
-        --it;
-    }
+    QList<RowData *>::ConstIterator it = findLayoutRow(rect.y());
 
-    for (; it != layoutRows.end() && it.key() <= rect.bottom(); ++it)
+    for (; it != layoutRows.end() && (*it)->y <= rect.bottom(); ++it)
     {
         if ((*it)->type != RowData::Location)
             continue;
@@ -382,7 +384,7 @@ bool EventTimelineWidget::findEvent(EventData *event, bool create, ServerData **
         it = serversMap.insert(serverData->server, serverData);
 
         scheduleDelayedItemsLayout(DoRowsLayout);
-        clearLeftPadding();
+        clearLeftPaddingCache();
     }
 
     ServerData *serverData = *it;
@@ -402,7 +404,7 @@ bool EventTimelineWidget::findEvent(EventData *event, bool create, ServerData **
         lit = serverData->locationsMap.insert(locationData->locationId, locationData);
 
         scheduleDelayedItemsLayout(DoRowsLayout);
-        clearLeftPadding();
+        clearLeftPaddingCache();
     }
 
     LocationData *locationData = *lit;
@@ -557,6 +559,7 @@ void EventTimelineWidget::doRowsLayout()
 
     foreach (ServerData *sd, sortedServers)
     {
+        sd->y = y;
         layoutRows.insert(y, sd);
         y += rowHeight();
 
@@ -565,6 +568,7 @@ void EventTimelineWidget::doRowsLayout()
 
         foreach (LocationData *ld, sortedLocations)
         {
+            ld->y = y;
             layoutRows.insert(y, ld);
             y += rowHeight();
         }
@@ -575,12 +579,6 @@ void EventTimelineWidget::doRowsLayout()
     int h = viewportItemArea().height();
     verticalScrollBar()->setRange(0, qMax(0, layoutRowsBottom-h));
     verticalScrollBar()->setPageStep(h);
-}
-
-int EventTimelineWidget::layoutHeightForRow(const QMap<int,RowData*>::ConstIterator &it) const
-{
-    QMap<int,RowData*>::ConstIterator next = it+1;
-    return ((next == layoutRows.end()) ? layoutRowsBottom : next.key()) - it.key();
 }
 
 void EventTimelineWidget::addModelRows(int first, int last)
@@ -729,13 +727,23 @@ int EventTimelineWidget::timeXOffset(const QDateTime &time) const
     return qMax(0, qRound((visibleTimeRange.visibleRange().start().secsTo(time) / range) * width));
 }
 
-QRect EventTimelineWidget::timeCellRect(const QDateTime &time, int duration) const
+double EventTimelineWidget::pixelsPerSeconds(int seconds) const
 {
-    Q_ASSERT(visibleTimeRange.range().contains(time));
+    int range = qMax(visibleTimeRange.visibleSeconds(), 1);
+    int width = viewportItemArea().width();
+    double pixelsPerSecond = (double) width / range;
+    return pixelsPerSecond * seconds;
+}
+
+QRect EventTimelineWidget::timeCellRect(const QDateTime &start, int duration, int top, int height) const
+{
+    Q_ASSERT(visibleTimeRange.range().contains(start));
 
     QRect r;
-    r.setLeft(timeXOffset(time));
-    r.setRight(timeXOffset(time.addSecs(duration)));
+    r.setTop(top);
+    r.setHeight(height);
+    r.setLeft(timeXOffset(start));
+    r.setRight(timeXOffset(start.addSecs(duration)));
     return r;
 }
 
@@ -754,6 +762,8 @@ bool EventTimelineWidget::viewportEvent(QEvent *event)
         /* Top padding for the X-axis label text */
         QFont f = font();
         QFontMetrics fm(font());
+
+        m_rowHeight = fm.height() + 6;
         int height = fm.height();
 
         f.setBold(true);
@@ -762,56 +772,27 @@ bool EventTimelineWidget::viewportEvent(QEvent *event)
 
         cachedTopPadding = height;
 
-        clearLeftPadding();
+        clearLeftPaddingCache();
         scheduleDelayedItemsLayout(DoUpdateTimeRange);
     }
 
     return re;
 }
 
-int EventTimelineWidget::paintDays(QPainter &p, const QRect &rect, int yPos)
+void EventTimelineWidget::paintDays(QPainter &p)
 {
-    int resultYPos = yPos;
+    EventTimelineDatePainter datePainter(p);
+    datePainter.setStartDate(visibleTimeRange.visibleRange().start().date().addDays(-1));
+    datePainter.setEndDate(visibleTimeRange.visibleRange().end().date());
+    datePainter.setVisibleTimeStart(visibleTimeRange.visibleRange().start().addSecs(utcOffset()));
+    datePainter.setPixelsPerSecondRatio(pixelsPerSeconds(1));
 
-    /* Dates across the top; first one is fully qualified (space permitting) */
-    p.save();
     QFont font = p.font();
     font.setBold(true);
     p.setFont(font);
+    p.setBrush(Qt::NoBrush);
 
-    bool first = true;
-
-    QDate startDate = visibleTimeRange.visibleRange().start().date();
-    QDate endDate = visibleTimeRange.visibleRange().end().date();
-    for (QDate date = startDate; date <= endDate; date = date.addDays(1))
-    {
-        QDateTime dt = qMax(QDateTime(date), visibleTimeRange.visibleRange().start());
-        QRect dateRect = timeCellRect(dt, dt.secsTo(QDateTime(date.addDays(1))));
-        dateRect.setHeight(rect.height());
-        dateRect.translate(leftPadding(), 0);
-        QString dateStr = date.toString(first ? tr("ddd, MMM d yyyy") : tr("ddd, MMM d"));
-
-        /* This is very slow and could be improved dramatically with the use of QTextLayout */
-        QFontMetrics fm(p.font());
-        int w = fm.width(dateStr)+10;
-        if (w > dateRect.width() && date < endDate)
-        {
-            date = date.addDays(1);
-            dt = QDateTime(date);
-            QRect nr = timeCellRect(dt, dt.secsTo(qMin(QDateTime(dt.addDays(1)), visibleTimeRange.visibleRange().end())));
-            nr.setHeight(rect.height());
-            nr.translate(leftPadding(), 0);
-            dateRect |= nr;
-        }
-
-        p.drawText(dateRect, 0, dateStr, &dateRect);
-        resultYPos = qMax(yPos, dateRect.bottom());
-
-        first = false;
-    }
-    p.restore();
-
-    return resultYPos;
+    datePainter.paintDates();
 }
 
 int EventTimelineWidget::utcOffset() const
@@ -829,81 +810,101 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
     QPainter p(viewport());
     p.eraseRect(event->rect());
 
-    QRect r = viewport()->rect();
-
     QAbstractItemModel *model = this->model();
     if (!model || rowsMap.isEmpty())
         return;
 
-    /* Draw timeline (x-axis) */
-    int y = 0;
+    // we dont have to draw anything now
+    if (viewportItemArea().width() <= 0)
+        return;
 
-    y = paintDays(p, r, 0);
+    QRect r = viewport()->rect();
 
+    p.save();
+    p.translate(leftPadding(), 0);
+    paintDays(p);
+    p.restore();
+
+    p.save();
+    p.translate(QPoint(leftPadding(), p.fontMetrics().height()));
+    paintTickLines(p, r);
+    p.restore();
+
+    p.save();
+    p.translate(QPoint(0, topPadding()));
+    paintLegend(p, r.width());
+    p.restore();
+
+    p.save();
+    p.translate(QPoint(leftPadding(), topPadding()));
+    p.drawLine(0, 0, r.width(), 0);
+    p.drawLine(0, 0, 0, r.height());
+    p.setClipRect(0, 1, r.width(), r.height());
+    paintChart(p, r.width());
+    p.restore();
+}
+
+QDateTime EventTimelineWidget::firstTickDateTime() const
+{
+    QDateTime firstTickDateTime = visibleTimeRange.visibleRange().start().addSecs(utcOffset());
+    int preAreaSecs = visibleTimeRange.visibleRange().start().toTime_t() % visibleTimeRange.primaryTickSecs();
+    if (preAreaSecs)
+        return firstTickDateTime.addSecs(visibleTimeRange.primaryTickSecs() - preAreaSecs);
+    else
+        return firstTickDateTime;
+}
+
+int EventTimelineWidget::secondsFromVisibleStart(const QDateTime& serverTime) const
+{
+    return visibleTimeRange.visibleRange().start().addSecs(utcOffset()).secsTo(serverTime);
+}
+
+void EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect)
+{
     Q_ASSERT(visibleTimeRange.primaryTickSecs());
 
-    /* Draw primary ticks and text */
-    QVector<QLine> lines;
-    lines.reserve(qCeil(double(visibleTimeRange.visibleSeconds())/visibleTimeRange.primaryTickSecs()));
+    int tickLineCount = qCeil(double(visibleTimeRange.visibleSeconds()) / visibleTimeRange.primaryTickSecs());
+    QVector<QLine> tickLines;
+    tickLines.reserve(tickLineCount);
 
-    /* Rectangle for each tick area */
-    int areaWidth = viewportItemArea().width();
-    QRectF tickRect(leftPadding(), y, (double(visibleTimeRange.primaryTickSecs()) / qMax(visibleTimeRange.visibleSeconds(), 1)) * areaWidth, r.height());
+    QDateTime tickDateTime = firstTickDateTime();
+    int tickDateTimeOffset = qRound(pixelsPerSeconds(secondsFromVisibleStart(tickDateTime)));
 
-    /* Round to the first tick */
-    int preAreaSecs = int(visibleTimeRange.visibleRange().start().toTime_t() % visibleTimeRange.primaryTickSecs());
-    if (preAreaSecs)
-        preAreaSecs = visibleTimeRange.primaryTickSecs() - preAreaSecs;
+    double tickPosition = tickDateTimeOffset;
+    double tickWidth = pixelsPerSeconds(visibleTimeRange.primaryTickSecs());
 
-    QDateTime dt = visibleTimeRange.visibleRange().start().toUTC().addSecs(preAreaSecs).addSecs(utcOffset());
-    tickRect.translate((double(preAreaSecs)/qMax(visibleTimeRange.visibleSeconds(), 1))*areaWidth, 0);
-
-    for (;;)
+    int lineTop = p.fontMetrics().height() + 1;
+    while (true)
     {
-        lines.append(QLine(qRound(tickRect.x()), 1, qRound(tickRect.x()), r.bottom()));
+        tickLines.append(QLine(qRound(tickPosition), lineTop, qRound(tickPosition), rect.bottom()));
 
-        QString text = dt.toString(tr("h:mm"));
-        QRectF textRect = tickRect.translated(qRound(tickRect.width()/-2.0), 0);
-
+        QString text = tickDateTime.toString(tr("h:mm"));
+        QRectF textRect(tickPosition - tickWidth / 2.0, 0, tickWidth, rect.height());
         p.drawText(textRect, Qt::AlignTop | Qt::AlignHCenter, text);
 
-        if (textRect.right() >= r.right())
+        if (textRect.right() >= rect.right())
             break;
 
-        tickRect.translate(tickRect.width(), 0);
-        dt = dt.addSecs(visibleTimeRange.primaryTickSecs());
+        tickPosition += tickWidth;
+        tickDateTime = tickDateTime.addSecs(visibleTimeRange.primaryTickSecs());
     }
-
-    y = topPadding();
-    for (QVector<QLine>::Iterator it = lines.begin(); it != lines.end(); ++it)
-        it->translate(0, y);
 
     p.save();
     p.setPen(QColor(205, 205, 205));
-    p.drawLines(lines);
+    p.drawLines(tickLines);
     p.restore();
+}
 
-    p.drawLine(leftPadding(), y, r.width(), y);
-
-    /* Loop servers */
-    y = topPadding();
-    QRect textRect(2, 0, leftPadding(), rowHeight());
+void EventTimelineWidget::paintLegend(QPainter& p, int width)
+{
+    QRect textRect(16, 0, leftPadding(), rowHeight());
     QFont serverFont = p.font();
     serverFont.setBold(true);
 
-    QMap<int,RowData*>::ConstIterator it = layoutRows.lowerBound(verticalScrollBar()->value());
-    if (it == layoutRows.end() || it.key() > verticalScrollBar()->value())
-    {
-        Q_ASSERT(it != layoutRows.begin());
-        --it;
-    }
-
-    p.save();
-    p.setClipRect(0, y+1, r.width(), r.height());
-
+    QList<RowData *>::ConstIterator it = findLayoutRow(verticalScrollBar()->value());
     for (; it != layoutRows.end(); ++it)
     {
-        int ry = y + (it.key() - verticalScrollBar()->value());
+        int ry = (*it)->y - verticalScrollBar()->value();
         textRect.moveTop(ry);
 
         if ((*it)->type == RowData::Server)
@@ -914,18 +915,34 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
             p.restore();
         }
         else
-        {
-            p.drawText(textRect.adjusted(6, 0, 0, 0), Qt::AlignLeft | Qt::AlignVCenter,
+            p.drawText(textRect.adjusted(16, 0, 0, 0), Qt::AlignLeft | Qt::AlignVCenter,
                        (*it)->toLocation()->uiLocation());
+    }
+}
 
-            QRect rowRect(leftPadding(), ry, r.width(), rowHeight());
+void EventTimelineWidget::paintChart(QPainter& p, int width)
+{
+    QList<RowData *>::ConstIterator it = findLayoutRow(verticalScrollBar()->value());
+    for (; it != layoutRows.end(); ++it)
+    {
+        int ry = (*it)->y - verticalScrollBar()->value();
+
+        if ((*it)->type != RowData::Server)
+        {
+            QRect rowRect(0, ry, width, rowHeight());
             paintRow(&p, rowRect, (*it)->toLocation());
         }
     }
+}
 
-    p.restore();
+bool EventTimelineWidget::isEventVisible(EventData *data) const
+{
+    if (data->utcEndDate() < visibleTimeRange.visibleRange().start())
+        return false;
+    if (data->utcStartDate() > visibleTimeRange.visibleRange().end())
+        return false;
 
-    p.drawLine(leftPadding(), topPadding(), leftPadding(), r.height());
+    return true;
 }
 
 void EventTimelineWidget::paintRow(QPainter *p, QRect r, LocationData *locationData)
@@ -933,36 +950,38 @@ void EventTimelineWidget::paintRow(QPainter *p, QRect r, LocationData *locationD
     p->save();
     p->setRenderHint(QPainter::Antialiasing, true);
     p->setPen(Qt::NoPen);
+    p->setClipRect(r, Qt::IntersectClip);
+    p->translate(r.topLeft());
 
-    for (QList<EventData*>::Iterator it = locationData->events.begin(); it != locationData->events.end(); ++it)
-    {
-        EventData *data = *it;
-        if (data->utcStartDate().addSecs(data->durationInSeconds()) < visibleTimeRange.visibleRange().start())
-            continue;
-
-        Q_ASSERT(rowsMap.contains(data));
-        int modelRow = rowsMap[data];
-
-        QRect cellRect = timeCellRect(data->utcStartDate(), data->durationInSeconds());
-        cellRect.setX(qMax(cellRect.x(), 0));
-        cellRect.translate(r.x(), r.y());
-        cellRect.setHeight(r.height());
-
-        p->setBrush(data->uiColor());
-        p->drawRoundedRect(cellRect.adjusted(0, 1, 0, -1), 2, 2);
-
-        if (selectionModel()->rowIntersectsSelection(modelRow, QModelIndex()))
-        {
-            p->setPen(Qt::red);
-            p->drawRect(cellRect.adjusted(0, 0, -1, -1));
-            p->setPen(Qt::NoPen);
-        }
-    }
+    // TODO: what about finding first and last visible event by binary search?
+    foreach (EventData *event, locationData->events)
+        if (isEventVisible(event))
+            paintEvent(*p, r.height(), event);
 
     p->restore();
 }
 
-void EventTimelineWidget::clearLeftPadding()
+void EventTimelineWidget::paintEvent(QPainter &p, int boxHeight, EventData *event)
+{
+    Q_ASSERT(event);
+    Q_ASSERT(rowsMap.contains(event));
+
+    int modelRow = rowsMap[event];
+
+    QRect cellRect = timeCellRect(event->utcStartDate(), event->durationInSeconds(), 0, boxHeight);
+
+    p.setBrush(event->uiColor());
+    p.drawRoundedRect(cellRect.adjusted(0, 1, 0, -1), 2, 2);
+
+    if (selectionModel()->rowIntersectsSelection(modelRow, QModelIndex()))
+    {
+        p.setPen(Qt::red);
+        p.drawRect(cellRect.adjusted(0, 0, -1, -1));
+        p.setPen(Qt::NoPen);
+    }
+}
+
+void EventTimelineWidget::clearLeftPaddingCache()
 {
     cachedLeftPadding = -1;
 }
@@ -981,16 +1000,16 @@ int EventTimelineWidget::leftPadding() const
 
     for (QHash<DVRServer*,ServerData*>::ConstIterator it = serversMap.begin(); it != serversMap.end(); ++it)
     {
-        cachedLeftPadding = qMax(cachedLeftPadding, serverfm.width((*it)->server->displayName())+2);
+        cachedLeftPadding = qMax(cachedLeftPadding, serverfm.width((*it)->server->displayName()) + 16);
 
         for (QHash<int,LocationData*>::ConstIterator lit = (*it)->locationsMap.begin();
              lit != (*it)->locationsMap.end(); ++lit)
         {
-            cachedLeftPadding = qMax(cachedLeftPadding, locfm.width((*lit)->uiLocation())+8);
+            cachedLeftPadding = qMax(cachedLeftPadding, locfm.width((*lit)->uiLocation()) + 16);
         }
     }
 
-    cachedLeftPadding += 4;
+    cachedLeftPadding += 16;
     return cachedLeftPadding;
 }
 
