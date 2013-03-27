@@ -18,6 +18,7 @@
 #ifndef EVENTTIMELINEWIDGET_H
 #define EVENTTIMELINEWIDGET_H
 
+#include "VisibleTimeRange.h"
 #include <QAbstractItemView>
 #include <QDateTime>
 
@@ -27,25 +28,20 @@ class QRubberBand;
 struct RowData;
 struct ServerData;
 struct LocationData;
-struct EventData;
+class EventData;
 
 class EventTimelineWidget : public QAbstractItemView
 {
     Q_OBJECT
-    Q_PROPERTY(double zoomLevel READ zoomLevel WRITE setZoomLevel)
-    Q_PROPERTY(int zoomSeconds READ zoomSeconds WRITE setZoomSeconds NOTIFY zoomSecondsChanged)
 
 public:
     explicit EventTimelineWidget(QWidget *parent = 0);
     ~EventTimelineWidget();
 
     /* Zoom in the number of seconds of time visible on screen */
-    int zoomSeconds() const;
-    int minZoomSeconds() const { return qMin(timeSeconds, 60); }
-    int maxZoomSeconds() const { return timeSeconds; }
-
-    /* Zoom level in the range of 0-100, 0 showing everything with no scroll */
-    double zoomLevel() const;
+    int zoomSeconds() const { return visibleTimeRange.visibleSeconds(); }
+    int minZoomSeconds() const { return visibleTimeRange.minVisibleSeconds(); }
+    int maxZoomSeconds() const { return visibleTimeRange.maxVisibleSeconds(); }
 
     virtual QSize sizeHint() const;
     virtual QRect visualRect(const QModelIndex &index) const;
@@ -59,12 +55,7 @@ public:
     virtual void doItemsLayout();
 
 public slots:
-    void setZoomLevel(double level);
-    void setZoomSeconds(int seconds);
-
-signals:
-    void zoomSecondsChanged(int zoomSeconds);
-    void zoomRangeChanged(int min, int max);
+    void setZoomLevel(int value);
 
 protected:
     virtual void paintEvent(QPaintEvent *event);
@@ -96,19 +87,7 @@ private:
     QHash<DVRServer*,ServerData*> serversMap;
     QHash<EventData*,int> rowsMap;
 
-    /* Total span of time represented by the timeline, rounded from dataTime */
-    QDateTime timeStart, timeEnd;
-    /* Span of time represented in data; end is inclusive of the duration */
-    QDateTime dataTimeStart, dataTimeEnd;
-    /* Span of time shown in the viewport */
-    QDateTime viewTimeStart, viewTimeEnd;
-    /* Span of seconds between timeStart and timeEnd */
-    int timeSeconds;
-    /* Span of seconds between viewTimeStart and viewTimeEnd */
-    int viewSeconds;
-    /* Seconds of time per primary tick (a x-axis label), derived from the view area
-     * and a minimum width and rounded up to a user-friendly duration in updateTimeRange */
-    int primaryTickSecs;
+    VisibleTimeRange visibleTimeRange;
 
     int cachedTopPadding;
     mutable int cachedLeftPadding;
@@ -124,6 +103,10 @@ private:
     };
     Q_DECLARE_FLAGS(LayoutFlags, LayoutFlag)
     LayoutFlags pendingLayouts;
+    
+    QDateTime earliestDate();
+    QDateTime latestDate();
+
     void scheduleDelayedItemsLayout(LayoutFlags flags);
     void ensureLayout();
 
@@ -145,6 +128,8 @@ private:
     /* Mouse events */
     QPoint mouseClickPos;
     QRubberBand *mouseRubberBand;
+    
+    int paintDays(QPainter &p, const QRect &rect, int yPos);
 
     int leftPadding() const;
     int topPadding() const { return cachedTopPadding; }
@@ -158,12 +143,12 @@ private:
 
     void addModelRows(int first, int last = -1);
     void clearData();
-    /* Ensure that the view time is within the boundaries of the data, changing it (scrolling or zooming) if necessary */
-    void ensureViewTimeSpan();
     /* Update the scroll bar position, which is necessary when viewSeconds has changed */
     void updateScrollBars();
 
     EventData *eventAt(const QPoint &point) const;
+    
+    int utcOffset() const;
 
     /* Area of the viewport containing items */
     QRect viewportItemArea() const;

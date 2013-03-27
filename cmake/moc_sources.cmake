@@ -29,11 +29,10 @@ set (bluecherry_client_MOC_SRCS
     src/core/TransferRateCalculator.h
 
     src/event/EventDownloadManager.h
+    src/event/EventsCursor.h
+    src/event/EventsLoader.h
     src/event/EventVideoDownload.h
-
-    src/events/EventsCursor.h
-    src/events/EventsLoader.h
-    src/events/ModelEventsCursor.h
+    src/event/ModelEventsCursor.h
 
     src/network/MediaDownloadManager.h
     src/network/RemotePortChecker.h
@@ -77,6 +76,8 @@ set (bluecherry_client_MOC_SRCS
     src/ui/StatusBandwidthWidget.h
     src/ui/StatusBarServerAlert.h
     src/ui/SwitchEventsWidget.h
+    src/ui/TimeRangeScrollBar.h
+    src/ui/VisibleTimeRange.h
     src/ui/WebRtpPortCheckerWidget.h
 
     src/utils/ThreadTaskCourier.h

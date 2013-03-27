@@ -15,18 +15,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVENTFILTER_H
-#define EVENTFILTER_H
+#ifndef TIMERANGESCROLLBAR_H
+#define TIMERANGESCROLLBAR_H
 
-class EventData;
+#include <QScrollBar>
 
-class EventFilter
+class TimeRangeScrollBar : public QScrollBar
 {
-public:
-    EventFilter();
-    virtual ~EventFilter();
+    Q_OBJECT
 
-    virtual bool accept(const EventData &event) const = 0;
+public:
+    explicit TimeRangeScrollBar(QWidget *parent = 0);
+    virtual ~TimeRangeScrollBar();
+
+public slots:
+    void setInvisibleSeconds(int invisibleSeconds);
+    void setPrimaryTickSecs(int primaryTickSecs);
+
 };
 
-#endif // EVENTFILTER_H
+#endif // TIMERANGESCROLLBAR_H

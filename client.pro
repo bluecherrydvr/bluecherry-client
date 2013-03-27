@@ -139,9 +139,9 @@ SOURCES += src/main.cpp \
     src/network/RemotePortChecker.cpp \
     src/ui/RemotePortCheckerWidget.cpp \
     src/ui/WebRtpPortCheckerWidget.cpp \
-    src/events/EventsLoader.cpp \
-    src/events/EventsCursor.cpp \
-    src/events/ModelEventsCursor.cpp \
+    src/event/EventsLoader.cpp \
+    src/event/EventsCursor.cpp \
+    src/event/ModelEventsCursor.cpp \
     src/ui/SwitchEventsWidget.cpp \
     src/network/MediaDownloadManager.cpp \
     src/event/EventDownloadManager.cpp \
@@ -219,9 +219,9 @@ HEADERS  += src/ui/MainWindow.h \
     src/network/RemotePortChecker.h \
     src/ui/RemotePortCheckerWidget.h \
     src/ui/WebRtpPortCheckerWidget.h \
-    src/events/EventsLoader.h \
-    src/events/EventsCursor.h \
-    src/events/ModelEventsCursor.h \
+    src/event/EventsLoader.h \
+    src/event/EventsCursor.h \
+    src/event/ModelEventsCursor.h \
     src/ui/SwitchEventsWidget.h \
     src/network/MediaDownloadManager.h \
     src/event/EventDownloadManager.h \

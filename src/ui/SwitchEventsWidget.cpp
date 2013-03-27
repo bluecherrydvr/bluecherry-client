@@ -1,5 +1,5 @@
 #include "SwitchEventsWidget.h"
-#include "events/EventsCursor.h"
+#include "event/EventsCursor.h"
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QPushButton>

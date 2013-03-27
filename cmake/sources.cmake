@@ -35,12 +35,11 @@ set (bluecherry_client_main_SRCS
     src/event/EventDownloadManager.cpp
     src/event/EventFilter.cpp
     src/event/EventList.cpp
+    src/event/EventsCursor.cpp
+    src/event/EventsLoader.cpp
     src/event/EventVideoDownload.cpp
     src/event/MediaEventFilter.cpp
-
-    src/events/EventsCursor.cpp
-    src/events/EventsLoader.cpp
-    src/events/ModelEventsCursor.cpp
+    src/event/ModelEventsCursor.cpp
 
     src/network/MediaDownloadManager.cpp
     src/network/RemotePortChecker.cpp
@@ -86,8 +85,11 @@ set (bluecherry_client_main_SRCS
     src/ui/StatusBandwidthWidget.cpp
     src/ui/StatusBarServerAlert.cpp
     src/ui/SwitchEventsWidget.cpp
+    src/ui/TimeRangeScrollBar.cpp
+    src/ui/VisibleTimeRange.cpp
     src/ui/WebRtpPortCheckerWidget.cpp
 
+    src/utils/DateTimeRange.cpp
     src/utils/FileUtils.cpp
     src/utils/ImageDecodeTask.cpp
     src/utils/Range.cpp
