@@ -52,7 +52,6 @@ public:
     QString statusAlertMessage() const { return m_statusAlertMessage; }
 
     /* Settings */
-    QVariant readSetting(const QString &key, const QVariant &def = QVariant()) const;
     QVariant readSetting(const char *key, const QVariant &def = QVariant()) const { return readSetting(QLatin1String(key), def); }
 
     void writeSetting(const char *key, const QVariant &value) { writeSetting(QLatin1String(key), value); }
@@ -96,6 +95,9 @@ private:
     QString m_statusAlertMessage;
     QTimer m_refreshTimer;
     bool devicesLoaded;
+
+    QVariant readSetting(const QString &key, const QVariant &def = QVariant()) const;
+
 };
 
 Q_DECLARE_METATYPE(DVRServer*)
