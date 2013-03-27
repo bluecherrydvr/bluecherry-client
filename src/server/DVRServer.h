@@ -38,7 +38,7 @@ public:
 
     explicit DVRServer(int configId, QObject *parent = 0);
 
-    const QString &displayName() const { return m_displayName; }
+    QString displayName() const;
     void setDisplayName(const QString &displayName);
 
     QString hostname() const;
@@ -91,14 +91,22 @@ private slots:
     void disconnected();
 
 private:
-    QList<DVRCamera> m_cameras;
     QString m_displayName;
+    QString m_hostname;
+    int m_port;
+    QString m_username;
+    QString m_password;
+    bool m_autoConnect;
+
+    QList<DVRCamera> m_cameras;
     QString m_statusAlertMessage;
     QTimer m_refreshTimer;
     bool devicesLoaded;
 
     QVariant readSetting(const QString &key, const QVariant &def = QVariant()) const;
     void writeSetting(const QString &key, const QVariant &value);
+
+    void readFromSettings();
 
 };
 

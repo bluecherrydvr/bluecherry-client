@@ -28,7 +28,8 @@
 DVRServer::DVRServer(int id, QObject *parent)
     : QObject(parent), configId(id), devicesLoaded(false)
 {
-    m_displayName = readSetting(QLatin1String("displayName")).toString();
+    readFromSettings();
+
     api = new ServerRequestManager(this);
 
     connect(api, SIGNAL(loginSuccessful()), SLOT(updateCameras()));
@@ -66,26 +67,31 @@ void DVRServer::setDisplayName(const QString &name)
 void DVRServer::setHostname(const QString &hostname)
 {
     writeSetting(QLatin1String("hostname"), hostname);
+    m_hostname = hostname;
 }
 
 void DVRServer::setPort(int port)
 {
     writeSetting(QLatin1String("port"), port == 0 ? 7001 : port);
+    m_port = port;
 }
 
 void DVRServer::setUsername(const QString &username)
 {
     writeSetting(QLatin1String("username"), username);
+    m_username = username;
 }
 
 void DVRServer::setPassword(const QString &password)
 {
     writeSetting(QLatin1String("password"), password);
+    m_password = password;
 }
 
 void DVRServer::setAutoConnect(bool autoConnect)
 {
     writeSetting(QLatin1String("autoConnect"), autoConnect);
+    m_autoConnect = autoConnect;
 }
 
 void DVRServer::removeServer()
@@ -323,16 +329,19 @@ void DVRServer::setKnownCertificate(const QSslCertificate &certificate)
     writeSetting(QLatin1String("sslDigest"), certificate.digest(QCryptographicHash::Sha1));
 }
 
+QString DVRServer::displayName() const
+{
+    return m_displayName;
+}
+
 QString DVRServer::hostname() const
 {
-    return readSetting(QLatin1String("hostname")).toString();
+    return m_hostname;
 }
 
 int DVRServer::serverPort() const
 {
-    bool ok = false;
-    int r = readSetting(QLatin1String("port")).toInt(&ok);
-    return ok ? r : 7001;
+    return m_port;
 }
 
 int DVRServer::rtspPort() const
@@ -342,15 +351,27 @@ int DVRServer::rtspPort() const
 
 QString DVRServer::username() const
 {
-    return readSetting(QLatin1String("username")).toString();
+    return m_username;
 }
 
 QString DVRServer::password() const
 {
-    return readSetting(QLatin1String("password")).toString();
+    return m_password;
 }
 
 bool DVRServer::autoConnect() const
 {
-    return readSetting(QLatin1String("autoConnect"), true).toBool();
+    return m_autoConnect;
+}
+
+void DVRServer::readFromSettings()
+{
+    m_displayName = readSetting(QLatin1String("displayName")).toString();
+    m_hostname = readSetting(QLatin1String("hostname")).toString();
+    m_port = readSetting(QLatin1String("port")).toInt();
+    if (!m_port)
+        m_port = 7001;
+    m_username = readSetting(QLatin1String("username")).toString();
+    m_password = readSetting(QLatin1String("password")).toString();
+    m_autoConnect = readSetting(QLatin1String("autoConnect"), true).toBool();
 }
