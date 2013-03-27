@@ -192,7 +192,7 @@ void SetupServerPage::save()
     server->setHostname(field(QLatin1String("serverHostname")).toString());
     server->setPort(field(QLatin1String("serverPort")).toInt());
     server->setUsername(field(QLatin1String("serverUsername")).toString());
-    server->writeSetting("password", field(QLatin1String("serverPassword")).toString());
+    server->setPassword(field(QLatin1String("serverPassword")).toString());
     server->writeSetting("autoConnect", field(QLatin1String("serverAutoConnect")).toBool());
 
     server->login();

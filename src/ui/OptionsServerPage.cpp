@@ -270,7 +270,7 @@ void OptionsServerPage::saveChanges(DVRServer *server)
     }
     if (m_passwordEdit->isModified())
     {
-        server->writeSetting("password", m_passwordEdit->text());
+        server->setPassword(m_passwordEdit->text());
         m_passwordEdit->setModified(false);
         connectionModified = true;
     }

@@ -86,6 +86,11 @@ void DVRServer::setUsername(const QString &username)
     writeSetting("username", username);
 }
 
+void DVRServer::setPassword(const QString &password)
+{
+    writeSetting("password", password);
+}
+
 void DVRServer::removeServer()
 {
     qDebug("Deleting DVR server %d", configId);

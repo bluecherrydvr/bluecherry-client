@@ -52,6 +52,8 @@ public:
     void setUsername(const QString &username);
 
     QString password() const;
+    void setPassword(const QString &password);
+
     bool autoConnect() const;
 
     QList<DVRCamera> cameras() const { return m_cameras; }

@@ -234,7 +234,7 @@ void BluecherryApp::loadServers()
         s->setHostname(QHostAddress(QHostAddress::LocalHost).toString());
         /* This must match the default username and password for the server */
         s->setUsername(QLatin1String("Admin"));
-        s->writeSetting("password", QLatin1String("bluecherry"));
+        s->setPassword(QLatin1String("bluecherry"));
         s->writeSetting("autoConnect", true);
         QTimer::singleShot(0, s, SLOT(login()));
     }
