@@ -193,6 +193,9 @@ void OptionsServerPage::checkServer()
 void OptionsServerPage::addNewServer()
 {
     DVRServer *server = bcApp->addNewServer(tr("New Server"));
+    server->setAutoConnect(true);
+    server->setPort(7001);
+
     if (!m_serversView->currentIndex().isValid())
         saveChanges(server);
     setCurrentServer(server);

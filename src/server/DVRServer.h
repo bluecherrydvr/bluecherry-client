@@ -107,10 +107,7 @@ private:
     QTimer m_refreshTimer;
     bool devicesLoaded;
 
-    QVariant readSetting(const QString &key, const QVariant &def = QVariant()) const;
     void writeSetting(const QString &key, const QVariant &value);
-
-    void readFromSettings();
 
 };
 

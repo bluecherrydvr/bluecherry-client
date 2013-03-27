@@ -28,20 +28,12 @@
 DVRServer::DVRServer(int id, QObject *parent)
     : QObject(parent), configId(id), devicesLoaded(false)
 {
-    readFromSettings();
-
     api = new ServerRequestManager(this);
 
     connect(api, SIGNAL(loginSuccessful()), SLOT(updateCameras()));
     connect(api, SIGNAL(disconnected()), SLOT(disconnected()));
 
     connect(&m_refreshTimer, SIGNAL(timeout()), SLOT(updateCameras()));
-}
-
-QVariant DVRServer::readSetting(const QString &key, const QVariant &def) const
-{
-    QSettings settings;
-    return settings.value(QString::fromLatin1("servers/%1/").arg(configId).append(key), def);
 }
 
 void DVRServer::writeSetting(const QString &key, const QVariant &value)
@@ -369,17 +361,4 @@ bool DVRServer::autoConnect() const
 QByteArray DVRServer::sslDigest() const
 {
     return m_sslDigest;
-}
-
-void DVRServer::readFromSettings()
-{
-    m_displayName = readSetting(QLatin1String("displayName")).toString();
-    m_hostname = readSetting(QLatin1String("hostname")).toString();
-    m_port = readSetting(QLatin1String("port")).toInt();
-    if (!m_port)
-        m_port = 7001;
-    m_username = readSetting(QLatin1String("username")).toString();
-    m_password = readSetting(QLatin1String("password")).toString();
-    m_autoConnect = readSetting(QLatin1String("autoConnect"), true).toBool();
-    m_sslDigest = readSetting(QLatin1String("sslDigest")).toByteArray();
 }

@@ -22,6 +22,7 @@
 #include "network/MediaDownloadManager.h"
 #include "server/DVRServer.h"
 #include "server/DVRServerRepository.h"
+#include "server/DVRServerSettingsReader.h"
 #include <QSettings>
 #include <QStringList>
 #include <QNetworkAccessManager>
@@ -207,6 +208,7 @@ void BluecherryApp::loadServers()
     settings.beginGroup(QLatin1String("servers"));
     QStringList groups = settings.childGroups();
 
+    DVRServerSettingsReader settingsReader;
     foreach (QString group, groups)
     {
         bool ok = false;
@@ -217,7 +219,14 @@ void BluecherryApp::loadServers()
             continue;
         }
 
-        DVRServer *server = new DVRServer(id, this);
+        DVRServer *server = settingsReader.readServer(id);
+        if (!server)
+        {
+            qWarning("Ignoring invalid server from configuration");
+            continue;
+        }
+
+        server->setParent(this);
         connect(server, SIGNAL(serverRemoved(DVRServer*)), SLOT(onServerRemoved(DVRServer*)));
         connect(server, SIGNAL(statusAlertMessageChanged(QString)), SIGNAL(serverAlertsChanged()));
 
@@ -258,10 +267,9 @@ DVRServer *BluecherryApp::addNewServer(const QString &name)
 {
     int id = ++m_serverRepository->m_maxServerId;
 
-    QSettings settings;
-    settings.setValue(QString::fromLatin1("servers/%1/displayName").arg(id), name);
-
     DVRServer *server = new DVRServer(id, this);
+    server->setDisplayName(name);
+
     m_serverRepository->m_servers.append(server);
     connect(server, SIGNAL(serverRemoved(DVRServer*)), SLOT(onServerRemoved(DVRServer*)));
     connect(server, SIGNAL(statusAlertMessageChanged(QString)), SLOT(serverAlertsChanged()));
