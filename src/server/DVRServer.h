@@ -42,6 +42,8 @@ public:
     void setDisplayName(const QString &displayName);
 
     QString hostname() const;
+    void setHostname(const QString &hostname);
+
     int serverPort() const;
     int rtspPort() const;
     QString username() const;

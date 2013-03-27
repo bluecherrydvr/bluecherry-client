@@ -231,7 +231,7 @@ void BluecherryApp::loadServers()
     if (groups.isEmpty() && QFile::exists(QLatin1String("/etc/bluecherry.conf")))
     {
         DVRServer *s = addNewServer(tr("Local"));
-        s->writeSetting("hostname", QHostAddress(QHostAddress::LocalHost).toString());
+        s->setHostname(QHostAddress(QHostAddress::LocalHost).toString());
         /* This must match the default username and password for the server */
         s->writeSetting("username", QLatin1String("Admin"));
         s->writeSetting("password", QLatin1String("bluecherry"));

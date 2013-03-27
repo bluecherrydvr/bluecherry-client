@@ -252,7 +252,7 @@ void OptionsServerPage::saveChanges(DVRServer *server)
     if (m_hostnameEdit->isModified())
     {
         m_hostnameEdit->setText(m_hostnameEdit->text().trimmed());
-        server->writeSetting("hostname", m_hostnameEdit->text());
+        server->setHostname(m_hostnameEdit->text());
         m_hostnameEdit->setModified(false);
         connectionModified = true;
     }

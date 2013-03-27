@@ -71,6 +71,11 @@ void DVRServer::setDisplayName(const QString &name)
     writeSetting("displayName", name);
 }
 
+void DVRServer::setHostname(const QString &hostname)
+{
+    writeSetting("hostname", hostname);
+}
+
 void DVRServer::removeServer()
 {
     qDebug("Deleting DVR server %d", configId);

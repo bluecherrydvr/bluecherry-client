@@ -189,7 +189,7 @@ void SetupServerPage::save()
     }
 
     DVRServer *server = bcApp->addNewServer(field(QLatin1String("serverName")).toString());
-    server->writeSetting("hostname", field(QLatin1String("serverHostname")).toString());
+    server->setHostname(field(QLatin1String("serverHostname")).toString());
     server->writeSetting("port", field(QLatin1String("serverPort")).toString());
     server->writeSetting("username", field(QLatin1String("serverUsername")).toString());
     server->writeSetting("password", field(QLatin1String("serverPassword")).toString());
