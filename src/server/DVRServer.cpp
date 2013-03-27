@@ -28,13 +28,13 @@
 DVRServer::DVRServer(int id, QObject *parent)
     : QObject(parent), configId(id), devicesLoaded(false)
 {
-    m_displayName = readSetting("displayName").toString();
+    m_displayName = readSetting(QLatin1String("displayName")).toString();
     api = new ServerRequestManager(this);
 
     connect(api, SIGNAL(loginSuccessful()), SLOT(updateCameras()));
     connect(api, SIGNAL(disconnected()), SLOT(disconnected()));
 
-    if (readSetting("autoConnect", true).toBool() && !hostname().isEmpty() && !username().isEmpty())
+    if (readSetting(QLatin1String("autoConnect"), true).toBool() && !hostname().isEmpty() && !username().isEmpty())
         QTimer::singleShot(0, this, SLOT(login()));
 
     connect(&m_refreshTimer, SIGNAL(timeout()), SLOT(updateCameras()));
@@ -68,32 +68,32 @@ void DVRServer::setDisplayName(const QString &name)
         return;
 
     m_displayName = name;
-    writeSetting("displayName", name);
+    writeSetting(QLatin1String("displayName"), name);
 }
 
 void DVRServer::setHostname(const QString &hostname)
 {
-    writeSetting("hostname", hostname);
+    writeSetting(QLatin1String("hostname"), hostname);
 }
 
 void DVRServer::setPort(int port)
 {
-    writeSetting("port", port == 0 ? 7001 : port);
+    writeSetting(QLatin1String("port"), port == 0 ? 7001 : port);
 }
 
 void DVRServer::setUsername(const QString &username)
 {
-    writeSetting("username", username);
+    writeSetting(QLatin1String("username"), username);
 }
 
 void DVRServer::setPassword(const QString &password)
 {
-    writeSetting("password", password);
+    writeSetting(QLatin1String("password"), password);
 }
 
 void DVRServer::setAutoConnect(bool autoConnect)
 {
-    writeSetting("autoConnect", autoConnect);
+    writeSetting(QLatin1String("autoConnect"), autoConnect);
 }
 
 void DVRServer::removeServer()
@@ -313,7 +313,7 @@ void DVRServer::disconnected()
 
 bool DVRServer::isKnownCertificate(const QSslCertificate &certificate) const
 {
-    QByteArray knownDigest = readSetting("sslDigest").toByteArray();
+    QByteArray knownDigest = readSetting(QLatin1String("sslDigest")).toByteArray();
     if (knownDigest.isEmpty())
     {
         /* If we don't know a certificate yet, we treat the first one we see as
@@ -328,18 +328,18 @@ bool DVRServer::isKnownCertificate(const QSslCertificate &certificate) const
 
 void DVRServer::setKnownCertificate(const QSslCertificate &certificate)
 {
-    writeSetting("sslDigest", certificate.digest(QCryptographicHash::Sha1));
+    writeSetting(QLatin1String("sslDigest"), certificate.digest(QCryptographicHash::Sha1));
 }
 
 QString DVRServer::hostname() const
 {
-    return readSetting("hostname").toString();
+    return readSetting(QLatin1String("hostname")).toString();
 }
 
 int DVRServer::serverPort() const
 {
     bool ok = false;
-    int r = readSetting("port").toInt(&ok);
+    int r = readSetting(QLatin1String("port")).toInt(&ok);
     return ok ? r : 7001;
 }
 
@@ -350,15 +350,15 @@ int DVRServer::rtspPort() const
 
 QString DVRServer::username() const
 {
-    return readSetting("username").toString();
+    return readSetting(QLatin1String("username")).toString();
 }
 
 QString DVRServer::password() const
 {
-    return readSetting("password").toString();
+    return readSetting(QLatin1String("password")).toString();
 }
 
 bool DVRServer::autoConnect() const
 {
-    return readSetting("autoConnect", true).toBool();
+    return readSetting(QLatin1String("autoConnect"), true).toBool();
 }
