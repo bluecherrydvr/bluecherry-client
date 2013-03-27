@@ -63,9 +63,6 @@ public:
     QString statusAlertMessage() const { return m_statusAlertMessage; }
 
     /* Settings */
-    void writeSetting(const char *key, const QVariant &value) { writeSetting(QLatin1String(key), value); }
-    void writeSetting(const QString &key, const QVariant &value);
-
     void clearSetting(const char *key) { clearSetting(QLatin1String(key)); }
     void clearSetting(const QString &key);
 
@@ -106,6 +103,9 @@ private:
 
     QVariant readSetting(const char *key, const QVariant &def = QVariant()) const { return readSetting(QLatin1String(key), def); }
     QVariant readSetting(const QString &key, const QVariant &def = QVariant()) const;
+
+    void writeSetting(const char *key, const QVariant &value) { writeSetting(QLatin1String(key), value); }
+    void writeSetting(const QString &key, const QVariant &value);
 
 };
 
