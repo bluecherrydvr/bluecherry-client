@@ -39,6 +39,7 @@ public:
     explicit DVRServer(int configId, QObject *parent = 0);
 
     const QString &displayName() const { return m_displayName; }
+    void setDisplayName(const QString &displayName);
 
     QString hostname() const;
     int serverPort() const;
@@ -64,7 +65,6 @@ public:
     void setKnownCertificate(const QSslCertificate &certificate);
 
 public slots:
-    void setDisplayName(const QString &displayName);
     /* Permanently remove from config and delete */
     void removeServer();
 
