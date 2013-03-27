@@ -305,3 +305,30 @@ void DVRServer::setKnownCertificate(const QSslCertificate &certificate)
 {
     writeSetting("sslDigest", certificate.digest(QCryptographicHash::Sha1));
 }
+
+QString DVRServer::hostname() const
+{
+    return readSetting("hostname").toString();
+}
+
+int DVRServer::serverPort() const
+{
+    bool ok = false;
+    int r = readSetting("port").toInt(&ok);
+    return ok ? r : 7001;
+}
+
+int DVRServer::rtspPort() const
+{
+    return serverPort() + 1;
+}
+
+QString DVRServer::username() const
+{
+    return readSetting("username").toString();
+}
+
+QString DVRServer::password() const
+{
+    return readSetting("password").toString();
+}

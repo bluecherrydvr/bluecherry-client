@@ -100,31 +100,4 @@ private:
 
 Q_DECLARE_METATYPE(DVRServer*)
 
-inline QString DVRServer::hostname() const
-{
-    return readSetting("hostname").toString();
-}
-
-inline int DVRServer::serverPort() const
-{
-    bool ok = false;
-    int r = readSetting("port").toInt(&ok);
-    return ok ? r : 7001;
-}
-
-inline int DVRServer::rtspPort() const
-{
-    return serverPort() + 1;
-}
-
-inline QString DVRServer::username() const
-{
-    return readSetting("username").toString();
-}
-
-inline QString DVRServer::password() const
-{
-    return readSetting("password").toString();
-}
-
 #endif // DVRSERVER_H
