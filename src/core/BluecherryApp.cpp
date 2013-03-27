@@ -16,11 +16,12 @@
  */
 
 #include "BluecherryApp.h"
-#include "server/DVRServer.h"
 #include "LiveViewManager.h"
 #include "ui/MainWindow.h"
 #include "event/EventDownloadManager.h"
 #include "network/MediaDownloadManager.h"
+#include "server/DVRServer.h"
+#include "server/DVRServerRepository.h"
 #include <QSettings>
 #include <QStringList>
 #include <QNetworkAccessManager>
@@ -41,12 +42,14 @@ BluecherryApp *bcApp = 0;
 BluecherryApp::BluecherryApp()
     : nam(new QNetworkAccessManager(this)), liveView(new LiveViewManager(this)),
       globalRate(new TransferRateCalculator(this)),
-      m_maxServerId(-1), m_livePaused(false), m_inPauseQuery(false),
+      m_livePaused(false), m_inPauseQuery(false),
       m_screensaverInhibited(false),
       m_doingUpdateCheck(false)
 {
     Q_ASSERT(!bcApp);
     bcApp = this;
+
+    m_serverRepository = new DVRServerRepository(this);
 
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(aboutToQuit()));
 
@@ -198,7 +201,7 @@ QNetworkAccessManager *BluecherryApp::createNam()
 
 void BluecherryApp::loadServers()
 {
-    Q_ASSERT(m_servers.isEmpty());
+    Q_ASSERT(m_serverRepository->m_servers.isEmpty());
 
     QSettings settings;
     settings.beginGroup(QLatin1String("servers"));
@@ -218,8 +221,8 @@ void BluecherryApp::loadServers()
         connect(server, SIGNAL(serverRemoved(DVRServer*)), SLOT(onServerRemoved(DVRServer*)));
         connect(server, SIGNAL(statusAlertMessageChanged(QString)), SIGNAL(serverAlertsChanged()));
 
-        m_servers.append(server);
-        m_maxServerId = qMax(m_maxServerId, id);
+        m_serverRepository->m_servers.append(server);
+        m_serverRepository->m_maxServerId = qMax(m_serverRepository->m_maxServerId, id);
     }
 
 #ifdef Q_OS_LINUX
@@ -238,15 +241,25 @@ void BluecherryApp::loadServers()
 #endif
 }
 
+QList<DVRServer *> BluecherryApp::servers() const
+{
+    return m_serverRepository->m_servers;
+}
+
+bool BluecherryApp::serverExists(DVRServer *server) const
+{
+    return m_serverRepository->m_servers.contains(server);
+}
+
 DVRServer *BluecherryApp::addNewServer(const QString &name)
 {
-    int id = ++m_maxServerId;
+    int id = ++m_serverRepository->m_maxServerId;
 
     QSettings settings;
     settings.setValue(QString::fromLatin1("servers/%1/displayName").arg(id), name);
 
     DVRServer *server = new DVRServer(id, this);
-    m_servers.append(server);
+    m_serverRepository->m_servers.append(server);
     connect(server, SIGNAL(serverRemoved(DVRServer*)), SLOT(onServerRemoved(DVRServer*)));
     connect(server, SIGNAL(statusAlertMessageChanged(QString)), SLOT(serverAlertsChanged()));
 
@@ -256,7 +269,7 @@ DVRServer *BluecherryApp::addNewServer(const QString &name)
 
 DVRServer *BluecherryApp::findServerID(int id)
 {
-    for (QList<DVRServer*>::Iterator it = m_servers.begin(); it != m_servers.end(); ++it)
+    for (QList<DVRServer*>::Iterator it = m_serverRepository->m_servers.begin(); it != m_serverRepository->m_servers.end(); ++it)
     {
         if ((*it)->configId == id)
             return *it;
@@ -267,7 +280,7 @@ DVRServer *BluecherryApp::findServerID(int id)
 
 void BluecherryApp::onServerRemoved(DVRServer *server)
 {
-    if (m_servers.removeOne(server))
+    if (m_serverRepository->m_servers.removeOne(server))
         emit serverRemoved(server);
 }
 
@@ -366,7 +379,7 @@ void BluecherryApp::releaseLive()
 QList<DVRServer*> BluecherryApp::serverAlerts() const
 {
     QList<DVRServer*> re;
-    for (QList<DVRServer*>::ConstIterator it = m_servers.begin(); it != m_servers.end(); ++it)
+    for (QList<DVRServer*>::ConstIterator it = m_serverRepository->m_servers.begin(); it != m_serverRepository->m_servers.end(); ++it)
     {
         if (!(*it)->statusAlertMessage().isEmpty())
             re.append(*it);

@@ -37,6 +37,7 @@ set (bluecherry_client_MOC_SRCS
     src/network/RemotePortChecker.h
 
     src/server/DVRServer.h
+    src/server/DVRServerRepository.h
 
     src/ui/liveview/LiveFeedItem.h
     src/ui/liveview/LiveStreamItem.h

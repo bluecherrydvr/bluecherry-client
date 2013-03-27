@@ -24,6 +24,7 @@
 #include "core/TransferRateCalculator.h"
 
 class DVRServer;
+class DVRServerRepository;
 class QNetworkAccessManager;
 class MainWindow;
 class QNetworkReply;
@@ -49,10 +50,10 @@ public:
 
     MainWindow *globalParentWindow() const;
 
-    QList<DVRServer*> servers() const { return m_servers; }
+    QList<DVRServer*> servers() const;
     DVRServer *addNewServer(const QString &name);
     DVRServer *findServerID(int id);
-    bool serverExists(DVRServer *server) { return m_servers.contains(server); }
+    bool serverExists(DVRServer *server) const;
 
     QList<DVRServer*> serverAlerts() const;
 
@@ -100,10 +101,9 @@ private slots:
     void resetSystemActivity();
 
 private:
+    DVRServerRepository *m_serverRepository;
     MediaDownloadManager *m_mediaDownloadManager;
     EventDownloadManager *m_eventDownloadManager;
-    QList<DVRServer*> m_servers;
-    int m_maxServerId;
     bool m_livePaused, m_inPauseQuery, m_screensaverInhibited;
 #ifdef Q_OS_WIN
     int m_screensaveValue;

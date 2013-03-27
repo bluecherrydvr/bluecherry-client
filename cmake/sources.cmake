@@ -45,6 +45,7 @@ set (bluecherry_client_main_SRCS
     src/network/SocketError.cpp
 
     src/server/DVRServer.cpp
+    src/server/DVRServerRepository.cpp
 
     src/ui/liveview/LiveFeedItem.cpp
     src/ui/liveview/LiveStreamItem.cpp
