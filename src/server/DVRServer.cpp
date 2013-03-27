@@ -35,7 +35,7 @@ DVRServer::DVRServer(int id, QObject *parent)
     connect(api, SIGNAL(loginSuccessful()), SLOT(updateCameras()));
     connect(api, SIGNAL(disconnected()), SLOT(disconnected()));
 
-    if (readSetting(QLatin1String("autoConnect"), true).toBool() && !hostname().isEmpty() && !username().isEmpty())
+    if (m_autoConnect && !hostname().isEmpty() && !username().isEmpty())
         QTimer::singleShot(0, this, SLOT(login()));
 
     connect(&m_refreshTimer, SIGNAL(timeout()), SLOT(updateCameras()));
