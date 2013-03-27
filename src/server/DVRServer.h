@@ -62,10 +62,6 @@ public:
 
     QString statusAlertMessage() const { return m_statusAlertMessage; }
 
-    /* Settings */
-    void clearSetting(const char *key) { clearSetting(QLatin1String(key)); }
-    void clearSetting(const QString &key);
-
     /* SSL */
     bool isKnownCertificate(const QSslCertificate &certificate) const;
     void setKnownCertificate(const QSslCertificate &certificate);

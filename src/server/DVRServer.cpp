@@ -54,14 +54,6 @@ void DVRServer::writeSetting(const QString &key, const QVariant &value)
     emit changed();
 }
 
-void DVRServer::clearSetting(const QString &key)
-{
-    QSettings settings;
-    settings.remove(QString::fromLatin1("servers/%1/").arg(configId).append(key));
-
-    emit changed();
-}
-
 void DVRServer::setDisplayName(const QString &name)
 {
     if (m_displayName == name)
