@@ -55,6 +55,7 @@ public:
     void setPassword(const QString &password);
 
     bool autoConnect() const;
+    void setAutoConnect(bool autoConnect);
 
     QList<DVRCamera> cameras() const { return m_cameras; }
     DVRCamera findCamera(int id) { return DVRCamera::getCamera(this, id); }

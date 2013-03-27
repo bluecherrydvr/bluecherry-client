@@ -275,7 +275,7 @@ void OptionsServerPage::saveChanges(DVRServer *server)
         connectionModified = true;
     }
 
-    server->writeSetting("autoConnect", m_autoConnect->isChecked());
+    server->setAutoConnect(m_autoConnect->isChecked());
 
     if (connectionModified || (m_autoConnect->isChecked() && !server->api->isOnline()))
         server->login();

@@ -91,6 +91,11 @@ void DVRServer::setPassword(const QString &password)
     writeSetting("password", password);
 }
 
+void DVRServer::setAutoConnect(bool autoConnect)
+{
+    writeSetting("autoConnect", autoConnect);
+}
+
 void DVRServer::removeServer()
 {
     qDebug("Deleting DVR server %d", configId);
