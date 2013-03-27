@@ -165,10 +165,10 @@ void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const 
     }
 
     m_nameEdit->setText(server->displayName());
-    m_hostnameEdit->setText(server->readSetting("hostname").toString());
+    m_hostnameEdit->setText(server->hostname());
     m_portEdit->setText(QString::number(server->serverPort()));
-    m_usernameEdit->setText(server->readSetting("username").toString());
-    m_passwordEdit->setText(server->readSetting("password").toString());
+    m_usernameEdit->setText(server->username());
+    m_passwordEdit->setText(server->password());
     m_autoConnect->setChecked(server->readSetting("autoConnect", true).toBool());
 
     connect(server->api, SIGNAL(loginSuccessful()), SLOT(setLoginSuccessful()));
