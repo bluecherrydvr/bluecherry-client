@@ -76,6 +76,11 @@ void DVRServer::setHostname(const QString &hostname)
     writeSetting("hostname", hostname);
 }
 
+void DVRServer::setPort(int port)
+{
+    writeSetting("port", port == 0 ? 7001 : port);
+}
+
 void DVRServer::removeServer()
 {
     qDebug("Deleting DVR server %d", configId);

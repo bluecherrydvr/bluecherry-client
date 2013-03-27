@@ -258,7 +258,7 @@ void OptionsServerPage::saveChanges(DVRServer *server)
     }
     if (m_portEdit->isModified())
     {
-        server->writeSetting("port", m_portEdit->text());
+        server->setPort(m_portEdit->text().toInt());
         m_portEdit->setModified(false);
         connectionModified = true;
     }

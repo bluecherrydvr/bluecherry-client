@@ -46,6 +46,8 @@ public:
 
     int serverPort() const;
     int rtspPort() const;
+    void setPort(int port);
+
     QString username() const;
     QString password() const;
     bool autoConnect() const;
