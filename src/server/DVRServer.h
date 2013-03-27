@@ -49,6 +49,8 @@ public:
     void setPort(int port);
 
     QString username() const;
+    void setUsername(const QString &username);
+
     QString password() const;
     bool autoConnect() const;
 

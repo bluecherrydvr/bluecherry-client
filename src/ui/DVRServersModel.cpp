@@ -366,7 +366,7 @@ bool DVRServersModel::setData(const QModelIndex &index, const QVariant &value, i
         server->setHostname(value.toString());
         break;
     case 2:
-        server->writeSetting("username", value.toString());
+        server->setUsername(value.toString());
         break;
     case 3:
         server->writeSetting("password", value.toString());

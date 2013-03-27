@@ -264,7 +264,7 @@ void OptionsServerPage::saveChanges(DVRServer *server)
     }
     if (m_usernameEdit->isModified())
     {
-        server->writeSetting("username", m_usernameEdit->text());
+        server->setUsername(m_usernameEdit->text());
         m_usernameEdit->setModified(false);
         connectionModified = true;
     }
