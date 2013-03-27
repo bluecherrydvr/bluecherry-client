@@ -21,7 +21,6 @@ set (bluecherry_client_main_SRCS
     src/core/BluecherryApp.cpp
     src/core/CameraPtzControl.cpp
     src/core/DVRCamera.cpp
-    src/core/DVRServer.cpp
     src/core/EventData.cpp
     src/core/LiveStream.cpp
     src/core/LiveStreamWorker.cpp
@@ -44,6 +43,8 @@ set (bluecherry_client_main_SRCS
     src/network/MediaDownloadManager.cpp
     src/network/RemotePortChecker.cpp
     src/network/SocketError.cpp
+
+    src/server/DVRServer.cpp
 
     src/ui/liveview/LiveFeedItem.cpp
     src/ui/liveview/LiveStreamItem.cpp

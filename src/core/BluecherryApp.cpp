@@ -16,7 +16,7 @@
  */
 
 #include "BluecherryApp.h"
-#include "DVRServer.h"
+#include "server/DVRServer.h"
 #include "LiveViewManager.h"
 #include "ui/MainWindow.h"
 #include "event/EventDownloadManager.h"

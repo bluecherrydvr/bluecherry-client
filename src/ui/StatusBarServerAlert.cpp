@@ -18,7 +18,7 @@
 #include "StatusBarServerAlert.h"
 #include "ServerConfigWindow.h"
 #include "core/BluecherryApp.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
 #include <QTextDocument>
 #include <QLabel>
 #include <QBoxLayout>

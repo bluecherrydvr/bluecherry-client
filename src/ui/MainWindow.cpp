@@ -35,7 +35,7 @@
 #include "MacSplitter.h"
 #include "StatusBandwidthWidget.h"
 #include "StatusBarServerAlert.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
 #include "core/BluecherryApp.h"
 #include "core/LiveViewManager.h"
 #include "event/ModelEventsCursor.h"

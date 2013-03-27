@@ -18,7 +18,7 @@
 #include "OptionsServerPage.h"
 #include "DVRServersModel.h"
 #include "core/BluecherryApp.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
 #include "ui/WebRtpPortCheckerWidget.h"
 #include <QTreeView>
 #include <QHeaderView>

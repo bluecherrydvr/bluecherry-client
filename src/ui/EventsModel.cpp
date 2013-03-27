@@ -17,7 +17,7 @@
 
 #include "EventsModel.h"
 #include "core/BluecherryApp.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
 #include "core/DVRCamera.h"
 #include "core/EventData.h"
 #include "event/EventsLoader.h"

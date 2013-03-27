@@ -16,7 +16,7 @@
  */
 
 #include "ServerRequestManager.h"
-#include "DVRServer.h"
+#include "server/DVRServer.h"
 #include "BluecherryApp.h"
 #include <QNetworkAccessManager>
 #include <QNetworkCookieJar>

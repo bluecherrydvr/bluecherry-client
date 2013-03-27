@@ -18,7 +18,7 @@
 #include "SetupWizard.h"
 #include "SetupWizard_p.h"
 #include "core/BluecherryApp.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
 #include "ui/WebRtpPortCheckerWidget.h"
 #include <QLabel>
 #include <QBoxLayout>

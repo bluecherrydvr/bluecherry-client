@@ -17,7 +17,7 @@
 
 #include "EventVideoDownload.h"
 #include "core/BluecherryApp.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
 #include "video/MediaDownload.h"
 #include "network/MediaDownloadManager.h"
 #include <QtConcurrentRun>

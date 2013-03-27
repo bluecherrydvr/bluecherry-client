@@ -16,7 +16,7 @@
  */
 
 #include "DVRCamera.h"
-#include "DVRServer.h"
+#include "server/DVRServer.h"
 #include "BluecherryApp.h"
 #include "MJpegStream.h"
 #include "LiveStream.h"

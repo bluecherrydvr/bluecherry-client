@@ -20,7 +20,7 @@
 #include "OptionsDialog.h"
 #include "OptionsServerPage.h"
 #include "ServerConfigWindow.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
 #include "core/BluecherryApp.h"
 #include "MainWindow.h"
 #include "liveview/LiveViewWindow.h"

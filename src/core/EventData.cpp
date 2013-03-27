@@ -16,7 +16,7 @@
  */
 
 #include "EventData.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
 #include "core/DVRCamera.h"
 #include "utils/FileUtils.h"
 #include <QApplication>

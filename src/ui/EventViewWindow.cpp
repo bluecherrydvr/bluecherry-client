@@ -24,7 +24,7 @@
 #include "ExpandingTextEdit.h"
 #include "ui/MainWindow.h"
 #include "ui/SwitchEventsWidget.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
 #include "core/BluecherryApp.h"
 #include "event/EventsCursor.h"
 #include <QBoxLayout>

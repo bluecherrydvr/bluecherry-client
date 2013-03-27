@@ -16,7 +16,7 @@
  */
 
 #include "ServerConfigWindow.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
 #include "core/BluecherryApp.h"
 #include "ui/MainWindow.h"
 #include <QBoxLayout>

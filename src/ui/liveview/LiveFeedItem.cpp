@@ -23,7 +23,7 @@
 #include "LiveViewWindow.h"
 #include "ui/MainWindow.h"
 #include "utils/FileUtils.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
 #include "core/LiveViewManager.h"
 #include <QMessageBox>
 #include <QDesktopServices>

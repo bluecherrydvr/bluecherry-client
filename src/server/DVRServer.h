@@ -21,8 +21,8 @@
 #include <QObject>
 #include <QVariant>
 #include <QTimer>
-#include "ServerRequestManager.h"
-#include "DVRCamera.h"
+#include "core/ServerRequestManager.h"
+#include "core/DVRCamera.h"
 
 class QNetworkRequest;
 class QUrl;

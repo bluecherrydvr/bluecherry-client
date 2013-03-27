@@ -20,7 +20,7 @@
 #include "EventsModel.h"
 #include "TimeRangeScrollBar.h"
 #include "core/EventData.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
 #include <QPaintEvent>
 #include <QPainter>
 #include <QVector>

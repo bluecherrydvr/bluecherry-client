@@ -17,7 +17,7 @@
 
 #include "CameraPtzControl.h"
 #include "BluecherryApp.h"
-#include "DVRServer.h"
+#include "server/DVRServer.h"
 #include <QVariant>
 #include <QDebug>
 #include <QXmlStreamReader>

@@ -17,7 +17,7 @@
 
 #include "core/BluecherryApp.h"
 #include "DVRServersModel.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
 #include "core/DVRCamera.h"
 #include <QTextDocument>
 #include <QApplication>

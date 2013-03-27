@@ -18,7 +18,7 @@
 #include "EventSourcesModel.h"
 #include "DVRServersModel.h"
 #include "core/BluecherryApp.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
 #include "core/DVRCamera.h"
 #include <QFont>
 #include <QStringList>

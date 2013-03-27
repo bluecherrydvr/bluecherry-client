@@ -18,7 +18,7 @@
 #include "EventDownloadManager.h"
 #include "core/BluecherryApp.h"
 #include "core/EventData.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
 #include "event/EventVideoDownload.h"
 #include "ui/MainWindow.h"
 #include "utils/StringUtils.h"
