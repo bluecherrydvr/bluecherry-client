@@ -91,6 +91,12 @@ void DVRServer::setAutoConnect(bool autoConnect)
     m_autoConnect = autoConnect;
 }
 
+void DVRServer::setSslDigest(const QByteArray &sslDigest)
+{
+    writeSetting(QLatin1String("sslDigest"), sslDigest);
+    m_sslDigest = sslDigest;
+}
+
 void DVRServer::removeServer()
 {
     qDebug("Deleting DVR server %d", configId);
@@ -308,8 +314,7 @@ void DVRServer::disconnected()
 
 bool DVRServer::isKnownCertificate(const QSslCertificate &certificate) const
 {
-    QByteArray knownDigest = readSetting(QLatin1String("sslDigest")).toByteArray();
-    if (knownDigest.isEmpty())
+    if (m_sslDigest.isEmpty())
     {
         /* If we don't know a certificate yet, we treat the first one we see as
          * correct. This is insecure, obviously, but it's a much nicer way to behave
@@ -318,12 +323,12 @@ bool DVRServer::isKnownCertificate(const QSslCertificate &certificate) const
         return true;
     }
 
-    return (certificate.digest(QCryptographicHash::Sha1) == knownDigest);
+    return (certificate.digest(QCryptographicHash::Sha1) == m_sslDigest);
 }
 
 void DVRServer::setKnownCertificate(const QSslCertificate &certificate)
 {
-    writeSetting(QLatin1String("sslDigest"), certificate.digest(QCryptographicHash::Sha1));
+    setSslDigest(certificate.digest(QCryptographicHash::Sha1));
 }
 
 QString DVRServer::displayName() const
@@ -361,6 +366,11 @@ bool DVRServer::autoConnect() const
     return m_autoConnect;
 }
 
+QByteArray DVRServer::sslDigest() const
+{
+    return m_sslDigest;
+}
+
 void DVRServer::readFromSettings()
 {
     m_displayName = readSetting(QLatin1String("displayName")).toString();
@@ -371,4 +381,5 @@ void DVRServer::readFromSettings()
     m_username = readSetting(QLatin1String("username")).toString();
     m_password = readSetting(QLatin1String("password")).toString();
     m_autoConnect = readSetting(QLatin1String("autoConnect"), true).toBool();
+    m_sslDigest = readSetting(QLatin1String("sslDigest")).toByteArray();
 }

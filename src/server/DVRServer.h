@@ -57,6 +57,9 @@ public:
     bool autoConnect() const;
     void setAutoConnect(bool autoConnect);
 
+    QByteArray sslDigest() const;
+    void setSslDigest(const QByteArray &sslDigest);
+
     QList<DVRCamera> cameras() const { return m_cameras; }
     DVRCamera findCamera(int id) { return DVRCamera::getCamera(this, id); }
 
@@ -97,6 +100,7 @@ private:
     QString m_username;
     QString m_password;
     bool m_autoConnect;
+    QByteArray m_sslDigest;
 
     QList<DVRCamera> m_cameras;
     QString m_statusAlertMessage;
