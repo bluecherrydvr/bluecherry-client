@@ -40,8 +40,6 @@ void DVRServer::writeSetting(const QString &key, const QVariant &value)
 {
     QSettings settings;
     settings.setValue(QString::fromLatin1("servers/%1/").arg(configId).append(key), value);
-
-    emit changed();
 }
 
 void DVRServer::setDisplayName(const QString &name)
@@ -51,42 +49,56 @@ void DVRServer::setDisplayName(const QString &name)
 
     m_displayName = name;
     writeSetting(QLatin1String("displayName"), name);
+
+    emit changed();
 }
 
 void DVRServer::setHostname(const QString &hostname)
 {
     writeSetting(QLatin1String("hostname"), hostname);
     m_hostname = hostname;
+
+    emit changed();
 }
 
 void DVRServer::setPort(int port)
 {
     writeSetting(QLatin1String("port"), port == 0 ? 7001 : port);
     m_port = port;
+
+    emit changed();
 }
 
 void DVRServer::setUsername(const QString &username)
 {
     writeSetting(QLatin1String("username"), username);
     m_username = username;
+
+    emit changed();
 }
 
 void DVRServer::setPassword(const QString &password)
 {
     writeSetting(QLatin1String("password"), password);
     m_password = password;
+
+    emit changed();
 }
 
 void DVRServer::setAutoConnect(bool autoConnect)
 {
     writeSetting(QLatin1String("autoConnect"), autoConnect);
     m_autoConnect = autoConnect;
+
+    emit changed();
 }
 
 void DVRServer::setSslDigest(const QByteArray &sslDigest)
 {
     writeSetting(QLatin1String("sslDigest"), sslDigest);
     m_sslDigest = sslDigest;
+
+    emit changed();
 }
 
 void DVRServer::removeServer()
