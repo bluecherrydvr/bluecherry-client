@@ -23,6 +23,7 @@
 #include "server/DVRServer.h"
 #include "server/DVRServerRepository.h"
 #include "server/DVRServerSettingsReader.h"
+#include "server/DVRServerSettingsWriter.h"
 #include <QSettings>
 #include <QStringList>
 #include <QNetworkAccessManager>
@@ -248,6 +249,10 @@ void BluecherryApp::loadServers()
         s->setUsername(QLatin1String("Admin"));
         s->setPassword(QLatin1String("bluecherry"));
         s->setAutoConnect(true);
+
+        DVRServerSettingsWriter writer;
+        writer.writeServer(s);
+
         QTimer::singleShot(0, s, SLOT(login()));
     }
 #endif
@@ -363,6 +368,9 @@ void BluecherryApp::sslErrors(QNetworkReply *reply, const QList<QSslError> &erro
             return;
         }
     }
+
+    DVRServerSettingsWriter writer;
+    writer.writeServer(server);
 
     reply->ignoreSslErrors();
 }

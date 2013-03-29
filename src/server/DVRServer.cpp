@@ -17,13 +17,13 @@
 
 #include "DVRServer.h"
 #include "core/DVRCamera.h"
-#include <QSettings>
 #include <QNetworkRequest>
 #include <QUrl>
 #include <QTimer>
 #include <QXmlStreamReader>
 #include <QSslCertificate>
 #include <QDebug>
+#include <QSettings>
 
 DVRServer::DVRServer(int id, QObject *parent)
     : QObject(parent), configId(id), devicesLoaded(false)
@@ -36,68 +36,48 @@ DVRServer::DVRServer(int id, QObject *parent)
     connect(&m_refreshTimer, SIGNAL(timeout()), SLOT(updateCameras()));
 }
 
-void DVRServer::writeSetting(const QString &key, const QVariant &value)
-{
-    QSettings settings;
-    settings.setValue(QString::fromLatin1("servers/%1/").arg(configId).append(key), value);
-}
-
 void DVRServer::setDisplayName(const QString &name)
 {
     if (m_displayName == name)
         return;
 
     m_displayName = name;
-    writeSetting(QLatin1String("displayName"), name);
-
     emit changed();
 }
 
 void DVRServer::setHostname(const QString &hostname)
 {
-    writeSetting(QLatin1String("hostname"), hostname);
     m_hostname = hostname;
-
     emit changed();
 }
 
 void DVRServer::setPort(int port)
 {
-    writeSetting(QLatin1String("port"), port == 0 ? 7001 : port);
     m_port = port;
-
     emit changed();
 }
 
 void DVRServer::setUsername(const QString &username)
 {
-    writeSetting(QLatin1String("username"), username);
     m_username = username;
-
     emit changed();
 }
 
 void DVRServer::setPassword(const QString &password)
 {
-    writeSetting(QLatin1String("password"), password);
     m_password = password;
-
     emit changed();
 }
 
 void DVRServer::setAutoConnect(bool autoConnect)
 {
-    writeSetting(QLatin1String("autoConnect"), autoConnect);
     m_autoConnect = autoConnect;
-
     emit changed();
 }
 
 void DVRServer::setSslDigest(const QByteArray &sslDigest)
 {
-    writeSetting(QLatin1String("sslDigest"), sslDigest);
     m_sslDigest = sslDigest;
-
     emit changed();
 }
 
@@ -343,6 +323,11 @@ QString DVRServer::displayName() const
 QString DVRServer::hostname() const
 {
     return m_hostname;
+}
+
+int DVRServer::port() const
+{
+    return m_port;
 }
 
 int DVRServer::serverPort() const

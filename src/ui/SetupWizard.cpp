@@ -19,6 +19,7 @@
 #include "SetupWizard_p.h"
 #include "core/BluecherryApp.h"
 #include "server/DVRServer.h"
+#include "server/DVRServerSettingsWriter.h"
 #include "ui/WebRtpPortCheckerWidget.h"
 #include <QLabel>
 #include <QBoxLayout>
@@ -194,6 +195,9 @@ void SetupServerPage::save()
     server->setUsername(field(QLatin1String("serverUsername")).toString());
     server->setPassword(field(QLatin1String("serverPassword")).toString());
     server->setAutoConnect(field(QLatin1String("serverAutoConnect")).toBool());
+
+    DVRServerSettingsWriter writer;
+    writer.writeServer(server);
 
     server->login();
 

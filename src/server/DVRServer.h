@@ -44,6 +44,7 @@ public:
     QString hostname() const;
     void setHostname(const QString &hostname);
 
+    int port() const;
     int serverPort() const;
     int rtspPort() const;
     void setPort(int port);
@@ -106,8 +107,6 @@ private:
     QString m_statusAlertMessage;
     QTimer m_refreshTimer;
     bool devicesLoaded;
-
-    void writeSetting(const QString &key, const QVariant &value);
 
 };
 

@@ -36,6 +36,7 @@
 #include "StatusBandwidthWidget.h"
 #include "StatusBarServerAlert.h"
 #include "server/DVRServer.h"
+#include "server/DVRServerSettingsWriter.h"
 #include "core/BluecherryApp.h"
 #include "core/LiveViewManager.h"
 #include "event/ModelEventsCursor.h"
@@ -623,6 +624,9 @@ void MainWindow::sslConfirmRequired(DVRServer *server, const QList<QSslError> &e
         return;
 
     server->setKnownCertificate(config.peerCertificate());
+
+    DVRServerSettingsWriter writer;
+    writer.writeServer(server);
 }
 
 void MainWindow::eventsContextMenu(const QPoint &pos)
