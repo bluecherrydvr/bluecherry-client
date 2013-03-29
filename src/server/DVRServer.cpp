@@ -26,7 +26,7 @@
 #include <QSettings>
 
 DVRServer::DVRServer(int id, QObject *parent)
-    : QObject(parent), configId(id), devicesLoaded(false)
+    : QObject(parent), configId(id), m_devicesLoaded(false)
 {
     api = new ServerRequestManager(this);
 
@@ -220,9 +220,9 @@ void DVRServer::updateCamerasReply()
         }
     }
 
-    if (!devicesLoaded || (wasEmpty && !m_cameras.isEmpty()))
+    if (!m_devicesLoaded || (wasEmpty && !m_cameras.isEmpty()))
     {
-        devicesLoaded = true;
+        m_devicesLoaded = true;
         emit devicesReady();
     }
 }
@@ -291,7 +291,7 @@ void DVRServer::disconnected()
         emit cameraRemoved(c);
         c.removed();
     }
-    devicesLoaded = false;
+    m_devicesLoaded = false;
     m_statusAlertMessage.clear();
     emit statusAlertMessageChanged(QString());
 }

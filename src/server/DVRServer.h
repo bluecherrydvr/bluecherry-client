@@ -106,7 +106,7 @@ private:
     QList<DVRCamera> m_cameras;
     QString m_statusAlertMessage;
     QTimer m_refreshTimer;
-    bool devicesLoaded;
+    bool m_devicesLoaded;
 
 };
 
