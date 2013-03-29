@@ -26,7 +26,7 @@
 #include <QSettings>
 
 DVRServer::DVRServer(int id, QObject *parent)
-    : QObject(parent), configId(id), m_devicesLoaded(false)
+    : QObject(parent), m_id(id), m_devicesLoaded(false)
 {
     api = new ServerRequestManager(this);
 
@@ -83,12 +83,12 @@ void DVRServer::setSslDigest(const QByteArray &sslDigest)
 
 void DVRServer::removeServer()
 {
-    qDebug("Deleting DVR server %d", configId);
+    qDebug("Deleting DVR server %d", m_id);
 
     emit serverRemoved(this);
 
     QSettings settings;
-    settings.remove(QString::fromLatin1("servers/%1").arg(configId));
+    settings.remove(QString::fromLatin1("servers/%1").arg(m_id));
 
     deleteLater();
 }
@@ -313,6 +313,11 @@ bool DVRServer::isKnownCertificate(const QSslCertificate &certificate) const
 void DVRServer::setKnownCertificate(const QSslCertificate &certificate)
 {
     setSslDigest(certificate.digest(QCryptographicHash::Sha1));
+}
+
+int DVRServer::id() const
+{
+    return m_id;
 }
 
 QString DVRServer::displayName() const

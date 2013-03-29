@@ -37,7 +37,7 @@ DVRCamera DVRCamera::getCamera(int serverID, int cameraID)
 
 DVRCamera DVRCamera::getCamera(DVRServer *server, int cameraID)
 {
-    DVRCameraData *data = DVRCameraData::instances.value(qMakePair(server->configId, cameraID), 0);
+    DVRCameraData *data = DVRCameraData::instances.value(qMakePair(server->id(), cameraID), 0);
     if (!data)
         data = new DVRCameraData(server, cameraID);
 
@@ -147,21 +147,21 @@ DVRCameraData::DVRCameraData(DVRServer *s, int i)
     : server(s), uniqueID(i), isLoaded(false), isOnline(false), isDisabled(false),
       ptzProtocol(DVRCamera::UnknownProtocol), recordingState(DVRCamera::NoRecording)
 {
-    Q_ASSERT(instances.find(qMakePair(s->configId, i)) == instances.end());
-    instances.insert(qMakePair(server->configId, uniqueID), this);
+    Q_ASSERT(instances.find(qMakePair(s->id(), i)) == instances.end());
+    instances.insert(qMakePair(server->id(), uniqueID), this);
 
     loadSavedSettings();
 }
 
 DVRCameraData::~DVRCameraData()
 {
-    instances.remove(qMakePair(server->configId, uniqueID));
+    instances.remove(qMakePair(server->id(), uniqueID));
 }
 
 void DVRCameraData::loadSavedSettings()
 {
     QSettings settings;
-    displayName = settings.value(QString::fromLatin1("servers/%1/cameras/%2").arg(server->configId).arg(uniqueID)).toString();
+    displayName = settings.value(QString::fromLatin1("servers/%1/cameras/%2").arg(server->id()).arg(uniqueID)).toString();
 }
 
 void DVRCameraData::doDataUpdated()
@@ -169,7 +169,7 @@ void DVRCameraData::doDataUpdated()
     if (server)
     {
         QSettings settings;
-        settings.beginGroup(QString::fromLatin1("servers/%1/cameras/").arg(server->configId));
+        settings.beginGroup(QString::fromLatin1("servers/%1/cameras/").arg(server->id()));
         settings.setValue(QString::number(uniqueID), displayName);
     }
 
@@ -190,7 +190,7 @@ QDataStream &operator<<(QDataStream &s, const DVRCamera &camera)
     if (!camera.isValid())
         s << -1;
     else
-        s << camera.server()->configId << camera.uniqueId();
+        s << camera.server()->id() << camera.uniqueId();
     return s;
 }
 

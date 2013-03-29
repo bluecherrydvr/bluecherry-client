@@ -34,9 +34,9 @@ class DVRServer : public QObject
 
 public:
     ServerRequestManager *api;
-    const int configId;
+    explicit DVRServer(int id, QObject *parent = 0);
 
-    explicit DVRServer(int configId, QObject *parent = 0);
+    int id() const;
 
     QString displayName() const;
     void setDisplayName(const QString &displayName);
@@ -95,6 +95,8 @@ private slots:
     void disconnected();
 
 private:
+    const int m_id;
+
     QString m_displayName;
     QString m_hostname;
     int m_port;

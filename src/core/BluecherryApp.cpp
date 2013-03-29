@@ -287,7 +287,7 @@ DVRServer *BluecherryApp::findServerID(int id)
 {
     for (QList<DVRServer*>::Iterator it = m_serverRepository->m_servers.begin(); it != m_serverRepository->m_servers.end(); ++it)
     {
-        if ((*it)->configId == id)
+        if ((*it)->id() == id)
             return *it;
     }
 

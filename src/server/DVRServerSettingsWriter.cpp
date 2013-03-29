@@ -23,7 +23,7 @@ void DVRServerSettingsWriter::writeServer(DVRServer *server) const
 {
     Q_ASSERT(server);
 
-    int serverId = server->configId;
+    int serverId = server->id();
     Q_ASSERT(serverId >= 0);
 
     writeSetting(serverId, QLatin1String("displayName"), server->displayName());
