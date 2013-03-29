@@ -25,7 +25,7 @@ class DVRServer;
 class DVRServerSettingsReader
 {
 public:
-    DVRServer * readServer(int serverId);
+    DVRServer * readServer(int serverId) const;
 
 private:
     QVariant readSetting(int serverId, const QString &key, const QVariant &def = QVariant()) const;

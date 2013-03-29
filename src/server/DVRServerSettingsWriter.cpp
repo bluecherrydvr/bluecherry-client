@@ -38,5 +38,5 @@ void DVRServerSettingsWriter::writeServer(DVRServer *server) const
 void DVRServerSettingsWriter::writeSetting(int serverId, const QString &key, const QVariant &value) const
 {
     QSettings settings;
-    settings.setValue(QString::fromLatin1("servers/%1/").arg(serverId).append(key), value);
+    settings.setValue(QString::fromLatin1("servers/%1/%2").arg(serverId).arg(key), value);
 }

@@ -19,7 +19,7 @@
 #include "DVRServer.h"
 #include <QSettings>
 
-DVRServer * DVRServerSettingsReader::readServer(int serverId)
+DVRServer * DVRServerSettingsReader::readServer(int serverId) const
 {
     Q_ASSERT(serverId >= 0);
 
@@ -38,5 +38,5 @@ DVRServer * DVRServerSettingsReader::readServer(int serverId)
 QVariant DVRServerSettingsReader::readSetting(int serverId, const QString &key, const QVariant &def) const
 {
     QSettings settings;
-    return settings.value(QString::fromLatin1("servers/%1/").arg(serverId).append(key), def);
+    return settings.value(QString::fromLatin1("servers/%1/%2").arg(serverId).arg(key), def);
 }
