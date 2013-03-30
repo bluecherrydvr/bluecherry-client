@@ -62,6 +62,7 @@ public:
      * will error rather than prompting the user on any but the default (GUI thread). */
     QNetworkAccessManager *createNam();
 
+    DVRServerRepository * serverRepository() const { return m_serverRepository; }
     MediaDownloadManager * mediaDownloadManager() const { return m_mediaDownloadManager; }
     EventDownloadManager * eventDownloadManager() const { return m_eventDownloadManager; }
 
