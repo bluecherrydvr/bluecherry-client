@@ -547,7 +547,7 @@ void MainWindow::openLiveWindow()
 
 void MainWindow::addServer()
 {
-    SetupWizard *dlg = new SetupWizard(this);
+    SetupWizard *dlg = new SetupWizard(m_serverRepository, this);
     dlg->setAttribute(Qt::WA_DeleteOnClose);
     dlg->setWindowModality(Qt::WindowModal);
     dlg->show();
