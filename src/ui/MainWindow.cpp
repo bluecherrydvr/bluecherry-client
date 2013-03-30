@@ -85,7 +85,7 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
     updateTrayIcon();
 
     statusBar()->addPermanentWidget(new StatusBandwidthWidget(statusBar()));
-    statusBar()->addWidget(new StatusBarServerAlert(statusBar()));
+    statusBar()->addWidget(new StatusBarServerAlert(m_serverRepository, statusBar()));
 
 #ifdef Q_OS_MAC
     statusBar()->setSizeGripEnabled(false);
