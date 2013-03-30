@@ -190,7 +190,7 @@ QList<DVRCamera> DVRCamera::fromMimeData(const QMimeData *mimeData)
 {
     QByteArray data = mimeData->data(QLatin1String("application/x-bluecherry-dvrcamera"));
     QDataStream stream(&data, QIODevice::ReadOnly);
-    DVRCameraStreamReader reader(stream);
+    DVRCameraStreamReader reader(bcApp->serverRepository(), stream);
 
     QList<DVRCamera> re;
     while (!stream.atEnd() && stream.status() == QDataStream::Ok)

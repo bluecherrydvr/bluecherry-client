@@ -236,7 +236,7 @@ void LiveFeedItem::loadState(QDataStream *data, int version)
 {
     Q_ASSERT(data);
 
-    DVRCameraStreamReader reader(*data);
+    DVRCameraStreamReader reader(bcApp->serverRepository(), *data);
     setCamera(reader.readCamera());
 
     if (version >= 1) {
