@@ -76,6 +76,10 @@ BluecherryApp::BluecherryApp()
     QSslConfiguration::setDefaultConfiguration(sslConfig);
 
     loadServers();
+    if (shouldAddLocalServer())
+        addLocalServer();
+    autoConnectServers();
+
     sendSettingsChanged();
 
     performVersionCheck();
@@ -206,28 +210,30 @@ QNetworkAccessManager *BluecherryApp::createNam()
 void BluecherryApp::loadServers()
 {
     m_serverRepository->loadServers();
+}
 
+bool BluecherryApp::shouldAddLocalServer() const
+{
+    if (!m_serverRepository->m_servers.isEmpty())
+        return false;
+
+    return QFile::exists(QLatin1String("/etc/bluecherry.conf"));
+}
+
+void BluecherryApp::addLocalServer()
+{
 #ifdef Q_OS_LINUX
-    /* If there are no servers configured, and the server application is installed here, automatically
-     * configure a local server. */
-    if (m_serverRepository->m_servers.isEmpty() && QFile::exists(QLatin1String("/etc/bluecherry.conf")))
-    {
-        DVRServer *s = addNewServer(tr("Local"));
-        s->setHostname(QHostAddress(QHostAddress::LocalHost).toString());
-        /* This must match the default username and password for the server */
-        s->setUsername(QLatin1String("Admin"));
-        s->setPassword(QLatin1String("bluecherry"));
-        s->setPort(7001);
-        s->setAutoConnect(true);
+    DVRServer *s = addNewServer(tr("Local"));
+    s->setHostname(QHostAddress(QHostAddress::LocalHost).toString());
+    /* This must match the default username and password for the server */
+    s->setUsername(QLatin1String("Admin"));
+    s->setPassword(QLatin1String("bluecherry"));
+    s->setPort(7001);
+    s->setAutoConnect(true);
 
-        DVRServerSettingsWriter writer;
-        writer.writeServer(s);
-    }
+    DVRServerSettingsWriter writer;
+    writer.writeServer(s);
 #endif
-
-    foreach (DVRServer *server, m_serverRepository->m_servers)
-        if (server->autoConnect() && !server->hostname().isEmpty() && !server->username().isEmpty())
-            server->login();
 }
 
 QList<DVRServer *> BluecherryApp::servers() const
@@ -238,6 +244,13 @@ QList<DVRServer *> BluecherryApp::servers() const
 bool BluecherryApp::serverExists(DVRServer *server) const
 {
     return m_serverRepository->m_servers.contains(server);
+}
+
+void BluecherryApp::autoConnectServers()
+{
+    foreach (DVRServer *server, m_serverRepository->m_servers)
+        if (server->autoConnect() && !server->hostname().isEmpty() && !server->username().isEmpty())
+            server->login();
 }
 
 DVRServer *BluecherryApp::addNewServer(const QString &name)

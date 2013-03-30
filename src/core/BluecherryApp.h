@@ -112,6 +112,9 @@ private:
     bool m_doingUpdateCheck;
 
     void loadServers();
+    bool shouldAddLocalServer() const;
+    void addLocalServer();
+    void autoConnectServers();
 };
 
 extern BluecherryApp *bcApp;
