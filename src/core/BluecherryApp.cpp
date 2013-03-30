@@ -247,11 +247,6 @@ void BluecherryApp::autoConnectServers()
             server->login();
 }
 
-DVRServer * BluecherryApp::serverByID(int id)
-{
-    return m_serverRepository->serverByID(id);
-}
-
 void BluecherryApp::sslErrors(QNetworkReply *reply, const QList<QSslError> &errors)
 {
     Q_ASSERT(QThread::currentThread() == thread());
