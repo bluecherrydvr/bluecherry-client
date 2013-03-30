@@ -222,7 +222,7 @@ bool BluecherryApp::shouldAddLocalServer() const
 void BluecherryApp::addLocalServer()
 {
 #ifdef Q_OS_LINUX
-    DVRServer *s = addNewServer(tr("Local"));
+    DVRServer *s = m_serverRepository->createServer(tr("Local"));
     s->setHostname(QHostAddress(QHostAddress::LocalHost).toString());
     /* This must match the default username and password for the server */
     s->setUsername(QLatin1String("Admin"));
@@ -245,11 +245,6 @@ void BluecherryApp::autoConnectServers()
     foreach (DVRServer *server, m_serverRepository->servers())
         if (server->autoConnect() && !server->hostname().isEmpty() && !server->username().isEmpty())
             server->login();
-}
-
-DVRServer * BluecherryApp::addNewServer(const QString &name)
-{
-    return m_serverRepository->createServer(name);
 }
 
 DVRServer * BluecherryApp::serverByID(int id)

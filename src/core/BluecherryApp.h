@@ -50,7 +50,6 @@ public:
 
     MainWindow *globalParentWindow() const;
 
-    DVRServer * addNewServer(const QString &name);
     DVRServer * serverByID(int id);
     bool serverExists(DVRServer *server) const;
 
