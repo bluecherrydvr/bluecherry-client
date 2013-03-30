@@ -50,7 +50,6 @@ public:
 
     MainWindow *globalParentWindow() const;
 
-    const QList<DVRServer *> & servers() const;
     DVRServer * addNewServer(const QString &name);
     DVRServer * serverByID(int id);
     bool serverExists(DVRServer *server) const;
@@ -82,8 +81,6 @@ public slots:
     void setScreensaverInhibited(bool inhibit);
 
 signals:
-    void serverAdded(DVRServer *server);
-    void serverRemoved(DVRServer *server);
     void serverAlertsChanged();
 
     void sslConfirmRequired(DVRServer *server, const QList<QSslError> &errors, const QSslConfiguration &config);

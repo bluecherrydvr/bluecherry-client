@@ -52,8 +52,6 @@ BluecherryApp::BluecherryApp()
     bcApp = this;
 
     m_serverRepository = new DVRServerRepository(this);
-    connect(m_serverRepository, SIGNAL(serverAdded(DVRServer*)), this, SIGNAL(serverAdded(DVRServer*)));
-    connect(m_serverRepository, SIGNAL(serverRemoved(DVRServer*)), this, SIGNAL(serverRemoved(DVRServer*)));
     connect(m_serverRepository, SIGNAL(serverAlertsChanged()), this, SIGNAL(serverAlertsChanged()));
 
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(aboutToQuit()));
@@ -237,11 +235,6 @@ void BluecherryApp::addLocalServer()
 #endif
 }
 
-const QList<DVRServer *> & BluecherryApp::servers() const
-{
-    return m_serverRepository->servers();
-}
-
 bool BluecherryApp::serverExists(DVRServer *server) const
 {
     return m_serverRepository->serverExists(server);
@@ -301,7 +294,7 @@ void BluecherryApp::sslErrors(QNetworkReply *reply, const QList<QSslError> &erro
         if (!server)
         {
             QUrl requestUrl = reply->request().url();
-            foreach (DVRServer *s, servers())
+            foreach (DVRServer *s, m_serverRepository->servers())
             {
                 QUrl serverUrl = s->api->serverUrl();
                 if (QString::compare(serverUrl.host(), requestUrl.host(), Qt::CaseInsensitive) == 0
