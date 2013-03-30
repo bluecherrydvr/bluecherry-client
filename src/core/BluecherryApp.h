@@ -51,8 +51,8 @@ public:
     MainWindow *globalParentWindow() const;
 
     const QList<DVRServer *> & servers() const;
-    DVRServer *addNewServer(const QString &name);
-    DVRServer *findServerID(int id);
+    DVRServer * addNewServer(const QString &name);
+    DVRServer * serverByID(int id);
     bool serverExists(DVRServer *server) const;
 
     QList<DVRServer*> serverAlerts() const;

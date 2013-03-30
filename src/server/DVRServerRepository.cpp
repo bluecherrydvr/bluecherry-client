@@ -95,6 +95,15 @@ const QList<DVRServer *> & DVRServerRepository::servers() const
     return m_servers;
 }
 
+DVRServer * DVRServerRepository::serverByID(int id) const
+{
+    foreach (DVRServer *server, m_servers)
+        if (server->id() == id)
+            return server;
+
+    return 0;
+}
+
 void DVRServerRepository::onServerRemoved(DVRServer *server)
 {
     if (m_servers.removeOne(server))

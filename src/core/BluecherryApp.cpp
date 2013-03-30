@@ -259,15 +259,9 @@ DVRServer * BluecherryApp::addNewServer(const QString &name)
     return m_serverRepository->createServer(name);
 }
 
-DVRServer *BluecherryApp::findServerID(int id)
+DVRServer * BluecherryApp::serverByID(int id)
 {
-    for (QList<DVRServer*>::ConstIterator it = m_serverRepository->servers().constBegin(); it != m_serverRepository->servers().constEnd(); ++it)
-    {
-        if ((*it)->id() == id)
-            return *it;
-    }
-
-    return 0;
+    return m_serverRepository->serverByID(id);
 }
 
 void BluecherryApp::sslErrors(QNetworkReply *reply, const QList<QSslError> &errors)
