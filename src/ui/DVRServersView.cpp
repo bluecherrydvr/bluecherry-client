@@ -198,7 +198,7 @@ void DVRServersView::mouseDoubleClickEvent(QMouseEvent *event)
         {
             if (server->api->isLoginPending())
             {
-                OptionsDialog *dlg = new OptionsDialog(this);
+                OptionsDialog *dlg = new OptionsDialog(bcApp->serverRepository(), this);
                 dlg->showPage(OptionsDialog::ServerPage);
                 dlg->setAttribute(Qt::WA_DeleteOnClose);
 

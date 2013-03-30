@@ -19,6 +19,7 @@
 #include "DVRServersModel.h"
 #include "core/BluecherryApp.h"
 #include "server/DVRServer.h"
+#include "server/DVRServerRepository.h"
 #include "server/DVRServerSettingsWriter.h"
 #include "ui/WebRtpPortCheckerWidget.h"
 #include <QTreeView>
@@ -32,9 +33,11 @@
 #include <QIntValidator>
 #include <QCheckBox>
 
-OptionsServerPage::OptionsServerPage(QWidget *parent)
-    : OptionsDialogPage(parent)
+OptionsServerPage::OptionsServerPage(DVRServerRepository *serverRepository, QWidget *parent)
+    : OptionsDialogPage(parent), m_serverRepository(serverRepository)
 {
+    Q_ASSERT(m_serverRepository);
+
     QBoxLayout *mainLayout = new QVBoxLayout(this);
     QBoxLayout *topLayout = new QHBoxLayout;
     mainLayout->addLayout(topLayout);
@@ -193,7 +196,7 @@ void OptionsServerPage::checkServer()
 
 void OptionsServerPage::addNewServer()
 {
-    DVRServer *server = bcApp->addNewServer(tr("New Server"));
+    DVRServer *server = m_serverRepository->createServer(tr("New Server"));
     server->setAutoConnect(true);
     server->setPort(7001);
 

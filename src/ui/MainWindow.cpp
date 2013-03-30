@@ -488,7 +488,7 @@ QWidget *MainWindow::createRecentEvents()
 
 void MainWindow::showOptionsDialog()
 {
-    OptionsDialog *dlg = new OptionsDialog(this);
+    OptionsDialog *dlg = new OptionsDialog(m_serverRepository, this);
     dlg->setAttribute(Qt::WA_DeleteOnClose);
     dlg->show();
 }
@@ -561,7 +561,7 @@ void MainWindow::openServerSettings()
     if (!server)
         return;
 
-    OptionsDialog *dlg = new OptionsDialog(this);
+    OptionsDialog *dlg = new OptionsDialog(m_serverRepository, this);
     dlg->showPage(OptionsDialog::ServerPage);
     dlg->setAttribute(Qt::WA_DeleteOnClose);
 
