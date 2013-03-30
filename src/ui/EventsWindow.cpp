@@ -281,7 +281,7 @@ QWidget *EventsWindow::createResultTitle()
 QWidget *EventsWindow::createResultsView()
 {
     m_resultsView = new EventsView;
-    m_resultsView->setModel(new EventsModel(this));
+    m_resultsView->setModel(new EventsModel(bcApp->serverRepository(), this));
     m_resultsView->setFrameStyle(QFrame::NoFrame);
     m_resultsView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_resultsView, SIGNAL(customContextMenuRequested(QPoint)), SLOT(eventContextMenu(QPoint)));

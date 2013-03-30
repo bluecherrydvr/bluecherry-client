@@ -467,7 +467,7 @@ QWidget *MainWindow::createRecentEvents()
     m_eventsView->setFrameStyle(QFrame::NoFrame);
     m_eventsView->setAttribute(Qt::WA_MacShowFocusRect, false);
 
-    m_eventsModel = new EventsModel(m_eventsView);
+    m_eventsModel = new EventsModel(bcApp->serverRepository(), m_eventsView);
     m_eventsView->setModel(m_eventsModel);
 
     QSettings settings;

@@ -16,21 +16,24 @@
  */
 
 #include "EventsModel.h"
-#include "core/BluecherryApp.h"
 #include "server/DVRServer.h"
+#include "server/DVRServerRepository.h"
 #include "core/DVRCamera.h"
 #include "core/EventData.h"
 #include "event/EventsLoader.h"
 #include <QTextDocument>
 #include <QColor>
 #include <QDebug>
+#include <QIcon>
 #include <QtConcurrentRun>
 
-EventsModel::EventsModel(QObject *parent)
-    : QAbstractItemModel(parent), serverEventsLimit(-1), incompleteEventsFirst(false)
+EventsModel::EventsModel(DVRServerRepository *serverRepository, QObject *parent)
+    : QAbstractItemModel(parent), m_serverRepository(serverRepository), serverEventsLimit(-1), incompleteEventsFirst(false)
 {
-    connect(bcApp, SIGNAL(serverAdded(DVRServer*)), SLOT(serverAdded(DVRServer*)));
-    connect(bcApp, SIGNAL(serverRemoved(DVRServer*)), SLOT(clearServerEvents(DVRServer*)));
+    Q_ASSERT(m_serverRepository);
+
+    connect(m_serverRepository, SIGNAL(serverAdded(DVRServer*)), SLOT(serverAdded(DVRServer*)));
+    connect(m_serverRepository, SIGNAL(serverRemoved(DVRServer*)), SLOT(clearServerEvents(DVRServer*)));
     connect(&updateTimer, SIGNAL(timeout()), SLOT(updateServers()));
 
     //createTestData();
@@ -39,7 +42,7 @@ EventsModel::EventsModel(QObject *parent)
     sortOrder = Qt::DescendingOrder;
     applyFilters();
 
-    foreach (DVRServer *s, bcApp->servers())
+    foreach (DVRServer *s, m_serverRepository->servers())
         serverAdded(s);
 }
 
@@ -449,7 +452,7 @@ QString EventsModel::filterDescription() const
         }
     }
 
-    if (!m_filter.sources.isEmpty() && m_filter.sources.size() != bcApp->servers().size())
+    if (!m_filter.sources.isEmpty() && m_filter.sources.size() != m_serverRepository->servers().size())
     {
         if (m_filter.sources.size() == 1)
         {
@@ -630,7 +633,7 @@ void EventsModel::setUpdateInterval(int ms)
 
 void EventsModel::updateServers()
 {
-    foreach (DVRServer *s, bcApp->servers())
+    foreach (DVRServer *s, m_serverRepository->servers())
         updateServer(s);
 }
 
@@ -666,7 +669,7 @@ void EventsModel::eventsLoaded(bool ok, const QList<EventData *> &events)
     Q_ASSERT(eventsLoader);
 
     DVRServer *server = eventsLoader->server();
-    if (!server || !bcApp->serverExists(server))
+    if (!server || !m_serverRepository->serverExists(server))
         return;
 
     if (ok)
