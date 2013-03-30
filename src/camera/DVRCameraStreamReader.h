@@ -31,6 +31,8 @@ public:
 private:
     QDataStream &m_dataStream;
 
+    DVRCamera getCamera(int serverID, int cameraID);
+
 };
 
 #endif // DVRCAMERASTREAMREADER_H

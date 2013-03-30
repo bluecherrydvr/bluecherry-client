@@ -27,15 +27,6 @@
 
 QHash<QPair<int,int>,DVRCameraData*> DVRCameraData::instances;
 
-DVRCamera DVRCamera::getCamera(int serverID, int cameraID)
-{
-    DVRServer *server = bcApp->serverByID(serverID);
-    if (!server)
-        return 0;
-
-    return getCamera(server, cameraID);
-}
-
 DVRCamera DVRCamera::getCamera(DVRServer *server, int cameraID)
 {
     DVRCameraData *data = DVRCameraData::instances.value(qMakePair(server->id(), cameraID), 0);

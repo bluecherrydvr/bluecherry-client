@@ -15,6 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "core/BluecherryApp.h"
 #include "core/DVRCamera.h"
 #include "DVRCameraStreamReader.h"
 
@@ -33,5 +34,14 @@ DVRCamera DVRCameraStreamReader::readCamera()
 
     int cameraId = -1;
     m_dataStream >> cameraId;
-    return DVRCamera::getCamera(serverId, cameraId);
+    return getCamera(serverId, cameraId);
+}
+
+DVRCamera DVRCameraStreamReader::getCamera(int serverID, int cameraID)
+{
+    DVRServer *server = bcApp->serverByID(serverID);
+    if (!server)
+        return DVRCamera();
+
+    return DVRCamera::getCamera(server, cameraID);
 }
