@@ -95,7 +95,6 @@ signals:
 private slots:
     void performVersionCheck();
     void versionInfoReceived();
-    void onServerRemoved(DVRServer *server);
     void sslErrors(QNetworkReply *reply, const QList<QSslError> &errors);
     void aboutToQuit();
     void resetSystemActivity();

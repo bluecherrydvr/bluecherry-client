@@ -31,6 +31,15 @@ public:
     explicit DVRServerRepository(QObject *parent = 0);
     virtual ~DVRServerRepository();
 
+    void loadServers();
+
+signals:
+    void serverRemoved(DVRServer *server);
+    void serverAlertsChanged();
+
+private slots:
+    void onServerRemoved(DVRServer *server);
+
 private:
     QList<DVRServer *> m_servers;
     int m_maxServerId;

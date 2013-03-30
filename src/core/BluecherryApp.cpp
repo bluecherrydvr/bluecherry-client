@@ -52,6 +52,8 @@ BluecherryApp::BluecherryApp()
     bcApp = this;
 
     m_serverRepository = new DVRServerRepository(this);
+    connect(m_serverRepository, SIGNAL(serverRemoved(DVRServer*)), this, SIGNAL(serverRemoved(DVRServer*)));
+    connect(m_serverRepository, SIGNAL(serverAlertsChanged()), this, SIGNAL(serverAlertsChanged()));
 
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(aboutToQuit()));
 
@@ -203,45 +205,12 @@ QNetworkAccessManager *BluecherryApp::createNam()
 
 void BluecherryApp::loadServers()
 {
-    Q_ASSERT(m_serverRepository->m_servers.isEmpty());
-
-    QSettings settings;
-    settings.beginGroup(QLatin1String("servers"));
-    QStringList groups = settings.childGroups();
-
-    DVRServerSettingsReader settingsReader;
-    foreach (QString group, groups)
-    {
-        bool ok = false;
-        int id = (int)group.toUInt(&ok);
-        if (!ok)
-        {
-            qWarning("Ignoring invalid server ID from configuration");
-            continue;
-        }
-
-        DVRServer *server = settingsReader.readServer(id);
-        if (!server)
-        {
-            qWarning("Ignoring invalid server from configuration");
-            continue;
-        }
-
-        server->setParent(this);
-        connect(server, SIGNAL(serverRemoved(DVRServer*)), SLOT(onServerRemoved(DVRServer*)));
-        connect(server, SIGNAL(statusAlertMessageChanged(QString)), SIGNAL(serverAlertsChanged()));
-
-        m_serverRepository->m_servers.append(server);
-        m_serverRepository->m_maxServerId = qMax(m_serverRepository->m_maxServerId, id);
-
-        if (server->autoConnect() && !server->hostname().isEmpty() && !server->username().isEmpty())
-            server->login();
-    }
+    m_serverRepository->loadServers();
 
 #ifdef Q_OS_LINUX
     /* If there are no servers configured, and the server application is installed here, automatically
      * configure a local server. */
-    if (groups.isEmpty() && QFile::exists(QLatin1String("/etc/bluecherry.conf")))
+    if (m_serverRepository->m_servers.isEmpty() && QFile::exists(QLatin1String("/etc/bluecherry.conf")))
     {
         DVRServer *s = addNewServer(tr("Local"));
         s->setHostname(QHostAddress(QHostAddress::LocalHost).toString());
@@ -253,10 +222,12 @@ void BluecherryApp::loadServers()
 
         DVRServerSettingsWriter writer;
         writer.writeServer(s);
-
-        s->login();
     }
 #endif
+
+    foreach (DVRServer *server, m_serverRepository->m_servers)
+        if (server->autoConnect() && !server->hostname().isEmpty() && !server->username().isEmpty())
+            server->login();
 }
 
 QList<DVRServer *> BluecherryApp::servers() const
@@ -277,7 +248,7 @@ DVRServer *BluecherryApp::addNewServer(const QString &name)
     server->setDisplayName(name);
 
     m_serverRepository->m_servers.append(server);
-    connect(server, SIGNAL(serverRemoved(DVRServer*)), SLOT(onServerRemoved(DVRServer*)));
+    connect(server, SIGNAL(serverRemoved(DVRServer*)), SIGNAL(serverRemoved(DVRServer*)));
     connect(server, SIGNAL(statusAlertMessageChanged(QString)), SLOT(serverAlertsChanged()));
 
     emit serverAdded(server);
@@ -293,12 +264,6 @@ DVRServer *BluecherryApp::findServerID(int id)
     }
 
     return 0;
-}
-
-void BluecherryApp::onServerRemoved(DVRServer *server)
-{
-    if (m_serverRepository->m_servers.removeOne(server))
-        emit serverRemoved(server);
 }
 
 void BluecherryApp::sslErrors(QNetworkReply *reply, const QList<QSslError> &errors)

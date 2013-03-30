@@ -15,7 +15,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "DVRServer.h"
 #include "DVRServerRepository.h"
+#include "DVRServerSettingsReader.h"
+#include <QSettings>
+#include <QStringList>
 
 DVRServerRepository::DVRServerRepository(QObject *parent)
     : QObject(parent), m_maxServerId(-1)
@@ -24,4 +28,45 @@ DVRServerRepository::DVRServerRepository(QObject *parent)
 
 DVRServerRepository::~DVRServerRepository()
 {
+}
+
+void DVRServerRepository::loadServers()
+{
+    Q_ASSERT(m_servers.isEmpty());
+
+    QSettings settings;
+    settings.beginGroup(QLatin1String("servers"));
+    QStringList groups = settings.childGroups();
+
+    DVRServerSettingsReader settingsReader;
+    foreach (QString group, groups)
+    {
+        bool ok = false;
+        int id = (int)group.toUInt(&ok);
+        if (!ok)
+        {
+            qWarning("Ignoring invalid server ID from configuration");
+            continue;
+        }
+
+        DVRServer *server = settingsReader.readServer(id);
+        if (!server)
+        {
+            qWarning("Ignoring invalid server from configuration");
+            continue;
+        }
+
+        server->setParent(this);
+        connect(server, SIGNAL(serverRemoved(DVRServer*)), this, SLOT(onServerRemoved(DVRServer*)));
+        connect(server, SIGNAL(statusAlertMessageChanged(QString)), this, SIGNAL(serverAlertsChanged()));
+
+        m_servers.append(server);
+        m_maxServerId = qMax(m_maxServerId, id);
+    }
+}
+
+void DVRServerRepository::onServerRemoved(DVRServer *server)
+{
+    if (m_servers.removeOne(server))
+        emit serverRemoved(server);
 }
