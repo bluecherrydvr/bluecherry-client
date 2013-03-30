@@ -25,7 +25,6 @@ class DVRServer;
 class DVRServerRepository : public QObject
 {
     Q_OBJECT
-    friend class BluecherryApp;
 
 public:
     explicit DVRServerRepository(QObject *parent = 0);
