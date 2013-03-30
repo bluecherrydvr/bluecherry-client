@@ -235,7 +235,7 @@ void BluecherryApp::loadServers()
         m_serverRepository->m_maxServerId = qMax(m_serverRepository->m_maxServerId, id);
 
         if (server->autoConnect() && !server->hostname().isEmpty() && !server->username().isEmpty())
-            QTimer::singleShot(0, server, SLOT(login()));
+            server->login();
     }
 
 #ifdef Q_OS_LINUX
@@ -253,7 +253,7 @@ void BluecherryApp::loadServers()
         DVRServerSettingsWriter writer;
         writer.writeServer(s);
 
-        QTimer::singleShot(0, s, SLOT(login()));
+        s->login();
     }
 #endif
 }
