@@ -35,6 +35,10 @@ public:
 
     void loadServers();
 
+    int serverCount() const;
+    bool serverExists(DVRServer *) const;
+    const QList<DVRServer *> & servers() const;
+
 signals:
     void serverAdded(DVRServer *server);
     void serverRemoved(DVRServer *server);

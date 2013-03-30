@@ -215,7 +215,7 @@ void BluecherryApp::loadServers()
 
 bool BluecherryApp::shouldAddLocalServer() const
 {
-    if (!m_serverRepository->m_servers.isEmpty())
+    if (m_serverRepository->serverCount() > 0)
         return false;
 
     return QFile::exists(QLatin1String("/etc/bluecherry.conf"));
@@ -237,19 +237,19 @@ void BluecherryApp::addLocalServer()
 #endif
 }
 
-QList<DVRServer *> BluecherryApp::servers() const
+const QList<DVRServer *> & BluecherryApp::servers() const
 {
-    return m_serverRepository->m_servers;
+    return m_serverRepository->servers();
 }
 
 bool BluecherryApp::serverExists(DVRServer *server) const
 {
-    return m_serverRepository->m_servers.contains(server);
+    return m_serverRepository->serverExists(server);
 }
 
 void BluecherryApp::autoConnectServers()
 {
-    foreach (DVRServer *server, m_serverRepository->m_servers)
+    foreach (DVRServer *server, m_serverRepository->servers())
         if (server->autoConnect() && !server->hostname().isEmpty() && !server->username().isEmpty())
             server->login();
 }
@@ -261,7 +261,7 @@ DVRServer * BluecherryApp::addNewServer(const QString &name)
 
 DVRServer *BluecherryApp::findServerID(int id)
 {
-    for (QList<DVRServer*>::Iterator it = m_serverRepository->m_servers.begin(); it != m_serverRepository->m_servers.end(); ++it)
+    for (QList<DVRServer*>::ConstIterator it = m_serverRepository->servers().constBegin(); it != m_serverRepository->servers().constEnd(); ++it)
     {
         if ((*it)->id() == id)
             return *it;

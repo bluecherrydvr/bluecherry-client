@@ -80,6 +80,21 @@ void DVRServerRepository::loadServers()
     }
 }
 
+int DVRServerRepository::serverCount() const
+{
+    return m_servers.count();
+}
+
+bool DVRServerRepository::serverExists(DVRServer *server) const
+{
+    return m_servers.contains(server);
+}
+
+const QList<DVRServer *> & DVRServerRepository::servers() const
+{
+    return m_servers;
+}
+
 void DVRServerRepository::onServerRemoved(DVRServer *server)
 {
     if (m_servers.removeOne(server))
