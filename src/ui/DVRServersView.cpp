@@ -38,7 +38,7 @@ DVRServersView::DVRServersView(QWidget *parent)
     setDragEnabled(true);
     setAnimated(true);
 
-    DVRServersModel *model = new DVRServersModel(this);
+    DVRServersModel *model = new DVRServersModel(bcApp->serverRepository(), this);
     model->setOfflineDisabled(true);
     setModel(model);
 

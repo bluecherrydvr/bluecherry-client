@@ -23,6 +23,7 @@
 #include "core/DVRCamera.h"
 
 class DVRServer;
+class DVRServerRepository;
 
 class DVRServersModel : public QAbstractItemModel
 {
@@ -35,7 +36,7 @@ public:
         DVRCameraRole
     };
 
-    explicit DVRServersModel(QObject *parent = 0);
+    explicit DVRServersModel(DVRServerRepository *serverRepository, QObject *parent = 0);
 
     DVRServer *serverForRow(const QModelIndex &index) const;
     DVRCamera cameraForRow(const QModelIndex &index) const;

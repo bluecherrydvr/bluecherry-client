@@ -15,9 +15,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "core/BluecherryApp.h"
 #include "DVRServersModel.h"
 #include "server/DVRServer.h"
+#include "server/DVRServerRepository.h"
 #include "server/DVRServerSettingsWriter.h"
 #include "core/DVRCamera.h"
 #include <QTextDocument>
@@ -26,9 +26,11 @@
 #include <QMimeData>
 #include <QDataStream>
 
-DVRServersModel::DVRServersModel(QObject *parent)
+DVRServersModel::DVRServersModel(DVRServerRepository *serverRepository, QObject *parent)
     : QAbstractItemModel(parent), m_offlineDisabled(false)
 {
+    Q_ASSERT(serverRepository);
+
     statusIcon = QIcon(QLatin1String(":/icons/status.png"));
     statusIcon.addFile(QLatin1String(":/icons/status-offline.png"), QSize(), QIcon::Disabled, QIcon::Off);
 
@@ -37,10 +39,10 @@ DVRServersModel::DVRServersModel(QObject *parent)
 
     statusAlertIcon = QIcon(QLatin1String(":/icons/status-alert.png"));
 
-    connect(bcApp, SIGNAL(serverAdded(DVRServer*)), SLOT(serverAdded(DVRServer*)));
-    connect(bcApp, SIGNAL(serverRemoved(DVRServer*)), SLOT(serverRemoved(DVRServer*)));
+    connect(serverRepository, SIGNAL(serverAdded(DVRServer*)), SLOT(serverAdded(DVRServer*)));
+    connect(serverRepository, SIGNAL(serverRemoved(DVRServer*)), SLOT(serverRemoved(DVRServer*)));
 
-    QList<DVRServer*> servers = bcApp->servers();
+    const QList<DVRServer *> &servers = serverRepository->servers();
     items.reserve(servers.size());
 
     blockSignals(true);

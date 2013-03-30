@@ -41,7 +41,7 @@ OptionsServerPage::OptionsServerPage(QWidget *parent)
 
     /* Servers list */
     m_serversView = new QTreeView;
-    m_serversView->setModel(new DVRServersModel(m_serversView));
+    m_serversView->setModel(new DVRServersModel(bcApp->serverRepository(), m_serversView));
     m_serversView->header()->setHighlightSections(false);
     m_serversView->header()->setResizeMode(QHeaderView::ResizeToContents);
     m_serversView->header()->setResizeMode(0, QHeaderView::Stretch);
