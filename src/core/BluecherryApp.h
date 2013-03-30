@@ -50,8 +50,6 @@ public:
 
     MainWindow *globalParentWindow() const;
 
-    QList<DVRServer *> serversWithAlerts() const;
-
     /* Used to create other QNAM instances, for use on other threads.
      * Keeps the correct SSL verification behavior, although changes in fingerprints
      * will error rather than prompting the user on any but the default (GUI thread). */
@@ -77,8 +75,6 @@ public slots:
     void setScreensaverInhibited(bool inhibit);
 
 signals:
-    void serverAlertsChanged();
-
     void sslConfirmRequired(DVRServer *server, const QList<QSslError> &errors, const QSslConfiguration &config);
 
     void queryLivePaused();

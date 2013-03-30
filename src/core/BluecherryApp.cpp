@@ -52,7 +52,6 @@ BluecherryApp::BluecherryApp()
     bcApp = this;
 
     m_serverRepository = new DVRServerRepository(this);
-    connect(m_serverRepository, SIGNAL(serverAlertsChanged()), this, SIGNAL(serverAlertsChanged()));
 
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(aboutToQuit()));
 
@@ -335,11 +334,6 @@ void BluecherryApp::releaseLive()
 
     if (!m_livePaused)
         emit livePausedChanged(false);
-}
-
-QList<DVRServer *> BluecherryApp::serversWithAlerts() const
-{
-    return m_serverRepository->serversWithAlerts();
 }
 
 #ifdef Q_OS_WIN
