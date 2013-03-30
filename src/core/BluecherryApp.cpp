@@ -248,6 +248,7 @@ void BluecherryApp::loadServers()
         /* This must match the default username and password for the server */
         s->setUsername(QLatin1String("Admin"));
         s->setPassword(QLatin1String("bluecherry"));
+        s->setPort(7001);
         s->setAutoConnect(true);
 
         DVRServerSettingsWriter writer;
