@@ -46,7 +46,7 @@ StatusBarServerAlert::StatusBarServerAlert(QWidget *parent)
 
 void StatusBarServerAlert::updateAlert()
 {
-    QList<DVRServer*> servers = bcApp->serverAlerts();
+    QList<DVRServer*> servers = bcApp->serversWithAlerts();
     QString message;
 
     if (servers.size() == 1)
@@ -63,7 +63,7 @@ void StatusBarServerAlert::mousePressEvent(QMouseEvent *ev)
     if (ev->button() != Qt::LeftButton)
         return;
 
-    QList<DVRServer*> servers = bcApp->serverAlerts();
+    QList<DVRServer*> servers = bcApp->serversWithAlerts();
     if (servers.isEmpty())
         return;
 

@@ -55,7 +55,7 @@ public:
     DVRServer * serverByID(int id);
     bool serverExists(DVRServer *server) const;
 
-    QList<DVRServer*> serverAlerts() const;
+    QList<DVRServer *> serversWithAlerts() const;
 
     /* Used to create other QNAM instances, for use on other threads.
      * Keeps the correct SSL verification behavior, although changes in fingerprints

@@ -359,15 +359,9 @@ void BluecherryApp::releaseLive()
         emit livePausedChanged(false);
 }
 
-QList<DVRServer*> BluecherryApp::serverAlerts() const
+QList<DVRServer *> BluecherryApp::serversWithAlerts() const
 {
-    QList<DVRServer*> re;
-    for (QList<DVRServer*>::ConstIterator it = m_serverRepository->m_servers.begin(); it != m_serverRepository->m_servers.end(); ++it)
-    {
-        if (!(*it)->statusAlertMessage().isEmpty())
-            re.append(*it);
-    }
-    return re;
+    return m_serverRepository->serversWithAlerts();
 }
 
 #ifdef Q_OS_WIN

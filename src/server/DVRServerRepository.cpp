@@ -104,6 +104,16 @@ DVRServer * DVRServerRepository::serverByID(int id) const
     return 0;
 }
 
+QList<DVRServer *> DVRServerRepository::serversWithAlerts() const
+{
+    QList<DVRServer*> result;
+    foreach (DVRServer *server, m_servers)
+        if (!server->statusAlertMessage().isEmpty())
+            result.append(server);
+
+    return result;
+}
+
 void DVRServerRepository::onServerRemoved(DVRServer *server)
 {
     if (m_servers.removeOne(server))

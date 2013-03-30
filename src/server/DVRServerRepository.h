@@ -39,6 +39,7 @@ public:
     bool serverExists(DVRServer *) const;
     const QList<DVRServer *> & servers() const;
     DVRServer * serverByID(int id) const;
+    QList<DVRServer *> serversWithAlerts() const;
 
 signals:
     void serverAdded(DVRServer *server);
