@@ -50,8 +50,6 @@ public:
 
     MainWindow *globalParentWindow() const;
 
-    bool serverExists(DVRServer *server) const;
-
     QList<DVRServer *> serversWithAlerts() const;
 
     /* Used to create other QNAM instances, for use on other threads.

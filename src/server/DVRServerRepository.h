@@ -35,7 +35,6 @@ public:
     void loadServers();
 
     int serverCount() const;
-    bool serverExists(DVRServer *) const;
     const QList<DVRServer *> & servers() const;
     DVRServer * serverByID(int id) const;
     QList<DVRServer *> serversWithAlerts() const;

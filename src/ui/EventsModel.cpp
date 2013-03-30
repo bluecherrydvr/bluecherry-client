@@ -669,7 +669,7 @@ void EventsModel::eventsLoaded(bool ok, const QList<EventData *> &events)
     Q_ASSERT(eventsLoader);
 
     DVRServer *server = eventsLoader->server();
-    if (!server || !m_serverRepository->serverExists(server))
+    if (!server)
         return;
 
     if (ok)

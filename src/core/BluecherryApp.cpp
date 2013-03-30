@@ -235,11 +235,6 @@ void BluecherryApp::addLocalServer()
 #endif
 }
 
-bool BluecherryApp::serverExists(DVRServer *server) const
-{
-    return m_serverRepository->serverExists(server);
-}
-
 void BluecherryApp::autoConnectServers()
 {
     foreach (DVRServer *server, m_serverRepository->servers())
