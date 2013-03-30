@@ -30,6 +30,21 @@ DVRServerRepository::~DVRServerRepository()
 {
 }
 
+DVRServer * DVRServerRepository::createServer(const QString& name)
+{
+    int id = ++m_maxServerId;
+
+    DVRServer *server = new DVRServer(id, this);
+    server->setDisplayName(name);
+
+    m_servers.append(server);
+        connect(server, SIGNAL(serverRemoved(DVRServer*)), this, SLOT(onServerRemoved(DVRServer*)));
+        connect(server, SIGNAL(statusAlertMessageChanged(QString)), this, SIGNAL(serverAlertsChanged()));
+
+    emit serverAdded(server);
+    return server;
+}
+
 void DVRServerRepository::loadServers()
 {
     Q_ASSERT(m_servers.isEmpty());

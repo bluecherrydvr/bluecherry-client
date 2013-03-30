@@ -31,9 +31,12 @@ public:
     explicit DVRServerRepository(QObject *parent = 0);
     virtual ~DVRServerRepository();
 
+    DVRServer * createServer(const QString &name);
+
     void loadServers();
 
 signals:
+    void serverAdded(DVRServer *server);
     void serverRemoved(DVRServer *server);
     void serverAlertsChanged();
 

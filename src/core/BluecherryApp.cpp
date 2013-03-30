@@ -52,6 +52,7 @@ BluecherryApp::BluecherryApp()
     bcApp = this;
 
     m_serverRepository = new DVRServerRepository(this);
+    connect(m_serverRepository, SIGNAL(serverAdded(DVRServer*)), this, SIGNAL(serverAdded(DVRServer*)));
     connect(m_serverRepository, SIGNAL(serverRemoved(DVRServer*)), this, SIGNAL(serverRemoved(DVRServer*)));
     connect(m_serverRepository, SIGNAL(serverAlertsChanged()), this, SIGNAL(serverAlertsChanged()));
 
@@ -253,19 +254,9 @@ void BluecherryApp::autoConnectServers()
             server->login();
 }
 
-DVRServer *BluecherryApp::addNewServer(const QString &name)
+DVRServer * BluecherryApp::addNewServer(const QString &name)
 {
-    int id = ++m_serverRepository->m_maxServerId;
-
-    DVRServer *server = new DVRServer(id, this);
-    server->setDisplayName(name);
-
-    m_serverRepository->m_servers.append(server);
-    connect(server, SIGNAL(serverRemoved(DVRServer*)), SIGNAL(serverRemoved(DVRServer*)));
-    connect(server, SIGNAL(statusAlertMessageChanged(QString)), SLOT(serverAlertsChanged()));
-
-    emit serverAdded(server);
-    return server;
+    return m_serverRepository->createServer(name);
 }
 
 DVRServer *BluecherryApp::findServerID(int id)
