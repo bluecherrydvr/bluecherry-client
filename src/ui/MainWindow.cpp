@@ -36,6 +36,7 @@
 #include "StatusBandwidthWidget.h"
 #include "StatusBarServerAlert.h"
 #include "server/DVRServer.h"
+#include "server/DVRServerRepository.h"
 #include "server/DVRServerSettingsWriter.h"
 #include "core/BluecherryApp.h"
 #include "core/LiveViewManager.h"
@@ -68,9 +69,11 @@
 #include <QLinearGradient>
 #include <QAction>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), m_trayIcon(0)
+MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
+    : QMainWindow(parent), m_serverRepository(serverRepository), m_trayIcon(0)
 {
+    Q_ASSERT(m_serverRepository);
+
     bcApp->mainWindow = this;
     connect(bcApp->eventDownloadManager(), SIGNAL(eventVideoDownloadAdded(EventVideoDownload*)),
             this, SLOT(showDownloadsWindow()));
@@ -167,9 +170,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(bcApp, SIGNAL(sslConfirmRequired(DVRServer*,QList<QSslError>,QSslConfiguration)),
             SLOT(sslConfirmRequired(DVRServer*,QList<QSslError>,QSslConfiguration)));
     connect(bcApp, SIGNAL(queryLivePaused()), SLOT(queryLivePaused()));
-    connect(bcApp, SIGNAL(serverAdded(DVRServer*)), SLOT(onServerAdded(DVRServer*)));
+    connect(m_serverRepository, SIGNAL(serverAdded(DVRServer*)), SLOT(onServerAdded(DVRServer*)));
 
-    foreach (DVRServer *s, bcApp->servers())
+    foreach (DVRServer *s, m_serverRepository->servers())
         onServerAdded(s);
 
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(saveSettings()));
@@ -189,7 +192,7 @@ void MainWindow::showEvent(QShowEvent *event)
 {
     if (!event->spontaneous())
     {
-        if (bcApp->servers().isEmpty())
+        if (m_serverRepository->serverCount() == 0)
             addServer();
     }
     else
@@ -314,8 +317,8 @@ void MainWindow::createMenu()
     m_serversMenu = menuBar()->addMenu(QString());
     updateServersMenu();
 
-    connect(bcApp, SIGNAL(serverAdded(DVRServer*)), SLOT(updateServersMenu()));
-    connect(bcApp, SIGNAL(serverRemoved(DVRServer*)), SLOT(updateServersMenu()));
+    connect(m_serverRepository, SIGNAL(serverAdded(DVRServer*)), SLOT(updateServersMenu()));
+    connect(m_serverRepository, SIGNAL(serverRemoved(DVRServer*)), SLOT(updateServersMenu()));
 
     QMenu *liveMenu = menuBar()->addMenu(tr("&Live"));
     liveMenu->addAction(tr("New window"), this, SLOT(openLiveWindow()));
@@ -403,7 +406,7 @@ void MainWindow::updateServersMenu()
 {
     m_serversMenu->clear();
 
-    QList<DVRServer*> servers = bcApp->servers();
+    const QList<DVRServer*> & servers = m_serverRepository->servers();
     m_serversMenu->setTitle((servers.size() > 1) ? tr("&Servers") : tr("&Server"));
 
     if (servers.isEmpty())
@@ -770,7 +773,7 @@ void MainWindow::serverDevicesLoaded()
          * is likely the setup wizard. As a result, the configuration dialog will come up
          * before the wizard has ended, but that isn't much of a problem. */
         QMessageBox msg(qApp->activeModalWidget() ? qApp->activeModalWidget() : this);
-        if (bcApp->servers().count() > 1)
+        if (m_serverRepository->serverCount() > 1)
             msg.setText(tr("%1 hasn't been configured yet").arg(Qt::escape(server->displayName())));
         else
             msg.setText(tr("The server hasn't been configured yet"));

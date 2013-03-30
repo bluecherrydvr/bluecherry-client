@@ -28,6 +28,7 @@ class EventsModel;
 class EventsView;
 class QSplitter;
 class DVRServer;
+class DVRServerRepository;
 class QSslError;
 class QSslConfiguration;
 class QLabel;
@@ -37,7 +38,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = 0);
+    MainWindow(DVRServerRepository *serverRepository, QWidget *parent = 0);
     ~MainWindow();
 
     LiveViewWindow *liveView() const { return m_liveView; }
@@ -87,6 +88,7 @@ protected:
     virtual void closeEvent(QCloseEvent *event);
 
 private:
+    DVRServerRepository *m_serverRepository;
     DVRServersView *m_sourcesList;
     EventsModel *m_eventsModel;
     EventsView *m_eventsView;
