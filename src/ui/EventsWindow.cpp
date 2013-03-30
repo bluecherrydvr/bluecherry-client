@@ -64,7 +64,7 @@ EventsWindow::EventsWindow(QWidget *parent)
 
     /* Filters */
     m_sourcesView = new DVRServersView;
-    EventSourcesModel *sourcesModel = new EventSourcesModel(m_sourcesView);
+    EventSourcesModel *sourcesModel = new EventSourcesModel(bcApp->serverRepository(), m_sourcesView);
     m_sourcesView->setModel(sourcesModel);
     m_sourcesView->setMaximumWidth(180);
     //m_sourcesView->setMaximumHeight(150);

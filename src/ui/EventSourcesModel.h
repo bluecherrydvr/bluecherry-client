@@ -24,6 +24,7 @@
 #include "core/DVRCamera.h"
 
 class DVRServer;
+class DVRServerRepository;
 class QStringList;
 
 class EventSourcesModel : public QAbstractItemModel
@@ -31,7 +32,7 @@ class EventSourcesModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    explicit EventSourcesModel(QObject *parent = 0);
+    explicit EventSourcesModel(DVRServerRepository *serverRepository, QObject *parent = 0);
 
     virtual QMap<DVRServer*,QList<int> > checkedSources() const;
 

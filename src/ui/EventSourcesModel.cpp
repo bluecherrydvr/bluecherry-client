@@ -17,16 +17,18 @@
 
 #include "EventSourcesModel.h"
 #include "DVRServersModel.h"
-#include "core/BluecherryApp.h"
 #include "server/DVRServer.h"
+#include "server/DVRServerRepository.h"
 #include "core/DVRCamera.h"
 #include <QFont>
 #include <QStringList>
 
-EventSourcesModel::EventSourcesModel(QObject *parent)
+EventSourcesModel::EventSourcesModel(DVRServerRepository *serverRepository, QObject *parent)
     : QAbstractItemModel(parent)
 {
-    QList<DVRServer*> sl = bcApp->servers();
+    Q_ASSERT(serverRepository);
+
+    QList<DVRServer*> sl = serverRepository->servers();
     servers.reserve(sl.size());
     foreach (DVRServer *s, sl)
     {
