@@ -144,7 +144,6 @@ private:
 Q_DECLARE_METATYPE(DVRCamera)
 
 QDataStream &operator<<(QDataStream &s, const DVRCamera &camera);
-QDataStream &operator>>(QDataStream &s, DVRCamera &camera);
 
 inline DVRCamera DVRCamera::fromQObject(QObject *o)
 {

@@ -16,6 +16,7 @@
  */
 
 #include "DVRCamera.h"
+#include "camera/DVRCameraStreamReader.h"
 #include "server/DVRServer.h"
 #include "BluecherryApp.h"
 #include "MJpegStream.h"
@@ -194,32 +195,16 @@ QDataStream &operator<<(QDataStream &s, const DVRCamera &camera)
     return s;
 }
 
-QDataStream &operator>>(QDataStream &s, DVRCamera &camera)
-{
-    int serverId = -1, cameraId = -1;
-    s >> serverId;
-
-    if (s.status() != QDataStream::Ok || serverId < 0)
-    {
-        camera = DVRCamera();
-        return s;
-    }
-
-    s >> cameraId;
-    camera = DVRCamera::getCamera(serverId, cameraId);
-    return s;
-}
-
 QList<DVRCamera> DVRCamera::fromMimeData(const QMimeData *mimeData)
 {
     QByteArray data = mimeData->data(QLatin1String("application/x-bluecherry-dvrcamera"));
     QDataStream stream(&data, QIODevice::ReadOnly);
+    DVRCameraStreamReader reader(stream);
 
     QList<DVRCamera> re;
     while (!stream.atEnd() && stream.status() == QDataStream::Ok)
     {
-        DVRCamera c;
-        stream >> c;
+        DVRCamera c = reader.readCamera();
         if (c)
             re.append(c);
     }

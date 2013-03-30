@@ -18,6 +18,7 @@
 #include "LiveFeedItem.h"
 #include "LiveStreamItem.h"
 #include "PtzPresetsWindow.h"
+#include "camera/DVRCameraStreamReader.h"
 #include "core/BluecherryApp.h"
 #include "core/CameraPtzControl.h"
 #include "LiveViewWindow.h"
@@ -235,9 +236,8 @@ void LiveFeedItem::loadState(QDataStream *data, int version)
 {
     Q_ASSERT(data);
 
-    DVRCamera c;
-    *data >> c;
-    setCamera(c);
+    DVRCameraStreamReader reader(*data);
+    setCamera(reader.readCamera());
 
     if (version >= 1) {
         int bandwidth_mode = 0;
