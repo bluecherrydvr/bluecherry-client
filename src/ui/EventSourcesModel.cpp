@@ -28,16 +28,42 @@ EventSourcesModel::EventSourcesModel(DVRServerRepository *serverRepository, QObj
 {
     Q_ASSERT(serverRepository);
 
+    connect(serverRepository, SIGNAL(serverAdded(DVRServer*)), this, SLOT(serverAdded(DVRServer*)));
+    connect(serverRepository, SIGNAL(serverRemoved(DVRServer*)), this, SLOT(serverRemoved(DVRServer*)));
+
     QList<DVRServer*> sl = serverRepository->servers();
     servers.reserve(sl.size());
+
+    blockSignals(true);
     foreach (DVRServer *s, sl)
-    {
-        ServerData sd;
-        sd.server = s;
-        sd.cameras = QVector<DVRCamera>::fromList(s->cameras());
-        sd.checkState.fill(true, sd.cameras.size()+1);
-        servers.append(sd);
-    }
+        serverAdded(s);
+    blockSignals(false);
+}
+
+void EventSourcesModel::serverAdded(DVRServer *server)
+{
+    beginInsertRows(QModelIndex(), servers.count(), servers.count());
+
+    ServerData sd;
+    sd.server = server;
+    sd.cameras = QVector<DVRCamera>::fromList(server->cameras());
+    sd.checkState.fill(true, sd.cameras.size()+1);
+    servers.append(sd);
+
+    endInsertRows();
+}
+
+void EventSourcesModel::serverRemoved(DVRServer *server)
+{
+    for (int i = 0; i < servers.count(); i++)
+        if (server == servers.at(i).server)
+        {
+            beginRemoveRows(QModelIndex(), i, i);
+            servers.remove(i);
+            endRemoveRows();
+
+            return;
+        }
 }
 
 QModelIndex EventSourcesModel::indexOfCamera(const DVRCamera &camera) const

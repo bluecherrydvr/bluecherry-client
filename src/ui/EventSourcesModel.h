@@ -49,6 +49,10 @@ public:
 signals:
     void checkedSourcesChanged(const QMap<DVRServer*,QList<int> > &checkedSources);
 
+private slots:
+    void serverAdded(DVRServer *server);
+    void serverRemoved(DVRServer *server);
+
 private:
     struct ServerData
     {
@@ -59,6 +63,7 @@ private:
     };
 
     QVector<ServerData> servers;
+
 };
 
 #endif // EVENTSOURCESMODEL_H
