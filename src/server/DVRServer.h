@@ -56,6 +56,7 @@ public:
     void setKnownCertificate(const QSslCertificate &certificate);
 
     void setError(const QString &error);
+    QString errorMessage() const;
 
 public slots:
     /* Permanently remove from config and delete */

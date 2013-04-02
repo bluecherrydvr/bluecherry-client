@@ -185,8 +185,8 @@ void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const 
         setLoginSuccessful();
     else if (server->isLoginPending())
         setLoginConnecting();
-    else if (!server->api->errorMessage().isEmpty())
-        setLoginError(server->api->errorMessage());
+    else if (!server->errorMessage().isEmpty())
+        setLoginError(server->errorMessage());
 }
 
 void OptionsServerPage::checkServer()

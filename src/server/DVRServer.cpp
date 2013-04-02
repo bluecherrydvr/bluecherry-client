@@ -314,3 +314,8 @@ void DVRServer::setError(const QString &error)
 {
     api->setError(error);
 }
+
+QString DVRServer::errorMessage() const
+{
+    return api->errorMessage();
+}
