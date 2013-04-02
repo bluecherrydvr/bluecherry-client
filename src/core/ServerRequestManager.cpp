@@ -104,7 +104,7 @@ void ServerRequestManager::login(const QString &username, const QString &passwor
     /* Essentially duplicated in SetupWizard's server page; changes are probably
      * necessary there too. */
 
-    QNetworkRequest req = buildRequest(QLatin1String("/ajax/login.php"));
+    QNetworkRequest req = buildRequest(QUrl(QLatin1String("/ajax/login.php")));
     req.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/x-www-form-urlencoded"));
     if (req.url().scheme() == QLatin1String("https") && !QSslSocket::supportsSsl())
     {
