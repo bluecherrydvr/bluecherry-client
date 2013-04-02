@@ -47,8 +47,8 @@ void EventsLoader::loadEvents()
     if (!m_endTime.isNull())
         url.addQueryItem(QLatin1String("endDate"), QString::number(m_endTime.toTime_t()));
 
-    QNetworkRequest req = m_server.data()->api->buildRequest(url);
-    QNetworkReply *reply = m_server.data()->api->sendRequest(req);
+    QNetworkRequest req = m_server.data()->buildRequest(url);
+    QNetworkReply *reply = m_server.data()->sendRequest(req);
     connect(reply, SIGNAL(finished()), SLOT(serverRequestFinished()));
 }
 

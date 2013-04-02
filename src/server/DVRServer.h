@@ -60,6 +60,10 @@ public:
 
     ServerRequestManager::Status status() const;
 
+    QNetworkRequest buildRequest(const QUrl &relativeUrl);
+    QNetworkReply * sendRequest(const QNetworkRequest &request);
+    QNetworkReply * sendRequest(const QUrl &relativeUrl);
+
 public slots:
     /* Permanently remove from config and delete */
     void removeServer();
