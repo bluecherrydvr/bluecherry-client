@@ -34,7 +34,6 @@ class DVRServer : public QObject
     Q_OBJECT
 
 public:
-    ServerRequestManager *api;
     explicit DVRServer(int id, QObject *parent = 0);
 
     bool isOnline() const;
@@ -97,6 +96,7 @@ private slots:
     void disconnectedSlot();
 
 private:
+    ServerRequestManager *m_api;
     DVRServerConfiguration *m_configuration;
 
     QList<DVRCamera> m_cameras;

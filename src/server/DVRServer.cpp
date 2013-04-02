@@ -29,19 +29,19 @@
 DVRServer::DVRServer(int id, QObject *parent)
     : QObject(parent), m_configuration(new DVRServerConfiguration(id, this)), m_devicesLoaded(false)
 {
-    api = new ServerRequestManager(this);
+    m_api = new ServerRequestManager(this);
 
     connect(m_configuration, SIGNAL(changed()), this, SIGNAL(changed()));
-    connect(api, SIGNAL(loginSuccessful()), SLOT(updateCameras()));
-    connect(api, SIGNAL(disconnected()), SLOT(disconnectedSlot()));
+    connect(m_api, SIGNAL(loginSuccessful()), SLOT(updateCameras()));
+    connect(m_api, SIGNAL(disconnected()), SLOT(disconnectedSlot()));
 
-    connect(api, SIGNAL(loginRequestStarted()), this, SIGNAL(loginRequestStarted()));
-    connect(api, SIGNAL(loginSuccessful()), this, SIGNAL(loginSuccessful()));
-    connect(api, SIGNAL(serverError(QString)), this, SIGNAL(serverError(QString)));
-    connect(api, SIGNAL(loginError(QString)), this, SIGNAL(loginError(QString)));
-    connect(api, SIGNAL(disconnected()), this, SIGNAL(disconnected()));
-    connect(api, SIGNAL(statusChanged(int)), this, SIGNAL(statusChanged(int)));
-    connect(api, SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
+    connect(m_api, SIGNAL(loginRequestStarted()), this, SIGNAL(loginRequestStarted()));
+    connect(m_api, SIGNAL(loginSuccessful()), this, SIGNAL(loginSuccessful()));
+    connect(m_api, SIGNAL(serverError(QString)), this, SIGNAL(serverError(QString)));
+    connect(m_api, SIGNAL(loginError(QString)), this, SIGNAL(loginError(QString)));
+    connect(m_api, SIGNAL(disconnected()), this, SIGNAL(disconnected()));
+    connect(m_api, SIGNAL(statusChanged(int)), this, SIGNAL(statusChanged(int)));
+    connect(m_api, SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
 
     connect(&m_refreshTimer, SIGNAL(timeout()), SLOT(updateCameras()));
 }
@@ -60,13 +60,13 @@ void DVRServer::removeServer()
 
 void DVRServer::login()
 {
-    api->login(m_configuration->username(), m_configuration->password());
+    m_api->login(m_configuration->username(), m_configuration->password());
 }
 
 void DVRServer::toggleOnline()
 {
     if (isOnline())
-        api->logout();
+        m_api->logout();
     else
         login();
 }
@@ -83,10 +83,10 @@ void DVRServer::updateCameras()
         m_refreshTimer.start(60000);
 
     qDebug() << "DVRServer: Requesting cameras list";
-    QNetworkReply *reply = api->sendRequest(QUrl(QLatin1String("/ajax/devices.php?XML=1")));
+    QNetworkReply *reply = m_api->sendRequest(QUrl(QLatin1String("/ajax/devices.php?XML=1")));
     connect(reply, SIGNAL(finished()), SLOT(updateCamerasReply()));
 
-    reply = api->sendRequest(QUrl(QLatin1String("/ajax/stats.php")));
+    reply = m_api->sendRequest(QUrl(QLatin1String("/ajax/stats.php")));
     connect(reply, SIGNAL(finished()), SLOT(updateStatsReply()));
 }
 
@@ -282,12 +282,12 @@ void DVRServer::setKnownCertificate(const QSslCertificate &certificate)
 
 bool DVRServer::isOnline() const
 {
-    return api->isOnline();
+    return m_api->isOnline();
 }
 
 bool DVRServer::isLoginPending() const
 {
-    return api->isLoginPending();
+    return m_api->isLoginPending();
 }
 
 DVRServerConfiguration * const DVRServer::configuration() const
@@ -297,7 +297,7 @@ DVRServerConfiguration * const DVRServer::configuration() const
 
 QUrl DVRServer::url() const
 {
-    return api->serverUrl();
+    return m_api->serverUrl();
 }
 
 int DVRServer::serverPort() const
@@ -312,30 +312,30 @@ int DVRServer::rtspPort() const
 
 void DVRServer::setError(const QString &error)
 {
-    api->setError(error);
+    m_api->setError(error);
 }
 
 QString DVRServer::errorMessage() const
 {
-    return api->errorMessage();
+    return m_api->errorMessage();
 }
 
 ServerRequestManager::Status DVRServer::status() const
 {
-    return api->status();
+    return m_api->status();
 }
 
 QNetworkRequest DVRServer::buildRequest(const QUrl &relativeUrl)
 {
-    return api->buildRequest(relativeUrl);
+    return m_api->buildRequest(relativeUrl);
 }
 
 QNetworkReply * DVRServer::sendRequest(const QNetworkRequest &request)
 {
-    return api->sendRequest(request);
+    return m_api->sendRequest(request);
 }
 
 QNetworkReply * DVRServer::sendRequest(const QUrl &relativeUrl)
 {
-    return api->sendRequest(relativeUrl);
+    return m_api->sendRequest(relativeUrl);
 }
