@@ -68,7 +68,6 @@ public:
 
     Status status() const;
 
-    QNetworkReply * sendRequest(const QNetworkRequest &request);
     QNetworkReply * sendRequest(const QUrl &relativeUrl);
 
 public slots:

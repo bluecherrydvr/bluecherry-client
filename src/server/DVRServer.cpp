@@ -326,11 +326,6 @@ DVRServer::Status DVRServer::status() const
     return m_api->status();
 }
 
-QNetworkReply * DVRServer::sendRequest(const QNetworkRequest &request)
-{
-    return m_api->sendRequest(request);
-}
-
 QNetworkReply * DVRServer::sendRequest(const QUrl &relativeUrl)
 {
     return m_api->sendRequest(relativeUrl);
