@@ -47,7 +47,7 @@ EventVideoDownload::~EventVideoDownload()
 {
     if (m_mediaDownload)
     {
-        QUrl eventDownloadUrl = m_event.server()->api->serverUrl().resolved(QUrl(QLatin1String("/media/request.php")));
+        QUrl eventDownloadUrl = m_event.server()->url().resolved(QUrl(QLatin1String("/media/request.php")));
         eventDownloadUrl.addQueryItem(QLatin1String("id"), QString::number(m_event.mediaId()));
 
         bcApp->mediaDownloadManager()->releaseMediaDownload(eventDownloadUrl);
@@ -57,7 +57,7 @@ EventVideoDownload::~EventVideoDownload()
 
 void EventVideoDownload::start()
 {
-    QUrl eventDownloadUrl = m_event.server()->api->serverUrl().resolved(QUrl(QLatin1String("/media/request.php")));
+    QUrl eventDownloadUrl = m_event.server()->url().resolved(QUrl(QLatin1String("/media/request.php")));
     eventDownloadUrl.addQueryItem(QLatin1String("id"), QString::number(m_event.mediaId()));
 
     m_mediaDownload = bcApp->mediaDownloadManager()->acquireMediaDownload(eventDownloadUrl);

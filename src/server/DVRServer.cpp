@@ -282,6 +282,11 @@ DVRServerConfiguration * const DVRServer::configuration() const
     return m_configuration;
 }
 
+QUrl DVRServer::url() const
+{
+    return api->serverUrl();
+}
+
 int DVRServer::serverPort() const
 {
     return m_configuration->port();

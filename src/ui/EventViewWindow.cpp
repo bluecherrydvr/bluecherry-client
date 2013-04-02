@@ -137,7 +137,7 @@ void EventViewWindow::setEvent(const EventData &event)
 
     if (m_event.hasMedia() && m_event.mediaId() >= 0)
     {
-        QUrl url = m_event.server()->api->serverUrl().resolved(QUrl(QLatin1String("/media/request.php")));
+        QUrl url = m_event.server()->url().resolved(QUrl(QLatin1String("/media/request.php")));
         url.addQueryItem(QLatin1String("id"), QString::number(m_event.mediaId()));
         m_videoPlayer->setVideo(url, &m_event);
     }

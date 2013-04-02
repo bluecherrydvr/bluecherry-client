@@ -613,7 +613,7 @@ void MainWindow::sslConfirmRequired(DVRServer *server, const QList<QSslError> &e
                                           "reinstalled.<br><br><b>Server:</b> %1<br><b>URL:</b> %2<br>"
                                           "<b>Fingerprint:</b> %3<br><br>Do you want to connect anyway, and trust "
                                           "this certificate in the future?")
-                                       .arg(Qt::escape(server->configuration()->displayName()), server->api->serverUrl().toString(),
+                                       .arg(Qt::escape(server->configuration()->displayName()), server->url().toString(),
                                             fingerprint));
     server->setProperty("ssl_verify_dialog", QVariant::fromValue<QObject*>(dlg));
     QPushButton *ab = dlg->addButton(tr("Accept Certificate"), QMessageBox::AcceptRole);

@@ -40,6 +40,8 @@ public:
     bool isOnline() const;
 
     DVRServerConfiguration * const configuration() const;
+
+    QUrl url() const;
     int serverPort() const;
     int rtspPort() const;
 
