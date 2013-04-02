@@ -62,7 +62,7 @@ void DVRServersModel::serverAdded(DVRServer *server)
     endInsertRows();
 
     connect(server, SIGNAL(changed()), SLOT(serverDataChanged()));
-    connect(server->api, SIGNAL(statusChanged(int)), SLOT(serverDataChanged()));
+    connect(server, SIGNAL(statusChanged(int)), SLOT(serverDataChanged()));
     connect(server, SIGNAL(cameraAdded(DVRCamera)), SLOT(cameraAdded(DVRCamera)));
     connect(server, SIGNAL(cameraRemoved(DVRCamera)), SLOT(cameraRemoved(DVRCamera)));
     connect(server, SIGNAL(statusAlertMessageChanged(QString)), SLOT(serverDataChanged()));

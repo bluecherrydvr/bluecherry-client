@@ -33,7 +33,15 @@ DVRServer::DVRServer(int id, QObject *parent)
 
     connect(m_configuration, SIGNAL(changed()), this, SIGNAL(changed()));
     connect(api, SIGNAL(loginSuccessful()), SLOT(updateCameras()));
-    connect(api, SIGNAL(disconnected()), SLOT(disconnected()));
+    connect(api, SIGNAL(disconnected()), SLOT(disconnectedSlot()));
+
+    connect(api, SIGNAL(loginRequestStarted()), this, SIGNAL(loginRequestStarted()));
+    connect(api, SIGNAL(loginSuccessful()), this, SIGNAL(loginSuccessful()));
+    connect(api, SIGNAL(serverError(QString)), this, SIGNAL(serverError(QString)));
+    connect(api, SIGNAL(loginError(QString)), this, SIGNAL(loginError(QString)));
+    connect(api, SIGNAL(disconnected()), this, SIGNAL(disconnected()));
+    connect(api, SIGNAL(statusChanged(int)), this, SIGNAL(statusChanged(int)));
+    connect(api, SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
 
     connect(&m_refreshTimer, SIGNAL(timeout()), SLOT(updateCameras()));
 }
@@ -239,7 +247,7 @@ void DVRServer::updateStatsReply()
     }
 }
 
-void DVRServer::disconnected()
+void DVRServer::disconnectedSlot()
 {
     while (!m_cameras.isEmpty())
     {

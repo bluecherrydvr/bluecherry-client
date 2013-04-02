@@ -49,8 +49,8 @@ EventsModel::EventsModel(DVRServerRepository *serverRepository, QObject *parent)
 
 void EventsModel::serverAdded(DVRServer *server)
 {
-    connect(server->api, SIGNAL(loginSuccessful()), SLOT(updateServer()));
-    connect(server->api, SIGNAL(disconnected()), SLOT(clearServerEvents()));
+    connect(server, SIGNAL(loginSuccessful()), SLOT(updateServer()));
+    connect(server, SIGNAL(disconnected()), SLOT(clearServerEvents()));
     updateServer(server);
 }
 

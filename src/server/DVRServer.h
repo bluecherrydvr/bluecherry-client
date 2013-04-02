@@ -73,10 +73,18 @@ signals:
 
     void statusAlertMessageChanged(const QString &message);
 
+    void loginRequestStarted();
+    void loginSuccessful();
+    void serverError(const QString &message);
+    void loginError(const QString &message);
+    void disconnected();
+    void statusChanged(int status);
+    void onlineChanged(bool online);
+
 private slots:
     void updateCamerasReply();
     void updateStatsReply();
-    void disconnected();
+    void disconnectedSlot();
 
 private:
     DVRServerConfiguration *m_configuration;

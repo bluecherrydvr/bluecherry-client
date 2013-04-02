@@ -355,25 +355,25 @@ QMenu *MainWindow::serverMenu(DVRServer *server)
 
     QAction *a = m->addAction(tr("Browse &events"), this, SLOT(showEventsWindow()));
     a->setEnabled(server->isOnline());
-    connect(server->api, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
+    connect(server, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
 
     a = m->addAction(tr("&Configure server"), this, SLOT(openServerConfig()));
     a->setProperty("associatedServer", QVariant::fromValue<QObject*>(server));
     a->setEnabled(server->isOnline());
-    connect(server->api, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
+    connect(server, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
 
     m->addSeparator();
 
     a = m->addAction(tr("Refresh devices"), server, SLOT(updateCameras()));
     a->setEnabled(server->isOnline());
-    connect(server->api, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
+    connect(server, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
 
     a = m->addAction(tr("Settings"), this, SLOT(openServerSettings()));
     a->setProperty("associatedServer", QVariant::fromValue<QObject*>(server));
 
     connect(server, SIGNAL(serverRemoved(DVRServer*)), m, SLOT(deleteLater()));
     connect(server, SIGNAL(changed()), SLOT(updateMenuForServer()));
-    connect(server->api, SIGNAL(statusChanged(int)), SLOT(updateMenuForServer()));
+    connect(server, SIGNAL(statusChanged(int)), SLOT(updateMenuForServer()));
 
     server->setProperty("uiMenu", QVariant::fromValue<QObject*>(m));
     updateMenuForServer(server);

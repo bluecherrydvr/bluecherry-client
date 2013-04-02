@@ -175,9 +175,9 @@ void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const 
     m_passwordEdit->setText(server->configuration()->password());
     m_autoConnect->setChecked(server->configuration()->autoConnect());
 
-    connect(server->api, SIGNAL(loginSuccessful()), SLOT(setLoginSuccessful()));
-    connect(server->api, SIGNAL(loginError(QString)), SLOT(setLoginError(QString)));
-    connect(server->api, SIGNAL(loginRequestStarted()), SLOT(setLoginConnecting()));
+    connect(server, SIGNAL(loginSuccessful()), SLOT(setLoginSuccessful()));
+    connect(server, SIGNAL(loginError(QString)), SLOT(setLoginError(QString)));
+    connect(server, SIGNAL(loginRequestStarted()), SLOT(setLoginConnecting()));
 
     checkServer();
 
