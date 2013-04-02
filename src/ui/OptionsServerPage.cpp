@@ -153,7 +153,7 @@ void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const 
     if (server)
     {
         saveChanges(server);
-        server->api->disconnect(this);
+        server->disconnect(this);
         m_connectionStatus->setVisible(false);
     }
 
