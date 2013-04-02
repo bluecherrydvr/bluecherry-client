@@ -319,3 +319,8 @@ QString DVRServer::errorMessage() const
 {
     return api->errorMessage();
 }
+
+ServerRequestManager::Status DVRServer::status() const
+{
+    return api->status();
+}

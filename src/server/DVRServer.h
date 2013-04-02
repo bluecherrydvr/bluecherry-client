@@ -58,6 +58,8 @@ public:
     void setError(const QString &error);
     QString errorMessage() const;
 
+    ServerRequestManager::Status status() const;
+
 public slots:
     /* Permanently remove from config and delete */
     void removeServer();

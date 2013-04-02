@@ -286,7 +286,7 @@ QVariant DVRServersModel::data(const QModelIndex &index, int role) const
                 return server->configuration()->displayName();
             else if (role == Qt::DecorationRole)
             {
-                if (server->api->status() == ServerRequestManager::LoginError)
+                if (server->status() == ServerRequestManager::LoginError)
                     return statusErrorIcon;
 
                 if (!server->statusAlertMessage().isEmpty())
