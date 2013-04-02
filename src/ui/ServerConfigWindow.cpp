@@ -21,6 +21,8 @@
 #include "core/BluecherryApp.h"
 #include "ui/MainWindow.h"
 #include <QBoxLayout>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QWebView>
 #include <QWebFrame>
 #include <QDesktopServices>

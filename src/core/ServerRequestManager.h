@@ -18,36 +18,27 @@
 #ifndef SERVERREQUESTMANAGER_H
 #define SERVERREQUESTMANAGER_H
 
+#include "server/DVRServer.h"
 #include <QObject>
 #include <QNetworkRequest>
 #include <QNetworkReply>
-
-class DVRServer;
 
 class ServerRequestManager : public QObject
 {
     Q_OBJECT
 
 public:
-    enum Status
-    {
-        LoginError = -2,
-        ServerError = -1,
-        Offline,
-        Online
-    };
-
     DVRServer * const server;
 
     explicit ServerRequestManager(DVRServer *server);
 
-    bool isOnline() const { return m_status == Online; }
+    bool isOnline() const { return m_status == DVRServer::Online; }
     bool isLoginPending() const { return !isOnline() && m_loginReply; }
-    Status status() const { return m_status; }
+    DVRServer::Status status() const { return m_status; }
     QString errorMessage() const { return m_errorMessage; }
 
     void login(const QString &username, const QString &password);
-    void setError(const QString &message) { setStatus(ServerError, message); }
+    void setError(const QString &message) { setStatus(DVRServer::ServerError, message); }
 
     QUrl serverUrl() const;
     QNetworkRequest buildRequest(const QUrl &relativeUrl);
@@ -73,9 +64,9 @@ private slots:
 private:
     QString m_errorMessage;
     QNetworkReply *m_loginReply;
-    Status m_status;
+    DVRServer::Status m_status;
 
-    void setStatus(Status status, const QString &errorMessage = QString());
+    void setStatus(DVRServer::Status status, const QString &errorMessage = QString());
 };
 
 #endif // SERVERREQUESTMANAGER_H

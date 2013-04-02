@@ -18,6 +18,7 @@
 #include "DVRServer.h"
 #include "DVRServerConfiguration.h"
 #include "core/DVRCamera.h"
+#include "core/ServerRequestManager.h"
 #include <QNetworkRequest>
 #include <QUrl>
 #include <QTimer>
@@ -320,7 +321,7 @@ QString DVRServer::errorMessage() const
     return m_api->errorMessage();
 }
 
-ServerRequestManager::Status DVRServer::status() const
+DVRServer::Status DVRServer::status() const
 {
     return m_api->status();
 }

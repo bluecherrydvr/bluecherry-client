@@ -21,10 +21,11 @@
 #include <QObject>
 #include <QVariant>
 #include <QTimer>
-#include "core/ServerRequestManager.h"
 #include "core/DVRCamera.h"
 
 class DVRServerConfiguration;
+class ServerRequestManager;
+class QNetworkReply;
 class QNetworkRequest;
 class QUrl;
 class QSslCertificate;
@@ -34,6 +35,14 @@ class DVRServer : public QObject
     Q_OBJECT
 
 public:
+    enum Status
+    {
+        LoginError = -2,
+        ServerError = -1,
+        Offline,
+        Online
+    };
+
     explicit DVRServer(int id, QObject *parent = 0);
 
     bool isOnline() const;
@@ -57,7 +66,7 @@ public:
     void setError(const QString &error);
     QString errorMessage() const;
 
-    ServerRequestManager::Status status() const;
+    Status status() const;
 
     QNetworkRequest buildRequest(const QUrl &relativeUrl);
     QNetworkReply * sendRequest(const QNetworkRequest &request);

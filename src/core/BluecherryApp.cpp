@@ -26,6 +26,8 @@
 #include <QSettings>
 #include <QStringList>
 #include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QHostAddress>
 #include <QTimer>
 #include <QFile>

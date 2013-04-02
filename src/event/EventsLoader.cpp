@@ -4,6 +4,8 @@
 #include "core/EventData.h"
 #include <QFuture>
 #include <QFutureWatcher>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QtConcurrentRun>
 
 EventsLoader::EventsLoader(DVRServer *server, QObject *parent)

@@ -20,6 +20,7 @@
 #include "server/DVRServerConfiguration.h"
 #include "server/DVRServerRepository.h"
 #include "core/DVRCamera.h"
+#include "core/ServerRequestManager.h"
 #include <QTextDocument>
 #include <QApplication>
 #include <QStyle>
@@ -286,7 +287,7 @@ QVariant DVRServersModel::data(const QModelIndex &index, int role) const
                 return server->configuration()->displayName();
             else if (role == Qt::DecorationRole)
             {
-                if (server->status() == ServerRequestManager::LoginError)
+                if (server->status() == DVRServer::LoginError)
                     return statusErrorIcon;
 
                 if (!server->statusAlertMessage().isEmpty())

@@ -18,8 +18,9 @@
 #include "CameraPtzControl.h"
 #include "BluecherryApp.h"
 #include "server/DVRServer.h"
-#include <QVariant>
 #include <QDebug>
+#include <QNetworkReply>
+#include <QVariant>
 #include <QXmlStreamReader>
 
 Q_DECLARE_METATYPE(QWeakPointer<CameraPtzControl>)
