@@ -649,7 +649,7 @@ void EventsModel::updateServer(DVRServer *server)
             return;
     }
 
-    if (!server->api->isOnline() || updatingServers.contains(server))
+    if (!server->isOnline() || updatingServers.contains(server))
         return;
 
     updatingServers.insert(server);

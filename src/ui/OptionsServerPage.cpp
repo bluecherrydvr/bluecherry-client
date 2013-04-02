@@ -181,7 +181,7 @@ void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const 
 
     checkServer();
 
-    if (server->api->isOnline())
+    if (server->isOnline())
         setLoginSuccessful();
     else if (server->api->isLoginPending())
         setLoginConnecting();
@@ -284,7 +284,7 @@ void OptionsServerPage::saveChanges(DVRServer *server)
 
     server->configuration()->setAutoConnect(m_autoConnect->isChecked());
 
-    if (connectionModified || (m_autoConnect->isChecked() && !server->api->isOnline()))
+    if (connectionModified || (m_autoConnect->isChecked() && !server->isOnline()))
         server->login();
 }
 

@@ -57,7 +57,7 @@ void DVRServer::login()
 
 void DVRServer::toggleOnline()
 {
-    if (api->isOnline())
+    if (isOnline())
         api->logout();
     else
         login();
@@ -65,7 +65,7 @@ void DVRServer::toggleOnline()
 
 void DVRServer::updateCameras()
 {
-    if (!api->isOnline())
+    if (!isOnline())
     {
         m_refreshTimer.stop();
         return;
@@ -270,6 +270,11 @@ bool DVRServer::isKnownCertificate(const QSslCertificate &certificate) const
 void DVRServer::setKnownCertificate(const QSslCertificate &certificate)
 {
     m_configuration->setSslDigest(certificate.digest(QCryptographicHash::Sha1));
+}
+
+bool DVRServer::isOnline() const
+{
+    return api->isOnline();
 }
 
 DVRServerConfiguration * const DVRServer::configuration() const

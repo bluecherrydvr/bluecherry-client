@@ -33,7 +33,7 @@ void EventsLoader::setEndTime(const QDateTime &endTime)
 
 void EventsLoader::loadEvents()
 {
-    if (!m_server || !m_server.data()->api || !m_server.data()->api->isOnline())
+    if (!m_server || !m_server.data()->api || !m_server.data()->isOnline())
     {
         emit eventsLoaded(false, QList<EventData*>());
         deleteLater();

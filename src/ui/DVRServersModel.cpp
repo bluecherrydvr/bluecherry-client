@@ -249,7 +249,7 @@ Qt::ItemFlags DVRServersModel::flags(const QModelIndex &index) const
     else
         s = serverForRow(index);
 
-    if (!m_offlineDisabled || (s && s->api->isOnline() && (!camera.isValid() || !camera.isDisabled())))
+    if (!m_offlineDisabled || (s && s->isOnline() && (!camera.isValid() || !camera.isDisabled())))
         re |= Qt::ItemIsEnabled;
     else
         return re;
@@ -295,7 +295,7 @@ QVariant DVRServersModel::data(const QModelIndex &index, int role) const
                 if (m_offlineDisabled)
                     return statusIcon;
                 else
-                    return statusIcon.pixmap(16, server->api->isOnline() ? QIcon::Normal : QIcon::Disabled);
+                    return statusIcon.pixmap(16, server->isOnline() ? QIcon::Normal : QIcon::Disabled);
             }
             break;
         case 1:

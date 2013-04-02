@@ -354,18 +354,18 @@ QMenu *MainWindow::serverMenu(DVRServer *server)
     m->addSeparator();
 
     QAction *a = m->addAction(tr("Browse &events"), this, SLOT(showEventsWindow()));
-    a->setEnabled(server->api->isOnline());
+    a->setEnabled(server->isOnline());
     connect(server->api, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
 
     a = m->addAction(tr("&Configure server"), this, SLOT(openServerConfig()));
     a->setProperty("associatedServer", QVariant::fromValue<QObject*>(server));
-    a->setEnabled(server->api->isOnline());
+    a->setEnabled(server->isOnline());
     connect(server->api, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
 
     m->addSeparator();
 
     a = m->addAction(tr("Refresh devices"), server, SLOT(updateCameras()));
-    a->setEnabled(server->api->isOnline());
+    a->setEnabled(server->isOnline());
     connect(server->api, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
 
     a = m->addAction(tr("Settings"), this, SLOT(openServerSettings()));
@@ -393,13 +393,13 @@ void MainWindow::updateMenuForServer(DVRServer *server)
 
     QMenu *m = serverMenu(server);
     m->setTitle(server->configuration()->displayName());
-    m->setIcon(QIcon(server->api->isOnline() ? QLatin1String(":/icons/status.png") :
-                                               QLatin1String(":/icons/status-offline.png")));
+    m->setIcon(QIcon(server->isOnline() ? QLatin1String(":/icons/status.png") :
+                                          QLatin1String(":/icons/status-offline.png")));
 
     QAction *connect = m->findChild<QAction*>(QLatin1String("aConnect"));
     Q_ASSERT(connect);
     if (connect)
-        connect->setText(server->api->isOnline() ? tr("Disconnect") : tr("Connect"));
+        connect->setText(server->isOnline() ? tr("Disconnect") : tr("Connect"));
 }
 
 void MainWindow::updateServersMenu()

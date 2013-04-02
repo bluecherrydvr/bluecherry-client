@@ -37,6 +37,8 @@ public:
     ServerRequestManager *api;
     explicit DVRServer(int id, QObject *parent = 0);
 
+    bool isOnline() const;
+
     DVRServerConfiguration * const configuration() const;
     int serverPort() const;
     int rtspPort() const;

@@ -154,7 +154,7 @@ Qt::ItemFlags EventSourcesModel::flags(const QModelIndex &index) const
     if (!server.isValid())
         server = index;
 
-    if (!server.row() || servers[server.row()-1].server->api->isOnline())
+    if (!server.row() || servers[server.row()-1].server->isOnline())
         re |= Qt::ItemIsEnabled;
 
     return re;
@@ -197,7 +197,7 @@ QVariant EventSourcesModel::data(const QModelIndex &index, int role) const
             else if (role == Qt::CheckStateRole)
             {
                 int c = sd.checkState.count(true);
-                if (!c || !sd.server->api->isOnline())
+                if (!c || !sd.server->isOnline())
                     return Qt::Unchecked;
                 else if (c == sd.cameras.size()+1)
                     return Qt::Checked;
@@ -230,7 +230,7 @@ QVariant EventSourcesModel::data(const QModelIndex &index, int role) const
         switch (role)
         {
         case Qt::CheckStateRole:
-            return (sd.checkState[index.row()] && sd.server->api->isOnline()) ? Qt::Checked : Qt::Unchecked;
+            return (sd.checkState[index.row()] && sd.server->isOnline()) ? Qt::Checked : Qt::Unchecked;
         }
     }
 
