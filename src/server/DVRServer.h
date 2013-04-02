@@ -68,7 +68,6 @@ public:
 
     Status status() const;
 
-    QNetworkRequest buildRequest(const QUrl &relativeUrl);
     QNetworkReply * sendRequest(const QNetworkRequest &request);
     QNetworkReply * sendRequest(const QUrl &relativeUrl);
 
