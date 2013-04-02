@@ -304,3 +304,8 @@ int DVRServer::rtspPort() const
 {
     return m_configuration->port() + 1;
 }
+
+void DVRServer::setError(const QString &error)
+{
+    api->setError(error);
+}

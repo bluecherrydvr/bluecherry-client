@@ -314,7 +314,7 @@ void BluecherryApp::sslErrors(QNetworkReply *reply, const QList<QSslError> &erro
         /* If the user accepted, this should now be a known certificate */
         if (!server->isKnownCertificate(reply->sslConfiguration().peerCertificate()))
         {
-            server->api->setError(tr("Unrecognized SSL certificate"));
+            server->setError(tr("Unrecognized SSL certificate"));
             return;
         }
     }

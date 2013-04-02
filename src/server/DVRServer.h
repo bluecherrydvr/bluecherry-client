@@ -54,6 +54,8 @@ public:
     bool isKnownCertificate(const QSslCertificate &certificate) const;
     void setKnownCertificate(const QSslCertificate &certificate);
 
+    void setError(const QString &error);
+
 public slots:
     /* Permanently remove from config and delete */
     void removeServer();
