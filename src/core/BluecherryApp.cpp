@@ -22,8 +22,6 @@
 #include "network/MediaDownloadManager.h"
 #include "server/DVRServer.h"
 #include "server/DVRServerRepository.h"
-#include "server/DVRServerSettingsReader.h"
-#include "server/DVRServerSettingsWriter.h"
 #include <QSettings>
 #include <QStringList>
 #include <QNetworkAccessManager>
@@ -91,6 +89,19 @@ BluecherryApp::BluecherryApp()
     m_mediaDownloadManager->setCookieJar(nam->cookieJar());
 
     m_eventDownloadManager = new EventDownloadManager(this);
+
+    connect(qApp, SIGNAL(commitDataRequest(QSessionManager&)), this, SLOT(commitDataRequest(QSessionManager&)));
+    connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(saveSettings()));
+}
+
+void BluecherryApp::commitDataRequest(QSessionManager &sessionManager)
+{
+    saveSettings();
+}
+
+void BluecherryApp::saveSettings()
+{
+    m_serverRepository->storeServers();
 }
 
 void BluecherryApp::performVersionCheck()
@@ -228,9 +239,6 @@ void BluecherryApp::addLocalServer()
     s->setPassword(QLatin1String("bluecherry"));
     s->setPort(7001);
     s->setAutoConnect(true);
-
-    DVRServerSettingsWriter writer;
-    writer.writeServer(s);
 #endif
 }
 
@@ -309,9 +317,6 @@ void BluecherryApp::sslErrors(QNetworkReply *reply, const QList<QSslError> &erro
             return;
         }
     }
-
-    DVRServerSettingsWriter writer;
-    writer.writeServer(server);
 
     reply->ignoreSslErrors();
 }

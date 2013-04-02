@@ -21,6 +21,7 @@
 #include <QObject>
 #include <QList>
 #include <QIcon>
+#include <QSessionManager>
 #include "core/TransferRateCalculator.h"
 
 class DVRServer;
@@ -73,6 +74,7 @@ public slots:
     void pauseLive();
     void releaseLive();
     void setScreensaverInhibited(bool inhibit);
+    void commitDataRequest(QSessionManager &sessionManager);
 
 signals:
     void sslConfirmRequired(DVRServer *server, const QList<QSslError> &errors, const QSslConfiguration &config);
@@ -88,6 +90,7 @@ private slots:
     void sslErrors(QNetworkReply *reply, const QList<QSslError> &errors);
     void aboutToQuit();
     void resetSystemActivity();
+    void saveSettings();
 
 private:
     DVRServerRepository *m_serverRepository;

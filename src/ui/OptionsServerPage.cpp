@@ -20,7 +20,6 @@
 #include "core/BluecherryApp.h"
 #include "server/DVRServer.h"
 #include "server/DVRServerRepository.h"
-#include "server/DVRServerSettingsWriter.h"
 #include "ui/WebRtpPortCheckerWidget.h"
 #include <QTreeView>
 #include <QHeaderView>
@@ -283,9 +282,6 @@ void OptionsServerPage::saveChanges(DVRServer *server)
     }
 
     server->setAutoConnect(m_autoConnect->isChecked());
-
-    DVRServerSettingsWriter writer;
-    writer.writeServer(server);
 
     if (connectionModified || (m_autoConnect->isChecked() && !server->api->isOnline()))
         server->login();

@@ -18,6 +18,7 @@
 #include "DVRServer.h"
 #include "DVRServerRepository.h"
 #include "DVRServerSettingsReader.h"
+#include "DVRServerSettingsWriter.h"
 #include <QSettings>
 #include <QStringList>
 
@@ -78,6 +79,14 @@ void DVRServerRepository::loadServers()
         m_servers.append(server);
         m_maxServerId = qMax(m_maxServerId, id);
     }
+}
+
+void DVRServerRepository::storeServers()
+{
+    DVRServerSettingsWriter settingsWriter;
+
+    foreach (DVRServer *server, m_servers)
+        settingsWriter.writeServer(server);
 }
 
 int DVRServerRepository::serverCount() const

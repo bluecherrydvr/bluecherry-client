@@ -18,7 +18,6 @@
 #include "DVRServersModel.h"
 #include "server/DVRServer.h"
 #include "server/DVRServerRepository.h"
-#include "server/DVRServerSettingsWriter.h"
 #include "core/DVRCamera.h"
 #include <QTextDocument>
 #include <QApplication>
@@ -377,9 +376,6 @@ bool DVRServersModel::setData(const QModelIndex &index, const QVariant &value, i
     default:
         return false;
     }
-
-    DVRServerSettingsWriter writer;
-    writer.writeServer(server);
 
     return true;
 }

@@ -33,6 +33,7 @@ public:
     DVRServer * createServer(const QString &name);
 
     void loadServers();
+    void storeServers();
 
     int serverCount() const;
     const QList<DVRServer *> & servers() const;
