@@ -86,6 +86,7 @@ private slots:
 private:
     QHash<DVRServer*,ServerData*> serversMap;
     QHash<EventData*,int> rowsMap;
+    int m_rowHeight;
 
     VisibleTimeRange visibleTimeRange;
 
@@ -107,6 +108,8 @@ private:
     QDateTime earliestDate();
     QDateTime latestDate();
 
+    bool isEventVisible(EventData *data) const;
+
     void scheduleDelayedItemsLayout(LayoutFlags flags);
     void ensureLayout();
 
@@ -119,24 +122,29 @@ private:
 
     /* Scroll-invariant inner y-position to row data, suitable for vertical painting and hit tests.
      * First row will be at position 0, which is drawn just below the top padding when scrolled up. */
-    QMap<int, RowData*> layoutRows;
+    QList<RowData *> layoutRows;
     int layoutRowsBottom;
 
     void doRowsLayout();
-    int layoutHeightForRow(const QMap<int,RowData*>::ConstIterator &iterator) const;
+    QList<RowData *>::const_iterator findLayoutRow(int y) const;
 
     /* Mouse events */
     QPoint mouseClickPos;
     QRubberBand *mouseRubberBand;
     
-    int paintDays(QPainter &p, const QRect &rect, int yPos);
+    QDateTime firstTickDateTime() const;
+    
+    void paintDays(QPainter &p);
+    void paintTickLines(QPainter &p, const QRect &rect);
+    void paintLegend(QPainter &p, int width);
+    void paintChart(QPainter &p, int width);
 
     int leftPadding() const;
     int topPadding() const { return cachedTopPadding; }
-    int rowHeight() const { return 20; }
+    int rowHeight() const { return m_rowHeight; }
     int cellMinimum() const { return 8; }
 
-    void clearLeftPadding();
+    void clearLeftPaddingCache();
 
     EventData *rowData(int row) const;
     bool findEvent(EventData *event, bool create, ServerData **server, LocationData **location, int *position);
@@ -152,11 +160,14 @@ private:
 
     /* Area of the viewport containing items */
     QRect viewportItemArea() const;
-    /* X-coordinate offset from the edge of the viewport item area for the given time */
+    int secondsFromVisibleStart(const QDateTime &serverTime) const;
     int timeXOffset(const QDateTime &time) const;
-    QRect timeCellRect(const QDateTime &start, int duration) const;
+    double pixelsPerSeconds(int seconds) const;
+    QRect timeCellRect(const QDateTime &start, int duration, int top = 0, int height = 0) const;
 
     void paintRow(QPainter *p, QRect rect, LocationData *locationData);
+    void paintEvent(QPainter &p, int boxHeight, EventData *event);
+
 };
 
 inline void EventTimelineWidget::ensureLayout()

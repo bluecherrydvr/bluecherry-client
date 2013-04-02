@@ -65,6 +65,7 @@ set (bluecherry_client_main_SRCS
     src/ui/EventTagsDelegate.cpp
     src/ui/EventTagsModel.cpp
     src/ui/EventTagsView.cpp
+    src/ui/EventTimelineDatePainter.cpp
     src/ui/EventTimelineWidget.cpp
     src/ui/EventTypesFilter.cpp
     src/ui/EventVideoDownloadsWindow.cpp
