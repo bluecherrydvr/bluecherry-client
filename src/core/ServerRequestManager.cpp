@@ -17,6 +17,7 @@
 
 #include "ServerRequestManager.h"
 #include "server/DVRServer.h"
+#include "server/DVRServerConfiguration.h"
 #include "BluecherryApp.h"
 #include <QNetworkAccessManager>
 #include <QNetworkCookieJar>
@@ -37,7 +38,7 @@ void ServerRequestManager::setStatus(Status s, const QString &errmsg)
     m_status = s;
     m_errorMessage = errmsg;
 
-    qDebug() << "ServerRequestManager" << server->displayName() << ": Status" << m_status << "message" << m_errorMessage;
+    qDebug() << "ServerRequestManager" << server->configuration()->displayName() << ": Status" << m_status << "message" << m_errorMessage;
 
     emit statusChanged(m_status);
 
@@ -68,7 +69,7 @@ QUrl ServerRequestManager::serverUrl() const
 {
     QUrl url;
     url.setScheme(QLatin1String("https"));
-    url.setHost(server->hostname());
+    url.setHost(server->configuration()->hostname());
     url.setPort(server->serverPort());
     return url;
 }

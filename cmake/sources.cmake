@@ -47,6 +47,7 @@ set (bluecherry_client_main_SRCS
     src/network/SocketError.cpp
 
     src/server/DVRServer.cpp
+    src/server/DVRServerConfiguration.cpp
     src/server/DVRServerRepository.cpp
     src/server/DVRServerSettingsReader.cpp
     src/server/DVRServerSettingsWriter.cpp

@@ -15,24 +15,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DVRServerSettingsWriter.h"
 #include "DVRServer.h"
+#include "DVRServerConfiguration.h"
+#include "DVRServerSettingsWriter.h"
 #include <QSettings>
 
 void DVRServerSettingsWriter::writeServer(DVRServer *server) const
 {
     Q_ASSERT(server);
 
-    int serverId = server->id();
+    int serverId = server->configuration()->id();
     Q_ASSERT(serverId >= 0);
 
-    writeSetting(serverId, QLatin1String("displayName"), server->displayName());
-    writeSetting(serverId, QLatin1String("hostname"), server->hostname());
-    writeSetting(serverId, QLatin1String("port"), server->port());
-    writeSetting(serverId, QLatin1String("username"), server->username());
-    writeSetting(serverId, QLatin1String("password"), server->password());
-    writeSetting(serverId, QLatin1String("autoConnect"), server->autoConnect());
-    writeSetting(serverId, QLatin1String("sslDigest"), server->sslDigest());
+    writeSetting(serverId, QLatin1String("displayName"), server->configuration()->displayName());
+    writeSetting(serverId, QLatin1String("hostname"), server->configuration()->hostname());
+    writeSetting(serverId, QLatin1String("port"), server->configuration()->port());
+    writeSetting(serverId, QLatin1String("username"), server->configuration()->username());
+    writeSetting(serverId, QLatin1String("password"), server->configuration()->password());
+    writeSetting(serverId, QLatin1String("autoConnect"), server->configuration()->autoConnect());
+    writeSetting(serverId, QLatin1String("sslDigest"), server->configuration()->sslDigest());
 }
 
 void DVRServerSettingsWriter::writeSetting(int serverId, const QString &key, const QVariant &value) const

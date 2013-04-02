@@ -18,6 +18,7 @@
 #include "StatusBarServerAlert.h"
 #include "ServerConfigWindow.h"
 #include "server/DVRServer.h"
+#include "server/DVRServerConfiguration.h"
 #include "server/DVRServerRepository.h"
 #include <QBoxLayout>
 #include <QIcon>
@@ -53,7 +54,7 @@ void StatusBarServerAlert::updateAlert()
     QString message;
 
     if (servers.size() == 1)
-        message = tr("Alert on %1").arg(servers[0]->displayName());
+        message = tr("Alert on %1").arg(servers[0]->configuration()->displayName());
     else if (servers.size() > 1)
         message = tr("Alerts on %1 servers").arg(servers.size());
 

@@ -24,6 +24,7 @@
 #include "core/ServerRequestManager.h"
 #include "core/DVRCamera.h"
 
+class DVRServerConfiguration;
 class QNetworkRequest;
 class QUrl;
 class QSslCertificate;
@@ -36,30 +37,9 @@ public:
     ServerRequestManager *api;
     explicit DVRServer(int id, QObject *parent = 0);
 
-    int id() const;
-
-    QString displayName() const;
-    void setDisplayName(const QString &displayName);
-
-    QString hostname() const;
-    void setHostname(const QString &hostname);
-
-    int port() const;
+    DVRServerConfiguration * const configuration() const;
     int serverPort() const;
     int rtspPort() const;
-    void setPort(int port);
-
-    QString username() const;
-    void setUsername(const QString &username);
-
-    QString password() const;
-    void setPassword(const QString &password);
-
-    bool autoConnect() const;
-    void setAutoConnect(bool autoConnect);
-
-    QByteArray sslDigest() const;
-    void setSslDigest(const QByteArray &sslDigest);
 
     QList<DVRCamera> cameras() const { return m_cameras; }
     DVRCamera findCamera(int id) { return DVRCamera::getCamera(this, id); }
@@ -95,15 +75,7 @@ private slots:
     void disconnected();
 
 private:
-    const int m_id;
-
-    QString m_displayName;
-    QString m_hostname;
-    int m_port;
-    QString m_username;
-    QString m_password;
-    bool m_autoConnect;
-    QByteArray m_sslDigest;
+    DVRServerConfiguration *m_configuration;
 
     QList<DVRCamera> m_cameras;
     QString m_statusAlertMessage;

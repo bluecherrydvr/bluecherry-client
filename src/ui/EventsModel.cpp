@@ -17,6 +17,7 @@
 
 #include "EventsModel.h"
 #include "server/DVRServer.h"
+#include "server/DVRServerConfiguration.h"
 #include "server/DVRServerRepository.h"
 #include "core/DVRCamera.h"
 #include "core/EventData.h"
@@ -153,7 +154,7 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
     {
     case ServerColumn:
         if (role == Qt::DisplayRole)
-            return data->server()->displayName();
+            return data->server()->configuration()->displayName();
         break;
     case LocationColumn:
         if (role == Qt::DisplayRole)
@@ -278,7 +279,7 @@ public:
         switch (column)
         {
         case EventsModel::ServerColumn:
-            re = QString::localeAwareCompare(e1->server()->displayName(), e2->server()->displayName()) <= 0;
+            re = QString::localeAwareCompare(e1->server()->configuration()->displayName(), e2->server()->configuration()->displayName()) <= 0;
             break;
         case EventsModel::LocationColumn:
             re = QString::localeAwareCompare(e1->uiLocation(), e2->uiLocation()) <= 0;
@@ -465,7 +466,7 @@ QString EventsModel::filterDescription() const
                     re += tr(" on selected cameras");
             }
 
-            re += tr(" from %1").arg(m_filter.sources.begin().key()->displayName());
+            re += tr(" from %1").arg(m_filter.sources.begin().key()->configuration()->displayName());
         }
         else if (!allCameras)
             re += tr(" on selected cameras");

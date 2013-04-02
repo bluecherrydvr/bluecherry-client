@@ -18,6 +18,7 @@
 #include "EventSourcesModel.h"
 #include "DVRServersModel.h"
 #include "server/DVRServer.h"
+#include "server/DVRServerConfiguration.h"
 #include "server/DVRServerRepository.h"
 #include "core/DVRCamera.h"
 #include <QFont>
@@ -191,7 +192,7 @@ QVariant EventSourcesModel::data(const QModelIndex &index, int role) const
             const ServerData &sd = servers[index.row()-1];
             if (role == Qt::DisplayRole)
             {
-                return sd.server->displayName();
+                return sd.server->configuration()->displayName();
             }
             else if (role == Qt::CheckStateRole)
             {

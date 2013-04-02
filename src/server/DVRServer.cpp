@@ -16,6 +16,7 @@
  */
 
 #include "DVRServer.h"
+#include "DVRServerConfiguration.h"
 #include "core/DVRCamera.h"
 #include <QNetworkRequest>
 #include <QUrl>
@@ -26,76 +27,32 @@
 #include <QSettings>
 
 DVRServer::DVRServer(int id, QObject *parent)
-    : QObject(parent), m_id(id), m_devicesLoaded(false)
+    : QObject(parent), m_configuration(new DVRServerConfiguration(id, this)), m_devicesLoaded(false)
 {
     api = new ServerRequestManager(this);
 
+    connect(m_configuration, SIGNAL(changed()), this, SIGNAL(changed()));
     connect(api, SIGNAL(loginSuccessful()), SLOT(updateCameras()));
     connect(api, SIGNAL(disconnected()), SLOT(disconnected()));
 
     connect(&m_refreshTimer, SIGNAL(timeout()), SLOT(updateCameras()));
 }
 
-void DVRServer::setDisplayName(const QString &name)
-{
-    if (m_displayName == name)
-        return;
-
-    m_displayName = name;
-    emit changed();
-}
-
-void DVRServer::setHostname(const QString &hostname)
-{
-    m_hostname = hostname;
-    emit changed();
-}
-
-void DVRServer::setPort(int port)
-{
-    m_port = port;
-    emit changed();
-}
-
-void DVRServer::setUsername(const QString &username)
-{
-    m_username = username;
-    emit changed();
-}
-
-void DVRServer::setPassword(const QString &password)
-{
-    m_password = password;
-    emit changed();
-}
-
-void DVRServer::setAutoConnect(bool autoConnect)
-{
-    m_autoConnect = autoConnect;
-    emit changed();
-}
-
-void DVRServer::setSslDigest(const QByteArray &sslDigest)
-{
-    m_sslDigest = sslDigest;
-    emit changed();
-}
-
 void DVRServer::removeServer()
 {
-    qDebug("Deleting DVR server %d", m_id);
+    qDebug("Deleting DVR server %d", m_configuration->id());
 
     emit serverRemoved(this);
 
     QSettings settings;
-    settings.remove(QString::fromLatin1("servers/%1").arg(m_id));
+    settings.remove(QString::fromLatin1("servers/%1").arg(m_configuration->id()));
 
     deleteLater();
 }
 
 void DVRServer::login()
 {
-    api->login(username(), password());
+    api->login(m_configuration->username(), m_configuration->password());
 }
 
 void DVRServer::toggleOnline()
@@ -298,7 +255,7 @@ void DVRServer::disconnected()
 
 bool DVRServer::isKnownCertificate(const QSslCertificate &certificate) const
 {
-    if (m_sslDigest.isEmpty())
+    if (m_configuration->sslDigest().isEmpty())
     {
         /* If we don't know a certificate yet, we treat the first one we see as
          * correct. This is insecure, obviously, but it's a much nicer way to behave
@@ -307,60 +264,25 @@ bool DVRServer::isKnownCertificate(const QSslCertificate &certificate) const
         return true;
     }
 
-    return (certificate.digest(QCryptographicHash::Sha1) == m_sslDigest);
+    return (certificate.digest(QCryptographicHash::Sha1) == m_configuration->sslDigest());
 }
 
 void DVRServer::setKnownCertificate(const QSslCertificate &certificate)
 {
-    setSslDigest(certificate.digest(QCryptographicHash::Sha1));
+    m_configuration->setSslDigest(certificate.digest(QCryptographicHash::Sha1));
 }
 
-int DVRServer::id() const
+DVRServerConfiguration * const DVRServer::configuration() const
 {
-    return m_id;
-}
-
-QString DVRServer::displayName() const
-{
-    return m_displayName;
-}
-
-QString DVRServer::hostname() const
-{
-    return m_hostname;
-}
-
-int DVRServer::port() const
-{
-    return m_port;
+    return m_configuration;
 }
 
 int DVRServer::serverPort() const
 {
-    return m_port;
+    return m_configuration->port();
 }
 
 int DVRServer::rtspPort() const
 {
-    return serverPort() + 1;
-}
-
-QString DVRServer::username() const
-{
-    return m_username;
-}
-
-QString DVRServer::password() const
-{
-    return m_password;
-}
-
-bool DVRServer::autoConnect() const
-{
-    return m_autoConnect;
-}
-
-QByteArray DVRServer::sslDigest() const
-{
-    return m_sslDigest;
+    return m_configuration->port() + 1;
 }

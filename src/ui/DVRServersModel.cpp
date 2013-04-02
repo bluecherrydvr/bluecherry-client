@@ -17,6 +17,7 @@
 
 #include "DVRServersModel.h"
 #include "server/DVRServer.h"
+#include "server/DVRServerConfiguration.h"
 #include "server/DVRServerRepository.h"
 #include "core/DVRCamera.h"
 #include <QTextDocument>
@@ -271,9 +272,9 @@ QVariant DVRServersModel::data(const QModelIndex &index, int role) const
         if (role == Qt::ToolTipRole)
         {
             return tr("<span style='white-space:nowrap'><b>%1</b><br>%3 @ %2</span>", "tooltip")
-                    .arg(Qt::escape(server->displayName()))
-                    .arg(Qt::escape(server->hostname()))
-                    .arg(Qt::escape(server->username()));
+                    .arg(Qt::escape(server->configuration()->displayName()))
+                    .arg(Qt::escape(server->configuration()->hostname()))
+                    .arg(Qt::escape(server->configuration()->username()));
         }
         else if (role == ServerPtrRole)
             return QVariant::fromValue(server);
@@ -282,7 +283,7 @@ QVariant DVRServersModel::data(const QModelIndex &index, int role) const
         {
         case 0:
             if (role == Qt::DisplayRole || role == Qt::EditRole)
-                return server->displayName();
+                return server->configuration()->displayName();
             else if (role == Qt::DecorationRole)
             {
                 if (server->api->status() == ServerRequestManager::LoginError)
@@ -299,11 +300,11 @@ QVariant DVRServersModel::data(const QModelIndex &index, int role) const
             break;
         case 1:
             if (role == Qt::DisplayRole || role == Qt::EditRole)
-                return server->hostname();
+                return server->configuration()->hostname();
             break;
         case 2:
             if (role == Qt::DisplayRole || role == Qt::EditRole)
-                return server->username();
+                return server->configuration()->username();
             break;
         }
     }
@@ -361,17 +362,17 @@ bool DVRServersModel::setData(const QModelIndex &index, const QVariant &value, i
                 return false;
 
             /* dataChanged will be emitted in response to the DVRServer::changed() signal */
-            server->setDisplayName(name);
+            server->configuration()->setDisplayName(name);
         }
         break;
     case 1:
-        server->setHostname(value.toString());
+        server->configuration()->setHostname(value.toString());
         break;
     case 2:
-        server->setUsername(value.toString());
+        server->configuration()->setUsername(value.toString());
         break;
     case 3:
-        server->setPassword(value.toString());
+        server->configuration()->setPassword(value.toString());
         break;
     default:
         return false;

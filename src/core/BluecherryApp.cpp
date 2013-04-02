@@ -21,6 +21,7 @@
 #include "event/EventDownloadManager.h"
 #include "network/MediaDownloadManager.h"
 #include "server/DVRServer.h"
+#include "server/DVRServerConfiguration.h"
 #include "server/DVRServerRepository.h"
 #include <QSettings>
 #include <QStringList>
@@ -233,19 +234,19 @@ void BluecherryApp::addLocalServer()
 {
 #ifdef Q_OS_LINUX
     DVRServer *s = m_serverRepository->createServer(tr("Local"));
-    s->setHostname(QHostAddress(QHostAddress::LocalHost).toString());
+    s->configuration()->setHostname(QHostAddress(QHostAddress::LocalHost).toString());
     /* This must match the default username and password for the server */
-    s->setUsername(QLatin1String("Admin"));
-    s->setPassword(QLatin1String("bluecherry"));
-    s->setPort(7001);
-    s->setAutoConnect(true);
+    s->configuration()->setUsername(QLatin1String("Admin"));
+    s->configuration()->setPassword(QLatin1String("bluecherry"));
+    s->configuration()->setPort(7001);
+    s->configuration()->setAutoConnect(true);
 #endif
 }
 
 void BluecherryApp::autoConnectServers()
 {
     foreach (DVRServer *server, m_serverRepository->servers())
-        if (server->autoConnect() && !server->hostname().isEmpty() && !server->username().isEmpty())
+        if (server->configuration()->autoConnect() && !server->configuration()->hostname().isEmpty() && !server->configuration()->username().isEmpty())
             server->login();
 }
 

@@ -18,6 +18,7 @@
 #include "DVRCamera.h"
 #include "camera/DVRCameraStreamReader.h"
 #include "server/DVRServer.h"
+#include "server/DVRServerConfiguration.h"
 #include "BluecherryApp.h"
 #include "MJpegStream.h"
 #include "LiveStream.h"
@@ -29,7 +30,7 @@ QHash<QPair<int,int>,DVRCameraData*> DVRCameraData::instances;
 
 DVRCamera DVRCamera::getCamera(DVRServer *server, int cameraID)
 {
-    DVRCameraData *data = DVRCameraData::instances.value(qMakePair(server->id(), cameraID), 0);
+    DVRCameraData *data = DVRCameraData::instances.value(qMakePair(server->configuration()->id(), cameraID), 0);
     if (!data)
         data = new DVRCameraData(server, cameraID);
 
@@ -97,8 +98,8 @@ bool DVRCamera::parseXML(QXmlStreamReader &xml)
     d->displayName = name;
     QUrl url;
     url.setScheme(QLatin1String("rtsp"));
-    url.setUserName(server()->username());
-    url.setPassword(server()->password());
+    url.setUserName(server()->configuration()->username());
+    url.setPassword(server()->configuration()->password());
     url.setHost(server()->api->serverUrl().host());
     url.setPort(server()->rtspPort());
     url.setPath(QString::fromLatin1("live/") + QString::number(d->uniqueID));
@@ -139,21 +140,21 @@ DVRCameraData::DVRCameraData(DVRServer *s, int i)
     : server(s), uniqueID(i), isLoaded(false), isOnline(false), isDisabled(false),
       ptzProtocol(DVRCamera::UnknownProtocol), recordingState(DVRCamera::NoRecording)
 {
-    Q_ASSERT(instances.find(qMakePair(s->id(), i)) == instances.end());
-    instances.insert(qMakePair(server->id(), uniqueID), this);
+    Q_ASSERT(instances.find(qMakePair(s->configuration()->id(), i)) == instances.end());
+    instances.insert(qMakePair(server->configuration()->id(), uniqueID), this);
 
     loadSavedSettings();
 }
 
 DVRCameraData::~DVRCameraData()
 {
-    instances.remove(qMakePair(server->id(), uniqueID));
+    instances.remove(qMakePair(server->configuration()->id(), uniqueID));
 }
 
 void DVRCameraData::loadSavedSettings()
 {
     QSettings settings;
-    displayName = settings.value(QString::fromLatin1("servers/%1/cameras/%2").arg(server->id()).arg(uniqueID)).toString();
+    displayName = settings.value(QString::fromLatin1("servers/%1/cameras/%2").arg(server->configuration()->id()).arg(uniqueID)).toString();
 }
 
 void DVRCameraData::doDataUpdated()
@@ -161,7 +162,7 @@ void DVRCameraData::doDataUpdated()
     if (server)
     {
         QSettings settings;
-        settings.beginGroup(QString::fromLatin1("servers/%1/cameras/").arg(server->id()));
+        settings.beginGroup(QString::fromLatin1("servers/%1/cameras/").arg(server->configuration()->id()));
         settings.setValue(QString::number(uniqueID), displayName);
     }
 
@@ -182,7 +183,7 @@ QDataStream &operator<<(QDataStream &s, const DVRCamera &camera)
     if (!camera.isValid())
         s << -1;
     else
-        s << camera.server()->id() << camera.uniqueId();
+        s << camera.server()->configuration()->id() << camera.uniqueId();
     return s;
 }
 

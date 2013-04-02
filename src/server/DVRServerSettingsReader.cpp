@@ -15,8 +15,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DVRServerSettingsReader.h"
 #include "DVRServer.h"
+#include "DVRServerConfiguration.h"
+#include "DVRServerSettingsReader.h"
 #include <QSettings>
 
 DVRServer * DVRServerSettingsReader::readServer(int serverId) const
@@ -24,13 +25,13 @@ DVRServer * DVRServerSettingsReader::readServer(int serverId) const
     Q_ASSERT(serverId >= 0);
 
     DVRServer *server = new DVRServer(serverId);
-    server->setDisplayName(readSetting(serverId, QLatin1String("displayName")).toString());
-    server->setHostname(readSetting(serverId, QLatin1String("hostname")).toString());
-    server->setPort(readSetting(serverId, QLatin1String("port")).toInt());
-    server->setUsername(readSetting(serverId, QLatin1String("username")).toString());
-    server->setPassword(readSetting(serverId, QLatin1String("password")).toString());
-    server->setAutoConnect(readSetting(serverId, QLatin1String("autoConnect"), true).toBool());
-    server->setSslDigest(readSetting(serverId, QLatin1String("sslDigest")).toByteArray());
+    server->configuration()->setDisplayName(readSetting(serverId, QLatin1String("displayName")).toString());
+    server->configuration()->setHostname(readSetting(serverId, QLatin1String("hostname")).toString());
+    server->configuration()->setPort(readSetting(serverId, QLatin1String("port")).toInt());
+    server->configuration()->setUsername(readSetting(serverId, QLatin1String("username")).toString());
+    server->configuration()->setPassword(readSetting(serverId, QLatin1String("password")).toString());
+    server->configuration()->setAutoConnect(readSetting(serverId, QLatin1String("autoConnect"), true).toBool());
+    server->configuration()->setSslDigest(readSetting(serverId, QLatin1String("sslDigest")).toByteArray());
 
     return server;
 }
