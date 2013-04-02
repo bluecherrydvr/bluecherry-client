@@ -285,6 +285,11 @@ bool DVRServer::isOnline() const
     return api->isOnline();
 }
 
+bool DVRServer::isLoginPending() const
+{
+    return api->isLoginPending();
+}
+
 DVRServerConfiguration * const DVRServer::configuration() const
 {
     return m_configuration;

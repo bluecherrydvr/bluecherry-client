@@ -38,6 +38,7 @@ public:
     explicit DVRServer(int id, QObject *parent = 0);
 
     bool isOnline() const;
+    bool isLoginPending() const;
 
     DVRServerConfiguration * const configuration() const;
 
