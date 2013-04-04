@@ -18,11 +18,11 @@
 include_directories (src)
 
 set (bluecherry_client_main_SRCS
+    src/camera/DVRCamera.cpp
     src/camera/DVRCameraStreamReader.cpp
 
     src/core/BluecherryApp.cpp
     src/core/CameraPtzControl.cpp
-    src/core/DVRCamera.cpp
     src/core/EventData.cpp
     src/core/LiveStream.cpp
     src/core/LiveStreamWorker.cpp

@@ -19,9 +19,9 @@
 #include "camera/DVRCameraStreamReader.h"
 #include "server/DVRServer.h"
 #include "server/DVRServerConfiguration.h"
-#include "BluecherryApp.h"
-#include "MJpegStream.h"
-#include "LiveStream.h"
+#include "core/BluecherryApp.h"
+#include "core/MJpegStream.h"
+#include "core/LiveStream.h"
 #include <QXmlStreamReader>
 #include <QMimeData>
 #include <QSettings>

@@ -20,7 +20,7 @@
 
 #include <QAbstractItemModel>
 #include <QIcon>
-#include "core/DVRCamera.h"
+#include "camera/DVRCamera.h"
 
 class DVRServer;
 class DVRServerRepository;

@@ -22,7 +22,7 @@
 #include <QUrl>
 #include <QPixmap>
 #include <QTimer>
-#include "DVRCamera.h"
+#include "camera/DVRCamera.h"
 
 #if defined(Q_OS_MAC) || defined(Q_OS_WIN)
 /* On mac, it is very expensive to convert between QImage and QPixmap, and

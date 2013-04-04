@@ -21,7 +21,7 @@
 #include <QObject>
 #include <QVariant>
 #include <QTimer>
-#include "core/DVRCamera.h"
+#include "camera/DVRCamera.h"
 
 class DVRServerConfiguration;
 class ServerRequestManager;

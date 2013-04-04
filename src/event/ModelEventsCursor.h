@@ -2,7 +2,7 @@
 #define MODELEVENTSCURSOR_H
 
 #include "event/EventsCursor.h"
-#include "core/DVRCamera.h"
+#include "camera/DVRCamera.h"
 #include <QModelIndex>
 
 class QAbstractItemModel;

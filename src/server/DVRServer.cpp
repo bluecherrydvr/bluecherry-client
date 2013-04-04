@@ -17,7 +17,7 @@
 
 #include "DVRServer.h"
 #include "DVRServerConfiguration.h"
-#include "core/DVRCamera.h"
+#include "camera/DVRCamera.h"
 #include "core/ServerRequestManager.h"
 #include <QNetworkRequest>
 #include <QUrl>

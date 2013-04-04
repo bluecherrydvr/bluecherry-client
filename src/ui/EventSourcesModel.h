@@ -21,7 +21,7 @@
 #include <QAbstractItemModel>
 #include <QVector>
 #include <QBitArray>
-#include "core/DVRCamera.h"
+#include "camera/DVRCamera.h"
 
 class DVRServer;
 class DVRServerRepository;

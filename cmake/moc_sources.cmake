@@ -16,9 +16,10 @@
 #
 
 set (bluecherry_client_MOC_SRCS
+    src/camera/DVRCamera.h
+
     src/core/BluecherryApp.h
     src/core/CameraPtzControl.h
-    src/core/DVRCamera.h
     src/core/LiveStream.h
     src/core/LiveStreamWorker.h
     src/core/LiveViewManager.h

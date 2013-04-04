@@ -16,7 +16,7 @@
  */
 
 #include "EventList.h"
-#include "core/DVRCamera.h"
+#include "camera/DVRCamera.h"
 #include "event/EventFilter.h"
 #include <QSet>
 

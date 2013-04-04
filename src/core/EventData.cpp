@@ -16,9 +16,9 @@
  */
 
 #include "EventData.h"
+#include "camera/DVRCamera.h"
 #include "server/DVRServer.h"
 #include "server/DVRServerConfiguration.h"
-#include "core/DVRCamera.h"
 #include "utils/FileUtils.h"
 #include <QApplication>
 #include <QXmlStreamReader>

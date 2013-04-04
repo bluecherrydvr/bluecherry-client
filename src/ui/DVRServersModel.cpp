@@ -19,7 +19,7 @@
 #include "server/DVRServer.h"
 #include "server/DVRServerConfiguration.h"
 #include "server/DVRServerRepository.h"
-#include "core/DVRCamera.h"
+#include "camera/DVRCamera.h"
 #include "core/ServerRequestManager.h"
 #include <QTextDocument>
 #include <QApplication>

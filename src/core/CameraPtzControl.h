@@ -22,7 +22,7 @@
 #include <QMap>
 #include <QSharedPointer>
 #include <QUrl>
-#include "DVRCamera.h"
+#include "camera/DVRCamera.h"
 
 class QNetworkReply;
 

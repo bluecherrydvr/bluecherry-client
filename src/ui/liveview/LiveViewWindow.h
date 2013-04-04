@@ -20,7 +20,7 @@
 
 #include <QWidget>
 #include <QWeakPointer>
-#include "core/DVRCamera.h"
+#include "camera/DVRCamera.h"
 
 class LiveViewArea;
 class QComboBox;

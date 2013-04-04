@@ -21,7 +21,7 @@
 #include <QString>
 #include <QDateTime>
 #include <QColor>
-#include "DVRCamera.h"
+#include "camera/DVRCamera.h"
 
 class DVRServer;
 
