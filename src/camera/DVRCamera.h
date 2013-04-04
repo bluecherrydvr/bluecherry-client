@@ -19,6 +19,7 @@
 #define DVRCAMERA_H
 
 #include "camera/DVRCameraData.h"
+#include "camera/RecordingState.h"
 #include <QObject>
 #include <QSharedPointer>
 #include <QWeakPointer>
@@ -39,14 +40,6 @@ public:
         NoPtz,
         UnknownProtocol,
         PelcoPtz
-    };
-
-    /* Duplicated in LiveFeedItem for QMetaObject. This is not ideal. */
-    enum RecordingState {
-        NoRecording = 0,
-        Continuous,
-        MotionInactive,
-        MotionActive
     };
 
     static PtzProtocol parseProtocol(const QString &protocol);

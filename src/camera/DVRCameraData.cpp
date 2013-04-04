@@ -23,7 +23,7 @@
 
 DVRCameraData::DVRCameraData(DVRServer *s, int i)
     : server(s), uniqueID(i), isLoaded(false), isOnline(false), isDisabled(false),
-      ptzProtocol(DVRCamera::UnknownProtocol), recordingState(DVRCamera::NoRecording)
+      ptzProtocol(DVRCamera::UnknownProtocol), recordingState(NoRecording)
 {
     loadSavedSettings();
 }
@@ -55,6 +55,6 @@ void DVRCameraData::setRecordingState(int state)
     if (state == recordingState)
         return;
 
-    recordingState = DVRCamera::RecordingState(state);
+    recordingState = RecordingState(state);
     emit recordingStateChanged(state);
 }

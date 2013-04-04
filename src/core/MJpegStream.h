@@ -73,7 +73,7 @@ public:
 
     bool isPaused() const { return m_paused; }
     int interval() const { return m_interval; }
-    DVRCamera::RecordingState recordingState() const { return m_recordingState; }
+    RecordingState recordingState() const { return m_recordingState; }
 
     float receivedFps() const { return m_receivedFps; }
 
@@ -130,7 +130,7 @@ private:
         ParserHeaders,
         ParserBody
     } m_parserState;
-    DVRCamera::RecordingState m_recordingState;
+    RecordingState m_recordingState;
     bool m_autoStart, m_paused;
     qint8 m_interval;
 
