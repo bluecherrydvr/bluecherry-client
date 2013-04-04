@@ -113,7 +113,7 @@ void DVRServer::updateCamerasReply()
 
     QSet<int> idSet;
     bool hasDevicesElement = false;
-    bool wasEmpty = m_cameras.isEmpty();
+    bool wasEmpty = m_visibleCameras.isEmpty();
 
     while (xml.readNextStartElement())
     {
@@ -151,9 +151,9 @@ void DVRServer::updateCamerasReply()
                         continue;
                     }
 
-                    if (!m_cameras.contains(camera))
+                    if (!m_visibleCameras.contains(camera))
                     {
-                        m_cameras.append(camera);
+                        m_visibleCameras.append(camera);
                         emit cameraAdded(camera);
                     }
                 }
@@ -173,12 +173,12 @@ void DVRServer::updateCamerasReply()
         return;
     }
 
-    for (int i = 0; i < m_cameras.size(); ++i)
+    for (int i = 0; i < m_visibleCameras.size(); ++i)
     {
-        if (!idSet.contains(m_cameras[i].uniqueId()))
+        if (!idSet.contains(m_visibleCameras[i].uniqueId()))
         {
-            DVRCamera c = m_cameras[i];
-            m_cameras.removeAt(i);
+            DVRCamera c = m_visibleCameras[i];
+            m_visibleCameras.removeAt(i);
             qDebug("DVRServer: camera %d removed", c.uniqueId());
             emit cameraRemoved(c);
             c.removed();
@@ -186,7 +186,7 @@ void DVRServer::updateCamerasReply()
         }
     }
 
-    if (!m_devicesLoaded || (wasEmpty && !m_cameras.isEmpty()))
+    if (!m_devicesLoaded || (wasEmpty && !m_visibleCameras.isEmpty()))
     {
         m_devicesLoaded = true;
         emit devicesReady();
@@ -250,13 +250,14 @@ void DVRServer::updateStatsReply()
 
 void DVRServer::disconnectedSlot()
 {
-    while (!m_cameras.isEmpty())
+    while (!m_visibleCameras.isEmpty())
     {
-        DVRCamera c = m_cameras.takeFirst();
+        DVRCamera c = m_visibleCameras.takeFirst();
         c.setOnline(false);
         emit cameraRemoved(c);
         c.removed();
     }
+
     m_devicesLoaded = false;
     m_statusAlertMessage.clear();
     emit statusAlertMessageChanged(QString());
@@ -340,6 +341,9 @@ DVRCamera DVRServer::getCamera(int cameraId)
 
         Q_ASSERT(DVRCameraData::instances.find(qMakePair(m_configuration->id(), cameraId)) == DVRCameraData::instances.end());
         DVRCameraData::instances.insert(qMakePair(m_configuration->id(), cameraId), data);
+
+        m_allCameras.append(DVRCamera(data));
+        m_camerasMap.insert(cameraId, DVRCamera(data));
     }
 
     return DVRCamera(data);

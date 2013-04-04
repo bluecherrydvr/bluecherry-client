@@ -54,7 +54,7 @@ public:
     int serverPort() const;
     int rtspPort() const;
 
-    QList<DVRCamera> cameras() const { return m_cameras; }
+    QList<DVRCamera> cameras() const { return m_visibleCameras; }
     DVRCamera getCamera(int cameraId);
 
     QString statusAlertMessage() const { return m_statusAlertMessage; }
@@ -106,7 +106,10 @@ private:
     ServerRequestManager *m_api;
     DVRServerConfiguration *m_configuration;
 
-    QList<DVRCamera> m_cameras;
+    QList<DVRCamera> m_allCameras;
+    QList<DVRCamera> m_visibleCameras;
+    QHash<int, DVRCamera> m_camerasMap;
+
     QString m_statusAlertMessage;
     QTimer m_refreshTimer;
     bool m_devicesLoaded;
