@@ -16,7 +16,7 @@
 #
 
 set (bluecherry_client_MOC_SRCS
-    src/camera/DVRCamera.h
+    src/camera/DVRCameraData.h
 
     src/core/BluecherryApp.h
     src/core/CameraPtzControl.h

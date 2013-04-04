@@ -26,8 +26,6 @@
 #include <QMimeData>
 #include <QSettings>
 
-QHash<QPair<int,int>,DVRCameraData*> DVRCameraData::instances;
-
 DVRCamera DVRCamera::getCamera(DVRServer *server, int cameraID)
 {
     DVRCameraData *data = DVRCameraData::instances.value(qMakePair(server->configuration()->id(), cameraID), 0);
@@ -134,48 +132,6 @@ QSharedPointer<LiveStream> DVRCamera::liveStream()
 void DVRCamera::removed()
 {
     emit d->removed();
-}
-
-DVRCameraData::DVRCameraData(DVRServer *s, int i)
-    : server(s), uniqueID(i), isLoaded(false), isOnline(false), isDisabled(false),
-      ptzProtocol(DVRCamera::UnknownProtocol), recordingState(DVRCamera::NoRecording)
-{
-    Q_ASSERT(instances.find(qMakePair(s->configuration()->id(), i)) == instances.end());
-    instances.insert(qMakePair(server->configuration()->id(), uniqueID), this);
-
-    loadSavedSettings();
-}
-
-DVRCameraData::~DVRCameraData()
-{
-    instances.remove(qMakePair(server->configuration()->id(), uniqueID));
-}
-
-void DVRCameraData::loadSavedSettings()
-{
-    QSettings settings;
-    displayName = settings.value(QString::fromLatin1("servers/%1/cameras/%2").arg(server->configuration()->id()).arg(uniqueID)).toString();
-}
-
-void DVRCameraData::doDataUpdated()
-{
-    if (server)
-    {
-        QSettings settings;
-        settings.beginGroup(QString::fromLatin1("servers/%1/cameras/").arg(server->configuration()->id()));
-        settings.setValue(QString::number(uniqueID), displayName);
-    }
-
-    emit dataUpdated();
-}
-
-void DVRCameraData::setRecordingState(int state)
-{
-    if (state == recordingState)
-        return;
-
-    recordingState = DVRCamera::RecordingState(state);
-    emit recordingStateChanged(state);
 }
 
 QDataStream &operator<<(QDataStream &s, const DVRCamera &camera)

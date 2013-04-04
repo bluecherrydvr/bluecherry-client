@@ -18,6 +18,7 @@
 #ifndef DVRCAMERA_H
 #define DVRCAMERA_H
 
+#include "camera/DVRCameraData.h"
 #include <QObject>
 #include <QSharedPointer>
 #include <QWeakPointer>
@@ -28,48 +29,6 @@
 class DVRServer;
 class LiveStream;
 class QMimeData;
-
-/* There is one DVRCameraData per server+ID; it is shared among many instances of
- * DVRCamera by reference count. This may be created before we've actually queried
- * the server for cameras (for example, with saved camera layouts in the config).
- * Once real data is available, this object will be updated and dataUpdated will be
- * emitted. The DVRServer holds a reference to every camera that currently exists
- * according to the server. */
-class DVRCameraData : public QObject, public QSharedData
-{
-    Q_OBJECT
-
-    friend class DVRCamera;
-
-public:
-    DVRServer * const server;
-    const int uniqueID;
-    QString displayName;
-    QByteArray streamUrl;
-    QWeakPointer<LiveStream> liveStream;
-    bool isLoaded, isOnline, isDisabled;
-    qint8 ptzProtocol;
-    qint8 recordingState;
-
-    DVRCameraData(DVRServer *server, int uniqueID);
-    virtual ~DVRCameraData();
-
-    void loadSavedSettings();
-    void doDataUpdated();
-
-public slots:
-    void setRecordingState(int recordingState);
-
-signals:
-    void onlineChanged(bool isOnline);
-    void dataUpdated();
-    void removed();
-
-    void recordingStateChanged(int recordingState);
-
-private:
-    static QHash<QPair<int,int>,DVRCameraData*> instances;
-};
 
 class DVRCamera
 {
