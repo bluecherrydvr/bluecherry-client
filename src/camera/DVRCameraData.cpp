@@ -27,9 +27,6 @@ DVRCameraData::DVRCameraData(DVRServer *s, int i)
     : server(s), uniqueID(i), isLoaded(false), isOnline(false), isDisabled(false),
       ptzProtocol(DVRCamera::UnknownProtocol), recordingState(DVRCamera::NoRecording)
 {
-    Q_ASSERT(instances.find(qMakePair(s->configuration()->id(), i)) == instances.end());
-    instances.insert(qMakePair(server->configuration()->id(), uniqueID), this);
-
     loadSavedSettings();
 }
 

@@ -335,7 +335,12 @@ DVRCamera DVRServer::getCamera(int cameraId)
 {
     DVRCameraData *data = DVRCameraData::instances.value(qMakePair(m_configuration->id(), cameraId), 0);
     if (!data)
+    {
         data = new DVRCameraData(this, cameraId);
+
+        Q_ASSERT(DVRCameraData::instances.find(qMakePair(m_configuration->id(), cameraId)) == DVRCameraData::instances.end());
+        DVRCameraData::instances.insert(qMakePair(m_configuration->id(), cameraId), data);
+    }
 
     return DVRCamera(data);
 }
