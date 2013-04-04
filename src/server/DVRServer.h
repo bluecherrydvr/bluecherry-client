@@ -55,6 +55,7 @@ public:
     int rtspPort() const;
 
     QList<DVRCamera> cameras() const { return m_cameras; }
+    DVRCamera getCamera(int cameraId);
 
     QString statusAlertMessage() const { return m_statusAlertMessage; }
 

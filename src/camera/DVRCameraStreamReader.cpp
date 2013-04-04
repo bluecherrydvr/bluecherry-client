@@ -16,6 +16,7 @@
  */
 
 #include "camera/DVRCamera.h"
+#include "server/DVRServer.h"
 #include "server/DVRServerRepository.h"
 #include "DVRCameraStreamReader.h"
 
@@ -44,5 +45,5 @@ DVRCamera DVRCameraStreamReader::getCamera(int serverID, int cameraID)
     if (!server)
         return DVRCamera();
 
-    return DVRCamera::getCamera(server, cameraID);
+    return server->getCamera(cameraID);
 }

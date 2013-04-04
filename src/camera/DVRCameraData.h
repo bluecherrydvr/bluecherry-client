@@ -37,6 +37,7 @@ class DVRCameraData : public QObject, public QSharedData
     Q_OBJECT
 
     friend class DVRCamera;
+    friend class DVRServer;
 
 public:
     DVRServer * const server;

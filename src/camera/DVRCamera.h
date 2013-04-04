@@ -51,8 +51,6 @@ public:
 
     static PtzProtocol parseProtocol(const QString &protocol);
 
-    static DVRCamera getCamera(DVRServer *server, int cameraID);
-
     DVRCamera() { }
     DVRCamera(const DVRCamera &o) : d(o.d) { }
 

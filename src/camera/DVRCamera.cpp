@@ -26,15 +26,6 @@
 #include <QMimeData>
 #include <QSettings>
 
-DVRCamera DVRCamera::getCamera(DVRServer *server, int cameraID)
-{
-    DVRCameraData *data = DVRCameraData::instances.value(qMakePair(server->configuration()->id(), cameraID), 0);
-    if (!data)
-        data = new DVRCameraData(server, cameraID);
-
-    return DVRCamera(data);
-}
-
 void DVRCamera::setOnline(bool on)
 {
     if (!d || on == d->isOnline)

@@ -142,7 +142,7 @@ void DVRServer::updateCamerasReply()
                     }
 
                     idSet.insert(deviceId);
-                    DVRCamera camera = DVRCamera::getCamera(this, deviceId);
+                    DVRCamera camera = getCamera(deviceId);
                     camera.setOnline(true);
                     if (!camera.parseXML(xml))
                     {
@@ -329,4 +329,13 @@ DVRServer::Status DVRServer::status() const
 QNetworkReply * DVRServer::sendRequest(const QUrl &relativeUrl)
 {
     return m_api->sendRequest(relativeUrl);
+}
+
+DVRCamera DVRServer::getCamera(int cameraId)
+{
+    DVRCameraData *data = DVRCameraData::instances.value(qMakePair(m_configuration->id(), cameraId), 0);
+    if (!data)
+        data = new DVRCameraData(this, cameraId);
+
+    return DVRCamera(data);
 }
