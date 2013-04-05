@@ -335,6 +335,9 @@ QNetworkReply * DVRServer::sendRequest(const QUrl &relativeUrl)
 
 DVRCamera DVRServer::getCamera(int cameraId)
 {
+    if (cameraId < 0)
+        return DVRCamera();
+
     if (!m_camerasMap.contains(cameraId))
     {
         DVRCamera camera = DVRCamera(new DVRCameraData(this, cameraId));
