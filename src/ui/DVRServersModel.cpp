@@ -90,7 +90,7 @@ void DVRServersModel::cameraAdded(const DVRCamera &camera)
 
     Item &it = items[parent.row()];
 
-    connect(camera, SIGNAL(dataUpdated()), SLOT(cameraDataChanged()));
+    connect(camera.getQObject(), SIGNAL(dataUpdated()), SLOT(cameraDataChanged()));
 
     beginInsertRows(parent, it.cameras.size(), it.cameras.size());
     it.cameras.append(camera);
@@ -107,7 +107,7 @@ void DVRServersModel::cameraRemoved(const DVRCamera &camera)
     if (row < 0)
         return;
 
-    static_cast<QObject*>(camera)->disconnect(this);
+    camera.getQObject()->disconnect(this);
 
     beginRemoveRows(parent, row, row);
     items[parent.row()].cameras.removeAt(row);

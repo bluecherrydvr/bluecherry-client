@@ -35,12 +35,12 @@ CameraPtzControl::CameraPtzControl(const DVRCamera &camera, QObject *parent)
 
 QSharedPointer<CameraPtzControl> CameraPtzControl::sharedObjectFor(const DVRCamera &camera)
 {
-    QSharedPointer<CameraPtzControl> ptr = static_cast<QObject*>(camera)->property("cameraPtzControl")
+    QSharedPointer<CameraPtzControl> ptr = camera.getQObject()->property("cameraPtzControl")
                                            .value<QWeakPointer<CameraPtzControl> >();
     if (ptr.isNull())
     {
         ptr = QSharedPointer<CameraPtzControl>(new CameraPtzControl(camera));
-        static_cast<QObject*>(camera)->setProperty("cameraPtzControl", QVariant::fromValue(ptr.toWeakRef()));
+        camera.getQObject()->setProperty("cameraPtzControl", QVariant::fromValue(ptr.toWeakRef()));
     }
 
     return ptr;

@@ -60,7 +60,8 @@ public:
 
     bool isValid() const { return d; }
     operator bool() const { return isValid(); }
-    operator QObject*() const { return d ? d.data() : 0; }
+
+    QObject * getQObject() const { return d ? d.data() : 0; }
 
     DVRServer *server() const { return d ? d->server : 0; }
     int uniqueId() const { return d ? d->uniqueID : -1; }
