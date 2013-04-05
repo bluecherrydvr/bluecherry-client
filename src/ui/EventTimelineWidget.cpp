@@ -67,7 +67,7 @@ struct LocationData : public RowData
 
     DVRCamera locationCamera() const
     {
-        return EventData::locationCamera(serverData->server, locationId);
+        return serverData->server->getCamera(locationId);
     }
 
     QString uiLocation() const

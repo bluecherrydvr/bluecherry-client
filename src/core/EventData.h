@@ -155,7 +155,6 @@ public:
     DVRCamera locationCamera() const;
 
     static QString uiLocation(DVRServer *server, int locationId);
-    static DVRCamera locationCamera(DVRServer *server, int locationId);
 
     QString baseFileName() const;
 
