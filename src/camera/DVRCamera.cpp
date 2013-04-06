@@ -120,11 +120,6 @@ QSharedPointer<LiveStream> DVRCamera::liveStream()
     return re;
 }
 
-void DVRCamera::removed()
-{
-    emit d->removed();
-}
-
 QDataStream &operator<<(QDataStream &s, const DVRCamera &camera)
 {
     if (!camera.isValid())

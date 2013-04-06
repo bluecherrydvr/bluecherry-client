@@ -61,7 +61,6 @@ public slots:
 signals:
     void onlineChanged(bool isOnline);
     void dataUpdated();
-    void removed();
 
     void recordingStateChanged(int recordingState);
 

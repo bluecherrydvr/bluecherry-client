@@ -88,7 +88,6 @@ private:
 
     DVRCamera(DVRCameraData *dt) : d(dt) { }
 
-    void removed();
     void setOnline(bool on);
 };
 

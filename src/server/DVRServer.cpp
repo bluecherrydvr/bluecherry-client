@@ -186,7 +186,6 @@ void DVRServer::updateCamerasReply()
             m_camerasMap.remove(c->uniqueId());
             qDebug("DVRServer: camera %d removed", c->uniqueId());
             emit cameraRemoved(c);
-            c->removed();
             --i;
 
             delete c;
@@ -262,7 +261,6 @@ void DVRServer::disconnectedSlot()
         DVRCamera *c = m_visibleCameras.takeFirst();
         c->setOnline(false);
         emit cameraRemoved(c);
-        c->removed();
     }
 
     m_devicesLoaded = false;
