@@ -47,13 +47,9 @@ public:
     static PtzProtocol parseProtocol(const QString &protocol);
 
     DVRCamera() { }
-    DVRCamera(const DVRCamera &o) : d(o.d) { }
+    DVRCamera(const DVRCamera &o);
 
-    DVRCamera &operator=(const DVRCamera &o)
-    {
-        d = o.d;
-        return *this;
-    }
+    DVRCamera &operator=(const DVRCamera &o);
 
     bool operator==(const DVRCamera &o) const
     {
@@ -86,7 +82,7 @@ public:
 private:
     QExplicitlySharedDataPointer<DVRCameraData> d;
 
-    DVRCamera(DVRCameraData *dt) : d(dt) { }
+    DVRCamera(DVRCameraData *dt);
 
     void setOnline(bool on);
 };

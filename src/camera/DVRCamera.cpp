@@ -26,6 +26,22 @@
 #include <QMimeData>
 #include <QSettings>
 
+DVRCamera::DVRCamera(const DVRCamera &o)
+    : QObject(), d(o.d)
+{
+}
+
+DVRCamera::DVRCamera(DVRCameraData *dt)
+    : QObject(), d(dt)
+{
+}
+
+DVRCamera& DVRCamera::operator = (const DVRCamera &o)
+{
+    d = o.d;
+    return *this;
+}
+
 void DVRCamera::setOnline(bool on)
 {
     if (!d || on == d->isOnline)
