@@ -72,12 +72,12 @@ public:
     LiveStream *stream() const;
 
     DVRCamera camera() const { return m_camera; }
-    QString cameraName() const { return m_camera ? m_camera.displayName() : QLatin1String(" "); }
+    QString cameraName() const { return m_camera.isValid() ? m_camera.displayName() : QLatin1String(" "); }
 
     CustomCursor customCursor() const { return m_customCursor; }
     CameraPtzControl *ptz() const { return m_ptz.data(); }
-    bool hasPtz() const { return m_camera ? m_camera.hasPtz() : false; }
-    RecordingState recordingState() const { return m_camera ? RecordingState(m_camera.recordingState()) : NoRecording; }
+    bool hasPtz() const { return m_camera.isValid() ? m_camera.hasPtz() : false; }
+    RecordingState recordingState() const { return m_camera.isValid() ? RecordingState(m_camera.recordingState()) : NoRecording; }
 
     Q_INVOKABLE void saveState(QDataStream *stream);
     Q_INVOKABLE void loadState(QDataStream *stream, int version);

@@ -109,7 +109,7 @@ void DVRServersView::contextMenuEvent(QContextMenuEvent *event)
             menu.addSeparator();
         }
 
-        if (camera)
+        if (camera.isValid())
         {
             aAddFeed = menu.addAction(tr("Add to view"));
             menu.addSeparator();
@@ -215,7 +215,7 @@ void DVRServersView::mouseDoubleClickEvent(QMouseEvent *event)
             ServerConfigWindow::instance()->show();
             ServerConfigWindow::instance()->raise();
         }
-        else if (camera)
+        else if (camera.isValid())
         {
             bcApp->mainWindow->liveView()->view()->addCamera(camera);
         }

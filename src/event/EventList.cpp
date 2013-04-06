@@ -35,7 +35,7 @@ QSet<DVRCamera> EventList::cameras() const
     foreach (const EventData &cameraEventData, *this)
     {
         DVRCamera camera = cameraEventData.locationCamera();
-        if (camera)
+        if (camera.isValid())
             result.insert(camera);
     }
     return result;

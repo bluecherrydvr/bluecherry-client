@@ -144,9 +144,14 @@ QList<DVRCamera> DVRCamera::fromMimeData(const QMimeData *mimeData)
     while (!stream.atEnd() && stream.status() == QDataStream::Ok)
     {
         DVRCamera c = reader.readCamera();
-        if (c)
+        if (c.isValid())
             re.append(c);
     }
 
     return re;
+}
+
+uint qHash(const DVRCamera &camera)
+{
+    return qHash(camera.getQObject());
 }

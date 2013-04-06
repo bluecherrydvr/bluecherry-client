@@ -117,7 +117,7 @@ void DVRServersModel::cameraRemoved(const DVRCamera &camera)
 void DVRServersModel::cameraDataChanged()
 {
     DVRCamera camera = DVRCamera::fromQObject(sender());
-    if (!camera)
+    if (!camera.isValid())
         return;
 
     QModelIndex index = indexForCamera(camera);
@@ -311,7 +311,7 @@ QVariant DVRServersModel::data(const QModelIndex &index, int role) const
     }
 
     const DVRCamera &camera = cameraForRow(index);
-    if (camera)
+    if (camera.isValid())
     {
         switch (role)
         {
@@ -404,7 +404,7 @@ QMimeData *DVRServersModel::mimeData(const QModelIndexList &indexes) const
             foreach (const DVRCamera &c, server->cameras())
                 stream << c;
         }
-        else if ((camera = cameraForRow(index)))
+        else if ((camera = cameraForRow(index)).isValid())
         {
             stream << camera;
         }

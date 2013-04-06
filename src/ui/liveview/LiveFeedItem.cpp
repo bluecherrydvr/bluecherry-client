@@ -66,7 +66,7 @@ void LiveFeedItem::setCamera(const DVRCamera &camera)
     if (camera == m_camera)
         return;
 
-    if (m_camera)
+    if (m_camera.isValid())
     {
         camera.getQObject()->disconnect(this);
         m_streamItem->clear();
@@ -74,7 +74,7 @@ void LiveFeedItem::setCamera(const DVRCamera &camera)
 
     m_camera = camera;
 
-    if (m_camera)
+    if (m_camera.isValid())
     {
         connect(camera.getQObject(), SIGNAL(dataUpdated()), SLOT(cameraDataUpdated()));
         connect(camera.getQObject(), SIGNAL(onlineChanged(bool)), SLOT(cameraDataUpdated()));
@@ -114,7 +114,7 @@ void LiveFeedItem::close()
 
 void LiveFeedItem::saveSnapshot(const QString &ifile)
 {
-    if (!m_camera)
+    if (!m_camera.isValid())
         return;
 
     /* Grab the current frame, so the user gets what they expect regardless of the time taken by the dialog */
@@ -205,7 +205,7 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     menu.addSeparator();
 
     QAction *actClose = menu.addAction(tr("Close camera"), this, SLOT(close()));
-    actClose->setEnabled(m_camera);
+    actClose->setEnabled(m_camera.isValid());
 
     menu.exec(event->screenPos());
     delete ptzmenu;

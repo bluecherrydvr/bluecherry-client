@@ -59,7 +59,6 @@ public:
     }
 
     bool isValid() const { return d; }
-    operator bool() const { return isValid(); }
 
     QObject * getQObject() const { return d ? d.data() : 0; }
 
@@ -92,6 +91,8 @@ private:
 };
 
 Q_DECLARE_METATYPE(DVRCamera)
+
+uint qHash(const DVRCamera &camera);
 
 QDataStream &operator<<(QDataStream &s, const DVRCamera &camera);
 

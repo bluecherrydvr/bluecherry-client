@@ -52,7 +52,7 @@ LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, bool fullscreen, con
     window->setAutoSized(!fullscreen);
     window->setAttribute(Qt::WA_DeleteOnClose);
 
-    if (camera)
+    if (camera.isValid())
         window->showSingleCamera(camera);
 
     return window;
