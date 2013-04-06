@@ -62,8 +62,8 @@ private slots:
     void serverAdded(DVRServer *server);
     void serverRemoved(DVRServer *server);
     void cameraDataChanged();
-    void cameraAdded(const DVRCamera &camera);
-    void cameraRemoved(const DVRCamera &camera);
+    void cameraAdded(DVRCamera *camera);
+    void cameraRemoved(DVRCamera *camera);
 
 private:
     struct Item

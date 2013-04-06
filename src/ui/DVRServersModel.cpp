@@ -66,8 +66,8 @@ void DVRServersModel::serverAdded(DVRServer *server)
 
     connect(server, SIGNAL(changed()), SLOT(serverDataChanged()));
     connect(server, SIGNAL(statusChanged(int)), SLOT(serverDataChanged()));
-    connect(server, SIGNAL(cameraAdded(DVRCamera)), SLOT(cameraAdded(DVRCamera)));
-    connect(server, SIGNAL(cameraRemoved(DVRCamera)), SLOT(cameraRemoved(DVRCamera)));
+    connect(server, SIGNAL(cameraAdded(DVRCamera*)), SLOT(cameraAdded(DVRCamera*)));
+    connect(server, SIGNAL(cameraRemoved(DVRCamera*)), SLOT(cameraRemoved(DVRCamera*)));
     connect(server, SIGNAL(statusAlertMessageChanged(QString)), SLOT(serverDataChanged()));
 }
 
@@ -84,32 +84,35 @@ void DVRServersModel::serverRemoved(DVRServer *server)
     server->disconnect(this);
 }
 
-void DVRServersModel::cameraAdded(const DVRCamera &camera)
+void DVRServersModel::cameraAdded(DVRCamera *camera)
 {
-    QModelIndex parent = indexForServer(camera.server());
+    Q_ASSERT(camera);
+    Q_ASSERT(camera->isValid());
+
+    QModelIndex parent = indexForServer(camera->server());
     if (!parent.isValid())
         return;
 
     Item &it = items[parent.row()];
 
-    connect(camera.getQObject(), SIGNAL(dataUpdated()), SLOT(cameraDataChanged()));
+    connect(camera->getQObject(), SIGNAL(dataUpdated()), SLOT(cameraDataChanged()));
 
     beginInsertRows(parent, it.cameras.size(), it.cameras.size());
-    it.cameras.append(camera);
+    it.cameras.append(*camera);
     endInsertRows();
 }
 
-void DVRServersModel::cameraRemoved(const DVRCamera &camera)
+void DVRServersModel::cameraRemoved(DVRCamera *camera)
 {
-    QModelIndex parent = indexForServer(camera.server());
+    QModelIndex parent = indexForServer(camera->server());
     if (!parent.isValid())
         return;
 
-    int row = items[parent.row()].cameras.indexOf(camera);
+    int row = items[parent.row()].cameras.indexOf(*camera);
     if (row < 0)
         return;
 
-    camera.getQObject()->disconnect(this);
+    camera->getQObject()->disconnect(this);
 
     beginRemoveRows(parent, row, row);
     items[parent.row()].cameras.removeAt(row);
