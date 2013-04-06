@@ -31,8 +31,10 @@ class DVRServer;
 class LiveStream;
 class QMimeData;
 
-class DVRCamera
+class DVRCamera : public QObject
 {
+    Q_OBJECT
+
     friend class DVRServer;
 
 public:
