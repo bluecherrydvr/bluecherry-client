@@ -29,17 +29,38 @@
 DVRCamera::DVRCamera(const DVRCamera &o)
     : QObject(), d(o.d)
 {
+    connectData();
 }
 
 DVRCamera::DVRCamera(DVRCameraData *dt)
     : QObject(), d(dt)
 {
+    connectData();
 }
 
 DVRCamera& DVRCamera::operator = (const DVRCamera &o)
 {
+    disconnectData();
     d = o.d;
+    connectData();
+
     return *this;
+}
+
+void DVRCamera::connectData()
+{
+    if (!d)
+        return;
+
+    connect(d.data(), SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
+}
+
+void DVRCamera::disconnectData()
+{
+    if (!d)
+        return;
+
+    disconnect(d.data(), SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
 }
 
 void DVRCamera::setOnline(bool on)

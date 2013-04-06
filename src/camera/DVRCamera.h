@@ -79,12 +79,19 @@ public:
     static QList<DVRCamera> fromMimeData(const QMimeData *mimeData);
     static DVRCamera fromQObject(QObject *o);
 
+signals:
+    void onlineChanged(bool isOnline);
+
 private:
     QExplicitlySharedDataPointer<DVRCameraData> d;
 
     DVRCamera(DVRCameraData *dt);
 
     void setOnline(bool on);
+
+    void connectData();
+    void disconnectData();
+
 };
 
 Q_DECLARE_METATYPE(DVRCamera)
