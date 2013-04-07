@@ -77,7 +77,7 @@ public:
 
     bool parseXML(QXmlStreamReader &xml);
 
-    static QList<DVRCamera> fromMimeData(const QMimeData *mimeData);
+    static QList<DVRCamera *> fromMimeData(const QMimeData *mimeData);
 
 signals:
     void onlineChanged(bool isOnline);

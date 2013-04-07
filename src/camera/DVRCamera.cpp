@@ -170,21 +170,21 @@ QDataStream &operator<<(QDataStream &s, const DVRCamera &camera)
     return s;
 }
 
-QList<DVRCamera> DVRCamera::fromMimeData(const QMimeData *mimeData)
+QList<DVRCamera *> DVRCamera::fromMimeData(const QMimeData *mimeData)
 {
     QByteArray data = mimeData->data(QLatin1String("application/x-bluecherry-dvrcamera"));
     QDataStream stream(&data, QIODevice::ReadOnly);
     DVRCameraStreamReader reader(bcApp->serverRepository(), stream);
 
-    QList<DVRCamera> re;
+    QList<DVRCamera *> result;
     while (!stream.atEnd() && stream.status() == QDataStream::Ok)
     {
-        DVRCamera *c = reader.readCamera();
-        if (c && c->isValid())
-            re.append(*c);
+        DVRCamera *camera = reader.readCamera();
+        if (camera && camera->isValid())
+            result.append(camera);
     }
 
-    return re;
+    return result;
 }
 
 uint qHash(const DVRCamera &camera)
