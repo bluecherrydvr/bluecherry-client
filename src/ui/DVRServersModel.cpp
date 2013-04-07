@@ -20,6 +20,7 @@
 #include "server/DVRServerConfiguration.h"
 #include "server/DVRServerRepository.h"
 #include "camera/DVRCamera.h"
+#include "camera/DVRCameraStreamWriter.h"
 #include "core/ServerRequestManager.h"
 #include <QTextDocument>
 #include <QApplication>
@@ -401,19 +402,21 @@ QMimeData *DVRServersModel::mimeData(const QModelIndexList &indexes) const
     QByteArray data;
     QDataStream stream(&data, QIODevice::WriteOnly);
 
+    DVRCameraStreamWriter cameraWriter(stream);
+
     foreach (QModelIndex index, indexes)
     {
         DVRServer *server = serverForRow(index);
         if (server)
         {
             foreach (DVRCamera *camera, server->cameras())
-                stream << *camera;
+                cameraWriter.writeCamera(camera);
         }
         else
         {
             DVRCamera *camera = cameraForRow(index);
             if (camera && camera->isValid())
-                stream << *camera;
+                cameraWriter.writeCamera(camera);
         }
     }
 

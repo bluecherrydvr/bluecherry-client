@@ -101,6 +101,4 @@ Q_DECLARE_METATYPE(DVRCamera *)
 
 uint qHash(const DVRCamera &camera);
 
-QDataStream &operator<<(QDataStream &s, const DVRCamera &camera);
-
 #endif // DVRCAMERA_H

@@ -19,6 +19,7 @@
 #include "LiveStreamItem.h"
 #include "PtzPresetsWindow.h"
 #include "camera/DVRCameraStreamReader.h"
+#include "camera/DVRCameraStreamWriter.h"
 #include "core/BluecherryApp.h"
 #include "core/CameraPtzControl.h"
 #include "LiveViewWindow.h"
@@ -227,8 +228,10 @@ void LiveFeedItem::setBandwidthModeFromAction()
 void LiveFeedItem::saveState(QDataStream *data)
 {
     Q_ASSERT(data);
+    
+    DVRCameraStreamWriter writer(*data);
+    writer.writeCamera(&m_camera);
 
-    *data << m_camera;
     *data << (stream() ? stream()->bandwidthMode() : 0);
 }
 

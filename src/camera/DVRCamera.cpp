@@ -161,15 +161,6 @@ QSharedPointer<LiveStream> DVRCamera::liveStream()
     return re;
 }
 
-QDataStream &operator<<(QDataStream &s, const DVRCamera &camera)
-{
-    if (!camera.isValid())
-        s << -1;
-    else
-        s << camera.server()->configuration()->id() << camera.uniqueId();
-    return s;
-}
-
 QList<DVRCamera *> DVRCamera::fromMimeData(const QMimeData *mimeData)
 {
     QByteArray data = mimeData->data(QLatin1String("application/x-bluecherry-dvrcamera"));
