@@ -77,7 +77,7 @@ void LiveFeedItem::setCamera(const DVRCamera &camera)
 
     if (m_camera.isValid())
     {
-        connect(m_camera.getQObject(), SIGNAL(dataUpdated()), SLOT(cameraDataUpdated()));
+        connect(&m_camera, SIGNAL(dataUpdated()), SLOT(cameraDataUpdated()));
         connect(&m_camera, SIGNAL(onlineChanged(bool)), SLOT(cameraDataUpdated()));
         connect(m_camera.getQObject(), SIGNAL(recordingStateChanged(int)), SIGNAL(recordingStateChanged()));
     }
