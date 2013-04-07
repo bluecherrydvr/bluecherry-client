@@ -26,28 +26,24 @@ DVRCameraStreamReader::DVRCameraStreamReader(DVRServerRepository *serverReposito
     Q_ASSERT(m_serverRepository);
 }
 
-DVRCamera DVRCameraStreamReader::readCamera()
+DVRCamera * DVRCameraStreamReader::readCamera()
 {
     int serverId = -1;
     m_dataStream >> serverId;
 
     if (m_dataStream.status() != QDataStream::Ok || serverId < 0)
-        return DVRCamera();
+        return 0;
 
     int cameraId = -1;
     m_dataStream >> cameraId;
     return getCamera(serverId, cameraId);
 }
 
-DVRCamera DVRCameraStreamReader::getCamera(int serverID, int cameraID)
+DVRCamera * DVRCameraStreamReader::getCamera(int serverID, int cameraID)
 {
     DVRServer *server = m_serverRepository->serverByID(serverID);
     if (!server)
-        return DVRCamera();
+        return 0;
 
-    DVRCamera *camera = server->getCamera(cameraID);
-    if (camera)
-        return *camera;
-    else
-        return DVRCamera();
+    return server->getCamera(cameraID);
 }

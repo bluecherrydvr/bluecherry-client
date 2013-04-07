@@ -237,7 +237,11 @@ void LiveFeedItem::loadState(QDataStream *data, int version)
     Q_ASSERT(data);
 
     DVRCameraStreamReader reader(bcApp->serverRepository(), *data);
-    setCamera(reader.readCamera());
+    DVRCamera *camera = reader.readCamera();
+    if (camera)
+        setCamera(*camera);
+    else
+        clear();
 
     if (version >= 1) {
         int bandwidth_mode = 0;

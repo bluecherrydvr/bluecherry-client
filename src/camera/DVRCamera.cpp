@@ -179,9 +179,9 @@ QList<DVRCamera> DVRCamera::fromMimeData(const QMimeData *mimeData)
     QList<DVRCamera> re;
     while (!stream.atEnd() && stream.status() == QDataStream::Ok)
     {
-        DVRCamera c = reader.readCamera();
-        if (c.isValid())
-            re.append(c);
+        DVRCamera *c = reader.readCamera();
+        if (c && c->isValid())
+            re.append(*c);
     }
 
     return re;

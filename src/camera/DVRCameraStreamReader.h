@@ -27,13 +27,13 @@ class DVRCameraStreamReader
 public:
     explicit DVRCameraStreamReader(DVRServerRepository *serverRepository, QDataStream &dataStream);
 
-    DVRCamera readCamera();
+    DVRCamera * readCamera();
 
 private:
     DVRServerRepository *m_serverRepository;
     QDataStream &m_dataStream;
 
-    DVRCamera getCamera(int serverID, int cameraID);
+    DVRCamera * getCamera(int serverID, int cameraID);
 
 };
 
