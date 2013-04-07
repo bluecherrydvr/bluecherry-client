@@ -51,7 +51,7 @@ public:
     };
 
     static void init();
-    explicit LiveStream(const DVRCamera &camera, QObject *parent = 0);
+    explicit LiveStream(DVRCamera *camera, QObject *parent = 0);
     virtual ~LiveStream();
 
     QByteArray url() const;
@@ -97,7 +97,7 @@ private slots:
 private:
     static QTimer *renderTimer, *stateTimer;
 
-    DVRCamera camera;
+    QWeakPointer<DVRCamera> m_camera;
     QThread *thread;
     LiveStreamWorker *worker;
     QImage m_currentFrame;

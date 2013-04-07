@@ -150,7 +150,7 @@ QSharedPointer<LiveStream> DVRCamera::liveStream()
 
     if (d->liveStream.isNull())
     {
-        re = QSharedPointer<LiveStream>(new LiveStream(*this));
+        re = QSharedPointer<LiveStream>(new LiveStream(this));
         QObject::connect(d.data(), SIGNAL(onlineChanged(bool)), re.data(), SLOT(setOnline(bool)));
         re->setOnline(isOnline());
         d->liveStream = re;
