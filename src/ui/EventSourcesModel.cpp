@@ -47,7 +47,8 @@ void EventSourcesModel::serverAdded(DVRServer *server)
 
     ServerData sd;
     sd.server = server;
-    sd.cameras = QVector<DVRCamera>::fromList(server->cameras());
+    foreach (DVRCamera *camera, server->cameras())
+        sd.cameras.append(*camera);
     sd.checkState.fill(true, sd.cameras.size()+1);
     servers.append(sd);
 

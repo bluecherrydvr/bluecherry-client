@@ -56,7 +56,9 @@ void DVRServersModel::serverAdded(DVRServer *server)
 {
     Item i;
     i.server = server;
-    i.cameras = server->cameras();
+
+    foreach (DVRCamera *camera, server->cameras())
+        i.cameras.append(*camera);
 
     beginInsertRows(QModelIndex(), items.size(), items.size());
     items.append(i);
@@ -401,8 +403,8 @@ QMimeData *DVRServersModel::mimeData(const QModelIndexList &indexes) const
         DVRServer *server = serverForRow(index);
         if (server)
         {
-            foreach (const DVRCamera &c, server->cameras())
-                stream << c;
+            foreach (DVRCamera *camera, server->cameras())
+                stream << *camera;
         }
         else if ((camera = cameraForRow(index)).isValid())
         {

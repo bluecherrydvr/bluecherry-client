@@ -45,5 +45,9 @@ DVRCamera DVRCameraStreamReader::getCamera(int serverID, int cameraID)
     if (!server)
         return DVRCamera();
 
-    return server->getCamera(cameraID);
+    DVRCamera *camera = server->getCamera(cameraID);
+    if (camera)
+        return *camera;
+    else
+        return DVRCamera();
 }

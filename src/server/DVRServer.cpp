@@ -142,20 +142,23 @@ void DVRServer::updateCamerasReply()
                     }
 
                     idSet.insert(deviceId);
-                    DVRCamera camera = getCamera(deviceId);
+                    DVRCamera *camera = getCamera(deviceId);
 
-                    camera.setOnline(true);
-                    if (!camera.parseXML(xml))
+                    if (camera)
                     {
-                        if (!xml.hasError())
-                            xml.raiseError(QLatin1String("Device parsing failed"));
-                        continue;
+                        camera->setOnline(true);
+                        if (!camera->parseXML(xml))
+                        {
+                            if (!xml.hasError())
+                                xml.raiseError(QLatin1String("Device parsing failed"));
+                            continue;
+                        }
                     }
 
                     if (!m_visibleCameras.contains(camera))
                     {
                         m_visibleCameras.append(camera);
-                        emit cameraAdded(camera);
+                        emit cameraAdded(*camera);
                     }
                 }
             }
@@ -176,14 +179,17 @@ void DVRServer::updateCamerasReply()
 
     for (int i = 0; i < m_visibleCameras.size(); ++i)
     {
-        if (!idSet.contains(m_visibleCameras[i].uniqueId()))
+        if (!idSet.contains(m_visibleCameras[i]->uniqueId()))
         {
-            DVRCamera c = m_visibleCameras[i];
+            DVRCamera *c = m_visibleCameras[i];
             m_visibleCameras.removeAt(i);
-            qDebug("DVRServer: camera %d removed", c.uniqueId());
-            emit cameraRemoved(c);
-            c.removed();
+            m_camerasMap.remove(c->uniqueId());
+            qDebug("DVRServer: camera %d removed", c->uniqueId());
+            emit cameraRemoved(*c);
+            c->removed();
             --i;
+
+            delete c;
         }
     }
 
@@ -253,10 +259,10 @@ void DVRServer::disconnectedSlot()
 {
     while (!m_visibleCameras.isEmpty())
     {
-        DVRCamera c = m_visibleCameras.takeFirst();
-        c.setOnline(false);
-        emit cameraRemoved(c);
-        c.removed();
+        DVRCamera *c = m_visibleCameras.takeFirst();
+        c->setOnline(false);
+        emit cameraRemoved(*c);
+        c->removed();
     }
 
     m_devicesLoaded = false;
@@ -333,15 +339,14 @@ QNetworkReply * DVRServer::sendRequest(const QUrl &relativeUrl)
     return m_api->sendRequest(relativeUrl);
 }
 
-DVRCamera DVRServer::getCamera(int cameraId)
+DVRCamera * DVRServer::getCamera(int cameraId)
 {
     if (cameraId < 0)
-        return DVRCamera();
+        return 0;
 
     if (!m_camerasMap.contains(cameraId))
     {
-        DVRCamera camera = DVRCamera(new DVRCameraData(this, cameraId));
-
+        DVRCamera *camera = new DVRCamera(new DVRCameraData(this, cameraId));
         m_allCameras.append(camera);
         m_camerasMap.insert(cameraId, camera);
     }
