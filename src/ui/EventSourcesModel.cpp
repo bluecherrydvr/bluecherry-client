@@ -205,7 +205,7 @@ QVariant EventSourcesModel::data(const QModelIndex &index, int role) const
                 else
                     return Qt::PartiallyChecked;
             }
-            else if (role == DVRServersModel::ServerPtrRole)
+            else if (role == DVRServersModel::DVRServerRole)
                 return QVariant::fromValue(sd.server);
         }
     }

@@ -64,7 +64,7 @@ DVRServer *DVRServersView::currentServer() const
 
     while (c.isValid())
     {
-        re = c.data(DVRServersModel::ServerPtrRole).value<DVRServer*>();
+        re = c.data(DVRServersModel::DVRServerRole).value<DVRServer*>();
         if (re)
             break;
         c = c.parent();
@@ -76,7 +76,7 @@ DVRServer *DVRServersView::currentServer() const
 void DVRServersView::contextMenuEvent(QContextMenuEvent *event)
 {
     QModelIndex index = indexAt(event->pos());
-    DVRServer *server = index.data(DVRServersModel::ServerPtrRole).value<DVRServer*>();
+    DVRServer *server = index.data(DVRServersModel::DVRServerRole).value<DVRServer*>();
     DVRCamera camera = index.data(DVRServersModel::DVRCameraRole).value<DVRCamera>();
 
     /* For servers, we prefer the checkable menu over the server controls menu,
@@ -185,7 +185,7 @@ void DVRServersView::mouseDoubleClickEvent(QMouseEvent *event)
     QModelIndex index;
     if (event->button() == Qt::LeftButton && (index = indexAt(event->pos())).isValid())
     {
-        DVRServer *server = index.data(DVRServersModel::ServerPtrRole).value<DVRServer*>();
+        DVRServer *server = index.data(DVRServersModel::DVRServerRole).value<DVRServer*>();
         DVRCamera camera = index.data(DVRServersModel::DVRCameraRole).value<DVRCamera>();
         if (index.flags() & Qt::ItemIsUserCheckable)
         {

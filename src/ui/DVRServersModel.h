@@ -32,7 +32,7 @@ class DVRServersModel : public QAbstractItemModel
 public:
     enum
     {
-        ServerPtrRole = Qt::UserRole,
+        DVRServerRole = Qt::UserRole,
         DVRCameraRole
     };
 
