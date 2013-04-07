@@ -68,7 +68,6 @@ void LiveFeedItem::setCamera(const DVRCamera &camera)
 
     if (m_camera.isValid())
     {
-        m_camera.getQObject()->disconnect(this);
         m_camera.disconnect(this);
         m_streamItem->clear();
     }
@@ -79,7 +78,7 @@ void LiveFeedItem::setCamera(const DVRCamera &camera)
     {
         connect(&m_camera, SIGNAL(dataUpdated()), SLOT(cameraDataUpdated()));
         connect(&m_camera, SIGNAL(onlineChanged(bool)), SLOT(cameraDataUpdated()));
-        connect(m_camera.getQObject(), SIGNAL(recordingStateChanged(int)), SIGNAL(recordingStateChanged()));
+        connect(&m_camera, SIGNAL(recordingStateChanged(int)), SIGNAL(recordingStateChanged()));
     }
 
     cameraDataUpdated();
