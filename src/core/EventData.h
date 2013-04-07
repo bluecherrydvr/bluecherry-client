@@ -152,7 +152,7 @@ public:
     QString uiServer() const;
     QString uiLocation() const { return uiLocation(server(), locationId()); }
 
-    DVRCamera locationCamera() const;
+    DVRCamera * locationCamera() const;
 
     static QString uiLocation(DVRServer *server, int locationId);
 

@@ -51,10 +51,10 @@ bool ModelEventsCursor::acceptIndex(int index) const
     if (!event)
         return false;
 
-    if (!m_cameraFilter.isValid())
+    if (!m_cameraFilter || !m_cameraFilter.data()->isValid())
         return true;
 
-    return event->locationCamera() == m_cameraFilter;
+    return event->locationCamera() == m_cameraFilter.data();
 }
 
 void ModelEventsCursor::invalidateIndexCache()
@@ -273,9 +273,9 @@ void ModelEventsCursor::setModel(QAbstractItemModel *model)
     emit eventSwitched(current());
 }
 
-void ModelEventsCursor::setCameraFilter(DVRCamera cameraFilter)
+void ModelEventsCursor::setCameraFilter(DVRCamera *cameraFilter)
 {
-    if (m_cameraFilter == cameraFilter)
+    if (m_cameraFilter.data() == cameraFilter)
         return;
 
     m_cameraFilter = cameraFilter;
