@@ -65,9 +65,6 @@ signals:
 
     void recordingStateChanged(int recordingState);
 
-private:
-    static QHash<QPair<int,int>,DVRCameraData*> instances;
-
 };
 
 #endif // DVRCAMERADATA_H

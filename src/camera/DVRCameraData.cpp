@@ -21,8 +21,6 @@
 #include "server/DVRServerConfiguration.h"
 #include <QSettings>
 
-QHash<QPair<int,int>,DVRCameraData*> DVRCameraData::instances;
-
 DVRCameraData::DVRCameraData(DVRServer *s, int i)
     : server(s), uniqueID(i), isLoaded(false), isOnline(false), isDisabled(false),
       ptzProtocol(DVRCamera::UnknownProtocol), recordingState(DVRCamera::NoRecording)
@@ -32,7 +30,6 @@ DVRCameraData::DVRCameraData(DVRServer *s, int i)
 
 DVRCameraData::~DVRCameraData()
 {
-    instances.remove(qMakePair(server->configuration()->id(), uniqueID));
 }
 
 void DVRCameraData::loadSavedSettings()
