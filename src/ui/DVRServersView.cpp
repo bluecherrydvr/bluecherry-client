@@ -76,8 +76,8 @@ DVRServer *DVRServersView::currentServer() const
 void DVRServersView::contextMenuEvent(QContextMenuEvent *event)
 {
     QModelIndex index = indexAt(event->pos());
-    DVRServer *server = index.data(DVRServersModel::DVRServerRole).value<DVRServer*>();
-    DVRCamera camera = index.data(DVRServersModel::DVRCameraRole).value<DVRCamera>();
+    DVRServer *server = index.data(DVRServersModel::DVRServerRole).value<DVRServer *>();
+    DVRCamera *camera = index.data(DVRServersModel::DVRCameraRole).value<DVRCamera *>();
 
     /* For servers, we prefer the checkable menu over the server controls menu,
      * due to the way they're used specifically. Somewhat unclean. */
@@ -109,7 +109,7 @@ void DVRServersView::contextMenuEvent(QContextMenuEvent *event)
             menu.addSeparator();
         }
 
-        if (camera.isValid())
+        if (camera && camera->isValid())
         {
             aAddFeed = menu.addAction(tr("Add to view"));
             menu.addSeparator();
@@ -140,15 +140,19 @@ void DVRServersView::contextMenuEvent(QContextMenuEvent *event)
     }
     else if (action == aAddFeed)
     {
-        bcApp->mainWindow->liveView()->view()->addCamera(camera);
+        if (camera)
+            bcApp->mainWindow->liveView()->view()->addCamera(*camera);
     }
     else if (action == aOpenWin || action == aOpenFull)
     {
-        LiveViewWindow *w = LiveViewWindow::openWindow(bcApp->mainWindow, (action == aOpenFull), camera);
-        if (action == aOpenFull)
-            w->showFullScreen();
-        else
-            w->show();
+        if (camera)
+        {
+            LiveViewWindow *w = LiveViewWindow::openWindow(bcApp->mainWindow, (action == aOpenFull), *camera);
+            if (action == aOpenFull)
+                w->showFullScreen();
+            else
+                w->show();
+        }
     }
     else if (action == aSelectOnly)
     {
@@ -185,8 +189,8 @@ void DVRServersView::mouseDoubleClickEvent(QMouseEvent *event)
     QModelIndex index;
     if (event->button() == Qt::LeftButton && (index = indexAt(event->pos())).isValid())
     {
-        DVRServer *server = index.data(DVRServersModel::DVRServerRole).value<DVRServer*>();
-        DVRCamera camera = index.data(DVRServersModel::DVRCameraRole).value<DVRCamera>();
+        DVRServer *server = index.data(DVRServersModel::DVRServerRole).value<DVRServer *>();
+        DVRCamera *camera = index.data(DVRServersModel::DVRCameraRole).value<DVRCamera *>();
         if (index.flags() & Qt::ItemIsUserCheckable)
         {
             Qt::CheckState state = (index.data(Qt::CheckStateRole).toInt() == Qt::Checked) ? Qt::Unchecked : Qt::Checked;
@@ -215,9 +219,9 @@ void DVRServersView::mouseDoubleClickEvent(QMouseEvent *event)
             ServerConfigWindow::instance()->show();
             ServerConfigWindow::instance()->raise();
         }
-        else if (camera.isValid())
+        else if (camera && camera->isValid())
         {
-            bcApp->mainWindow->liveView()->view()->addCamera(camera);
+            bcApp->mainWindow->liveView()->view()->addCamera(*camera);
         }
 
         event->accept();

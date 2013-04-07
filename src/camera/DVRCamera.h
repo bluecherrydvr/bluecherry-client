@@ -98,6 +98,7 @@ private:
 };
 
 Q_DECLARE_METATYPE(DVRCamera)
+Q_DECLARE_METATYPE(DVRCamera *)
 
 uint qHash(const DVRCamera &camera);
 
