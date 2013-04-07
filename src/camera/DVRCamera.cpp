@@ -189,5 +189,5 @@ QList<DVRCamera> DVRCamera::fromMimeData(const QMimeData *mimeData)
 
 uint qHash(const DVRCamera &camera)
 {
-    return qHash(camera.getQObject());
+    return qHash(camera.d);
 }

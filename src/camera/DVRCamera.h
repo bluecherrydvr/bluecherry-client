@@ -36,6 +36,7 @@ class DVRCamera : public QObject
     Q_OBJECT
 
     friend class DVRServer;
+    friend uint qHash(const DVRCamera &camera);
 
 public:
     enum PtzProtocol {
