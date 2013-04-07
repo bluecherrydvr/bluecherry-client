@@ -311,7 +311,7 @@ void LiveFeedItem::setPtzEnabled(bool ptzEnabled)
         return;
 
     if (ptzEnabled)
-        m_ptz = CameraPtzControl::sharedObjectFor(camera());
+        m_ptz = CameraPtzControl::sharedObjectFor(&m_camera);
     else
         m_ptz.clear();
 

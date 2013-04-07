@@ -25,22 +25,25 @@
 
 Q_DECLARE_METATYPE(QWeakPointer<CameraPtzControl>)
 
-CameraPtzControl::CameraPtzControl(const DVRCamera &camera, QObject *parent)
+CameraPtzControl::CameraPtzControl(DVRCamera *camera, QObject *parent)
     : QObject(parent), m_camera(camera), m_protocol(DVRCamera::UnknownProtocol), m_capabilities(NoCapabilities),
       m_currentPreset(-1)
 {
-    Q_ASSERT(m_camera.isValid());
+    Q_ASSERT(m_camera && m_camera.data()->isValid());
     updateInfo();
 }
 
-QSharedPointer<CameraPtzControl> CameraPtzControl::sharedObjectFor(const DVRCamera &camera)
+QSharedPointer<CameraPtzControl> CameraPtzControl::sharedObjectFor(DVRCamera *camera)
 {
-    QSharedPointer<CameraPtzControl> ptr = camera.getQObject()->property("cameraPtzControl")
+    if (!camera || !camera->isValid())
+        return QSharedPointer<CameraPtzControl>();
+
+    QSharedPointer<CameraPtzControl> ptr = camera->getQObject()->property("cameraPtzControl")
                                            .value<QWeakPointer<CameraPtzControl> >();
     if (ptr.isNull())
     {
         ptr = QSharedPointer<CameraPtzControl>(new CameraPtzControl(camera));
-        camera.getQObject()->setProperty("cameraPtzControl", QVariant::fromValue(ptr.toWeakRef()));
+        camera->getQObject()->setProperty("cameraPtzControl", QVariant::fromValue(ptr.toWeakRef()));
     }
 
     return ptr;
@@ -58,13 +61,16 @@ CameraPtzControl::~CameraPtzControl()
 
 QNetworkReply *CameraPtzControl::sendCommand(const QUrl &partialUrl)
 {
+    if (!m_camera)
+        return 0;
+
     QUrl url(QLatin1String("/media/ptz.php"));
     url = url.resolved(partialUrl);
-    url.addEncodedQueryItem("id", QByteArray::number(m_camera.uniqueId()));
+    url.addEncodedQueryItem("id", QByteArray::number(m_camera.data()->uniqueId()));
 
     Q_ASSERT(url.hasQueryItem(QLatin1String("command")));
 
-    QNetworkReply *reply = m_camera.server()->sendRequest(url);
+    QNetworkReply *reply = m_camera.data()->server()->sendRequest(url);
     connect(reply, SIGNAL(finished()), SLOT(finishCommand()));
 
     m_pendingCommands.append(reply);
@@ -135,7 +141,8 @@ bool CameraPtzControl::parseResponse(QNetworkReply *reply, QXmlStreamReader &xml
 void CameraPtzControl::updateInfo()
 {
     QNetworkReply *reply = sendCommand(QUrl(QLatin1String("?command=query")));
-    connect(reply, SIGNAL(finished()), SLOT(queryResult()));
+    if (reply)
+        connect(reply, SIGNAL(finished()), SLOT(queryResult()));
 }
 
 void CameraPtzControl::queryResult()
@@ -261,7 +268,8 @@ void CameraPtzControl::move(Movements movements, int panSpeed, int tiltSpeed, in
         url.addEncodedQueryItem("duration", QByteArray::number(duration));
 
     QNetworkReply *reply = sendCommand(url);
-    connect(reply, SIGNAL(finished()), SLOT(moveResult()));
+    if (reply)
+        connect(reply, SIGNAL(finished()), SLOT(moveResult()));
 }
 
 void CameraPtzControl::moveResult()
@@ -294,7 +302,8 @@ void CameraPtzControl::moveToPreset(int preset)
     url.addEncodedQueryItem("preset", QByteArray::number(preset));
 
     QNetworkReply *reply = sendCommand(url);
-    connect(reply, SIGNAL(finished()), SLOT(moveToPresetResult()));
+    if (reply)
+        connect(reply, SIGNAL(finished()), SLOT(moveToPresetResult()));
 }
 
 void CameraPtzControl::moveToPresetResult()
@@ -351,7 +360,8 @@ int CameraPtzControl::savePreset(int preset, const QString &name)
     url.addQueryItem(QLatin1String("name"), actualName);
 
     QNetworkReply *reply = sendCommand(url);
-    connect(reply, SIGNAL(finished()), SLOT(savePresetResult()));
+    if (reply)
+        connect(reply, SIGNAL(finished()), SLOT(savePresetResult()));
 
     return preset;
 }
@@ -364,7 +374,8 @@ void CameraPtzControl::updatePreset(int preset)
     url.addQueryItem(QLatin1String("name"), m_presets.value(preset));
 
     QNetworkReply *reply = sendCommand(url);
-    connect(reply, SIGNAL(finished()), SLOT(savePresetResult()));
+    if (reply)
+        connect(reply, SIGNAL(finished()), SLOT(savePresetResult()));
 }
 
 void CameraPtzControl::savePresetResult()
@@ -430,7 +441,8 @@ void CameraPtzControl::clearPreset(int preset)
     url.addEncodedQueryItem("preset", QByteArray::number(preset));
 
     QNetworkReply *reply = sendCommand(url);
-    connect(reply, SIGNAL(finished()), SLOT(clearPresetResult()));
+    if (reply)
+        connect(reply, SIGNAL(finished()), SLOT(clearPresetResult()));
 }
 
 void CameraPtzControl::clearPresetResult()
