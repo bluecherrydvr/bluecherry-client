@@ -78,7 +78,6 @@ public:
     bool parseXML(QXmlStreamReader &xml);
 
     static QList<DVRCamera> fromMimeData(const QMimeData *mimeData);
-    static DVRCamera fromQObject(QObject *o);
 
 signals:
     void onlineChanged(bool isOnline);
@@ -103,10 +102,5 @@ Q_DECLARE_METATYPE(DVRCamera *)
 uint qHash(const DVRCamera &camera);
 
 QDataStream &operator<<(QDataStream &s, const DVRCamera &camera);
-
-inline DVRCamera DVRCamera::fromQObject(QObject *o)
-{
-    return DVRCamera(qobject_cast<DVRCameraData*>(o));
-}
 
 #endif // DVRCAMERA_H
