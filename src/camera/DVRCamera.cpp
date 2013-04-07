@@ -53,6 +53,7 @@ void DVRCamera::connectData()
         return;
 
     connect(d.data(), SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
+    connect(d.data(), SIGNAL(dataUpdated()), this, SIGNAL(dataUpdated()));
 }
 
 void DVRCamera::disconnectData()
@@ -61,6 +62,7 @@ void DVRCamera::disconnectData()
         return;
 
     disconnect(d.data(), SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
+    disconnect(d.data(), SIGNAL(dataUpdated()), this, SIGNAL(dataUpdated()));
 }
 
 void DVRCamera::setOnline(bool on)

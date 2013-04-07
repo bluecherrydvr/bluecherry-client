@@ -81,6 +81,7 @@ public:
 
 signals:
     void onlineChanged(bool isOnline);
+    void dataUpdated();
 
 private:
     QExplicitlySharedDataPointer<DVRCameraData> d;
