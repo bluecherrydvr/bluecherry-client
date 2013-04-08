@@ -75,7 +75,7 @@ public:
     virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
 
 public slots:
-    void setFilterSource(const DVRCamera &camera);
+    void setFilterSource(DVRCamera *camera);
     void setFilterSource(DVRServer *server);
     void setFilterSources(const QMap<DVRServer*,QList<int> > &sources);
 

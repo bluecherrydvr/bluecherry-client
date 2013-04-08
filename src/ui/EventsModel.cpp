@@ -582,13 +582,13 @@ void EventsModel::setFilterSources(const QMap<DVRServer*, QList<int> > &sources)
     applyFilters(!fast);
 }
 
-void EventsModel::setFilterSource(const DVRCamera &camera)
+void EventsModel::setFilterSource(DVRCamera *camera)
 {
-    if (!camera.isValid())
+    if (!camera || !camera->isValid())
         return;
 
     QMap<DVRServer*,QList<int> > sources;
-    sources.insert(camera.server(), QList<int>() << camera.uniqueId());
+    sources.insert(camera->server(), QList<int>() << camera->uniqueId());
     setFilterSources(sources);
 }
 
