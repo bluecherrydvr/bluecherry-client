@@ -115,10 +115,10 @@ void LiveViewArea::setViewportHack()
     setViewport(new QGLWidget);
 }
 
-void LiveViewArea::addCamera(const DVRCamera &camera)
+void LiveViewArea::addCamera(DVRCamera *camera)
 {
     QDeclarativeItem *item = m_layout->addItemAuto();
-    if (!item)
+    if (!item || !camera)
         return;
 
     bool setCameraProperty = item->setProperty("camera", QVariant::fromValue(camera));

@@ -15,7 +15,7 @@ public:
     explicit EventsLoader(DVRServer *server, QObject *parent = 0);
     virtual ~EventsLoader();
 
-    DVRServer * server() const { return m_server; }
+    DVRServer * server() const { return m_server.data(); }
 
     void setLimit(int limit);
     void setStartTime(const QDateTime &startTime);
@@ -31,7 +31,7 @@ private slots:
     void eventParseFinished();
 
 private:
-    DVRServer *m_server;
+    QWeakPointer<DVRServer> m_server;
     int m_limit;
     QDateTime m_startTime;
     QDateTime m_endTime;

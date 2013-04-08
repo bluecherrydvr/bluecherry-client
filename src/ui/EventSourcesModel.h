@@ -21,9 +21,10 @@
 #include <QAbstractItemModel>
 #include <QVector>
 #include <QBitArray>
-#include "core/DVRCamera.h"
+#include "camera/DVRCamera.h"
 
 class DVRServer;
+class DVRServerRepository;
 class QStringList;
 
 class EventSourcesModel : public QAbstractItemModel
@@ -31,11 +32,11 @@ class EventSourcesModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    explicit EventSourcesModel(QObject *parent = 0);
+    explicit EventSourcesModel(DVRServerRepository *serverRepository, QObject *parent = 0);
 
     virtual QMap<DVRServer*,QList<int> > checkedSources() const;
 
-    QModelIndex indexOfCamera(const DVRCamera &camera) const;
+    QModelIndex indexOfCamera(DVRCamera *camera) const;
 
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
@@ -48,16 +49,21 @@ public:
 signals:
     void checkedSourcesChanged(const QMap<DVRServer*,QList<int> > &checkedSources);
 
+private slots:
+    void serverAdded(DVRServer *server);
+    void serverRemoved(DVRServer *server);
+
 private:
     struct ServerData
     {
         DVRServer *server;
-        QVector<DVRCamera> cameras;
+        QVector<QWeakPointer<DVRCamera> > cameras;
         /* Note that the indexes are +1 from cameras */
         QBitArray checkState;
     };
 
     QVector<ServerData> servers;
+
 };
 
 #endif // EVENTSOURCESMODEL_H

@@ -21,9 +21,11 @@
 #include <QObject>
 #include <QList>
 #include <QIcon>
+#include <QSessionManager>
 #include "core/TransferRateCalculator.h"
 
 class DVRServer;
+class DVRServerRepository;
 class QNetworkAccessManager;
 class MainWindow;
 class QNetworkReply;
@@ -49,18 +51,12 @@ public:
 
     MainWindow *globalParentWindow() const;
 
-    QList<DVRServer*> servers() const { return m_servers; }
-    DVRServer *addNewServer(const QString &name);
-    DVRServer *findServerID(int id);
-    bool serverExists(DVRServer *server) { return m_servers.contains(server); }
-
-    QList<DVRServer*> serverAlerts() const;
-
     /* Used to create other QNAM instances, for use on other threads.
      * Keeps the correct SSL verification behavior, although changes in fingerprints
      * will error rather than prompting the user on any but the default (GUI thread). */
     QNetworkAccessManager *createNam();
 
+    DVRServerRepository * serverRepository() const { return m_serverRepository; }
     MediaDownloadManager * mediaDownloadManager() const { return m_mediaDownloadManager; }
     EventDownloadManager * eventDownloadManager() const { return m_eventDownloadManager; }
 
@@ -78,12 +74,9 @@ public slots:
     void pauseLive();
     void releaseLive();
     void setScreensaverInhibited(bool inhibit);
+    void commitDataRequest(QSessionManager &sessionManager);
 
 signals:
-    void serverAdded(DVRServer *server);
-    void serverRemoved(DVRServer *server);
-    void serverAlertsChanged();
-
     void sslConfirmRequired(DVRServer *server, const QList<QSslError> &errors, const QSslConfiguration &config);
 
     void queryLivePaused();
@@ -94,16 +87,15 @@ signals:
 private slots:
     void performVersionCheck();
     void versionInfoReceived();
-    void onServerRemoved(DVRServer *server);
     void sslErrors(QNetworkReply *reply, const QList<QSslError> &errors);
     void aboutToQuit();
     void resetSystemActivity();
+    void saveSettings();
 
 private:
+    DVRServerRepository *m_serverRepository;
     MediaDownloadManager *m_mediaDownloadManager;
     EventDownloadManager *m_eventDownloadManager;
-    QList<DVRServer*> m_servers;
-    int m_maxServerId;
     bool m_livePaused, m_inPauseQuery, m_screensaverInhibited;
 #ifdef Q_OS_WIN
     int m_screensaveValue;
@@ -113,6 +105,9 @@ private:
     bool m_doingUpdateCheck;
 
     void loadServers();
+    bool shouldAddLocalServer() const;
+    void addLocalServer();
+    void autoConnectServers();
 };
 
 extern BluecherryApp *bcApp;

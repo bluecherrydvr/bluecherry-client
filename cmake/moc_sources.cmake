@@ -16,10 +16,11 @@
 #
 
 set (bluecherry_client_MOC_SRCS
+    src/camera/DVRCamera.h
+    src/camera/DVRCameraData.h
+
     src/core/BluecherryApp.h
     src/core/CameraPtzControl.h
-    src/core/DVRCamera.h
-    src/core/DVRServer.h
     src/core/LiveStream.h
     src/core/LiveStreamWorker.h
     src/core/LiveViewManager.h
@@ -36,6 +37,10 @@ set (bluecherry_client_MOC_SRCS
 
     src/network/MediaDownloadManager.h
     src/network/RemotePortChecker.h
+
+    src/server/DVRServer.h
+    src/server/DVRServerConfiguration.h
+    src/server/DVRServerRepository.h
 
     src/ui/liveview/LiveFeedItem.h
     src/ui/liveview/LiveStreamItem.h

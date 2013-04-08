@@ -16,7 +16,7 @@
  */
 
 #include "EventList.h"
-#include "core/DVRCamera.h"
+#include "camera/DVRCamera.h"
 #include "event/EventFilter.h"
 #include <QSet>
 
@@ -29,12 +29,12 @@ EventList EventList::filter(const EventFilter &eventFilter) const
     return result;
 }
 
-QSet<DVRCamera> EventList::cameras() const
+QSet<DVRCamera *> EventList::cameras() const
 {
-    QSet<DVRCamera> result;
+    QSet<DVRCamera *> result;
     foreach (const EventData &cameraEventData, *this)
     {
-        DVRCamera camera = cameraEventData.locationCamera();
+        DVRCamera *camera = cameraEventData.locationCamera();
         if (camera)
             result.insert(camera);
     }

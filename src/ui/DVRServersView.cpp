@@ -20,7 +20,7 @@
 #include "OptionsDialog.h"
 #include "OptionsServerPage.h"
 #include "ServerConfigWindow.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
 #include "core/BluecherryApp.h"
 #include "MainWindow.h"
 #include "liveview/LiveViewWindow.h"
@@ -38,7 +38,7 @@ DVRServersView::DVRServersView(QWidget *parent)
     setDragEnabled(true);
     setAnimated(true);
 
-    DVRServersModel *model = new DVRServersModel(this);
+    DVRServersModel *model = new DVRServersModel(bcApp->serverRepository(), this);
     model->setOfflineDisabled(true);
     setModel(model);
 
@@ -64,7 +64,7 @@ DVRServer *DVRServersView::currentServer() const
 
     while (c.isValid())
     {
-        re = c.data(DVRServersModel::ServerPtrRole).value<DVRServer*>();
+        re = c.data(DVRServersModel::DVRServerRole).value<DVRServer*>();
         if (re)
             break;
         c = c.parent();
@@ -76,8 +76,8 @@ DVRServer *DVRServersView::currentServer() const
 void DVRServersView::contextMenuEvent(QContextMenuEvent *event)
 {
     QModelIndex index = indexAt(event->pos());
-    DVRServer *server = index.data(DVRServersModel::ServerPtrRole).value<DVRServer*>();
-    DVRCamera camera = index.data(DVRServersModel::DVRCameraRole).value<DVRCamera>();
+    DVRServer *server = index.data(DVRServersModel::DVRServerRole).value<DVRServer *>();
+    DVRCamera *camera = index.data(DVRServersModel::DVRCameraRole).value<DVRCamera *>();
 
     /* For servers, we prefer the checkable menu over the server controls menu,
      * due to the way they're used specifically. Somewhat unclean. */
@@ -140,15 +140,19 @@ void DVRServersView::contextMenuEvent(QContextMenuEvent *event)
     }
     else if (action == aAddFeed)
     {
-        bcApp->mainWindow->liveView()->view()->addCamera(camera);
+        if (camera)
+            bcApp->mainWindow->liveView()->view()->addCamera(camera);
     }
     else if (action == aOpenWin || action == aOpenFull)
     {
-        LiveViewWindow *w = LiveViewWindow::openWindow(bcApp->mainWindow, (action == aOpenFull), camera);
-        if (action == aOpenFull)
-            w->showFullScreen();
-        else
-            w->show();
+        if (camera)
+        {
+            LiveViewWindow *w = LiveViewWindow::openWindow(bcApp->mainWindow, (action == aOpenFull), camera);
+            if (action == aOpenFull)
+                w->showFullScreen();
+            else
+                w->show();
+        }
     }
     else if (action == aSelectOnly)
     {
@@ -185,8 +189,8 @@ void DVRServersView::mouseDoubleClickEvent(QMouseEvent *event)
     QModelIndex index;
     if (event->button() == Qt::LeftButton && (index = indexAt(event->pos())).isValid())
     {
-        DVRServer *server = index.data(DVRServersModel::ServerPtrRole).value<DVRServer*>();
-        DVRCamera camera = index.data(DVRServersModel::DVRCameraRole).value<DVRCamera>();
+        DVRServer *server = index.data(DVRServersModel::DVRServerRole).value<DVRServer *>();
+        DVRCamera *camera = index.data(DVRServersModel::DVRCameraRole).value<DVRCamera *>();
         if (index.flags() & Qt::ItemIsUserCheckable)
         {
             Qt::CheckState state = (index.data(Qt::CheckStateRole).toInt() == Qt::Checked) ? Qt::Unchecked : Qt::Checked;
@@ -196,9 +200,9 @@ void DVRServersView::mouseDoubleClickEvent(QMouseEvent *event)
         }
         else if (server && !(index.flags() & Qt::ItemIsEnabled))
         {
-            if (server->api->isLoginPending())
+            if (server->isLoginPending())
             {
-                OptionsDialog *dlg = new OptionsDialog(this);
+                OptionsDialog *dlg = new OptionsDialog(bcApp->serverRepository(), this);
                 dlg->showPage(OptionsDialog::ServerPage);
                 dlg->setAttribute(Qt::WA_DeleteOnClose);
 

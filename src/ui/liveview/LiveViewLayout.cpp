@@ -16,7 +16,7 @@
  */
 
 #include "LiveViewLayout.h"
-#include "core/DVRCamera.h"
+#include "camera/DVRCamera.h"
 #include <QDeclarativeEngine>
 #include <QDeclarativeContext>
 #include <QTimerEvent>
@@ -299,7 +299,7 @@ void LiveViewLayout::insertRow(int row)
     m_rows++;
 
     for (int i = (row * m_columns), n = i+m_columns; i < n; ++i)
-        m_items.insert(i, 0);
+        m_items.insert(i, QWeakPointer<QDeclarativeItem>());
 
     scheduleLayout(DoItemsLayout | EmitLayoutChanged);
 }
@@ -313,12 +313,12 @@ void LiveViewLayout::removeRow(int row)
 
     for (int i = (row * m_columns), n = i+m_columns; i < n; ++i)
     {
-        QDeclarativeItem *item = m_items[i];
+        QDeclarativeItem *item = m_items[i].data();
         if (item)
             item->deleteLater();
     }
 
-    QList<QDeclarativeItem*>::Iterator st = m_items.begin() + (row * m_columns);
+    QList<QWeakPointer<QDeclarativeItem> >::Iterator st = m_items.begin() + (row * m_columns);
     m_items.erase(st, st+m_columns);
 
     /* Ensure that we always have at least one row, but still clear it if asked to remove */
@@ -334,7 +334,7 @@ void LiveViewLayout::insertColumn(int column)
 
     for (int i = column, n = 0; n < m_rows; i += m_columns, ++n)
     {
-        m_items.insert(i, 0);
+        m_items.insert(i, QWeakPointer<QDeclarativeItem>());
         ++i;
     }
 
@@ -350,7 +350,7 @@ void LiveViewLayout::removeColumn(int column)
 
     for (int i = column; i < m_items.size(); i += m_columns)
     {
-        QDeclarativeItem *item = m_items[i];
+        QDeclarativeItem *item = m_items[i].data();
         if (item)
             item->deleteLater();
         m_items.removeAt(i);
@@ -452,14 +452,14 @@ void LiveViewLayout::set(int row, int col, QDeclarativeItem *item)
     if (row >= m_rows || col >= m_columns || (item == at(row, col)))
         return;
 
-    QDeclarativeItem *&ip = m_items[coordinatesToIndex(row, col)];
+    QDeclarativeItem *ip = m_items[coordinatesToIndex(row, col)].data();
     if (ip == item)
         return;
 
     if (ip)
         ip->deleteLater();
 
-    ip = item;
+    m_items[coordinatesToIndex(row, col)] = item;
 
     scheduleLayout(DoItemsLayout | EmitLayoutChanged);
 }
@@ -470,7 +470,7 @@ void LiveViewLayout::removeItem(QDeclarativeItem *item)
     if (index < 0 || !item)
         return;
 
-    m_items[index] = 0;
+    m_items[index].clear();
     item->deleteLater();
     scheduleLayout(DoItemsLayout | EmitLayoutChanged);
 }
@@ -478,7 +478,10 @@ void LiveViewLayout::removeItem(QDeclarativeItem *item)
 QDeclarativeItem *LiveViewLayout::addItemAuto()
 {
     /* Put the item in the first empty space, top-left to bottom-right */
-    int index = m_items.indexOf(0);
+    int index = -1;
+    for (int i = 0; i < m_items.length(); i++)
+        if (m_items.value(i).isNull())
+            index = i;
 
     if (index < 0)
     {
@@ -488,7 +491,9 @@ QDeclarativeItem *LiveViewLayout::addItemAuto()
         else
             appendRow();
 
-        index = m_items.indexOf(0);
+        for (int i = 0; i < m_items.length(); i++)
+            if (m_items.value(i).isNull())
+                index = i;
         // it is possible that no item was added as grid has its maximum size already
         // and all grid items are already filled
         if (index < 0)
@@ -500,7 +505,7 @@ QDeclarativeItem *LiveViewLayout::addItemAuto()
     scheduleLayout(EmitLayoutChanged);
     doLayout();
 
-    return m_items[index];
+    return m_items[index].data();
 }
 
 QDeclarativeItem *LiveViewLayout::addItem(int row, int column)
@@ -514,7 +519,8 @@ QDeclarativeItem *LiveViewLayout::addItem(int row, int column)
     if (row < rows() - 1 || column < columns() - 1)
         return 0;
 
-    QDeclarativeItem *re = m_items[coordinatesToIndex(row, column)] = createNewItem();
+    QDeclarativeItem *re = createNewItem();
+    m_items[coordinatesToIndex(row, column)] = re;
 
     scheduleLayout(EmitLayoutChanged);
     doLayout();
@@ -528,8 +534,8 @@ QDeclarativeItem *LiveViewLayout::takeItem(int row, int column)
         return 0;
 
     int i = coordinatesToIndex(row, column);
-    QDeclarativeItem *item = m_items[i];
-    m_items[i] = 0;
+    QDeclarativeItem *item = m_items[i].data();
+    m_items[i].clear();
 
     scheduleLayout(EmitLayoutChanged);
 
@@ -671,7 +677,7 @@ void LiveViewLayout::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
     if (!event->mimeData()->hasFormat(QLatin1String("application/x-bluecherry-dvrcamera")))
         return;
 
-    QList<DVRCamera> cameras = DVRCamera::fromMimeData(event->mimeData());
+    QList<DVRCamera *> cameras = DVRCamera::fromMimeData(event->mimeData());
     if (cameras.isEmpty())
         return;
 
@@ -687,7 +693,7 @@ void LiveViewLayout::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
     item->setFocus(true);
     startDrag(item);
 
-    bool dragItemCameraProperty = item->setProperty("camera", QVariant::fromValue(cameras[0]));
+    bool dragItemCameraProperty = item->setProperty("camera", QVariant::fromValue(cameras.at(0)));
     Q_ASSERT(dragItemCameraProperty);
     Q_UNUSED(dragItemCameraProperty);
 
@@ -726,13 +732,13 @@ QByteArray LiveViewLayout::saveLayout() const
     /* -1, then version */
     data << -1 << 1;
     data << m_rows << m_columns;
-    foreach (QDeclarativeItem *item, m_items)
+    foreach (QWeakPointer<QDeclarativeItem> item, m_items)
     {
         if (!item)
             data << -1;
-        else if (!item->metaObject()->invokeMethod(item, "saveState", Qt::DirectConnection, Q_ARG(QDataStream*,&data)))
+        else if (!item.data()->metaObject()->invokeMethod(item.data(), "saveState", Qt::DirectConnection, Q_ARG(QDataStream*,&data)))
         {
-            qWarning() << "Failed to save LiveViewLayout state for item" << item;
+            qWarning() << "Failed to save LiveViewLayout state for item" << item.data();
             data << -1;
         }
     }

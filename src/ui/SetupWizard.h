@@ -20,12 +20,14 @@
 
 #include <QWizard>
 
+class DVRServerRepository;
+
 class SetupWizard : public QWizard
 {
     Q_OBJECT
 
 public:
-    SetupWizard(QWidget *parent = 0);
+    explicit SetupWizard(DVRServerRepository *serverRepository, QWidget *parent = 0);
 
 public slots:
     void skip();
@@ -35,6 +37,7 @@ protected:
 
 private:
     bool skipFlag;
+
 };
 
 #endif // SETUPWIZARD_H

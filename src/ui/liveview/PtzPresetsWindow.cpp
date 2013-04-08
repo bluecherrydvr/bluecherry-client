@@ -30,7 +30,10 @@ PtzPresetsWindow::PtzPresetsWindow(CameraPtzControl *ptzControl, QWidget *parent
 {
     connect(ptzControl, SIGNAL(destroyed()), SLOT(close()));
 
-    setWindowTitle(tr("PTZ - %1").arg(m_ptz->camera().displayName()));
+    if (m_ptz->camera())
+        setWindowTitle(tr("PTZ - %1").arg(m_ptz->camera()->displayName()));
+    else
+        setWindowTitle(tr("PTZ"));
     resize(150, 200);
 
     QBoxLayout *layout = new QVBoxLayout(this);

@@ -29,7 +29,7 @@ class LiveStreamItem : public QDeclarativeItem
 {
     Q_OBJECT
 
-    Q_PROPERTY(QSharedPointer<LiveStream> stream READ stream WRITE setStream NOTIFY streamChanged)
+    Q_PROPERTY(LiveStream *stream READ stream WRITE setStream NOTIFY streamChanged)
     Q_PROPERTY(QSizeF frameSize READ frameSize NOTIFY frameSizeChanged)
 
 public:
@@ -38,14 +38,14 @@ public:
 
     virtual void paint(QPainter *, const QStyleOptionGraphicsItem *, QWidget *);
 
-    QSharedPointer<LiveStream> stream() const { return m_stream; }
-    void setStream(const QSharedPointer<LiveStream> &stream);
+    LiveStream * stream() const { return m_stream.data(); }
+    void setStream(LiveStream *stream);
     void clear();
 
-    QSizeF frameSize() const { return m_stream ? m_stream->streamSize() : QSize(0, 0); }
+    QSizeF frameSize() const { return m_stream ? m_stream.data()->streamSize() : QSize(0, 0); }
 
 signals:
-    void streamChanged(const QSharedPointer<LiveStream> &stream);
+    void streamChanged(LiveStream *stream);
     void frameSizeChanged(const QSizeF &frameSize);
 
 private slots:
@@ -58,7 +58,7 @@ private slots:
     void updateSettings();
 
 private:
-    QSharedPointer<LiveStream> m_stream;
+    QWeakPointer<LiveStream> m_stream;
     bool m_useAdvancedGL;
     unsigned m_texId;
     const QGLContext *m_texLastContext;

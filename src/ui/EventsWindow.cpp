@@ -64,7 +64,7 @@ EventsWindow::EventsWindow(QWidget *parent)
 
     /* Filters */
     m_sourcesView = new DVRServersView;
-    EventSourcesModel *sourcesModel = new EventSourcesModel(m_sourcesView);
+    EventSourcesModel *sourcesModel = new EventSourcesModel(bcApp->serverRepository(), m_sourcesView);
     m_sourcesView->setModel(sourcesModel);
     m_sourcesView->setMaximumWidth(180);
     //m_sourcesView->setMaximumHeight(150);
@@ -281,7 +281,7 @@ QWidget *EventsWindow::createResultTitle()
 QWidget *EventsWindow::createResultsView()
 {
     m_resultsView = new EventsView;
-    m_resultsView->setModel(new EventsModel(this));
+    m_resultsView->setModel(new EventsModel(bcApp->serverRepository(), this));
     m_resultsView->setFrameStyle(QFrame::NoFrame);
     m_resultsView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_resultsView, SIGNAL(customContextMenuRequested(QPoint)), SLOT(eventContextMenu(QPoint)));
@@ -447,18 +447,18 @@ void EventsWindow::eventContextMenu(const QPoint &pos)
         if (!sModel)
             return;
 
-        QSet<DVRCamera> cameras = selectedCameraEvents.cameras();
+        QSet<DVRCamera *> cameras = selectedCameraEvents.cameras();
         QModelIndex sIdx = sModel->indexOfCamera(*cameras.begin());
 
         if (act == aSelectOnly)
         {
             m_sourcesView->checkOnlyIndex(sIdx); // uncheck all, some kind of temporary hack
-            foreach (const DVRCamera &camera, cameras)
+            foreach (DVRCamera *camera, cameras)
                 sModel->setData(sModel->indexOfCamera(camera), Qt::Checked, Qt::CheckStateRole);
         }
         else
         {
-            foreach (const DVRCamera &camera, cameras)
+            foreach (DVRCamera *camera, cameras)
                 sModel->setData(sModel->indexOfCamera(camera), Qt::Unchecked, Qt::CheckStateRole);
         }
     }

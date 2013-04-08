@@ -18,7 +18,7 @@
 #include "EventDownloadManager.h"
 #include "core/BluecherryApp.h"
 #include "core/EventData.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
 #include "event/EventVideoDownload.h"
 #include "ui/MainWindow.h"
 #include "utils/StringUtils.h"
@@ -42,6 +42,16 @@ EventDownloadManager::EventDownloadManager(QObject *parent)
 
 EventDownloadManager::~EventDownloadManager()
 {
+}
+
+void EventDownloadManager::serverRemoved(DVRServer *server)
+{
+    QList<EventVideoDownload *> toDelete;
+    foreach (EventVideoDownload *dl, m_eventVideoDownloadList)
+        if (dl->eventData().server() == server)
+            toDelete.append(dl); // do not delete immediately, it will affect m_eventVideoDownloadList
+
+    qDeleteAll(toDelete);
 }
 
 QString EventDownloadManager::defaultFileName(const EventData &event) const

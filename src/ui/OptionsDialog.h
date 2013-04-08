@@ -22,6 +22,7 @@
 
 class QTabWidget;
 class QDialogButtonBox;
+class DVRServerRepository;
 
 class OptionsDialog : public QDialog
 {
@@ -34,7 +35,7 @@ public:
         ServerPage
     };
 
-    explicit OptionsDialog(QWidget *parent = 0);
+    explicit OptionsDialog(DVRServerRepository *serverRepository, QWidget *parent = 0);
 
     void showPage(OptionsPage page);
     QWidget *pageWidget(OptionsPage page) const;

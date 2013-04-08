@@ -65,7 +65,7 @@ public:
 
     QSize idealSize() const;
 
-    QDeclarativeItem *at(int row, int col) const { return m_items[coordinatesToIndex(row, col)]; }
+    QDeclarativeItem *at(int row, int col) const { return m_items[coordinatesToIndex(row, col)].data(); }
     Q_INVOKABLE void set(int row, int col, QDeclarativeItem *item);
 
     /* Add a new item, automatically placing it in the best available position */
@@ -131,7 +131,7 @@ protected:
 
 private:
     int m_rows, m_columns;
-    QList<QDeclarativeItem*> m_items;
+    QList<QWeakPointer<QDeclarativeItem> > m_items;
     QDeclarativeComponent *m_itemComponent;
     QBasicTimer m_layoutTimer;
 

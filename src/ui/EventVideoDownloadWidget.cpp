@@ -17,9 +17,10 @@
 
 #include "EventVideoDownloadWidget.h"
 #include "core/BluecherryApp.h"
-#include "core/DVRServer.h"
 #include "event/EventVideoDownload.h"
 #include "network/MediaDownloadManager.h"
+#include "server/DVRServer.h"
+#include "server/DVRServerConfiguration.h"
 #include "video/MediaDownload.h"
 #include <QFrame>
 #include <QGridLayout>
@@ -38,8 +39,8 @@ EventVideoDownloadWidget::EventVideoDownloadWidget(EventVideoDownload *eventVide
 
     const EventData &event = m_eventVideoDownload.data()->eventData();
     QLabel *label = new QLabel(QString::fromLatin1("<b>%2</b> %1<br /> %3")
-                               .arg(event.server()->displayName())
-                               .arg(event.locationCamera().displayName())
+                               .arg(event.uiServer())
+                               .arg(event.uiLocation())
                                .arg(event.serverStartDate().toString())
                                );
     layout->addWidget(label, 0, 0);

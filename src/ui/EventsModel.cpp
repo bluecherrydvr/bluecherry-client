@@ -16,21 +16,26 @@
  */
 
 #include "EventsModel.h"
-#include "core/BluecherryApp.h"
-#include "core/DVRServer.h"
-#include "core/DVRCamera.h"
+#include "server/DVRServer.h"
+#include "server/DVRServerConfiguration.h"
+#include "server/DVRServerRepository.h"
+#include "camera/DVRCamera.h"
 #include "core/EventData.h"
+#include "core/ServerRequestManager.h"
 #include "event/EventsLoader.h"
 #include <QTextDocument>
 #include <QColor>
 #include <QDebug>
+#include <QIcon>
 #include <QtConcurrentRun>
 
-EventsModel::EventsModel(QObject *parent)
-    : QAbstractItemModel(parent), serverEventsLimit(-1), incompleteEventsFirst(false)
+EventsModel::EventsModel(DVRServerRepository *serverRepository, QObject *parent)
+    : QAbstractItemModel(parent), m_serverRepository(serverRepository), serverEventsLimit(-1), incompleteEventsFirst(false)
 {
-    connect(bcApp, SIGNAL(serverAdded(DVRServer*)), SLOT(serverAdded(DVRServer*)));
-    connect(bcApp, SIGNAL(serverRemoved(DVRServer*)), SLOT(clearServerEvents(DVRServer*)));
+    Q_ASSERT(m_serverRepository);
+
+    connect(m_serverRepository, SIGNAL(serverAdded(DVRServer*)), SLOT(serverAdded(DVRServer*)));
+    connect(m_serverRepository, SIGNAL(serverRemoved(DVRServer*)), SLOT(clearServerEvents(DVRServer*)));
     connect(&updateTimer, SIGNAL(timeout()), SLOT(updateServers()));
 
     //createTestData();
@@ -39,14 +44,14 @@ EventsModel::EventsModel(QObject *parent)
     sortOrder = Qt::DescendingOrder;
     applyFilters();
 
-    foreach (DVRServer *s, bcApp->servers())
+    foreach (DVRServer *s, m_serverRepository->servers())
         serverAdded(s);
 }
 
 void EventsModel::serverAdded(DVRServer *server)
 {
-    connect(server->api, SIGNAL(loginSuccessful()), SLOT(updateServer()));
-    connect(server->api, SIGNAL(disconnected()), SLOT(clearServerEvents()));
+    connect(server, SIGNAL(loginSuccessful()), SLOT(updateServer()));
+    connect(server, SIGNAL(disconnected()), SLOT(clearServerEvents()));
     updateServer(server);
 }
 
@@ -150,7 +155,10 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
     {
     case ServerColumn:
         if (role == Qt::DisplayRole)
-            return data->server()->displayName();
+            if (data->server())
+                return data->server()->configuration()->displayName();
+            else
+                return QString();
         break;
     case LocationColumn:
         if (role == Qt::DisplayRole)
@@ -275,7 +283,7 @@ public:
         switch (column)
         {
         case EventsModel::ServerColumn:
-            re = QString::localeAwareCompare(e1->server()->displayName(), e2->server()->displayName()) <= 0;
+            re = QString::localeAwareCompare(e1->server()->configuration()->displayName(), e2->server()->configuration()->displayName()) <= 0;
             break;
         case EventsModel::LocationColumn:
             re = QString::localeAwareCompare(e1->uiLocation(), e2->uiLocation()) <= 0;
@@ -449,7 +457,7 @@ QString EventsModel::filterDescription() const
         }
     }
 
-    if (!m_filter.sources.isEmpty() && m_filter.sources.size() != bcApp->servers().size())
+    if (!m_filter.sources.isEmpty() && m_filter.sources.size() != m_serverRepository->servers().size())
     {
         if (m_filter.sources.size() == 1)
         {
@@ -462,7 +470,7 @@ QString EventsModel::filterDescription() const
                     re += tr(" on selected cameras");
             }
 
-            re += tr(" from %1").arg(m_filter.sources.begin().key()->displayName());
+            re += tr(" from %1").arg(m_filter.sources.begin().key()->configuration()->displayName());
         }
         else if (!allCameras)
             re += tr(" on selected cameras");
@@ -577,13 +585,13 @@ void EventsModel::setFilterSources(const QMap<DVRServer*, QList<int> > &sources)
     applyFilters(!fast);
 }
 
-void EventsModel::setFilterSource(const DVRCamera &camera)
+void EventsModel::setFilterSource(DVRCamera *camera)
 {
-    if (!camera.isValid())
+    if (!camera)
         return;
 
     QMap<DVRServer*,QList<int> > sources;
-    sources.insert(camera.server(), QList<int>() << camera.uniqueId());
+    sources.insert(camera->server(), QList<int>() << camera->uniqueId());
     setFilterSources(sources);
 }
 
@@ -630,7 +638,7 @@ void EventsModel::setUpdateInterval(int ms)
 
 void EventsModel::updateServers()
 {
-    foreach (DVRServer *s, bcApp->servers())
+    foreach (DVRServer *s, m_serverRepository->servers())
         updateServer(s);
 }
 
@@ -645,7 +653,7 @@ void EventsModel::updateServer(DVRServer *server)
             return;
     }
 
-    if (!server->api->isOnline() || updatingServers.contains(server))
+    if (!server->isOnline() || updatingServers.contains(server))
         return;
 
     updatingServers.insert(server);
@@ -666,7 +674,7 @@ void EventsModel::eventsLoaded(bool ok, const QList<EventData *> &events)
     Q_ASSERT(eventsLoader);
 
     DVRServer *server = eventsLoader->server();
-    if (!server || !bcApp->serverExists(server))
+    if (!server)
         return;
 
     if (ok)

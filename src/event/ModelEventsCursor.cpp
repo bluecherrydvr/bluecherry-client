@@ -54,7 +54,7 @@ bool ModelEventsCursor::acceptIndex(int index) const
     if (!m_cameraFilter)
         return true;
 
-    return event->locationCamera() == m_cameraFilter;
+    return event->locationCamera() == m_cameraFilter.data();
 }
 
 void ModelEventsCursor::invalidateIndexCache()
@@ -216,6 +216,9 @@ void ModelEventsCursor::rowsMoved(const QModelIndex &sourceParent, int sourceFir
 
 void ModelEventsCursor::rowsRemoved(const QModelIndex &parent, int start, int end)
 {
+    qDebug() << "rowsRemoved";
+    qDebug() << m_cameraFilter.data();
+
     if (parent.isValid())
         return;
 
@@ -273,9 +276,9 @@ void ModelEventsCursor::setModel(QAbstractItemModel *model)
     emit eventSwitched(current());
 }
 
-void ModelEventsCursor::setCameraFilter(DVRCamera cameraFilter)
+void ModelEventsCursor::setCameraFilter(DVRCamera *cameraFilter)
 {
-    if (m_cameraFilter == cameraFilter)
+    if (m_cameraFilter.data() == cameraFilter)
         return;
 
     m_cameraFilter = cameraFilter;

@@ -32,6 +32,7 @@ public:
 class QLineEdit;
 class QNetworkReply;
 class QLabel;
+class DVRServerRepository;
 class WebRtpPortCheckerWidget;
 
 class SetupServerPage : public QWizardPage
@@ -39,7 +40,7 @@ class SetupServerPage : public QWizardPage
     Q_OBJECT
 
 public:
-    SetupServerPage();
+    explicit SetupServerPage(DVRServerRepository *serverRepository);
 
     virtual void initializePage();
     virtual void cleanupPage();
@@ -60,6 +61,8 @@ protected:
     virtual void hideEvent(QHideEvent *ev);
 
 private:
+    DVRServerRepository *m_serverRepository;
+
     QLineEdit *nameEdit;
     WebRtpPortCheckerWidget *portChecker;
     QLabel *testResultIcon;
