@@ -34,9 +34,9 @@ class QMimeData;
 class DVRCamera : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(DVRCamera)
 
     friend class DVRServer;
-    friend uint qHash(const DVRCamera &camera);
 
 public:
     enum PtzProtocol {
@@ -46,16 +46,6 @@ public:
     };
 
     static PtzProtocol parseProtocol(const QString &protocol);
-
-    DVRCamera() { }
-    DVRCamera(const DVRCamera &o);
-
-    DVRCamera &operator=(const DVRCamera &o);
-
-    bool operator==(const DVRCamera &o) const
-    {
-        return (d.data() == o.d.data());
-    }
 
     bool isValid() const { return d; }
 
@@ -96,9 +86,6 @@ private:
 
 };
 
-Q_DECLARE_METATYPE(DVRCamera)
 Q_DECLARE_METATYPE(DVRCamera *)
-
-uint qHash(const DVRCamera &camera);
 
 #endif // DVRCAMERA_H

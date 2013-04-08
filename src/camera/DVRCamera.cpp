@@ -26,25 +26,10 @@
 #include <QMimeData>
 #include <QSettings>
 
-DVRCamera::DVRCamera(const DVRCamera &o)
-    : QObject(), d(o.d)
-{
-    connectData();
-}
-
 DVRCamera::DVRCamera(DVRCameraData *dt)
     : QObject(), d(dt)
 {
     connectData();
-}
-
-DVRCamera& DVRCamera::operator = (const DVRCamera &o)
-{
-    disconnectData();
-    d = o.d;
-    connectData();
-
-    return *this;
 }
 
 void DVRCamera::connectData()
@@ -176,9 +161,4 @@ QList<DVRCamera *> DVRCamera::fromMimeData(const QMimeData *mimeData)
     }
 
     return result;
-}
-
-uint qHash(const DVRCamera &camera)
-{
-    return qHash(camera.d);
 }
