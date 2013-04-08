@@ -584,7 +584,7 @@ void EventsModel::setFilterSources(const QMap<DVRServer*, QList<int> > &sources)
 
 void EventsModel::setFilterSource(DVRCamera *camera)
 {
-    if (!camera || !camera->isValid())
+    if (!camera)
         return;
 
     QMap<DVRServer*,QList<int> > sources;

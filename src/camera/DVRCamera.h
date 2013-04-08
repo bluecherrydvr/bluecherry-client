@@ -47,8 +47,6 @@ public:
 
     static PtzProtocol parseProtocol(const QString &protocol);
 
-    bool isValid() const { return d; }
-
     QObject * getQObject() const { return d ? d.data() : 0; }
 
     DVRServer *server() const { return d ? d->server : 0; }

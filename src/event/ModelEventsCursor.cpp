@@ -51,7 +51,7 @@ bool ModelEventsCursor::acceptIndex(int index) const
     if (!event)
         return false;
 
-    if (!m_cameraFilter || !m_cameraFilter.data()->isValid())
+    if (!m_cameraFilter)
         return true;
 
     return event->locationCamera() == m_cameraFilter.data();

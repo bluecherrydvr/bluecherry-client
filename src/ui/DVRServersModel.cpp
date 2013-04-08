@@ -88,7 +88,6 @@ void DVRServersModel::serverRemoved(DVRServer *server)
 void DVRServersModel::cameraAdded(DVRCamera *camera)
 {
     Q_ASSERT(camera);
-    Q_ASSERT(camera->isValid());
 
     QModelIndex parent = indexForServer(camera->server());
     if (!parent.isValid())
@@ -123,7 +122,7 @@ void DVRServersModel::cameraRemoved(DVRCamera *camera)
 void DVRServersModel::cameraDataChanged()
 {
     DVRCamera *camera = qobject_cast<DVRCamera *>(sender());
-    if (!camera || !camera->isValid())
+    if (!camera)
         return;
 
     QModelIndex index = indexForCamera(camera);
@@ -257,7 +256,7 @@ Qt::ItemFlags DVRServersModel::flags(const QModelIndex &index) const
     else
         s = serverForRow(index);
 
-    if (!m_offlineDisabled || (s && s->isOnline() && (!camera || !camera->isValid() || !camera->isDisabled())))
+    if (!m_offlineDisabled || (s && s->isOnline() && (!camera || !camera->isDisabled())))
         re |= Qt::ItemIsEnabled;
     else
         return re;
@@ -318,7 +317,7 @@ QVariant DVRServersModel::data(const QModelIndex &index, int role) const
     }
 
     DVRCamera *camera = cameraForRow(index);
-    if (camera && camera->isValid())
+    if (camera)
     {
         switch (role)
         {
@@ -415,7 +414,7 @@ QMimeData *DVRServersModel::mimeData(const QModelIndexList &indexes) const
         else
         {
             DVRCamera *camera = cameraForRow(index);
-            if (camera && camera->isValid())
+            if (camera)
                 cameraWriter.writeCamera(camera);
         }
     }

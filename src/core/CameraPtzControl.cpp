@@ -29,13 +29,13 @@ CameraPtzControl::CameraPtzControl(DVRCamera *camera, QObject *parent)
     : QObject(parent), m_camera(camera), m_protocol(DVRCamera::UnknownProtocol), m_capabilities(NoCapabilities),
       m_currentPreset(-1)
 {
-    Q_ASSERT(m_camera && m_camera.data()->isValid());
+    Q_ASSERT(m_camera);
     updateInfo();
 }
 
 QSharedPointer<CameraPtzControl> CameraPtzControl::sharedObjectFor(DVRCamera *camera)
 {
-    if (!camera || !camera->isValid())
+    if (!camera)
         return QSharedPointer<CameraPtzControl>();
 
     QSharedPointer<CameraPtzControl> ptr = camera->getQObject()->property("cameraPtzControl")

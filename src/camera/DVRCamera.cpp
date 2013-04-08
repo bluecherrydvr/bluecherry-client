@@ -73,9 +73,6 @@ DVRCamera::PtzProtocol DVRCamera::parseProtocol(const QString &protocol)
 
 bool DVRCamera::parseXML(QXmlStreamReader &xml)
 {
-    if (!isValid())
-        return false;
-
     Q_ASSERT(xml.isStartElement() && xml.name() == QLatin1String("device"));
 
     QString name;
@@ -156,7 +153,7 @@ QList<DVRCamera *> DVRCamera::fromMimeData(const QMimeData *mimeData)
     while (!stream.atEnd() && stream.status() == QDataStream::Ok)
     {
         DVRCamera *camera = reader.readCamera();
-        if (camera && camera->isValid())
+        if (camera)
             result.append(camera);
     }
 

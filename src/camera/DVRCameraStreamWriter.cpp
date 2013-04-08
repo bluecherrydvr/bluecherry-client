@@ -27,7 +27,7 @@ DVRCameraStreamWriter::DVRCameraStreamWriter(QDataStream &dataStream)
 
 void DVRCameraStreamWriter::writeCamera(DVRCamera *camera)
 {
-    if (!camera || !camera->isValid())
+    if (!camera)
         m_dataStream << -1;
     else
         m_dataStream << camera->server()->configuration()->id() << camera->uniqueId();

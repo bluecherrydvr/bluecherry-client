@@ -52,7 +52,7 @@ LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, bool fullscreen, DVR
     window->setAutoSized(!fullscreen);
     window->setAttribute(Qt::WA_DeleteOnClose);
 
-    if (camera && camera->isValid())
+    if (camera)
         window->showSingleCamera(camera);
 
     return window;
