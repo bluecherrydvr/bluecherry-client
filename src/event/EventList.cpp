@@ -29,14 +29,14 @@ EventList EventList::filter(const EventFilter &eventFilter) const
     return result;
 }
 
-QSet<DVRCamera> EventList::cameras() const
+QSet<DVRCamera *> EventList::cameras() const
 {
-    QSet<DVRCamera> result;
+    QSet<DVRCamera *> result;
     foreach (const EventData &cameraEventData, *this)
     {
         DVRCamera *camera = cameraEventData.locationCamera();
         if (camera && camera->isValid())
-            result.insert(*camera);
+            result.insert(camera);
     }
     return result;
 }

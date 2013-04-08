@@ -99,13 +99,13 @@ void LiveFeedItem::cameraDataUpdated()
 void LiveFeedItem::openNewWindow()
 {
     if (m_camera)
-        LiveViewWindow::openWindow(bcApp->mainWindow, false, *m_camera.data())->show();
+        LiveViewWindow::openWindow(bcApp->mainWindow, false, m_camera.data())->show();
 }
 
 void LiveFeedItem::openFullScreen()
 {
     if (m_camera)
-        LiveViewWindow::openWindow(bcApp->mainWindow, true, *m_camera.data())->showFullScreen();
+        LiveViewWindow::openWindow(bcApp->mainWindow, true, m_camera.data())->showFullScreen();
 }
 
 void LiveFeedItem::close()

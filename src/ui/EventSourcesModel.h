@@ -36,7 +36,7 @@ public:
 
     virtual QMap<DVRServer*,QList<int> > checkedSources() const;
 
-    QModelIndex indexOfCamera(const DVRCamera &camera) const;
+    QModelIndex indexOfCamera(DVRCamera *camera) const;
 
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
@@ -57,7 +57,7 @@ private:
     struct ServerData
     {
         DVRServer *server;
-        QVector<DVRCamera> cameras;
+        QVector<QWeakPointer<DVRCamera> > cameras;
         /* Note that the indexes are +1 from cameras */
         QBitArray checkState;
     };

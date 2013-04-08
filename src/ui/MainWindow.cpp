@@ -684,8 +684,8 @@ void MainWindow::eventsContextMenu(const QPoint &pos)
     }
     else if (act == aViewLive)
     {
-        QSet<DVRCamera> cameras = selectedCameraEvents.cameras();
-        foreach (const DVRCamera &camera, cameras)
+        QSet<DVRCamera *> cameras = selectedCameraEvents.cameras();
+        foreach (DVRCamera *camera, cameras)
             LiveViewWindow::openWindow(this, false, camera)->show();
     }
     else if (act == aSaveVideo)

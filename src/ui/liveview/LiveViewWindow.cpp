@@ -42,7 +42,7 @@
 #include <QMacStyle>
 #endif
 
-LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, bool fullscreen, const DVRCamera &camera)
+LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, bool fullscreen, DVRCamera *camera)
 {
 #ifdef Q_OS_MAC
     /* Child windows are undesirable on Mac, and cause problems (QTBUG-20652) */
@@ -52,7 +52,7 @@ LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, bool fullscreen, con
     window->setAutoSized(!fullscreen);
     window->setAttribute(Qt::WA_DeleteOnClose);
 
-    if (camera.isValid())
+    if (camera && camera->isValid())
         window->showSingleCamera(camera);
 
     return window;
@@ -207,7 +207,7 @@ void LiveViewWindow::doAutoResize()
     setAutoSized(false);
 }
 
-void LiveViewWindow::showSingleCamera(const DVRCamera &camera)
+void LiveViewWindow::showSingleCamera(DVRCamera *camera)
 {
     m_liveView->layout()->setGridSize(1, 1);
     QDeclarativeItem *item = m_liveView->layout()->addItem(0, 0);

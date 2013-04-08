@@ -447,18 +447,18 @@ void EventsWindow::eventContextMenu(const QPoint &pos)
         if (!sModel)
             return;
 
-        QSet<DVRCamera> cameras = selectedCameraEvents.cameras();
+        QSet<DVRCamera *> cameras = selectedCameraEvents.cameras();
         QModelIndex sIdx = sModel->indexOfCamera(*cameras.begin());
 
         if (act == aSelectOnly)
         {
             m_sourcesView->checkOnlyIndex(sIdx); // uncheck all, some kind of temporary hack
-            foreach (const DVRCamera &camera, cameras)
+            foreach (DVRCamera *camera, cameras)
                 sModel->setData(sModel->indexOfCamera(camera), Qt::Checked, Qt::CheckStateRole);
         }
         else
         {
-            foreach (const DVRCamera &camera, cameras)
+            foreach (DVRCamera *camera, cameras)
                 sModel->setData(sModel->indexOfCamera(camera), Qt::Unchecked, Qt::CheckStateRole);
         }
     }
