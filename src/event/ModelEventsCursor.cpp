@@ -216,6 +216,9 @@ void ModelEventsCursor::rowsMoved(const QModelIndex &sourceParent, int sourceFir
 
 void ModelEventsCursor::rowsRemoved(const QModelIndex &parent, int start, int end)
 {
+    qDebug() << "rowsRemoved";
+    qDebug() << m_cameraFilter.data();
+
     if (parent.isValid())
         return;
 

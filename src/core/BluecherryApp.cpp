@@ -92,6 +92,7 @@ BluecherryApp::BluecherryApp()
     m_mediaDownloadManager->setCookieJar(nam->cookieJar());
 
     m_eventDownloadManager = new EventDownloadManager(this);
+    connect(m_serverRepository, SIGNAL(serverRemoved(DVRServer*)), m_eventDownloadManager, SLOT(serverRemoved(DVRServer*)));
 
     connect(qApp, SIGNAL(commitDataRequest(QSessionManager&)), this, SLOT(commitDataRequest(QSessionManager&)));
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(saveSettings()));

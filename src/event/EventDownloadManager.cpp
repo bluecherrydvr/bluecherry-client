@@ -44,6 +44,16 @@ EventDownloadManager::~EventDownloadManager()
 {
 }
 
+void EventDownloadManager::serverRemoved(DVRServer *server)
+{
+    QList<EventVideoDownload *> toDelete;
+    foreach (EventVideoDownload *dl, m_eventVideoDownloadList)
+        if (dl->eventData().server() == server)
+            toDelete.append(dl); // do not delete immediately, it will affect m_eventVideoDownloadList
+
+    qDeleteAll(toDelete);
+}
+
 QString EventDownloadManager::defaultFileName(const EventData &event) const
 {
     return withSuffix(event.baseFileName(), QLatin1String(".mkv"));
