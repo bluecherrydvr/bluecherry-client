@@ -56,7 +56,7 @@ public:
     bool isOnline() const { return d && d->isOnline && !d->isDisabled && !d->streamUrl.isEmpty(); }
     bool isDisabled() const { return d && d->isDisabled; }
     bool canStream() const { return d && !d->streamUrl.isEmpty() && isOnline(); }
-    QSharedPointer<LiveStream> liveStream();
+    LiveStream * liveStream();
 
     PtzProtocol ptzProtocol() const { return d ? static_cast<PtzProtocol>(d->ptzProtocol) : NoPtz; }
     bool hasPtz() const { return d ? (d->ptzProtocol > 0) : false; }

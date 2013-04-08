@@ -57,9 +57,9 @@ void LiveFeedItem::setStreamItem(LiveStreamItem *item)
     m_streamItem = item;
 }
 
-LiveStream *LiveFeedItem::stream() const
+LiveStream * LiveFeedItem::stream() const
 {
-    return m_streamItem ? m_streamItem->stream().data() : 0;
+    return m_streamItem ? m_streamItem->stream() : 0;
 }
 
 void LiveFeedItem::setCamera(DVRCamera *camera)
@@ -92,8 +92,7 @@ void LiveFeedItem::cameraDataUpdated()
     emit cameraNameChanged(cameraName());
     emit hasPtzChanged();
 
-    QSharedPointer<LiveStream> nstream = m_camera.data()->liveStream();
-    m_streamItem->setStream(nstream);
+    m_streamItem->setStream(m_camera.data()->liveStream());
 }
 
 void LiveFeedItem::openNewWindow()

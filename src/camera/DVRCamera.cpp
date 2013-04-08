@@ -124,23 +124,17 @@ bool DVRCamera::parseXML(QXmlStreamReader &xml)
     return true;
 }
 
-QSharedPointer<LiveStream> DVRCamera::liveStream()
+LiveStream * DVRCamera::liveStream()
 {
-    QSharedPointer<LiveStream> re;
-    if (!d)
-        return re;
-
-    if (d->liveStream.isNull())
+    if (!d->liveStream)
     {
-        re = QSharedPointer<LiveStream>(new LiveStream(this));
-        QObject::connect(d.data(), SIGNAL(onlineChanged(bool)), re.data(), SLOT(setOnline(bool)));
+        LiveStream * re = new LiveStream(this);
+        QObject::connect(d.data(), SIGNAL(onlineChanged(bool)), re, SLOT(setOnline(bool)));
         re->setOnline(isOnline());
         d->liveStream = re;
     }
-    else
-        re = d->liveStream.toStrongRef();
 
-    return re;
+    d->liveStream.data();
 }
 
 QList<DVRCamera *> DVRCamera::fromMimeData(const QMimeData *mimeData)
