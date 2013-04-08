@@ -39,7 +39,7 @@ EventVideoDownloadWidget::EventVideoDownloadWidget(EventVideoDownload *eventVide
 
     const EventData &event = m_eventVideoDownload.data()->eventData();
     QLabel *label = new QLabel(QString::fromLatin1("<b>%2</b> %1<br /> %3")
-                               .arg(event.server()->configuration()->displayName())
+                               .arg(event.uiServer())
                                .arg(event.uiLocation())
                                .arg(event.serverStartDate().toString())
                                );

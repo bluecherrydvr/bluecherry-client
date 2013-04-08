@@ -155,7 +155,10 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
     {
     case ServerColumn:
         if (role == Qt::DisplayRole)
-            return data->server()->configuration()->displayName();
+            if (data->server())
+                return data->server()->configuration()->displayName();
+            else
+                return QString();
         break;
     case LocationColumn:
         if (role == Qt::DisplayRole)

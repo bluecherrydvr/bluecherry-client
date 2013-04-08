@@ -45,7 +45,7 @@ EventVideoDownload::EventVideoDownload(const EventData &event, const QString &to
 
 EventVideoDownload::~EventVideoDownload()
 {
-    if (m_mediaDownload)
+    if (m_mediaDownload && m_event.server())
     {
         QUrl eventDownloadUrl = m_event.server()->url().resolved(QUrl(QLatin1String("/media/request.php")));
         eventDownloadUrl.addQueryItem(QLatin1String("id"), QString::number(m_event.mediaId()));
@@ -57,6 +57,9 @@ EventVideoDownload::~EventVideoDownload()
 
 void EventVideoDownload::start()
 {
+    if (!m_event.server())
+        return;
+
     QUrl eventDownloadUrl = m_event.server()->url().resolved(QUrl(QLatin1String("/media/request.php")));
     eventDownloadUrl.addQueryItem(QLatin1String("id"), QString::number(m_event.mediaId()));
 

@@ -22,8 +22,7 @@
 #include <QDateTime>
 #include <QColor>
 #include "camera/DVRCamera.h"
-
-class DVRServer;
+#include "server/DVRServer.h"
 
 class EventLevel
 {
@@ -86,7 +85,7 @@ public:
 class EventData
 {
     QDateTime m_utcStartDate;
-    DVRServer *m_server;
+    QWeakPointer<DVRServer> m_server;
     qint64 m_eventId;
     qint64 m_mediaId;
     int m_durationInSeconds;
@@ -119,7 +118,7 @@ public:
     bool inProgress() const;
     void setInProgress();
 
-    DVRServer * server() const { return m_server; }
+    DVRServer * server() const { return m_server.data(); }
 
     int locationId() const { return m_locationId; }
     void setLocationId(int locationId);

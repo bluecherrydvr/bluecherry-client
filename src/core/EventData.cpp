@@ -220,16 +220,25 @@ void EventData::setLocation(const QString &location)
 
 QString EventData::uiServer() const
 {
-    return server()->configuration()->displayName();
+    if (server())
+        return server()->configuration()->displayName();
+    else
+        return QString();
 }
 
 DVRCamera * EventData::locationCamera() const
 {
-    return server()->getCamera(locationId());
+    if (server())
+        return server()->getCamera(locationId());
+    else
+        return 0;
 }
 
 QString EventData::uiLocation(DVRServer *server, int locationId)
 {
+    if (!server)
+        return QString();
+
     DVRCamera *camera = server->getCamera(locationId);
     if (camera)
         return camera->displayName();

@@ -135,7 +135,7 @@ void EventViewWindow::setEvent(const EventData &event)
                          .arg(Qt::escape(event.uiLevel()))
                          .arg(event.serverStartDate().toString()));
 
-    if (m_event.hasMedia() && m_event.mediaId() >= 0)
+    if (m_event.hasMedia() && m_event.mediaId() >= 0 && m_event.server())
     {
         QUrl url = m_event.server()->url().resolved(QUrl(QLatin1String("/media/request.php")));
         url.addQueryItem(QLatin1String("id"), QString::number(m_event.mediaId()));
