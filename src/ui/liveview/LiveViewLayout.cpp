@@ -687,7 +687,7 @@ void LiveViewLayout::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
     item->setFocus(true);
     startDrag(item);
 
-    bool dragItemCameraProperty = item->setProperty("camera", QVariant::fromValue(*(cameras.at(0))));
+    bool dragItemCameraProperty = item->setProperty("camera", QVariant::fromValue(cameras.at(0)));
     Q_ASSERT(dragItemCameraProperty);
     Q_UNUSED(dragItemCameraProperty);
 

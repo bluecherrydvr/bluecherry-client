@@ -62,24 +62,24 @@ LiveStream *LiveFeedItem::stream() const
     return m_streamItem ? m_streamItem->stream().data() : 0;
 }
 
-void LiveFeedItem::setCamera(const DVRCamera &camera)
+void LiveFeedItem::setCamera(DVRCamera *camera)
 {
-    if (camera == m_camera)
+    if (camera == m_camera.data())
         return;
 
-    if (m_camera.isValid())
+    if (m_camera && m_camera.data()->isValid())
     {
-        m_camera.disconnect(this);
+        m_camera.data()->disconnect(this);
         m_streamItem->clear();
     }
 
     m_camera = camera;
 
-    if (m_camera.isValid())
+    if (m_camera && m_camera.data()->isValid())
     {
-        connect(&m_camera, SIGNAL(dataUpdated()), SLOT(cameraDataUpdated()));
-        connect(&m_camera, SIGNAL(onlineChanged(bool)), SLOT(cameraDataUpdated()));
-        connect(&m_camera, SIGNAL(recordingStateChanged(int)), SIGNAL(recordingStateChanged()));
+        connect(m_camera.data(), SIGNAL(dataUpdated()), SLOT(cameraDataUpdated()));
+        connect(m_camera.data(), SIGNAL(onlineChanged(bool)), SLOT(cameraDataUpdated()));
+        connect(m_camera.data(), SIGNAL(recordingStateChanged(int)), SIGNAL(recordingStateChanged()));
     }
 
     cameraDataUpdated();
@@ -92,18 +92,20 @@ void LiveFeedItem::cameraDataUpdated()
     emit cameraNameChanged(cameraName());
     emit hasPtzChanged();
 
-    QSharedPointer<LiveStream> nstream = m_camera.liveStream();
+    QSharedPointer<LiveStream> nstream = m_camera.data()->liveStream();
     m_streamItem->setStream(nstream);
 }
 
 void LiveFeedItem::openNewWindow()
 {
-    LiveViewWindow::openWindow(bcApp->mainWindow, false, camera())->show();
+    if (m_camera)
+        LiveViewWindow::openWindow(bcApp->mainWindow, false, *m_camera.data())->show();
 }
 
 void LiveFeedItem::openFullScreen()
 {
-    LiveViewWindow::openWindow(bcApp->mainWindow, true, camera())->showFullScreen();
+    if (m_camera)
+        LiveViewWindow::openWindow(bcApp->mainWindow, true, *m_camera.data())->showFullScreen();
 }
 
 void LiveFeedItem::close()
@@ -115,11 +117,11 @@ void LiveFeedItem::close()
 
 void LiveFeedItem::saveSnapshot(const QString &ifile)
 {
-    if (!m_camera.isValid())
+    if (!m_camera || !m_camera.data()->isValid())
         return;
 
     /* Grab the current frame, so the user gets what they expect regardless of the time taken by the dialog */
-    QImage frame = m_camera.liveStream()->currentFrame();
+    QImage frame = m_camera.data()->liveStream()->currentFrame();
     if (frame.isNull())
         return;
 
@@ -129,10 +131,10 @@ void LiveFeedItem::saveSnapshot(const QString &ifile)
 
     if (file.isEmpty())
     {
-        file = getSaveFileNameExt(window, tr("%1 - Save Snapshot").arg(m_camera.displayName()),
+        file = getSaveFileNameExt(window, tr("%1 - Save Snapshot").arg(m_camera.data()->displayName()),
                            QDesktopServices::storageLocation(QDesktopServices::PicturesLocation),
                            QLatin1String("ui/snapshotSaveLocation"),
-                           QString::fromLatin1("%1 - %2.jpg").arg(m_camera.displayName(),
+                           QString::fromLatin1("%1 - %2.jpg").arg(m_camera.data()->displayName(),
                                                                   QDateTime::currentDateTime().toString(
                                                                   QLatin1String("yyyy-MM-dd hh-mm-ss"))),
                            tr("Image (*.jpg)"));
@@ -178,7 +180,7 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     a->setEnabled(m_streamItem->stream() && !m_streamItem->stream()->currentFrame().isNull());
 
     QMenu *ptzmenu = 0;
-    if (camera().hasPtz())
+    if (camera() && camera()->hasPtz())
     {
         if (m_ptz)
         {
@@ -206,7 +208,7 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     menu.addSeparator();
 
     QAction *actClose = menu.addAction(tr("Close camera"), this, SLOT(close()));
-    actClose->setEnabled(m_camera.isValid());
+    actClose->setEnabled(m_camera.data()->isValid());
 
     menu.exec(event->screenPos());
     delete ptzmenu;
@@ -228,11 +230,14 @@ void LiveFeedItem::setBandwidthModeFromAction()
 void LiveFeedItem::saveState(QDataStream *data)
 {
     Q_ASSERT(data);
-    
-    DVRCameraStreamWriter writer(*data);
-    writer.writeCamera(&m_camera);
 
-    *data << (stream() ? stream()->bandwidthMode() : 0);
+    if (m_camera)
+    {
+        DVRCameraStreamWriter writer(*data);
+        writer.writeCamera(m_camera.data());
+
+        *data << (stream() ? stream()->bandwidthMode() : 0);
+    }
 }
 
 void LiveFeedItem::loadState(QDataStream *data, int version)
@@ -242,7 +247,7 @@ void LiveFeedItem::loadState(QDataStream *data, int version)
     DVRCameraStreamReader reader(bcApp->serverRepository(), *data);
     DVRCamera *camera = reader.readCamera();
     if (camera)
-        setCamera(*camera);
+        setCamera(camera);
     else
         clear();
 
@@ -313,8 +318,8 @@ void LiveFeedItem::setPtzEnabled(bool ptzEnabled)
     if (ptzEnabled == !m_ptz.isNull())
         return;
 
-    if (ptzEnabled)
-        m_ptz = CameraPtzControl::sharedObjectFor(&m_camera);
+    if (ptzEnabled && m_camera)
+        m_ptz = CameraPtzControl::sharedObjectFor(m_camera.data());
     else
         m_ptz.clear();
 

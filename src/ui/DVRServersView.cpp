@@ -141,7 +141,7 @@ void DVRServersView::contextMenuEvent(QContextMenuEvent *event)
     else if (action == aAddFeed)
     {
         if (camera)
-            bcApp->mainWindow->liveView()->view()->addCamera(*camera);
+            bcApp->mainWindow->liveView()->view()->addCamera(camera);
     }
     else if (action == aOpenWin || action == aOpenFull)
     {
@@ -221,7 +221,7 @@ void DVRServersView::mouseDoubleClickEvent(QMouseEvent *event)
         }
         else if (camera && camera->isValid())
         {
-            bcApp->mainWindow->liveView()->view()->addCamera(*camera);
+            bcApp->mainWindow->liveView()->view()->addCamera(camera);
         }
 
         event->accept();

@@ -33,9 +33,9 @@ class LiveFeedItem : public QDeclarativeItem
     Q_OBJECT
     Q_ENUMS(CustomCursor RecordingState)
 
-    Q_PROPERTY(LiveStreamItem* streamItem READ streamItem WRITE setStreamItem)
-    Q_PROPERTY(LiveStream* stream READ stream NOTIFY cameraChanged)
-    Q_PROPERTY(DVRCamera camera READ camera WRITE setCamera NOTIFY cameraChanged)
+    Q_PROPERTY(LiveStreamItem *streamItem READ streamItem WRITE setStreamItem)
+    Q_PROPERTY(LiveStream *stream READ stream NOTIFY cameraChanged)
+    Q_PROPERTY(DVRCamera *camera READ camera WRITE setCamera NOTIFY cameraChanged)
 
     Q_PROPERTY(QString cameraName READ cameraName NOTIFY cameraNameChanged)
     Q_PROPERTY(CustomCursor customCursor READ customCursor WRITE setCustomCursor)
@@ -71,20 +71,20 @@ public:
 
     LiveStream *stream() const;
 
-    DVRCamera camera() const { return m_camera; }
-    QString cameraName() const { return m_camera.isValid() ? m_camera.displayName() : QLatin1String(" "); }
+    DVRCamera * camera() const { return m_camera.data(); }
+    QString cameraName() const { return m_camera && m_camera.data()->isValid() ? m_camera.data()->displayName() : QLatin1String(" "); }
 
     CustomCursor customCursor() const { return m_customCursor; }
     CameraPtzControl *ptz() const { return m_ptz.data(); }
-    bool hasPtz() const { return m_camera.isValid() ? m_camera.hasPtz() : false; }
-    RecordingState recordingState() const { return m_camera.isValid() ? RecordingState(m_camera.recordingState()) : NoRecording; }
+    bool hasPtz() const { return m_camera && m_camera.data()->isValid() ? m_camera.data()->hasPtz() : false; }
+    RecordingState recordingState() const { return m_camera && m_camera.data()->isValid() ? RecordingState(m_camera.data()->recordingState()) : NoRecording; }
 
     Q_INVOKABLE void saveState(QDataStream *stream);
     Q_INVOKABLE void loadState(QDataStream *stream, int version);
 
 public slots:
-    void setCamera(const DVRCamera &camera);
-    void clear() { setCamera(DVRCamera()); }
+    void setCamera(DVRCamera *camera);
+    void clear() { setCamera(0); }
 
     void close();
 
@@ -103,7 +103,7 @@ public slots:
     void showFpsMenu(QDeclarativeItem *sourceItem = 0);
 
 signals:
-    void cameraChanged(const DVRCamera &camera);
+    void cameraChanged(DVRCamera *camera);
     void cameraNameChanged(const QString &cameraName);
     void pausedChanged(bool isPaused);
     void ptzChanged(CameraPtzControl *ptz);
@@ -121,7 +121,7 @@ private slots:
 
 private:
     LiveStreamItem *m_streamItem;
-    DVRCamera m_camera;
+    QWeakPointer<DVRCamera> m_camera;
     QSharedPointer<CameraPtzControl> m_ptz;
     CustomCursor m_customCursor;
 
