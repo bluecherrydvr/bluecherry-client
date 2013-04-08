@@ -126,7 +126,15 @@ void EventViewWindow::closeEvent(QCloseEvent *event)
 
 void EventViewWindow::setEvent(const EventData &event)
 {
+    DVRCamera *camera = m_event.locationCamera();
+    if (camera)
+        disconnect(camera, 0, this, 0);
+
     m_event = event;
+
+    DVRCamera *newCamera = m_event.locationCamera();
+    if (newCamera)
+        connect(newCamera, SIGNAL(destroyed(QObject*)), this, SLOT(close()));
 
     m_infoLabel->setText(tr("<b>%2</b> (%1)<br><br>%3 (%4)<br>%5")
                          .arg(Qt::escape(event.uiServer()))
