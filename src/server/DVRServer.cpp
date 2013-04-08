@@ -47,6 +47,11 @@ DVRServer::DVRServer(int id, QObject *parent)
     connect(&m_refreshTimer, SIGNAL(timeout()), SLOT(updateCameras()));
 }
 
+DVRServer::~DVRServer()
+{
+    qDeleteAll(m_allCameras);
+}
+
 void DVRServer::removeServer()
 {
     qDebug("Deleting DVR server %d", m_configuration->id());

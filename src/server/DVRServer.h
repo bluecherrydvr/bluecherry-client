@@ -44,6 +44,7 @@ public:
     };
 
     explicit DVRServer(int id, QObject *parent = 0);
+    virtual ~DVRServer();
 
     bool isOnline() const;
     bool isLoginPending() const;
