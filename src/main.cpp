@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 
     LiveStream::init();
 
-    MainWindow w;
+    MainWindow w(bcApp->serverRepository());
     w.show();
 
     return a.exec();

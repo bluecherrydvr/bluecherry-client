@@ -38,7 +38,7 @@ public:
     bool isHardwareAccelerated() const;
 
 public slots:
-    void addCamera(const DVRCamera &camera);
+    void addCamera(DVRCamera *camera);
     void updateGeometry() { m_sizeHint = QSize(); QDeclarativeView::updateGeometry(); }
 
     void settingsChanged();

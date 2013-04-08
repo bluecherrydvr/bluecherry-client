@@ -76,6 +76,7 @@ private:
 
     QWidget *createInfoArea();
     QWidget *createPlaybackArea();
+
 };
 
 #endif // EVENTVIEWWINDOW_H

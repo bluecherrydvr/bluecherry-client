@@ -35,7 +35,9 @@
 #include "MacSplitter.h"
 #include "StatusBandwidthWidget.h"
 #include "StatusBarServerAlert.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
+#include "server/DVRServerConfiguration.h"
+#include "server/DVRServerRepository.h"
 #include "core/BluecherryApp.h"
 #include "core/LiveViewManager.h"
 #include "event/ModelEventsCursor.h"
@@ -67,9 +69,11 @@
 #include <QLinearGradient>
 #include <QAction>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), m_trayIcon(0)
+MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
+    : QMainWindow(parent), m_serverRepository(serverRepository), m_trayIcon(0)
 {
+    Q_ASSERT(m_serverRepository);
+
     bcApp->mainWindow = this;
     connect(bcApp->eventDownloadManager(), SIGNAL(eventVideoDownloadAdded(EventVideoDownload*)),
             this, SLOT(showDownloadsWindow()));
@@ -81,7 +85,7 @@ MainWindow::MainWindow(QWidget *parent)
     updateTrayIcon();
 
     statusBar()->addPermanentWidget(new StatusBandwidthWidget(statusBar()));
-    statusBar()->addWidget(new StatusBarServerAlert(statusBar()));
+    statusBar()->addWidget(new StatusBarServerAlert(m_serverRepository, statusBar()));
 
 #ifdef Q_OS_MAC
     statusBar()->setSizeGripEnabled(false);
@@ -166,9 +170,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(bcApp, SIGNAL(sslConfirmRequired(DVRServer*,QList<QSslError>,QSslConfiguration)),
             SLOT(sslConfirmRequired(DVRServer*,QList<QSslError>,QSslConfiguration)));
     connect(bcApp, SIGNAL(queryLivePaused()), SLOT(queryLivePaused()));
-    connect(bcApp, SIGNAL(serverAdded(DVRServer*)), SLOT(onServerAdded(DVRServer*)));
+    connect(m_serverRepository, SIGNAL(serverAdded(DVRServer*)), SLOT(onServerAdded(DVRServer*)));
 
-    foreach (DVRServer *s, bcApp->servers())
+    foreach (DVRServer *s, m_serverRepository->servers())
         onServerAdded(s);
 
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(saveSettings()));
@@ -188,7 +192,7 @@ void MainWindow::showEvent(QShowEvent *event)
 {
     if (!event->spontaneous())
     {
-        if (bcApp->servers().isEmpty())
+        if (m_serverRepository->serverCount() == 0)
             addServer();
     }
     else
@@ -313,8 +317,8 @@ void MainWindow::createMenu()
     m_serversMenu = menuBar()->addMenu(QString());
     updateServersMenu();
 
-    connect(bcApp, SIGNAL(serverAdded(DVRServer*)), SLOT(updateServersMenu()));
-    connect(bcApp, SIGNAL(serverRemoved(DVRServer*)), SLOT(updateServersMenu()));
+    connect(m_serverRepository, SIGNAL(serverAdded(DVRServer*)), SLOT(updateServersMenu()));
+    connect(m_serverRepository, SIGNAL(serverRemoved(DVRServer*)), SLOT(updateServersMenu()));
 
     QMenu *liveMenu = menuBar()->addMenu(tr("&Live"));
     liveMenu->addAction(tr("New window"), this, SLOT(openLiveWindow()));
@@ -344,32 +348,32 @@ QMenu *MainWindow::serverMenu(DVRServer *server)
     if (m)
         return m;
 
-    m = new QMenu(server->displayName());
+    m = new QMenu(server->configuration()->displayName());
 
     m->addAction(tr("Connect"), server, SLOT(toggleOnline()))->setObjectName(QLatin1String("aConnect"));
     m->addSeparator();
 
     QAction *a = m->addAction(tr("Browse &events"), this, SLOT(showEventsWindow()));
-    a->setEnabled(server->api->isOnline());
-    connect(server->api, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
+    a->setEnabled(server->isOnline());
+    connect(server, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
 
     a = m->addAction(tr("&Configure server"), this, SLOT(openServerConfig()));
     a->setProperty("associatedServer", QVariant::fromValue<QObject*>(server));
-    a->setEnabled(server->api->isOnline());
-    connect(server->api, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
+    a->setEnabled(server->isOnline());
+    connect(server, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
 
     m->addSeparator();
 
     a = m->addAction(tr("Refresh devices"), server, SLOT(updateCameras()));
-    a->setEnabled(server->api->isOnline());
-    connect(server->api, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
+    a->setEnabled(server->isOnline());
+    connect(server, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
 
     a = m->addAction(tr("Settings"), this, SLOT(openServerSettings()));
     a->setProperty("associatedServer", QVariant::fromValue<QObject*>(server));
 
     connect(server, SIGNAL(serverRemoved(DVRServer*)), m, SLOT(deleteLater()));
     connect(server, SIGNAL(changed()), SLOT(updateMenuForServer()));
-    connect(server->api, SIGNAL(statusChanged(int)), SLOT(updateMenuForServer()));
+    connect(server, SIGNAL(statusChanged(int)), SLOT(updateMenuForServer()));
 
     server->setProperty("uiMenu", QVariant::fromValue<QObject*>(m));
     updateMenuForServer(server);
@@ -388,21 +392,21 @@ void MainWindow::updateMenuForServer(DVRServer *server)
     }
 
     QMenu *m = serverMenu(server);
-    m->setTitle(server->displayName());
-    m->setIcon(QIcon(server->api->isOnline() ? QLatin1String(":/icons/status.png") :
-                                               QLatin1String(":/icons/status-offline.png")));
+    m->setTitle(server->configuration()->displayName());
+    m->setIcon(QIcon(server->isOnline() ? QLatin1String(":/icons/status.png") :
+                                          QLatin1String(":/icons/status-offline.png")));
 
     QAction *connect = m->findChild<QAction*>(QLatin1String("aConnect"));
     Q_ASSERT(connect);
     if (connect)
-        connect->setText(server->api->isOnline() ? tr("Disconnect") : tr("Connect"));
+        connect->setText(server->isOnline() ? tr("Disconnect") : tr("Connect"));
 }
 
 void MainWindow::updateServersMenu()
 {
     m_serversMenu->clear();
 
-    QList<DVRServer*> servers = bcApp->servers();
+    const QList<DVRServer*> & servers = m_serverRepository->servers();
     m_serversMenu->setTitle((servers.size() > 1) ? tr("&Servers") : tr("&Server"));
 
     if (servers.isEmpty())
@@ -466,7 +470,7 @@ QWidget *MainWindow::createRecentEvents()
     m_eventsView->setFrameStyle(QFrame::NoFrame);
     m_eventsView->setAttribute(Qt::WA_MacShowFocusRect, false);
 
-    m_eventsModel = new EventsModel(m_eventsView);
+    m_eventsModel = new EventsModel(bcApp->serverRepository(), m_eventsView);
     m_eventsView->setModel(m_eventsModel);
 
     QSettings settings;
@@ -484,7 +488,7 @@ QWidget *MainWindow::createRecentEvents()
 
 void MainWindow::showOptionsDialog()
 {
-    OptionsDialog *dlg = new OptionsDialog(this);
+    OptionsDialog *dlg = new OptionsDialog(m_serverRepository, this);
     dlg->setAttribute(Qt::WA_DeleteOnClose);
     dlg->show();
 }
@@ -543,7 +547,7 @@ void MainWindow::openLiveWindow()
 
 void MainWindow::addServer()
 {
-    SetupWizard *dlg = new SetupWizard(this);
+    SetupWizard *dlg = new SetupWizard(m_serverRepository, this);
     dlg->setAttribute(Qt::WA_DeleteOnClose);
     dlg->setWindowModality(Qt::WindowModal);
     dlg->show();
@@ -557,7 +561,7 @@ void MainWindow::openServerSettings()
     if (!server)
         return;
 
-    OptionsDialog *dlg = new OptionsDialog(this);
+    OptionsDialog *dlg = new OptionsDialog(m_serverRepository, this);
     dlg->showPage(OptionsDialog::ServerPage);
     dlg->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -609,7 +613,7 @@ void MainWindow::sslConfirmRequired(DVRServer *server, const QList<QSslError> &e
                                           "reinstalled.<br><br><b>Server:</b> %1<br><b>URL:</b> %2<br>"
                                           "<b>Fingerprint:</b> %3<br><br>Do you want to connect anyway, and trust "
                                           "this certificate in the future?")
-                                       .arg(Qt::escape(server->displayName()), server->api->serverUrl().toString(),
+                                       .arg(Qt::escape(server->configuration()->displayName()), server->url().toString(),
                                             fingerprint));
     server->setProperty("ssl_verify_dialog", QVariant::fromValue<QObject*>(dlg));
     QPushButton *ab = dlg->addButton(tr("Accept Certificate"), QMessageBox::AcceptRole);
@@ -680,8 +684,8 @@ void MainWindow::eventsContextMenu(const QPoint &pos)
     }
     else if (act == aViewLive)
     {
-        QSet<DVRCamera> cameras = selectedCameraEvents.cameras();
-        foreach (const DVRCamera &camera, cameras)
+        QSet<DVRCamera *> cameras = selectedCameraEvents.cameras();
+        foreach (DVRCamera *camera, cameras)
             LiveViewWindow::openWindow(this, false, camera)->show();
     }
     else if (act == aSaveVideo)
@@ -766,8 +770,8 @@ void MainWindow::serverDevicesLoaded()
          * is likely the setup wizard. As a result, the configuration dialog will come up
          * before the wizard has ended, but that isn't much of a problem. */
         QMessageBox msg(qApp->activeModalWidget() ? qApp->activeModalWidget() : this);
-        if (bcApp->servers().count() > 1)
-            msg.setText(tr("%1 hasn't been configured yet").arg(Qt::escape(server->displayName())));
+        if (m_serverRepository->serverCount() > 1)
+            msg.setText(tr("%1 hasn't been configured yet").arg(Qt::escape(server->configuration()->displayName())));
         else
             msg.setText(tr("The server hasn't been configured yet"));
         msg.setInformativeText(tr("You can access configuration at any time by double-clicking on the server.<br><br>Do you want to configure devices for this server now?"));

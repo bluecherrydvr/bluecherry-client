@@ -16,40 +16,42 @@
  */
 
 #include "ServerRequestManager.h"
-#include "DVRServer.h"
+#include "server/DVRServerConfiguration.h"
 #include "BluecherryApp.h"
 #include <QNetworkAccessManager>
 #include <QNetworkCookieJar>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QSslSocket>
 #include <QDebug>
 
 ServerRequestManager::ServerRequestManager(DVRServer *s)
-    : QObject(s), server(s), m_loginReply(0), m_status(Offline)
+    : QObject(s), server(s), m_loginReply(0), m_status(DVRServer::Offline)
 {
 }
 
-void ServerRequestManager::setStatus(Status s, const QString &errmsg)
+void ServerRequestManager::setStatus(DVRServer::Status s, const QString &errmsg)
 {
     if (s == m_status && (errmsg.isEmpty() || errmsg == m_errorMessage))
         return;
 
-    Status old = m_status;
+    DVRServer::Status old = m_status;
     m_status = s;
     m_errorMessage = errmsg;
 
-    qDebug() << "ServerRequestManager" << server->displayName() << ": Status" << m_status << "message" << m_errorMessage;
+    qDebug() << "ServerRequestManager" << server->configuration()->displayName() << ": Status" << m_status << "message" << m_errorMessage;
 
     emit statusChanged(m_status);
 
     switch (m_status)
     {
-    case LoginError:
+    case DVRServer::LoginError:
         emit loginError(m_errorMessage);
         break;
-    case ServerError:
+    case DVRServer::ServerError:
         emit serverError(m_errorMessage);
         break;
-    case Online:
+    case DVRServer::Online:
         emit loginSuccessful();
         emit onlineChanged(true);
         break;
@@ -57,7 +59,7 @@ void ServerRequestManager::setStatus(Status s, const QString &errmsg)
         break;
     }
 
-    if (old == Online && m_status < Online)
+    if (old == DVRServer::Online && m_status < DVRServer::Online)
     {
         emit disconnected();
         emit onlineChanged(false);
@@ -68,7 +70,7 @@ QUrl ServerRequestManager::serverUrl() const
 {
     QUrl url;
     url.setScheme(QLatin1String("https"));
-    url.setHost(server->hostname());
+    url.setHost(server->configuration()->hostname());
     url.setPort(server->serverPort());
     return url;
 }
@@ -102,11 +104,11 @@ void ServerRequestManager::login(const QString &username, const QString &passwor
     /* Essentially duplicated in SetupWizard's server page; changes are probably
      * necessary there too. */
 
-    QNetworkRequest req = buildRequest(QLatin1String("/ajax/login.php"));
+    QNetworkRequest req = buildRequest(QUrl(QLatin1String("/ajax/login.php")));
     req.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/x-www-form-urlencoded"));
     if (req.url().scheme() == QLatin1String("https") && !QSslSocket::supportsSsl())
     {
-        setStatus(ServerError, QLatin1String("SSL support is not enabled"));
+        setStatus(DVRServer::ServerError, QLatin1String("SSL support is not enabled"));
         return;
     }
 
@@ -132,30 +134,30 @@ void ServerRequestManager::loginReplyReady()
 
     if (reply->error() != QNetworkReply::NoError)
     {
-        setStatus(ServerError, tr("Request failed: %1").arg(reply->errorString()));
+        setStatus(DVRServer::ServerError, tr("Request failed: %1").arg(reply->errorString()));
         return;
     }
 
     QByteArray data = reply->readAll();
     if (!data.startsWith("OK"))
     {
-        setStatus(LoginError, data.isEmpty() ? tr("Unknown error") : QString::fromUtf8(data));
+        setStatus(DVRServer::LoginError, data.isEmpty() ? tr("Unknown error") : QString::fromUtf8(data));
         return;
     }
 
     if (bcApp->nam->cookieJar()->cookiesForUrl(reply->url()).isEmpty())
     {
-        setStatus(LoginError, QLatin1String("No authentication data provided by server"));
+        setStatus(DVRServer::LoginError, QLatin1String("No authentication data provided by server"));
         return;
     }
 
-    setStatus(Online);
+    setStatus(DVRServer::Online);
 }
 
 void ServerRequestManager::logout()
 {
-    if (m_status < Online)
+    if (m_status < DVRServer::Online)
         return;
 
-    setStatus(Offline);
+    setStatus(DVRServer::Offline);
 }

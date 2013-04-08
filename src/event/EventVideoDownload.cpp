@@ -17,7 +17,7 @@
 
 #include "EventVideoDownload.h"
 #include "core/BluecherryApp.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
 #include "video/MediaDownload.h"
 #include "network/MediaDownloadManager.h"
 #include <QtConcurrentRun>
@@ -45,9 +45,9 @@ EventVideoDownload::EventVideoDownload(const EventData &event, const QString &to
 
 EventVideoDownload::~EventVideoDownload()
 {
-    if (m_mediaDownload)
+    if (m_mediaDownload && m_event.server())
     {
-        QUrl eventDownloadUrl = m_event.server()->api->serverUrl().resolved(QUrl(QLatin1String("/media/request.php")));
+        QUrl eventDownloadUrl = m_event.server()->url().resolved(QUrl(QLatin1String("/media/request.php")));
         eventDownloadUrl.addQueryItem(QLatin1String("id"), QString::number(m_event.mediaId()));
 
         bcApp->mediaDownloadManager()->releaseMediaDownload(eventDownloadUrl);
@@ -57,7 +57,10 @@ EventVideoDownload::~EventVideoDownload()
 
 void EventVideoDownload::start()
 {
-    QUrl eventDownloadUrl = m_event.server()->api->serverUrl().resolved(QUrl(QLatin1String("/media/request.php")));
+    if (!m_event.server())
+        return;
+
+    QUrl eventDownloadUrl = m_event.server()->url().resolved(QUrl(QLatin1String("/media/request.php")));
     eventDownloadUrl.addQueryItem(QLatin1String("id"), QString::number(m_event.mediaId()));
 
     m_mediaDownload = bcApp->mediaDownloadManager()->acquireMediaDownload(eventDownloadUrl);

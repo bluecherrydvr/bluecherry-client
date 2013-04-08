@@ -17,32 +17,65 @@
 
 #include "EventSourcesModel.h"
 #include "DVRServersModel.h"
-#include "core/BluecherryApp.h"
-#include "core/DVRServer.h"
-#include "core/DVRCamera.h"
+#include "server/DVRServer.h"
+#include "server/DVRServerConfiguration.h"
+#include "server/DVRServerRepository.h"
+#include "camera/DVRCamera.h"
 #include <QFont>
 #include <QStringList>
 
-EventSourcesModel::EventSourcesModel(QObject *parent)
+EventSourcesModel::EventSourcesModel(DVRServerRepository *serverRepository, QObject *parent)
     : QAbstractItemModel(parent)
 {
-    QList<DVRServer*> sl = bcApp->servers();
+    Q_ASSERT(serverRepository);
+
+    connect(serverRepository, SIGNAL(serverAdded(DVRServer*)), this, SLOT(serverAdded(DVRServer*)));
+    connect(serverRepository, SIGNAL(serverRemoved(DVRServer*)), this, SLOT(serverRemoved(DVRServer*)));
+
+    QList<DVRServer*> sl = serverRepository->servers();
     servers.reserve(sl.size());
+
+    blockSignals(true);
     foreach (DVRServer *s, sl)
-    {
-        ServerData sd;
-        sd.server = s;
-        sd.cameras = QVector<DVRCamera>::fromList(s->cameras());
-        sd.checkState.fill(true, sd.cameras.size()+1);
-        servers.append(sd);
-    }
+        serverAdded(s);
+    blockSignals(false);
 }
 
-QModelIndex EventSourcesModel::indexOfCamera(const DVRCamera &camera) const
+void EventSourcesModel::serverAdded(DVRServer *server)
 {
+    beginInsertRows(QModelIndex(), servers.count(), servers.count());
+
+    ServerData sd;
+    sd.server = server;
+    foreach (DVRCamera *camera, server->cameras())
+        sd.cameras.append(camera);
+    sd.checkState.fill(true, sd.cameras.size()+1);
+    servers.append(sd);
+
+    endInsertRows();
+}
+
+void EventSourcesModel::serverRemoved(DVRServer *server)
+{
+    for (int i = 0; i < servers.count(); i++)
+        if (server == servers.at(i).server)
+        {
+            beginRemoveRows(QModelIndex(), i, i);
+            servers.remove(i);
+            endRemoveRows();
+
+            return;
+        }
+}
+
+QModelIndex EventSourcesModel::indexOfCamera(DVRCamera *camera) const
+{
+    if (!camera)
+        return QModelIndex();
+
     for (int r = 0; r < servers.size(); ++r)
     {
-        if (servers[r].server == camera.server())
+        if (servers[r].server == camera->server())
         {
             int cr = servers[r].cameras.indexOf(camera);
             if (cr < 0)
@@ -67,8 +100,8 @@ QMap<DVRServer*,QList<int> > EventSourcesModel::checkedSources() const
         {
             if (!i && it->checkState[i])
                 sl.append(-1);
-            else if (it->checkState[i])
-                sl.append(it->cameras[i-1].uniqueId());
+            else if (it->checkState[i] && it->cameras[i-1])
+                sl.append(it->cameras[i-1].data()->uniqueId());
         }
 
         if (!sl.isEmpty())
@@ -125,7 +158,7 @@ Qt::ItemFlags EventSourcesModel::flags(const QModelIndex &index) const
     if (!server.isValid())
         server = index;
 
-    if (!server.row() || servers[server.row()-1].server->api->isOnline())
+    if (!server.row() || servers[server.row()-1].server->isOnline())
         re |= Qt::ItemIsEnabled;
 
     return re;
@@ -163,19 +196,19 @@ QVariant EventSourcesModel::data(const QModelIndex &index, int role) const
             const ServerData &sd = servers[index.row()-1];
             if (role == Qt::DisplayRole)
             {
-                return sd.server->displayName();
+                return sd.server->configuration()->displayName();
             }
             else if (role == Qt::CheckStateRole)
             {
                 int c = sd.checkState.count(true);
-                if (!c || !sd.server->api->isOnline())
+                if (!c || !sd.server->isOnline())
                     return Qt::Unchecked;
                 else if (c == sd.cameras.size()+1)
                     return Qt::Checked;
                 else
                     return Qt::PartiallyChecked;
             }
-            else if (role == DVRServersModel::ServerPtrRole)
+            else if (role == DVRServersModel::DVRServerRole)
                 return QVariant::fromValue(sd.server);
         }
     }
@@ -191,17 +224,21 @@ QVariant EventSourcesModel::data(const QModelIndex &index, int role) const
         }
         else
         {
-            const DVRCamera &camera = sd.cameras[index.row()-1];
-            switch (role)
+            if (sd.cameras[index.row() - 1])
             {
-            case Qt::DisplayRole: return camera.displayName();
+                switch (role)
+                {
+                case Qt::DisplayRole: return sd.cameras[index.row() - 1].data()->displayName();
+                }
             }
+            else
+                return QVariant();
         }
 
         switch (role)
         {
         case Qt::CheckStateRole:
-            return (sd.checkState[index.row()] && sd.server->api->isOnline()) ? Qt::Checked : Qt::Unchecked;
+            return (sd.checkState[index.row()] && sd.server->isOnline()) ? Qt::Checked : Qt::Unchecked;
         }
     }
 

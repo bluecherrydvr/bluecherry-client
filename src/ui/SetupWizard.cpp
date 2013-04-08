@@ -18,7 +18,9 @@
 #include "SetupWizard.h"
 #include "SetupWizard_p.h"
 #include "core/BluecherryApp.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
+#include "server/DVRServerConfiguration.h"
+#include "server/DVRServerRepository.h"
 #include "ui/WebRtpPortCheckerWidget.h"
 #include <QLabel>
 #include <QBoxLayout>
@@ -31,13 +33,15 @@
 #include <QNetworkReply>
 #include <QHideEvent>
 
-SetupWizard::SetupWizard(QWidget *parent)
+SetupWizard::SetupWizard(DVRServerRepository *serverRepository, QWidget *parent)
     : QWizard(parent), skipFlag(false)
 {
+    Q_ASSERT(serverRepository);
+
     setWindowTitle(tr("Bluecherry - Setup"));
 
     addPage(new SetupWelcomePage);
-    addPage(new SetupServerPage);
+    addPage(new SetupServerPage(serverRepository));
     addPage(new SetupFinishPage);
 }
 
@@ -73,9 +77,11 @@ SetupWelcomePage::SetupWelcomePage()
     layout->addWidget(logo, 0, Qt::AlignHCenter | Qt::AlignBottom);
 }
 
-SetupServerPage::SetupServerPage()
-    : loginReply(0), saved(false)
+SetupServerPage::SetupServerPage(DVRServerRepository *serverRepository)
+    : m_serverRepository(serverRepository), loginReply(0), saved(false)
 {
+    Q_ASSERT(m_serverRepository);
+
     loginRequestTimer.setSingleShot(true);
     connect(&loginRequestTimer, SIGNAL(timeout()), SLOT(testLogin()));
 
@@ -188,13 +194,12 @@ void SetupServerPage::save()
         return;
     }
 
-    DVRServer *server = bcApp->addNewServer(field(QLatin1String("serverName")).toString());
-    server->writeSetting("hostname", field(QLatin1String("serverHostname")).toString());
-    server->writeSetting("port", field(QLatin1String("serverPort")).toString());
-    server->writeSetting("username", field(QLatin1String("serverUsername")).toString());
-    server->writeSetting("password", field(QLatin1String("serverPassword")).toString());
-    server->writeSetting("autoConnect", field(QLatin1String("serverAutoConnect")).toBool());
-
+    DVRServer *server = m_serverRepository->createServer(field(QLatin1String("serverName")).toString());
+    server->configuration()->setHostname(field(QLatin1String("serverHostname")).toString());
+    server->configuration()->setPort(field(QLatin1String("serverPort")).toInt());
+    server->configuration()->setUsername(field(QLatin1String("serverUsername")).toString());
+    server->configuration()->setPassword(field(QLatin1String("serverPassword")).toString());
+    server->configuration()->setAutoConnect(field(QLatin1String("serverAutoConnect")).toBool());
     server->login();
 
     saved = true;

@@ -20,9 +20,10 @@
 
 #include <QAbstractItemModel>
 #include <QIcon>
-#include "core/DVRCamera.h"
+#include "camera/DVRCamera.h"
 
 class DVRServer;
+class DVRServerRepository;
 
 class DVRServersModel : public QAbstractItemModel
 {
@@ -31,19 +32,19 @@ class DVRServersModel : public QAbstractItemModel
 public:
     enum
     {
-        ServerPtrRole = Qt::UserRole,
+        DVRServerRole = Qt::UserRole,
         DVRCameraRole
     };
 
-    explicit DVRServersModel(QObject *parent = 0);
+    explicit DVRServersModel(DVRServerRepository *serverRepository, QObject *parent = 0);
 
-    DVRServer *serverForRow(const QModelIndex &index) const;
-    DVRCamera cameraForRow(const QModelIndex &index) const;
+    DVRServer * serverForRow(const QModelIndex &index) const;
+    DVRCamera * cameraForRow(const QModelIndex &index) const;
 
     void setOfflineDisabled(bool offlineDisabled);
 
     QModelIndex indexForServer(DVRServer *server) const;
-    QModelIndex indexForCamera(const DVRCamera &camera) const;
+    QModelIndex indexForCamera(DVRCamera *camera) const;
 
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
@@ -61,14 +62,14 @@ private slots:
     void serverAdded(DVRServer *server);
     void serverRemoved(DVRServer *server);
     void cameraDataChanged();
-    void cameraAdded(const DVRCamera &camera);
-    void cameraRemoved(const DVRCamera &camera);
+    void cameraAdded(DVRCamera *camera);
+    void cameraRemoved(DVRCamera *camera);
 
 private:
     struct Item
     {
         DVRServer *server;
-        QList<DVRCamera> cameras;
+        QList<DVRCamera *> cameras;
     };
 
     QVector<Item> items;

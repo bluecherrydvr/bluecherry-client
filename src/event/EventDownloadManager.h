@@ -22,6 +22,7 @@
 #include <QQueue>
 
 class QTimer;
+class DVRServer;
 class EventData;
 class EventVideoDownload;
 
@@ -42,6 +43,9 @@ public:
     void startMultipleEventDownloads(const QList<EventData> &events);
 
     QList<EventVideoDownload *> list() const { return m_eventVideoDownloadList; }
+
+public slots:
+    void serverRemoved(DVRServer *server);
 
 signals:
     void eventVideoDownloadAdded(EventVideoDownload *eventVideoDownload);

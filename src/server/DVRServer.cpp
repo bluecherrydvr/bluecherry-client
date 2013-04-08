@@ -16,89 +16,70 @@
  */
 
 #include "DVRServer.h"
-#include "DVRCamera.h"
-#include <QSettings>
+#include "DVRServerConfiguration.h"
+#include "camera/DVRCamera.h"
+#include "core/ServerRequestManager.h"
 #include <QNetworkRequest>
 #include <QUrl>
 #include <QTimer>
 #include <QXmlStreamReader>
 #include <QSslCertificate>
 #include <QDebug>
+#include <QSettings>
 
 DVRServer::DVRServer(int id, QObject *parent)
-    : QObject(parent), configId(id), devicesLoaded(false)
+    : QObject(parent), m_configuration(new DVRServerConfiguration(id, this)), m_devicesLoaded(false)
 {
-    m_displayName = readSetting("displayName").toString();
-    api = new ServerRequestManager(this);
+    m_api = new ServerRequestManager(this);
 
-    connect(api, SIGNAL(loginSuccessful()), SLOT(updateCameras()));
-    connect(api, SIGNAL(disconnected()), SLOT(disconnected()));
+    connect(m_configuration, SIGNAL(changed()), this, SIGNAL(changed()));
+    connect(m_api, SIGNAL(loginSuccessful()), SLOT(updateCameras()));
+    connect(m_api, SIGNAL(disconnected()), SLOT(disconnectedSlot()));
 
-    if (readSetting("autoConnect", true).toBool() && !hostname().isEmpty() && !username().isEmpty())
-        QTimer::singleShot(0, this, SLOT(login()));
+    connect(m_api, SIGNAL(loginRequestStarted()), this, SIGNAL(loginRequestStarted()));
+    connect(m_api, SIGNAL(loginSuccessful()), this, SIGNAL(loginSuccessful()));
+    connect(m_api, SIGNAL(serverError(QString)), this, SIGNAL(serverError(QString)));
+    connect(m_api, SIGNAL(loginError(QString)), this, SIGNAL(loginError(QString)));
+    connect(m_api, SIGNAL(disconnected()), this, SIGNAL(disconnected()));
+    connect(m_api, SIGNAL(statusChanged(int)), this, SIGNAL(statusChanged(int)));
+    connect(m_api, SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
 
     connect(&m_refreshTimer, SIGNAL(timeout()), SLOT(updateCameras()));
 }
 
-QVariant DVRServer::readSetting(const QString &key, const QVariant &def) const
+DVRServer::~DVRServer()
 {
-    QSettings settings;
-    return settings.value(QString::fromLatin1("servers/%1/").arg(configId).append(key), def);
-}
-
-void DVRServer::writeSetting(const QString &key, const QVariant &value)
-{
-    QSettings settings;
-    settings.setValue(QString::fromLatin1("servers/%1/").arg(configId).append(key), value);
-
-    emit changed();
-}
-
-void DVRServer::clearSetting(const QString &key)
-{
-    QSettings settings;
-    settings.remove(QString::fromLatin1("servers/%1/").arg(configId).append(key));
-
-    emit changed();
-}
-
-void DVRServer::setDisplayName(const QString &name)
-{
-    if (m_displayName == name)
-        return;
-
-    m_displayName = name;
-    writeSetting("displayName", name);
+    qDeleteAll(m_allCameras);
 }
 
 void DVRServer::removeServer()
 {
-    qDebug("Deleting DVR server %d", configId);
+    qDebug("Deleting DVR server %d", m_configuration->id());
 
     emit serverRemoved(this);
 
     QSettings settings;
-    settings.remove(QString::fromLatin1("servers/%1").arg(configId));
+    settings.remove(QString::fromLatin1("servers/%1").arg(m_configuration->id()));
 
     deleteLater();
 }
 
 void DVRServer::login()
 {
-    api->login(username(), password());
+    m_api->login(m_configuration->username(), m_configuration->password());
 }
 
 void DVRServer::toggleOnline()
 {
-    if (api->isOnline())
-        api->logout();
+    if (isOnline())
+        m_api->logout();
     else
         login();
 }
 
 void DVRServer::updateCameras()
 {
-    if (!api->isOnline())
+    if (!isOnline())
     {
         m_refreshTimer.stop();
         return;
@@ -108,10 +89,10 @@ void DVRServer::updateCameras()
         m_refreshTimer.start(60000);
 
     qDebug() << "DVRServer: Requesting cameras list";
-    QNetworkReply *reply = api->sendRequest(QUrl(QLatin1String("/ajax/devices.php?XML=1")));
+    QNetworkReply *reply = m_api->sendRequest(QUrl(QLatin1String("/ajax/devices.php?XML=1")));
     connect(reply, SIGNAL(finished()), SLOT(updateCamerasReply()));
 
-    reply = api->sendRequest(QUrl(QLatin1String("/ajax/stats.php")));
+    reply = m_api->sendRequest(QUrl(QLatin1String("/ajax/stats.php")));
     connect(reply, SIGNAL(finished()), SLOT(updateStatsReply()));
 }
 
@@ -137,7 +118,7 @@ void DVRServer::updateCamerasReply()
 
     QSet<int> idSet;
     bool hasDevicesElement = false;
-    bool wasEmpty = m_cameras.isEmpty();
+    bool wasEmpty = m_visibleCameras.isEmpty();
 
     while (xml.readNextStartElement())
     {
@@ -166,18 +147,22 @@ void DVRServer::updateCamerasReply()
                     }
 
                     idSet.insert(deviceId);
-                    DVRCamera camera = DVRCamera::getCamera(this, deviceId);
-                    camera.setOnline(true);
-                    if (!camera.parseXML(xml))
+                    DVRCamera *camera = getCamera(deviceId);
+
+                    if (camera)
                     {
-                        if (!xml.hasError())
-                            xml.raiseError(QLatin1String("Device parsing failed"));
-                        continue;
+                        camera->setOnline(true);
+                        if (!camera->parseXML(xml))
+                        {
+                            if (!xml.hasError())
+                                xml.raiseError(QLatin1String("Device parsing failed"));
+                            continue;
+                        }
                     }
 
-                    if (!m_cameras.contains(camera))
+                    if (!m_visibleCameras.contains(camera))
                     {
-                        m_cameras.append(camera);
+                        m_visibleCameras.append(camera);
                         emit cameraAdded(camera);
                     }
                 }
@@ -197,22 +182,24 @@ void DVRServer::updateCamerasReply()
         return;
     }
 
-    for (int i = 0; i < m_cameras.size(); ++i)
+    for (int i = 0; i < m_visibleCameras.size(); ++i)
     {
-        if (!idSet.contains(m_cameras[i].uniqueId()))
+        if (!idSet.contains(m_visibleCameras[i]->uniqueId()))
         {
-            DVRCamera c = m_cameras[i];
-            m_cameras.removeAt(i);
-            qDebug("DVRServer: camera %d removed", c.uniqueId());
+            DVRCamera *c = m_visibleCameras[i];
+            m_visibleCameras.removeAt(i);
+            m_camerasMap.remove(c->uniqueId());
+            qDebug("DVRServer: camera %d removed", c->uniqueId());
             emit cameraRemoved(c);
-            c.removed();
             --i;
+
+            delete c;
         }
     }
 
-    if (!devicesLoaded || (wasEmpty && !m_cameras.isEmpty()))
+    if (!m_devicesLoaded || (wasEmpty && !m_visibleCameras.isEmpty()))
     {
-        devicesLoaded = true;
+        m_devicesLoaded = true;
         emit devicesReady();
     }
 }
@@ -272,24 +259,23 @@ void DVRServer::updateStatsReply()
     }
 }
 
-void DVRServer::disconnected()
+void DVRServer::disconnectedSlot()
 {
-    while (!m_cameras.isEmpty())
+    while (!m_visibleCameras.isEmpty())
     {
-        DVRCamera c = m_cameras.takeFirst();
-        c.setOnline(false);
+        DVRCamera *c = m_visibleCameras.takeFirst();
+        c->setOnline(false);
         emit cameraRemoved(c);
-        c.removed();
     }
-    devicesLoaded = false;
+
+    m_devicesLoaded = false;
     m_statusAlertMessage.clear();
     emit statusAlertMessageChanged(QString());
 }
 
 bool DVRServer::isKnownCertificate(const QSslCertificate &certificate) const
 {
-    QByteArray knownDigest = readSetting("sslDigest").toByteArray();
-    if (knownDigest.isEmpty())
+    if (m_configuration->sslDigest().isEmpty())
     {
         /* If we don't know a certificate yet, we treat the first one we see as
          * correct. This is insecure, obviously, but it's a much nicer way to behave
@@ -298,10 +284,75 @@ bool DVRServer::isKnownCertificate(const QSslCertificate &certificate) const
         return true;
     }
 
-    return (certificate.digest(QCryptographicHash::Sha1) == knownDigest);
+    return (certificate.digest(QCryptographicHash::Sha1) == m_configuration->sslDigest());
 }
 
 void DVRServer::setKnownCertificate(const QSslCertificate &certificate)
 {
-    writeSetting("sslDigest", certificate.digest(QCryptographicHash::Sha1));
+    m_configuration->setSslDigest(certificate.digest(QCryptographicHash::Sha1));
+}
+
+bool DVRServer::isOnline() const
+{
+    return m_api->isOnline();
+}
+
+bool DVRServer::isLoginPending() const
+{
+    return m_api->isLoginPending();
+}
+
+DVRServerConfiguration * const DVRServer::configuration() const
+{
+    return m_configuration;
+}
+
+QUrl DVRServer::url() const
+{
+    return m_api->serverUrl();
+}
+
+int DVRServer::serverPort() const
+{
+    return m_configuration->port();
+}
+
+int DVRServer::rtspPort() const
+{
+    return m_configuration->port() + 1;
+}
+
+void DVRServer::setError(const QString &error)
+{
+    m_api->setError(error);
+}
+
+QString DVRServer::errorMessage() const
+{
+    return m_api->errorMessage();
+}
+
+DVRServer::Status DVRServer::status() const
+{
+    return m_api->status();
+}
+
+QNetworkReply * DVRServer::sendRequest(const QUrl &relativeUrl)
+{
+    return m_api->sendRequest(relativeUrl);
+}
+
+DVRCamera * DVRServer::getCamera(int cameraId)
+{
+    if (cameraId < 0)
+        return 0;
+
+    if (!m_camerasMap.contains(cameraId))
+    {
+        DVRCamera *camera = new DVRCamera(new DVRCameraData(this, cameraId));
+        m_allCameras.append(camera);
+        m_camerasMap.insert(cameraId, camera);
+    }
+
+    return m_camerasMap.value(cameraId);
 }

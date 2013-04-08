@@ -2,7 +2,7 @@
 #define MODELEVENTSCURSOR_H
 
 #include "event/EventsCursor.h"
-#include "core/DVRCamera.h"
+#include "camera/DVRCamera.h"
 #include <QModelIndex>
 
 class QAbstractItemModel;
@@ -24,8 +24,8 @@ public:
     void setModel(QAbstractItemModel *model);
     QAbstractItemModel * model() const { return m_model; }
 
-    void setCameraFilter(DVRCamera cameraFilter);
-    DVRCamera cameraFilter() const { return m_cameraFilter; }
+    void setCameraFilter(DVRCamera *cameraFilter);
+    DVRCamera * cameraFilter() const { return m_cameraFilter.data(); }
 
     void setIndex(int index);
     int index() const { return m_index; }
@@ -42,7 +42,7 @@ private slots:
     void modelDestroyed();
 
 private:
-    DVRCamera m_cameraFilter;
+    QWeakPointer<DVRCamera> m_cameraFilter;
     QAbstractItemModel *m_model;
     int m_index;
     int m_cachedNextIndex;

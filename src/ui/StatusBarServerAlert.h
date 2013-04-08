@@ -21,13 +21,14 @@
 #include <QWidget>
 
 class QLabel;
+class DVRServerRepository;
 
 class StatusBarServerAlert : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit StatusBarServerAlert(QWidget *parent = 0);
+    explicit StatusBarServerAlert(DVRServerRepository *serverRepository, QWidget *parent = 0);
 
 private slots:
     void updateAlert();
@@ -36,7 +37,9 @@ protected:
     virtual void mousePressEvent(QMouseEvent *);
 
 private:
+    DVRServerRepository *m_serverRepository;
     QLabel *alertText;
+
 };
 
 #endif // STATUSBARSERVERALERT_H

@@ -89,21 +89,21 @@ void LiveStreamItem::clearTexture()
     }
 }
 
-void LiveStreamItem::setStream(const QSharedPointer<LiveStream> &stream)
+void LiveStreamItem::setStream(LiveStream *stream)
 {
-    if (stream == m_stream)
+    if (stream == m_stream.data())
         return;
 
     if (m_stream)
-        m_stream->disconnect(this);
+        m_stream.data()->disconnect(this);
 
     m_stream = stream;
 
-    if (m_stream)
+    if (m_stream.data())
     {
         connect(m_stream.data(), SIGNAL(updated()), SLOT(updateFrame()));
         connect(m_stream.data(), SIGNAL(streamSizeChanged(QSize)), SLOT(updateFrameSize()));
-        m_stream->start();
+        m_stream.data()->start();
     }
 
     updateFrameSize();
@@ -112,7 +112,7 @@ void LiveStreamItem::setStream(const QSharedPointer<LiveStream> &stream)
 
 void LiveStreamItem::clear()
 {
-    setStream(QSharedPointer<LiveStream>());
+    setStream(0);
     clearTexture();
 }
 
@@ -128,7 +128,7 @@ void LiveStreamItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWi
     if (!m_stream)
         return;
 
-    QImage frame = m_stream->currentFrame();
+    QImage frame = m_stream.data()->currentFrame();
 
     if (frame.isNull())
     {

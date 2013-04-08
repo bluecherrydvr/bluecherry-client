@@ -16,8 +16,9 @@
  */
 
 #include "EventData.h"
-#include "core/DVRServer.h"
-#include "core/DVRCamera.h"
+#include "camera/DVRCamera.h"
+#include "server/DVRServer.h"
+#include "server/DVRServerConfiguration.h"
 #include "utils/FileUtils.h"
 #include <QApplication>
 #include <QXmlStreamReader>
@@ -219,21 +220,28 @@ void EventData::setLocation(const QString &location)
 
 QString EventData::uiServer() const
 {
-    return server()->displayName();
+    if (server())
+        return server()->configuration()->displayName();
+    else
+        return QString();
 }
 
-DVRCamera EventData::locationCamera(DVRServer *server, int locationId)
+DVRCamera * EventData::locationCamera() const
 {
-    if (locationId >= 0)
-        return DVRCamera::getCamera(server, locationId);
-    return DVRCamera();
+    if (server())
+        return server()->getCamera(locationId());
+    else
+        return 0;
 }
 
 QString EventData::uiLocation(DVRServer *server, int locationId)
 {
-    const DVRCamera &camera = locationCamera(server, locationId);
+    if (!server)
+        return QString();
+
+    DVRCamera *camera = server->getCamera(locationId);
     if (camera)
-        return camera.displayName();
+        return camera->displayName();
     else if (locationId < 0)
         return QApplication::translate("EventData", "System");
     else

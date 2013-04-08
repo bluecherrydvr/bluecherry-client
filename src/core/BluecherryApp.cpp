@@ -16,14 +16,18 @@
  */
 
 #include "BluecherryApp.h"
-#include "DVRServer.h"
 #include "LiveViewManager.h"
 #include "ui/MainWindow.h"
 #include "event/EventDownloadManager.h"
 #include "network/MediaDownloadManager.h"
+#include "server/DVRServer.h"
+#include "server/DVRServerConfiguration.h"
+#include "server/DVRServerRepository.h"
 #include <QSettings>
 #include <QStringList>
 #include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QHostAddress>
 #include <QTimer>
 #include <QFile>
@@ -41,12 +45,14 @@ BluecherryApp *bcApp = 0;
 BluecherryApp::BluecherryApp()
     : nam(new QNetworkAccessManager(this)), liveView(new LiveViewManager(this)),
       globalRate(new TransferRateCalculator(this)),
-      m_maxServerId(-1), m_livePaused(false), m_inPauseQuery(false),
+      m_livePaused(false), m_inPauseQuery(false),
       m_screensaverInhibited(false),
       m_doingUpdateCheck(false)
 {
     Q_ASSERT(!bcApp);
     bcApp = this;
+
+    m_serverRepository = new DVRServerRepository(this);
 
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(aboutToQuit()));
 
@@ -69,6 +75,10 @@ BluecherryApp::BluecherryApp()
     QSslConfiguration::setDefaultConfiguration(sslConfig);
 
     loadServers();
+    if (shouldAddLocalServer())
+        addLocalServer();
+    autoConnectServers();
+
     sendSettingsChanged();
 
     performVersionCheck();
@@ -82,6 +92,20 @@ BluecherryApp::BluecherryApp()
     m_mediaDownloadManager->setCookieJar(nam->cookieJar());
 
     m_eventDownloadManager = new EventDownloadManager(this);
+    connect(m_serverRepository, SIGNAL(serverRemoved(DVRServer*)), m_eventDownloadManager, SLOT(serverRemoved(DVRServer*)));
+
+    connect(qApp, SIGNAL(commitDataRequest(QSessionManager&)), this, SLOT(commitDataRequest(QSessionManager&)));
+    connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(saveSettings()));
+}
+
+void BluecherryApp::commitDataRequest(QSessionManager &sessionManager)
+{
+    saveSettings();
+}
+
+void BluecherryApp::saveSettings()
+{
+    m_serverRepository->storeServers();
 }
 
 void BluecherryApp::performVersionCheck()
@@ -198,77 +222,35 @@ QNetworkAccessManager *BluecherryApp::createNam()
 
 void BluecherryApp::loadServers()
 {
-    Q_ASSERT(m_servers.isEmpty());
+    m_serverRepository->loadServers();
+}
 
-    QSettings settings;
-    settings.beginGroup(QLatin1String("servers"));
-    QStringList groups = settings.childGroups();
+bool BluecherryApp::shouldAddLocalServer() const
+{
+    if (m_serverRepository->serverCount() > 0)
+        return false;
 
-    foreach (QString group, groups)
-    {
-        bool ok = false;
-        int id = (int)group.toUInt(&ok);
-        if (!ok)
-        {
-            qWarning("Ignoring invalid server ID from configuration");
-            continue;
-        }
+    return QFile::exists(QLatin1String("/etc/bluecherry.conf"));
+}
 
-        DVRServer *server = new DVRServer(id, this);
-        connect(server, SIGNAL(serverRemoved(DVRServer*)), SLOT(onServerRemoved(DVRServer*)));
-        connect(server, SIGNAL(statusAlertMessageChanged(QString)), SIGNAL(serverAlertsChanged()));
-
-        m_servers.append(server);
-        m_maxServerId = qMax(m_maxServerId, id);
-    }
-
+void BluecherryApp::addLocalServer()
+{
 #ifdef Q_OS_LINUX
-    /* If there are no servers configured, and the server application is installed here, automatically
-     * configure a local server. */
-    if (groups.isEmpty() && QFile::exists(QLatin1String("/etc/bluecherry.conf")))
-    {
-        DVRServer *s = addNewServer(tr("Local"));
-        s->writeSetting("hostname", QHostAddress(QHostAddress::LocalHost).toString());
-        /* This must match the default username and password for the server */
-        s->writeSetting("username", QLatin1String("Admin"));
-        s->writeSetting("password", QLatin1String("bluecherry"));
-        s->writeSetting("autoConnect", true);
-        QTimer::singleShot(0, s, SLOT(login()));
-    }
+    DVRServer *s = m_serverRepository->createServer(tr("Local"));
+    s->configuration()->setHostname(QHostAddress(QHostAddress::LocalHost).toString());
+    /* This must match the default username and password for the server */
+    s->configuration()->setUsername(QLatin1String("Admin"));
+    s->configuration()->setPassword(QLatin1String("bluecherry"));
+    s->configuration()->setPort(7001);
+    s->configuration()->setAutoConnect(true);
 #endif
 }
 
-DVRServer *BluecherryApp::addNewServer(const QString &name)
+void BluecherryApp::autoConnectServers()
 {
-    int id = ++m_maxServerId;
-
-    QSettings settings;
-    settings.setValue(QString::fromLatin1("servers/%1/displayName").arg(id), name);
-
-    DVRServer *server = new DVRServer(id, this);
-    m_servers.append(server);
-    connect(server, SIGNAL(serverRemoved(DVRServer*)), SLOT(onServerRemoved(DVRServer*)));
-    connect(server, SIGNAL(statusAlertMessageChanged(QString)), SLOT(serverAlertsChanged()));
-
-    emit serverAdded(server);
-    return server;
-}
-
-DVRServer *BluecherryApp::findServerID(int id)
-{
-    for (QList<DVRServer*>::Iterator it = m_servers.begin(); it != m_servers.end(); ++it)
-    {
-        if ((*it)->configId == id)
-            return *it;
-    }
-
-    return 0;
-}
-
-void BluecherryApp::onServerRemoved(DVRServer *server)
-{
-    if (m_servers.removeOne(server))
-        emit serverRemoved(server);
+    foreach (DVRServer *server, m_serverRepository->servers())
+        if (server->configuration()->autoConnect() && !server->configuration()->hostname().isEmpty() && !server->configuration()->username().isEmpty())
+            server->login();
 }
 
 void BluecherryApp::sslErrors(QNetworkReply *reply, const QList<QSslError> &errors)
@@ -308,9 +290,9 @@ void BluecherryApp::sslErrors(QNetworkReply *reply, const QList<QSslError> &erro
         if (!server)
         {
             QUrl requestUrl = reply->request().url();
-            foreach (DVRServer *s, servers())
+            foreach (DVRServer *s, m_serverRepository->servers())
             {
-                QUrl serverUrl = s->api->serverUrl();
+                QUrl serverUrl = s->url();
                 if (QString::compare(serverUrl.host(), requestUrl.host(), Qt::CaseInsensitive) == 0
                     && serverUrl.port() == requestUrl.port()
                     && QString::compare(serverUrl.scheme(), requestUrl.scheme(), Qt::CaseInsensitive) == 0)
@@ -335,7 +317,7 @@ void BluecherryApp::sslErrors(QNetworkReply *reply, const QList<QSslError> &erro
         /* If the user accepted, this should now be a known certificate */
         if (!server->isKnownCertificate(reply->sslConfiguration().peerCertificate()))
         {
-            server->api->setError(tr("Unrecognized SSL certificate"));
+            server->setError(tr("Unrecognized SSL certificate"));
             return;
         }
     }
@@ -361,17 +343,6 @@ void BluecherryApp::releaseLive()
 
     if (!m_livePaused)
         emit livePausedChanged(false);
-}
-
-QList<DVRServer*> BluecherryApp::serverAlerts() const
-{
-    QList<DVRServer*> re;
-    for (QList<DVRServer*>::ConstIterator it = m_servers.begin(); it != m_servers.end(); ++it)
-    {
-        if (!(*it)->statusAlertMessage().isEmpty())
-            re.append(*it);
-    }
-    return re;
 }
 
 #ifdef Q_OS_WIN

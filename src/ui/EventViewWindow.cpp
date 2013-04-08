@@ -24,7 +24,7 @@
 #include "ExpandingTextEdit.h"
 #include "ui/MainWindow.h"
 #include "ui/SwitchEventsWidget.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
 #include "core/BluecherryApp.h"
 #include "event/EventsCursor.h"
 #include <QBoxLayout>
@@ -126,7 +126,15 @@ void EventViewWindow::closeEvent(QCloseEvent *event)
 
 void EventViewWindow::setEvent(const EventData &event)
 {
+    DVRCamera *camera = m_event.locationCamera();
+    if (camera)
+        disconnect(camera, 0, this, 0);
+
     m_event = event;
+
+    DVRCamera *newCamera = m_event.locationCamera();
+    if (newCamera)
+        connect(newCamera, SIGNAL(destroyed(QObject*)), this, SLOT(close()));
 
     m_infoLabel->setText(tr("<b>%2</b> (%1)<br><br>%3 (%4)<br>%5")
                          .arg(Qt::escape(event.uiServer()))
@@ -135,9 +143,9 @@ void EventViewWindow::setEvent(const EventData &event)
                          .arg(Qt::escape(event.uiLevel()))
                          .arg(event.serverStartDate().toString()));
 
-    if (m_event.hasMedia() && m_event.mediaId() >= 0)
+    if (m_event.hasMedia() && m_event.mediaId() >= 0 && m_event.server())
     {
-        QUrl url = m_event.server()->api->serverUrl().resolved(QUrl(QLatin1String("/media/request.php")));
+        QUrl url = m_event.server()->url().resolved(QUrl(QLatin1String("/media/request.php")));
         url.addQueryItem(QLatin1String("id"), QString::number(m_event.mediaId()));
         m_videoPlayer->setVideo(url, &m_event);
     }

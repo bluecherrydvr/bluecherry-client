@@ -25,7 +25,7 @@
 #include <QMessageBox>
 #include <QCloseEvent>
 
-OptionsDialog::OptionsDialog(QWidget *parent)
+OptionsDialog::OptionsDialog(DVRServerRepository *serverRepository, QWidget *parent)
     : QDialog(parent)
 {
     setModal(true);
@@ -42,8 +42,8 @@ OptionsDialog::OptionsDialog(QWidget *parent)
     connect(m_buttons->addButton(QDialogButtonBox::Close), SIGNAL(clicked()), SLOT(close()));
     layout->addWidget(m_buttons);
 
-    m_tabWidget->addTab(new OptionsGeneralPage, tr("General"));
-    m_tabWidget->addTab(new OptionsServerPage, tr("DVR Servers"));
+    m_tabWidget->addTab(new OptionsGeneralPage(), tr("General"));
+    m_tabWidget->addTab(new OptionsServerPage(serverRepository), tr("DVR Servers"));
 }
 
 void OptionsDialog::showPage(OptionsPage page)

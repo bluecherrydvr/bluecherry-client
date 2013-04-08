@@ -18,10 +18,13 @@
 include_directories (src)
 
 set (bluecherry_client_main_SRCS
+    src/camera/DVRCamera.cpp
+    src/camera/DVRCameraData.cpp
+    src/camera/DVRCameraStreamReader.cpp
+    src/camera/DVRCameraStreamWriter.cpp
+
     src/core/BluecherryApp.cpp
     src/core/CameraPtzControl.cpp
-    src/core/DVRCamera.cpp
-    src/core/DVRServer.cpp
     src/core/EventData.cpp
     src/core/LiveStream.cpp
     src/core/LiveStreamWorker.cpp
@@ -44,6 +47,12 @@ set (bluecherry_client_main_SRCS
     src/network/MediaDownloadManager.cpp
     src/network/RemotePortChecker.cpp
     src/network/SocketError.cpp
+
+    src/server/DVRServer.cpp
+    src/server/DVRServerConfiguration.cpp
+    src/server/DVRServerRepository.cpp
+    src/server/DVRServerSettingsReader.cpp
+    src/server/DVRServerSettingsWriter.cpp
 
     src/ui/liveview/LiveFeedItem.cpp
     src/ui/liveview/LiveStreamItem.cpp

@@ -23,6 +23,7 @@
 class QTreeView;
 class QLineEdit;
 class DVRServer;
+class DVRServerRepository;
 class QModelIndex;
 class QLabel;
 class QCheckBox;
@@ -33,7 +34,7 @@ class OptionsServerPage : public OptionsDialogPage
     Q_OBJECT
 
 public:
-    explicit OptionsServerPage(QWidget *parent = 0);
+    explicit OptionsServerPage(DVRServerRepository *serverRepository, QWidget *parent = 0);
 
     virtual bool hasUnsavedChanges() const;
     virtual void saveChanges();
@@ -54,6 +55,8 @@ private slots:
     void setLoginError(const QString &message);
 
 private:
+    DVRServerRepository *m_serverRepository;
+
     QTreeView *m_serversView;
     QLabel *m_connectionStatus;
     QLineEdit *m_nameEdit, *m_hostnameEdit, *m_portEdit, *m_usernameEdit, *m_passwordEdit;

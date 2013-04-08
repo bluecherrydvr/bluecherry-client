@@ -87,11 +87,14 @@ void LiveStream::init()
     stateTimer->setSingleShot(false);
 }
 
-LiveStream::LiveStream(const DVRCamera &c, QObject *parent)
-    : QObject(parent), camera(c), thread(0), worker(0), m_frame(0), m_state(NotConnected),
+LiveStream::LiveStream(DVRCamera *camera, QObject *parent)
+    : QObject(parent), m_camera(camera), thread(0), worker(0), m_frame(0), m_state(NotConnected),
       m_autoStart(false), m_fpsUpdateCnt(0), m_fpsUpdateHits(0),
       m_fps(0), m_ptsBase(AV_NOPTS_VALUE)
 {
+    Q_ASSERT(m_camera);
+    connect(m_camera.data(), SIGNAL(destroyed(QObject*)), this, SLOT(deleteLater()));
+
     bcApp->liveView->addStream(this);
     connect(bcApp, SIGNAL(settingsChanged()), SLOT(updateSettings()));
     connect(stateTimer, SIGNAL(timeout()), SLOT(checkState()));
@@ -127,7 +130,10 @@ void LiveStream::setState(State newState)
 
 QByteArray LiveStream::url() const
 {
-    QByteArray re = camera.streamUrl();
+    if (!m_camera)
+        return QByteArray();
+
+    QByteArray re = m_camera.data()->streamUrl();
     if (m_bandwidthMode == LiveViewManager::LowBandwidth)
         re.append("/mode=keyframe");
     qDebug() << re;

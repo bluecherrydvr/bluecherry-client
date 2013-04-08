@@ -16,10 +16,13 @@
  */
 
 #include "ServerConfigWindow.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
+#include "server/DVRServerConfiguration.h"
 #include "core/BluecherryApp.h"
 #include "ui/MainWindow.h"
 #include <QBoxLayout>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QWebView>
 #include <QWebFrame>
 #include <QDesktopServices>
@@ -89,8 +92,8 @@ void ServerConfigWindow::setServer(DVRServer *server)
 
     if (server)
     {
-        m_webView->load(server->api->serverUrl());
-        setWindowTitle(tr("Bluecherry - %1").arg(server->displayName()));
+        m_webView->load(server->url());
+        setWindowTitle(tr("Bluecherry - %1").arg(server->configuration()->displayName()));
     }
 
     emit serverChanged(m_server);

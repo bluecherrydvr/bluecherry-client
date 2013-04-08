@@ -29,6 +29,7 @@
 #include <QTimer>
 
 class DVRServer;
+class DVRServerRepository;
 class DVRCamera;
 
 Q_DECLARE_METATYPE(EventData*)
@@ -55,7 +56,7 @@ public:
         LastColumn = DateColumn
     };
 
-    explicit EventsModel(QObject *parent = 0);
+    explicit EventsModel(DVRServerRepository *serverRepository, QObject *parent = 0);
 
     bool isLoading() const { return !updatingServers.isEmpty(); }
 
@@ -74,7 +75,7 @@ public:
     virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
 
 public slots:
-    void setFilterSource(const DVRCamera &camera);
+    void setFilterSource(DVRCamera *camera);
     void setFilterSource(DVRServer *server);
     void setFilterSources(const QMap<DVRServer*,QList<int> > &sources);
 
@@ -109,6 +110,7 @@ private slots:
     void clearServerEvents(DVRServer *server = 0);
 
 private:
+    DVRServerRepository *m_serverRepository;
     QList<EventData*> items;
     QHash<DVRServer*,QList<EventData*> > cachedEvents;
     QSet<DVRServer*> updatingServers;

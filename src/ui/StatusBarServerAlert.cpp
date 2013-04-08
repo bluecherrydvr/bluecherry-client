@@ -17,16 +17,20 @@
 
 #include "StatusBarServerAlert.h"
 #include "ServerConfigWindow.h"
-#include "core/BluecherryApp.h"
-#include "core/DVRServer.h"
-#include <QTextDocument>
-#include <QLabel>
+#include "server/DVRServer.h"
+#include "server/DVRServerConfiguration.h"
+#include "server/DVRServerRepository.h"
 #include <QBoxLayout>
+#include <QIcon>
+#include <QLabel>
 #include <QMouseEvent>
+#include <QTextDocument>
 
-StatusBarServerAlert::StatusBarServerAlert(QWidget *parent)
-    : QWidget(parent)
+StatusBarServerAlert::StatusBarServerAlert(DVRServerRepository *serverRepository, QWidget *parent)
+    : QWidget(parent), m_serverRepository(serverRepository)
 {
+    Q_ASSERT(m_serverRepository);
+
     QBoxLayout *layout = new QHBoxLayout(this);
     layout->setMargin(0);
     layout->addSpacing(8);
@@ -41,16 +45,16 @@ StatusBarServerAlert::StatusBarServerAlert(QWidget *parent)
 
     setVisible(false);
 
-    connect(bcApp, SIGNAL(serverAlertsChanged()), SLOT(updateAlert()));
+    connect(m_serverRepository, SIGNAL(serverAlertsChanged()), SLOT(updateAlert()));
 }
 
 void StatusBarServerAlert::updateAlert()
 {
-    QList<DVRServer*> servers = bcApp->serverAlerts();
+    QList<DVRServer*> servers = m_serverRepository->serversWithAlerts();
     QString message;
 
     if (servers.size() == 1)
-        message = tr("Alert on %1").arg(servers[0]->displayName());
+        message = tr("Alert on %1").arg(servers[0]->configuration()->displayName());
     else if (servers.size() > 1)
         message = tr("Alerts on %1 servers").arg(servers.size());
 
@@ -63,7 +67,7 @@ void StatusBarServerAlert::mousePressEvent(QMouseEvent *ev)
     if (ev->button() != Qt::LeftButton)
         return;
 
-    QList<DVRServer*> servers = bcApp->serverAlerts();
+    QList<DVRServer*> servers = m_serverRepository->serversWithAlerts();
     if (servers.isEmpty())
         return;
 

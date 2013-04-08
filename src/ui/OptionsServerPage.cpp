@@ -18,7 +18,9 @@
 #include "OptionsServerPage.h"
 #include "DVRServersModel.h"
 #include "core/BluecherryApp.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
+#include "server/DVRServerConfiguration.h"
+#include "server/DVRServerRepository.h"
 #include "ui/WebRtpPortCheckerWidget.h"
 #include <QTreeView>
 #include <QHeaderView>
@@ -31,16 +33,18 @@
 #include <QIntValidator>
 #include <QCheckBox>
 
-OptionsServerPage::OptionsServerPage(QWidget *parent)
-    : OptionsDialogPage(parent)
+OptionsServerPage::OptionsServerPage(DVRServerRepository *serverRepository, QWidget *parent)
+    : OptionsDialogPage(parent), m_serverRepository(serverRepository)
 {
+    Q_ASSERT(m_serverRepository);
+
     QBoxLayout *mainLayout = new QVBoxLayout(this);
     QBoxLayout *topLayout = new QHBoxLayout;
     mainLayout->addLayout(topLayout);
 
     /* Servers list */
     m_serversView = new QTreeView;
-    m_serversView->setModel(new DVRServersModel(m_serversView));
+    m_serversView->setModel(new DVRServersModel(bcApp->serverRepository(), m_serversView));
     m_serversView->header()->setHighlightSections(false);
     m_serversView->header()->setResizeMode(QHeaderView::ResizeToContents);
     m_serversView->header()->setResizeMode(0, QHeaderView::Stretch);
@@ -149,7 +153,7 @@ void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const 
     if (server)
     {
         saveChanges(server);
-        server->api->disconnect(this);
+        server->disconnect(this);
         m_connectionStatus->setVisible(false);
     }
 
@@ -164,25 +168,25 @@ void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const 
         return;
     }
 
-    m_nameEdit->setText(server->displayName());
-    m_hostnameEdit->setText(server->readSetting("hostname").toString());
+    m_nameEdit->setText(server->configuration()->displayName());
+    m_hostnameEdit->setText(server->configuration()->hostname());
     m_portEdit->setText(QString::number(server->serverPort()));
-    m_usernameEdit->setText(server->readSetting("username").toString());
-    m_passwordEdit->setText(server->readSetting("password").toString());
-    m_autoConnect->setChecked(server->readSetting("autoConnect", true).toBool());
+    m_usernameEdit->setText(server->configuration()->username());
+    m_passwordEdit->setText(server->configuration()->password());
+    m_autoConnect->setChecked(server->configuration()->autoConnect());
 
-    connect(server->api, SIGNAL(loginSuccessful()), SLOT(setLoginSuccessful()));
-    connect(server->api, SIGNAL(loginError(QString)), SLOT(setLoginError(QString)));
-    connect(server->api, SIGNAL(loginRequestStarted()), SLOT(setLoginConnecting()));
+    connect(server, SIGNAL(loginSuccessful()), SLOT(setLoginSuccessful()));
+    connect(server, SIGNAL(loginError(QString)), SLOT(setLoginError(QString)));
+    connect(server, SIGNAL(loginRequestStarted()), SLOT(setLoginConnecting()));
 
     checkServer();
 
-    if (server->api->isOnline())
+    if (server->isOnline())
         setLoginSuccessful();
-    else if (server->api->isLoginPending())
+    else if (server->isLoginPending())
         setLoginConnecting();
-    else if (!server->api->errorMessage().isEmpty())
-        setLoginError(server->api->errorMessage());
+    else if (!server->errorMessage().isEmpty())
+        setLoginError(server->errorMessage());
 }
 
 void OptionsServerPage::checkServer()
@@ -192,7 +196,10 @@ void OptionsServerPage::checkServer()
 
 void OptionsServerPage::addNewServer()
 {
-    DVRServer *server = bcApp->addNewServer(tr("New Server"));
+    DVRServer *server = m_serverRepository->createServer(tr("New Server"));
+    server->configuration()->setAutoConnect(true);
+    server->configuration()->setPort(7001);
+
     if (!m_serversView->currentIndex().isValid())
         saveChanges(server);
     setCurrentServer(server);
@@ -210,7 +217,7 @@ void OptionsServerPage::deleteServer()
         return;
 
     QMessageBox dlg(QMessageBox::Question, tr("Delete DVR Server"), tr("Are you sure you want to delete <b>%1</b>?")
-                    .arg(Qt::escape(server->displayName())), QMessageBox::NoButton, this);
+                    .arg(Qt::escape(server->configuration()->displayName())), QMessageBox::NoButton, this);
     QPushButton *delBtn = dlg.addButton(tr("Delete"), QMessageBox::DestructiveRole);
     dlg.addButton(QMessageBox::Cancel);
     dlg.exec();
@@ -246,38 +253,38 @@ void OptionsServerPage::saveChanges(DVRServer *server)
 
     if (m_nameEdit->isModified())
     {
-        server->setDisplayName(m_nameEdit->text().trimmed());
+        server->configuration()->setDisplayName(m_nameEdit->text().trimmed());
         m_nameEdit->setModified(false);
     }
     if (m_hostnameEdit->isModified())
     {
         m_hostnameEdit->setText(m_hostnameEdit->text().trimmed());
-        server->writeSetting("hostname", m_hostnameEdit->text());
+        server->configuration()->setHostname(m_hostnameEdit->text());
         m_hostnameEdit->setModified(false);
         connectionModified = true;
     }
     if (m_portEdit->isModified())
     {
-        server->writeSetting("port", m_portEdit->text());
+        server->configuration()->setPort(m_portEdit->text().toInt());
         m_portEdit->setModified(false);
         connectionModified = true;
     }
     if (m_usernameEdit->isModified())
     {
-        server->writeSetting("username", m_usernameEdit->text());
+        server->configuration()->setUsername(m_usernameEdit->text());
         m_usernameEdit->setModified(false);
         connectionModified = true;
     }
     if (m_passwordEdit->isModified())
     {
-        server->writeSetting("password", m_passwordEdit->text());
+        server->configuration()->setPassword(m_passwordEdit->text());
         m_passwordEdit->setModified(false);
         connectionModified = true;
     }
 
-    server->writeSetting("autoConnect", m_autoConnect->isChecked());
+    server->configuration()->setAutoConnect(m_autoConnect->isChecked());
 
-    if (connectionModified || (m_autoConnect->isChecked() && !server->api->isOnline()))
+    if (connectionModified || (m_autoConnect->isChecked() && !server->isOnline()))
         server->login();
 }
 

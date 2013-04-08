@@ -18,11 +18,11 @@
 #ifndef CAMERAPTZCONTROL_H
 #define CAMERAPTZCONTROL_H
 
+#include "camera/DVRCamera.h"
 #include <QObject>
 #include <QMap>
 #include <QSharedPointer>
 #include <QUrl>
-#include "DVRCamera.h"
 
 class QNetworkReply;
 
@@ -32,7 +32,7 @@ class CameraPtzControl : public QObject
     Q_FLAGS(Capability Capabilities)
     Q_FLAGS(Movement Movements)
 
-    Q_PROPERTY(DVRCamera camera READ camera)
+    Q_PROPERTY(DVRCamera *camera READ camera)
     Q_PROPERTY(int protocol READ protocol NOTIFY infoUpdated)
     Q_PROPERTY(Capabilities capabilities READ capabilities NOTIFY infoUpdated)
     Q_PROPERTY(bool hasPendingActions READ hasPendingActions NOTIFY hasPendingActionsChanged)
@@ -60,12 +60,12 @@ public:
     };
     Q_DECLARE_FLAGS(Movements, Movement)
 
-    static QSharedPointer<CameraPtzControl> sharedObjectFor(const DVRCamera &camera);
+    static QSharedPointer<CameraPtzControl> sharedObjectFor(DVRCamera *camera);
 
-    explicit CameraPtzControl(const DVRCamera &camera, QObject *parent = 0);
+    explicit CameraPtzControl(DVRCamera *camera, QObject *parent = 0);
     virtual ~CameraPtzControl();
 
-    const DVRCamera &camera() const { return m_camera; }
+    DVRCamera *camera() const { return m_camera.data(); }
     DVRCamera::PtzProtocol protocol() const { return m_protocol; }
     Capabilities capabilities() const { return m_capabilities; }
 
@@ -104,7 +104,7 @@ private slots:
     void clearPresetResult();
 
 private:
-    DVRCamera m_camera;
+    QWeakPointer<DVRCamera> m_camera;
     QMap<int,QString> m_presets;
     QList<QNetworkReply*> m_pendingCommands;
     DVRCamera::PtzProtocol m_protocol;

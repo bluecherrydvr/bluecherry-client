@@ -20,7 +20,7 @@
 
 #include <QWidget>
 #include <QWeakPointer>
-#include "core/DVRCamera.h"
+#include "camera/DVRCamera.h"
 
 class LiveViewArea;
 class QComboBox;
@@ -35,7 +35,7 @@ public:
     /* Note that the returned window has the Qt::WA_DeleteOnClose attribute set.
      * If you intend to save this pointer long-term, put it in a guard (QWeakPointer) or
      * unset this attribute. */
-    static LiveViewWindow *openWindow(QWidget *parent, bool fullscreen, const DVRCamera &camera = DVRCamera());
+    static LiveViewWindow *openWindow(QWidget *parent, bool fullscreen, DVRCamera *camera = 0);
 
     LiveViewArea *view() const { return m_liveView; }
     QString currentLayout() const;
@@ -45,7 +45,7 @@ public:
     bool isFullScreen() const { return QWidget::isFullScreen() || m_fsSetWindow; }
 
 public slots:
-    void showSingleCamera(const DVRCamera &camera);
+    void showSingleCamera(DVRCamera *camera);
     bool setLayout(const QString &layout);
     void saveLayout();
 

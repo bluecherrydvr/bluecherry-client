@@ -31,7 +31,7 @@
 MJpegStream::MJpegStream(QObject *parent)
     : QObject(parent), m_httpReply(0), m_currentFrameNo(0), m_latestFrameNo(0), m_fpsRecvTs(0), m_fpsRecvNo(0),
       m_decodeTask(0), m_lastActivity(0), m_receivedFps(0), m_httpBodyLength(0), m_state(NotConnected),
-      m_parserState(ParserBoundary), m_recordingState(DVRCamera::NoRecording), m_autoStart(false),
+      m_parserState(ParserBoundary), m_recordingState(NoRecording), m_autoStart(false),
       m_paused(false), m_interval(1)
 {
     //bcApp->liveView->addStream(this);
@@ -41,7 +41,7 @@ MJpegStream::MJpegStream(QObject *parent)
 MJpegStream::MJpegStream(const QUrl &url, QObject *parent)
     : QObject(parent), m_httpReply(0), m_currentFrameNo(0), m_latestFrameNo(0), m_fpsRecvTs(0), m_fpsRecvNo(0),
       m_decodeTask(0), m_lastActivity(0), m_receivedFps(0), m_httpBodyLength(0), m_state(NotConnected),
-      m_parserState(ParserBoundary), m_recordingState(DVRCamera::NoRecording), m_autoStart(false),
+      m_parserState(ParserBoundary), m_recordingState(NoRecording), m_autoStart(false),
       m_paused(false), m_interval(1)
 {
     //bcApp->liveView->addStream(this);
@@ -51,9 +51,9 @@ MJpegStream::MJpegStream(const QUrl &url, QObject *parent)
 
 MJpegStream::~MJpegStream()
 {
-    if (m_recordingState != DVRCamera::NoRecording)
+    if (m_recordingState != NoRecording)
     {
-        m_recordingState = DVRCamera::NoRecording;
+        m_recordingState = NoRecording;
         emit recordingStateChanged(m_recordingState);
     }
 
@@ -84,9 +84,9 @@ void MJpegStream::setState(State newState)
     else if (oldState >= Buffering && newState < Buffering)
     {
         emit streamStopped();
-        if (m_recordingState != DVRCamera::NoRecording)
+        if (m_recordingState != NoRecording)
         {
-            m_recordingState = DVRCamera::NoRecording;
+            m_recordingState = NoRecording;
             emit recordingStateChanged(m_recordingState);
         }
     }
@@ -413,10 +413,10 @@ bool MJpegStream::parseBuffer()
 
                 /* Because we remove processed headers, we can guarantee that the header is
                  * only parsed once, so it's safe to set and emit here. */
-                DVRCamera::RecordingState newState = DVRCamera::NoRecording;
+                RecordingState newState = NoRecording;
 
                 if (active == "true")
-                    newState = DVRCamera::MotionActive;
+                    newState = MotionActive;
 
                 if (newState != m_recordingState)
                 {

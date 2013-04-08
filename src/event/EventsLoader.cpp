@@ -1,9 +1,11 @@
 #include "EventsLoader.h"
 #include "core/BluecherryApp.h"
-#include "core/DVRServer.h"
+#include "server/DVRServer.h"
 #include "core/EventData.h"
 #include <QFuture>
 #include <QFutureWatcher>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QtConcurrentRun>
 
 EventsLoader::EventsLoader(DVRServer *server, QObject *parent)
@@ -33,7 +35,7 @@ void EventsLoader::setEndTime(const QDateTime &endTime)
 
 void EventsLoader::loadEvents()
 {
-    if (!m_server || !m_server->api || !m_server->api->isOnline())
+    if (!m_server || !m_server.data()->isOnline())
     {
         emit eventsLoaded(false, QList<EventData*>());
         deleteLater();
@@ -47,8 +49,7 @@ void EventsLoader::loadEvents()
     if (!m_endTime.isNull())
         url.addQueryItem(QLatin1String("endDate"), QString::number(m_endTime.toTime_t()));
 
-    QNetworkRequest req = m_server->api->buildRequest(url);
-    QNetworkReply *reply = m_server->api->sendRequest(req);
+    QNetworkReply *reply = m_server.data()->sendRequest(url);
     connect(reply, SIGNAL(finished()), SLOT(serverRequestFinished()));
 }
 
@@ -59,7 +60,7 @@ void EventsLoader::serverRequestFinished()
 
     reply->deleteLater();
 
-    if (!bcApp->serverExists(m_server))
+    if (!m_server)
     {
         deleteLater();
         return; // ignore data from removed servers
@@ -86,7 +87,7 @@ void EventsLoader::serverRequestFinished()
     QByteArray data = reply->readAll();
     // qDebug() << "EventsLoader: Received reply from server: " << data;
 
-    QFuture<QList<EventData*> > future = QtConcurrent::run(&EventData::parseEvents, m_server, data);
+    QFuture<QList<EventData*> > future = QtConcurrent::run(&EventData::parseEvents, m_server.data(), data);
 
     QFutureWatcher<QList<EventData*> > *qfw = new QFutureWatcher<QList<EventData*> >(this);
     connect(qfw, SIGNAL(finished()), SLOT(eventParseFinished()));
@@ -99,8 +100,9 @@ void EventsLoader::eventParseFinished()
     QFutureWatcher<QList<EventData*> > *qfw = static_cast<QFutureWatcher<QList<EventData*> >*>(sender());
     qfw->deleteLater();
 
-    if (!bcApp->serverExists(m_server))
+    if (!m_server)
     {
+        emit eventsLoaded(false, QList<EventData*>());
         deleteLater();
         return; // ignore data from removed servers
     }
