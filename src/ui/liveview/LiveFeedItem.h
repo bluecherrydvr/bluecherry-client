@@ -118,6 +118,7 @@ protected:
 private slots:
     void cameraDataUpdated();
     void setBandwidthModeFromAction();
+    void serverRemoved(DVRServer *server);
 
 private:
     LiveStreamItem *m_streamItem;

@@ -22,11 +22,12 @@
 #include "camera/DVRCameraStreamWriter.h"
 #include "core/BluecherryApp.h"
 #include "core/CameraPtzControl.h"
+#include "core/LiveViewManager.h"
 #include "LiveViewWindow.h"
 #include "ui/MainWindow.h"
 #include "utils/FileUtils.h"
 #include "server/DVRServer.h"
-#include "core/LiveViewManager.h"
+#include "server/DVRServerRepository.h"
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QGraphicsSceneContextMenuEvent>
@@ -45,6 +46,8 @@
 LiveFeedItem::LiveFeedItem(QDeclarativeItem *parent)
     : QDeclarativeItem(parent), m_streamItem(0), m_customCursor(DefaultCursor)
 {
+    connect(bcApp->serverRepository(), SIGNAL(serverRemoved(DVRServer*)), this, SLOT(serverRemoved(DVRServer*)));
+
     setAcceptedMouseButtons(acceptedMouseButtons() | Qt::RightButton);
 }
 
@@ -222,6 +225,15 @@ void LiveFeedItem::setBandwidthModeFromAction()
     int mode = a->data().toInt();
     stream()->setBandwidthMode(mode);
     stream()->setPaused(false);
+}
+
+void LiveFeedItem::serverRemoved(DVRServer *server)
+{
+    if (!server || !m_camera)
+        return;
+
+    if (server == m_camera.data()->server())
+        deleteLater();
 }
 
 /* Version (in LiveViewLayout) must be bumped for any change to
