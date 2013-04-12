@@ -81,12 +81,16 @@ QNetworkRequest ServerRequestManager::buildRequest(const QUrl &relativeUrl)
 
 QNetworkReply *ServerRequestManager::sendRequest(const QNetworkRequest &request)
 {
-    return bcApp->nam->get(request);
+    QNetworkReply *result = bcApp->nam->get(request);
+    result->ignoreSslErrors();
+    return result;
 }
 
 QNetworkReply *ServerRequestManager::sendRequest(const QUrl &relativeUrl)
 {
-    return bcApp->nam->get(buildRequest(relativeUrl));
+    QNetworkReply *result = bcApp->nam->get(buildRequest(relativeUrl));
+    result->ignoreSslErrors();
+    return result;
 }
 
 void ServerRequestManager::login(const QString &username, const QString &password)
@@ -118,6 +122,7 @@ void ServerRequestManager::login(const QString &username, const QString &passwor
     emit loginRequestStarted();
 
     m_loginReply = bcApp->nam->post(req, queryData.encodedQuery());
+    m_loginReply->ignoreSslErrors();
     connect(m_loginReply, SIGNAL(finished()), SLOT(loginReplyReady()));
 }
 

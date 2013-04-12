@@ -149,6 +149,7 @@ void MJpegStream::start()
     hackUrl.addEncodedQueryItem("activity", "1");
 
     m_httpReply = bcApp->nam->get(QNetworkRequest(hackUrl));
+    m_httpReply->ignoreSslErrors();
     connect(m_httpReply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(requestError()));
     connect(m_httpReply, SIGNAL(finished()), SLOT(requestError()));
     connect(m_httpReply, SIGNAL(readyRead()), SLOT(readable()));
