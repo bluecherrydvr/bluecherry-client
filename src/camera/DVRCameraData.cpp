@@ -18,11 +18,9 @@
 #include "DVRCameraData.h"
 #include "DVRCamera.h"
 #include "server/DVRServer.h"
-#include "server/DVRServerConfiguration.h"
 
 DVRCameraData::DVRCameraData(int id, DVRServer *server)
-    : server(server), id(id), isDisabled(false),
-      ptzProtocol(DVRCamera::UnknownProtocol)
+    : m_id(id), m_server(server), m_disabled(false), m_ptzProtocol(DVRCamera::UnknownProtocol)
 {
 }
 
@@ -30,7 +28,54 @@ DVRCameraData::~DVRCameraData()
 {
 }
 
-void DVRCameraData::doDataUpdated()
+void DVRCameraData::setDisplayName(const QString &name)
 {
-    emit dataUpdated();
+    if (m_displayName == name)
+        return;
+
+    m_displayName = name;
+    emit changed();
+}
+
+void DVRCameraData::setDisabled(bool disabled)
+{
+    if (m_disabled == disabled)
+        return;
+
+    m_disabled = disabled;
+    emit changed();
+}
+
+void DVRCameraData::setPtzProtocol(qint8 ptzProtocol)
+{
+    if (m_ptzProtocol == ptzProtocol)
+        return;
+
+    m_ptzProtocol = ptzProtocol;
+    emit changed();
+}
+
+int DVRCameraData::id() const
+{
+    return m_id;
+}
+
+DVRServer* DVRCameraData::server() const
+{
+    return m_server;
+}
+
+QString DVRCameraData::displayName() const
+{
+    return m_displayName;
+}
+
+bool DVRCameraData::disabled() const
+{
+    return m_disabled;
+}
+
+qint8 DVRCameraData::ptzProtocol() const
+{
+    return m_ptzProtocol;
 }

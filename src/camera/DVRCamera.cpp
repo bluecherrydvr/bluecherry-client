@@ -30,7 +30,7 @@
 DVRCamera::DVRCamera(int id, DVRServer *server)
     : QObject(), m_data(id, server), m_isOnline(false), m_recordingState(NoRecording)
 {
-    connect(&m_data, SIGNAL(dataUpdated()), this, SIGNAL(dataUpdated()));
+    connect(&m_data, SIGNAL(changed()), this, SIGNAL(dataUpdated()));
 }
 
 DVRCamera::~DVRCamera()
@@ -39,8 +39,7 @@ DVRCamera::~DVRCamera()
 
 void DVRCamera::setDisplayName(const QString &displayName)
 {
-    m_data.displayName = displayName;
-    m_data.doDataUpdated();
+    m_data.setDisplayName(displayName);
 }
 
 void DVRCamera::setOnline(bool on)

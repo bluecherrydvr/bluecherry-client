@@ -26,24 +26,33 @@ class DVRServer;
 class DVRCameraData : public QObject
 {
     Q_OBJECT
-
-    friend class DVRCamera;
-    friend class DVRServer;
+    Q_DISABLE_COPY(DVRCameraData)
 
 public:
-    DVRServer * const server;
-    const int id;
-    QString displayName;
-    bool isDisabled;
-    qint8 ptzProtocol;
-
-    DVRCameraData(int id, DVRServer *server);
+    explicit DVRCameraData(int id, DVRServer *server);
     virtual ~DVRCameraData();
 
-    void doDataUpdated();
+    int id() const;
+    DVRServer * server() const;
+
+    QString displayName() const;
+    void setDisplayName(const QString &displayName);
+
+    bool disabled() const;
+    void setDisabled(bool disabled);
+
+    qint8 ptzProtocol() const;
+    void setPtzProtocol(qint8 ptzProtocol);
 
 signals:
-    void dataUpdated();
+    void changed();
+
+private:
+    const int m_id;
+    DVRServer * const m_server;
+    QString m_displayName;
+    bool m_disabled;
+    qint8 m_ptzProtocol;
 
 };
 

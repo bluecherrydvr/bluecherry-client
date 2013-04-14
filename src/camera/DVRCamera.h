@@ -56,17 +56,17 @@ public:
 
     void setDisplayName(const QString &displayName);
 
-    DVRServer *server() const { return m_data.server; }
-    int id() const { return m_data.id; }
-    QString displayName() const { return m_data.displayName; }
+    DVRServer *server() const { return m_data.server(); }
+    int id() const { return m_data.id(); }
+    QString displayName() const { return m_data.displayName(); }
     QByteArray streamUrl() const { return m_streamUrl; }
-    bool isOnline() const { return m_isOnline && !m_data.isDisabled && !m_streamUrl.isEmpty(); }
-    bool isDisabled() const { return m_data.isDisabled; }
+    bool isOnline() const { return m_isOnline && !m_data.disabled() && !m_streamUrl.isEmpty(); }
+    bool isDisabled() const { return m_data.disabled(); }
     bool canStream() const { return !m_streamUrl.isEmpty() && isOnline(); }
     LiveStream * liveStream();
 
-    PtzProtocol ptzProtocol() const { return static_cast<PtzProtocol>(m_data.ptzProtocol); }
-    bool hasPtz() const { return m_data.ptzProtocol > 0; }
+    PtzProtocol ptzProtocol() const { return static_cast<PtzProtocol>(m_data.ptzProtocol()); }
+    bool hasPtz() const { return m_data.ptzProtocol() > 0; }
 
     RecordingState recordingState() const { return RecordingState(m_recordingState); }
 
