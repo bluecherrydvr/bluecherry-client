@@ -101,7 +101,7 @@ QMap<DVRServer*,QList<int> > EventSourcesModel::checkedSources() const
             if (!i && it->checkState[i])
                 sl.append(-1);
             else if (it->checkState[i] && it->cameras[i-1])
-                sl.append(it->cameras[i-1].data()->id());
+                sl.append(it->cameras[i-1].data()->data().id());
         }
 
         if (!sl.isEmpty())
