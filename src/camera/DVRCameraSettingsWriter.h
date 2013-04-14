@@ -15,31 +15,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DVRCameraData.h"
-#include "DVRCamera.h"
-#include "server/DVRServer.h"
-#include "server/DVRServerConfiguration.h"
+#ifndef DVRCAMERASETTINGSWRITER_H
+#define DVRCAMERASETTINGSWRITER_H
 
-DVRCameraData::DVRCameraData(int id, DVRServer *server)
-    : server(server), id(id), isLoaded(false), isOnline(false), isDisabled(false),
-      ptzProtocol(DVRCamera::UnknownProtocol), recordingState(NoRecording)
+#include <QVariant>
+
+class DVRCamera;
+
+class DVRCameraSettingsWriter
 {
-}
+public:
+    void writeCamera(DVRCamera *camera) const;
 
-DVRCameraData::~DVRCameraData()
-{
-}
+};
 
-void DVRCameraData::doDataUpdated()
-{
-    emit dataUpdated();
-}
-
-void DVRCameraData::setRecordingState(int state)
-{
-    if (state == recordingState)
-        return;
-
-    recordingState = RecordingState(state);
-    emit recordingStateChanged(state);
-}
+#endif // DVRCAMERASETTINGSWRITER_H

@@ -19,6 +19,7 @@
 #include "DVRServerConfiguration.h"
 #include "camera/DVRCamera.h"
 #include "camera/DVRCameraSettingsReader.h"
+#include "camera/DVRCameraSettingsWriter.h"
 #include "core/ServerRequestManager.h"
 #include <QNetworkRequest>
 #include <QUrl>
@@ -158,6 +159,11 @@ void DVRServer::updateCamerasReply()
                             if (!xml.hasError())
                                 xml.raiseError(QLatin1String("Device parsing failed"));
                             continue;
+                        }
+                        else
+                        {
+                            DVRCameraSettingsWriter settingsWriter;
+                            settingsWriter.writeCamera(camera);
                         }
                     }
 

@@ -15,31 +15,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DVRCameraData.h"
 #include "DVRCamera.h"
+#include "DVRCameraSettingsWriter.h"
 #include "server/DVRServer.h"
-#include "server/DVRServerConfiguration.h"
+#include <QSettings>
 
-DVRCameraData::DVRCameraData(int id, DVRServer *server)
-    : server(server), id(id), isLoaded(false), isOnline(false), isDisabled(false),
-      ptzProtocol(DVRCamera::UnknownProtocol), recordingState(NoRecording)
+void DVRCameraSettingsWriter::writeCamera(DVRCamera *camera) const
 {
-}
+    Q_ASSERT(camera);
+    Q_ASSERT(camera->server());
 
-DVRCameraData::~DVRCameraData()
-{
-}
+    int serverId = camera->server()->configuration().id();
+    Q_ASSERT(serverId >= 0);
 
-void DVRCameraData::doDataUpdated()
-{
-    emit dataUpdated();
-}
-
-void DVRCameraData::setRecordingState(int state)
-{
-    if (state == recordingState)
-        return;
-
-    recordingState = RecordingState(state);
-    emit recordingStateChanged(state);
+    QSettings settings;
+    settings.beginGroup(QString::fromLatin1("servers/%1/cameras/").arg(serverId));
+    settings.setValue(QString::number(camera->id()), camera->displayName());
 }
