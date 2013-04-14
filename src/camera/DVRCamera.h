@@ -56,19 +56,19 @@ public:
 
     void setDisplayName(const QString &displayName);
 
-    DVRServer *server() const { return d.server; }
-    int id() const { return d.id; }
-    QString displayName() const { return d.displayName; }
-    QByteArray streamUrl() const { return d.streamUrl; }
-    bool isOnline() const { return d.isOnline && !d.isDisabled && !d.streamUrl.isEmpty(); }
-    bool isDisabled() const { return d.isDisabled; }
-    bool canStream() const { return !d.streamUrl.isEmpty() && isOnline(); }
+    DVRServer *server() const { return m_data.server; }
+    int id() const { return m_data.id; }
+    QString displayName() const { return m_data.displayName; }
+    QByteArray streamUrl() const { return m_data.streamUrl; }
+    bool isOnline() const { return m_data.isOnline && !m_data.isDisabled && !m_data.streamUrl.isEmpty(); }
+    bool isDisabled() const { return m_data.isDisabled; }
+    bool canStream() const { return !m_data.streamUrl.isEmpty() && isOnline(); }
     LiveStream * liveStream();
 
-    PtzProtocol ptzProtocol() const { return static_cast<PtzProtocol>(d.ptzProtocol); }
-    bool hasPtz() const { return d.ptzProtocol > 0; }
+    PtzProtocol ptzProtocol() const { return static_cast<PtzProtocol>(m_data.ptzProtocol); }
+    bool hasPtz() const { return m_data.ptzProtocol > 0; }
 
-    RecordingState recordingState() const { return RecordingState(d.recordingState); }
+    RecordingState recordingState() const { return RecordingState(m_data.recordingState); }
 
     static QList<DVRCamera *> fromMimeData(const QMimeData *mimeData);
 
@@ -78,8 +78,8 @@ signals:
     void recordingStateChanged(int recordingState);
 
 private:
-    DVRCameraData d;
-    QWeakPointer<CameraPtzControl> ptzControl;
+    DVRCameraData m_data;
+    QWeakPointer<CameraPtzControl> m_ptzControl;
     QWeakPointer<LiveStream> m_liveStream;
 
     void setOnline(bool on);

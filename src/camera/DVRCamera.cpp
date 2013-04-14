@@ -28,10 +28,10 @@
 #include <QXmlStreamReader>
 
 DVRCamera::DVRCamera(int id, DVRServer *server)
-    : QObject(), d(id, server)
+    : QObject(), m_data(id, server)
 {
-    connect(&d, SIGNAL(dataUpdated()), this, SIGNAL(dataUpdated()));
-    connect(&d, SIGNAL(recordingStateChanged(int)), this, SIGNAL(recordingStateChanged(int)));
+    connect(&m_data, SIGNAL(dataUpdated()), this, SIGNAL(dataUpdated()));
+    connect(&m_data, SIGNAL(recordingStateChanged(int)), this, SIGNAL(recordingStateChanged(int)));
 }
 
 DVRCamera::~DVRCamera()
@@ -40,16 +40,16 @@ DVRCamera::~DVRCamera()
 
 void DVRCamera::setDisplayName(const QString &displayName)
 {
-    d.displayName = displayName;
-    d.doDataUpdated();
+    m_data.displayName = displayName;
+    m_data.doDataUpdated();
 }
 
 void DVRCamera::setOnline(bool on)
 {
-    if (on == d.isOnline)
+    if (on == m_data.isOnline)
         return;
 
-    d.isOnline = on;
+    m_data.isOnline = on;
     emit onlineChanged(isOnline());
 }
 
@@ -95,11 +95,11 @@ QList<DVRCamera *> DVRCamera::fromMimeData(const QMimeData *mimeData)
 
 QSharedPointer<CameraPtzControl> DVRCamera::sharedPtzControl()
 {
-    QSharedPointer<CameraPtzControl> result = ptzControl;
+    QSharedPointer<CameraPtzControl> result = m_ptzControl;
     if (!result)
     {
         result = QSharedPointer<CameraPtzControl>(new CameraPtzControl(this));
-        ptzControl = result.toWeakRef();
+        m_ptzControl = result.toWeakRef();
     }
 
     return result;

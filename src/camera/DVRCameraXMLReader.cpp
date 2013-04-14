@@ -25,7 +25,7 @@ bool DVRCameraXMLReader::readCamera(DVRCamera *camera, QXmlStreamReader &xmlStre
     Q_ASSERT(xmlStreamReader.isStartElement() && xmlStreamReader.name() == QLatin1String("device"));
 
     QString name;
-    camera->d.ptzProtocol = DVRCamera::UnknownProtocol;
+    camera->m_data.ptzProtocol = DVRCamera::UnknownProtocol;
 
     while (xmlStreamReader.readNext() != QXmlStreamReader::Invalid)
     {
@@ -40,14 +40,14 @@ bool DVRCameraXMLReader::readCamera(DVRCamera *camera, QXmlStreamReader &xmlStre
         }
         else if (xmlStreamReader.name() == QLatin1String("ptz_control_protocol"))
         {
-            camera->d.ptzProtocol = DVRCamera::parseProtocol(xmlStreamReader.readElementText());
+            camera->m_data.ptzProtocol = DVRCamera::parseProtocol(xmlStreamReader.readElementText());
         }
         else if (xmlStreamReader.name() == QLatin1String("disabled"))
         {
             bool ok = false;
-            camera->d.isDisabled = xmlStreamReader.readElementText().toInt(&ok);
+            camera->m_data.isDisabled = xmlStreamReader.readElementText().toInt(&ok);
             if (!ok)
-                camera->d.isDisabled = false;
+                camera->m_data.isDisabled = false;
         }
         else
             xmlStreamReader.skipCurrentElement();
@@ -64,10 +64,10 @@ bool DVRCameraXMLReader::readCamera(DVRCamera *camera, QXmlStreamReader &xmlStre
     url.setHost(camera->server()->url().host());
     url.setPort(camera->server()->rtspPort());
     url.setPath(QString::fromLatin1("live/") + QString::number(camera->id()));
-    camera->d.streamUrl = url.toString().toLatin1();
-    camera->d.isLoaded = true;
+    camera->m_data.streamUrl = url.toString().toLatin1();
+    camera->m_data.isLoaded = true;
 
-    camera->d.doDataUpdated();
+    camera->m_data.doDataUpdated();
     /* Changing stream URL or disabled flag will change online state */
     emit camera->onlineChanged(camera->isOnline());
     return true;
