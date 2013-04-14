@@ -37,9 +37,9 @@ void DVRCamera::connectData()
     if (!d)
         return;
 
-    connect(d.data(), SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
-    connect(d.data(), SIGNAL(dataUpdated()), this, SIGNAL(dataUpdated()));
-    connect(d.data(), SIGNAL(recordingStateChanged(int)), this, SIGNAL(recordingStateChanged(int)));
+    connect(d, SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
+    connect(d, SIGNAL(dataUpdated()), this, SIGNAL(dataUpdated()));
+    connect(d, SIGNAL(recordingStateChanged(int)), this, SIGNAL(recordingStateChanged(int)));
 }
 
 void DVRCamera::disconnectData()
@@ -47,9 +47,9 @@ void DVRCamera::disconnectData()
     if (!d)
         return;
 
-    disconnect(d.data(), SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
-    disconnect(d.data(), SIGNAL(dataUpdated()), this, SIGNAL(dataUpdated()));
-    disconnect(d.data(), SIGNAL(recordingStateChanged(int)), this, SIGNAL(recordingStateChanged(int)));
+    disconnect(d, SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
+    disconnect(d, SIGNAL(dataUpdated()), this, SIGNAL(dataUpdated()));
+    disconnect(d, SIGNAL(recordingStateChanged(int)), this, SIGNAL(recordingStateChanged(int)));
 }
 
 void DVRCamera::setOnline(bool on)
@@ -129,7 +129,7 @@ LiveStream * DVRCamera::liveStream()
     if (!d->liveStream)
     {
         LiveStream * re = new LiveStream(this);
-        QObject::connect(d.data(), SIGNAL(onlineChanged(bool)), re, SLOT(setOnline(bool)));
+        QObject::connect(d, SIGNAL(onlineChanged(bool)), re, SLOT(setOnline(bool)));
         re->setOnline(isOnline());
         d->liveStream = re;
     }

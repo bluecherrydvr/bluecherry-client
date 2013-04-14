@@ -47,7 +47,7 @@ public:
 
     static PtzProtocol parseProtocol(const QString &protocol);
 
-    QObject * getQObject() const { return d ? d.data() : 0; }
+    QObject * getQObject() const { return d ? d : 0; }
 
     DVRServer *server() const { return d ? d->server : 0; }
     int uniqueId() const { return d ? d->uniqueID : -1; }
@@ -73,7 +73,7 @@ signals:
     void recordingStateChanged(int recordingState);
 
 private:
-    QExplicitlySharedDataPointer<DVRCameraData> d;
+    DVRCameraData *d;
 
     DVRCamera(DVRServer *s, int i);
 
