@@ -36,7 +36,7 @@ DVRCamera::DVRCamera(int id, DVRServer *server)
 
 void DVRCamera::setOnline(bool on)
 {
-    if (!d || on == d->isOnline)
+    if (on == d->isOnline)
         return;
 
     d->isOnline = on;
