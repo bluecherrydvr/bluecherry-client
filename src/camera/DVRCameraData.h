@@ -18,15 +18,13 @@
 #ifndef DVRCAMERADATA_H
 #define DVRCAMERADATA_H
 
-#include <QHash>
 #include <QObject>
-#include <QSharedData>
 #include <QWeakPointer>
 
 class DVRServer;
 class LiveStream;
 
-class DVRCameraData : public QObject, public QSharedData
+class DVRCameraData : public QObject
 {
     Q_OBJECT
 
