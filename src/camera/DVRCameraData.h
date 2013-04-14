@@ -26,12 +26,6 @@
 class DVRServer;
 class LiveStream;
 
-/* There is one DVRCameraData per server+ID; it is shared among many instances of
- * DVRCamera by reference count. This may be created before we've actually queried
- * the server for cameras (for example, with saved camera layouts in the config).
- * Once real data is available, this object will be updated and dataUpdated will be
- * emitted. The DVRServer holds a reference to every camera that currently exists
- * according to the server. */
 class DVRCameraData : public QObject, public QSharedData
 {
     Q_OBJECT
