@@ -58,7 +58,6 @@ public:
 
     QByteArray streamUrl() const { return m_streamUrl; }
     bool isOnline() const { return m_isOnline && !m_data.disabled() && !m_streamUrl.isEmpty(); }
-    bool canStream() const { return !m_streamUrl.isEmpty() && isOnline(); }
     LiveStream * liveStream();
 
     PtzProtocol ptzProtocol() const { return static_cast<PtzProtocol>(m_data.ptzProtocol()); }
