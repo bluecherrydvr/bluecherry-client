@@ -30,5 +30,5 @@ void DVRCameraStreamWriter::writeCamera(DVRCamera *camera)
     if (!camera)
         m_dataStream << -1;
     else
-        m_dataStream << camera->server()->configuration().id() << camera->id();
+        m_dataStream << camera->data().server()->configuration().id() << camera->id();
 }

@@ -232,7 +232,7 @@ void LiveFeedItem::serverRemoved(DVRServer *server)
     if (!server || !m_camera)
         return;
 
-    if (server == m_camera.data()->server())
+    if (server == m_camera.data()->data().server())
         deleteLater();
 }
 

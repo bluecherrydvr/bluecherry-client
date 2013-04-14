@@ -23,9 +23,9 @@
 void DVRCameraSettingsWriter::writeCamera(DVRCamera *camera) const
 {
     Q_ASSERT(camera);
-    Q_ASSERT(camera->server());
+    Q_ASSERT(camera->data().server());
 
-    int serverId = camera->server()->configuration().id();
+    int serverId = camera->data().server()->configuration().id();
     Q_ASSERT(serverId >= 0);
 
     QSettings settings;

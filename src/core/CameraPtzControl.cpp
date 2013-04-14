@@ -54,7 +54,7 @@ QNetworkReply *CameraPtzControl::sendCommand(const QUrl &partialUrl)
 
     Q_ASSERT(url.hasQueryItem(QLatin1String("command")));
 
-    QNetworkReply *reply = m_camera.data()->server()->sendRequest(url);
+    QNetworkReply *reply = m_camera.data()->data().server()->sendRequest(url);
     connect(reply, SIGNAL(finished()), SLOT(finishCommand()));
 
     m_pendingCommands.append(reply);

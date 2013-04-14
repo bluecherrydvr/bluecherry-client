@@ -58,7 +58,6 @@ public:
 
     void setDisplayName(const QString &displayName);
 
-    DVRServer *server() const { return m_data.server(); }
     int id() const { return m_data.id(); }
     QByteArray streamUrl() const { return m_streamUrl; }
     bool isOnline() const { return m_isOnline && !m_data.disabled() && !m_streamUrl.isEmpty(); }

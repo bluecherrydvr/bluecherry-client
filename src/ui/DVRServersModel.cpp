@@ -89,7 +89,7 @@ void DVRServersModel::cameraAdded(DVRCamera *camera)
 {
     Q_ASSERT(camera);
 
-    QModelIndex parent = indexForServer(camera->server());
+    QModelIndex parent = indexForServer(camera->data().server());
     if (!parent.isValid())
         return;
 
@@ -104,7 +104,7 @@ void DVRServersModel::cameraAdded(DVRCamera *camera)
 
 void DVRServersModel::cameraRemoved(DVRCamera *camera)
 {
-    QModelIndex parent = indexForServer(camera->server());
+    QModelIndex parent = indexForServer(camera->data().server());
     if (!parent.isValid())
         return;
 
@@ -168,7 +168,7 @@ QModelIndex DVRServersModel::indexForCamera(DVRCamera *camera) const
     {
         const Item &it = items[i];
 
-        if (it.server == camera->server())
+        if (it.server == camera->data().server())
         {
             int r = it.cameras.indexOf(camera);
             if (r < 0)
@@ -251,7 +251,7 @@ Qt::ItemFlags DVRServersModel::flags(const QModelIndex &index) const
     {
         camera = cameraForRow(index);
         if (camera)
-            s = camera->server();
+            s = camera->data().server();
     }
     else
         s = serverForRow(index);

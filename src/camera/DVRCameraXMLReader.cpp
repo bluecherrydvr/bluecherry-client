@@ -59,10 +59,10 @@ bool DVRCameraXMLReader::readCamera(DVRCamera *camera, QXmlStreamReader &xmlStre
     camera->setDisplayName(name);
     QUrl url;
     url.setScheme(QLatin1String("rtsp"));
-    url.setUserName(camera->server()->configuration().username());
-    url.setPassword(camera->server()->configuration().password());
-    url.setHost(camera->server()->url().host());
-    url.setPort(camera->server()->rtspPort());
+    url.setUserName(camera->data().server()->configuration().username());
+    url.setPassword(camera->data().server()->configuration().password());
+    url.setHost(camera->data().server()->url().host());
+    url.setPort(camera->data().server()->rtspPort());
     url.setPath(QString::fromLatin1("live/") + QString::number(camera->id()));
     camera->m_streamUrl = url.toString().toLatin1();
 

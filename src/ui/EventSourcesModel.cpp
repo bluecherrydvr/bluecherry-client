@@ -75,7 +75,7 @@ QModelIndex EventSourcesModel::indexOfCamera(DVRCamera *camera) const
 
     for (int r = 0; r < servers.size(); ++r)
     {
-        if (servers[r].server == camera->server())
+        if (servers[r].server == camera->data().server())
         {
             int cr = servers[r].cameras.indexOf(camera);
             if (cr < 0)
