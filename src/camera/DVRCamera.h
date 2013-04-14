@@ -54,8 +54,6 @@ public:
 
     QSharedPointer<CameraPtzControl> sharedPtzControl();
 
-    QObject * getQObject() { return &d; }
-
     void setDisplayName(const QString &displayName);
 
     DVRServer *server() const { return d.server; }
