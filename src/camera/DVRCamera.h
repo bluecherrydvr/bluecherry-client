@@ -79,9 +79,6 @@ private:
 
     void setOnline(bool on);
 
-    void connectData();
-    void disconnectData();
-
 };
 
 Q_DECLARE_METATYPE(DVRCamera *)

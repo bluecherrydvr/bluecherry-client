@@ -29,27 +29,9 @@
 DVRCamera::DVRCamera(DVRServer *s, int i)
     : QObject(), d(new DVRCameraData(s, i))
 {
-    connectData();
-}
-
-void DVRCamera::connectData()
-{
-    if (!d)
-        return;
-
     connect(d, SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
     connect(d, SIGNAL(dataUpdated()), this, SIGNAL(dataUpdated()));
     connect(d, SIGNAL(recordingStateChanged(int)), this, SIGNAL(recordingStateChanged(int)));
-}
-
-void DVRCamera::disconnectData()
-{
-    if (!d)
-        return;
-
-    disconnect(d, SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
-    disconnect(d, SIGNAL(dataUpdated()), this, SIGNAL(dataUpdated()));
-    disconnect(d, SIGNAL(recordingStateChanged(int)), this, SIGNAL(recordingStateChanged(int)));
 }
 
 void DVRCamera::setOnline(bool on)
