@@ -47,21 +47,21 @@ public:
 
     static PtzProtocol parseProtocol(const QString &protocol);
 
-    QObject * getQObject() const { return d; }
+    QObject * getQObject() { return &d; }
 
-    DVRServer *server() const { return d->server; }
-    int id() const { return d->id; }
-    QString displayName() const { return d->displayName; }
-    QByteArray streamUrl() const { return d->streamUrl; }
-    bool isOnline() const { return d->isOnline && !d->isDisabled && !d->streamUrl.isEmpty(); }
-    bool isDisabled() const { return d->isDisabled; }
-    bool canStream() const { return !d->streamUrl.isEmpty() && isOnline(); }
+    DVRServer *server() const { return d.server; }
+    int id() const { return d.id; }
+    QString displayName() const { return d.displayName; }
+    QByteArray streamUrl() const { return d.streamUrl; }
+    bool isOnline() const { return d.isOnline && !d.isDisabled && !d.streamUrl.isEmpty(); }
+    bool isDisabled() const { return d.isDisabled; }
+    bool canStream() const { return !d.streamUrl.isEmpty() && isOnline(); }
     LiveStream * liveStream();
 
-    PtzProtocol ptzProtocol() const { return static_cast<PtzProtocol>(d->ptzProtocol); }
-    bool hasPtz() const { return d->ptzProtocol > 0; }
+    PtzProtocol ptzProtocol() const { return static_cast<PtzProtocol>(d.ptzProtocol); }
+    bool hasPtz() const { return d.ptzProtocol > 0; }
 
-    RecordingState recordingState() const { return RecordingState(d->recordingState); }
+    RecordingState recordingState() const { return RecordingState(d.recordingState); }
 
     bool parseXML(QXmlStreamReader &xml);
 
@@ -73,7 +73,7 @@ signals:
     void recordingStateChanged(int recordingState);
 
 private:
-    DVRCameraData *d;
+    DVRCameraData d;
 
     DVRCamera(int id, DVRServer *server);
 

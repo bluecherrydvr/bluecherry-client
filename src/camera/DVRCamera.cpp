@@ -27,18 +27,18 @@
 #include <QSettings>
 
 DVRCamera::DVRCamera(int id, DVRServer *server)
-    : QObject(), d(new DVRCameraData(id, server))
+    : QObject(), d(id, server)
 {
-    connect(d, SIGNAL(dataUpdated()), this, SIGNAL(dataUpdated()));
-    connect(d, SIGNAL(recordingStateChanged(int)), this, SIGNAL(recordingStateChanged(int)));
+    connect(&d, SIGNAL(dataUpdated()), this, SIGNAL(dataUpdated()));
+    connect(&d, SIGNAL(recordingStateChanged(int)), this, SIGNAL(recordingStateChanged(int)));
 }
 
 void DVRCamera::setOnline(bool on)
 {
-    if (on == d->isOnline)
+    if (on == d.isOnline)
         return;
 
-    d->isOnline = on;
+    d.isOnline = on;
     emit onlineChanged(isOnline());
 }
 
@@ -57,7 +57,7 @@ bool DVRCamera::parseXML(QXmlStreamReader &xml)
     Q_ASSERT(xml.isStartElement() && xml.name() == QLatin1String("device"));
 
     QString name;
-    d->ptzProtocol = UnknownProtocol;
+    d.ptzProtocol = UnknownProtocol;
 
     while (xml.readNext() != QXmlStreamReader::Invalid)
     {
@@ -72,14 +72,14 @@ bool DVRCamera::parseXML(QXmlStreamReader &xml)
         }
         else if (xml.name() == QLatin1String("ptz_control_protocol"))
         {
-            d->ptzProtocol = parseProtocol(xml.readElementText());
+            d.ptzProtocol = parseProtocol(xml.readElementText());
         }
         else if (xml.name() == QLatin1String("disabled"))
         {
             bool ok = false;
-            d->isDisabled = xml.readElementText().toInt(&ok);
+            d.isDisabled = xml.readElementText().toInt(&ok);
             if (!ok)
-                d->isDisabled = false;
+                d.isDisabled = false;
         }
         else
             xml.skipCurrentElement();
@@ -88,18 +88,18 @@ bool DVRCamera::parseXML(QXmlStreamReader &xml)
     if (name.isEmpty())
         name = QString::fromLatin1("#%2").arg(id());
 
-    d->displayName = name;
+    d.displayName = name;
     QUrl url;
     url.setScheme(QLatin1String("rtsp"));
     url.setUserName(server()->configuration().username());
     url.setPassword(server()->configuration().password());
     url.setHost(server()->url().host());
     url.setPort(server()->rtspPort());
-    url.setPath(QString::fromLatin1("live/") + QString::number(d->id));
-    d->streamUrl = url.toString().toLatin1();
-    d->isLoaded = true;
+    url.setPath(QString::fromLatin1("live/") + QString::number(d.id));
+    d.streamUrl = url.toString().toLatin1();
+    d.isLoaded = true;
 
-    d->doDataUpdated();
+    d.doDataUpdated();
     /* Changing stream URL or disabled flag will change online state */
     emit onlineChanged(isOnline());
     return true;
@@ -107,15 +107,15 @@ bool DVRCamera::parseXML(QXmlStreamReader &xml)
 
 LiveStream * DVRCamera::liveStream()
 {
-    if (!d->liveStream)
+    if (!d.liveStream)
     {
         LiveStream * re = new LiveStream(this);
         connect(this, SIGNAL(onlineChanged(bool)), re, SLOT(setOnline(bool)));
         re->setOnline(isOnline());
-        d->liveStream = re;
+        d.liveStream = re;
     }
 
-    return d->liveStream.data();
+    return d.liveStream.data();
 }
 
 QList<DVRCamera *> DVRCamera::fromMimeData(const QMimeData *mimeData)
