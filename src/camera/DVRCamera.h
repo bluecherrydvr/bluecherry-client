@@ -50,6 +50,8 @@ public:
     explicit DVRCamera(int id, DVRServer *server);
     virtual ~DVRCamera();
 
+    DVRCameraData & data();
+
     static PtzProtocol parseProtocol(const QString &protocol);
 
     QSharedPointer<CameraPtzControl> sharedPtzControl();

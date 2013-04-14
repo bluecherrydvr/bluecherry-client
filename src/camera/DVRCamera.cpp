@@ -37,6 +37,11 @@ DVRCamera::~DVRCamera()
 {
 }
 
+DVRCameraData & DVRCamera::data()
+{
+    return m_data;
+}
+
 void DVRCamera::setDisplayName(const QString &displayName)
 {
     m_data.setDisplayName(displayName);
