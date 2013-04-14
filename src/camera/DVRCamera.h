@@ -38,7 +38,6 @@ class DVRCamera : public QObject
     Q_DISABLE_COPY(DVRCamera)
 
     friend class DVRServer;
-    friend class DVRCameraXMLReader;
 
 public:
     enum PtzProtocol {
@@ -56,7 +55,9 @@ public:
 
     QSharedPointer<CameraPtzControl> sharedPtzControl();
 
+    void setStreamUrl(const QByteArray &streamUrl);
     QByteArray streamUrl() const;
+
     bool isOnline() const;
     LiveStream * liveStream();
 
