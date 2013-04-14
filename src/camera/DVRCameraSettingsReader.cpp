@@ -28,7 +28,7 @@ DVRCamera * DVRCameraSettingsReader::readCamera(int cameraId, DVRServer *server)
     DVRCamera *camera = new DVRCamera(cameraId, server);
 
     QSettings settings;
-    camera->setDisplayName(settings.value(QString::fromLatin1("servers/%1/cameras/%2").arg(server->configuration().id()).arg(cameraId)).toString());
+    camera->data().setDisplayName(settings.value(QString::fromLatin1("servers/%1/cameras/%2").arg(server->configuration().id()).arg(cameraId)).toString());
 
     return camera;
 }

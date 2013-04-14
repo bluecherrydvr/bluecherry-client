@@ -56,7 +56,7 @@ bool DVRCameraXMLReader::readCamera(DVRCamera *camera, QXmlStreamReader &xmlStre
     if (name.isEmpty())
         name = QString::fromLatin1("#%2").arg(camera->data().id());
 
-    camera->setDisplayName(name);
+    camera->data().setDisplayName(name);
     QUrl url;
     url.setScheme(QLatin1String("rtsp"));
     url.setUserName(camera->data().server()->configuration().username());
