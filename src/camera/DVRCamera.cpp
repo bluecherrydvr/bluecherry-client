@@ -134,7 +134,7 @@ LiveStream * DVRCamera::liveStream()
         d->liveStream = re;
     }
 
-    d->liveStream.data();
+    return d->liveStream.data();
 }
 
 QList<DVRCamera *> DVRCamera::fromMimeData(const QMimeData *mimeData)
