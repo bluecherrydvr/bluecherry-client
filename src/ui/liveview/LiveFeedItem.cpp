@@ -133,10 +133,10 @@ void LiveFeedItem::saveSnapshot(const QString &ifile)
 
     if (file.isEmpty())
     {
-        file = getSaveFileNameExt(window, tr("%1 - Save Snapshot").arg(m_camera.data()->displayName()),
+        file = getSaveFileNameExt(window, tr("%1 - Save Snapshot").arg(m_camera.data()->data().displayName()),
                            QDesktopServices::storageLocation(QDesktopServices::PicturesLocation),
                            QLatin1String("ui/snapshotSaveLocation"),
-                           QString::fromLatin1("%1 - %2.jpg").arg(m_camera.data()->displayName(),
+                           QString::fromLatin1("%1 - %2.jpg").arg(m_camera.data()->data().displayName(),
                                                                   QDateTime::currentDateTime().toString(
                                                                   QLatin1String("yyyy-MM-dd hh-mm-ss"))),
                            tr("Image (*.jpg)"));

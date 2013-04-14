@@ -30,5 +30,5 @@ void DVRCameraSettingsWriter::writeCamera(DVRCamera *camera) const
 
     QSettings settings;
     settings.beginGroup(QString::fromLatin1("servers/%1/cameras/").arg(serverId));
-    settings.setValue(QString::number(camera->id()), camera->displayName());
+    settings.setValue(QString::number(camera->id()), camera->data().displayName());
 }

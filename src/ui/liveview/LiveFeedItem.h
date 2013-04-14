@@ -72,7 +72,7 @@ public:
     LiveStream *stream() const;
 
     DVRCamera * camera() const { return m_camera.data(); }
-    QString cameraName() const { return m_camera ? m_camera.data()->displayName() : QLatin1String(" "); }
+    QString cameraName() const { return m_camera ? m_camera.data()->data().displayName() : QLatin1String(" "); }
 
     CustomCursor customCursor() const { return m_customCursor; }
     CameraPtzControl *ptz() const { return m_ptz.data(); }

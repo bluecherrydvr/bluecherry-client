@@ -60,7 +60,6 @@ public:
 
     DVRServer *server() const { return m_data.server(); }
     int id() const { return m_data.id(); }
-    QString displayName() const { return m_data.displayName(); }
     QByteArray streamUrl() const { return m_streamUrl; }
     bool isOnline() const { return m_isOnline && !m_data.disabled() && !m_streamUrl.isEmpty(); }
     bool isDisabled() const { return m_data.disabled(); }

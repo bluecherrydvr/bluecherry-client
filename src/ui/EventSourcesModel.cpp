@@ -228,7 +228,7 @@ QVariant EventSourcesModel::data(const QModelIndex &index, int role) const
             {
                 switch (role)
                 {
-                case Qt::DisplayRole: return sd.cameras[index.row() - 1].data()->displayName();
+                case Qt::DisplayRole: return sd.cameras[index.row() - 1].data()->data().displayName();
                 }
             }
             else
