@@ -51,7 +51,6 @@ public slots:
     void setRecordingState(int recordingState);
 
 signals:
-    void onlineChanged(bool isOnline);
     void dataUpdated();
 
     void recordingStateChanged(int recordingState);

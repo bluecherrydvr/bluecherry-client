@@ -29,7 +29,6 @@
 DVRCamera::DVRCamera(int id, DVRServer *server)
     : QObject(), d(new DVRCameraData(id, server))
 {
-    connect(d, SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
     connect(d, SIGNAL(dataUpdated()), this, SIGNAL(dataUpdated()));
     connect(d, SIGNAL(recordingStateChanged(int)), this, SIGNAL(recordingStateChanged(int)));
 }
@@ -40,7 +39,7 @@ void DVRCamera::setOnline(bool on)
         return;
 
     d->isOnline = on;
-    emit d->onlineChanged(isOnline());
+    emit onlineChanged(isOnline());
 }
 
 DVRCamera::PtzProtocol DVRCamera::parseProtocol(const QString &protocol)
@@ -102,7 +101,7 @@ bool DVRCamera::parseXML(QXmlStreamReader &xml)
 
     d->doDataUpdated();
     /* Changing stream URL or disabled flag will change online state */
-    emit d->onlineChanged(isOnline());
+    emit onlineChanged(isOnline());
     return true;
 }
 
@@ -111,7 +110,7 @@ LiveStream * DVRCamera::liveStream()
     if (!d->liveStream)
     {
         LiveStream * re = new LiveStream(this);
-        QObject::connect(d, SIGNAL(onlineChanged(bool)), re, SLOT(setOnline(bool)));
+        connect(this, SIGNAL(onlineChanged(bool)), re, SLOT(setOnline(bool)));
         re->setOnline(isOnline());
         d->liveStream = re;
     }
