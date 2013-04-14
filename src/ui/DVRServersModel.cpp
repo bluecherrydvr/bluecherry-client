@@ -256,7 +256,7 @@ Qt::ItemFlags DVRServersModel::flags(const QModelIndex &index) const
     else
         s = serverForRow(index);
 
-    if (!m_offlineDisabled || (s && s->isOnline() && (!camera || !camera->isDisabled())))
+    if (!m_offlineDisabled || (s && s->isOnline() && (!camera || !camera->data().disabled())))
         re |= Qt::ItemIsEnabled;
     else
         return re;
