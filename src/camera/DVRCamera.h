@@ -75,7 +75,7 @@ signals:
 private:
     QExplicitlySharedDataPointer<DVRCameraData> d;
 
-    DVRCamera(DVRCameraData *dt);
+    DVRCamera(DVRServer *s, int i);
 
     void setOnline(bool on);
 

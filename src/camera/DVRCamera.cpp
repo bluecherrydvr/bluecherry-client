@@ -26,8 +26,8 @@
 #include <QMimeData>
 #include <QSettings>
 
-DVRCamera::DVRCamera(DVRCameraData *dt)
-    : QObject(), d(dt)
+DVRCamera::DVRCamera(DVRServer *s, int i)
+    : QObject(), d(new DVRCameraData(s, i))
 {
     connectData();
 }

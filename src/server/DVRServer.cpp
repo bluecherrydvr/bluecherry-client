@@ -349,7 +349,7 @@ DVRCamera * DVRServer::getCamera(int cameraId)
 
     if (!m_camerasMap.contains(cameraId))
     {
-        DVRCamera *camera = new DVRCamera(new DVRCameraData(this, cameraId));
+        DVRCamera *camera = new DVRCamera(this, cameraId);
         m_allCameras.append(camera);
         m_camerasMap.insert(cameraId, camera);
     }
