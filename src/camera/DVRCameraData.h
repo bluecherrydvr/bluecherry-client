@@ -33,7 +33,7 @@ class DVRCameraData : public QObject
 
 public:
     DVRServer * const server;
-    const int uniqueID;
+    const int id;
     QString displayName;
     QByteArray streamUrl;
     QWeakPointer<LiveStream> liveStream;
@@ -41,7 +41,7 @@ public:
     qint8 ptzProtocol;
     qint8 recordingState;
 
-    DVRCameraData(DVRServer *server, int uniqueID);
+    DVRCameraData(DVRServer *server, int id);
     virtual ~DVRCameraData();
 
     void loadSavedSettings();

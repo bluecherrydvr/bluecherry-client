@@ -50,7 +50,7 @@ public:
     QObject * getQObject() const { return d ? d : 0; }
 
     DVRServer *server() const { return d ? d->server : 0; }
-    int uniqueId() const { return d ? d->uniqueID : -1; }
+    int id() const { return d ? d->id: -1; }
     QString displayName() const { return d ? d->displayName : QString(); }
     QByteArray streamUrl() const { return d ? d->streamUrl : QByteArray(); }
     bool isOnline() const { return d && d->isOnline && !d->isDisabled && !d->streamUrl.isEmpty(); }

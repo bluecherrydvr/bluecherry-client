@@ -66,7 +66,7 @@ QNetworkReply *CameraPtzControl::sendCommand(const QUrl &partialUrl)
 
     QUrl url(QLatin1String("/media/ptz.php"));
     url = url.resolved(partialUrl);
-    url.addEncodedQueryItem("id", QByteArray::number(m_camera.data()->uniqueId()));
+    url.addEncodedQueryItem("id", QByteArray::number(m_camera.data()->id()));
 
     Q_ASSERT(url.hasQueryItem(QLatin1String("command")));
 

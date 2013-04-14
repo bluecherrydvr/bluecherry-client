@@ -21,8 +21,8 @@
 #include "server/DVRServerConfiguration.h"
 #include <QSettings>
 
-DVRCameraData::DVRCameraData(DVRServer *s, int i)
-    : server(s), uniqueID(i), isLoaded(false), isOnline(false), isDisabled(false),
+DVRCameraData::DVRCameraData(DVRServer *server, int id)
+    : server(server), id(id), isLoaded(false), isOnline(false), isDisabled(false),
       ptzProtocol(DVRCamera::UnknownProtocol), recordingState(NoRecording)
 {
     loadSavedSettings();
@@ -35,7 +35,7 @@ DVRCameraData::~DVRCameraData()
 void DVRCameraData::loadSavedSettings()
 {
     QSettings settings;
-    displayName = settings.value(QString::fromLatin1("servers/%1/cameras/%2").arg(server->configuration().id()).arg(uniqueID)).toString();
+    displayName = settings.value(QString::fromLatin1("servers/%1/cameras/%2").arg(server->configuration().id()).arg(id)).toString();
 }
 
 void DVRCameraData::doDataUpdated()
@@ -44,7 +44,7 @@ void DVRCameraData::doDataUpdated()
     {
         QSettings settings;
         settings.beginGroup(QString::fromLatin1("servers/%1/cameras/").arg(server->configuration().id()));
-        settings.setValue(QString::number(uniqueID), displayName);
+        settings.setValue(QString::number(id), displayName);
     }
 
     emit dataUpdated();

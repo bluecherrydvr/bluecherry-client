@@ -87,7 +87,7 @@ bool DVRCamera::parseXML(QXmlStreamReader &xml)
     }
 
     if (name.isEmpty())
-        name = QString::fromLatin1("#%2").arg(uniqueId());
+        name = QString::fromLatin1("#%2").arg(id());
 
     d->displayName = name;
     QUrl url;
@@ -96,7 +96,7 @@ bool DVRCamera::parseXML(QXmlStreamReader &xml)
     url.setPassword(server()->configuration().password());
     url.setHost(server()->url().host());
     url.setPort(server()->rtspPort());
-    url.setPath(QString::fromLatin1("live/") + QString::number(d->uniqueID));
+    url.setPath(QString::fromLatin1("live/") + QString::number(d->id));
     d->streamUrl = url.toString().toLatin1();
     d->isLoaded = true;
 

@@ -184,12 +184,12 @@ void DVRServer::updateCamerasReply()
 
     for (int i = 0; i < m_visibleCameras.size(); ++i)
     {
-        if (!idSet.contains(m_visibleCameras[i]->uniqueId()))
+        if (!idSet.contains(m_visibleCameras[i]->id()))
         {
             DVRCamera *c = m_visibleCameras[i];
             m_visibleCameras.removeAt(i);
-            m_camerasMap.remove(c->uniqueId());
-            qDebug("DVRServer: camera %d removed", c->uniqueId());
+            m_camerasMap.remove(c->id());
+            qDebug("DVRServer: camera %d removed", c->id());
             emit cameraRemoved(c);
             --i;
 
