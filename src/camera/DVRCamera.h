@@ -45,9 +45,14 @@ public:
         PelcoPtz
     };
 
+    explicit DVRCamera(int id, DVRServer *server);
+    virtual ~DVRCamera();
+
     static PtzProtocol parseProtocol(const QString &protocol);
 
     QObject * getQObject() { return &d; }
+
+    void setDisplayName(const QString &displayName);
 
     DVRServer *server() const { return d.server; }
     int id() const { return d.id; }
@@ -74,8 +79,6 @@ signals:
 
 private:
     DVRCameraData d;
-
-    DVRCamera(int id, DVRServer *server);
 
     void setOnline(bool on);
 

@@ -18,6 +18,7 @@
 #include "DVRServer.h"
 #include "DVRServerConfiguration.h"
 #include "camera/DVRCamera.h"
+#include "camera/DVRCameraSettingsReader.h"
 #include "core/ServerRequestManager.h"
 #include <QNetworkRequest>
 #include <QUrl>
@@ -349,7 +350,8 @@ DVRCamera * DVRServer::getCamera(int cameraId)
 
     if (!m_camerasMap.contains(cameraId))
     {
-        DVRCamera *camera = new DVRCamera(cameraId, this);
+        DVRCameraSettingsReader settingsReader;
+        DVRCamera *camera = settingsReader.readCamera(cameraId, this);
         m_allCameras.append(camera);
         m_camerasMap.insert(cameraId, camera);
     }

@@ -25,17 +25,10 @@ DVRCameraData::DVRCameraData(int id, DVRServer *server)
     : server(server), id(id), isLoaded(false), isOnline(false), isDisabled(false),
       ptzProtocol(DVRCamera::UnknownProtocol), recordingState(NoRecording)
 {
-    loadSavedSettings();
 }
 
 DVRCameraData::~DVRCameraData()
 {
-}
-
-void DVRCameraData::loadSavedSettings()
-{
-    QSettings settings;
-    displayName = settings.value(QString::fromLatin1("servers/%1/cameras/%2").arg(server->configuration().id()).arg(id)).toString();
 }
 
 void DVRCameraData::doDataUpdated()

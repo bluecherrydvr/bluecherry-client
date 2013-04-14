@@ -33,6 +33,16 @@ DVRCamera::DVRCamera(int id, DVRServer *server)
     connect(&d, SIGNAL(recordingStateChanged(int)), this, SIGNAL(recordingStateChanged(int)));
 }
 
+DVRCamera::~DVRCamera()
+{
+}
+
+void DVRCamera::setDisplayName(const QString &displayName)
+{
+    d.displayName = displayName;
+    d.doDataUpdated();
+}
+
 void DVRCamera::setOnline(bool on)
 {
     if (on == d.isOnline)

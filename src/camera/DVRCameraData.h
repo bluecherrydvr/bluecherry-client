@@ -44,7 +44,6 @@ public:
     DVRCameraData(int id, DVRServer *server);
     virtual ~DVRCameraData();
 
-    void loadSavedSettings();
     void doDataUpdated();
 
 public slots:

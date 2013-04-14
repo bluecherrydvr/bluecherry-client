@@ -20,6 +20,7 @@ include_directories (src)
 set (bluecherry_client_main_SRCS
     src/camera/DVRCamera.cpp
     src/camera/DVRCameraData.cpp
+    src/camera/DVRCameraSettingsReader.cpp
     src/camera/DVRCameraStreamReader.cpp
     src/camera/DVRCameraStreamWriter.cpp
 
