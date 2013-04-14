@@ -33,22 +33,6 @@ CameraPtzControl::CameraPtzControl(DVRCamera *camera, QObject *parent)
     updateInfo();
 }
 
-QSharedPointer<CameraPtzControl> CameraPtzControl::sharedObjectFor(DVRCamera *camera)
-{
-    if (!camera)
-        return QSharedPointer<CameraPtzControl>();
-
-    QSharedPointer<CameraPtzControl> ptr = camera->getQObject()->property("cameraPtzControl")
-                                           .value<QWeakPointer<CameraPtzControl> >();
-    if (ptr.isNull())
-    {
-        ptr = QSharedPointer<CameraPtzControl>(new CameraPtzControl(camera));
-        camera->getQObject()->setProperty("cameraPtzControl", QVariant::fromValue(ptr.toWeakRef()));
-    }
-
-    return ptr;
-}
-
 CameraPtzControl::~CameraPtzControl()
 {
     foreach (QNetworkReply *r, m_pendingCommands)

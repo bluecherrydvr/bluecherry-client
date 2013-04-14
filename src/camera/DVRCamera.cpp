@@ -20,11 +20,12 @@
 #include "server/DVRServer.h"
 #include "server/DVRServerConfiguration.h"
 #include "core/BluecherryApp.h"
+#include "core/CameraPtzControl.h"
 #include "core/MJpegStream.h"
 #include "core/LiveStream.h"
-#include <QXmlStreamReader>
 #include <QMimeData>
 #include <QSettings>
+#include <QXmlStreamReader>
 
 DVRCamera::DVRCamera(int id, DVRServer *server)
     : QObject(), d(id, server)
@@ -87,6 +88,18 @@ QList<DVRCamera *> DVRCamera::fromMimeData(const QMimeData *mimeData)
         DVRCamera *camera = reader.readCamera();
         if (camera)
             result.append(camera);
+    }
+
+    return result;
+}
+
+QSharedPointer<CameraPtzControl> DVRCamera::sharedPtzControl()
+{
+    QSharedPointer<CameraPtzControl> result = ptzControl;
+    if (!result)
+    {
+        result = QSharedPointer<CameraPtzControl>(new CameraPtzControl(this));
+        ptzControl = result.toWeakRef();
     }
 
     return result;

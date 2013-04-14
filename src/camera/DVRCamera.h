@@ -27,6 +27,7 @@
 #include <QXmlStreamReader>
 #include <QMetaType>
 
+class CameraPtzControl;
 class DVRServer;
 class LiveStream;
 class QMimeData;
@@ -50,6 +51,8 @@ public:
     virtual ~DVRCamera();
 
     static PtzProtocol parseProtocol(const QString &protocol);
+
+    QSharedPointer<CameraPtzControl> sharedPtzControl();
 
     QObject * getQObject() { return &d; }
 
@@ -78,6 +81,7 @@ signals:
 
 private:
     DVRCameraData d;
+    QWeakPointer<CameraPtzControl> ptzControl;
 
     void setOnline(bool on);
 

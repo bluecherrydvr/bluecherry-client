@@ -60,8 +60,6 @@ public:
     };
     Q_DECLARE_FLAGS(Movements, Movement)
 
-    static QSharedPointer<CameraPtzControl> sharedObjectFor(DVRCamera *camera);
-
     explicit CameraPtzControl(DVRCamera *camera, QObject *parent = 0);
     virtual ~CameraPtzControl();
 
