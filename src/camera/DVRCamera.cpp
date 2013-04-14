@@ -102,3 +102,28 @@ QSharedPointer<CameraPtzControl> DVRCamera::sharedPtzControl()
 
     return result;
 }
+
+QByteArray DVRCamera::streamUrl() const
+{
+    return m_streamUrl;
+}
+
+bool DVRCamera::isOnline() const
+{
+    return m_isOnline && !m_data.disabled() && !m_streamUrl.isEmpty();
+}
+
+DVRCamera::PtzProtocol DVRCamera::ptzProtocol() const
+{
+    return static_cast<PtzProtocol>(m_data.ptzProtocol());
+}
+
+bool DVRCamera::hasPtz() const
+{
+    return m_data.ptzProtocol() > 0;
+}
+
+RecordingState DVRCamera::recordingState() const
+{
+    return RecordingState(m_recordingState);
+}

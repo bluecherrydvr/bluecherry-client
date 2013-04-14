@@ -56,14 +56,14 @@ public:
 
     QSharedPointer<CameraPtzControl> sharedPtzControl();
 
-    QByteArray streamUrl() const { return m_streamUrl; }
-    bool isOnline() const { return m_isOnline && !m_data.disabled() && !m_streamUrl.isEmpty(); }
+    QByteArray streamUrl() const;
+    bool isOnline() const;
     LiveStream * liveStream();
 
-    PtzProtocol ptzProtocol() const { return static_cast<PtzProtocol>(m_data.ptzProtocol()); }
-    bool hasPtz() const { return m_data.ptzProtocol() > 0; }
+    PtzProtocol ptzProtocol() const;
+    bool hasPtz() const;
 
-    RecordingState recordingState() const { return RecordingState(m_recordingState); }
+    RecordingState recordingState() const;
 
     static QList<DVRCamera *> fromMimeData(const QMimeData *mimeData);
 
