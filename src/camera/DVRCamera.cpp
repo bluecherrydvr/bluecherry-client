@@ -65,15 +65,15 @@ DVRCamera::PtzProtocol DVRCamera::parseProtocol(const QString &protocol)
 
 LiveStream * DVRCamera::liveStream()
 {
-    if (!d.liveStream)
+    if (!m_liveStream)
     {
         LiveStream * re = new LiveStream(this);
         connect(this, SIGNAL(onlineChanged(bool)), re, SLOT(setOnline(bool)));
         re->setOnline(isOnline());
-        d.liveStream = re;
+        m_liveStream = re;
     }
 
-    return d.liveStream.data();
+    return m_liveStream.data();
 }
 
 QList<DVRCamera *> DVRCamera::fromMimeData(const QMimeData *mimeData)

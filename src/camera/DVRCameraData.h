@@ -22,7 +22,6 @@
 #include <QWeakPointer>
 
 class DVRServer;
-class LiveStream;
 
 class DVRCameraData : public QObject
 {
@@ -36,7 +35,6 @@ public:
     const int id;
     QString displayName;
     QByteArray streamUrl;
-    QWeakPointer<LiveStream> liveStream;
     bool isLoaded, isOnline, isDisabled;
     qint8 ptzProtocol;
     qint8 recordingState;

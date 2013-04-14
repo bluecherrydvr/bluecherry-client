@@ -80,6 +80,7 @@ signals:
 private:
     DVRCameraData d;
     QWeakPointer<CameraPtzControl> ptzControl;
+    QWeakPointer<LiveStream> m_liveStream;
 
     void setOnline(bool on);
 
