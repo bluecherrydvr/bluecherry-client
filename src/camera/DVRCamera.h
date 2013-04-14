@@ -82,7 +82,6 @@ private:
     QWeakPointer<CameraPtzControl> m_ptzControl;
     QWeakPointer<LiveStream> m_liveStream;
     QByteArray m_streamUrl;
-    bool m_isLoaded;
     bool m_isOnline;
     qint8 m_recordingState;
 

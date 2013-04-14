@@ -65,7 +65,6 @@ bool DVRCameraXMLReader::readCamera(DVRCamera *camera, QXmlStreamReader &xmlStre
     url.setPort(camera->server()->rtspPort());
     url.setPath(QString::fromLatin1("live/") + QString::number(camera->id()));
     camera->m_streamUrl = url.toString().toLatin1();
-    camera->m_isLoaded = true;
 
     camera->m_data.doDataUpdated();
     /* Changing stream URL or disabled flag will change online state */

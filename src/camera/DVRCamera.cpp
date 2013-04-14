@@ -28,7 +28,7 @@
 #include <QXmlStreamReader>
 
 DVRCamera::DVRCamera(int id, DVRServer *server)
-    : QObject(), m_data(id, server), m_isLoaded(false), m_isOnline(false), m_recordingState(NoRecording)
+    : QObject(), m_data(id, server), m_isOnline(false), m_recordingState(NoRecording)
 {
     connect(&m_data, SIGNAL(dataUpdated()), this, SIGNAL(dataUpdated()));
 }
