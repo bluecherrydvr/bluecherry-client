@@ -62,59 +62,6 @@ DVRCamera::PtzProtocol DVRCamera::parseProtocol(const QString &protocol)
         return UnknownProtocol;
 }
 
-bool DVRCamera::parseXML(QXmlStreamReader &xml)
-{
-    Q_ASSERT(xml.isStartElement() && xml.name() == QLatin1String("device"));
-
-    QString name;
-    d.ptzProtocol = UnknownProtocol;
-
-    while (xml.readNext() != QXmlStreamReader::Invalid)
-    {
-        if (xml.tokenType() == QXmlStreamReader::EndElement && xml.name() == QLatin1String("device"))
-            break;
-        else if (xml.tokenType() != QXmlStreamReader::StartElement)
-            continue;
-
-        if (xml.name() == QLatin1String("device_name"))
-        {
-            name = xml.readElementText();
-        }
-        else if (xml.name() == QLatin1String("ptz_control_protocol"))
-        {
-            d.ptzProtocol = parseProtocol(xml.readElementText());
-        }
-        else if (xml.name() == QLatin1String("disabled"))
-        {
-            bool ok = false;
-            d.isDisabled = xml.readElementText().toInt(&ok);
-            if (!ok)
-                d.isDisabled = false;
-        }
-        else
-            xml.skipCurrentElement();
-    }
-
-    if (name.isEmpty())
-        name = QString::fromLatin1("#%2").arg(id());
-
-    d.displayName = name;
-    QUrl url;
-    url.setScheme(QLatin1String("rtsp"));
-    url.setUserName(server()->configuration().username());
-    url.setPassword(server()->configuration().password());
-    url.setHost(server()->url().host());
-    url.setPort(server()->rtspPort());
-    url.setPath(QString::fromLatin1("live/") + QString::number(d.id));
-    d.streamUrl = url.toString().toLatin1();
-    d.isLoaded = true;
-
-    d.doDataUpdated();
-    /* Changing stream URL or disabled flag will change online state */
-    emit onlineChanged(isOnline());
-    return true;
-}
-
 LiveStream * DVRCamera::liveStream()
 {
     if (!d.liveStream)

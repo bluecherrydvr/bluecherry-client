@@ -24,6 +24,7 @@ set (bluecherry_client_main_SRCS
     src/camera/DVRCameraSettingsWriter.cpp
     src/camera/DVRCameraStreamReader.cpp
     src/camera/DVRCameraStreamWriter.cpp
+    src/camera/DVRCameraXMLReader.cpp
 
     src/core/BluecherryApp.cpp
     src/core/CameraPtzControl.cpp

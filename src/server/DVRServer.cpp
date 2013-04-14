@@ -20,6 +20,7 @@
 #include "camera/DVRCamera.h"
 #include "camera/DVRCameraSettingsReader.h"
 #include "camera/DVRCameraSettingsWriter.h"
+#include "camera/DVRCameraXMLReader.h"
 #include "core/ServerRequestManager.h"
 #include <QNetworkRequest>
 #include <QUrl>
@@ -154,7 +155,9 @@ void DVRServer::updateCamerasReply()
                     if (camera)
                     {
                         camera->setOnline(true);
-                        if (!camera->parseXML(xml))
+                        
+                        DVRCameraXMLReader xmlReader;
+                        if (!xmlReader.readCamera(camera, xml))
                         {
                             if (!xml.hasError())
                                 xml.raiseError(QLatin1String("Device parsing failed"));

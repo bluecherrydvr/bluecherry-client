@@ -37,6 +37,7 @@ class DVRCamera : public QObject
     Q_DISABLE_COPY(DVRCamera)
 
     friend class DVRServer;
+    friend class DVRCameraXMLReader;
 
 public:
     enum PtzProtocol {
@@ -67,8 +68,6 @@ public:
     bool hasPtz() const { return d.ptzProtocol > 0; }
 
     RecordingState recordingState() const { return RecordingState(d.recordingState); }
-
-    bool parseXML(QXmlStreamReader &xml);
 
     static QList<DVRCamera *> fromMimeData(const QMimeData *mimeData);
 
