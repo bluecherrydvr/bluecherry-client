@@ -28,11 +28,11 @@
 #include <QSettings>
 
 DVRServer::DVRServer(int id, QObject *parent)
-    : QObject(parent), m_configuration(new DVRServerConfiguration(id, this)), m_devicesLoaded(false)
+    : QObject(parent), m_configuration(id), m_devicesLoaded(false)
 {
     m_api = new ServerRequestManager(this);
 
-    connect(m_configuration, SIGNAL(changed()), this, SIGNAL(changed()));
+    connect(&m_configuration, SIGNAL(changed()), this, SIGNAL(changed()));
     connect(m_api, SIGNAL(loginSuccessful()), SLOT(updateCameras()));
     connect(m_api, SIGNAL(disconnected()), SLOT(disconnectedSlot()));
 
@@ -54,19 +54,19 @@ DVRServer::~DVRServer()
 
 void DVRServer::removeServer()
 {
-    qDebug("Deleting DVR server %d", m_configuration->id());
+    qDebug("Deleting DVR server %d", m_configuration.id());
 
     emit serverRemoved(this);
 
     QSettings settings;
-    settings.remove(QString::fromLatin1("servers/%1").arg(m_configuration->id()));
+    settings.remove(QString::fromLatin1("servers/%1").arg(m_configuration.id()));
 
     deleteLater();
 }
 
 void DVRServer::login()
 {
-    m_api->login(m_configuration->username(), m_configuration->password());
+    m_api->login(m_configuration.username(), m_configuration.password());
 }
 
 void DVRServer::toggleOnline()
@@ -275,7 +275,7 @@ void DVRServer::disconnectedSlot()
 
 bool DVRServer::isKnownCertificate(const QSslCertificate &certificate) const
 {
-    if (m_configuration->sslDigest().isEmpty())
+    if (m_configuration.sslDigest().isEmpty())
     {
         /* If we don't know a certificate yet, we treat the first one we see as
          * correct. This is insecure, obviously, but it's a much nicer way to behave
@@ -284,12 +284,12 @@ bool DVRServer::isKnownCertificate(const QSslCertificate &certificate) const
         return true;
     }
 
-    return (certificate.digest(QCryptographicHash::Sha1) == m_configuration->sslDigest());
+    return (certificate.digest(QCryptographicHash::Sha1) == m_configuration.sslDigest());
 }
 
 void DVRServer::setKnownCertificate(const QSslCertificate &certificate)
 {
-    m_configuration->setSslDigest(certificate.digest(QCryptographicHash::Sha1));
+    m_configuration.setSslDigest(certificate.digest(QCryptographicHash::Sha1));
 }
 
 bool DVRServer::isOnline() const
@@ -302,7 +302,7 @@ bool DVRServer::isLoginPending() const
     return m_api->isLoginPending();
 }
 
-DVRServerConfiguration * const DVRServer::configuration() const
+DVRServerConfiguration & DVRServer::configuration()
 {
     return m_configuration;
 }
@@ -314,12 +314,12 @@ QUrl DVRServer::url() const
 
 int DVRServer::serverPort() const
 {
-    return m_configuration->port();
+    return m_configuration.port();
 }
 
 int DVRServer::rtspPort() const
 {
-    return m_configuration->port() + 1;
+    return m_configuration.port() + 1;
 }
 
 void DVRServer::setError(const QString &error)

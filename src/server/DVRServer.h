@@ -22,8 +22,8 @@
 #include <QVariant>
 #include <QTimer>
 #include "camera/DVRCamera.h"
+#include "server/DVRServerConfiguration.h"
 
-class DVRServerConfiguration;
 class ServerRequestManager;
 class QNetworkReply;
 class QNetworkRequest;
@@ -49,7 +49,7 @@ public:
     bool isOnline() const;
     bool isLoginPending() const;
 
-    DVRServerConfiguration * const configuration() const;
+    DVRServerConfiguration & configuration();
 
     QUrl url() const;
     int serverPort() const;
@@ -105,7 +105,7 @@ private slots:
 
 private:
     ServerRequestManager *m_api;
-    DVRServerConfiguration *m_configuration;
+    DVRServerConfiguration m_configuration;
 
     QList<DVRCamera *> m_allCameras;
     QList<DVRCamera *> m_visibleCameras;

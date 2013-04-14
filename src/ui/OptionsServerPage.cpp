@@ -168,12 +168,12 @@ void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const 
         return;
     }
 
-    m_nameEdit->setText(server->configuration()->displayName());
-    m_hostnameEdit->setText(server->configuration()->hostname());
+    m_nameEdit->setText(server->configuration().displayName());
+    m_hostnameEdit->setText(server->configuration().hostname());
     m_portEdit->setText(QString::number(server->serverPort()));
-    m_usernameEdit->setText(server->configuration()->username());
-    m_passwordEdit->setText(server->configuration()->password());
-    m_autoConnect->setChecked(server->configuration()->autoConnect());
+    m_usernameEdit->setText(server->configuration().username());
+    m_passwordEdit->setText(server->configuration().password());
+    m_autoConnect->setChecked(server->configuration().autoConnect());
 
     connect(server, SIGNAL(loginSuccessful()), SLOT(setLoginSuccessful()));
     connect(server, SIGNAL(loginError(QString)), SLOT(setLoginError(QString)));
@@ -197,8 +197,8 @@ void OptionsServerPage::checkServer()
 void OptionsServerPage::addNewServer()
 {
     DVRServer *server = m_serverRepository->createServer(tr("New Server"));
-    server->configuration()->setAutoConnect(true);
-    server->configuration()->setPort(7001);
+    server->configuration().setAutoConnect(true);
+    server->configuration().setPort(7001);
 
     if (!m_serversView->currentIndex().isValid())
         saveChanges(server);
@@ -217,7 +217,7 @@ void OptionsServerPage::deleteServer()
         return;
 
     QMessageBox dlg(QMessageBox::Question, tr("Delete DVR Server"), tr("Are you sure you want to delete <b>%1</b>?")
-                    .arg(Qt::escape(server->configuration()->displayName())), QMessageBox::NoButton, this);
+                    .arg(Qt::escape(server->configuration().displayName())), QMessageBox::NoButton, this);
     QPushButton *delBtn = dlg.addButton(tr("Delete"), QMessageBox::DestructiveRole);
     dlg.addButton(QMessageBox::Cancel);
     dlg.exec();
@@ -253,36 +253,36 @@ void OptionsServerPage::saveChanges(DVRServer *server)
 
     if (m_nameEdit->isModified())
     {
-        server->configuration()->setDisplayName(m_nameEdit->text().trimmed());
+        server->configuration().setDisplayName(m_nameEdit->text().trimmed());
         m_nameEdit->setModified(false);
     }
     if (m_hostnameEdit->isModified())
     {
         m_hostnameEdit->setText(m_hostnameEdit->text().trimmed());
-        server->configuration()->setHostname(m_hostnameEdit->text());
+        server->configuration().setHostname(m_hostnameEdit->text());
         m_hostnameEdit->setModified(false);
         connectionModified = true;
     }
     if (m_portEdit->isModified())
     {
-        server->configuration()->setPort(m_portEdit->text().toInt());
+        server->configuration().setPort(m_portEdit->text().toInt());
         m_portEdit->setModified(false);
         connectionModified = true;
     }
     if (m_usernameEdit->isModified())
     {
-        server->configuration()->setUsername(m_usernameEdit->text());
+        server->configuration().setUsername(m_usernameEdit->text());
         m_usernameEdit->setModified(false);
         connectionModified = true;
     }
     if (m_passwordEdit->isModified())
     {
-        server->configuration()->setPassword(m_passwordEdit->text());
+        server->configuration().setPassword(m_passwordEdit->text());
         m_passwordEdit->setModified(false);
         connectionModified = true;
     }
 
-    server->configuration()->setAutoConnect(m_autoConnect->isChecked());
+    server->configuration().setAutoConnect(m_autoConnect->isChecked());
 
     if (connectionModified || (m_autoConnect->isChecked() && !server->isOnline()))
         server->login();

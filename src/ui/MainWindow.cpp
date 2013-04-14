@@ -348,7 +348,7 @@ QMenu *MainWindow::serverMenu(DVRServer *server)
     if (m)
         return m;
 
-    m = new QMenu(server->configuration()->displayName());
+    m = new QMenu(server->configuration().displayName());
 
     m->addAction(tr("Connect"), server, SLOT(toggleOnline()))->setObjectName(QLatin1String("aConnect"));
     m->addSeparator();
@@ -392,7 +392,7 @@ void MainWindow::updateMenuForServer(DVRServer *server)
     }
 
     QMenu *m = serverMenu(server);
-    m->setTitle(server->configuration()->displayName());
+    m->setTitle(server->configuration().displayName());
     m->setIcon(QIcon(server->isOnline() ? QLatin1String(":/icons/status.png") :
                                           QLatin1String(":/icons/status-offline.png")));
 
@@ -613,7 +613,7 @@ void MainWindow::sslConfirmRequired(DVRServer *server, const QList<QSslError> &e
                                           "reinstalled.<br><br><b>Server:</b> %1<br><b>URL:</b> %2<br>"
                                           "<b>Fingerprint:</b> %3<br><br>Do you want to connect anyway, and trust "
                                           "this certificate in the future?")
-                                       .arg(Qt::escape(server->configuration()->displayName()), server->url().toString(),
+                                       .arg(Qt::escape(server->configuration().displayName()), server->url().toString(),
                                             fingerprint));
     server->setProperty("ssl_verify_dialog", QVariant::fromValue<QObject*>(dlg));
     QPushButton *ab = dlg->addButton(tr("Accept Certificate"), QMessageBox::AcceptRole);
@@ -771,7 +771,7 @@ void MainWindow::serverDevicesLoaded()
          * before the wizard has ended, but that isn't much of a problem. */
         QMessageBox msg(qApp->activeModalWidget() ? qApp->activeModalWidget() : this);
         if (m_serverRepository->serverCount() > 1)
-            msg.setText(tr("%1 hasn't been configured yet").arg(Qt::escape(server->configuration()->displayName())));
+            msg.setText(tr("%1 hasn't been configured yet").arg(Qt::escape(server->configuration().displayName())));
         else
             msg.setText(tr("The server hasn't been configured yet"));
         msg.setInformativeText(tr("You can access configuration at any time by double-clicking on the server.<br><br>Do you want to configure devices for this server now?"));

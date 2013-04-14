@@ -35,7 +35,7 @@ DVRCameraData::~DVRCameraData()
 void DVRCameraData::loadSavedSettings()
 {
     QSettings settings;
-    displayName = settings.value(QString::fromLatin1("servers/%1/cameras/%2").arg(server->configuration()->id()).arg(uniqueID)).toString();
+    displayName = settings.value(QString::fromLatin1("servers/%1/cameras/%2").arg(server->configuration().id()).arg(uniqueID)).toString();
 }
 
 void DVRCameraData::doDataUpdated()
@@ -43,7 +43,7 @@ void DVRCameraData::doDataUpdated()
     if (server)
     {
         QSettings settings;
-        settings.beginGroup(QString::fromLatin1("servers/%1/cameras/").arg(server->configuration()->id()));
+        settings.beginGroup(QString::fromLatin1("servers/%1/cameras/").arg(server->configuration().id()));
         settings.setValue(QString::number(uniqueID), displayName);
     }
 

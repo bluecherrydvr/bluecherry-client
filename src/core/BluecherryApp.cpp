@@ -237,19 +237,19 @@ void BluecherryApp::addLocalServer()
 {
 #ifdef Q_OS_LINUX
     DVRServer *s = m_serverRepository->createServer(tr("Local"));
-    s->configuration()->setHostname(QHostAddress(QHostAddress::LocalHost).toString());
+    s->configuration().setHostname(QHostAddress(QHostAddress::LocalHost).toString());
     /* This must match the default username and password for the server */
-    s->configuration()->setUsername(QLatin1String("Admin"));
-    s->configuration()->setPassword(QLatin1String("bluecherry"));
-    s->configuration()->setPort(7001);
-    s->configuration()->setAutoConnect(true);
+    s->configuration().setUsername(QLatin1String("Admin"));
+    s->configuration().setPassword(QLatin1String("bluecherry"));
+    s->configuration().setPort(7001);
+    s->configuration().setAutoConnect(true);
 #endif
 }
 
 void BluecherryApp::autoConnectServers()
 {
     foreach (DVRServer *server, m_serverRepository->servers())
-        if (server->configuration()->autoConnect() && !server->configuration()->hostname().isEmpty() && !server->configuration()->username().isEmpty())
+        if (server->configuration().autoConnect() && !server->configuration().hostname().isEmpty() && !server->configuration().username().isEmpty())
             server->login();
 }
 

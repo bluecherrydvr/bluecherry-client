@@ -196,7 +196,7 @@ QVariant EventSourcesModel::data(const QModelIndex &index, int role) const
             const ServerData &sd = servers[index.row()-1];
             if (role == Qt::DisplayRole)
             {
-                return sd.server->configuration()->displayName();
+                return sd.server->configuration().displayName();
             }
             else if (role == Qt::CheckStateRole)
             {

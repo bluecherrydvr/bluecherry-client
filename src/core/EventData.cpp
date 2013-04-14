@@ -221,7 +221,7 @@ void EventData::setLocation(const QString &location)
 QString EventData::uiServer() const
 {
     if (server())
-        return server()->configuration()->displayName();
+        return server()->configuration().displayName();
     else
         return QString();
 }

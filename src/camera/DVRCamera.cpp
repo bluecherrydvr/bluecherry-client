@@ -110,8 +110,8 @@ bool DVRCamera::parseXML(QXmlStreamReader &xml)
     d->displayName = name;
     QUrl url;
     url.setScheme(QLatin1String("rtsp"));
-    url.setUserName(server()->configuration()->username());
-    url.setPassword(server()->configuration()->password());
+    url.setUserName(server()->configuration().username());
+    url.setPassword(server()->configuration().password());
     url.setHost(server()->url().host());
     url.setPort(server()->rtspPort());
     url.setPath(QString::fromLatin1("live/") + QString::number(d->uniqueID));
