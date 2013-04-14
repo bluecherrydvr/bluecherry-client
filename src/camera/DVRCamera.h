@@ -75,7 +75,7 @@ signals:
 private:
     DVRCameraData *d;
 
-    DVRCamera(DVRServer *s, int i);
+    DVRCamera(int id, DVRServer *server);
 
     void setOnline(bool on);
 

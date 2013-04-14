@@ -41,7 +41,7 @@ public:
     qint8 ptzProtocol;
     qint8 recordingState;
 
-    DVRCameraData(DVRServer *server, int id);
+    DVRCameraData(int id, DVRServer *server);
     virtual ~DVRCameraData();
 
     void loadSavedSettings();

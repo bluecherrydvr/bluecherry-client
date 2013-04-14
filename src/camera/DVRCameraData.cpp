@@ -21,7 +21,7 @@
 #include "server/DVRServerConfiguration.h"
 #include <QSettings>
 
-DVRCameraData::DVRCameraData(DVRServer *server, int id)
+DVRCameraData::DVRCameraData(int id, DVRServer *server)
     : server(server), id(id), isLoaded(false), isOnline(false), isDisabled(false),
       ptzProtocol(DVRCamera::UnknownProtocol), recordingState(NoRecording)
 {

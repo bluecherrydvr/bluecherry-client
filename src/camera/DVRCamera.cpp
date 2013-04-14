@@ -26,8 +26,8 @@
 #include <QMimeData>
 #include <QSettings>
 
-DVRCamera::DVRCamera(DVRServer *s, int i)
-    : QObject(), d(new DVRCameraData(s, i))
+DVRCamera::DVRCamera(int id, DVRServer *server)
+    : QObject(), d(new DVRCameraData(id, server))
 {
     connect(d, SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
     connect(d, SIGNAL(dataUpdated()), this, SIGNAL(dataUpdated()));
