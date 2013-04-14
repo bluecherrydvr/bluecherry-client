@@ -34,23 +34,16 @@ public:
     DVRServer * const server;
     const int id;
     QString displayName;
-    QByteArray streamUrl;
-    bool isLoaded, isOnline, isDisabled;
+    bool isDisabled;
     qint8 ptzProtocol;
-    qint8 recordingState;
 
     DVRCameraData(int id, DVRServer *server);
     virtual ~DVRCameraData();
 
     void doDataUpdated();
 
-public slots:
-    void setRecordingState(int recordingState);
-
 signals:
     void dataUpdated();
-
-    void recordingStateChanged(int recordingState);
 
 };
 

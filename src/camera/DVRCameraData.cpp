@@ -21,8 +21,8 @@
 #include "server/DVRServerConfiguration.h"
 
 DVRCameraData::DVRCameraData(int id, DVRServer *server)
-    : server(server), id(id), isLoaded(false), isOnline(false), isDisabled(false),
-      ptzProtocol(DVRCamera::UnknownProtocol), recordingState(NoRecording)
+    : server(server), id(id), isDisabled(false),
+      ptzProtocol(DVRCamera::UnknownProtocol)
 {
 }
 
@@ -33,13 +33,4 @@ DVRCameraData::~DVRCameraData()
 void DVRCameraData::doDataUpdated()
 {
     emit dataUpdated();
-}
-
-void DVRCameraData::setRecordingState(int state)
-{
-    if (state == recordingState)
-        return;
-
-    recordingState = RecordingState(state);
-    emit recordingStateChanged(state);
 }

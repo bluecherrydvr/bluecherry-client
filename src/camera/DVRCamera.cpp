@@ -28,10 +28,9 @@
 #include <QXmlStreamReader>
 
 DVRCamera::DVRCamera(int id, DVRServer *server)
-    : QObject(), m_data(id, server)
+    : QObject(), m_data(id, server), m_isLoaded(false), m_isOnline(false), m_recordingState(NoRecording)
 {
     connect(&m_data, SIGNAL(dataUpdated()), this, SIGNAL(dataUpdated()));
-    connect(&m_data, SIGNAL(recordingStateChanged(int)), this, SIGNAL(recordingStateChanged(int)));
 }
 
 DVRCamera::~DVRCamera()
@@ -46,10 +45,10 @@ void DVRCamera::setDisplayName(const QString &displayName)
 
 void DVRCamera::setOnline(bool on)
 {
-    if (on == m_data.isOnline)
+    if (on == m_isOnline)
         return;
 
-    m_data.isOnline = on;
+    m_isOnline = on;
     emit onlineChanged(isOnline());
 }
 
