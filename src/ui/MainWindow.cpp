@@ -35,6 +35,7 @@
 #include "MacSplitter.h"
 #include "StatusBandwidthWidget.h"
 #include "StatusBarServerAlert.h"
+#include "DVRServersModel.h"
 #include "server/DVRServer.h"
 #include "server/DVRServerConfiguration.h"
 #include "server/DVRServerRepository.h"
@@ -435,6 +436,10 @@ QWidget *MainWindow::createSourcesList()
     m_sourcesList->setAttribute(Qt::WA_MacShowFocusRect, false);
     m_sourcesList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_sourcesList->setMinimumWidth(140);
+
+    DVRServersModel *model = new DVRServersModel(bcApp->serverRepository(), true, m_sourcesList);
+    model->setOfflineDisabled(true);
+    m_sourcesList->setModel(model);
 
 #ifdef Q_OS_MAC
     if (style()->inherits("QMacStyle"))

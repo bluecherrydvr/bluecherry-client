@@ -37,10 +37,6 @@ DVRServersView::DVRServersView(QWidget *parent)
     setContextMenuPolicy(Qt::DefaultContextMenu);
     setDragEnabled(true);
     setAnimated(true);
-
-    DVRServersModel *model = new DVRServersModel(bcApp->serverRepository(), true, this);
-    model->setOfflineDisabled(true);
-    setModel(model);
 }
 
 void DVRServersView::setModel(QAbstractItemModel *m)
