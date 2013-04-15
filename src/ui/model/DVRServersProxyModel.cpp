@@ -47,7 +47,7 @@ bool DVRServersProxyModel::lessThan(const QModelIndex &left, const QModelIndex &
     DVRServer *rightServer = right.data(DVRServersModel::DVRServerRole).value<DVRServer *>();
 
     if (leftServer && rightServer)
-        return lessThan(leftServer, rightServer);
+        return DVRServer::lessThan(leftServer, rightServer);
 
     DVRCamera *leftCamera = left.data(DVRServersModel::DVRCameraRole).value<DVRCamera *>();
     DVRCamera *rightCamera = right.data(DVRServersModel::DVRCameraRole).value<DVRCamera *>();
@@ -61,11 +61,6 @@ bool DVRServersProxyModel::lessThan(const QModelIndex &left, const QModelIndex &
 bool DVRServersProxyModel::lessThan(DVRCamera *left, DVRCamera *right) const
 {
     return QString::localeAwareCompare(left->data().displayName(), right->data().displayName()) < 0;
-}
-
-bool DVRServersProxyModel::lessThan(DVRServer *left, DVRServer *right) const
-{
-    return QString::localeAwareCompare(left->configuration().displayName(), right->configuration().displayName()) < 0;
 }
 
 void DVRServersProxyModel::setHideDisabledCameras(bool hideDisabledCameras)

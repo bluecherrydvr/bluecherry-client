@@ -40,7 +40,6 @@ private:
     bool m_hideDisabledCameras;
 
     bool lessThan(DVRCamera *left, DVRCamera *right) const;
-    bool lessThan(DVRServer *left, DVRServer *right) const;
 
 };
 

@@ -30,6 +30,14 @@
 #include <QDebug>
 #include <QSettings>
 
+bool DVRServer::lessThan(DVRServer *left, DVRServer *right)
+{
+    Q_ASSERT(left);
+    Q_ASSERT(right);
+
+    return QString::localeAwareCompare(left->configuration().displayName(), right->configuration().displayName()) < 0;
+}
+
 DVRServer::DVRServer(int id, QObject *parent)
     : QObject(parent), m_configuration(id), m_devicesLoaded(false)
 {

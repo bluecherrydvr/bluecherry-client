@@ -43,6 +43,8 @@ public:
         Online
     };
 
+    static bool lessThan(DVRServer *left, DVRServer *right);
+
     explicit DVRServer(int id, QObject *parent = 0);
     virtual ~DVRServer();
 
