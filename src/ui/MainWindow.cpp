@@ -36,6 +36,7 @@
 #include "StatusBandwidthWidget.h"
 #include "StatusBarServerAlert.h"
 #include "model/DVRServersModel.h"
+#include "model/DVRServersProxyModel.h"
 #include "server/DVRServer.h"
 #include "server/DVRServerConfiguration.h"
 #include "server/DVRServerRepository.h"
@@ -439,7 +440,11 @@ QWidget *MainWindow::createSourcesList()
 
     DVRServersModel *model = new DVRServersModel(bcApp->serverRepository(), true, m_sourcesList);
     model->setOfflineDisabled(true);
-    m_sourcesList->setModel(model);
+
+    DVRServersProxyModel *proxyModel = new DVRServersProxyModel(model);
+    proxyModel->setSourceModel(model);
+
+    m_sourcesList->setModel(proxyModel);
 
 #ifdef Q_OS_MAC
     if (style()->inherits("QMacStyle"))

@@ -50,6 +50,7 @@ set (bluecherry_client_MOC_SRCS
     src/ui/liveview/PtzPresetsWindow.h
 
     src/ui/model/DVRServersModel.h
+    src/ui/model/DVRServersProxyModel.h
     src/ui/model/EventsModel.h
     src/ui/model/EventSourcesModel.h
     src/ui/model/EventTagsModel.h
