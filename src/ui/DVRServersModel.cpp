@@ -28,8 +28,8 @@
 #include <QMimeData>
 #include <QDataStream>
 
-DVRServersModel::DVRServersModel(DVRServerRepository *serverRepository, QObject *parent)
-    : QAbstractItemModel(parent), m_offlineDisabled(false)
+DVRServersModel::DVRServersModel(DVRServerRepository *serverRepository, bool onlyName, QObject *parent)
+    : QAbstractItemModel(parent), m_offlineDisabled(false), m_onlyName(onlyName)
 {
     Q_ASSERT(serverRepository);
 
@@ -205,7 +205,7 @@ int DVRServersModel::rowCount(const QModelIndex &parent) const
 int DVRServersModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return 3;
+    return m_onlyName ? 1 : 3;
 }
 
 QModelIndex DVRServersModel::index(int row, int column, const QModelIndex &parent) const

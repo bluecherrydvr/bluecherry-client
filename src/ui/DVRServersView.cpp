@@ -38,13 +38,9 @@ DVRServersView::DVRServersView(QWidget *parent)
     setDragEnabled(true);
     setAnimated(true);
 
-    DVRServersModel *model = new DVRServersModel(bcApp->serverRepository(), this);
+    DVRServersModel *model = new DVRServersModel(bcApp->serverRepository(), true, this);
     model->setOfflineDisabled(true);
     setModel(model);
-
-    /* We only show the server name in this list; hide other columns */
-    for (int i = 1, n = model->columnCount(); i < n; ++i)
-        header()->setSectionHidden(i, true);
 }
 
 void DVRServersView::setModel(QAbstractItemModel *m)
