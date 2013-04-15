@@ -20,6 +20,9 @@
 
 #include <QSortFilterProxyModel>
 
+class DVRCamera;
+class DVRServer;
+
 class DVRServersProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
@@ -29,11 +32,15 @@ public:
     virtual ~DVRServersProxyModel();
 
     virtual bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
+    virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 
     void setHideDisabledCameras(bool hideDisabledCameras);
 
 private:
     bool m_hideDisabledCameras;
+
+    bool lessThan(DVRCamera *left, DVRCamera *right) const;
+    bool lessThan(DVRServer *left, DVRServer *right) const;
 
 };
 

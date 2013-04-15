@@ -445,6 +445,7 @@ QWidget *MainWindow::createSourcesList()
     proxyModel->setDynamicSortFilter(true);
     proxyModel->setHideDisabledCameras(true);
     proxyModel->setSourceModel(model);
+    proxyModel->sort(0);
 
     m_sourcesList->setModel(proxyModel);
 

@@ -17,6 +17,7 @@
 
 #include "DVRServersModel.h"
 #include "DVRServersProxyModel.h"
+#include "server/DVRServer.h"
 
 DVRServersProxyModel::DVRServersProxyModel(QObject *parent)
     : QSortFilterProxyModel(parent), m_hideDisabledCameras(false)
@@ -38,6 +39,33 @@ bool DVRServersProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &so
         return false;
 
     return true;
+}
+
+bool DVRServersProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
+{
+    DVRServer *leftServer = left.data(DVRServersModel::DVRServerRole).value<DVRServer *>();
+    DVRServer *rightServer = right.data(DVRServersModel::DVRServerRole).value<DVRServer *>();
+
+    if (leftServer && rightServer)
+        return lessThan(leftServer, rightServer);
+
+    DVRCamera *leftCamera = left.data(DVRServersModel::DVRCameraRole).value<DVRCamera *>();
+    DVRCamera *rightCamera = right.data(DVRServersModel::DVRCameraRole).value<DVRCamera *>();
+
+    if (leftCamera && rightCamera)
+        return lessThan(leftCamera, rightCamera);
+
+    return QSortFilterProxyModel::lessThan(left, right);
+}
+
+bool DVRServersProxyModel::lessThan(DVRCamera *left, DVRCamera *right) const
+{
+    return QString::localeAwareCompare(left->data().displayName(), right->data().displayName()) < 0;
+}
+
+bool DVRServersProxyModel::lessThan(DVRServer *left, DVRServer *right) const
+{
+    return QString::localeAwareCompare(left->configuration().displayName(), right->configuration().displayName()) < 0;
 }
 
 void DVRServersProxyModel::setHideDisabledCameras(bool hideDisabledCameras)
