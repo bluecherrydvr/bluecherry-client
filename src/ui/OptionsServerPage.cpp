@@ -48,6 +48,7 @@ OptionsServerPage::OptionsServerPage(DVRServerRepository *serverRepository, QWid
 
     m_model = new DVRServersModel(bcApp->serverRepository(), false, m_serversView);
     m_proxyModel = new DVRServersProxyModel(m_model);
+    m_proxyModel->setDynamicSortFilter(true);
     m_proxyModel->setSourceModel(m_model);
     m_proxyModel->sort(0);
 
