@@ -414,19 +414,18 @@ void MainWindow::updateServersMenu()
     if (servers.isEmpty())
     {
         m_serversMenu->addAction(tr("Add a server"), this, SLOT(addServer()));
+        return;
     }
-    else if (servers.size() == 1)
+
+    if (servers.size() == 1)
     {
         QMenu *sm = serverMenu(servers.first());
         m_serversMenu->addActions(sm->actions());
+        return;
     }
-    else
-    {
-        foreach (DVRServer *s, servers)
-        {
-            m_serversMenu->addMenu(serverMenu(s));
-        }
-    }
+
+    foreach (DVRServer *s, servers)
+        m_serversMenu->addMenu(serverMenu(s));
 }
 
 QWidget *MainWindow::createSourcesList()
