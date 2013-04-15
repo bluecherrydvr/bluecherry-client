@@ -49,17 +49,19 @@ set (bluecherry_client_MOC_SRCS
     src/ui/liveview/LiveViewWindow.h
     src/ui/liveview/PtzPresetsWindow.h
 
+    src/ui/model/DVRServersModel.h
+    src/ui/model/EventsModel.h
+    src/ui/model/EventSourcesModel.h
+    src/ui/model/EventTagsModel.h
+    src/ui/model/SavedLayoutsModel.h
+
     src/ui/AboutDialog.h
     src/ui/CrashReportDialog.h
-    src/ui/DVRServersModel.h
     src/ui/DVRServersView.h
     src/ui/EventCommentsWidget.h
-    src/ui/EventsModel.h
-    src/ui/EventSourcesModel.h
     src/ui/EventsView.h
     src/ui/EventsWindow.h
     src/ui/EventTagsDelegate.h
-    src/ui/EventTagsModel.h
     src/ui/EventTagsView.h
     src/ui/EventTimelineWidget.h
     src/ui/EventTypesFilter.h
@@ -74,7 +76,6 @@ set (bluecherry_client_MOC_SRCS
     src/ui/OptionsGeneralPage.h
     src/ui/OptionsServerPage.h
     src/ui/RemotePortCheckerWidget.h
-    src/ui/SavedLayoutsModel.h
     src/ui/ServerConfigWindow.h
     src/ui/SetupWizard.h
     src/ui/SetupWizard_p.h

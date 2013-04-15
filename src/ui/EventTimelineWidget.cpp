@@ -17,7 +17,7 @@
 
 #include "EventTimelineWidget.h"
 #include "EventTimelineDatePainter.h"
-#include "EventsModel.h"
+#include "model/EventsModel.h"
 #include "TimeRangeScrollBar.h"
 #include "core/EventData.h"
 #include "server/DVRServer.h"

@@ -16,7 +16,7 @@
  */
 
 #include "DVRServersView.h"
-#include "DVRServersModel.h"
+#include "model/DVRServersModel.h"
 #include "OptionsDialog.h"
 #include "OptionsServerPage.h"
 #include "ServerConfigWindow.h"

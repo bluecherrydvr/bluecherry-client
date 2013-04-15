@@ -17,7 +17,7 @@
 
 #include "EventTagsView.h"
 #include "EventTagsDelegate.h"
-#include "EventTagsModel.h"
+#include "model/EventTagsModel.h"
 #include <QMouseEvent>
 
 EventTagsView::EventTagsView(QWidget *parent)

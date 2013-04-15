@@ -16,7 +16,7 @@
  */
 
 #include "OptionsServerPage.h"
-#include "DVRServersModel.h"
+#include "model/DVRServersModel.h"
 #include "core/BluecherryApp.h"
 #include "server/DVRServer.h"
 #include "server/DVRServerConfiguration.h"
