@@ -408,7 +408,7 @@ void MainWindow::updateServersMenu()
 {
     m_serversMenu->clear();
 
-    const QList<DVRServer*> & servers = m_serverRepository->servers();
+    QList<DVRServer *> servers = m_serverRepository->servers();
     m_serversMenu->setTitle((servers.size() > 1) ? tr("&Servers") : tr("&Server"));
 
     if (servers.isEmpty())
@@ -424,6 +424,7 @@ void MainWindow::updateServersMenu()
         return;
     }
 
+    qSort(servers.begin(), servers.end(), DVRServer::lessThan);
     foreach (DVRServer *s, servers)
         m_serversMenu->addMenu(serverMenu(s));
 }
