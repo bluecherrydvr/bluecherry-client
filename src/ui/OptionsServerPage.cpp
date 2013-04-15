@@ -17,6 +17,7 @@
 
 #include "OptionsServerPage.h"
 #include "model/DVRServersModel.h"
+#include "model/DVRServersProxyModel.h"
 #include "core/BluecherryApp.h"
 #include "server/DVRServer.h"
 #include "server/DVRServerConfiguration.h"
@@ -44,7 +45,14 @@ OptionsServerPage::OptionsServerPage(DVRServerRepository *serverRepository, QWid
 
     /* Servers list */
     m_serversView = new QTreeView;
-    m_serversView->setModel(new DVRServersModel(bcApp->serverRepository(), false, m_serversView));
+
+    m_model = new DVRServersModel(bcApp->serverRepository(), false, m_serversView);
+    m_proxyModel = new DVRServersProxyModel(m_model);
+    m_proxyModel->setSourceModel(m_model);
+    m_proxyModel->sort(0);
+
+    m_serversView->setModel(m_proxyModel);
+
     m_serversView->header()->setHighlightSections(false);
     m_serversView->header()->setResizeMode(QHeaderView::ResizeToContents);
     m_serversView->header()->setResizeMode(0, QHeaderView::Stretch);
@@ -141,15 +149,20 @@ OptionsServerPage::OptionsServerPage(DVRServerRepository *serverRepository, QWid
 
 void OptionsServerPage::setCurrentServer(DVRServer *server)
 {
-    QModelIndex index = static_cast<DVRServersModel*>(m_serversView->model())->indexForServer(server);
-    if (index.isValid())
-        m_serversView->setCurrentIndex(index);
+    QModelIndex index = m_model->indexForServer(server);
+    if (!index.isValid())
+        return;
+
+    QModelIndex proxyIndex = m_proxyModel->mapFromSource(index);
+    if (!proxyIndex.isValid())
+        return;
+    
+    m_serversView->setCurrentIndex(proxyIndex);
 }
 
 void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const QModelIndex &oldIndex)
 {
-    DVRServer *server = static_cast<DVRServersModel*>(m_serversView->model())->
-                        serverForRow(oldIndex);
+    DVRServer *server = oldIndex.data(DVRServersModel::DVRServerRole).value<DVRServer *>();
     if (server)
     {
         saveChanges(server);
@@ -157,7 +170,7 @@ void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const 
         m_connectionStatus->setVisible(false);
     }
 
-    server = static_cast<DVRServersModel*>(m_serversView->model())->serverForRow(newIndex);
+    server = newIndex.data(DVRServersModel::DVRServerRole).value<DVRServer *>();
     if (!server)
     {
         m_nameEdit->clear();
@@ -210,8 +223,7 @@ void OptionsServerPage::addNewServer()
 
 void OptionsServerPage::deleteServer()
 {
-    DVRServer *server = static_cast<DVRServersModel*>(m_serversView->model())->
-                        serverForRow(m_serversView->currentIndex());
+    DVRServer *server = m_serversView->currentIndex().data(DVRServersModel::DVRServerRole).value<DVRServer *>();
 
     if (!server)
         return;
@@ -243,8 +255,7 @@ void OptionsServerPage::saveChanges(DVRServer *server)
 {
     if (!server)
     {
-        server = static_cast<DVRServersModel*>(m_serversView->model())->
-                 serverForRow(m_serversView->currentIndex());
+        server = m_serversView->currentIndex().data(DVRServersModel::DVRServerRole).value<DVRServer *>();
         if (!server)
             return;
     }

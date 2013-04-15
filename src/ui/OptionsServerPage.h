@@ -24,6 +24,8 @@ class QTreeView;
 class QLineEdit;
 class DVRServer;
 class DVRServerRepository;
+class DVRServersModel;
+class DVRServersProxyModel;
 class QModelIndex;
 class QLabel;
 class QCheckBox;
@@ -58,6 +60,9 @@ private:
     DVRServerRepository *m_serverRepository;
 
     QTreeView *m_serversView;
+    DVRServersModel *m_model;
+    DVRServersProxyModel *m_proxyModel;
+
     QLabel *m_connectionStatus;
     QLineEdit *m_nameEdit, *m_hostnameEdit, *m_portEdit, *m_usernameEdit, *m_passwordEdit;
     WebRtpPortCheckerWidget *m_portChecker;
