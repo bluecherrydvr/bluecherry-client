@@ -28,6 +28,13 @@ public:
     explicit DVRServersProxyModel(QObject *parent);
     virtual ~DVRServersProxyModel();
 
+    virtual bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
+
+    void setHideDisabledCameras(bool hideDisabledCameras);
+
+private:
+    bool m_hideDisabledCameras;
+
 };
 
 #endif // DVRSERVERSPROXYMODEL_H

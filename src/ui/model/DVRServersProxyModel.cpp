@@ -15,13 +15,36 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "DVRServersModel.h"
 #include "DVRServersProxyModel.h"
 
 DVRServersProxyModel::DVRServersProxyModel(QObject *parent)
-    : QSortFilterProxyModel(parent)
+    : QSortFilterProxyModel(parent), m_hideDisabledCameras(false)
 {
 }
 
 DVRServersProxyModel::~DVRServersProxyModel()
 {
+}
+
+bool DVRServersProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
+{
+    Q_ASSERT(sourceModel());
+
+    const QModelIndex &index = sourceModel()->index(sourceRow, 0, sourceParent);
+    DVRCamera *camera = index.data(DVRServersModel::DVRCameraRole).value<DVRCamera *>();
+
+    if (camera && m_hideDisabledCameras && camera->data().disabled())
+        return false;
+
+    return true;
+}
+
+void DVRServersProxyModel::setHideDisabledCameras(bool hideDisabledCameras)
+{
+    if (m_hideDisabledCameras == hideDisabledCameras)
+        return;
+
+    m_hideDisabledCameras = hideDisabledCameras;
+    invalidateFilter();
 }

@@ -442,6 +442,8 @@ QWidget *MainWindow::createSourcesList()
     model->setOfflineDisabled(true);
 
     DVRServersProxyModel *proxyModel = new DVRServersProxyModel(model);
+    proxyModel->setDynamicSortFilter(true);
+    proxyModel->setHideDisabledCameras(true);
     proxyModel->setSourceModel(model);
 
     m_sourcesList->setModel(proxyModel);
