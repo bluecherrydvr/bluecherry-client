@@ -55,6 +55,11 @@ bool DVRServersProxyModel::lessThan(const QModelIndex &left, const QModelIndex &
     if (leftCamera && rightCamera)
         return lessThan(leftCamera, rightCamera);
 
+    if (leftServer || leftCamera)
+        return false;
+    if (rightServer || rightCamera)
+        return true;
+
     return QSortFilterProxyModel::lessThan(left, right);
 }
 
