@@ -38,6 +38,7 @@ set (bluecherry_client_main_SRCS
     src/event/EventDownloadManager.cpp
     src/event/EventFilter.cpp
     src/event/EventList.cpp
+    src/event/EventParser.cpp
     src/event/EventsCursor.cpp
     src/event/EventsLoader.cpp
     src/event/EventVideoDownload.cpp
@@ -100,6 +101,7 @@ set (bluecherry_client_main_SRCS
     src/ui/WebRtpPortCheckerWidget.cpp
 
     src/utils/DateTimeRange.cpp
+    src/utils/DateTimeUtils.cpp
     src/utils/FileUtils.cpp
     src/utils/ImageDecodeTask.cpp
     src/utils/Range.cpp

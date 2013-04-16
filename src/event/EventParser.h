@@ -15,43 +15,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVENTSLOADER_H
-#define EVENTSLOADER_H
+#ifndef EVENTPARSER_H
+#define EVENTPARSER_H
 
-#include <QDateTime>
-#include <QObject>
+#include <QList>
 
 class DVRServer;
 class EventData;
+class QXmlStreamReader;
 
-class EventsLoader : public QObject
+class EventParser
 {
-    Q_OBJECT
-
 public:
-    explicit EventsLoader(DVRServer *server, QObject *parent = 0);
-    virtual ~EventsLoader();
-
-    DVRServer * server() const { return m_server.data(); }
-
-    void setLimit(int limit);
-    void setStartTime(const QDateTime &startTime);
-    void setEndTime(const QDateTime &endTime);
-
-    void loadEvents();
-
-signals:
-    void eventsLoaded(bool ok, const QList<EventData *> &events);
-
-private slots:
-    void serverRequestFinished();
-    void eventParseFinished();
+    static QList<EventData *> parseEvents(DVRServer *server, const QByteArray &input);
 
 private:
-    QWeakPointer<DVRServer> m_server;
-    int m_limit;
-    QDateTime m_startTime;
-    QDateTime m_endTime;
+    static EventData * parseEntry(DVRServer *server, QXmlStreamReader &reader);
+
 };
 
-#endif // EVENTSLOADER_H
+#endif // EVENTPARSER_H
