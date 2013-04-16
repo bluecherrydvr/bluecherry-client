@@ -20,3 +20,4 @@ include (cmake/tests/bluecherry-add-test.cmake)
 
 bluecherry_add_test (RangeMapTestCase tests/src/utils/RangeMapTestCase.cpp)
 bluecherry_add_test (RangeTestCase tests/src/utils/RangeTestCase.cpp)
+bluecherry_add_test (EventParserTestCase tests/src/event/EventParserTestCase.cpp)
