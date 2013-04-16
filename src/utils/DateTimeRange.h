@@ -31,6 +31,7 @@ public:
     DateTimeRange(const DateTimeRange &copyMe);
 
     DateTimeRange & operator = (const DateTimeRange &copyMe);
+    bool operator == (const DateTimeRange &compareTo) const;
 
     bool isNull() const;
 
@@ -39,6 +40,7 @@ public:
 
     int lengthInSeconds() const;
     bool contains(const QDateTime &dateTime) const;
+    bool contains(const DateTimeRange &dateTimeRange) const;
 
     DateTimeRange boundedBy(const DateTimeRange &range) const;
     DateTimeRange extendWith(const QDateTime &dateTime) const;

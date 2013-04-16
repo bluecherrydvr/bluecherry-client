@@ -18,5 +18,6 @@
 enable_testing ()
 include (cmake/tests/bluecherry-add-test.cmake)
 
+bluecherry_add_test (DateTimeRangeTestCase tests/src/utils/DateTimeRangeTestCase.cpp)
 bluecherry_add_test (RangeMapTestCase tests/src/utils/RangeMapTestCase.cpp)
 bluecherry_add_test (RangeTestCase tests/src/utils/RangeTestCase.cpp)
