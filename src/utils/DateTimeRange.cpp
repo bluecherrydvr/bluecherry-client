@@ -33,12 +33,17 @@ DateTimeRange::DateTimeRange(const DateTimeRange &copyMe)
     m_end = copyMe.m_end;
 }
 
-DateTimeRange & DateTimeRange::operator=(const DateTimeRange& copyMe)
+DateTimeRange & DateTimeRange::operator = (const DateTimeRange &copyMe)
 {
     m_start = copyMe.m_start;
     m_end = copyMe.m_end;
 
     return *this;
+}
+
+bool DateTimeRange::operator == (const DateTimeRange &compareTo) const
+{
+    return m_start == compareTo.m_start && m_end == compareTo.m_end;
 }
 
 bool DateTimeRange::isNull() const
@@ -77,11 +82,17 @@ DateTimeRange DateTimeRange::boundedBy(const DateTimeRange &range) const
     if (isNull() || range.isNull())
         return DateTimeRange();
 
-    return DateTimeRange(qMax(m_start, range.m_start), qMin(m_end, range.m_end));
+    if (range.m_start > m_end || range.m_end < m_start)
+        return DateTimeRange();
+    else
+        return DateTimeRange(qMax(m_start, range.m_start), qMin(m_end, range.m_end));
 }
 
 DateTimeRange DateTimeRange::extendWith(const QDateTime &dateTime) const
 {
+    if (dateTime.isNull())
+        return *this;
+
     QDateTime start = (m_start.isNull() || dateTime < m_start) ? dateTime : m_start;
     QDateTime end = (m_end.isNull() || dateTime > m_end) ? dateTime : m_end;
     return DateTimeRange(start, end);
@@ -117,7 +128,7 @@ DateTimeRange DateTimeRange::moveInto(const DateTimeRange &dateTime) const
 
 DateTimeRange DateTimeRange::moveStart(const QDateTime &start) const
 {
-    if (isNull())
+    if (isNull() || !start.isValid())
         return DateTimeRange();
 
     return DateTimeRange(start, start.addSecs(lengthInSeconds()));
