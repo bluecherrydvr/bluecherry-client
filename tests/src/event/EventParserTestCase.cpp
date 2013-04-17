@@ -15,14 +15,8 @@ private Q_SLOTS:
 
     void testSingleItems();
     void testSingleItems_data();
-    /*
-    void testUtcDateTimeEventWithoutDuration();
-    void testUtcDateTimeEventWithZeroDuration();
-    void testUtcDateTimeEventWithNonZeroDuration();
-    void testNonUtcDateTimeEventWithoutDuration();
-    void testNonUtcDateTimeEventWithZeroDuration();
-    void testNonUtcDateTimeEventWithNonZeroDuration();
-    */
+    void testMedia();
+    void testMedia_data();
 
 private:
     QList<EventData *> parseFile(const QString &fileName);
@@ -309,6 +303,46 @@ void EventParserTestCase::testSingleItems_data()
         << false
         << true
         << true;
+}
+
+void EventParserTestCase::testMedia()
+{
+    QFETCH(QString, fileName);
+    QFETCH(long long, mediaId);
+    QFETCH(bool, hasMedia);
+
+    EventData *event = parseSingleEventFile(fileName);
+    QVERIFY(!event->server());
+    QCOMPARE(event->mediaId(), mediaId);
+    QCOMPARE(event->hasMedia(), hasMedia);
+    QTest::addColumn<bool>("hasMedia");
+}
+
+void EventParserTestCase::testMedia_data()
+{
+    QTest::addColumn<QString>("fileName");
+    QTest::addColumn<long long>("mediaId");
+    QTest::addColumn<bool>("hasMedia");
+
+    QTest::newRow("With media")
+        << QString::fromLatin1("with-media.xml")
+        << (long long)123
+        << true;
+
+    QTest::newRow("Without media invalid attribute")
+        << QString::fromLatin1("without-media-invalid-attribute.xml")
+        << (long long)-1
+        << false;
+
+    QTest::newRow("Without media no attribute")
+        << QString::fromLatin1("without-media-no-attribute.xml")
+        << (long long)-1
+        << false;
+
+    QTest::newRow("Without media verbatim attribute")
+        << QString::fromLatin1("without-media-verbatim-value.xml")
+        << (long long)-1
+        << false;
 }
 
 QTEST_MAIN(EventParserTestCase)
