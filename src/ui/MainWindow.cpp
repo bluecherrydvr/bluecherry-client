@@ -25,7 +25,7 @@
 #include "OptionsDialog.h"
 #include "EventsWindow.h"
 #include "NumericOffsetWidget.h"
-#include "EventsModel.h"
+#include "model/EventsModel.h"
 #include "AboutDialog.h"
 #include "OptionsServerPage.h"
 #include "ServerConfigWindow.h"
@@ -35,6 +35,8 @@
 #include "MacSplitter.h"
 #include "StatusBandwidthWidget.h"
 #include "StatusBarServerAlert.h"
+#include "model/DVRServersModel.h"
+#include "model/DVRServersProxyModel.h"
 #include "server/DVRServer.h"
 #include "server/DVRServerConfiguration.h"
 #include "server/DVRServerRepository.h"
@@ -348,7 +350,7 @@ QMenu *MainWindow::serverMenu(DVRServer *server)
     if (m)
         return m;
 
-    m = new QMenu(server->configuration()->displayName());
+    m = new QMenu(server->configuration().displayName());
 
     m->addAction(tr("Connect"), server, SLOT(toggleOnline()))->setObjectName(QLatin1String("aConnect"));
     m->addSeparator();
@@ -392,7 +394,7 @@ void MainWindow::updateMenuForServer(DVRServer *server)
     }
 
     QMenu *m = serverMenu(server);
-    m->setTitle(server->configuration()->displayName());
+    m->setTitle(server->configuration().displayName());
     m->setIcon(QIcon(server->isOnline() ? QLatin1String(":/icons/status.png") :
                                           QLatin1String(":/icons/status-offline.png")));
 
@@ -406,25 +408,25 @@ void MainWindow::updateServersMenu()
 {
     m_serversMenu->clear();
 
-    const QList<DVRServer*> & servers = m_serverRepository->servers();
+    QList<DVRServer *> servers = m_serverRepository->servers();
     m_serversMenu->setTitle((servers.size() > 1) ? tr("&Servers") : tr("&Server"));
 
     if (servers.isEmpty())
     {
         m_serversMenu->addAction(tr("Add a server"), this, SLOT(addServer()));
+        return;
     }
-    else if (servers.size() == 1)
+
+    if (servers.size() == 1)
     {
         QMenu *sm = serverMenu(servers.first());
         m_serversMenu->addActions(sm->actions());
+        return;
     }
-    else
-    {
-        foreach (DVRServer *s, servers)
-        {
-            m_serversMenu->addMenu(serverMenu(s));
-        }
-    }
+
+    qSort(servers.begin(), servers.end(), DVRServer::lessThan);
+    foreach (DVRServer *s, servers)
+        m_serversMenu->addMenu(serverMenu(s));
 }
 
 QWidget *MainWindow::createSourcesList()
@@ -435,6 +437,17 @@ QWidget *MainWindow::createSourcesList()
     m_sourcesList->setAttribute(Qt::WA_MacShowFocusRect, false);
     m_sourcesList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_sourcesList->setMinimumWidth(140);
+
+    DVRServersModel *model = new DVRServersModel(bcApp->serverRepository(), true, m_sourcesList);
+    model->setOfflineDisabled(true);
+
+    DVRServersProxyModel *proxyModel = new DVRServersProxyModel(model);
+    proxyModel->setDynamicSortFilter(true);
+    proxyModel->setHideDisabledCameras(true);
+    proxyModel->setSourceModel(model);
+    proxyModel->sort(0);
+
+    m_sourcesList->setModel(proxyModel);
 
 #ifdef Q_OS_MAC
     if (style()->inherits("QMacStyle"))
@@ -613,7 +626,7 @@ void MainWindow::sslConfirmRequired(DVRServer *server, const QList<QSslError> &e
                                           "reinstalled.<br><br><b>Server:</b> %1<br><b>URL:</b> %2<br>"
                                           "<b>Fingerprint:</b> %3<br><br>Do you want to connect anyway, and trust "
                                           "this certificate in the future?")
-                                       .arg(Qt::escape(server->configuration()->displayName()), server->url().toString(),
+                                       .arg(Qt::escape(server->configuration().displayName()), server->url().toString(),
                                             fingerprint));
     server->setProperty("ssl_verify_dialog", QVariant::fromValue<QObject*>(dlg));
     QPushButton *ab = dlg->addButton(tr("Accept Certificate"), QMessageBox::AcceptRole);
@@ -771,7 +784,7 @@ void MainWindow::serverDevicesLoaded()
          * before the wizard has ended, but that isn't much of a problem. */
         QMessageBox msg(qApp->activeModalWidget() ? qApp->activeModalWidget() : this);
         if (m_serverRepository->serverCount() > 1)
-            msg.setText(tr("%1 hasn't been configured yet").arg(Qt::escape(server->configuration()->displayName())));
+            msg.setText(tr("%1 hasn't been configured yet").arg(Qt::escape(server->configuration().displayName())));
         else
             msg.setText(tr("The server hasn't been configured yet"));
         msg.setInformativeText(tr("You can access configuration at any time by double-clicking on the server.<br><br>Do you want to configure devices for this server now?"));

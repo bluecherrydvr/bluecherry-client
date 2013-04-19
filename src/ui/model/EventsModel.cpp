@@ -156,7 +156,7 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
     case ServerColumn:
         if (role == Qt::DisplayRole)
             if (data->server())
-                return data->server()->configuration()->displayName();
+                return data->server()->configuration().displayName();
             else
                 return QString();
         break;
@@ -283,7 +283,7 @@ public:
         switch (column)
         {
         case EventsModel::ServerColumn:
-            re = QString::localeAwareCompare(e1->server()->configuration()->displayName(), e2->server()->configuration()->displayName()) <= 0;
+            re = QString::localeAwareCompare(e1->server()->configuration().displayName(), e2->server()->configuration().displayName()) <= 0;
             break;
         case EventsModel::LocationColumn:
             re = QString::localeAwareCompare(e1->uiLocation(), e2->uiLocation()) <= 0;
@@ -470,7 +470,7 @@ QString EventsModel::filterDescription() const
                     re += tr(" on selected cameras");
             }
 
-            re += tr(" from %1").arg(m_filter.sources.begin().key()->configuration()->displayName());
+            re += tr(" from %1").arg(m_filter.sources.begin().key()->configuration().displayName());
         }
         else if (!allCameras)
             re += tr(" on selected cameras");
@@ -591,7 +591,7 @@ void EventsModel::setFilterSource(DVRCamera *camera)
         return;
 
     QMap<DVRServer*,QList<int> > sources;
-    sources.insert(camera->server(), QList<int>() << camera->uniqueId());
+    sources.insert(camera->data().server(), QList<int>() << camera->data().id());
     setFilterSources(sources);
 }
 

@@ -15,45 +15,32 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DVRCAMERADATA_H
-#define DVRCAMERADATA_H
+#ifndef DVRSERVERSPROXYMODEL_H
+#define DVRSERVERSPROXYMODEL_H
 
-#include <QObject>
-#include <QWeakPointer>
+#include <QSortFilterProxyModel>
 
+class DVRCamera;
 class DVRServer;
 
-class DVRCameraData : public QObject
+class DVRServersProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
-    Q_DISABLE_COPY(DVRCameraData)
 
 public:
-    explicit DVRCameraData(int id, DVRServer *server);
-    virtual ~DVRCameraData();
+    explicit DVRServersProxyModel(QObject *parent);
+    virtual ~DVRServersProxyModel();
 
-    int id() const;
-    DVRServer * server() const;
+    virtual bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
+    virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 
-    QString displayName() const;
-    void setDisplayName(const QString &displayName);
-
-    bool disabled() const;
-    void setDisabled(bool disabled);
-
-    qint8 ptzProtocol() const;
-    void setPtzProtocol(qint8 ptzProtocol);
-
-signals:
-    void changed();
+    void setHideDisabledCameras(bool hideDisabledCameras);
 
 private:
-    const int m_id;
-    DVRServer * const m_server;
-    QString m_displayName;
-    bool m_disabled;
-    qint8 m_ptzProtocol;
+    bool m_hideDisabledCameras;
+
+    bool lessThan(DVRCamera *left, DVRCamera *right) const;
 
 };
 
-#endif // DVRCAMERADATA_H
+#endif // DVRSERVERSPROXYMODEL_H

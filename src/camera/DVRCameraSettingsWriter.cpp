@@ -15,20 +15,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "camera/DVRCamera.h"
+#include "DVRCamera.h"
+#include "DVRCameraSettingsWriter.h"
 #include "server/DVRServer.h"
-#include "server/DVRServerConfiguration.h"
-#include "DVRCameraStreamWriter.h"
+#include <QSettings>
 
-DVRCameraStreamWriter::DVRCameraStreamWriter(QDataStream &dataStream)
-    : m_dataStream(dataStream)
+void DVRCameraSettingsWriter::writeCamera(DVRCamera *camera) const
 {
-}
+    Q_ASSERT(camera);
+    Q_ASSERT(camera->data().server());
 
-void DVRCameraStreamWriter::writeCamera(DVRCamera *camera)
-{
-    if (!camera)
-        m_dataStream << -1;
-    else
-        m_dataStream << camera->data().server()->configuration().id() << camera->data().id();
+    int serverId = camera->data().server()->configuration().id();
+    Q_ASSERT(serverId >= 0);
+
+    QSettings settings;
+    settings.beginGroup(QString::fromLatin1("servers/%1/cameras/").arg(serverId));
+    settings.setValue(QString::number(camera->data().id()), camera->data().displayName());
 }

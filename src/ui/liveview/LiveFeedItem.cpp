@@ -133,10 +133,10 @@ void LiveFeedItem::saveSnapshot(const QString &ifile)
 
     if (file.isEmpty())
     {
-        file = getSaveFileNameExt(window, tr("%1 - Save Snapshot").arg(m_camera.data()->displayName()),
+        file = getSaveFileNameExt(window, tr("%1 - Save Snapshot").arg(m_camera.data()->data().displayName()),
                            QDesktopServices::storageLocation(QDesktopServices::PicturesLocation),
                            QLatin1String("ui/snapshotSaveLocation"),
-                           QString::fromLatin1("%1 - %2.jpg").arg(m_camera.data()->displayName(),
+                           QString::fromLatin1("%1 - %2.jpg").arg(m_camera.data()->data().displayName(),
                                                                   QDateTime::currentDateTime().toString(
                                                                   QLatin1String("yyyy-MM-dd hh-mm-ss"))),
                            tr("Image (*.jpg)"));
@@ -232,7 +232,7 @@ void LiveFeedItem::serverRemoved(DVRServer *server)
     if (!server || !m_camera)
         return;
 
-    if (server == m_camera.data()->server())
+    if (server == m_camera.data()->data().server())
         deleteLater();
 }
 
@@ -330,7 +330,7 @@ void LiveFeedItem::setPtzEnabled(bool ptzEnabled)
         return;
 
     if (ptzEnabled && m_camera)
-        m_ptz = CameraPtzControl::sharedObjectFor(m_camera.data());
+        m_ptz = m_camera.data()->sharedPtzControl();
     else
         m_ptz.clear();
 

@@ -24,16 +24,16 @@ void DVRServerSettingsWriter::writeServer(DVRServer *server) const
 {
     Q_ASSERT(server);
 
-    int serverId = server->configuration()->id();
+    int serverId = server->configuration().id();
     Q_ASSERT(serverId >= 0);
 
-    writeSetting(serverId, QLatin1String("displayName"), server->configuration()->displayName());
-    writeSetting(serverId, QLatin1String("hostname"), server->configuration()->hostname());
-    writeSetting(serverId, QLatin1String("port"), server->configuration()->port());
-    writeSetting(serverId, QLatin1String("username"), server->configuration()->username());
-    writeSetting(serverId, QLatin1String("password"), server->configuration()->password());
-    writeSetting(serverId, QLatin1String("autoConnect"), server->configuration()->autoConnect());
-    writeSetting(serverId, QLatin1String("sslDigest"), server->configuration()->sslDigest());
+    writeSetting(serverId, QLatin1String("displayName"), server->configuration().displayName());
+    writeSetting(serverId, QLatin1String("hostname"), server->configuration().hostname());
+    writeSetting(serverId, QLatin1String("port"), server->configuration().port());
+    writeSetting(serverId, QLatin1String("username"), server->configuration().username());
+    writeSetting(serverId, QLatin1String("password"), server->configuration().password());
+    writeSetting(serverId, QLatin1String("autoConnect"), server->configuration().autoConnect());
+    writeSetting(serverId, QLatin1String("sslDigest"), server->configuration().sslDigest());
 }
 
 void DVRServerSettingsWriter::writeSetting(int serverId, const QString &key, const QVariant &value) const

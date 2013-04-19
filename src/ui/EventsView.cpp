@@ -16,7 +16,7 @@
  */
 
 #include "EventsView.h"
-#include "EventsModel.h"
+#include "model/EventsModel.h"
 #include "EventViewWindow.h"
 #include "core/EventData.h"
 #include "event/EventList.h"

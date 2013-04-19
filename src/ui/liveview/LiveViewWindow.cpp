@@ -18,7 +18,7 @@
 #include "LiveViewWindow.h"
 #include "LiveViewArea.h"
 #include "LiveViewLayout.h"
-#include "ui/SavedLayoutsModel.h"
+#include "ui/model/SavedLayoutsModel.h"
 #include "ui/MainWindow.h"
 #include "core/BluecherryApp.h"
 #include <QBoxLayout>

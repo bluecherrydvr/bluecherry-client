@@ -20,8 +20,11 @@ include_directories (src)
 set (bluecherry_client_main_SRCS
     src/camera/DVRCamera.cpp
     src/camera/DVRCameraData.cpp
+    src/camera/DVRCameraSettingsReader.cpp
+    src/camera/DVRCameraSettingsWriter.cpp
     src/camera/DVRCameraStreamReader.cpp
     src/camera/DVRCameraStreamWriter.cpp
+    src/camera/DVRCameraXMLReader.cpp
 
     src/core/BluecherryApp.cpp
     src/core/CameraPtzControl.cpp
@@ -62,17 +65,20 @@ set (bluecherry_client_main_SRCS
     src/ui/liveview/LiveViewWindow.cpp
     src/ui/liveview/PtzPresetsWindow.cpp
 
+    src/ui/model/DVRServersModel.cpp
+    src/ui/model/DVRServersProxyModel.cpp
+    src/ui/model/EventsModel.cpp
+    src/ui/model/EventSourcesModel.cpp
+    src/ui/model/EventTagsModel.cpp
+    src/ui/model/SavedLayoutsModel.cpp
+
     src/ui/AboutDialog.cpp
     src/ui/CrashReportDialog.cpp
-    src/ui/DVRServersModel.cpp
     src/ui/DVRServersView.cpp
     src/ui/EventCommentsWidget.cpp
-    src/ui/EventsModel.cpp
-    src/ui/EventSourcesModel.cpp
     src/ui/EventsView.cpp
     src/ui/EventsWindow.cpp
     src/ui/EventTagsDelegate.cpp
-    src/ui/EventTagsModel.cpp
     src/ui/EventTagsView.cpp
     src/ui/EventTimelineDatePainter.cpp
     src/ui/EventTimelineWidget.cpp
@@ -89,7 +95,6 @@ set (bluecherry_client_main_SRCS
     src/ui/OptionsGeneralPage.cpp
     src/ui/OptionsServerPage.cpp
     src/ui/RemotePortCheckerWidget.cpp
-    src/ui/SavedLayoutsModel.cpp
     src/ui/ServerConfigWindow.cpp
     src/ui/SetupWizard.cpp
     src/ui/StatusBandwidthWidget.cpp

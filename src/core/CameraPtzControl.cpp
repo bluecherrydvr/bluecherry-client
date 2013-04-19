@@ -33,22 +33,6 @@ CameraPtzControl::CameraPtzControl(DVRCamera *camera, QObject *parent)
     updateInfo();
 }
 
-QSharedPointer<CameraPtzControl> CameraPtzControl::sharedObjectFor(DVRCamera *camera)
-{
-    if (!camera)
-        return QSharedPointer<CameraPtzControl>();
-
-    QSharedPointer<CameraPtzControl> ptr = camera->getQObject()->property("cameraPtzControl")
-                                           .value<QWeakPointer<CameraPtzControl> >();
-    if (ptr.isNull())
-    {
-        ptr = QSharedPointer<CameraPtzControl>(new CameraPtzControl(camera));
-        camera->getQObject()->setProperty("cameraPtzControl", QVariant::fromValue(ptr.toWeakRef()));
-    }
-
-    return ptr;
-}
-
 CameraPtzControl::~CameraPtzControl()
 {
     foreach (QNetworkReply *r, m_pendingCommands)
@@ -66,11 +50,11 @@ QNetworkReply *CameraPtzControl::sendCommand(const QUrl &partialUrl)
 
     QUrl url(QLatin1String("/media/ptz.php"));
     url = url.resolved(partialUrl);
-    url.addEncodedQueryItem("id", QByteArray::number(m_camera.data()->uniqueId()));
+    url.addEncodedQueryItem("id", QByteArray::number(m_camera.data()->data().id()));
 
     Q_ASSERT(url.hasQueryItem(QLatin1String("command")));
 
-    QNetworkReply *reply = m_camera.data()->server()->sendRequest(url);
+    QNetworkReply *reply = m_camera.data()->data().server()->sendRequest(url);
     connect(reply, SIGNAL(finished()), SLOT(finishCommand()));
 
     m_pendingCommands.append(reply);

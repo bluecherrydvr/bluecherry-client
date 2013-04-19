@@ -17,17 +17,18 @@
 
 #include "EventsWindow.h"
 #include "DVRServersView.h"
-#include "EventSourcesModel.h"
+#include "model/EventSourcesModel.h"
 #include "EventsView.h"
 #include "EventTimelineWidget.h"
 #include "EventViewWindow.h"
 #include "EventTypesFilter.h"
 #include "EventTagsView.h"
-#include "EventTagsModel.h"
-#include "EventsModel.h"
+#include "model/EventTagsModel.h"
+#include "model/EventsModel.h"
 #include "core/BluecherryApp.h"
 #include "event/ModelEventsCursor.h"
 #include "ui/MainWindow.h"
+#include "ui/model/DVRServersProxyModel.h"
 #include "event/CameraEventFilter.h"
 #include "event/EventDownloadManager.h"
 #include "event/EventList.h"
@@ -65,7 +66,13 @@ EventsWindow::EventsWindow(QWidget *parent)
     /* Filters */
     m_sourcesView = new DVRServersView;
     EventSourcesModel *sourcesModel = new EventSourcesModel(bcApp->serverRepository(), m_sourcesView);
-    m_sourcesView->setModel(sourcesModel);
+
+    DVRServersProxyModel *proxyModel = new DVRServersProxyModel(sourcesModel);
+    proxyModel->setDynamicSortFilter(true);
+    proxyModel->setSourceModel(sourcesModel);
+    proxyModel->sort(0);
+
+    m_sourcesView->setModel(proxyModel);
     m_sourcesView->setMaximumWidth(180);
     //m_sourcesView->setMaximumHeight(150);
     filtersLayout->addWidget(m_sourcesView);

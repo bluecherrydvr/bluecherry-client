@@ -20,45 +20,35 @@
 #include "server/DVRServer.h"
 #include "server/DVRServerConfiguration.h"
 #include "core/BluecherryApp.h"
+#include "core/CameraPtzControl.h"
 #include "core/MJpegStream.h"
 #include "core/LiveStream.h"
-#include <QXmlStreamReader>
 #include <QMimeData>
 #include <QSettings>
+#include <QXmlStreamReader>
 
-DVRCamera::DVRCamera(DVRCameraData *dt)
-    : QObject(), d(dt)
+DVRCamera::DVRCamera(int id, DVRServer *server)
+    : QObject(), m_data(id, server), m_isOnline(false), m_recordingState(NoRecording)
 {
-    connectData();
+    connect(&m_data, SIGNAL(changed()), this, SIGNAL(dataUpdated()));
 }
 
-void DVRCamera::connectData()
+DVRCamera::~DVRCamera()
 {
-    if (!d)
-        return;
-
-    connect(d.data(), SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
-    connect(d.data(), SIGNAL(dataUpdated()), this, SIGNAL(dataUpdated()));
-    connect(d.data(), SIGNAL(recordingStateChanged(int)), this, SIGNAL(recordingStateChanged(int)));
 }
 
-void DVRCamera::disconnectData()
+DVRCameraData & DVRCamera::data()
 {
-    if (!d)
-        return;
-
-    disconnect(d.data(), SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
-    disconnect(d.data(), SIGNAL(dataUpdated()), this, SIGNAL(dataUpdated()));
-    disconnect(d.data(), SIGNAL(recordingStateChanged(int)), this, SIGNAL(recordingStateChanged(int)));
+    return m_data;
 }
 
 void DVRCamera::setOnline(bool on)
 {
-    if (!d || on == d->isOnline)
+    if (on == m_isOnline)
         return;
 
-    d->isOnline = on;
-    emit d->onlineChanged(isOnline());
+    m_isOnline = on;
+    emit onlineChanged(isOnline());
 }
 
 DVRCamera::PtzProtocol DVRCamera::parseProtocol(const QString &protocol)
@@ -71,70 +61,17 @@ DVRCamera::PtzProtocol DVRCamera::parseProtocol(const QString &protocol)
         return UnknownProtocol;
 }
 
-bool DVRCamera::parseXML(QXmlStreamReader &xml)
-{
-    Q_ASSERT(xml.isStartElement() && xml.name() == QLatin1String("device"));
-
-    QString name;
-    d->ptzProtocol = UnknownProtocol;
-
-    while (xml.readNext() != QXmlStreamReader::Invalid)
-    {
-        if (xml.tokenType() == QXmlStreamReader::EndElement && xml.name() == QLatin1String("device"))
-            break;
-        else if (xml.tokenType() != QXmlStreamReader::StartElement)
-            continue;
-
-        if (xml.name() == QLatin1String("device_name"))
-        {
-            name = xml.readElementText();
-        }
-        else if (xml.name() == QLatin1String("ptz_control_protocol"))
-        {
-            d->ptzProtocol = parseProtocol(xml.readElementText());
-        }
-        else if (xml.name() == QLatin1String("disabled"))
-        {
-            bool ok = false;
-            d->isDisabled = xml.readElementText().toInt(&ok);
-            if (!ok)
-                d->isDisabled = false;
-        }
-        else
-            xml.skipCurrentElement();
-    }
-
-    if (name.isEmpty())
-        name = QString::fromLatin1("#%2").arg(uniqueId());
-
-    d->displayName = name;
-    QUrl url;
-    url.setScheme(QLatin1String("rtsp"));
-    url.setUserName(server()->configuration()->username());
-    url.setPassword(server()->configuration()->password());
-    url.setHost(server()->url().host());
-    url.setPort(server()->rtspPort());
-    url.setPath(QString::fromLatin1("live/") + QString::number(d->uniqueID));
-    d->streamUrl = url.toString().toLatin1();
-    d->isLoaded = true;
-
-    d->doDataUpdated();
-    /* Changing stream URL or disabled flag will change online state */
-    emit d->onlineChanged(isOnline());
-    return true;
-}
-
 LiveStream * DVRCamera::liveStream()
 {
-    if (!d->liveStream)
+    if (!m_liveStream)
     {
         LiveStream * re = new LiveStream(this);
-        QObject::connect(d.data(), SIGNAL(onlineChanged(bool)), re, SLOT(setOnline(bool)));
+        connect(this, SIGNAL(onlineChanged(bool)), re, SLOT(setOnline(bool)));
         re->setOnline(isOnline());
-        d->liveStream = re;
+        m_liveStream = re;
     }
 
-    d->liveStream.data();
+    return m_liveStream.data();
 }
 
 QList<DVRCamera *> DVRCamera::fromMimeData(const QMimeData *mimeData)
@@ -152,4 +89,51 @@ QList<DVRCamera *> DVRCamera::fromMimeData(const QMimeData *mimeData)
     }
 
     return result;
+}
+
+QSharedPointer<CameraPtzControl> DVRCamera::sharedPtzControl()
+{
+    QSharedPointer<CameraPtzControl> result = m_ptzControl;
+    if (!result)
+    {
+        result = QSharedPointer<CameraPtzControl>(new CameraPtzControl(this));
+        m_ptzControl = result.toWeakRef();
+    }
+
+    return result;
+}
+
+void DVRCamera::setStreamUrl(const QByteArray &streamUrl)
+{
+    if (m_streamUrl == streamUrl)
+        return;
+
+    m_streamUrl = streamUrl;
+    emit dataUpdated();
+    emit onlineChanged(isOnline());
+}
+
+QByteArray DVRCamera::streamUrl() const
+{
+    return m_streamUrl;
+}
+
+bool DVRCamera::isOnline() const
+{
+    return m_isOnline && !m_data.disabled() && !m_streamUrl.isEmpty();
+}
+
+DVRCamera::PtzProtocol DVRCamera::ptzProtocol() const
+{
+    return static_cast<PtzProtocol>(m_data.ptzProtocol());
+}
+
+bool DVRCamera::hasPtz() const
+{
+    return m_data.ptzProtocol() > 0;
+}
+
+RecordingState DVRCamera::recordingState() const
+{
+    return RecordingState(m_recordingState);
 }

@@ -16,9 +16,9 @@
  */
 
 #include "EventViewWindow.h"
-#include "EventsModel.h"
+#include "model/EventsModel.h"
 #include "EventTagsView.h"
-#include "EventTagsModel.h"
+#include "model/EventTagsModel.h"
 #include "EventCommentsWidget.h"
 #include "EventVideoPlayer.h"
 #include "ExpandingTextEdit.h"

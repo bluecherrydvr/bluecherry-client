@@ -36,7 +36,7 @@ public:
         DVRCameraRole
     };
 
-    explicit DVRServersModel(DVRServerRepository *serverRepository, QObject *parent = 0);
+    explicit DVRServersModel(DVRServerRepository *serverRepository, bool onlyName, QObject *parent = 0);
 
     DVRServer * serverForRow(const QModelIndex &index) const;
     DVRCamera * cameraForRow(const QModelIndex &index) const;
@@ -74,6 +74,7 @@ private:
 
     QVector<Item> items;
     QIcon statusIcon, statusErrorIcon, statusAlertIcon;
+    bool m_onlyName;
     bool m_offlineDisabled;
 };
 

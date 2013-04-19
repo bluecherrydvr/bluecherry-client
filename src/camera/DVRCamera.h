@@ -27,6 +27,7 @@
 #include <QXmlStreamReader>
 #include <QMetaType>
 
+class CameraPtzControl;
 class DVRServer;
 class LiveStream;
 class QMimeData;
@@ -45,25 +46,25 @@ public:
         PelcoPtz
     };
 
+    explicit DVRCamera(int id, DVRServer *server);
+    virtual ~DVRCamera();
+
+    DVRCameraData & data();
+
     static PtzProtocol parseProtocol(const QString &protocol);
 
-    QObject * getQObject() const { return d ? d.data() : 0; }
+    QSharedPointer<CameraPtzControl> sharedPtzControl();
 
-    DVRServer *server() const { return d ? d->server : 0; }
-    int uniqueId() const { return d ? d->uniqueID : -1; }
-    QString displayName() const { return d ? d->displayName : QString(); }
-    QByteArray streamUrl() const { return d ? d->streamUrl : QByteArray(); }
-    bool isOnline() const { return d && d->isOnline && !d->isDisabled && !d->streamUrl.isEmpty(); }
-    bool isDisabled() const { return d && d->isDisabled; }
-    bool canStream() const { return d && !d->streamUrl.isEmpty() && isOnline(); }
+    void setStreamUrl(const QByteArray &streamUrl);
+    QByteArray streamUrl() const;
+
+    bool isOnline() const;
     LiveStream * liveStream();
 
-    PtzProtocol ptzProtocol() const { return d ? static_cast<PtzProtocol>(d->ptzProtocol) : NoPtz; }
-    bool hasPtz() const { return d ? (d->ptzProtocol > 0) : false; }
+    PtzProtocol ptzProtocol() const;
+    bool hasPtz() const;
 
-    RecordingState recordingState() const { return d ? RecordingState(d->recordingState) : NoRecording; }
-
-    bool parseXML(QXmlStreamReader &xml);
+    RecordingState recordingState() const;
 
     static QList<DVRCamera *> fromMimeData(const QMimeData *mimeData);
 
@@ -73,14 +74,14 @@ signals:
     void recordingStateChanged(int recordingState);
 
 private:
-    QExplicitlySharedDataPointer<DVRCameraData> d;
-
-    DVRCamera(DVRCameraData *dt);
+    DVRCameraData m_data;
+    QWeakPointer<CameraPtzControl> m_ptzControl;
+    QWeakPointer<LiveStream> m_liveStream;
+    QByteArray m_streamUrl;
+    bool m_isOnline;
+    qint8 m_recordingState;
 
     void setOnline(bool on);
-
-    void connectData();
-    void disconnectData();
 
 };
 
