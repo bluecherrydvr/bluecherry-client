@@ -17,6 +17,8 @@ private Q_SLOTS:
     void testSingleItems_data();
     void testMedia();
     void testMedia_data();
+    void testCategoryLevel();
+    void testCategoryLevel_data();
 
 private:
     QList<EventData *> parseFile(const QString &fileName);
@@ -315,7 +317,6 @@ void EventParserTestCase::testMedia()
     QVERIFY(!event->server());
     QCOMPARE(event->mediaId(), mediaId);
     QCOMPARE(event->hasMedia(), hasMedia);
-    QTest::addColumn<bool>("hasMedia");
 }
 
 void EventParserTestCase::testMedia_data()
@@ -343,6 +344,130 @@ void EventParserTestCase::testMedia_data()
         << QString::fromLatin1("without-media-verbatim-value.xml")
         << (long long)-1
         << false;
+}
+
+void EventParserTestCase::testCategoryLevel()
+{
+    QFETCH(QString, fileName);
+    QFETCH(EventLevel::Level, level);
+    QFETCH(EventType::Type, type);
+
+    EventData *event = parseSingleEventFile(fileName);
+    QVERIFY(!event->server());
+    QCOMPARE(event->level().level, level);
+    QCOMPARE(event->type().type, type);
+}
+
+void EventParserTestCase::testCategoryLevel_data()
+{
+    QTest::addColumn<QString>("fileName");
+    QTest::addColumn<EventLevel::Level>("level");
+    QTest::addColumn<EventType::Type>("type");
+
+    QTest::newRow("Category/level invalid format")
+        << QString::fromLatin1("category-level-invalid-format.xml")
+        << EventLevel::Info
+        << EventType::UnknownType;
+
+    QTest::newRow("Category/level invalid level")
+        << QString::fromLatin1("category-level-invalid-level.xml")
+        << EventLevel::Info
+        << EventType::CameraContinuous;
+
+    QTest::newRow("Category/level invalid location id")
+        << QString::fromLatin1("category-level-invalid-location-id.xml")
+        << EventLevel::Info
+        << EventType::CameraContinuous;
+
+    QTest::newRow("Category/level invalid scheme")
+        << QString::fromLatin1("category-level-invalid-scheme.xml")
+        << EventLevel::Info
+        << EventType::UnknownType;
+
+    QTest::newRow("Category/level no scheme")
+        << QString::fromLatin1("category-level-invalid-format.xml")
+        << EventLevel::Info
+        << EventType::UnknownType;
+
+    QTest::newRow("Category/level invalid category")
+        << QString::fromLatin1("category-level-no-scheme.xml")
+        << EventLevel::Info
+        << EventType::UnknownType;
+
+    QTest::newRow("Category/level level alarm")
+        << QString::fromLatin1("category-level-alarm.xml")
+        << EventLevel::Alarm
+        << EventType::CameraContinuous;
+
+    QTest::newRow("Category/level level critical")
+        << QString::fromLatin1("category-level-critical.xml")
+        << EventLevel::Critical
+        << EventType::CameraContinuous;
+
+    QTest::newRow("Category/level level info")
+        << QString::fromLatin1("category-level-info.xml")
+        << EventLevel::Info
+        << EventType::CameraContinuous;
+
+    QTest::newRow("Category/level level warning")
+        << QString::fromLatin1("category-level-warning.xml")
+        << EventLevel::Warning
+        << EventType::CameraContinuous;
+
+    QTest::newRow("Category/level category motion")
+        << QString::fromLatin1("category-level-camera-motion.xml")
+        << EventLevel::Info
+        << EventType::CameraMotion;
+
+    QTest::newRow("Category/level category camera continuous")
+        << QString::fromLatin1("category-level-camera-continuous.xml")
+        << EventLevel::Info
+        << EventType::CameraContinuous;
+
+    QTest::newRow("Category/level category camera not found")
+        << QString::fromLatin1("category-level-camera-not-found.xml")
+        << EventLevel::Info
+        << EventType::CameraNotFound;
+
+    QTest::newRow("Category/level category camera video lost")
+        << QString::fromLatin1("category-level-camera-video-lost.xml")
+        << EventLevel::Info
+        << EventType::CameraVideoLost;
+
+    QTest::newRow("Category/level category camera audio lost")
+        << QString::fromLatin1("category-level-camera-audio-lost.xml")
+        << EventLevel::Info
+        << EventType::CameraAudioLost;
+
+    QTest::newRow("Category/level category system disk space")
+        << QString::fromLatin1("category-level-system-disk-space.xml")
+        << EventLevel::Info
+        << EventType::SystemDiskSpace;
+
+    QTest::newRow("Category/level category system crash")
+        << QString::fromLatin1("category-level-system-crash.xml")
+        << EventLevel::Info
+        << EventType::SystemCrash;
+
+    QTest::newRow("Category/level category system boot")
+        << QString::fromLatin1("category-level-system-boot.xml")
+        << EventLevel::Info
+        << EventType::SystemBoot;
+
+    QTest::newRow("Category/level category system shutdown")
+        << QString::fromLatin1("category-level-system-shutdown.xml")
+        << EventLevel::Info
+        << EventType::SystemShutdown;
+
+    QTest::newRow("Category/level category system reboot")
+        << QString::fromLatin1("category-level-system-reboot.xml")
+        << EventLevel::Info
+        << EventType::SystemReboot;
+
+    QTest::newRow("Category/level category system power outage")
+        << QString::fromLatin1("category-level-system-power-outage.xml")
+        << EventLevel::Info
+        << EventType::SystemPowerOutage;
 }
 
 QTEST_MAIN(EventParserTestCase)
