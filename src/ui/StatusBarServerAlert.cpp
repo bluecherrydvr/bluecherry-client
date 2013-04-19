@@ -54,7 +54,7 @@ void StatusBarServerAlert::updateAlert()
     QString message;
 
     if (servers.size() == 1)
-        message = tr("Alert on %1").arg(servers[0]->configuration()->displayName());
+        message = tr("Alert on %1").arg(servers[0]->configuration().displayName());
     else if (servers.size() > 1)
         message = tr("Alerts on %1 servers").arg(servers.size());
 

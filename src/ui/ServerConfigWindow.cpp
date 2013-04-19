@@ -93,7 +93,7 @@ void ServerConfigWindow::setServer(DVRServer *server)
     if (server)
     {
         m_webView->load(server->url());
-        setWindowTitle(tr("Bluecherry - %1").arg(server->configuration()->displayName()));
+        setWindowTitle(tr("Bluecherry - %1").arg(server->configuration().displayName()));
     }
 
     emit serverChanged(m_server);

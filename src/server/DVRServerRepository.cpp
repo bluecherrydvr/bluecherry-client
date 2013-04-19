@@ -37,7 +37,7 @@ DVRServer * DVRServerRepository::createServer(const QString& name)
     int id = ++m_maxServerId;
 
     DVRServer *server = new DVRServer(id, this);
-    server->configuration()->setDisplayName(name);
+    server->configuration().setDisplayName(name);
 
     m_servers.append(server);
         connect(server, SIGNAL(serverRemoved(DVRServer*)), this, SLOT(onServerRemoved(DVRServer*)));
@@ -103,7 +103,7 @@ const QList<DVRServer *> & DVRServerRepository::servers() const
 DVRServer * DVRServerRepository::serverByID(int id) const
 {
     foreach (DVRServer *server, m_servers)
-        if (server->configuration()->id() == id)
+        if (server->configuration().id() == id)
             return server;
 
     return 0;

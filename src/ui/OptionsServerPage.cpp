@@ -16,7 +16,8 @@
  */
 
 #include "OptionsServerPage.h"
-#include "DVRServersModel.h"
+#include "model/DVRServersModel.h"
+#include "model/DVRServersProxyModel.h"
 #include "core/BluecherryApp.h"
 #include "server/DVRServer.h"
 #include "server/DVRServerConfiguration.h"
@@ -44,7 +45,15 @@ OptionsServerPage::OptionsServerPage(DVRServerRepository *serverRepository, QWid
 
     /* Servers list */
     m_serversView = new QTreeView;
-    m_serversView->setModel(new DVRServersModel(bcApp->serverRepository(), m_serversView));
+
+    m_model = new DVRServersModel(bcApp->serverRepository(), false, m_serversView);
+    m_proxyModel = new DVRServersProxyModel(m_model);
+    m_proxyModel->setDynamicSortFilter(true);
+    m_proxyModel->setSourceModel(m_model);
+    m_proxyModel->sort(0);
+
+    m_serversView->setModel(m_proxyModel);
+
     m_serversView->header()->setHighlightSections(false);
     m_serversView->header()->setResizeMode(QHeaderView::ResizeToContents);
     m_serversView->header()->setResizeMode(0, QHeaderView::Stretch);
@@ -141,15 +150,20 @@ OptionsServerPage::OptionsServerPage(DVRServerRepository *serverRepository, QWid
 
 void OptionsServerPage::setCurrentServer(DVRServer *server)
 {
-    QModelIndex index = static_cast<DVRServersModel*>(m_serversView->model())->indexForServer(server);
-    if (index.isValid())
-        m_serversView->setCurrentIndex(index);
+    QModelIndex index = m_model->indexForServer(server);
+    if (!index.isValid())
+        return;
+
+    QModelIndex proxyIndex = m_proxyModel->mapFromSource(index);
+    if (!proxyIndex.isValid())
+        return;
+    
+    m_serversView->setCurrentIndex(proxyIndex);
 }
 
 void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const QModelIndex &oldIndex)
 {
-    DVRServer *server = static_cast<DVRServersModel*>(m_serversView->model())->
-                        serverForRow(oldIndex);
+    DVRServer *server = oldIndex.data(DVRServersModel::DVRServerRole).value<DVRServer *>();
     if (server)
     {
         saveChanges(server);
@@ -157,7 +171,7 @@ void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const 
         m_connectionStatus->setVisible(false);
     }
 
-    server = static_cast<DVRServersModel*>(m_serversView->model())->serverForRow(newIndex);
+    server = newIndex.data(DVRServersModel::DVRServerRole).value<DVRServer *>();
     if (!server)
     {
         m_nameEdit->clear();
@@ -168,12 +182,12 @@ void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const 
         return;
     }
 
-    m_nameEdit->setText(server->configuration()->displayName());
-    m_hostnameEdit->setText(server->configuration()->hostname());
+    m_nameEdit->setText(server->configuration().displayName());
+    m_hostnameEdit->setText(server->configuration().hostname());
     m_portEdit->setText(QString::number(server->serverPort()));
-    m_usernameEdit->setText(server->configuration()->username());
-    m_passwordEdit->setText(server->configuration()->password());
-    m_autoConnect->setChecked(server->configuration()->autoConnect());
+    m_usernameEdit->setText(server->configuration().username());
+    m_passwordEdit->setText(server->configuration().password());
+    m_autoConnect->setChecked(server->configuration().autoConnect());
 
     connect(server, SIGNAL(loginSuccessful()), SLOT(setLoginSuccessful()));
     connect(server, SIGNAL(loginError(QString)), SLOT(setLoginError(QString)));
@@ -197,8 +211,8 @@ void OptionsServerPage::checkServer()
 void OptionsServerPage::addNewServer()
 {
     DVRServer *server = m_serverRepository->createServer(tr("New Server"));
-    server->configuration()->setAutoConnect(true);
-    server->configuration()->setPort(7001);
+    server->configuration().setAutoConnect(true);
+    server->configuration().setPort(7001);
 
     if (!m_serversView->currentIndex().isValid())
         saveChanges(server);
@@ -210,14 +224,13 @@ void OptionsServerPage::addNewServer()
 
 void OptionsServerPage::deleteServer()
 {
-    DVRServer *server = static_cast<DVRServersModel*>(m_serversView->model())->
-                        serverForRow(m_serversView->currentIndex());
+    DVRServer *server = m_serversView->currentIndex().data(DVRServersModel::DVRServerRole).value<DVRServer *>();
 
     if (!server)
         return;
 
     QMessageBox dlg(QMessageBox::Question, tr("Delete DVR Server"), tr("Are you sure you want to delete <b>%1</b>?")
-                    .arg(Qt::escape(server->configuration()->displayName())), QMessageBox::NoButton, this);
+                    .arg(Qt::escape(server->configuration().displayName())), QMessageBox::NoButton, this);
     QPushButton *delBtn = dlg.addButton(tr("Delete"), QMessageBox::DestructiveRole);
     dlg.addButton(QMessageBox::Cancel);
     dlg.exec();
@@ -243,8 +256,7 @@ void OptionsServerPage::saveChanges(DVRServer *server)
 {
     if (!server)
     {
-        server = static_cast<DVRServersModel*>(m_serversView->model())->
-                 serverForRow(m_serversView->currentIndex());
+        server = m_serversView->currentIndex().data(DVRServersModel::DVRServerRole).value<DVRServer *>();
         if (!server)
             return;
     }
@@ -253,36 +265,36 @@ void OptionsServerPage::saveChanges(DVRServer *server)
 
     if (m_nameEdit->isModified())
     {
-        server->configuration()->setDisplayName(m_nameEdit->text().trimmed());
+        server->configuration().setDisplayName(m_nameEdit->text().trimmed());
         m_nameEdit->setModified(false);
     }
     if (m_hostnameEdit->isModified())
     {
         m_hostnameEdit->setText(m_hostnameEdit->text().trimmed());
-        server->configuration()->setHostname(m_hostnameEdit->text());
+        server->configuration().setHostname(m_hostnameEdit->text());
         m_hostnameEdit->setModified(false);
         connectionModified = true;
     }
     if (m_portEdit->isModified())
     {
-        server->configuration()->setPort(m_portEdit->text().toInt());
+        server->configuration().setPort(m_portEdit->text().toInt());
         m_portEdit->setModified(false);
         connectionModified = true;
     }
     if (m_usernameEdit->isModified())
     {
-        server->configuration()->setUsername(m_usernameEdit->text());
+        server->configuration().setUsername(m_usernameEdit->text());
         m_usernameEdit->setModified(false);
         connectionModified = true;
     }
     if (m_passwordEdit->isModified())
     {
-        server->configuration()->setPassword(m_passwordEdit->text());
+        server->configuration().setPassword(m_passwordEdit->text());
         m_passwordEdit->setModified(false);
         connectionModified = true;
     }
 
-    server->configuration()->setAutoConnect(m_autoConnect->isChecked());
+    server->configuration().setAutoConnect(m_autoConnect->isChecked());
 
     if (connectionModified || (m_autoConnect->isChecked() && !server->isOnline()))
         server->login();

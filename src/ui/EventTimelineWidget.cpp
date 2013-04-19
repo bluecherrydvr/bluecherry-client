@@ -17,7 +17,7 @@
 
 #include "EventTimelineWidget.h"
 #include "EventTimelineDatePainter.h"
-#include "EventsModel.h"
+#include "model/EventsModel.h"
 #include "TimeRangeScrollBar.h"
 #include "core/EventData.h"
 #include "server/DVRServer.h"
@@ -506,7 +506,7 @@ void EventTimelineWidget::updateRowsMapDelayed(int start)
 inline static bool serverSort(const ServerData *s1, const ServerData *s2)
 {
     Q_ASSERT(s1 && s2 && s1->server && s2->server);
-    return QString::localeAwareCompare(s1->server->configuration()->displayName(), s2->server->configuration()->displayName()) < 0;
+    return QString::localeAwareCompare(s1->server->configuration().displayName(), s2->server->configuration().displayName()) < 0;
 }
 
 inline static bool locationSort(const LocationData *s1, const LocationData *s2)
@@ -907,7 +907,7 @@ void EventTimelineWidget::paintLegend(QPainter& p, int width)
         {
             p.save();
             p.setFont(serverFont);
-            p.drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, (*it)->toServer()->server->configuration()->displayName());
+            p.drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, (*it)->toServer()->server->configuration().displayName());
             p.restore();
         }
         else
@@ -996,7 +996,7 @@ int EventTimelineWidget::leftPadding() const
 
     for (QHash<DVRServer*,ServerData*>::ConstIterator it = serversMap.begin(); it != serversMap.end(); ++it)
     {
-        cachedLeftPadding = qMax(cachedLeftPadding, serverfm.width((*it)->server->configuration()->displayName()) + 16);
+        cachedLeftPadding = qMax(cachedLeftPadding, serverfm.width((*it)->server->configuration().displayName()) + 16);
 
         for (QHash<int,LocationData*>::ConstIterator lit = (*it)->locationsMap.begin();
              lit != (*it)->locationsMap.end(); ++lit)

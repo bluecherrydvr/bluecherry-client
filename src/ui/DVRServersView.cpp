@@ -16,7 +16,7 @@
  */
 
 #include "DVRServersView.h"
-#include "DVRServersModel.h"
+#include "model/DVRServersModel.h"
 #include "OptionsDialog.h"
 #include "OptionsServerPage.h"
 #include "ServerConfigWindow.h"
@@ -37,14 +37,6 @@ DVRServersView::DVRServersView(QWidget *parent)
     setContextMenuPolicy(Qt::DefaultContextMenu);
     setDragEnabled(true);
     setAnimated(true);
-
-    DVRServersModel *model = new DVRServersModel(bcApp->serverRepository(), this);
-    model->setOfflineDisabled(true);
-    setModel(model);
-
-    /* We only show the server name in this list; hide other columns */
-    for (int i = 1, n = model->columnCount(); i < n; ++i)
-        header()->setSectionHidden(i, true);
 }
 
 void DVRServersView::setModel(QAbstractItemModel *m)

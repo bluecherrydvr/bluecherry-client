@@ -18,43 +18,64 @@
 #include "DVRCameraData.h"
 #include "DVRCamera.h"
 #include "server/DVRServer.h"
-#include "server/DVRServerConfiguration.h"
-#include <QSettings>
 
-DVRCameraData::DVRCameraData(DVRServer *s, int i)
-    : server(s), uniqueID(i), isLoaded(false), isOnline(false), isDisabled(false),
-      ptzProtocol(DVRCamera::UnknownProtocol), recordingState(NoRecording)
+DVRCameraData::DVRCameraData(int id, DVRServer *server)
+    : m_id(id), m_server(server), m_disabled(false), m_ptzProtocol(DVRCamera::UnknownProtocol)
 {
-    loadSavedSettings();
 }
 
 DVRCameraData::~DVRCameraData()
 {
 }
 
-void DVRCameraData::loadSavedSettings()
+void DVRCameraData::setDisplayName(const QString &name)
 {
-    QSettings settings;
-    displayName = settings.value(QString::fromLatin1("servers/%1/cameras/%2").arg(server->configuration()->id()).arg(uniqueID)).toString();
-}
-
-void DVRCameraData::doDataUpdated()
-{
-    if (server)
-    {
-        QSettings settings;
-        settings.beginGroup(QString::fromLatin1("servers/%1/cameras/").arg(server->configuration()->id()));
-        settings.setValue(QString::number(uniqueID), displayName);
-    }
-
-    emit dataUpdated();
-}
-
-void DVRCameraData::setRecordingState(int state)
-{
-    if (state == recordingState)
+    if (m_displayName == name)
         return;
 
-    recordingState = RecordingState(state);
-    emit recordingStateChanged(state);
+    m_displayName = name;
+    emit changed();
+}
+
+void DVRCameraData::setDisabled(bool disabled)
+{
+    if (m_disabled == disabled)
+        return;
+
+    m_disabled = disabled;
+    emit changed();
+}
+
+void DVRCameraData::setPtzProtocol(qint8 ptzProtocol)
+{
+    if (m_ptzProtocol == ptzProtocol)
+        return;
+
+    m_ptzProtocol = ptzProtocol;
+    emit changed();
+}
+
+int DVRCameraData::id() const
+{
+    return m_id;
+}
+
+DVRServer* DVRCameraData::server() const
+{
+    return m_server;
+}
+
+QString DVRCameraData::displayName() const
+{
+    return m_displayName;
+}
+
+bool DVRCameraData::disabled() const
+{
+    return m_disabled;
+}
+
+qint8 DVRCameraData::ptzProtocol() const
+{
+    return m_ptzProtocol;
 }

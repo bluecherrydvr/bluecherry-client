@@ -28,8 +28,8 @@
 #include <QMimeData>
 #include <QDataStream>
 
-DVRServersModel::DVRServersModel(DVRServerRepository *serverRepository, QObject *parent)
-    : QAbstractItemModel(parent), m_offlineDisabled(false)
+DVRServersModel::DVRServersModel(DVRServerRepository *serverRepository, bool onlyName, QObject *parent)
+    : QAbstractItemModel(parent), m_offlineDisabled(false), m_onlyName(onlyName)
 {
     Q_ASSERT(serverRepository);
 
@@ -89,7 +89,7 @@ void DVRServersModel::cameraAdded(DVRCamera *camera)
 {
     Q_ASSERT(camera);
 
-    QModelIndex parent = indexForServer(camera->server());
+    QModelIndex parent = indexForServer(camera->data().server());
     if (!parent.isValid())
         return;
 
@@ -104,7 +104,7 @@ void DVRServersModel::cameraAdded(DVRCamera *camera)
 
 void DVRServersModel::cameraRemoved(DVRCamera *camera)
 {
-    QModelIndex parent = indexForServer(camera->server());
+    QModelIndex parent = indexForServer(camera->data().server());
     if (!parent.isValid())
         return;
 
@@ -168,7 +168,7 @@ QModelIndex DVRServersModel::indexForCamera(DVRCamera *camera) const
     {
         const Item &it = items[i];
 
-        if (it.server == camera->server())
+        if (it.server == camera->data().server())
         {
             int r = it.cameras.indexOf(camera);
             if (r < 0)
@@ -205,7 +205,7 @@ int DVRServersModel::rowCount(const QModelIndex &parent) const
 int DVRServersModel::columnCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return 3;
+    return m_onlyName ? 1 : 3;
 }
 
 QModelIndex DVRServersModel::index(int row, int column, const QModelIndex &parent) const
@@ -251,12 +251,12 @@ Qt::ItemFlags DVRServersModel::flags(const QModelIndex &index) const
     {
         camera = cameraForRow(index);
         if (camera)
-            s = camera->server();
+            s = camera->data().server();
     }
     else
         s = serverForRow(index);
 
-    if (!m_offlineDisabled || (s && s->isOnline() && (!camera || !camera->isDisabled())))
+    if (!m_offlineDisabled || (s && s->isOnline() && (!camera || !camera->data().disabled())))
         re |= Qt::ItemIsEnabled;
     else
         return re;
@@ -279,9 +279,9 @@ QVariant DVRServersModel::data(const QModelIndex &index, int role) const
         if (role == Qt::ToolTipRole)
         {
             return tr("<span style='white-space:nowrap'><b>%1</b><br>%3 @ %2</span>", "tooltip")
-                    .arg(Qt::escape(server->configuration()->displayName()))
-                    .arg(Qt::escape(server->configuration()->hostname()))
-                    .arg(Qt::escape(server->configuration()->username()));
+                    .arg(Qt::escape(server->configuration().displayName()))
+                    .arg(Qt::escape(server->configuration().hostname()))
+                    .arg(Qt::escape(server->configuration().username()));
         }
         else if (role == DVRServerRole)
             return QVariant::fromValue(server);
@@ -290,7 +290,7 @@ QVariant DVRServersModel::data(const QModelIndex &index, int role) const
         {
         case 0:
             if (role == Qt::DisplayRole || role == Qt::EditRole)
-                return server->configuration()->displayName();
+                return server->configuration().displayName();
             else if (role == Qt::DecorationRole)
             {
                 if (server->status() == DVRServer::LoginError)
@@ -307,11 +307,11 @@ QVariant DVRServersModel::data(const QModelIndex &index, int role) const
             break;
         case 1:
             if (role == Qt::DisplayRole || role == Qt::EditRole)
-                return server->configuration()->hostname();
+                return server->configuration().hostname();
             break;
         case 2:
             if (role == Qt::DisplayRole || role == Qt::EditRole)
-                return server->configuration()->username();
+                return server->configuration().username();
             break;
         }
     }
@@ -324,7 +324,7 @@ QVariant DVRServersModel::data(const QModelIndex &index, int role) const
         case DVRCameraRole:
             return QVariant::fromValue(camera);
         case Qt::DisplayRole:
-            return camera->displayName();
+            return camera->data().displayName();
         case Qt::DecorationRole:
             return QIcon(QLatin1String(":/icons/webcam.png"));
         }
@@ -369,17 +369,17 @@ bool DVRServersModel::setData(const QModelIndex &index, const QVariant &value, i
                 return false;
 
             /* dataChanged will be emitted in response to the DVRServer::changed() signal */
-            server->configuration()->setDisplayName(name);
+            server->configuration().setDisplayName(name);
         }
         break;
     case 1:
-        server->configuration()->setHostname(value.toString());
+        server->configuration().setHostname(value.toString());
         break;
     case 2:
-        server->configuration()->setUsername(value.toString());
+        server->configuration().setUsername(value.toString());
         break;
     case 3:
-        server->configuration()->setPassword(value.toString());
+        server->configuration().setPassword(value.toString());
         break;
     default:
         return false;

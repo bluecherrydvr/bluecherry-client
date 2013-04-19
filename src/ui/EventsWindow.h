@@ -19,7 +19,7 @@
 #define EVENTSWINDOW_H
 
 #include <QWidget>
-#include "EventsModel.h"
+#include "model/EventsModel.h"
 
 class DVRServersView;
 class EventsView;

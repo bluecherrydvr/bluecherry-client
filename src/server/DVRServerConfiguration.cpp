@@ -37,36 +37,54 @@ void DVRServerConfiguration::setDisplayName(const QString &name)
 
 void DVRServerConfiguration::setHostname(const QString &hostname)
 {
+    if (m_hostname == hostname)
+        return;
+
     m_hostname = hostname;
     emit changed();
 }
 
 void DVRServerConfiguration::setPort(int port)
 {
+    if (m_port == port)
+        return;
+
     m_port = port;
     emit changed();
 }
 
 void DVRServerConfiguration::setUsername(const QString &username)
 {
+    if (m_username == username)
+        return;
+
     m_username = username;
     emit changed();
 }
 
 void DVRServerConfiguration::setPassword(const QString &password)
 {
+    if (m_password == password)
+        return;
+
     m_password = password;
     emit changed();
 }
 
 void DVRServerConfiguration::setAutoConnect(bool autoConnect)
 {
+    if (m_autoConnect == autoConnect)
+        return;
+
     m_autoConnect = autoConnect;
     emit changed();
 }
 
 void DVRServerConfiguration::setSslDigest(const QByteArray &sslDigest)
 {
+    if (m_sslDigest == sslDigest)
+        return;
+
     m_sslDigest = sslDigest;
     emit changed();
 }
