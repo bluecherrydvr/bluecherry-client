@@ -50,8 +50,7 @@ int main(int argc, char *argv[])
     a.setOrganizationName(QLatin1String("bluecherry"));
     a.setOrganizationDomain(QLatin1String("bluecherrydvr.com"));
     a.setApplicationName(QLatin1String("bluecherry"));
-
-    a.setApplicationVersion(QLatin1String("2.1.0"));
+    a.setApplicationVersion(QLatin1String("2.1.1"));
 
 #ifdef Q_OS_WIN
     /* Use explorer style for fancier toolbars */
