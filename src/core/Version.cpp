@@ -90,3 +90,23 @@ bool Version::isValid() const
 {
     return m_major != 0 || m_minor != 0 || m_fix != 0;
 }
+
+quint16 Version::major() const
+{
+    return m_major;
+}
+
+quint16 Version::minor() const
+{
+    return m_minor;
+}
+
+quint16 Version::fix() const
+{
+    return m_fix;
+}
+
+QString Version::spec() const
+{
+    return m_spec;
+}

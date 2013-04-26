@@ -36,6 +36,11 @@ public:
 
     bool isValid() const;
 
+    quint16 major() const;
+    quint16 minor() const;
+    quint16 fix() const;
+    QString spec() const;
+
 private:
     quint16 m_major;
     quint16 m_minor;
