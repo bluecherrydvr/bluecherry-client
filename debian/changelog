@@ -1,3 +1,10 @@
+bluecherry-client (1:2.1.1-1) lucid; urgency=low
+
+  * Feature #94: Only report new version when it is greater that current
+  * Fixed issue with SSL handshake failures
+
+ -- Rafał Malinowski <rafal.malinowski@corp.bluecherry.net>  Fri, 26 Apr 2013 17:01:30 +0200
+
 bluecherry-client (1:2.1.0-1) lucid; urgency=low
 
   * Licence changed to GPL2+
