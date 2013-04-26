@@ -17,7 +17,7 @@
 
 #include "BluecherryApp.h"
 #include "LiveViewManager.h"
-#include "core/Version.h"
+#include "core/UpdateChecker.h"
 #include "ui/MainWindow.h"
 #include "event/EventDownloadManager.h"
 #include "network/MediaDownloadManager.h"
@@ -30,7 +30,6 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QHostAddress>
-#include <QTimer>
 #include <QFile>
 #include <QSslError>
 #include <QSslConfiguration>
@@ -47,8 +46,7 @@ BluecherryApp::BluecherryApp()
     : nam(new QNetworkAccessManager(this)), liveView(new LiveViewManager(this)),
       globalRate(new TransferRateCalculator(this)),
       m_livePaused(false), m_inPauseQuery(false),
-      m_screensaverInhibited(false),
-      m_doingUpdateCheck(false)
+      m_screensaverInhibited(false)
 {
     Q_ASSERT(!bcApp);
     bcApp = this;
@@ -82,12 +80,9 @@ BluecherryApp::BluecherryApp()
 
     sendSettingsChanged();
 
-    performVersionCheck();
-
-    QTimer *timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), SLOT(performVersionCheck()));
-    timer->setInterval(60 * 60 * 24 * 1000);
-    timer->start();
+    m_updateChecker = new UpdateChecker(nam, this);
+    connect(m_updateChecker, SIGNAL(newVersionAvailable(Version)), this, SLOT(newVersionAvailable(Version)));
+    m_updateChecker->start(60 * 60 * 24 * 1000);
 
     m_mediaDownloadManager = new MediaDownloadManager(this);
     m_mediaDownloadManager->setCookieJar(nam->cookieJar());
@@ -109,95 +104,19 @@ void BluecherryApp::saveSettings()
     m_serverRepository->storeServers();
 }
 
-void BluecherryApp::performVersionCheck()
+void BluecherryApp::newVersionAvailable(const Version &newVersion)
 {
-    qDebug() << Q_FUNC_INFO << "Performing update check";
+    QMessageBox messageBox(mainWindow);
+    messageBox.setWindowTitle(tr("Bluecherry"));
+    messageBox.setText(tr("A new Bluecherry client update is available"));
+    messageBox.setInformativeText(tr("Would you like to download version %2 now?").arg(newVersion.toString()));
+    messageBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    messageBox.button(QMessageBox::Ok)->setText(tr("Download"));
+    messageBox.button(QMessageBox::Cancel)->setText(tr("Remind Me Later"));
 
-    // we don't want multiple "upgrade?" dialogs
-    if (m_doingUpdateCheck) {
-        qDebug() << Q_FUNC_INFO << "Check in progress; ignoring";
-        return;
-    }
-
-    /* perform update check */
-    QNetworkRequest versionCheck(QString::fromLatin1("http://keycheck.bluecherrydvr.com/client_version/?v=") + QApplication::applicationVersion());
-    QNetworkReply *versionReply = nam->get(versionCheck);
-
-    /* lack of error handling here is deliberate; we really don't care if it
-     * fails. a stupid error dialog popping up because the user didn't have
-     * internet connectivity (for instance) is worse than being a bit out of date.
-     */
-    connect(versionReply, SIGNAL(finished()), SLOT(versionInfoReceived()));
-}
-
-void BluecherryApp::versionInfoReceived()
-{
-    QNetworkReply *reply = static_cast<QNetworkReply *>(sender());
-    reply->deleteLater();
-
-    if (reply->error() != QNetworkReply::NoError)
-    {
-        qDebug() << Q_FUNC_INFO << "Error from server: " << reply->errorString();
-        return;
-    }
-
-    QByteArray versionXmlData = reply->readAll();
-    QXmlStreamReader xmlStream(versionXmlData);
-
-    if (xmlStream.hasError() || !xmlStream.readNextStartElement() || xmlStream.name() != QLatin1String("response"))
-    {
-        qDebug() << Q_FUNC_INFO << "Malformed version info from server";
-        qDebug() << versionXmlData;
-        qDebug() << xmlStream.errorString();
-        return;
-    }
-
-    forever {
-        if (xmlStream.tokenType() == QXmlStreamReader::StartElement &&
-            xmlStream.name() == QLatin1String("version"))
-            break;
-
-        if (!xmlStream.readNext()) {
-            qWarning() << "Didn't find valid version info";
-            return;
-        }
-    }
-
-    QString latest = xmlStream.attributes().value(QLatin1String("latest")).toString();
-    Version currentVersion = Version::fromString(QApplication::applicationVersion());
-    Version latestVersion = Version::fromString(latest);
-
-    qDebug() << Q_FUNC_INFO << "Latest version info: " << latest;
-
-    if (currentVersion.isValid() && latestVersion.isValid() && (latestVersion > currentVersion)) {
-        qDebug() << Q_FUNC_INFO << "Version differs:";
-        qDebug() << Q_FUNC_INFO << "Current: " << QApplication::applicationVersion();
-        qDebug() << Q_FUNC_INFO << "New: " << latest;
-
-        /* slight hack to work around timers triggering while a dialog is
-         * potentially open: tell the update requester that we're busy so it
-         * doesn't go and ask for the latest version again while the dialog is
-         * already open.
-         *
-         * this is only a problem if people don't close the dialog once a day,
-         * (and don't upgrade) but we might as well.
-         */
-        m_doingUpdateCheck = true;
-
-        QMessageBox messageBox(mainWindow);
-        messageBox.setWindowTitle(tr("Bluecherry"));
-        messageBox.setText(tr("A new Bluecherry client update is available"));
-        messageBox.setInformativeText(tr("Would you like to download version %2 now?").arg(latest));
-        messageBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-        messageBox.button(QMessageBox::Ok)->setText(tr("Download"));
-        messageBox.button(QMessageBox::Cancel)->setText(tr("Remind Me Later"));
-
-        if (messageBox.exec() == QMessageBox::Ok) {
-            qDebug() << Q_FUNC_INFO << "Upgrading";
-            QDesktopServices::openUrl(QString::fromLatin1("http://www.bluecherrydvr.com/downloads/?v=%1").arg(QApplication::applicationVersion()));
-        }
-
-        m_doingUpdateCheck = false;
+    if (messageBox.exec() == QMessageBox::Ok) {
+        qDebug() << Q_FUNC_INFO << "Upgrading";
+        QDesktopServices::openUrl(QString::fromLatin1("http://www.bluecherrydvr.com/downloads/?v=%1").arg(QApplication::applicationVersion()));
     }
 }
 

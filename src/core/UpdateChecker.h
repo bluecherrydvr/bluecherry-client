@@ -15,39 +15,38 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VERSION_H
-#define VERSION_H
+#ifndef UPDATECHECKER_H
+#define UPDATECHECKER_H
 
-#include <QString>
+#include "core/Version.h"
+#include <QObject>
 
-class Version
+class QNetworkAccessManager;
+class QTimer;
+
+class UpdateChecker : public QObject
 {
+    Q_OBJECT
 
 public:
-    static Version fromString(const QString &string);
+    explicit UpdateChecker(QNetworkAccessManager *networkAccessManager, QObject *parent = 0);
+    virtual ~UpdateChecker();
 
-    explicit Version(quint16 major, quint16 minor, quint16 fix, const QString &spec);
+    void start(int interval);
+    void stop();
 
-    Version();
-    Version(const Version &copyMe);
+signals:
+    void newVersionAvailable(const Version &newVersion);
 
-    Version operator = (const Version &copyMe);
-    bool operator > (const Version &compareTo) const;
-
-    bool isValid() const;
-    QString toString() const;
-
-    quint16 major() const;
-    quint16 minor() const;
-    quint16 fix() const;
-    QString spec() const;
+private slots:
+    void performVersionCheck();
+    void versionInfoReceived();
 
 private:
-    quint16 m_major;
-    quint16 m_minor;
-    quint16 m_fix;
-    QString m_spec;
+    QNetworkAccessManager *m_networkAccessManager;
+    QTimer *m_timer;
+    bool m_doingUpdateCheck;
 
 };
 
-#endif // VERSION_H
+#endif // UPDATECHECKER_H

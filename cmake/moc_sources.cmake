@@ -28,6 +28,7 @@ set (bluecherry_client_MOC_SRCS
     src/core/PtzPresetsModel.h
     src/core/ServerRequestManager.h
     src/core/TransferRateCalculator.h
+    src/core/UpdateChecker.h
 
     src/event/EventDownloadManager.h
     src/event/EventsCursor.h
