@@ -18,6 +18,7 @@
 #include "BluecherryApp.h"
 #include "DVRServer.h"
 #include "LiveViewManager.h"
+#include "core/Version.h"
 #include "ui/MainWindow.h"
 #include "event/EventDownloadManager.h"
 #include "network/MediaDownloadManager.h"
@@ -139,10 +140,12 @@ void BluecherryApp::versionInfoReceived()
     }
 
     QString latest = xmlStream.attributes().value(QLatin1String("latest")).toString();
+    Version currentVersion = Version::fromString(QApplication::applicationVersion());
+    Version latestVersion = Version::fromString(latest);
 
     qDebug() << Q_FUNC_INFO << "Latest version info: " << latest;
 
-    if (latest != QApplication::applicationVersion()) {
+    if (currentVersion.isValid() && latestVersion.isValid() && (latestVersion > currentVersion)) {
         qDebug() << Q_FUNC_INFO << "Version differs:";
         qDebug() << Q_FUNC_INFO << "Current: " << QApplication::applicationVersion();
         qDebug() << Q_FUNC_INFO << "New: " << latest;
