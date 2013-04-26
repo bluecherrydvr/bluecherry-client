@@ -36,6 +36,7 @@ set (bluecherry_client_main_SRCS
     src/core/PtzPresetsModel.cpp
     src/core/ServerRequestManager.cpp
     src/core/TransferRateCalculator.cpp
+    src/core/Version.cpp
 
     src/event/CameraEventFilter.cpp
     src/event/EventDownloadManager.cpp
