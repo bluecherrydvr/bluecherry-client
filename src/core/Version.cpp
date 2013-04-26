@@ -90,3 +90,11 @@ bool Version::isValid() const
 {
     return m_major != 0 || m_minor != 0 || m_fix != 0;
 }
+
+QString Version::toString() const
+{
+    if (m_spec.isEmpty())
+        return QString::fromLatin1("%1.%2.%3").arg(m_major).arg(m_minor).arg(m_fix);
+    else
+        return QString::fromLatin1("%1.%2.%3.%4").arg(m_major).arg(m_minor).arg(m_fix).arg(m_spec);
+}

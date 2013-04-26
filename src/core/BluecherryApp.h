@@ -22,6 +22,7 @@
 #include <QList>
 #include <QIcon>
 #include "core/TransferRateCalculator.h"
+#include "core/Version.h"
 
 class DVRServer;
 class QNetworkAccessManager;
@@ -33,6 +34,7 @@ class QTimer;
 class LiveViewManager;
 class EventDownloadManager;
 class MediaDownloadManager;
+class UpdateChecker;
 
 class BluecherryApp : public QObject
 {
@@ -92,9 +94,8 @@ signals:
     void settingsChanged();
 
 private slots:
-    void performVersionCheck();
-    void versionInfoReceived();
     void onServerRemoved(DVRServer *server);
+    void newVersionAvailable(const Version &newVersion);
     void sslErrors(QNetworkReply *reply, const QList<QSslError> &errors);
     void aboutToQuit();
     void resetSystemActivity();
@@ -104,13 +105,13 @@ private:
     EventDownloadManager *m_eventDownloadManager;
     QList<DVRServer*> m_servers;
     int m_maxServerId;
+    UpdateChecker *m_updateChecker;
     bool m_livePaused, m_inPauseQuery, m_screensaverInhibited;
 #ifdef Q_OS_WIN
     int m_screensaveValue;
 #else
     QTimer *m_screensaveTimer;
 #endif
-    bool m_doingUpdateCheck;
 
     void loadServers();
 };
