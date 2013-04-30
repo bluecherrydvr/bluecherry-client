@@ -153,7 +153,10 @@ bool EventData::hasDuration() const
 
 void EventData::setDurationInSeconds(int durationInSeconds)
 {
-    m_durationInSeconds = durationInSeconds;
+    if (durationInSeconds < -1)
+        m_durationInSeconds = -1;
+    else
+        m_durationInSeconds = durationInSeconds;
 }
 
 bool EventData::inProgress() const

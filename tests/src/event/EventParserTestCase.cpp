@@ -328,6 +328,29 @@ void EventParserTestCase::testSingleItems_data()
         << false
         << true
         << true;
+
+    QTest::newRow("Ended before Start")
+        << QString::fromLatin1("ended-before-start.xml")
+        << (long long)1
+        << parseUTCDateTime(QLatin1String("2013/03/01 02:00:00.000"))
+        << Qt::UTC
+        << parseUTCDateTime(QLatin1String("2013/03/01 02:00:00.000"))
+        << Qt::UTC
+        << parseUTCDateTimeWithHoursOffset(QLatin1String("2013/03/01 02:00:00.000"), 0)
+        << Qt::UTC
+        << parseUTCDateTimeWithHoursOffset(QLatin1String("2013/03/01 02:00:00.000"), 0)
+        << Qt::UTC
+        << -1
+        << false
+        << true
+        << 5
+        << EventLevel::Info
+        << EventType::CameraContinuous
+        << (long long)123
+        << (short)0
+        << false
+        << true
+        << true;
 }
 
 void EventParserTestCase::testMedia()
