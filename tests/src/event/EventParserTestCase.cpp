@@ -305,6 +305,29 @@ void EventParserTestCase::testSingleItems_data()
         << false
         << true
         << true;
+
+    QTest::newRow("Timezone Changed")
+        << QString::fromLatin1("timezone-changed.xml")
+        << (long long)1
+        << parseUTCDateTime(QLatin1String("2013/01/01 01:00:00.000"))
+        << Qt::UTC
+        << parseUTCDateTime(QLatin1String("2013/01/01 01:00:30.000"))
+        << Qt::UTC
+        << parseUTCDateTimeWithHoursOffset(QLatin1String("2013/01/01 02:00:00.000"), 60)
+        << Qt::OffsetFromUTC
+        << parseUTCDateTimeWithHoursOffset(QLatin1String("2013/01/01 03:00:30.000"), 120)
+        << Qt::OffsetFromUTC
+        << 30
+        << true
+        << false
+        << 5
+        << EventLevel::Info
+        << EventType::CameraContinuous
+        << (long long)123
+        << (short)60
+        << false
+        << true
+        << true;
 }
 
 void EventParserTestCase::testMedia()
