@@ -31,7 +31,7 @@ if (BUILD_TESTING)
 endif (BUILD_TESTING)
 
 find_package (Qt4 4.8.0 REQUIRED)
-include (${QT_USE_FILE})
+include (cmake/Modules/UseQt4.cmake)
 
 add_definitions (-DQT_NO_CAST_FROM_ASCII)
 add_definitions (-DQT_NO_CAST_TO_ASCII)
