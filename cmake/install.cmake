@@ -22,5 +22,5 @@ if (UNIX AND NOT APPLE)
 
 	install (TARGETS bluecherry-client RUNTIME DESTINATION bin)
 	install (FILES "${CMAKE_CURRENT_BINARY_DIR}/linux/Bluecherry Client.desktop" DESTINATION share/applications)
-	install (FILES "res/bluecherry.png" DESTINATION share/bluecherry-client)
+	install (FILES "res/bluecherry-client.png" DESTINATION share/icons)
 endif (UNIX AND NOT APPLE)
