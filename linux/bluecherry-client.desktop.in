@@ -6,3 +6,4 @@ Categories=Network;Qt
 Comment=Bluecherry DVR Client
 Icon=${CMAKE_INSTALL_FULL_DATADIR}/icons/bluecherry-client.png
 Exec=${CMAKE_INSTALL_FULL_BINDIR}/bluecherry-client
+Terminal=false
