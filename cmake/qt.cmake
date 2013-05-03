@@ -33,6 +33,10 @@ endif (BUILD_TESTING)
 find_package (Qt4 4.8.0 REQUIRED)
 include (cmake/Modules/UseQt4.cmake)
 
+if (LINUX)
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,${QT_LIBRARY_DIR}")
+endif (LINUX)
+
 add_definitions (-DQT_NO_CAST_FROM_ASCII)
 add_definitions (-DQT_NO_CAST_TO_ASCII)
 
