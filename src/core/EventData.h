@@ -157,7 +157,6 @@ public:
 
     QString baseFileName() const;
 
-    static QList<EventData*> parseEvents(DVRServer *server, const QByteArray &input);
 };
 
 #endif // EVENTDATA_H

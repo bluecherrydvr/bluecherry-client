@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title type="text">Bluecherry Events for v2demo.bluecherrydvr.com</title>
+  <updated>2013-04-16T16:10:03-05:00</updated>
+  <id>urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6</id>
+  <link rel="self" type="application/atom+xml" href="http://v2demo.bluecherrydvr.com/events/"/>
+  <generator uri="http://www.bluecherrydvr.com/atom.html" version="1.0">
+    BluecherryDVR Events Atom Generator
+  </generator>
+  <entry>
+    <id raw="511478">http://v2demo.bluecherrydvr.com/events/?id=511478</id>
+    <title>info: continuous event on device 5</title>
+    <published>2013-04-16T16:10:03-05:00</published>
+    <updated></updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="5/info/continuous"/>
+    <content media_id="505052" media_size="">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505052</content>
+  </entry>
+  <entry>
+    <id raw="511477">http://v2demo.bluecherrydvr.com/events/?id=511477</id>
+    <title>info: continuous event on device 7</title>
+    <published>2013-04-16T16:09:54-05:00</published>
+    <updated></updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="7/info/continuous"/>
+    <content media_id="505051" media_size="">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505051</content>
+  </entry>
+  <entry>
+    <id raw="511475">http://v2demo.bluecherrydvr.com/events/?id=511475</id>
+    <title>info: continuous event on device 3</title>
+    <published>2013-04-16T16:09:39-05:00</published>
+    <updated></updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="3/info/continuous"/>
+    <content media_id="505049" media_size="">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505049</content>
+  </entry>
+  <entry>
+    <id raw="511476">http://v2demo.bluecherrydvr.com/events/?id=511476</id>
+    <title>info: continuous event on device 11</title>
+    <published>2013-04-16T16:09:39-05:00</published>
+    <updated></updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="11/info/continuous"/>
+    <content media_id="505050" media_size="">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505050</content>
+  </entry>
+  <entry>
+    <id raw="511474">http://v2demo.bluecherrydvr.com/events/?id=511474</id>
+    <title>info: continuous event on device 5</title>
+    <published>2013-04-16T15:55:02-05:00</published>
+    <updated>2013-04-16T16:10:03-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="5/info/continuous"/>
+    <content media_id="505048" media_size="26616129">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505048</content>
+  </entry>
+  <entry>
+    <id raw="511473">http://v2demo.bluecherrydvr.com/events/?id=511473</id>
+    <title>info: continuous event on device 7</title>
+    <published>2013-04-16T15:54:52-05:00</published>
+    <updated>2013-04-16T16:09:54-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="7/info/continuous"/>
+    <content media_id="505047" media_size="152189837">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505047</content>
+  </entry>
+  <entry>
+    <id raw="511471">http://v2demo.bluecherrydvr.com/events/?id=511471</id>
+    <title>info: continuous event on device 11</title>
+    <published>2013-04-16T15:54:38-05:00</published>
+    <updated>2013-04-16T16:09:39-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="11/info/continuous"/>
+    <content media_id="505045" media_size="33744386">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505045</content>
+  </entry>
+  <entry>
+    <id raw="511472">http://v2demo.bluecherrydvr.com/events/?id=511472</id>
+    <title>info: continuous event on device 3</title>
+    <published>2013-04-16T15:54:38-05:00</published>
+    <updated>2013-04-16T16:09:39-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="3/info/continuous"/>
+    <content media_id="505046" media_size="15617865">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505046</content>
+  </entry>
+  <entry>
+    <id raw="511470">http://v2demo.bluecherrydvr.com/events/?id=511470</id>
+    <title>info: continuous event on device 5</title>
+    <published>2013-04-16T15:40:01-05:00</published>
+    <updated>2013-04-16T15:55:02-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="5/info/continuous"/>
+    <content media_id="505044" media_size="26349518">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505044</content>
+  </entry>
+  <entry>
+    <id raw="511469">http://v2demo.bluecherrydvr.com/events/?id=511469</id>
+    <title>info: continuous event on device 7</title>
+    <published>2013-04-16T15:39:51-05:00</published>
+    <updated>2013-04-16T15:54:52-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="7/info/continuous"/>
+    <content media_id="505043" media_size="152200822">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505043</content>
+  </entry>
+  <entry>
+    <id raw="511467">http://v2demo.bluecherrydvr.com/events/?id=511467</id>
+    <title>info: continuous event on device 11</title>
+    <published>2013-04-16T15:39:37-05:00</published>
+    <updated>2013-04-16T15:54:38-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="11/info/continuous"/>
+    <content media_id="505041" media_size="33837036">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505041</content>
+  </entry>
+  <entry>
+    <id raw="511468">http://v2demo.bluecherrydvr.com/events/?id=511468</id>
+    <title>info: continuous event on device 3</title>
+    <published>2013-04-16T15:39:37-05:00</published>
+    <updated>2013-04-16T15:54:38-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="3/info/continuous"/>
+    <content media_id="505042" media_size="15660250">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505042</content>
+  </entry>
+  <entry>
+    <id raw="511466">http://v2demo.bluecherrydvr.com/events/?id=511466</id>
+    <title>info: continuous event on device 5</title>
+    <published>2013-04-16T15:25:00-05:00</published>
+    <updated>2013-04-16T15:40:01-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="5/info/continuous"/>
+    <content media_id="505040" media_size="26562370">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505040</content>
+  </entry>
+  <entry>
+    <id raw="511465">http://v2demo.bluecherrydvr.com/events/?id=511465</id>
+    <title>info: continuous event on device 7</title>
+    <published>2013-04-16T15:24:50-05:00</published>
+    <updated>2013-04-16T15:39:51-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="7/info/continuous"/>
+    <content media_id="505039" media_size="151355470">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505039</content>
+  </entry>
+  <entry>
+    <id raw="511463">http://v2demo.bluecherrydvr.com/events/?id=511463</id>
+    <title>info: continuous event on device 3</title>
+    <published>2013-04-16T15:24:36-05:00</published>
+    <updated>2013-04-16T15:39:37-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="3/info/continuous"/>
+    <content media_id="505037" media_size="15678246">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505037</content>
+  </entry>
+  <entry>
+    <id raw="511464">http://v2demo.bluecherrydvr.com/events/?id=511464</id>
+    <title>info: continuous event on device 11</title>
+    <published>2013-04-16T15:24:36-05:00</published>
+    <updated>2013-04-16T15:39:37-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="11/info/continuous"/>
+    <content media_id="505038" media_size="34022774">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505038</content>
+  </entry>
+  <entry>
+    <id raw="511462">http://v2demo.bluecherrydvr.com/events/?id=511462</id>
+    <title>info: continuous event on device 5</title>
+    <published>2013-04-16T15:09:59-05:00</published>
+    <updated>2013-04-16T15:25:00-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="5/info/continuous"/>
+    <content media_id="505036" media_size="26680195">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505036</content>
+  </entry>
+  <entry>
+    <id raw="511461">http://v2demo.bluecherrydvr.com/events/?id=511461</id>
+    <title>info: continuous event on device 7</title>
+    <published>2013-04-16T15:09:49-05:00</published>
+    <updated>2013-04-16T15:24:50-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="7/info/continuous"/>
+    <content media_id="505035" media_size="151207062">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505035</content>
+  </entry>
+  <entry>
+    <id raw="511459">http://v2demo.bluecherrydvr.com/events/?id=511459</id>
+    <title>info: continuous event on device 11</title>
+    <published>2013-04-16T15:09:35-05:00</published>
+    <updated>2013-04-16T15:24:36-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="11/info/continuous"/>
+    <content media_id="505033" media_size="34202196">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505033</content>
+  </entry>
+  <entry>
+    <id raw="511460">http://v2demo.bluecherrydvr.com/events/?id=511460</id>
+    <title>info: continuous event on device 3</title>
+    <published>2013-04-16T15:09:35-05:00</published>
+    <updated>2013-04-16T15:24:36-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="3/info/continuous"/>
+    <content media_id="505034" media_size="15648888">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505034</content>
+  </entry>
+  <entry>
+    <id raw="511458">http://v2demo.bluecherrydvr.com/events/?id=511458</id>
+    <title>info: continuous event on device 5</title>
+    <published>2013-04-16T14:54:58-05:00</published>
+    <updated>2013-04-16T15:09:59-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="5/info/continuous"/>
+    <content media_id="505032" media_size="27375935">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505032</content>
+  </entry>
+  <entry>
+    <id raw="511457">http://v2demo.bluecherrydvr.com/events/?id=511457</id>
+    <title>info: continuous event on device 7</title>
+    <published>2013-04-16T14:54:48-05:00</published>
+    <updated>2013-04-16T15:09:49-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="7/info/continuous"/>
+    <content media_id="505031" media_size="149792288">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505031</content>
+  </entry>
+  <entry>
+    <id raw="511455">http://v2demo.bluecherrydvr.com/events/?id=511455</id>
+    <title>info: continuous event on device 11</title>
+    <published>2013-04-16T14:54:34-05:00</published>
+    <updated>2013-04-16T15:09:35-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="11/info/continuous"/>
+    <content media_id="505029" media_size="33859859">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505029</content>
+  </entry>
+  <entry>
+    <id raw="511456">http://v2demo.bluecherrydvr.com/events/?id=511456</id>
+    <title>info: continuous event on device 3</title>
+    <published>2013-04-16T14:54:34-05:00</published>
+    <updated>2013-04-16T15:09:35-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="3/info/continuous"/>
+    <content media_id="505030" media_size="15648843">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505030</content>
+  </entry>
+  <entry>
+    <id raw="511454">http://v2demo.bluecherrydvr.com/events/?id=511454</id>
+    <title>info: continuous event on device 5</title>
+    <published>2013-04-16T14:39:57-05:00</published>
+    <updated>2013-04-16T14:54:58-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="5/info/continuous"/>
+    <content media_id="505028" media_size="26905130">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505028</content>
+  </entry>
+  <entry>
+    <id raw="511453">http://v2demo.bluecherrydvr.com/events/?id=511453</id>
+    <title>info: continuous event on device 7</title>
+    <published>2013-04-16T14:39:47-05:00</published>
+    <updated>2013-04-16T14:54:48-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="7/info/continuous"/>
+    <content media_id="505027" media_size="45847103">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505027</content>
+  </entry>
+  <entry>
+    <id raw="511451">http://v2demo.bluecherrydvr.com/events/?id=511451</id>
+    <title>info: continuous event on device 11</title>
+    <published>2013-04-16T14:39:33-05:00</published>
+    <updated>2013-04-16T14:54:34-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="11/info/continuous"/>
+    <content media_id="505025" media_size="33896664">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505025</content>
+  </entry>
+  <entry>
+    <id raw="511452">http://v2demo.bluecherrydvr.com/events/?id=511452</id>
+    <title>info: continuous event on device 3</title>
+    <published>2013-04-16T14:39:33-05:00</published>
+    <updated>2013-04-16T14:54:34-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="3/info/continuous"/>
+    <content media_id="505026" media_size="15953412">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505026</content>
+  </entry>
+  <entry>
+    <id raw="511450">http://v2demo.bluecherrydvr.com/events/?id=511450</id>
+    <title>info: continuous event on device 5</title>
+    <published>2013-04-16T14:24:56-05:00</published>
+    <updated>2013-04-16T14:39:57-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="5/info/continuous"/>
+    <content media_id="505024" media_size="27405305">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505024</content>
+  </entry>
+  <entry>
+    <id raw="511449">http://v2demo.bluecherrydvr.com/events/?id=511449</id>
+    <title>info: continuous event on device 7</title>
+    <published>2013-04-16T14:24:46-05:00</published>
+    <updated>2013-04-16T14:39:47-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="7/info/continuous"/>
+    <content media_id="505023" media_size="148749746">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505023</content>
+  </entry>
+  <entry>
+    <id raw="511447">http://v2demo.bluecherrydvr.com/events/?id=511447</id>
+    <title>info: continuous event on device 11</title>
+    <published>2013-04-16T14:24:32-05:00</published>
+    <updated>2013-04-16T14:39:33-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="11/info/continuous"/>
+    <content media_id="505021" media_size="34035881">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505021</content>
+  </entry>
+  <entry>
+    <id raw="511448">http://v2demo.bluecherrydvr.com/events/?id=511448</id>
+    <title>info: continuous event on device 3</title>
+    <published>2013-04-16T14:24:32-05:00</published>
+    <updated>2013-04-16T14:39:33-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="3/info/continuous"/>
+    <content media_id="505022" media_size="15257962">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505022</content>
+  </entry>
+  <entry>
+    <id raw="511446">http://v2demo.bluecherrydvr.com/events/?id=511446</id>
+    <title>info: continuous event on device 5</title>
+    <published>2013-04-16T14:09:55-05:00</published>
+    <updated>2013-04-16T14:24:56-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="5/info/continuous"/>
+    <content media_id="505020" media_size="27218477">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505020</content>
+  </entry>
+  <entry>
+    <id raw="511445">http://v2demo.bluecherrydvr.com/events/?id=511445</id>
+    <title>info: continuous event on device 7</title>
+    <published>2013-04-16T14:09:45-05:00</published>
+    <updated>2013-04-16T14:24:46-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="7/info/continuous"/>
+    <content media_id="505019" media_size="149244651">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505019</content>
+  </entry>
+  <entry>
+    <id raw="511443">http://v2demo.bluecherrydvr.com/events/?id=511443</id>
+    <title>info: continuous event on device 11</title>
+    <published>2013-04-16T14:09:31-05:00</published>
+    <updated>2013-04-16T14:24:32-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="11/info/continuous"/>
+    <content media_id="505017" media_size="33207695">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505017</content>
+  </entry>
+  <entry>
+    <id raw="511444">http://v2demo.bluecherrydvr.com/events/?id=511444</id>
+    <title>info: continuous event on device 3</title>
+    <published>2013-04-16T14:09:31-05:00</published>
+    <updated>2013-04-16T14:24:32-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="3/info/continuous"/>
+    <content media_id="505018" media_size="15196047">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505018</content>
+  </entry>
+  <entry>
+    <id raw="511442">http://v2demo.bluecherrydvr.com/events/?id=511442</id>
+    <title>info: continuous event on device 5</title>
+    <published>2013-04-16T13:54:54-05:00</published>
+    <updated>2013-04-16T14:09:55-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="5/info/continuous"/>
+    <content media_id="505016" media_size="27191947">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505016</content>
+  </entry>
+  <entry>
+    <id raw="511441">http://v2demo.bluecherrydvr.com/events/?id=511441</id>
+    <title>info: continuous event on device 7</title>
+    <published>2013-04-16T13:54:44-05:00</published>
+    <updated>2013-04-16T14:09:45-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="7/info/continuous"/>
+    <content media_id="505015" media_size="149723913">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505015</content>
+  </entry>
+  <entry>
+    <id raw="511440">http://v2demo.bluecherrydvr.com/events/?id=511440</id>
+    <title>info: continuous event on device 11</title>
+    <published>2013-04-16T13:54:30-05:00</published>
+    <updated>2013-04-16T14:09:31-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="11/info/continuous"/>
+    <content media_id="505014" media_size="33260482">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505014</content>
+  </entry>
+  <entry>
+    <id raw="511439">http://v2demo.bluecherrydvr.com/events/?id=511439</id>
+    <title>info: continuous event on device 3</title>
+    <published>2013-04-16T13:54:29-05:00</published>
+    <updated>2013-04-16T14:09:31-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="3/info/continuous"/>
+    <content media_id="505013" media_size="15214826">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505013</content>
+  </entry>
+  <entry>
+    <id raw="511438">http://v2demo.bluecherrydvr.com/events/?id=511438</id>
+    <title>info: continuous event on device 5</title>
+    <published>2013-04-16T13:39:53-05:00</published>
+    <updated>2013-04-16T13:54:54-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="5/info/continuous"/>
+    <content media_id="505012" media_size="26783919">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505012</content>
+  </entry>
+  <entry>
+    <id raw="511437">http://v2demo.bluecherrydvr.com/events/?id=511437</id>
+    <title>info: continuous event on device 7</title>
+    <published>2013-04-16T13:39:43-05:00</published>
+    <updated>2013-04-16T13:54:44-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="7/info/continuous"/>
+    <content media_id="505011" media_size="150843468">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505011</content>
+  </entry>
+  <entry>
+    <id raw="511436">http://v2demo.bluecherrydvr.com/events/?id=511436</id>
+    <title>info: continuous event on device 11</title>
+    <published>2013-04-16T13:39:29-05:00</published>
+    <updated>2013-04-16T13:54:30-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="11/info/continuous"/>
+    <content media_id="505010" media_size="33213131">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505010</content>
+  </entry>
+  <entry>
+    <id raw="511435">http://v2demo.bluecherrydvr.com/events/?id=511435</id>
+    <title>info: continuous event on device 3</title>
+    <published>2013-04-16T13:39:28-05:00</published>
+    <updated>2013-04-16T13:54:29-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="3/info/continuous"/>
+    <content media_id="505009" media_size="15199885">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505009</content>
+  </entry>
+  <entry>
+    <id raw="511434">http://v2demo.bluecherrydvr.com/events/?id=511434</id>
+    <title>info: continuous event on device 5</title>
+    <published>2013-04-16T13:24:52-05:00</published>
+    <updated>2013-04-16T13:39:53-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="5/info/continuous"/>
+    <content media_id="505008" media_size="25813962">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505008</content>
+  </entry>
+  <entry>
+    <id raw="511433">http://v2demo.bluecherrydvr.com/events/?id=511433</id>
+    <title>info: continuous event on device 7</title>
+    <published>2013-04-16T13:24:42-05:00</published>
+    <updated>2013-04-16T13:39:43-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="7/info/continuous"/>
+    <content media_id="505007" media_size="156944379">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505007</content>
+  </entry>
+  <entry>
+    <id raw="511432">http://v2demo.bluecherrydvr.com/events/?id=511432</id>
+    <title>info: continuous event on device 11</title>
+    <published>2013-04-16T13:24:28-05:00</published>
+    <updated>2013-04-16T13:39:29-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="11/info/continuous"/>
+    <content media_id="505006" media_size="33207380">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505006</content>
+  </entry>
+  <entry>
+    <id raw="511431">http://v2demo.bluecherrydvr.com/events/?id=511431</id>
+    <title>info: continuous event on device 3</title>
+    <published>2013-04-16T13:24:27-05:00</published>
+    <updated>2013-04-16T13:39:28-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="3/info/continuous"/>
+    <content media_id="505005" media_size="15142335">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505005</content>
+  </entry>
+  <entry>
+    <id raw="511430">http://v2demo.bluecherrydvr.com/events/?id=511430</id>
+    <title>info: continuous event on device 5</title>
+    <published>2013-04-16T13:09:51-05:00</published>
+    <updated>2013-04-16T13:24:52-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="5/info/continuous"/>
+    <content media_id="505004" media_size="25487452">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505004</content>
+  </entry>
+  <entry>
+    <id raw="511429">http://v2demo.bluecherrydvr.com/events/?id=511429</id>
+    <title>info: continuous event on device 7</title>
+    <published>2013-04-16T13:09:41-05:00</published>
+    <updated>2013-04-16T13:24:42-05:00</updated>
+    <category scheme="http://www.bluecherrydvr.com/atom.html" term="7/info/continuous"/>
+    <content media_id="505003" media_size="158057942">https://v2demo.bluecherrydvr.com:7001/media/request.php?id=505003</content>
+  </entry>
+</feed>

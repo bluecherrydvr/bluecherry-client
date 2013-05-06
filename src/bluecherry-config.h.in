@@ -2,3 +2,4 @@
 #cmakedefine USE_GSTREAMER
 #define GSTREAMER_PLUGINS "@GSTREAMER_PLUGINS@"
 #define VERSION "@VERSION@"
+#define TEST_DATA_DIR "@CMAKE_SOURCE_DIR@/tests/data"
