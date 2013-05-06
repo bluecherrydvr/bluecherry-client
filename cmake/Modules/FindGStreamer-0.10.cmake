@@ -27,7 +27,7 @@
 if (NOT WIN32)
     find_package (PkgConfig)
     if (PKG_CONFIG_FOUND)
-        pkg_check_modules (GSTREAMER_0_10 QUIET gstreamer-0.10)
+        pkg_check_modules (GSTREAMER_0_10 gstreamer-0.10)
     endif (PKG_CONFIG_FOUND)
 endif (NOT WIN32)
 

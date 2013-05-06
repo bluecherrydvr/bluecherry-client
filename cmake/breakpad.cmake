@@ -25,7 +25,7 @@ include_directories (${BREAKPADCLIENT_INCLUDE_DIR_${CMAKE_BUILD_TYPE}})
 set (USE_BREAKPAD 1)
 
 if (UNIX)
-    set (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -gstabs)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -gstabs")
     list (APPEND CMAKE_INCLUDE_PATH ${LINUX_BREAKPAD_DIR})
 
     set (BREAKPAD_DUMPSYMS ${LINUX_BREAKPAD_DIR}/src/tools/linux/dump_syms/dump_syms)
