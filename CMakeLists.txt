@@ -19,11 +19,20 @@ project (bluecherry-client)
 
 set (CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
-cmake_minimum_required (VERSION 2.8.5)
+cmake_minimum_required (VERSION 2.8.0)
 cmake_policy (SET CMP0000 OLD)
 
 option (ENABLE_BREAKPAD "Enable Breakpad integration" ON)
 option (BUILD_TESTING "Build the test suite" ON)
+
+# hack for < 2.8.0 CMake
+if ("${CMAKE_CURRENT_LIST_DIR}" STREQUAL "")
+    set (CMAKE_CURRENT_LIST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
+endif ("${CMAKE_CURRENT_LIST_DIR}" STREQUAL "")
+set (CMAKE_MODULE_PATH
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules
+    ${CMAKE_ROOT}/Modules
+)
 
 if (EXISTS ${CMAKE_SOURCE_DIR}/user.cmake)
     include (${CMAKE_SOURCE_DIR}/user.cmake)
