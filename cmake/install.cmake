@@ -18,9 +18,9 @@
 if (UNIX AND NOT APPLE)
 	include (GNUInstallDirs)
 
-	configure_file ("linux/Bluecherry Client.desktop.in" "linux/Bluecherry Client.desktop")
+	configure_file ("linux/bluecherry-client.desktop.in" "linux/bluecherry-client.desktop")
 
 	install (TARGETS bluecherry-client RUNTIME DESTINATION bin)
-	install (FILES "${CMAKE_CURRENT_BINARY_DIR}/linux/Bluecherry Client.desktop" DESTINATION share/applications)
-	install (FILES "res/bluecherry.png" DESTINATION share/bluecherry-client)
+	install (FILES "${CMAKE_CURRENT_BINARY_DIR}/linux/bluecherry-client.desktop" DESTINATION share/applications)
+	install (FILES "res/bluecherry-client.png" DESTINATION share/icons)
 endif (UNIX AND NOT APPLE)
