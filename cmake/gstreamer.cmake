@@ -17,14 +17,20 @@
 
 find_package (GStreamer-0.10 0.10.0 REQUIRED)
 include_directories (${GSTREAMER_0_10_INCLUDE_DIRS})
-find_package (GStreamerApp-0.10 0.10.0 REQUIRED)
-include_directories (${GSTREAMERAPP_0_10_INCLUDE_DIRS})
 set (USE_GSTREAMER 1)
 
 list (APPEND bluecherry_client_LIBRARIES
     ${GSTREAMER_0_10_LIBRARIES}
-    ${GSTREAMERAPP_0_10_LIBRARIES}
 )
+
+if (NOT APPLE)
+    find_package (GStreamerApp-0.10 0.10.0 REQUIRED)
+    include_directories (${GSTREAMERAPP_0_10_INCLUDE_DIRS})
+
+    list (APPEND bluecherry_client_LIBRARIES
+        ${GSTREAMERAPP_0_10_LIBRARIES}
+    )
+endif (NOT APPLE)
 
 if (WIN32)
     if (CMAKE_BUILD_TYPE MATCHES Debug)

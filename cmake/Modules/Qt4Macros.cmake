@@ -88,6 +88,9 @@ MACRO (QT4_GET_MOC_FLAGS _moc_flags)
     SET(${_moc_flags} ${${_moc_flags}} -DWIN32)
   ENDIF(Q_WS_WIN)
 
+  IF(APPLE)
+    SET(${_moc_flags} ${${_moc_flags}} -DQ_OS_MAC)
+  ENDIF(APPLE)
 ENDMACRO(QT4_GET_MOC_FLAGS)
 
 
