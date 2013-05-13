@@ -38,3 +38,13 @@ set (MACOSX_BUNDLE_BUNDLE_NAME "Bluecherry Client")
 set (MACOSX_BUNDLE_SHORT_VERSION_STRING ${VERSION})
 set (MACOSX_BUNDLE_BUNDLE_VERSION ${VERSION})
 set (MACOSX_BUNDLE_COPYRIGHT "Copyright 2010-2013 Bluecherry")
+
+add_custom_command (
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/bluecherry-client.app/Contents/Resources/qt.conf
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMAND ${CMAKE_SOURCE_DIR}/mac/deploy.sh ${CMAKE_CURRENT_BINARY_DIR}/bluecherry-client.app ${QT_BINARY_DIR}/macdeployqt
+)
+
+add_custom_target (deploy ALL
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/bluecherry-client.app/Contents/Resources/qt.conf
+)
