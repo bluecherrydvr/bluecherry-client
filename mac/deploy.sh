@@ -18,6 +18,10 @@ if [ ! -d $1/Contents/Frameworks ]; then
 	mkdir $1/Contents/Frameworks
 fi
 
+echo "Copying Icon..."
+mkdir -p $1/Contents/Resources/
+cp res/bluecherry.icns $1/Contents/Resources/
+
 echo "Copying GStreamer libraries..."
 cp gstreamer-bin/mac/lib/* $1/Contents/Frameworks/
 
