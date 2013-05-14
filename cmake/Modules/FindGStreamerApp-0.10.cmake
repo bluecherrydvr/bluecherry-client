@@ -39,10 +39,9 @@ if (UNIX)
     set (GSTREAMERAPP_0_10_LIBRARIES
         ${GSTREAMERAPP_0_10_LIBRARY}
     )
-elseif (WIN32)
-endif (UNIX)
 
-include (FindPackageHandleStandardArgs)
-find_package_handle_standard_args (GStreamer-App-0.10 DEFAULT_MSG GSTREAMERAPP_0_10_LIBRARY GSTREAMERAPP_0_10_LIBRARIES GSTREAMERAPP_0_10_INCLUDE_DIRS)
+    include (FindPackageHandleStandardArgs)
+    find_package_handle_standard_args (GStreamer-App-0.10 DEFAULT_MSG GSTREAMERAPP_0_10_LIBRARY GSTREAMERAPP_0_10_LIBRARIES GSTREAMERAPP_0_10_INCLUDE_DIRS)
+endif (UNIX)
 
 mark_as_advanced (GSTREAMERAPP_0_10_INCLUDE_DIRS GSTREAMERAPP_0_10_LIBRARIES)

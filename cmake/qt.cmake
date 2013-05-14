@@ -37,6 +37,10 @@ if (LINUX)
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,${QT_LIBRARY_DIR}")
 endif (LINUX)
 
+if (APPLE)
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -F${QT_LIBRARY_DIR}")
+endif (APPLE)
+
 add_definitions (-DQT_NO_CAST_FROM_ASCII)
 add_definitions (-DQT_NO_CAST_TO_ASCII)
 

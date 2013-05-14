@@ -11,7 +11,7 @@ FILES+=`find $1.app/Contents/PlugIns/ -type f \( -name '*.dylib' -or -name '*.so
 
 # Run symbolstore for all of the libraries included in our bundle
 for I in $FILES; do
-    python breakpad-bin/symbolstore.py breakpad-bin/mac/dump_syms $1.symbols $I
+    python scripts/symbolstore.py breakpad-bin/mac/dump_syms $1.symbols $I
     strip -S $I 2>/dev/null
 done
 

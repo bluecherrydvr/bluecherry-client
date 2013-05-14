@@ -24,7 +24,12 @@ list (APPEND bluecherry_client_SRCS
 include_directories (${BREAKPADCLIENT_INCLUDE_DIR_${CMAKE_BUILD_TYPE}})
 set (USE_BREAKPAD 1)
 
-if (UNIX)
+if (APPLE)
+    add_custom_target (create-symbols
+        COMMAND ${MACOSX_BREAKPAD_BIN_DIR}/gather_symbols.sh ${CMAKE_BINARY_DIR}/bluecherry-client
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+elseif (UNIX)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -gstabs")
     list (APPEND CMAKE_INCLUDE_PATH ${LINUX_BREAKPAD_DIR})
 
@@ -41,7 +46,7 @@ if (UNIX)
 elseif (WIN32)
     set (CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} /DEBUG)
     list (APPEND CMAKE_INCLUDE_PATH ${WIN32_BREAKPAD_SRC_DIR})
-endif (UNIX)
+endif (APPLE)
 
 list (APPEND bluecherry_client_LIBRARIES
     ${BREAKPADCLIENT_LIBRARIES_${CMAKE_BUILD_TYPE}}
