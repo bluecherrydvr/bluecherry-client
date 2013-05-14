@@ -67,6 +67,10 @@ if (WIN32)
     include (cmake/win32.cmake)
 endif (WIN32)
 
+if (APPLE)
+    include (cmake/macosx.cmake)
+endif (APPLE)
+
 include (cmake/build.cmake)
 include (cmake/install.cmake)
 include (cmake/display-status.cmake)

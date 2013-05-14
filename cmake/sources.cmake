@@ -100,7 +100,6 @@ set (bluecherry_client_main_SRCS
     src/ui/RemotePortCheckerWidget.cpp
     src/ui/ServerConfigWindow.cpp
     src/ui/SetupWizard.cpp
-    src/ui/StatusBandwidthWidget.cpp
     src/ui/StatusBarServerAlert.cpp
     src/ui/SwitchEventsWidget.cpp
     src/ui/TimeRangeScrollBar.cpp
@@ -122,6 +121,17 @@ set (bluecherry_client_main_SRCS
     src/video/VideoHttpBuffer.cpp
     src/video/VideoPlayerBackend_gst.cpp
 )
+
+if (NOT APPLE)
+    list (APPEND bluecherry_client_main_SRCS
+        src/ui/StatusBandwidthWidget.cpp
+    )
+else (NOT APPLE)
+    list (APPEND bluecherry_client_main_SRCS
+        src/ui/StatusBandwidthWidget_mac.mm
+        src/utils/PlatformOSX.mm
+    )
+endif (NOT APPLE)
 
 if (WIN32)
     list (APPEND bluecherry_client_main_SRCS

@@ -15,11 +15,13 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-enable_testing ()
-include (cmake/tests/bluecherry-add-test.cmake)
+if (NOT APPLE)
+    enable_testing ()
+    include (cmake/tests/bluecherry-add-test.cmake)
 
-bluecherry_add_test (VersionTestCase tests/src/core/VersionTestCase.cpp)
-bluecherry_add_test (DateTimeRangeTestCase tests/src/utils/DateTimeRangeTestCase.cpp)
-bluecherry_add_test (RangeMapTestCase tests/src/utils/RangeMapTestCase.cpp)
-bluecherry_add_test (RangeTestCase tests/src/utils/RangeTestCase.cpp)
-bluecherry_add_test (EventParserTestCase tests/src/event/EventParserTestCase.cpp)
+    bluecherry_add_test (VersionTestCase tests/src/core/VersionTestCase.cpp)
+    bluecherry_add_test (DateTimeRangeTestCase tests/src/utils/DateTimeRangeTestCase.cpp)
+    bluecherry_add_test (RangeMapTestCase tests/src/utils/RangeMapTestCase.cpp)
+    bluecherry_add_test (RangeTestCase tests/src/utils/RangeTestCase.cpp)
+    bluecherry_add_test (EventParserTestCase tests/src/event/EventParserTestCase.cpp)
+endif (NOT APPLE)
