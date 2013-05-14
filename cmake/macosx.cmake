@@ -45,6 +45,6 @@ add_custom_command (
     COMMAND ${CMAKE_SOURCE_DIR}/mac/deploy.sh ${CMAKE_CURRENT_BINARY_DIR}/bluecherry-client.app ${QT_BINARY_DIR}/macdeployqt
 )
 
-add_custom_target (deploy ALL
+add_custom_target (deploy
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/bluecherry-client.app/Contents/Resources/qt.conf
 )
