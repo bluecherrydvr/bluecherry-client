@@ -33,9 +33,9 @@ endif (BUILD_TESTING)
 find_package (Qt4 4.8.0 REQUIRED)
 include (cmake/Modules/UseQt4.cmake)
 
-if (LINUX)
+if (UNIX AND NOT APPLE)
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,${QT_LIBRARY_DIR}")
-endif (LINUX)
+endif (UNIX AND NOT APPLE)
 
 if (APPLE)
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -F${QT_LIBRARY_DIR}")
@@ -54,3 +54,11 @@ if (WIN32)
         glu32.lib
     )
 endif (WIN32)
+
+if (UNIX AND NOT APPLE)
+    find_package (OpenGL REQUIRED)
+endif (UNIX AND NOT APPLE)
+
+list (APPEND bluecherry_client_LIBRARIES
+    ${OPENGL_LIBRARIES}
+)
