@@ -1,0 +1,31 @@
+REQUIREMENTS
+
+To compile bluecherry-client on MasOSX install following applications:
+
+* XCode with Command Line utils
+* MacPorts
+
+Using MacPorts install following packages:
+* git-core
+* cmake
+
+Download  bluecherry-client-scripts package from git and install libav and Qt:
+
+- git clone git://github.com/vogel/bluecherry-client-scripts.git
+- cd bluecherry-client-scripts/dependencies
+- ./install-libav-macosx.sh
+- ./install-qt-macosx.sh
+
+This script will automatically download more required MacPorts packages.
+
+Next step is to configure cmake - copy macosx.cmake file to user.cmake and adjust
+values appropriately.
+
+Next configure and compile your source code:
+
+- export QTPATH=$HOME/dev/user
+- mkdir build
+- cd build
+- cmake {path to bluecherry-client sources}
+- make
+- make deploy
