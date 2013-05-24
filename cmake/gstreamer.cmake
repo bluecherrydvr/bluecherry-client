@@ -23,6 +23,15 @@ list (APPEND bluecherry_client_LIBRARIES
     ${GSTREAMER_0_10_LIBRARIES}
 )
 
+if (NOT WIN32)
+    find_package (GStreamerApp-0.10 0.10.0 REQUIRED)
+    include_directories (${GSTREAMERAPP_0_10_INCLUDE_DIRS})
+
+    list (APPEND bluecherry_client_LIBRARIES
+        ${GSTREAMERAPP_0_10_LIBRARIES}
+    )
+endif (NOT WIN32)
+
 if (WIN32)
     if (CMAKE_BUILD_TYPE MATCHES Debug)
         set (GSTREAMER_PLUGINS ${CMAKE_SOURCE_DIR}/gstreamer-bin/win/plugins)
