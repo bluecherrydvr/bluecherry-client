@@ -94,7 +94,7 @@ bool VideoPlayerBackend::initGStreamer(QString *errorMessage)
         "libgstffmpeg"EXT,
 #endif
 #ifdef Q_OS_WIN
-        "libgstffmpeg-lgpl"EXT, "libgstautodetect"EXT, "libgstdirectsound"EXT,
+        "libgstffmpeg-lgpl"EXT, "libgstautodetect"EXT,
 #elif defined(Q_OS_MAC)
         "libgstosxaudio"EXT,
 #endif
