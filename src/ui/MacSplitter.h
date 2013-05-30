@@ -40,16 +40,11 @@ private:
 class MacSplitter : public QSplitter
 {
 public:
-    explicit MacSplitter(Qt::Orientation o, QWidget *parent = 0)
-        : QSplitter(o, parent)
-    {
-    }
+    explicit MacSplitter(Qt::Orientation o, QWidget *parent = 0);
 
 protected:
-    virtual QSplitterHandle *createHandle()
-    {
-        return new MacSplitterHandle(orientation(), this);
-    }
+    virtual QSplitterHandle *createHandle();
+
 };
 
 #endif // MACSPLITTER_H

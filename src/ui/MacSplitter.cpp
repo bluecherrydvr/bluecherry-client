@@ -137,3 +137,12 @@ bool MacSplitterHandle::eventFilter(QObject *obj, QEvent *e)
 
     return false;
 }
+
+MacSplitter::MacSplitter(Qt::Orientation o, QWidget* parent) : QSplitter(o, parent)
+{
+}
+
+QSplitterHandle* MacSplitter::createHandle()
+{
+    return new MacSplitterHandle(orientation(), this);
+}
