@@ -22,10 +22,7 @@
 #include "event/EventList.h"
 #include "event/MediaEventFilter.h"
 #include "DVRServersView.h"
-#include "OptionsDialog.h"
 #include "EventsWindow.h"
-#include "NumericOffsetWidget.h"
-#include "model/EventsModel.h"
 #include "AboutDialog.h"
 #include "OptionsServerPage.h"
 #include "ServerConfigWindow.h"
@@ -37,21 +34,14 @@
 #include "StatusBarServerAlert.h"
 #include "model/DVRServersModel.h"
 #include "model/DVRServersProxyModel.h"
-#include "server/DVRServer.h"
-#include "server/DVRServerConfiguration.h"
 #include "server/DVRServerRepository.h"
 #include "core/BluecherryApp.h"
 #include "core/LiveViewManager.h"
 #include "event/ModelEventsCursor.h"
 #include <QBoxLayout>
-#include <QTreeView>
 #include <QGroupBox>
 #include <QMenuBar>
-#include <QLabel>
-#include <QCheckBox>
 #include <QSettings>
-#include <QShortcut>
-#include <QSplitter>
 #include <QPushButton>
 #include <QApplication>
 #include <QDesktopServices>
@@ -59,17 +49,11 @@
 #include <QMessageBox>
 #include <QMacStyle>
 #include <QSslConfiguration>
-#include <QSslCertificate>
 #include <QTextDocument>
 #include <QShowEvent>
-#include <QSystemTrayIcon>
 #include <QHeaderView>
-#include <QPainter>
 #include <QToolBar>
-#include <QToolButton>
 #include <QStatusBar>
-#include <QLinearGradient>
-#include <QAction>
 
 MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
     : QMainWindow(parent), m_serverRepository(serverRepository), m_trayIcon(0)
