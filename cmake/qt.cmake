@@ -53,6 +53,11 @@ if (WIN32)
         opengl32.lib
         glu32.lib
     )
+elseif (UNIX AND NOT APPLE)
+    find_package (OpenGL REQUIRED)
+    list (APPEND bluecherry_client_LIBRARIES
+        ${OPENGL_LIBRARIES}
+    )
 endif (WIN32)
 
 if (UNIX AND NOT APPLE)

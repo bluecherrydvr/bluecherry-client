@@ -94,7 +94,7 @@ bool VideoPlayerBackend::initGStreamer(QString *errorMessage)
         "libgstffmpeg"EXT,
 #endif
 #ifdef Q_OS_WIN
-        "libgstffmpeg-lgpl"EXT, "libgstautodetect"EXT, "libgstdirectsound"EXT,
+        "libgstffmpeg-lgpl"EXT, "libgstautodetect"EXT,
 #elif defined(Q_OS_MAC)
         "libgstosxaudio"EXT,
 #endif
@@ -105,7 +105,7 @@ bool VideoPlayerBackend::initGStreamer(QString *errorMessage)
 #if defined(Q_OS_MAC)
     QString pluginPath = QApplication::applicationDirPath() + QLatin1String("/../PlugIns/gstreamer/");
 #else
-    QString pluginPath = QDir::toNativeSeparators(QApplication::applicationDirPath() + QLatin1String("/"));
+    QString pluginPath = QDir::toNativeSeparators(QApplication::applicationDirPath() + QDir::separator());
 #endif
 
 #ifdef GSTREAMER_PLUGINS
@@ -113,7 +113,7 @@ bool VideoPlayerBackend::initGStreamer(QString *errorMessage)
     if (QDir::isAbsolutePath(ppx))
         pluginPath = ppx;
     else
-        pluginPath += QDir::separator() + ppx;
+        pluginPath += ppx;
 #endif
 
     if (!QFile::exists(pluginPath))
