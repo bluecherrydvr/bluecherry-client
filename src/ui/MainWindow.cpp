@@ -102,9 +102,14 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
     m_leftSplit->addWidget(createSourcesList());
     m_leftSplit->addWidget(m_centerSplit);
     m_leftSplit->setStretchFactor(1, 1);
+    m_leftSplit->setCollapsible(0, false);
+    m_leftSplit->setCollapsible(1, false);
+
     m_centerSplit->addWidget(m_liveView);
     m_centerSplit->addWidget(eventsWidget);
     m_centerSplit->setStretchFactor(0, 1);
+    m_centerSplit->setCollapsible(0, false);
+    m_centerSplit->setCollapsible(1, false);
 
     /* Set center widget */
     QWidget *center = new QWidget;
