@@ -48,9 +48,6 @@ public:
     void setEventsCursor(EventsCursor *eventsCursor);
     EventsCursor * eventsCursor() const { return m_eventsCursor.data(); }
 
-public:
-    void showEvent();
-
 protected:
     virtual void closeEvent(QCloseEvent *event);
 

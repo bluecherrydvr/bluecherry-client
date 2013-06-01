@@ -29,7 +29,7 @@
 #include <QDataStream>
 
 DVRServersModel::DVRServersModel(DVRServerRepository *serverRepository, bool onlyName, QObject *parent)
-    : QAbstractItemModel(parent), m_offlineDisabled(false), m_onlyName(onlyName)
+    : QAbstractItemModel(parent), m_onlyName(onlyName), m_offlineDisabled(false)
 {
     Q_ASSERT(serverRepository);
 
