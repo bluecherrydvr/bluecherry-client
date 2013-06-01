@@ -92,6 +92,7 @@ set (bluecherry_client_main_SRCS
     src/ui/EventViewWindow.cpp
     src/ui/ExpandingTextEdit.cpp
     src/ui/MacSplitter.cpp
+    src/ui/MacSplitterHandle.cpp
     src/ui/MainWindow.cpp
     src/ui/NumericOffsetWidget.cpp
     src/ui/OptionsDialog.cpp

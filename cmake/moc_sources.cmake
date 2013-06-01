@@ -72,6 +72,8 @@ set (bluecherry_client_MOC_SRCS
     src/ui/EventVideoPlayer.h
     src/ui/EventViewWindow.h
     src/ui/ExpandingTextEdit.h
+    src/ui/MacSplitter.h
+    src/ui/MacSplitterHandle.h
     src/ui/MainWindow.h
     src/ui/NumericOffsetWidget.h
     src/ui/OptionsDialog.h
