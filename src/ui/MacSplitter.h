@@ -20,25 +20,10 @@
 
 #include <QSplitter>
 
-class MacSplitterHandle : public QSplitterHandle
-{
-public:
-    MacSplitterHandle(Qt::Orientation o, QSplitter *parent);
-    ~MacSplitterHandle();
-
-    virtual QSize sizeHint() const;
-
-protected:
-    virtual void paintEvent(QPaintEvent *e);
-    virtual void enterEvent(QEvent *e);
-    virtual bool eventFilter(QObject *, QEvent *);
-
-private:
-    bool isMouseGrabbed;
-};
-
 class MacSplitter : public QSplitter
 {
+    Q_OBJECT
+
 public:
     explicit MacSplitter(Qt::Orientation o, QWidget *parent = 0);
 
