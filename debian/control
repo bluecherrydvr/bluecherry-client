@@ -9,6 +9,7 @@ Package: bluecherry-client
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, gstreamer0.10-plugins-base,
  gstreamer0.10-plugins-good, gstreamer0.10-ffmpeg, libssl0.9.8
+Conflicts: gstreamer0.10-vaapi
 Description: Bluecherry DVR Client
  This package contains the client for the Bluecherry DVR system. It can
  also be used to connect to remote instances of the Bluecherry DVR server.
