@@ -30,14 +30,14 @@ extern "C" {
 #define ASSERT_WORKER_THREAD() Q_ASSERT(QThread::currentThread() == thread())
 
 LiveStreamWorker::LiveStreamWorker(QObject *parent)
-    : QObject(parent), ctx(0), sws(0), cancelFlag(false), paused(false), autoDeinterlacing(true),
-      blockingLoop(0), frameHead(0), frameTail(0)
+    : QObject(parent), m_ctx(0), m_sws(0), m_cancelFlag(false), m_paused(false), m_autoDeinterlacing(true),
+      m_blockingLoop(0), m_frameHead(0), m_frameTail(0)
 {
 }
 
 LiveStreamWorker::~LiveStreamWorker()
 {
-    Q_ASSERT(!ctx);
+    Q_ASSERT(!m_ctx);
 
     /* This is a little quirky; The frame in frameHead can be used by the LiveStream
      * at ANY point, including during or after destroy(), so we can't delete it, but
@@ -45,7 +45,7 @@ LiveStreamWorker::~LiveStreamWorker()
      * we can guarantee that, once this object destructs, LiveStream no longer has
      * any interest in this object or the frame, so this is the only time when it's
      * finally safe to free that frame that cannot leak. */
-    for (StreamFrame *f = frameHead, *n; f; f = n)
+    for (StreamFrame *f = m_frameHead, *n; f; f = n)
     {
         n = f->next;
         delete f;
@@ -54,12 +54,12 @@ LiveStreamWorker::~LiveStreamWorker()
 
 void LiveStreamWorker::setUrl(const QByteArray &url)
 {
-    this->url = url;
+    this->m_url = url;
 }
 
 void LiveStreamWorker::setAutoDeinterlacing(bool enabled)
 {
-    autoDeinterlacing = enabled;
+    m_autoDeinterlacing = enabled;
 }
 
 void LiveStreamWorker::run()
@@ -67,7 +67,7 @@ void LiveStreamWorker::run()
     ASSERT_WORKER_THREAD();
 
     // Prevent concurrent invocations
-    if (ctx)
+    if (m_ctx)
         return;
 
     AVPacket packet;
@@ -77,9 +77,9 @@ void LiveStreamWorker::run()
     if (!setup())
         abortFlag = true;
 
-    while (!cancelFlag && !abortFlag)
+    while (!m_cancelFlag && !abortFlag)
     {
-        int re = av_read_frame(ctx, &packet);
+        int re = av_read_frame(m_ctx, &packet);
         if (re < 0)
         {
             char error[512];
@@ -95,7 +95,7 @@ void LiveStreamWorker::run()
         while (packet.size > 0)
         {
             int got_picture = 0;
-            re = avcodec_decode_video2(ctx->streams[0]->codec, frame, &got_picture, &packet);
+            re = avcodec_decode_video2(m_ctx->streams[0]->codec, frame, &got_picture, &packet);
             if (re < 0)
             {
                 emit fatalError(QLatin1String("Decoding error"));
@@ -105,7 +105,7 @@ void LiveStreamWorker::run()
 
             if (got_picture)
             {
-                processVideo(ctx->streams[0], frame);
+                processVideo(m_ctx->streams[0], frame);
                 in_packet++;
             }
 
@@ -145,7 +145,7 @@ bool LiveStreamWorker::setup()
     av_dict_copy(&opt_cpy, opt, 0);
 
     int re;
-    if ((re = avformat_open_input(&ctx, url.constData(), NULL, &opt_cpy)) != 0)
+    if ((re = avformat_open_input(&m_ctx, m_url.constData(), NULL, &opt_cpy)) != 0)
     {
         char error[512];
         av_strerror(re, error, sizeof(error));
@@ -156,14 +156,14 @@ bool LiveStreamWorker::setup()
     av_dict_free(&opt_cpy);
 
     /* avformat_find_stream_info takes an array of AVDictionary ptrs for each stream */
-    opt_si = new AVDictionary*[ctx->nb_streams];
-    for (unsigned int i = 0; i < ctx->nb_streams; ++i)
+    opt_si = new AVDictionary*[m_ctx->nb_streams];
+    for (unsigned int i = 0; i < m_ctx->nb_streams; ++i)
     {
         opt_si[i] = 0;
         av_dict_copy(&opt_si[i], opt, 0);
     }
 
-    if ((re = avformat_find_stream_info(ctx, opt_si)) < 0)
+    if ((re = avformat_find_stream_info(m_ctx, opt_si)) < 0)
     {
         char error[512];
         av_strerror(re, error, sizeof(error));
@@ -171,21 +171,21 @@ bool LiveStreamWorker::setup()
         goto end;
     }
 
-    for (unsigned int i = 0; i < ctx->nb_streams; ++i)
+    for (unsigned int i = 0; i < m_ctx->nb_streams; ++i)
     {
         char info[512];
-        AVCodec *codec = avcodec_find_decoder(ctx->streams[i]->codec->codec_id);
+        AVCodec *codec = avcodec_find_decoder(m_ctx->streams[i]->codec->codec_id);
         av_dict_copy(&opt_cpy, opt, 0);
-        if (!ctx->streams[i]->codec->codec &&
-            (re = avcodec_open2(ctx->streams[i]->codec, codec, &opt_cpy)) < 0)
+        if (!m_ctx->streams[i]->codec->codec &&
+            (re = avcodec_open2(m_ctx->streams[i]->codec, codec, &opt_cpy)) < 0)
         {
             qDebug() << "LiveStream: cannot find decoder for stream" << i << "codec" <<
-                        ctx->streams[i]->codec->codec_id;
+                        m_ctx->streams[i]->codec->codec_id;
             av_dict_free(&opt_cpy);
             continue;
         }
         av_dict_free(&opt_cpy);
-        avcodec_string(info, sizeof(info), ctx->streams[i]->codec, 0);
+        avcodec_string(info, sizeof(info), m_ctx->streams[i]->codec, 0);
         qDebug() << "LiveStream: stream #" << i << ":" << info;
     }
 
@@ -194,14 +194,14 @@ end:
     av_dict_free(&opt);
     if (opt_si)
     {
-        for (unsigned int i = 0; i < ctx->nb_streams; ++i)
+        for (unsigned int i = 0; i < m_ctx->nb_streams; ++i)
             av_dict_free(&opt_si[i]);
         delete[] opt_si;
     }
-    if (!ok && ctx)
+    if (!ok && m_ctx)
     {
-        avformat_close_input(&ctx);
-        ctx = 0;
+        avformat_close_input(&m_ctx);
+        m_ctx = 0;
     }
 
     return ok;
@@ -211,37 +211,37 @@ void LiveStreamWorker::destroy()
 {
     ASSERT_WORKER_THREAD();
 
-    if (!ctx)
+    if (!m_ctx)
         return;
 
-    if (sws)
+    if (m_sws)
     {
-        sws_freeContext(sws);
-        sws = 0;
+        sws_freeContext(m_sws);
+        m_sws = 0;
     }
 
-    frameLock.lock();
-    if (frameHead)
+    m_frameLock.lock();
+    if (m_frameHead)
     {
         /* Even now, we cannot touch frameHead. It might be used by the other thread. */
-        for (StreamFrame *f = frameHead->next, *n; f; f = n)
+        for (StreamFrame *f = m_frameHead->next, *n; f; f = n)
         {
             n = f->next;
             delete f;
         }
-        frameHead->next = 0;
+        m_frameHead->next = 0;
     }
-    frameTail = frameHead;
-    frameLock.unlock();
+    m_frameTail = m_frameHead;
+    m_frameLock.unlock();
 
-    for (unsigned int i = 0; i < ctx->nb_streams; ++i)
+    for (unsigned int i = 0; i < m_ctx->nb_streams; ++i)
     {
-        avcodec_close(ctx->streams[i]->codec);
-        av_freep(ctx->streams[i]);
+        avcodec_close(m_ctx->streams[i]->codec);
+        av_freep(m_ctx->streams[i]);
     }
 
-    avformat_close_input(&ctx);
-    ctx = 0;
+    avformat_close_input(&m_ctx);
+    m_ctx = 0;
 }
 
 void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *rawFrame)
@@ -250,7 +250,7 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
 
     /* Assume that H.264 D1-resolution video is interlaced, to work around a solo(?) bug
      * that results in interlaced_frame not being set for videos from solo6110. */
-    if (autoDeinterlacing && (rawFrame->interlaced_frame ||
+    if (m_autoDeinterlacing && (rawFrame->interlaced_frame ||
                               (stream->codec->codec_id == CODEC_ID_H264 &&
                                ((stream->codec->width == 704 && stream->codec->height == 480) ||
                                 (stream->codec->width == 720 && stream->codec->height == 576)))))
@@ -262,7 +262,7 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
         }
     }
 
-    sws = sws_getCachedContext(sws, stream->codec->width, stream->codec->height, stream->codec->pix_fmt,
+    m_sws = sws_getCachedContext(m_sws, stream->codec->width, stream->codec->height, stream->codec->pix_fmt,
                                stream->codec->width, stream->codec->height, fmt, SWS_BICUBIC,
                                NULL, NULL, NULL);
 
@@ -271,7 +271,7 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
 
     AVFrame *frame = avcodec_alloc_frame();
     avpicture_fill((AVPicture*)frame, buf, fmt, stream->codec->width, stream->codec->height);
-    sws_scale(sws, (const uint8_t**)rawFrame->data, rawFrame->linesize, 0, stream->codec->height,
+    sws_scale(m_sws, (const uint8_t**)rawFrame->data, rawFrame->linesize, 0, stream->codec->height,
               frame->data, frame->linesize);
 
     frame->width  = stream->codec->width;
@@ -281,58 +281,58 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
     StreamFrame *sf = new StreamFrame;
     sf->d    = frame;
 
-    frameLock.lock();
-    if (!frameTail) {
-        frameHead = sf;
-        frameTail = sf;
+    m_frameLock.lock();
+    if (!m_frameTail) {
+        m_frameHead = sf;
+        m_frameTail = sf;
     } else {
-        sf->d->display_picture_number = frameTail->d->display_picture_number+1;
-        frameTail->next = sf;
-        frameTail = sf;
+        sf->d->display_picture_number = m_frameTail->d->display_picture_number+1;
+        m_frameTail->next = sf;
+        m_frameTail = sf;
 
         /* If necessary, drop frames to avoid exploding memory. This will only happen if
          * the UI thread cannot keep up enough to do is own PTS-based framedropping.
          * It is NEVER safe to drop frameHead; only the UI thread may do that. */
-        if (frameTail->d->display_picture_number - frameHead->next->d->display_picture_number >= 6)
+        if (m_frameTail->d->display_picture_number - m_frameHead->next->d->display_picture_number >= 6)
         {
-            for (StreamFrame *f = frameHead->next, *n = f->next; f && f != frameTail; f = n, n = f->next)
+            for (StreamFrame *f = m_frameHead->next, *n = f->next; f && f != m_frameTail; f = n, n = f->next)
                 delete f;
-            frameHead->next = frameTail;
+            m_frameHead->next = m_frameTail;
         }
     }
-    frameLock.unlock();
+    m_frameLock.unlock();
 }
 
 void LiveStreamWorker::stop()
 {
     ASSERT_WORKER_THREAD();
-    cancelFlag = true;
-    if (blockingLoop)
-        blockingLoop->exit();
+    m_cancelFlag = true;
+    if (m_blockingLoop)
+        m_blockingLoop->exit();
     deleteLater();
 }
 
 void LiveStreamWorker::setPaused(bool v)
 {
     ASSERT_WORKER_THREAD();
-    if (!ctx || v == paused)
+    if (!m_ctx || v == m_paused)
         return;
 
-    paused = v;
-    if (paused)
+    m_paused = v;
+    if (m_paused)
     {
-        av_read_pause(ctx);
+        av_read_pause(m_ctx);
         QEventLoop loop;
-        blockingLoop = &loop;
+        m_blockingLoop = &loop;
         loop.exec();
-        blockingLoop = 0;
+        m_blockingLoop = 0;
     }
     else
     {
-        av_read_play(ctx);
-        Q_ASSERT(blockingLoop);
-        if (blockingLoop)
-            blockingLoop->exit();
+        av_read_play(m_ctx);
+        Q_ASSERT(m_blockingLoop);
+        if (m_blockingLoop)
+            m_blockingLoop->exit();
     }
 }
 

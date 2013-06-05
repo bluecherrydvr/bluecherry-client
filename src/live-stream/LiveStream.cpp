@@ -259,8 +259,8 @@ bool LiveStream::updateFrame()
         m_fpsUpdateCnt = m_fpsUpdateHits = 0;
     }
 
-    QMutexLocker l(&m_worker->frameLock);
-    StreamFrame *sf = m_worker->frameHead;
+    QMutexLocker l(&m_worker->m_frameLock);
+    StreamFrame *sf = m_worker->m_frameHead;
     if (!sf)
         return false;
 
@@ -294,7 +294,7 @@ bool LiveStream::updateFrame()
 
         if (sf == m_frame)
             return false;
-        m_worker->frameHead = sf;
+        m_worker->m_frameHead = sf;
     }
     else if (m_frame)
         delete m_frame;

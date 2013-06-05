@@ -56,16 +56,16 @@ signals:
 private:
     friend class LiveStream;
 
-    struct AVFormatContext *ctx;
-    struct SwsContext *sws;
-    QByteArray url;
-    bool cancelFlag;
-    bool paused;
-    bool autoDeinterlacing;
-    QEventLoop *blockingLoop;
+    struct AVFormatContext *m_ctx;
+    struct SwsContext *m_sws;
+    QByteArray m_url;
+    bool m_cancelFlag;
+    bool m_paused;
+    bool m_autoDeinterlacing;
+    QEventLoop *m_blockingLoop;
 
-    QMutex frameLock;
-    StreamFrame *frameHead, *frameTail;
+    QMutex m_frameLock;
+    StreamFrame *m_frameHead, *m_frameTail;
 
     bool setup();
     void destroy();
