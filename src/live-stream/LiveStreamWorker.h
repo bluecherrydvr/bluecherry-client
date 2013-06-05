@@ -20,6 +20,7 @@
 
 #include <QObject>
 #include <QMutex>
+#include <QWaitCondition>
 
 struct AVFrame;
 class QEventLoop;
@@ -42,12 +43,13 @@ public:
     virtual ~LiveStreamWorker();
 
     void setUrl(const QByteArray &url);
+    void setPaused(bool paused);
+    bool isPaused();
 
 public slots:
     void run();
     void stop();
 
-    void setPaused(bool pause);
     void setAutoDeinterlacing(bool enabled);
 
 signals:
@@ -60,15 +62,20 @@ private:
     struct SwsContext *m_sws;
     QByteArray m_url;
     bool m_cancelFlag;
-    bool m_paused;
     bool m_autoDeinterlacing;
-    QEventLoop *m_blockingLoop;
 
     QMutex m_frameLock;
+
+    volatile bool m_paused;
+    QMutex m_pauseMutex;
+    QMutex m_pauseWaitConditionMutex;
+    QWaitCondition m_pauseWaitCondition;
+
     StreamFrame *m_frameHead, *m_frameTail;
 
     bool setup();
     void destroy();
+    void pause();
 
     void processVideo(struct AVStream *stream, struct AVFrame *frame);
 };

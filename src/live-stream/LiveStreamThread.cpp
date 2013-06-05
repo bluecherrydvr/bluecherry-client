@@ -67,7 +67,7 @@ void LiveStreamThread::stop()
 
 void LiveStreamThread::setPaused(bool paused)
 {
-    m_worker.data()->metaObject()->invokeMethod(m_worker.data(), "setPaused", Q_ARG(bool, paused));
+    m_worker.data()->setPaused(paused);
 }
 
 LiveStreamWorker * LiveStreamThread::worker() const

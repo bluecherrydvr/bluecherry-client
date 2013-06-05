@@ -31,7 +31,7 @@ extern "C" {
 
 LiveStreamWorker::LiveStreamWorker(QObject *parent)
     : QObject(parent), m_ctx(0), m_sws(0), m_cancelFlag(false), m_paused(false), m_autoDeinterlacing(true),
-      m_blockingLoop(0), m_frameHead(0), m_frameTail(0)
+      m_frameHead(0), m_frameTail(0)
 {
 }
 
@@ -81,6 +81,9 @@ void LiveStreamWorker::run()
 
     while (!m_cancelFlag && !abortFlag)
     {
+        if (isPaused())
+            pause();
+
         int re = av_read_frame(m_ctx, &packet);
         if (re < 0)
         {
@@ -309,33 +312,38 @@ void LiveStreamWorker::stop()
 {
     ASSERT_WORKER_THREAD();
     m_cancelFlag = true;
-    if (m_blockingLoop)
-        m_blockingLoop->exit();
+    m_pauseWaitCondition.wakeOne();
     deleteLater();
 }
 
-void LiveStreamWorker::setPaused(bool v)
+void LiveStreamWorker::setPaused(bool paused)
 {
-    ASSERT_WORKER_THREAD();
-    if (!m_ctx || v == m_paused)
+    QMutexLocker mutexLocked(&m_pauseMutex);
+
+    if (!m_ctx || paused == m_paused)
         return;
 
-    m_paused = v;
-    if (m_paused)
-    {
-        av_read_pause(m_ctx);
-        QEventLoop loop;
-        m_blockingLoop = &loop;
-        loop.exec();
-        m_blockingLoop = 0;
-    }
-    else
-    {
-        av_read_play(m_ctx);
-        Q_ASSERT(m_blockingLoop);
-        if (m_blockingLoop)
-            m_blockingLoop->exit();
-    }
+    m_paused = paused;
+    if (!m_paused)
+        m_pauseWaitCondition.wakeOne();
+}
+
+bool LiveStreamWorker::isPaused()
+{
+    QMutexLocker mutexLocked(&m_pauseMutex);
+
+    return m_paused;
+}
+
+void LiveStreamWorker::pause()
+{
+    ASSERT_WORKER_THREAD();
+
+    m_pauseWaitConditionMutex.lock();
+    av_read_pause(m_ctx);
+    m_pauseWaitCondition.wait(&m_pauseWaitConditionMutex);
+    av_read_play(m_ctx);
+    m_pauseWaitConditionMutex.unlock();
 }
 
 StreamFrame::~StreamFrame()
