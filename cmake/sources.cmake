@@ -29,8 +29,6 @@ set (bluecherry_client_main_SRCS
     src/core/BluecherryApp.cpp
     src/core/CameraPtzControl.cpp
     src/core/EventData.cpp
-    src/core/LiveStream.cpp
-    src/core/LiveStreamWorker.cpp
     src/core/LiveViewManager.cpp
     src/core/MJpegStream.cpp
     src/core/PtzPresetsModel.cpp
@@ -49,6 +47,9 @@ set (bluecherry_client_main_SRCS
     src/event/EventVideoDownload.cpp
     src/event/MediaEventFilter.cpp
     src/event/ModelEventsCursor.cpp
+
+    src/live-stream/LiveStream.cpp
+    src/live-stream/LiveStreamWorker.cpp
 
     src/network/MediaDownloadManager.cpp
     src/network/RemotePortChecker.cpp

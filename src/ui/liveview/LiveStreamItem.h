@@ -21,7 +21,7 @@
 #include <QDeclarativeItem>
 #include <QSharedPointer>
 #include "core/MJpegStream.h"
-#include "core/LiveStream.h"
+#include "live-stream/LiveStream.h"
 
 class QGLContext;
 

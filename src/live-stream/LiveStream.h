@@ -23,7 +23,7 @@
 #include <QImage>
 #include <QElapsedTimer>
 #include "camera/DVRCamera.h"
-#include "LiveViewManager.h"
+#include "core/LiveViewManager.h"
 
 class LiveStreamWorker;
 

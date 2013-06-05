@@ -16,7 +16,7 @@
  */
 
 #include "LiveStreamWorker.h"
-#include "BluecherryApp.h"
+#include "core/BluecherryApp.h"
 #include <QDebug>
 #include <QCoreApplication>
 #include <QThread>

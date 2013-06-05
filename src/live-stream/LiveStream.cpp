@@ -17,8 +17,8 @@
 
 #include "LiveStream.h"
 #include "LiveStreamWorker.h"
-#include "BluecherryApp.h"
-#include "LiveViewManager.h"
+#include "core/BluecherryApp.h"
+#include "core/LiveViewManager.h"
 #include <QMutex>
 #include <QMetaObject>
 #include <QTimer>
