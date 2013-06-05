@@ -95,11 +95,11 @@ private slots:
     void checkState();
 
 private:
-    static QTimer *renderTimer, *stateTimer;
+    static QTimer *m_renderTimer, *m_stateTimer;
 
     QWeakPointer<DVRCamera> m_camera;
     QThread *thread;
-    LiveStreamWorker *worker;
+    LiveStreamWorker *m_worker;
     QImage m_currentFrame;
     struct StreamFrame *m_frame;
     QString m_errorMessage;
