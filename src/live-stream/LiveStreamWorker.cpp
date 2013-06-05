@@ -30,7 +30,7 @@ extern "C" {
 #define ASSERT_WORKER_THREAD() Q_ASSERT(QThread::currentThread() == thread())
 
 LiveStreamWorker::LiveStreamWorker(QObject *parent)
-    : QObject(parent), m_ctx(0), m_sws(0), m_cancelFlag(false), m_paused(false), m_autoDeinterlacing(true),
+    : QObject(parent), m_ctx(0), m_sws(0), m_cancelFlag(false), m_autoDeinterlacing(true),
       m_frameHead(0), m_frameTail(0)
 {
 }
@@ -81,7 +81,7 @@ void LiveStreamWorker::run()
 
     while (!m_cancelFlag && !abortFlag)
     {
-        if (isPaused())
+        if (m_threadPause.shouldPause())
             pause();
 
         int re = av_read_frame(m_ctx, &packet);
@@ -312,38 +312,23 @@ void LiveStreamWorker::stop()
 {
     ASSERT_WORKER_THREAD();
     m_cancelFlag = true;
-    m_pauseWaitCondition.wakeOne();
+    m_threadPause.setPaused(false);
     deleteLater();
 }
 
 void LiveStreamWorker::setPaused(bool paused)
 {
-    QMutexLocker mutexLocked(&m_pauseMutex);
-
-    if (!m_ctx || paused == m_paused)
+    if (!m_ctx)
         return;
 
-    m_paused = paused;
-    if (!m_paused)
-        m_pauseWaitCondition.wakeOne();
-}
-
-bool LiveStreamWorker::isPaused()
-{
-    QMutexLocker mutexLocked(&m_pauseMutex);
-
-    return m_paused;
+    m_threadPause.setPaused(paused);
 }
 
 void LiveStreamWorker::pause()
 {
-    ASSERT_WORKER_THREAD();
-
-    m_pauseWaitConditionMutex.lock();
     av_read_pause(m_ctx);
-    m_pauseWaitCondition.wait(&m_pauseWaitConditionMutex);
+    m_threadPause.pause();
     av_read_play(m_ctx);
-    m_pauseWaitConditionMutex.unlock();
 }
 
 StreamFrame::~StreamFrame()

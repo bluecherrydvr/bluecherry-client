@@ -33,6 +33,7 @@ set (bluecherry_client_main_SRCS
     src/core/MJpegStream.cpp
     src/core/PtzPresetsModel.cpp
     src/core/ServerRequestManager.cpp
+    src/core/ThreadPause.cpp
     src/core/TransferRateCalculator.cpp
     src/core/UpdateChecker.cpp
     src/core/Version.cpp

@@ -18,9 +18,9 @@
 #ifndef LIVESTREAMWORKER_H
 #define LIVESTREAMWORKER_H
 
+#include "core/ThreadPause.h"
 #include <QObject>
 #include <QMutex>
-#include <QWaitCondition>
 
 struct AVFrame;
 class QEventLoop;
@@ -44,7 +44,6 @@ public:
 
     void setUrl(const QByteArray &url);
     void setPaused(bool paused);
-    bool isPaused();
 
 public slots:
     void run();
@@ -66,15 +65,13 @@ private:
 
     QMutex m_frameLock;
 
-    volatile bool m_paused;
-    QMutex m_pauseMutex;
-    QMutex m_pauseWaitConditionMutex;
-    QWaitCondition m_pauseWaitCondition;
+    ThreadPause m_threadPause;
 
     StreamFrame *m_frameHead, *m_frameTail;
 
     bool setup();
     void destroy();
+
     void pause();
 
     void processVideo(struct AVStream *stream, struct AVFrame *frame);
