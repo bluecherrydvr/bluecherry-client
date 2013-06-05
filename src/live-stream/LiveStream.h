@@ -25,7 +25,7 @@
 #include "camera/DVRCamera.h"
 #include "core/LiveViewManager.h"
 
-class LiveStreamWorker;
+class LiveStreamThread;
 
 class LiveStream : public QObject
 {
@@ -98,8 +98,7 @@ private:
     static QTimer *m_renderTimer, *m_stateTimer;
 
     QWeakPointer<DVRCamera> m_camera;
-    QThread *thread;
-    LiveStreamWorker *m_worker;
+    LiveStreamThread *m_thread;
     QImage m_currentFrame;
     struct StreamFrame *m_frame;
     QString m_errorMessage;

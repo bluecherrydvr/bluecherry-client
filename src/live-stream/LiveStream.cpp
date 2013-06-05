@@ -16,9 +16,10 @@
  */
 
 #include "LiveStream.h"
-#include "LiveStreamWorker.h"
+#include "LiveStreamThread.h"
 #include "core/BluecherryApp.h"
 #include "core/LiveViewManager.h"
+#include "live-stream/LiveStreamWorker.h"
 #include <QMutex>
 #include <QMetaObject>
 #include <QTimer>
@@ -88,12 +89,15 @@ void LiveStream::init()
 }
 
 LiveStream::LiveStream(DVRCamera *camera, QObject *parent)
-    : QObject(parent), m_camera(camera), thread(0), m_worker(0), m_frame(0), m_state(NotConnected),
+    : QObject(parent), m_camera(camera), m_frame(0), m_state(NotConnected),
       m_autoStart(false), m_fpsUpdateCnt(0), m_fpsUpdateHits(0),
       m_fps(0), m_ptsBase(AV_NOPTS_VALUE)
 {
     Q_ASSERT(m_camera);
     connect(m_camera.data(), SIGNAL(destroyed(QObject*)), this, SLOT(deleteLater()));
+
+    m_thread = new LiveStreamThread(this);
+    connect(m_thread, SIGNAL(fatalError(QString)), this, SLOT(fatalError(QString)));
 
     bcApp->liveView->addStream(this);
     connect(bcApp, SIGNAL(settingsChanged()), SLOT(updateSettings()));
@@ -166,51 +170,23 @@ void LiveStream::start()
         return;
     }
 
+    connect(m_renderTimer, SIGNAL(timeout()), SLOT(updateFrame()), Qt::UniqueConnection);
+
     m_frameInterval.start();
+    m_thread->start(url());
 
-    if (!m_worker)
-    {
-        Q_ASSERT(!thread);
-        thread = new QThread;
-        m_worker = new LiveStreamWorker;
-        m_worker->moveToThread(thread);
-        m_worker->setUrl(url());
-
-        connect(thread, SIGNAL(started()), m_worker, SLOT(run()));
-        connect(m_worker, SIGNAL(destroyed()), thread, SLOT(quit()));
-        connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-
-        connect(m_renderTimer, SIGNAL(timeout()), SLOT(updateFrame()));
-
-        connect(m_worker, SIGNAL(fatalError(QString)), SLOT(fatalError(QString)));
-
-        updateSettings();
-        setState(Connecting);
-        thread->start();
-    }
-    else
-    {
-        setState(Connecting);
-        m_worker->metaObject()->invokeMethod(m_worker, "run");
-    }
+    updateSettings();
+    setState(Connecting);
 }
 
 void LiveStream::stop()
 {
-    if (m_worker)
-    {
-        /* See LiveStreamWorker's destructor for how this frame is freed */
-        m_frame = 0;
-        /* Worker will delete itself, which will then destroy the thread */
-        m_worker->staticMetaObject.invokeMethod(m_worker, "stop");
-        m_worker = 0;
-        thread = 0;
-    }
-
-    Q_ASSERT(!m_frame);
-    Q_ASSERT(!thread);
+    m_thread->stop();
 
     disconnect(m_renderTimer, SIGNAL(timeout()), this, SLOT(updateFrame()));
+
+    /* See LiveStreamWorker's destructor for how this frame is freed */
+    m_frame = 0;
 
     if (state() > NotConnected)
     {
@@ -237,10 +213,11 @@ void LiveStream::setOnline(bool online)
 
 void LiveStream::setPaused(bool pause)
 {
-    if (pause == (state() == Paused) || state() < Streaming || !m_worker)
+    if (pause == (state() == Paused) || state() < Streaming || !m_thread->worker())
         return;
 
-    m_worker->metaObject()->invokeMethod(m_worker, "setPaused", Q_ARG(bool, pause));
+    m_thread->setPaused(pause);
+
     if (pause)
         setState(Paused);
     else
@@ -259,8 +236,8 @@ bool LiveStream::updateFrame()
         m_fpsUpdateCnt = m_fpsUpdateHits = 0;
     }
 
-    QMutexLocker l(&m_worker->m_frameLock);
-    StreamFrame *sf = m_worker->m_frameHead;
+    QMutexLocker l(&m_thread->worker()->m_frameLock);
+    StreamFrame *sf = m_thread->worker()->m_frameHead;
     if (!sf)
         return false;
 
@@ -294,7 +271,7 @@ bool LiveStream::updateFrame()
 
         if (sf == m_frame)
             return false;
-        m_worker->m_frameHead = sf;
+        m_thread->worker()->m_frameHead = sf;
     }
     else if (m_frame)
         delete m_frame;
@@ -348,9 +325,9 @@ void LiveStream::checkState()
 
 void LiveStream::updateSettings()
 {
-    if (!m_worker)
+    if (!m_thread->worker())
         return;
 
     QSettings settings;
-    m_worker->setAutoDeinterlacing(settings.value(QLatin1String("ui/liveview/autoDeinterlace"), false).toBool());
+    m_thread->worker()->setAutoDeinterlacing(settings.value(QLatin1String("ui/liveview/autoDeinterlace"), false).toBool());
 }

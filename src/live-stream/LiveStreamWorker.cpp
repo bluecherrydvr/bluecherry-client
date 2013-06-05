@@ -64,6 +64,8 @@ void LiveStreamWorker::setAutoDeinterlacing(bool enabled)
 
 void LiveStreamWorker::run()
 {
+    qDebug() << Q_FUNC_INFO;
+
     ASSERT_WORKER_THREAD();
 
     // Prevent concurrent invocations

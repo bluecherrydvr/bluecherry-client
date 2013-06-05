@@ -35,6 +35,7 @@ set (bluecherry_client_MOC_SRCS
     src/event/ModelEventsCursor.h
 
     src/live-stream/LiveStream.h
+    src/live-stream/LiveStreamThread.h
     src/live-stream/LiveStreamWorker.h
 
     src/network/MediaDownloadManager.h
