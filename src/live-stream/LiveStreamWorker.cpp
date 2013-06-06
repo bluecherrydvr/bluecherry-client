@@ -62,7 +62,7 @@ LiveStreamWorker::~LiveStreamWorker()
 
 void LiveStreamWorker::setUrl(const QByteArray &url)
 {
-    this->m_url = url;
+    m_url = url;
 }
 
 void LiveStreamWorker::setAutoDeinterlacing(bool enabled)
