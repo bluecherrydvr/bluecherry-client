@@ -19,6 +19,7 @@
 #define LIVESTREAMWORKER_H
 
 #include "core/ThreadPause.h"
+#include <QDateTime>
 #include <QObject>
 #include <QMutex>
 
@@ -43,7 +44,10 @@ public:
     virtual ~LiveStreamWorker();
 
     void setUrl(const QByteArray &url);
+
     void setPaused(bool paused);
+
+    QDateTime lastInterruptableOperationStarted() const;
 
 public slots:
     void run();
@@ -53,12 +57,14 @@ public slots:
 
 signals:
     void fatalError(const QString &message);
+    void finished();
 
 private:
     friend class LiveStream;
 
     struct AVFormatContext *m_ctx;
     struct SwsContext *m_sws;
+    QDateTime m_lastInterruptableOperationStarted;
     QByteArray m_url;
     bool m_cancelFlag;
     bool m_autoDeinterlacing;
@@ -74,6 +80,7 @@ private:
 
     void pause();
 
+    void startInterruptableOperation();
     void processVideo(struct AVStream *stream, struct AVFrame *frame);
 };
 

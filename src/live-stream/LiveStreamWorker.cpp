@@ -29,8 +29,16 @@ extern "C" {
 
 #define ASSERT_WORKER_THREAD() Q_ASSERT(QThread::currentThread() == thread())
 
+int liveStreamInterruptCallback(void *opaque)
+{
+    LiveStreamWorker *worker = (LiveStreamWorker *)opaque;
+    return worker->lastInterruptableOperationStarted().secsTo(QDateTime::currentDateTime()) > 10;
+}
+
 LiveStreamWorker::LiveStreamWorker(QObject *parent)
-    : QObject(parent), m_ctx(0), m_sws(0), m_cancelFlag(false), m_autoDeinterlacing(true),
+    : QObject(parent), m_ctx(0), m_sws(0),
+      m_lastInterruptableOperationStarted(QDateTime::currentDateTime()),
+      m_cancelFlag(false), m_autoDeinterlacing(true),
       m_frameHead(0), m_frameTail(0)
 {
 }
@@ -84,6 +92,7 @@ void LiveStreamWorker::run()
         if (m_threadPause.shouldPause())
             pause();
 
+        startInterruptableOperation();
         int re = av_read_frame(m_ctx, &packet);
         if (re < 0)
         {
@@ -100,6 +109,7 @@ void LiveStreamWorker::run()
         while (packet.size > 0)
         {
             int got_picture = 0;
+            startInterruptableOperation();
             re = avcodec_decode_video2(m_ctx->streams[0]->codec, frame, &got_picture, &packet);
             if (re < 0)
             {
@@ -127,11 +137,14 @@ void LiveStreamWorker::run()
 
     av_free(frame);
     destroy();
+
+    emit finished();
 }
 
 bool LiveStreamWorker::setup()
 {
     ASSERT_WORKER_THREAD();
+
     bool ok = false;
 
     AVDictionary *opt = 0;
@@ -149,7 +162,12 @@ bool LiveStreamWorker::setup()
     AVDictionary *opt_cpy = 0;
     av_dict_copy(&opt_cpy, opt, 0);
 
+    m_ctx = avformat_alloc_context();
+    m_ctx->interrupt_callback.callback = liveStreamInterruptCallback;
+    m_ctx->interrupt_callback.opaque = this;
+
     int re;
+    startInterruptableOperation();
     if ((re = avformat_open_input(&m_ctx, m_url.constData(), NULL, &opt_cpy)) != 0)
     {
         char error[512];
@@ -168,6 +186,7 @@ bool LiveStreamWorker::setup()
         av_dict_copy(&opt_si[i], opt, 0);
     }
 
+    startInterruptableOperation();
     if ((re = avformat_find_stream_info(m_ctx, opt_si)) < 0)
     {
         char error[512];
@@ -179,8 +198,10 @@ bool LiveStreamWorker::setup()
     for (unsigned int i = 0; i < m_ctx->nb_streams; ++i)
     {
         char info[512];
+        startInterruptableOperation();
         AVCodec *codec = avcodec_find_decoder(m_ctx->streams[i]->codec->codec_id);
         av_dict_copy(&opt_cpy, opt, 0);
+        startInterruptableOperation();
         if (!m_ctx->streams[i]->codec->codec &&
             (re = avcodec_open2(m_ctx->streams[i]->codec, codec, &opt_cpy)) < 0)
         {
@@ -245,8 +266,19 @@ void LiveStreamWorker::destroy()
         av_freep(m_ctx->streams[i]);
     }
 
+    startInterruptableOperation();
     avformat_close_input(&m_ctx);
     m_ctx = 0;
+}
+
+void LiveStreamWorker::startInterruptableOperation()
+{
+    m_lastInterruptableOperationStarted = QDateTime::currentDateTime();
+}
+
+QDateTime LiveStreamWorker::lastInterruptableOperationStarted() const
+{
+    return m_lastInterruptableOperationStarted;
 }
 
 void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *rawFrame)
