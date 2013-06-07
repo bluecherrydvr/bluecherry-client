@@ -45,13 +45,13 @@ public:
 
     void setUrl(const QByteArray &url);
 
+    void stop();
     void setPaused(bool paused);
 
     QDateTime lastInterruptableOperationStarted() const;
 
 public slots:
     void run();
-    void stop();
 
     void setAutoDeinterlacing(bool enabled);
 

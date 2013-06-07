@@ -342,10 +342,8 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
 
 void LiveStreamWorker::stop()
 {
-    ASSERT_WORKER_THREAD();
     m_cancelFlag = true;
     m_threadPause.setPaused(false);
-    deleteLater();
 }
 
 void LiveStreamWorker::setPaused(bool paused)

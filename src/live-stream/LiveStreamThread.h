@@ -36,14 +36,20 @@ public:
     void stop();
     void setPaused(bool paused);
 
+    bool isRunning() const;
     LiveStreamWorker * worker() const;
 
 signals:
     void fatalError(const QString &error);
+    void finished();
 
 private:
     QWeakPointer<QThread> m_thread;
     QWeakPointer<LiveStreamWorker> m_worker;
+    bool m_isRunning;
+
+private slots:
+    void threadFinished();
 
 };
 

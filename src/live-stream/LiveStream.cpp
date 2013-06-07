@@ -181,9 +181,9 @@ void LiveStream::start()
 
 void LiveStream::stop()
 {
-    m_thread->stop();
-
     disconnect(m_renderTimer, SIGNAL(timeout()), this, SLOT(updateFrame()));
+
+    m_thread->stop();
 
     /* See LiveStreamWorker's destructor for how this frame is freed */
     m_frame = 0;
@@ -227,7 +227,7 @@ void LiveStream::setPaused(bool pause)
 
 bool LiveStream::updateFrame()
 {
-    if (state() < Connecting)
+    if (state() < Connecting || !m_thread->isRunning())
         return false;
 
     if (++m_fpsUpdateCnt == int(1.5*renderTimerFps))

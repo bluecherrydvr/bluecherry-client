@@ -17,14 +17,17 @@
 
 #include "LiveStreamThread.h"
 #include "LiveStreamWorker.h"
+#include <QDebug>
 #include <QThread>
 
-LiveStreamThread::LiveStreamThread(QObject *parent) : QObject(parent)
+LiveStreamThread::LiveStreamThread(QObject *parent) : QObject(parent), m_isRunning(false)
 {
+    qDebug() << Q_FUNC_INFO;
 }
 
 LiveStreamThread::~LiveStreamThread()
 {
+    qDebug() << Q_FUNC_INFO;
 }
 
 void LiveStreamThread::start(const QByteArray &url)
@@ -42,22 +45,29 @@ void LiveStreamThread::start(const QByteArray &url)
 
         connect(m_thread.data(), SIGNAL(started()), m_worker.data(), SLOT(run()));
         connect(m_worker.data(), SIGNAL(destroyed()), m_thread.data(), SLOT(quit()));
+        connect(m_worker.data(), SIGNAL(finished()), m_worker.data(), SLOT(deleteLater()));
         connect(m_thread.data(), SIGNAL(finished()), m_thread.data(), SLOT(deleteLater()));
 
+        connect(m_worker.data(), SIGNAL(finished()), this, SIGNAL(finished()));
+        connect(m_worker.data(), SIGNAL(finished()), this, SLOT(threadFinished()));
         connect(m_worker.data(), SIGNAL(fatalError(QString)), this, SIGNAL(fatalError(QString)));
 
         m_thread.data()->start();
     }
     else
         m_worker.data()->metaObject()->invokeMethod(m_worker.data(), "run");
+
+    m_isRunning = true;
 }
 
 void LiveStreamThread::stop()
 {
+    m_isRunning = false;
+
     if (m_worker)
     {
         /* Worker will delete itself, which will then destroy the thread */
-        m_worker.data()->staticMetaObject.invokeMethod(m_worker.data(), "stop");
+        m_worker.data()->stop();
         m_worker.clear();
         m_thread.clear();
     }
@@ -73,4 +83,14 @@ void LiveStreamThread::setPaused(bool paused)
 LiveStreamWorker * LiveStreamThread::worker() const
 {
     return m_worker.data();
+}
+
+void LiveStreamThread::threadFinished()
+{
+    m_isRunning = false;
+}
+
+bool LiveStreamThread::isRunning() const
+{
+    return m_isRunning;
 }
