@@ -289,20 +289,19 @@ LiveStreamFrame * LiveStream::frameToDisplay()
 
     qint64 now = m_ptsTimer.elapsed() * 1000;
     LiveStreamFrame *next;
-    /* Cannot use the (AVRational){1,90000} syntax due to MSVC */
-    AVRational r = {1, 90000}, tb = {1, AV_TIME_BASE};
 
     while ((next = result->next))
     {
-        qint64 frameDisplayTime = av_rescale_q(next->d->pts - m_ptsBase, r, tb);
-        if (abs(frameDisplayTime - now) >= AV_TIME_BASE/2)
+        qint64 frameDisplayTime = next->d->pts - m_ptsBase;
+        qint64 scaledFrameDisplayTime = av_rescale_rnd(next->d->pts - m_ptsBase, AV_TIME_BASE, 90000, AV_ROUND_NEAR_INF);
+        if (abs(scaledFrameDisplayTime - now) >= AV_TIME_BASE/2)
         {
             m_ptsBase = next->d->pts;
             m_ptsTimer.restart();
-            now = frameDisplayTime = 0;
+            now = scaledFrameDisplayTime = 0;
         }
 
-        if (now >= frameDisplayTime || (frameDisplayTime - now) <= AV_TIME_BASE/(renderTimerFps*2))
+        if (now >= scaledFrameDisplayTime || (scaledFrameDisplayTime - now) <= AV_TIME_BASE/(renderTimerFps*2))
         {
             /* Target rendering time is in the past, or is less than half a repaint interval in
              * the future, so it's time to draw this frame. */
