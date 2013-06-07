@@ -21,6 +21,15 @@ extern "C" {
 #   include "libavformat/avformat.h"
 }
 
+void LiveStreamFrame::deleteFrom(LiveStreamFrame *from)
+{
+    for (LiveStreamFrame *frame = from, *next; frame; frame = next)
+    {
+        next = frame->next;
+        delete frame;
+    }
+}
+
 LiveStreamFrame::LiveStreamFrame() : next(0), d(0)
 {
 }
