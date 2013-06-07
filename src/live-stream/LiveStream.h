@@ -115,6 +115,7 @@ private:
     QElapsedTimer m_frameInterval;
 
     void setState(State newState);
+    LiveStreamFrame * frameToDisplay();
 };
 
 #endif // LIVESTREAM_H

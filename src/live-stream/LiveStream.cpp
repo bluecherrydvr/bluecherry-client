@@ -238,44 +238,16 @@ void LiveStream::updateFrame()
     }
 
     QMutexLocker l(&m_thread->worker()->m_frameLock);
-    LiveStreamFrame *sf = m_thread->worker()->m_frameHead;
+
+    if (m_thread->worker()->m_frameHead != m_frame)
+    {
+        delete m_frame;
+        m_frame = 0;
+    }
+
+    LiveStreamFrame *sf = frameToDisplay();
     if (!sf)
         return;
-
-    if (sf == m_frame)
-    {
-        qint64 now = m_ptsTimer.elapsed()*1000;
-        LiveStreamFrame *next;
-        /* Cannot use the (AVRational){1,90000} syntax due to MSVC */
-        AVRational r = {1, 90000}, tb = {1, AV_TIME_BASE};
-
-        while ((next = sf->next))
-        {
-            qint64 rescale = av_rescale_q(next->d->pts - m_ptsBase, r, tb);
-            if (abs(rescale - now) >= AV_TIME_BASE/2)
-            {
-                m_ptsBase = next->d->pts;
-                m_ptsTimer.restart();
-                now = rescale = 0;
-            }
-
-            if (now >= rescale || (rescale - now) <= AV_TIME_BASE/(renderTimerFps*2))
-            {
-                /* Target rendering time is in the past, or is less than half a repaint interval in
-                 * the future, so it's time to draw this frame. */
-                delete sf;
-                sf = next;
-            }
-            else
-                break;
-        }
-
-        if (sf == m_frame)
-            return;
-        m_thread->worker()->m_frameHead = sf;
-    }
-    else if (m_frame)
-        delete m_frame;
 
     l.unlock();
 
@@ -301,6 +273,45 @@ void LiveStream::updateFrame()
     if (sizeChanged)
         emit streamSizeChanged(m_currentFrame.size());
     emit updated();
+}
+
+LiveStreamFrame * LiveStream::frameToDisplay()
+{
+    LiveStreamFrame *result = m_thread->worker()->m_frameHead;
+    if (!result)
+        return 0;
+
+    if (result != m_frame)
+        return result;
+
+    qint64 now = m_ptsTimer.elapsed()*1000;
+    LiveStreamFrame *next;
+    /* Cannot use the (AVRational){1,90000} syntax due to MSVC */
+    AVRational r = {1, 90000}, tb = {1, AV_TIME_BASE};
+
+    while ((next = result->next))
+    {
+        qint64 rescale = av_rescale_q(next->d->pts - m_ptsBase, r, tb);
+        if (abs(rescale - now) >= AV_TIME_BASE/2)
+        {
+            m_ptsBase = next->d->pts;
+            m_ptsTimer.restart();
+            now = rescale = 0;
+        }
+
+        if (now >= rescale || (rescale - now) <= AV_TIME_BASE/(renderTimerFps*2))
+        {
+            /* Target rendering time is in the past, or is less than half a repaint interval in
+             * the future, so it's time to draw this frame. */
+            delete result;
+            result = next;
+        }
+        else
+            break;
+    }
+
+    m_thread->worker()->m_frameHead = result;
+    return result;
 }
 
 void LiveStream::fatalError(const QString &message)
