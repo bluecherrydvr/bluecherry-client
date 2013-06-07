@@ -54,7 +54,7 @@ LiveStreamWorker::~LiveStreamWorker()
      * we can guarantee that, once this object destructs, LiveStream no longer has
      * any interest in this object or the frame, so this is the only time when it's
      * finally safe to free that frame that cannot leak. */
-    LiveStreamFrame::deleteFrom(m_frameHead);
+    LiveStreamFrame::deleteFromTo(m_frameHead);
 }
 
 void LiveStreamWorker::setUrl(const QByteArray &url)
@@ -247,7 +247,7 @@ void LiveStreamWorker::destroy()
     if (m_frameHead)
     {
         /* Even now, we cannot touch frameHead. It might be used by the other thread. */
-        LiveStreamFrame::deleteFrom(m_frameHead->next);
+        LiveStreamFrame::deleteFromTo(m_frameHead->next);
         m_frameHead->next = 0;
     }
     m_frameTail = m_frameHead;
