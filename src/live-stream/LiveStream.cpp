@@ -245,9 +245,12 @@ void LiveStream::updateFrame()
         m_frame = 0;
     }
 
+    LiveStreamFrame *oldHead = m_thread->worker()->m_frameHead;
     LiveStreamFrame *sf = frameToDisplay();
     if (!sf)
         return;
+    LiveStreamFrame *newHead = m_thread->worker()->m_frameHead;
+    LiveStreamFrame::deleteFromTo(oldHead, newHead);
 
     l.unlock();
 
@@ -303,7 +306,6 @@ LiveStreamFrame * LiveStream::frameToDisplay()
         {
             /* Target rendering time is in the past, or is less than half a repaint interval in
              * the future, so it's time to draw this frame. */
-            delete result;
             result = next;
         }
         else
