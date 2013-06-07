@@ -89,7 +89,7 @@ signals:
     void updated();
 
 private slots:
-    bool updateFrame();
+    void updateFrame();
     void fatalError(const QString &message);
     void updateSettings();
     void checkState();

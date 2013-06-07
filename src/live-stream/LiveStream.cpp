@@ -226,10 +226,10 @@ void LiveStream::setPaused(bool pause)
     m_frameInterval.restart();
 }
 
-bool LiveStream::updateFrame()
+void LiveStream::updateFrame()
 {
     if (state() < Connecting || !m_thread->isRunning())
-        return false;
+        return;
 
     if (++m_fpsUpdateCnt == int(1.5*renderTimerFps))
     {
@@ -240,7 +240,7 @@ bool LiveStream::updateFrame()
     QMutexLocker l(&m_thread->worker()->m_frameLock);
     LiveStreamFrame *sf = m_thread->worker()->m_frameHead;
     if (!sf)
-        return false;
+        return;
 
     if (sf == m_frame)
     {
@@ -271,7 +271,7 @@ bool LiveStream::updateFrame()
         }
 
         if (sf == m_frame)
-            return false;
+            return;
         m_thread->worker()->m_frameHead = sf;
     }
     else if (m_frame)
@@ -301,7 +301,6 @@ bool LiveStream::updateFrame()
     if (sizeChanged)
         emit streamSizeChanged(m_currentFrame.size());
     emit updated();
-    return true;
 }
 
 void LiveStream::fatalError(const QString &message)
