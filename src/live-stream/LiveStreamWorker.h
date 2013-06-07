@@ -23,17 +23,7 @@
 #include <QObject>
 #include <QMutex>
 
-struct AVFrame;
-class QEventLoop;
-
-struct StreamFrame
-{
-    StreamFrame *next;
-    AVFrame *d;
-
-    StreamFrame() : next(0), d(0) { }
-    ~StreamFrame();
-};
+struct StreamFrame;
 
 class LiveStreamWorker : public QObject
 {

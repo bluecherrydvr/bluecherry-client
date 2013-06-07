@@ -16,6 +16,7 @@
  */
 
 #include "LiveStream.h"
+#include "LiveStreamFrame.h"
 #include "LiveStreamThread.h"
 #include "core/BluecherryApp.h"
 #include "core/LiveViewManager.h"

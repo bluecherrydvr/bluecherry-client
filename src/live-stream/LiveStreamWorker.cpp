@@ -16,6 +16,7 @@
  */
 
 #include "LiveStreamWorker.h"
+#include "LiveStreamFrame.h"
 #include "core/BluecherryApp.h"
 #include <QDebug>
 #include <QCoreApplication>
@@ -359,13 +360,4 @@ void LiveStreamWorker::pause()
     av_read_pause(m_ctx);
     m_threadPause.pause();
     av_read_play(m_ctx);
-}
-
-StreamFrame::~StreamFrame()
-{
-    if (d)
-    {
-        av_free(d->data[0]);
-        av_free(d);
-    }
 }

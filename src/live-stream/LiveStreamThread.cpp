@@ -32,6 +32,8 @@ LiveStreamThread::~LiveStreamThread()
 
 void LiveStreamThread::start(const QByteArray &url)
 {
+    qDebug() << Q_FUNC_INFO << m_worker.isNull();
+
     if (!m_worker)
     {
         Q_ASSERT(!m_thread);

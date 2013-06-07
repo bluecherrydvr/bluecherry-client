@@ -50,6 +50,7 @@ set (bluecherry_client_main_SRCS
     src/event/ModelEventsCursor.cpp
 
     src/live-stream/LiveStream.cpp
+    src/live-stream/LiveStreamFrame.cpp
     src/live-stream/LiveStreamThread.cpp
     src/live-stream/LiveStreamWorker.cpp
 
