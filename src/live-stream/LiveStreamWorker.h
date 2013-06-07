@@ -23,7 +23,7 @@
 #include <QObject>
 #include <QMutex>
 
-struct StreamFrame;
+struct LiveStreamFrame;
 
 class LiveStreamWorker : public QObject
 {
@@ -63,7 +63,7 @@ private:
 
     ThreadPause m_threadPause;
 
-    StreamFrame *m_frameHead, *m_frameTail;
+    LiveStreamFrame *m_frameHead, *m_frameTail;
 
     bool setup();
     void destroy();

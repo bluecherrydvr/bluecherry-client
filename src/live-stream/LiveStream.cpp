@@ -238,14 +238,14 @@ bool LiveStream::updateFrame()
     }
 
     QMutexLocker l(&m_thread->worker()->m_frameLock);
-    StreamFrame *sf = m_thread->worker()->m_frameHead;
+    LiveStreamFrame *sf = m_thread->worker()->m_frameHead;
     if (!sf)
         return false;
 
     if (sf == m_frame)
     {
         qint64 now = m_ptsTimer.elapsed()*1000;
-        StreamFrame *next;
+        LiveStreamFrame *next;
         /* Cannot use the (AVRational){1,90000} syntax due to MSVC */
         AVRational r = {1, 90000}, tb = {1, AV_TIME_BASE};
 

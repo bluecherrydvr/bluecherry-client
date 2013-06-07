@@ -20,13 +20,13 @@
 
 struct AVFrame;
 
-struct StreamFrame
+struct LiveStreamFrame
 {
-    StreamFrame *next;
+    LiveStreamFrame *next;
     AVFrame *d;
 
-    StreamFrame();
-    ~StreamFrame();
+    LiveStreamFrame();
+    ~LiveStreamFrame();
 
 };
 

@@ -21,11 +21,11 @@ extern "C" {
 #   include "libavformat/avformat.h"
 }
 
-StreamFrame::StreamFrame() : next(0), d(0)
+LiveStreamFrame::LiveStreamFrame() : next(0), d(0)
 {
 }
 
-StreamFrame::~StreamFrame()
+LiveStreamFrame::~LiveStreamFrame()
 {
     if (d)
     {

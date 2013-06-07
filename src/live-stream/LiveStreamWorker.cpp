@@ -54,7 +54,7 @@ LiveStreamWorker::~LiveStreamWorker()
      * we can guarantee that, once this object destructs, LiveStream no longer has
      * any interest in this object or the frame, so this is the only time when it's
      * finally safe to free that frame that cannot leak. */
-    for (StreamFrame *f = m_frameHead, *n; f; f = n)
+    for (LiveStreamFrame *f = m_frameHead, *n; f; f = n)
     {
         n = f->next;
         delete f;
@@ -251,7 +251,7 @@ void LiveStreamWorker::destroy()
     if (m_frameHead)
     {
         /* Even now, we cannot touch frameHead. It might be used by the other thread. */
-        for (StreamFrame *f = m_frameHead->next, *n; f; f = n)
+        for (LiveStreamFrame *f = m_frameHead->next, *n; f; f = n)
         {
             n = f->next;
             delete f;
@@ -316,7 +316,7 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
     frame->height = stream->codec->height;
     frame->pts    = rawFrame->pkt_pts;
 
-    StreamFrame *sf = new StreamFrame;
+    LiveStreamFrame *sf = new LiveStreamFrame;
     sf->d    = frame;
 
     m_frameLock.lock();
@@ -333,7 +333,7 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
          * It is NEVER safe to drop frameHead; only the UI thread may do that. */
         if (m_frameTail->d->display_picture_number - m_frameHead->next->d->display_picture_number >= 6)
         {
-            for (StreamFrame *f = m_frameHead->next, *n = f->next; f && f != m_frameTail; f = n, n = f->next)
+            for (LiveStreamFrame *f = m_frameHead->next, *n = f->next; f && f != m_frameTail; f = n, n = f->next)
                 delete f;
             m_frameHead->next = m_frameTail;
         }
