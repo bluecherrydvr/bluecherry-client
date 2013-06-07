@@ -30,6 +30,12 @@ void LiveStreamFrame::deleteFrom(LiveStreamFrame *from)
     }
 }
 
+void LiveStreamFrame::deleteFromTo(LiveStreamFrame *from, LiveStreamFrame *to)
+{
+    for (LiveStreamFrame *frame = from, *next = frame->next; frame && frame != to; frame = next, next = frame->next)
+        delete frame;
+}
+
 LiveStreamFrame::LiveStreamFrame() : next(0), d(0)
 {
 }

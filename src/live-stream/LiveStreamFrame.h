@@ -26,6 +26,7 @@ struct LiveStreamFrame
     AVFrame *d;
 
     static void deleteFrom(LiveStreamFrame *from);
+    static void deleteFromTo(LiveStreamFrame *from, LiveStreamFrame *to);
 
     LiveStreamFrame();
     ~LiveStreamFrame();

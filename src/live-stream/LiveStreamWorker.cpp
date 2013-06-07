@@ -325,8 +325,7 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
          * It is NEVER safe to drop frameHead; only the UI thread may do that. */
         if (m_frameTail->d->display_picture_number - m_frameHead->next->d->display_picture_number >= 6)
         {
-            for (LiveStreamFrame *f = m_frameHead->next, *n = f->next; f && f != m_frameTail; f = n, n = f->next)
-                delete f;
+            LiveStreamFrame::deleteFromTo(m_frameHead->next, m_frameTail);
             m_frameHead->next = m_frameTail;
         }
     }
