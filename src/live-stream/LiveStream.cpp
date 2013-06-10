@@ -255,11 +255,6 @@ void LiveStream::updateFrame()
     l.unlock();
 
     m_frame = sf;
-    if (m_ptsBase == (int64_t)AV_NOPTS_VALUE)
-    {
-        m_ptsBase = m_frame->d->pts;
-        m_ptsTimer.restart();
-    }
 
     m_fpsUpdateHits++;
 
@@ -283,6 +278,12 @@ LiveStreamFrame * LiveStream::frameToDisplay()
     LiveStreamFrame *result = m_thread->worker()->m_frameHead;
     if (!result)
         return 0;
+
+    if (m_ptsBase == (int64_t)AV_NOPTS_VALUE)
+    {
+        m_ptsBase = result->d->pts;
+        m_ptsTimer.restart();
+    }
 
     if (result != m_frame)
         return result;
