@@ -52,8 +52,6 @@ signals:
     void finished();
 
 private:
-    friend class LiveStream;
-
     struct AVFormatContext *m_ctx;
     struct SwsContext *m_sws;
     QDateTime m_lastInterruptableOperationStarted;
