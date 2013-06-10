@@ -315,6 +315,9 @@ LiveStreamFrame * LiveStreamWorker::frameToDisplay(LiveStreamFrame *lastKnownFra
             break;
     }
 
+    if (m_frameHead, result)
+        LiveStreamFrame::deleteFromTo(m_frameHead, result);
+
     m_frameHead = result;
     return result;
 }

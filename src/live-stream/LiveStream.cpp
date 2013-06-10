@@ -245,12 +245,9 @@ void LiveStream::updateFrame()
         m_frame = 0;
     }
 
-    LiveStreamFrame *oldHead = m_thread->worker()->m_frameHead;
     LiveStreamFrame *sf = m_thread->worker()->frameToDisplay(m_frame);
     if (!sf)
         return;
-    LiveStreamFrame *newHead = m_thread->worker()->m_frameHead;
-    LiveStreamFrame::deleteFromTo(oldHead, newHead);
 
     l.unlock();
 
