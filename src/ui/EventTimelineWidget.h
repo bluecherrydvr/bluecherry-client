@@ -136,7 +136,7 @@ private:
     
     void paintDays(QPainter &p);
     void paintTickLines(QPainter &p, const QRect &rect);
-    void paintLegend(QPainter &p, int width);
+    void paintLegend(QPainter &p);
     void paintChart(QPainter &p, int width);
 
     int leftPadding() const;
