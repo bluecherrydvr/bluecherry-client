@@ -186,7 +186,7 @@ void LiveStream::stop()
 
     m_thread->stop();
 
-    /* See LiveStreamWorker's destructor for how this frame is freed */
+    delete m_frame;
     m_frame = 0;
 
     if (state() > NotConnected)
@@ -238,19 +238,13 @@ void LiveStream::updateFrame()
     }
 
     QMutexLocker l(&m_thread->worker()->m_frameLock);
-
-    if (m_thread->worker()->m_frameHead != m_frame)
-    {
-        delete m_frame;
-        m_frame = 0;
-    }
-
     LiveStreamFrame *sf = m_thread->worker()->frameToDisplay(m_frame);
-    if (!sf)
-        return;
-
     l.unlock();
 
+    if (!sf) // no new frame
+        return;
+
+    delete m_frame;
     m_frame = sf;
 
     m_fpsUpdateHits++;

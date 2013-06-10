@@ -247,12 +247,9 @@ void LiveStreamWorker::destroy()
 
     m_frameLock.lock();
     if (m_frameHead)
-    {
-        /* Even now, we cannot touch frameHead. It might be used by the other thread. */
-        LiveStreamFrame::deleteFromTo(m_frameHead->next);
-        m_frameHead->next = 0;
-    }
-    m_frameTail = m_frameHead;
+        LiveStreamFrame::deleteFromTo(m_frameHead);
+    m_frameHead = 0;
+    m_frameTail = 0;
     m_frameLock.unlock();
 
     for (unsigned int i = 0; i < m_ctx->nb_streams; ++i)
@@ -288,9 +285,6 @@ LiveStreamFrame * LiveStreamWorker::frameToDisplay(LiveStreamFrame *lastKnownFra
         m_ptsTimer.restart();
     }
 
-    if (result != lastKnownFrame)
-        return result;
-
     qint64 now = m_ptsTimer.elapsed() * 1000;
     LiveStreamFrame *next;
 
@@ -318,7 +312,15 @@ LiveStreamFrame * LiveStreamWorker::frameToDisplay(LiveStreamFrame *lastKnownFra
     if (m_frameHead, result)
         LiveStreamFrame::deleteFromTo(m_frameHead, result);
 
-    m_frameHead = result;
+    if (m_frameTail == result)
+    {
+        m_frameHead = 0;
+        m_frameTail = 0;
+    }
+    else
+        m_frameHead = result->next;
+
+    result->next = 0;
     return result;
 }
 
