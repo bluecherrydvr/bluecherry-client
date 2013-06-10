@@ -237,10 +237,7 @@ void LiveStream::updateFrame()
         m_fpsUpdateCnt = m_fpsUpdateHits = 0;
     }
 
-    QMutexLocker l(&m_thread->worker()->m_frameLock);
     LiveStreamFrame *sf = m_thread->worker()->frameToDisplay(m_frame);
-    l.unlock();
-
     if (!sf) // no new frame
         return;
 
