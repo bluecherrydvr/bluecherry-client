@@ -91,9 +91,9 @@ void VisibleTimeRange::computePrimaryTickSecs(int prefferedTickCount)
 void VisibleTimeRange::boundVisibleRange(const DateTimeRange &boundBy)
 {
     if (!m_visibleRange.isNull())
-        m_visibleRange = m_visibleRange.boundedBy(m_range);
+        m_visibleRange = m_visibleRange.boundedBy(boundBy);
     else
-        m_visibleRange = m_range;
+        m_visibleRange = boundBy;
 
     emit invisibleSecondsChanged(invisibleSeconds());
 }

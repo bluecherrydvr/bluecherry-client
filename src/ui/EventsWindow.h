@@ -65,8 +65,8 @@ private slots:
     void timelineSliderChanged(int value);
 
     void eventContextMenu(const QPoint &pos);
-    void showEvent(const QModelIndex &index);
-    void showEvent(const EventData &eventData);
+    void showServerEvent(const QModelIndex &index);
+    void showServerEvent(const EventData &eventData);
 
 private:
     static EventsWindow *m_instance;

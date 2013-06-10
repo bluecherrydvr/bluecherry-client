@@ -828,7 +828,7 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
 
     p.save();
     p.translate(QPoint(0, topPadding()));
-    paintLegend(p, r.width());
+    paintLegend(p);
     p.restore();
 
     p.save();
@@ -891,7 +891,7 @@ void EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect)
     p.restore();
 }
 
-void EventTimelineWidget::paintLegend(QPainter& p, int width)
+void EventTimelineWidget::paintLegend(QPainter& p)
 {
     QRect textRect(16, 0, leftPadding(), rowHeight());
     QFont serverFont = p.font();

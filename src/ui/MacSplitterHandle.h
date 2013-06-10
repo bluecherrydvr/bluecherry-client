@@ -15,14 +15,28 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "MacSplitter.h"
-#include "MacSplitterHandle.h"
+#ifndef MACSPLITTERHANDLE_H
+#define MACSPLITTERHANDLE_H
 
-MacSplitter::MacSplitter(Qt::Orientation o, QWidget* parent) : QSplitter(o, parent)
-{
-}
+#include <QSplitterHandle>
 
-QSplitterHandle* MacSplitter::createHandle()
+class MacSplitterHandle : public QSplitterHandle
 {
-    return new MacSplitterHandle(orientation(), this);
-}
+    Q_OBJECT
+
+public:
+    MacSplitterHandle(Qt::Orientation o, QSplitter *parent);
+    ~MacSplitterHandle();
+
+    virtual QSize sizeHint() const;
+
+protected:
+    virtual void paintEvent(QPaintEvent *e);
+    virtual void enterEvent(QEvent *e);
+    virtual bool eventFilter(QObject *, QEvent *);
+
+private:
+    bool isMouseGrabbed;
+};
+
+#endif // MACSPLITTERHANDLE_H

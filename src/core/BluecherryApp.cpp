@@ -96,6 +96,8 @@ BluecherryApp::BluecherryApp()
 
 void BluecherryApp::commitDataRequest(QSessionManager &sessionManager)
 {
+    Q_UNUSED(sessionManager);
+
     saveSettings();
 }
 

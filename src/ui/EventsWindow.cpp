@@ -292,7 +292,7 @@ QWidget *EventsWindow::createResultsView()
     m_resultsView->setFrameStyle(QFrame::NoFrame);
     m_resultsView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_resultsView, SIGNAL(customContextMenuRequested(QPoint)), SLOT(eventContextMenu(QPoint)));
-    connect(m_resultsView, SIGNAL(doubleClicked(QModelIndex)), SLOT(showEvent(QModelIndex)));
+    connect(m_resultsView, SIGNAL(doubleClicked(QModelIndex)), SLOT(showServerEvent(QModelIndex)));
 
     QSettings settings;
     m_resultsView->header()->restoreState(settings.value(QLatin1String("ui/events/viewHeader")).toByteArray());
@@ -317,7 +317,7 @@ QWidget *EventsWindow::createTimeline()
     m_timelineZoom->setValue(0);
 
     connect(m_timeline, SIGNAL(customContextMenuRequested(QPoint)), SLOT(eventContextMenu(QPoint)));
-    connect(m_timeline, SIGNAL(doubleClicked(QModelIndex)), SLOT(showEvent(QModelIndex)));
+    connect(m_timeline, SIGNAL(doubleClicked(QModelIndex)), SLOT(showServerEvent(QModelIndex)));
 
     connect(m_timelineZoom, SIGNAL(valueChanged(int)), SLOT(timelineSliderChanged(int)));
 
@@ -375,16 +375,16 @@ void EventsWindow::timelineSliderChanged(int value)
     m_timeline->setZoomLevel(value);
 }
 
-void EventsWindow::showEvent(const QModelIndex &index)
+void EventsWindow::showServerEvent(const QModelIndex &index)
 {
     EventData *data = index.data(EventsModel::EventDataPtr).value<EventData*>();
-    showEvent(*data);
+    showServerEvent(*data);
 
     m_modelEventsCursor->setCameraFilter(data->locationCamera());
     m_modelEventsCursor->setIndex(index.row());
 }
 
-void EventsWindow::showEvent(const EventData &eventData)
+void EventsWindow::showServerEvent(const EventData &eventData)
 {
     if (!eventData.hasMedia())
         return;
@@ -431,7 +431,7 @@ void EventsWindow::eventContextMenu(const QPoint &pos)
     if (!act)
         return;
     else if (act == aPlay)
-        showEvent(view->currentIndex());
+        showServerEvent(view->currentIndex());
     else if (act == aPlayWindow)
     {
         ModelEventsCursor *modelEventsCursor = new ModelEventsCursor();
