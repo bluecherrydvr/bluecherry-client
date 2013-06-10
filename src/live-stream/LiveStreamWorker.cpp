@@ -23,12 +23,14 @@
 #include <QThread>
 
 extern "C" {
-#include "libavcodec/avcodec.h"
-#include "libavformat/avformat.h"
-#include "libswscale/swscale.h"
+#   include "libavcodec/avcodec.h"
+#   include "libavformat/avformat.h"
+#   include "libswscale/swscale.h"
+#   include "libavutil/mathematics.h"
 }
 
 #define ASSERT_WORKER_THREAD() Q_ASSERT(QThread::currentThread() == thread())
+#define RENDER_TIMER_FPS 30
 
 int liveStreamInterruptCallback(void *opaque)
 {
@@ -40,7 +42,7 @@ LiveStreamWorker::LiveStreamWorker(QObject *parent)
     : QObject(parent), m_ctx(0), m_sws(0),
       m_lastInterruptableOperationStarted(QDateTime::currentDateTime()),
       m_cancelFlag(false), m_autoDeinterlacing(true),
-      m_frameHead(0), m_frameTail(0)
+      m_frameHead(0), m_frameTail(0), m_ptsBase(AV_NOPTS_VALUE)
 {
 }
 
@@ -272,6 +274,49 @@ void LiveStreamWorker::startInterruptableOperation()
 QDateTime LiveStreamWorker::lastInterruptableOperationStarted() const
 {
     return m_lastInterruptableOperationStarted;
+}
+
+LiveStreamFrame * LiveStreamWorker::frameToDisplay(LiveStreamFrame *lastKnownFrame)
+{
+    LiveStreamFrame *result = m_frameHead;
+    if (!result)
+        return 0;
+
+    if (m_ptsBase == (int64_t)AV_NOPTS_VALUE)
+    {
+        m_ptsBase = result->d->pts;
+        m_ptsTimer.restart();
+    }
+
+    if (result != lastKnownFrame)
+        return result;
+
+    qint64 now = m_ptsTimer.elapsed() * 1000;
+    LiveStreamFrame *next;
+
+    while ((next = result->next))
+    {
+        qint64 frameDisplayTime = next->d->pts - m_ptsBase;
+        qint64 scaledFrameDisplayTime = av_rescale_rnd(next->d->pts - m_ptsBase, AV_TIME_BASE, 90000, AV_ROUND_NEAR_INF);
+        if (abs(scaledFrameDisplayTime - now) >= AV_TIME_BASE/2)
+        {
+            m_ptsBase = next->d->pts;
+            m_ptsTimer.restart();
+            now = scaledFrameDisplayTime = 0;
+        }
+
+        if (now >= scaledFrameDisplayTime || (scaledFrameDisplayTime - now) <= AV_TIME_BASE/(RENDER_TIMER_FPS*2))
+        {
+            /* Target rendering time is in the past, or is less than half a repaint interval in
+             * the future, so it's time to draw this frame. */
+            result = next;
+        }
+        else
+            break;
+    }
+
+    m_frameHead = result;
+    return result;
 }
 
 void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *rawFrame)

@@ -110,12 +110,10 @@ private:
     int m_fpsUpdateHits;
     float m_fps;
 
-    qint64 m_ptsBase;
-    QElapsedTimer m_ptsTimer;
     QElapsedTimer m_frameInterval;
 
     void setState(State newState);
-    LiveStreamFrame * frameToDisplay();
+
 };
 
 #endif // LIVESTREAM_H

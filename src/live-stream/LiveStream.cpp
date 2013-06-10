@@ -28,9 +28,9 @@
 #include <QSettings>
 
 extern "C" {
-#include "libavcodec/avcodec.h"
-#include "libavformat/avformat.h"
-#include "libavutil/mathematics.h"
+#   include "libavcodec/avcodec.h"
+#   include "libavformat/avformat.h"
+#   include "libavutil/mathematics.h"
 }
 
 static int bc_av_lockmgr(void **mutex, enum AVLockOp op)
@@ -92,7 +92,7 @@ void LiveStream::init()
 LiveStream::LiveStream(DVRCamera *camera, QObject *parent)
     : QObject(parent), m_camera(camera), m_frame(0), m_state(NotConnected),
       m_autoStart(false), m_fpsUpdateCnt(0), m_fpsUpdateHits(0),
-      m_fps(0), m_ptsBase(AV_NOPTS_VALUE)
+      m_fps(0)
 {
     Q_ASSERT(m_camera);
     connect(m_camera.data(), SIGNAL(destroyed(QObject*)), this, SLOT(deleteLater()));
@@ -246,7 +246,7 @@ void LiveStream::updateFrame()
     }
 
     LiveStreamFrame *oldHead = m_thread->worker()->m_frameHead;
-    LiveStreamFrame *sf = frameToDisplay();
+    LiveStreamFrame *sf = m_thread->worker()->frameToDisplay(m_frame);
     if (!sf)
         return;
     LiveStreamFrame *newHead = m_thread->worker()->m_frameHead;
@@ -271,49 +271,6 @@ void LiveStream::updateFrame()
     if (sizeChanged)
         emit streamSizeChanged(m_currentFrame.size());
     emit updated();
-}
-
-LiveStreamFrame * LiveStream::frameToDisplay()
-{
-    LiveStreamFrame *result = m_thread->worker()->m_frameHead;
-    if (!result)
-        return 0;
-
-    if (m_ptsBase == (int64_t)AV_NOPTS_VALUE)
-    {
-        m_ptsBase = result->d->pts;
-        m_ptsTimer.restart();
-    }
-
-    if (result != m_frame)
-        return result;
-
-    qint64 now = m_ptsTimer.elapsed() * 1000;
-    LiveStreamFrame *next;
-
-    while ((next = result->next))
-    {
-        qint64 frameDisplayTime = next->d->pts - m_ptsBase;
-        qint64 scaledFrameDisplayTime = av_rescale_rnd(next->d->pts - m_ptsBase, AV_TIME_BASE, 90000, AV_ROUND_NEAR_INF);
-        if (abs(scaledFrameDisplayTime - now) >= AV_TIME_BASE/2)
-        {
-            m_ptsBase = next->d->pts;
-            m_ptsTimer.restart();
-            now = scaledFrameDisplayTime = 0;
-        }
-
-        if (now >= scaledFrameDisplayTime || (scaledFrameDisplayTime - now) <= AV_TIME_BASE/(renderTimerFps*2))
-        {
-            /* Target rendering time is in the past, or is less than half a repaint interval in
-             * the future, so it's time to draw this frame. */
-            result = next;
-        }
-        else
-            break;
-    }
-
-    m_thread->worker()->m_frameHead = result;
-    return result;
 }
 
 void LiveStream::fatalError(const QString &message)

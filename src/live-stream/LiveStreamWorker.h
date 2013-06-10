@@ -20,6 +20,7 @@
 
 #include "core/ThreadPause.h"
 #include <QDateTime>
+#include <QElapsedTimer>
 #include <QObject>
 #include <QMutex>
 
@@ -39,6 +40,7 @@ public:
     void setPaused(bool paused);
 
     QDateTime lastInterruptableOperationStarted() const;
+    LiveStreamFrame * frameToDisplay(LiveStreamFrame *lastKnownFrame);
 
 public slots:
     void run();
@@ -64,6 +66,8 @@ private:
     ThreadPause m_threadPause;
 
     LiveStreamFrame *m_frameHead, *m_frameTail;
+    qint64 m_ptsBase;
+    QElapsedTimer m_ptsTimer;
 
     bool setup();
     void destroy();
@@ -72,6 +76,7 @@ private:
 
     void startInterruptableOperation();
     void processVideo(struct AVStream *stream, struct AVFrame *frame);
+
 };
 
 #endif // LIVESTREAMWORKER_H
