@@ -18,14 +18,22 @@
 #ifndef LIVE_STREAM_FRAME_H
 #define LIVE_STREAM_FRAME_H
 
+#include <QtGlobal>
+
 struct AVFrame;
 
-struct LiveStreamFrame
+class LiveStreamFrame
 {
-    AVFrame *d;
+    Q_DISABLE_COPY(LiveStreamFrame);
 
-    LiveStreamFrame();
+public:
+    explicit LiveStreamFrame(AVFrame *avFrame);
     ~LiveStreamFrame();
+
+    AVFrame * avFrame() const;
+
+private:
+    AVFrame *m_avFrame;
 
 };
 

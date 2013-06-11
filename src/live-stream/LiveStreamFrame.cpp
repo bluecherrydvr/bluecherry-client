@@ -21,15 +21,18 @@ extern "C" {
 #   include "libavformat/avformat.h"
 }
 
-LiveStreamFrame::LiveStreamFrame() : d(0)
+LiveStreamFrame::LiveStreamFrame(AVFrame *avFrame) : m_avFrame(avFrame)
 {
+    Q_ASSERT(m_avFrame);
 }
 
 LiveStreamFrame::~LiveStreamFrame()
 {
-    if (d)
-    {
-        av_free(d->data[0]);
-        av_free(d);
-    }
+    av_free(m_avFrame->data[0]);
+    av_free(m_avFrame);
+}
+
+AVFrame * LiveStreamFrame::avFrame() const
+{
+    return m_avFrame;
 }

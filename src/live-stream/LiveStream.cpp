@@ -250,11 +250,11 @@ void LiveStream::updateFrame()
         setState(Streaming);
     m_frameInterval.restart();
 
-    bool sizeChanged = (m_currentFrame.width() != sf->d->width ||
-                        m_currentFrame.height() != sf->d->height);
+    bool sizeChanged = (m_currentFrame.width() != sf->avFrame()->width ||
+                        m_currentFrame.height() != sf->avFrame()->height);
 
-    m_currentFrame = QImage(sf->d->data[0], sf->d->width, sf->d->height,
-                            sf->d->linesize[0], QImage::Format_RGB32);
+    m_currentFrame = QImage(sf->avFrame()->data[0], sf->avFrame()->width, sf->avFrame()->height,
+                            sf->avFrame()->linesize[0], QImage::Format_RGB32);
 
     if (sizeChanged)
         emit streamSizeChanged(m_currentFrame.size());

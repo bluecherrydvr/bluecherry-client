@@ -280,7 +280,7 @@ LiveStreamFrame * LiveStreamWorker::frameToDisplay()
 
     if (m_ptsBase == (int64_t)AV_NOPTS_VALUE)
     {
-        m_ptsBase = m_frameQueue.head()->d->pts;
+        m_ptsBase = m_frameQueue.head()->avFrame()->pts;
         m_ptsTimer.restart();
     }
 
@@ -289,11 +289,11 @@ LiveStreamFrame * LiveStreamWorker::frameToDisplay()
     LiveStreamFrame *frame = m_frameQueue.dequeue();
     while (frame)
     {
-        qint64 frameDisplayTime = frame->d->pts - m_ptsBase;
-        qint64 scaledFrameDisplayTime = av_rescale_rnd(frame->d->pts - m_ptsBase, AV_TIME_BASE, 90000, AV_ROUND_NEAR_INF);
+        qint64 frameDisplayTime = frame->avFrame()->pts - m_ptsBase;
+        qint64 scaledFrameDisplayTime = av_rescale_rnd(frame->avFrame()->pts - m_ptsBase, AV_TIME_BASE, 90000, AV_ROUND_NEAR_INF);
         if (abs(scaledFrameDisplayTime - now) >= AV_TIME_BASE/2)
         {
-            m_ptsBase = frame->d->pts;
+            m_ptsBase = frame->avFrame()->pts;
             m_ptsTimer.restart();
             now = scaledFrameDisplayTime = 0;
         }
@@ -346,8 +346,7 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
     frame->height = stream->codec->height;
     frame->pts    = rawFrame->pkt_pts;
 
-    LiveStreamFrame *sf = new LiveStreamFrame;
-    sf->d    = frame;
+    LiveStreamFrame *sf = new LiveStreamFrame(frame);
 
     QMutexLocker locker(&m_frameQueueLock);
     if (m_frameQueue.isEmpty())
@@ -356,7 +355,7 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
     }
     else
     {
-        sf->d->display_picture_number = m_frameQueue.last()->d->display_picture_number+1;
+        sf->avFrame()->display_picture_number = m_frameQueue.last()->avFrame()->display_picture_number+1;
         m_frameQueue.enqueue(sf);
 
         /* If necessary, drop frames to avoid exploding memory. This will only happen if

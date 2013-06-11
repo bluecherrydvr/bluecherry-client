@@ -25,7 +25,7 @@
 #include <QObject>
 #include <QQueue>
 
-struct LiveStreamFrame;
+class LiveStreamFrame;
 
 class LiveStreamWorker : public QObject
 {

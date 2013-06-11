@@ -100,7 +100,7 @@ private:
     QWeakPointer<DVRCamera> m_camera;
     LiveStreamThread *m_thread;
     QImage m_currentFrame;
-    struct LiveStreamFrame *m_frame;
+    class LiveStreamFrame *m_frame;
     QString m_errorMessage;
     State m_state;
     bool m_autoStart;
