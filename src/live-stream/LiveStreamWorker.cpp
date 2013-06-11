@@ -17,6 +17,7 @@
 
 #include "LiveStreamWorker.h"
 #include "LiveStreamFrame.h"
+#include "LiveStreamFrameQueue.h"
 #include "core/BluecherryApp.h"
 #include <QDebug>
 #include <QCoreApplication>
@@ -30,7 +31,6 @@ extern "C" {
 }
 
 #define ASSERT_WORKER_THREAD() Q_ASSERT(QThread::currentThread() == thread())
-#define RENDER_TIMER_FPS 30
 
 int liveStreamInterruptCallback(void *opaque)
 {
@@ -42,23 +42,13 @@ LiveStreamWorker::LiveStreamWorker(QObject *parent)
     : QObject(parent), m_ctx(0), m_sws(0),
       m_lastInterruptableOperationStarted(QDateTime::currentDateTime()),
       m_cancelFlag(false), m_autoDeinterlacing(true),
-      m_ptsBase(AV_NOPTS_VALUE)
+      m_frameQueue(new LiveStreamFrameQueue(6))
 {
 }
 
 LiveStreamWorker::~LiveStreamWorker()
 {
     Q_ASSERT(!m_ctx);
-
-    /* This is a little quirky; The frame in frameHead can be used by the LiveStream
-     * at ANY point, including during or after destroy(), so we can't delete it, but
-     * we can't guarantee that LiveStream ever saw it, or even still exists. However,
-     * we can guarantee that, once this object destructs, LiveStream no longer has
-     * any interest in this object or the frame, so this is the only time when it's
-     * finally safe to free that frame that cannot leak. */
-    QMutexLocker locker(&m_frameQueueLock);
-    qDeleteAll(m_frameQueue);
-    m_frameQueue.clear();
 }
 
 void LiveStreamWorker::setUrl(const QByteArray &url)
@@ -247,9 +237,7 @@ void LiveStreamWorker::destroy()
         m_sws = 0;
     }
 
-    QMutexLocker locker(&m_frameQueueLock);
-    qDeleteAll(m_frameQueue);
-    m_frameQueue.clear();
+    m_frameQueue->clear();
 
     for (unsigned int i = 0; i < m_ctx->nb_streams; ++i)
     {
@@ -274,42 +262,7 @@ QDateTime LiveStreamWorker::lastInterruptableOperationStarted() const
 
 LiveStreamFrame * LiveStreamWorker::frameToDisplay()
 {
-    QMutexLocker locker(&m_frameQueueLock);
-    if (m_frameQueue.isEmpty())
-        return 0;
-
-    if (m_ptsBase == (int64_t)AV_NOPTS_VALUE)
-    {
-        m_ptsBase = m_frameQueue.head()->avFrame()->pts;
-        m_ptsTimer.restart();
-    }
-
-    qint64 now = m_ptsTimer.elapsed() * 1000;
-
-    LiveStreamFrame *frame = m_frameQueue.dequeue();
-    while (frame)
-    {
-        qint64 frameDisplayTime = frame->avFrame()->pts - m_ptsBase;
-        qint64 scaledFrameDisplayTime = av_rescale_rnd(frame->avFrame()->pts - m_ptsBase, AV_TIME_BASE, 90000, AV_ROUND_NEAR_INF);
-        if (abs(scaledFrameDisplayTime - now) >= AV_TIME_BASE/2)
-        {
-            m_ptsBase = frame->avFrame()->pts;
-            m_ptsTimer.restart();
-            now = scaledFrameDisplayTime = 0;
-        }
-
-        if (now >= scaledFrameDisplayTime || (scaledFrameDisplayTime - now) <= AV_TIME_BASE/(RENDER_TIMER_FPS*2))
-        {
-            delete frame;
-            if (m_frameQueue.isEmpty())
-                return 0;
-            frame = m_frameQueue.dequeue();
-        }
-        else
-            break;
-    }
-
-    return frame;
+    return m_frameQueue.data()->dequeue();
 }
 
 void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *rawFrame)
@@ -346,24 +299,7 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
     frame->height = stream->codec->height;
     frame->pts    = rawFrame->pkt_pts;
 
-    enqueueFrame(new LiveStreamFrame(frame));
-    dropOldFrames();
-}
-
-void LiveStreamWorker::enqueueFrame(LiveStreamFrame* frame)
-{
-    QMutexLocker locker(&m_frameQueueLock);
-    m_frameQueue.enqueue(frame);    
-}
-
-void LiveStreamWorker::dropOldFrames()
-{
-    QMutexLocker locker(&m_frameQueueLock);
-    while (m_frameQueue.size() >= 6)
-    {
-        LiveStreamFrame *frame = m_frameQueue.dequeue();
-        delete frame;
-    }
+    m_frameQueue->enqueue(new LiveStreamFrame(frame));
 }
 
 void LiveStreamWorker::stop()

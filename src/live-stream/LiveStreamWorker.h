@@ -20,12 +20,10 @@
 
 #include "core/ThreadPause.h"
 #include <QDateTime>
-#include <QElapsedTimer>
-#include <QMutex>
 #include <QObject>
-#include <QQueue>
 
 class LiveStreamFrame;
+class LiveStreamFrameQueue;
 
 class LiveStreamWorker : public QObject
 {
@@ -61,11 +59,7 @@ private:
     bool m_autoDeinterlacing;
 
     ThreadPause m_threadPause;
-
-    QMutex m_frameQueueLock;
-    QQueue<LiveStreamFrame *> m_frameQueue;
-    qint64 m_ptsBase;
-    QElapsedTimer m_ptsTimer;
+    QScopedPointer<LiveStreamFrameQueue> m_frameQueue;
 
     bool setup();
     void destroy();
@@ -74,8 +68,6 @@ private:
 
     void startInterruptableOperation();
     void processVideo(struct AVStream *stream, struct AVFrame *frame);
-    void enqueueFrame(LiveStreamFrame *frame);
-    void dropOldFrames();
 
 };
 
