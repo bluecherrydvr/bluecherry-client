@@ -87,12 +87,17 @@ void LiveStreamWorker::run()
     if (m_ctx)
         return;
 
+    if (setup())
+        processStreamLoop();
+
+    emit finished();
+}
+
+void LiveStreamWorker::processStreamLoop()
+{
     AVFrame *frame = avcodec_alloc_frame();
+
     bool abortFlag = false;
-
-    if (!setup())
-        abortFlag = true;
-
     while (!m_cancelFlag && !abortFlag)
     {
         if (m_threadPause.shouldPause())
@@ -101,8 +106,6 @@ void LiveStreamWorker::run()
     }
 
     av_free(frame);
-
-    emit finished();
 }
 
 bool LiveStreamWorker::processStream(AVFrame *frame)

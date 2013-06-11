@@ -63,6 +63,7 @@ private:
 
     bool setup();
     void pause();
+    void processStreamLoop();
     bool processStream(struct AVFrame *frame);
 
     void startInterruptableOperation();
