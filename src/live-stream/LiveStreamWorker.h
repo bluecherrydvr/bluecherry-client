@@ -23,6 +23,7 @@
 #include <QObject>
 
 class LiveStreamFrame;
+class LiveStreamFrameFormatter;
 class LiveStreamFrameQueue;
 
 class LiveStreamWorker : public QObject
@@ -44,7 +45,7 @@ public:
 public slots:
     void run();
 
-    void setAutoDeinterlacing(bool enabled);
+    void setAutoDeinterlacing(bool autoDeinterlacing);
 
 signals:
     void fatalError(const QString &message);
@@ -52,23 +53,24 @@ signals:
 
 private:
     struct AVFormatContext *m_ctx;
-    struct SwsContext *m_sws;
     QDateTime m_lastInterruptableOperationStarted;
     QByteArray m_url;
     bool m_cancelFlag;
     bool m_autoDeinterlacing;
 
     ThreadPause m_threadPause;
+    QScopedPointer<LiveStreamFrameFormatter> m_frameFormatter;
     QScopedPointer<LiveStreamFrameQueue> m_frameQueue;
 
     bool setup();
     void pause();
+
     void processStreamLoop();
     bool processStream();
     bool processPacket(struct AVPacket packet);
+    void processFrame(struct AVFrame *frame);
 
     void startInterruptableOperation();
-    void processVideo(struct AVStream *stream, struct AVFrame *frame);
 
 };
 

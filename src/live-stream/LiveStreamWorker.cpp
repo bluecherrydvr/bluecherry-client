@@ -17,6 +17,7 @@
 
 #include "LiveStreamWorker.h"
 #include "LiveStreamFrame.h"
+#include "LiveStreamFrameFormatter.h"
 #include "LiveStreamFrameQueue.h"
 #include "core/BluecherryApp.h"
 #include <QDebug>
@@ -39,7 +40,7 @@ int liveStreamInterruptCallback(void *opaque)
 }
 
 LiveStreamWorker::LiveStreamWorker(QObject *parent)
-    : QObject(parent), m_ctx(0), m_sws(0),
+    : QObject(parent), m_ctx(0),
       m_lastInterruptableOperationStarted(QDateTime::currentDateTime()),
       m_cancelFlag(false), m_autoDeinterlacing(true),
       m_frameQueue(new LiveStreamFrameQueue(6))
@@ -51,11 +52,6 @@ LiveStreamWorker::~LiveStreamWorker()
     if (!m_ctx)
         return;
 
-    if (m_sws)
-    {
-        sws_freeContext(m_sws);
-        m_sws = 0;
-    }
 
     for (unsigned int i = 0; i < m_ctx->nb_streams; ++i)
     {
@@ -72,9 +68,11 @@ void LiveStreamWorker::setUrl(const QByteArray &url)
     m_url = url;
 }
 
-void LiveStreamWorker::setAutoDeinterlacing(bool enabled)
+void LiveStreamWorker::setAutoDeinterlacing(bool autoDeinterlacing)
 {
-    m_autoDeinterlacing = enabled;
+    m_autoDeinterlacing = autoDeinterlacing;
+    if (m_frameFormatter)
+        m_frameFormatter->setAutoDeinterlacing(autoDeinterlacing);
 }
 
 void LiveStreamWorker::run()
@@ -146,7 +144,7 @@ bool LiveStreamWorker::processPacket(struct AVPacket packet)
         }
 
         if (got_picture)
-            processVideo(m_ctx->streams[0], frame);
+            processFrame(frame);
 
         av_free(frame);
         
@@ -246,6 +244,12 @@ end:
         m_ctx = 0;
     }
 
+    if (ok)
+    {
+        m_frameFormatter.reset(new LiveStreamFrameFormatter(m_ctx->streams[0]));
+        m_frameFormatter->setAutoDeinterlacing(m_autoDeinterlacing);
+    }
+
     return ok;
 }
 
@@ -264,41 +268,10 @@ LiveStreamFrame * LiveStreamWorker::frameToDisplay()
     return m_frameQueue.data()->dequeue();
 }
 
-void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *rawFrame)
+void LiveStreamWorker::processFrame(struct AVFrame *rawFrame)
 {
-    const PixelFormat fmt = PIX_FMT_BGRA;
-
-    /* Assume that H.264 D1-resolution video is interlaced, to work around a solo(?) bug
-     * that results in interlaced_frame not being set for videos from solo6110. */
-    if (m_autoDeinterlacing && (rawFrame->interlaced_frame ||
-                              (stream->codec->codec_id == CODEC_ID_H264 &&
-                               ((stream->codec->width == 704 && stream->codec->height == 480) ||
-                                (stream->codec->width == 720 && stream->codec->height == 576)))))
-    {
-        if (avpicture_deinterlace((AVPicture*)rawFrame, (AVPicture*)rawFrame, stream->codec->pix_fmt,
-                                  stream->codec->width, stream->codec->height) < 0)
-        {
-            qDebug("deinterlacing failed");
-        }
-    }
-
-    m_sws = sws_getCachedContext(m_sws, stream->codec->width, stream->codec->height, stream->codec->pix_fmt,
-                               stream->codec->width, stream->codec->height, fmt, SWS_BICUBIC,
-                               NULL, NULL, NULL);
-
-    int bufSize  = avpicture_get_size(fmt, stream->codec->width, stream->codec->height);
-    uint8_t *buf = (uint8_t*) av_malloc(bufSize);
-
-    AVFrame *frame = avcodec_alloc_frame();
-    avpicture_fill((AVPicture*)frame, buf, fmt, stream->codec->width, stream->codec->height);
-    sws_scale(m_sws, (const uint8_t**)rawFrame->data, rawFrame->linesize, 0, stream->codec->height,
-              frame->data, frame->linesize);
-
-    frame->width  = stream->codec->width;
-    frame->height = stream->codec->height;
-    frame->pts    = rawFrame->pkt_pts;
-
-    m_frameQueue->enqueue(new LiveStreamFrame(frame));
+    Q_ASSERT(m_frameFormatter);
+    m_frameQueue->enqueue(m_frameFormatter->formatFrame(rawFrame));
 }
 
 void LiveStreamWorker::stop()
