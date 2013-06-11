@@ -22,7 +22,6 @@ struct AVFrame;
 
 struct LiveStreamFrame
 {
-    LiveStreamFrame *next;
     AVFrame *d;
 
     LiveStreamFrame();

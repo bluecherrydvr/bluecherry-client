@@ -21,7 +21,7 @@ extern "C" {
 #   include "libavformat/avformat.h"
 }
 
-LiveStreamFrame::LiveStreamFrame() : next(0), d(0)
+LiveStreamFrame::LiveStreamFrame() : d(0)
 {
 }
 
