@@ -118,34 +118,43 @@ bool LiveStreamWorker::processStream(AVFrame *frame)
         char error[512];
         av_strerror(re, error, sizeof(error));
         emit fatalError(QString::fromLatin1("%1 (in read_frame)").arg(QLatin1String(error)));
+        av_free_packet(&packet);
         return false;
     }
 
-    uint8_t *data = packet.data;
+    bool result = processPacket(frame, packet);
+    av_free_packet(&packet);
+    return result;
+}
+
+bool LiveStreamWorker::processPacket(struct AVFrame *frame, AVPacket packet)
+{
     bcApp->globalRate->addSampleValue(packet.size);
 
-    if (packet.size > 0)
+    startInterruptableOperation();
+    int got_picture = 0;
+
+    AVPacket datapacket;
+    while (packet.size > 0)
     {
-        startInterruptableOperation();
-        int got_picture = 0;
-        re = avcodec_decode_video2(m_ctx->streams[0]->codec, frame, &got_picture, &packet);
+        int re = avcodec_decode_video2(m_ctx->streams[0]->codec, frame, &got_picture, &packet);
+        if (re == 0)
+            break;
+
         if (re < 0)
         {
             emit fatalError(QLatin1String("Decoding error"));
-            packet.data = data;
             av_free_packet(&packet);
             return false;
         }
 
         if (got_picture)
             processVideo(m_ctx->streams[0], frame);
-
-        packet.size -= re;
+        
         packet.data += re;
+        packet.size -= re;
     }
 
-    packet.data = data;
-    av_free_packet(&packet);
     return true;
 }
 
