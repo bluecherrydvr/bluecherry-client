@@ -87,7 +87,6 @@ void LiveStreamWorker::run()
     if (m_ctx)
         return;
 
-    AVPacket packet;
     AVFrame *frame = avcodec_alloc_frame();
     bool abortFlag = false;
 
@@ -100,6 +99,7 @@ void LiveStreamWorker::run()
             pause();
 
         startInterruptableOperation();
+        AVPacket packet;
         int re = av_read_frame(m_ctx, &packet);
         if (re < 0)
         {
