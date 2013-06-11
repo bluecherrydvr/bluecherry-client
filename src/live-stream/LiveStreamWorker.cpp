@@ -152,29 +152,44 @@ bool LiveStreamWorker::processPacket(struct AVPacket packet)
     AVPacket datapacket;
     while (packet.size > 0)
     {
-        AVFrame *frame = avcodec_alloc_frame();
-        startInterruptableOperation();
-        int re = avcodec_decode_video2(m_ctx->streams[0]->codec, frame, &got_picture, &packet);
-        if (re == 0)
-            break;
-
-        if (re < 0)
+        AVFrame *frame = extractFrame(packet);
+        if (frame)
         {
-            emit fatalError(QString::fromLatin1("Decoding error: %1").arg(errorMessageFromCode(re)));
-            av_free(frame);
-            return false;
-        }
-
-        if (got_picture)
             processFrame(frame);
-
-        av_free(frame);
-        
-        packet.data += re;
-        packet.size -= re;
+            av_free(frame);
+        }
     }
 
     return true;
+}
+
+AVFrame * LiveStreamWorker::extractFrame(AVPacket &packet)
+{
+    AVFrame *frame = avcodec_alloc_frame();
+    startInterruptableOperation();
+
+    int pictureAvailable;
+    int re = avcodec_decode_video2(m_ctx->streams[0]->codec, frame, &pictureAvailable, &packet);
+    if (re == 0)
+        return 0;
+
+    if (re < 0)
+    {
+        emit fatalError(QString::fromLatin1("Decoding error: %1").arg(errorMessageFromCode(re)));
+        av_free(frame);
+        return 0;
+    }
+
+    packet.size -= re;
+    packet.data += re;
+
+    if (!pictureAvailable)
+    {
+        av_free(frame);
+        return 0;
+    }
+
+    return frame;
 }
 
 void LiveStreamWorker::processFrame(struct AVFrame *rawFrame)
