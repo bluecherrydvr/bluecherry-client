@@ -138,8 +138,6 @@ void LiveStreamWorker::run()
 
         packet.data = data;
         av_free_packet(&packet);
-
-        QCoreApplication::processEvents(QEventLoop::AllEvents);
     }
 
     av_free(frame);
