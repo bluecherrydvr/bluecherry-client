@@ -48,7 +48,23 @@ LiveStreamWorker::LiveStreamWorker(QObject *parent)
 
 LiveStreamWorker::~LiveStreamWorker()
 {
-    Q_ASSERT(!m_ctx);
+    if (!m_ctx)
+        return;
+
+    if (m_sws)
+    {
+        sws_freeContext(m_sws);
+        m_sws = 0;
+    }
+
+    for (unsigned int i = 0; i < m_ctx->nb_streams; ++i)
+    {
+        avcodec_close(m_ctx->streams[i]->codec);
+        av_freep(m_ctx->streams[i]);
+    }
+
+    startInterruptableOperation();
+    avformat_close_input(&m_ctx);
 }
 
 void LiveStreamWorker::setUrl(const QByteArray &url)
@@ -127,7 +143,6 @@ void LiveStreamWorker::run()
     }
 
     av_free(frame);
-    destroy();
 
     emit finished();
 }
@@ -222,32 +237,6 @@ end:
     }
 
     return ok;
-}
-
-void LiveStreamWorker::destroy()
-{
-    ASSERT_WORKER_THREAD();
-
-    if (!m_ctx)
-        return;
-
-    if (m_sws)
-    {
-        sws_freeContext(m_sws);
-        m_sws = 0;
-    }
-
-    m_frameQueue->clear();
-
-    for (unsigned int i = 0; i < m_ctx->nb_streams; ++i)
-    {
-        avcodec_close(m_ctx->streams[i]->codec);
-        av_freep(m_ctx->streams[i]);
-    }
-
-    startInterruptableOperation();
-    avformat_close_input(&m_ctx);
-    m_ctx = 0;
 }
 
 void LiveStreamWorker::startInterruptableOperation()
