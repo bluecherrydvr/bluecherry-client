@@ -273,7 +273,7 @@ QDateTime LiveStreamWorker::lastInterruptableOperationStarted() const
     return m_lastInterruptableOperationStarted;
 }
 
-LiveStreamFrame * LiveStreamWorker::frameToDisplay(LiveStreamFrame *lastKnownFrame)
+LiveStreamFrame * LiveStreamWorker::frameToDisplay()
 {
     QMutexLocker locker(&m_frameLock);
 

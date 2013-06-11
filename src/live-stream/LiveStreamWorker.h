@@ -40,7 +40,7 @@ public:
     void setPaused(bool paused);
 
     QDateTime lastInterruptableOperationStarted() const;
-    LiveStreamFrame * frameToDisplay(LiveStreamFrame *lastKnownFrame);
+    LiveStreamFrame * frameToDisplay();
 
 public slots:
     void run();
