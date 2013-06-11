@@ -105,20 +105,35 @@ void LiveStreamWorker::processStreamLoop()
 bool LiveStreamWorker::processStream()
 {
     startInterruptableOperation();
-    AVPacket packet;
-    int re = av_read_frame(m_ctx, &packet);
-    if (re < 0)
-    {
-        char error[512];
-        av_strerror(re, error, sizeof(error));
-        emit fatalError(QString::fromLatin1("%1 (in read_frame)").arg(QLatin1String(error)));
-        av_free_packet(&packet);
+
+    bool ok;
+    AVPacket packet = readPacket(&ok);
+    if (!ok)
         return false;
-    }
 
     bool result = processPacket(packet);
     av_free_packet(&packet);
     return result;
+}
+
+AVPacket LiveStreamWorker::readPacket(bool *ok)
+{
+    if (ok)
+        *ok = true;
+
+    AVPacket packet;
+    int re = av_read_frame(m_ctx, &packet);
+    if (0 == re)
+        return packet;
+
+    char error[512];
+    av_strerror(re, error, sizeof(error));
+    emit fatalError(QString::fromLatin1("%1 (in read_frame)").arg(QLatin1String(error)));
+    av_free_packet(&packet);
+
+    if (ok)
+        *ok = false;
+    return packet;
 }
 
 bool LiveStreamWorker::processPacket(struct AVPacket packet)

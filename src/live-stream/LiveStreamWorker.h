@@ -67,6 +67,7 @@ private:
 
     void processStreamLoop();
     bool processStream();
+    struct AVPacket readPacket(bool *ok = 0);
     bool processPacket(struct AVPacket packet);
     void processFrame(struct AVFrame *frame);
 
