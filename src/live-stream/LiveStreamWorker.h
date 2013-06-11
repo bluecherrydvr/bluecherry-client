@@ -59,7 +59,7 @@ private:
     bool m_cancelFlag;
     bool m_autoDeinterlacing;
 
-    QMutex m_frameLock;
+    QMutex m_frameQueueLock;
 
     ThreadPause m_threadPause;
 

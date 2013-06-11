@@ -56,6 +56,7 @@ LiveStreamWorker::~LiveStreamWorker()
      * we can guarantee that, once this object destructs, LiveStream no longer has
      * any interest in this object or the frame, so this is the only time when it's
      * finally safe to free that frame that cannot leak. */
+    QMutexLocker locker(&m_frameQueueLock);
     LiveStreamFrame::deleteFromTo(m_frameHead);
 }
 
@@ -245,12 +246,11 @@ void LiveStreamWorker::destroy()
         m_sws = 0;
     }
 
-    m_frameLock.lock();
+    QMutexLocker locker(&m_frameQueueLock);
     if (m_frameHead)
         LiveStreamFrame::deleteFromTo(m_frameHead);
     m_frameHead = 0;
     m_frameTail = 0;
-    m_frameLock.unlock();
 
     for (unsigned int i = 0; i < m_ctx->nb_streams; ++i)
     {
@@ -275,8 +275,7 @@ QDateTime LiveStreamWorker::lastInterruptableOperationStarted() const
 
 LiveStreamFrame * LiveStreamWorker::frameToDisplay()
 {
-    QMutexLocker locker(&m_frameLock);
-
+    QMutexLocker locker(&m_frameQueueLock);
     LiveStreamFrame *result = m_frameHead;
     if (!result)
         return 0;
@@ -311,7 +310,7 @@ LiveStreamFrame * LiveStreamWorker::frameToDisplay()
             break;
     }
 
-    if (m_frameHead, result)
+    if (m_frameHead != result)
         LiveStreamFrame::deleteFromTo(m_frameHead, result);
 
     if (m_frameTail == result)
@@ -363,7 +362,7 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
     LiveStreamFrame *sf = new LiveStreamFrame;
     sf->d    = frame;
 
-    m_frameLock.lock();
+    QMutexLocker locker(&m_frameQueueLock);
     if (!m_frameTail) {
         m_frameHead = sf;
         m_frameTail = sf;
@@ -381,7 +380,6 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
             m_frameHead->next = m_frameTail;
         }
     }
-    m_frameLock.unlock();
 }
 
 void LiveStreamWorker::stop()
