@@ -346,26 +346,23 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
     frame->height = stream->codec->height;
     frame->pts    = rawFrame->pkt_pts;
 
-    LiveStreamFrame *sf = new LiveStreamFrame(frame);
+    enqueueFrame(new LiveStreamFrame(frame));
+    dropOldFrames();
+}
 
+void LiveStreamWorker::enqueueFrame(LiveStreamFrame* frame)
+{
     QMutexLocker locker(&m_frameQueueLock);
-    if (m_frameQueue.isEmpty())
-    {
-        m_frameQueue.enqueue(sf);
-    }
-    else
-    {
-        sf->avFrame()->display_picture_number = m_frameQueue.last()->avFrame()->display_picture_number+1;
-        m_frameQueue.enqueue(sf);
+    m_frameQueue.enqueue(frame);    
+}
 
-        /* If necessary, drop frames to avoid exploding memory. This will only happen if
-         * the UI thread cannot keep up enough to do is own PTS-based framedropping.
-         * It is NEVER safe to drop frameHead; only the UI thread may do that. */
-        while (m_frameQueue.size() >= 6)
-        {
-            LiveStreamFrame *frame = m_frameQueue.dequeue();
-            delete frame;
-        }
+void LiveStreamWorker::dropOldFrames()
+{
+    QMutexLocker locker(&m_frameQueueLock);
+    while (m_frameQueue.size() >= 6)
+    {
+        LiveStreamFrame *frame = m_frameQueue.dequeue();
+        delete frame;
     }
 }
 

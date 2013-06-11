@@ -60,7 +60,6 @@ private:
     bool m_cancelFlag;
     bool m_autoDeinterlacing;
 
-
     ThreadPause m_threadPause;
 
     QMutex m_frameQueueLock;
@@ -75,6 +74,8 @@ private:
 
     void startInterruptableOperation();
     void processVideo(struct AVStream *stream, struct AVFrame *frame);
+    void enqueueFrame(LiveStreamFrame *frame);
+    void dropOldFrames();
 
 };
 
