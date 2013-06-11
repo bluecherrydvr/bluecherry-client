@@ -71,6 +71,7 @@ private:
     bool processPacket(struct AVPacket packet);
     void processFrame(struct AVFrame *frame);
 
+    QString errorMessageFromCode(int errorCode);
     void startInterruptableOperation();
 
 };

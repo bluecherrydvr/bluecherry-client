@@ -126,9 +126,7 @@ AVPacket LiveStreamWorker::readPacket(bool *ok)
     if (0 == re)
         return packet;
 
-    char error[512];
-    av_strerror(re, error, sizeof(error));
-    emit fatalError(QString::fromLatin1("%1 (in read_frame)").arg(QLatin1String(error)));
+    emit fatalError(QString::fromLatin1("Reading error: %1").arg(errorMessageFromCode(re)));
     av_free_packet(&packet);
 
     if (ok)
@@ -153,7 +151,7 @@ bool LiveStreamWorker::processPacket(struct AVPacket packet)
 
         if (re < 0)
         {
-            emit fatalError(QLatin1String("Decoding error"));
+            emit fatalError(QString::fromLatin1("Decoding error: %1").arg(errorMessageFromCode(re)));
             av_free(frame);
             return false;
         }
@@ -168,6 +166,13 @@ bool LiveStreamWorker::processPacket(struct AVPacket packet)
     }
 
     return true;
+}
+
+QString LiveStreamWorker::errorMessageFromCode(int errorCode)
+{
+    char error[512];
+    av_strerror(errorCode, error, sizeof(error));
+    return QString::fromLatin1(error);
 }
 
 bool LiveStreamWorker::setup()
@@ -199,9 +204,7 @@ bool LiveStreamWorker::setup()
     startInterruptableOperation();
     if ((re = avformat_open_input(&m_ctx, m_url.constData(), NULL, &opt_cpy)) != 0)
     {
-        char error[512];
-        av_strerror(re, error, sizeof(error));
-        emit fatalError(QString::fromLatin1(error));
+        emit fatalError(QString::fromLatin1("Open error: %1").arg(errorMessageFromCode(re)));
         goto end;
     }
 
@@ -218,9 +221,7 @@ bool LiveStreamWorker::setup()
     startInterruptableOperation();
     if ((re = avformat_find_stream_info(m_ctx, opt_si)) < 0)
     {
-        char error[512];
-        av_strerror(re, error, sizeof(error));
-        emit fatalError(QString::fromLatin1(error));
+        emit fatalError(QString::fromLatin1("Find stream error: %1").arg(errorMessageFromCode(re)));
         goto end;
     }
 
