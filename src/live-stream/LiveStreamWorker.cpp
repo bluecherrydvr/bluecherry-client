@@ -114,8 +114,6 @@ void LiveStreamWorker::processStreamLoop()
 
 bool LiveStreamWorker::processStream()
 {
-    startInterruptableOperation();
-
     bool ok;
     AVPacket packet = readPacket(&ok);
     if (!ok)
@@ -132,6 +130,7 @@ AVPacket LiveStreamWorker::readPacket(bool *ok)
         *ok = true;
 
     AVPacket packet;
+    startInterruptableOperation();
     int re = av_read_frame(m_ctx, &packet);
     if (0 == re)
         return packet;
@@ -148,13 +147,13 @@ bool LiveStreamWorker::processPacket(struct AVPacket packet)
 {
     bcApp->globalRate->addSampleValue(packet.size);
 
-    startInterruptableOperation();
     int got_picture = 0;
 
     AVPacket datapacket;
     while (packet.size > 0)
     {
         AVFrame *frame = avcodec_alloc_frame();
+        startInterruptableOperation();
         int re = avcodec_decode_video2(m_ctx->streams[0]->codec, frame, &got_picture, &packet);
         if (re == 0)
             break;
@@ -176,6 +175,13 @@ bool LiveStreamWorker::processPacket(struct AVPacket packet)
     }
 
     return true;
+}
+
+void LiveStreamWorker::processFrame(struct AVFrame *rawFrame)
+{
+    Q_ASSERT(m_frameFormatter);
+    startInterruptableOperation();
+    m_frameQueue->enqueue(m_frameFormatter->formatFrame(rawFrame));
 }
 
 QString LiveStreamWorker::errorMessageFromCode(int errorCode)
@@ -287,12 +293,6 @@ void LiveStreamWorker::startInterruptableOperation()
 LiveStreamFrame * LiveStreamWorker::frameToDisplay()
 {
     return m_frameQueue.data()->dequeue();
-}
-
-void LiveStreamWorker::processFrame(struct AVFrame *rawFrame)
-{
-    Q_ASSERT(m_frameFormatter);
-    m_frameQueue->enqueue(m_frameFormatter->formatFrame(rawFrame));
 }
 
 void LiveStreamWorker::stop()
