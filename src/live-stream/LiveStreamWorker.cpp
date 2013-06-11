@@ -36,7 +36,7 @@ extern "C" {
 int liveStreamInterruptCallback(void *opaque)
 {
     LiveStreamWorker *worker = (LiveStreamWorker *)opaque;
-    return worker->lastInterruptableOperationStarted().secsTo(QDateTime::currentDateTime()) > 10;
+    return worker->shouldInterrupt();
 }
 
 LiveStreamWorker::LiveStreamWorker(QObject *parent)
@@ -51,7 +51,6 @@ LiveStreamWorker::~LiveStreamWorker()
 {
     if (!m_ctx)
         return;
-
 
     for (unsigned int i = 0; i < m_ctx->nb_streams; ++i)
     {
@@ -73,6 +72,17 @@ void LiveStreamWorker::setAutoDeinterlacing(bool autoDeinterlacing)
     m_autoDeinterlacing = autoDeinterlacing;
     if (m_frameFormatter)
         m_frameFormatter->setAutoDeinterlacing(autoDeinterlacing);
+}
+
+bool LiveStreamWorker::shouldInterrupt() const
+{
+    if (m_cancelFlag)
+        return true;
+
+    if (m_lastInterruptableOperationStarted.secsTo(QDateTime::currentDateTime()) > 10)
+        return true;
+
+    return false;
 }
 
 void LiveStreamWorker::run()
@@ -272,11 +282,6 @@ end:
 void LiveStreamWorker::startInterruptableOperation()
 {
     m_lastInterruptableOperationStarted = QDateTime::currentDateTime();
-}
-
-QDateTime LiveStreamWorker::lastInterruptableOperationStarted() const
-{
-    return m_lastInterruptableOperationStarted;
 }
 
 LiveStreamFrame * LiveStreamWorker::frameToDisplay()

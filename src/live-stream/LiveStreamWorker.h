@@ -39,7 +39,7 @@ public:
     void stop();
     void setPaused(bool paused);
 
-    QDateTime lastInterruptableOperationStarted() const;
+    bool shouldInterrupt() const;
     LiveStreamFrame * frameToDisplay();
 
 public slots:
