@@ -42,7 +42,7 @@ LiveStreamWorker::LiveStreamWorker(QObject *parent)
     : QObject(parent), m_ctx(0), m_sws(0),
       m_lastInterruptableOperationStarted(QDateTime::currentDateTime()),
       m_cancelFlag(false), m_autoDeinterlacing(true),
-      m_frameHead(0), m_frameTail(0), m_ptsBase(AV_NOPTS_VALUE)
+      m_ptsBase(AV_NOPTS_VALUE)
 {
 }
 
@@ -57,7 +57,8 @@ LiveStreamWorker::~LiveStreamWorker()
      * any interest in this object or the frame, so this is the only time when it's
      * finally safe to free that frame that cannot leak. */
     QMutexLocker locker(&m_frameQueueLock);
-    LiveStreamFrame::deleteFromTo(m_frameHead);
+    qDeleteAll(m_frameQueue);
+    m_frameQueue.clear();
 }
 
 void LiveStreamWorker::setUrl(const QByteArray &url)
@@ -247,10 +248,8 @@ void LiveStreamWorker::destroy()
     }
 
     QMutexLocker locker(&m_frameQueueLock);
-    if (m_frameHead)
-        LiveStreamFrame::deleteFromTo(m_frameHead);
-    m_frameHead = 0;
-    m_frameTail = 0;
+    qDeleteAll(m_frameQueue);
+    m_frameQueue.clear();
 
     for (unsigned int i = 0; i < m_ctx->nb_streams; ++i)
     {
@@ -276,53 +275,41 @@ QDateTime LiveStreamWorker::lastInterruptableOperationStarted() const
 LiveStreamFrame * LiveStreamWorker::frameToDisplay()
 {
     QMutexLocker locker(&m_frameQueueLock);
-    LiveStreamFrame *result = m_frameHead;
-    if (!result)
+    if (m_frameQueue.isEmpty())
         return 0;
 
     if (m_ptsBase == (int64_t)AV_NOPTS_VALUE)
     {
-        m_ptsBase = result->d->pts;
+        m_ptsBase = m_frameQueue.head()->d->pts;
         m_ptsTimer.restart();
     }
 
     qint64 now = m_ptsTimer.elapsed() * 1000;
-    LiveStreamFrame *next;
 
-    while ((next = result->next))
+    LiveStreamFrame *frame = m_frameQueue.dequeue();
+    while (frame)
     {
-        qint64 frameDisplayTime = next->d->pts - m_ptsBase;
-        qint64 scaledFrameDisplayTime = av_rescale_rnd(next->d->pts - m_ptsBase, AV_TIME_BASE, 90000, AV_ROUND_NEAR_INF);
+        qint64 frameDisplayTime = frame->d->pts - m_ptsBase;
+        qint64 scaledFrameDisplayTime = av_rescale_rnd(frame->d->pts - m_ptsBase, AV_TIME_BASE, 90000, AV_ROUND_NEAR_INF);
         if (abs(scaledFrameDisplayTime - now) >= AV_TIME_BASE/2)
         {
-            m_ptsBase = next->d->pts;
+            m_ptsBase = frame->d->pts;
             m_ptsTimer.restart();
             now = scaledFrameDisplayTime = 0;
         }
 
         if (now >= scaledFrameDisplayTime || (scaledFrameDisplayTime - now) <= AV_TIME_BASE/(RENDER_TIMER_FPS*2))
         {
-            /* Target rendering time is in the past, or is less than half a repaint interval in
-             * the future, so it's time to draw this frame. */
-            result = next;
+            delete frame;
+            if (m_frameQueue.isEmpty())
+                return 0;
+            frame = m_frameQueue.dequeue();
         }
         else
             break;
     }
 
-    if (m_frameHead != result)
-        LiveStreamFrame::deleteFromTo(m_frameHead, result);
-
-    if (m_frameTail == result)
-    {
-        m_frameHead = 0;
-        m_frameTail = 0;
-    }
-    else
-        m_frameHead = result->next;
-
-    result->next = 0;
-    return result;
+    return frame;
 }
 
 void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *rawFrame)
@@ -363,21 +350,22 @@ void LiveStreamWorker::processVideo(struct AVStream *stream, struct AVFrame *raw
     sf->d    = frame;
 
     QMutexLocker locker(&m_frameQueueLock);
-    if (!m_frameTail) {
-        m_frameHead = sf;
-        m_frameTail = sf;
-    } else {
-        sf->d->display_picture_number = m_frameTail->d->display_picture_number+1;
-        m_frameTail->next = sf;
-        m_frameTail = sf;
+    if (m_frameQueue.isEmpty())
+    {
+        m_frameQueue.enqueue(sf);
+    }
+    else
+    {
+        sf->d->display_picture_number = m_frameQueue.last()->d->display_picture_number+1;
+        m_frameQueue.enqueue(sf);
 
         /* If necessary, drop frames to avoid exploding memory. This will only happen if
          * the UI thread cannot keep up enough to do is own PTS-based framedropping.
          * It is NEVER safe to drop frameHead; only the UI thread may do that. */
-        if (m_frameTail->d->display_picture_number - m_frameHead->next->d->display_picture_number >= 6)
+        while (m_frameQueue.size() >= 6)
         {
-            LiveStreamFrame::deleteFromTo(m_frameHead->next, m_frameTail);
-            m_frameHead->next = m_frameTail;
+            LiveStreamFrame *frame = m_frameQueue.dequeue();
+            delete frame;
         }
     }
 }

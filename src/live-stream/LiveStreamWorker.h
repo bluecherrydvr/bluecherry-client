@@ -21,8 +21,9 @@
 #include "core/ThreadPause.h"
 #include <QDateTime>
 #include <QElapsedTimer>
-#include <QObject>
 #include <QMutex>
+#include <QObject>
+#include <QQueue>
 
 struct LiveStreamFrame;
 
@@ -59,11 +60,11 @@ private:
     bool m_cancelFlag;
     bool m_autoDeinterlacing;
 
-    QMutex m_frameQueueLock;
 
     ThreadPause m_threadPause;
 
-    LiveStreamFrame *m_frameHead, *m_frameTail;
+    QMutex m_frameQueueLock;
+    QQueue<LiveStreamFrame *> m_frameQueue;
     qint64 m_ptsBase;
     QElapsedTimer m_ptsTimer;
 
