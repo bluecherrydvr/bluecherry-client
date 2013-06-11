@@ -20,12 +20,14 @@
 #include <QDebug>
 
 extern "C" {
+#   include "libavcodec/avcodec.h"
 #   include "libavformat/avformat.h"
 #   include "libswscale/swscale.h"
 }
 
 LiveStreamFrameFormatter::LiveStreamFrameFormatter(AVStream *stream) :
-        m_stream(stream), m_sws_context(0), m_autoDeinterlacing(true)
+        m_stream(stream), m_sws_context(0), m_pixelFormat(PIX_FMT_BGRA),
+        m_autoDeinterlacing(true), m_shouldTryDeinterlaceStream(shouldTryDeinterlaceStream())
 {
 }
 
@@ -39,39 +41,75 @@ void LiveStreamFrameFormatter::setAutoDeinterlacing(bool autoDeinterlacing)
     m_autoDeinterlacing = autoDeinterlacing;
 }
 
-LiveStreamFrame * LiveStreamFrameFormatter::formatFrame(AVFrame* avFrame)
+bool LiveStreamFrameFormatter::shouldTryDeinterlaceStream()
 {
-    const PixelFormat fmt = PIX_FMT_BGRA;
-
     /* Assume that H.264 D1-resolution video is interlaced, to work around a solo(?) bug
      * that results in interlaced_frame not being set for videos from solo6110. */
-    if (m_autoDeinterlacing && (avFrame->interlaced_frame ||
-                              (m_stream->codec->codec_id == CODEC_ID_H264 &&
-                               ((m_stream->codec->width == 704 && m_stream->codec->height == 480) ||
-                                (m_stream->codec->width == 720 && m_stream->codec->height == 576)))))
-    {
-        if (avpicture_deinterlace((AVPicture*)avFrame, (AVPicture*)avFrame, m_stream->codec->pix_fmt,
-                                  m_stream->codec->width, m_stream->codec->height) < 0)
-        {
-            qDebug("deinterlacing failed");
-        }
-    }
 
-    m_sws_context = sws_getCachedContext(m_sws_context, m_stream->codec->width, m_stream->codec->height, m_stream->codec->pix_fmt,
-                               m_stream->codec->width, m_stream->codec->height, fmt, SWS_BICUBIC,
-                               NULL, NULL, NULL);
+    if (m_stream->codec->codec_id != CODEC_ID_H264)
+        return false;
 
-    int bufSize  = avpicture_get_size(fmt, m_stream->codec->width, m_stream->codec->height);
+    if (m_stream->codec->width == 704 && m_stream->codec->height == 480)
+        return true;
+
+    if (m_stream->codec->width == 720 && m_stream->codec->height == 576)
+        return true;
+
+    return false;
+}
+
+LiveStreamFrame * LiveStreamFrameFormatter::formatFrame(AVFrame* avFrame)
+{
+    if (shouldTryDeinterlaceFrame(avFrame))
+        deinterlaceFrame(avFrame);
+
+    return new LiveStreamFrame(scaleFrame(avFrame));
+}
+
+bool LiveStreamFrameFormatter::shouldTryDeinterlaceFrame(AVFrame *avFrame)
+{
+    if (!m_autoDeinterlacing)
+        return false;
+
+    if (avFrame->interlaced_frame)
+        return true;
+
+    return m_shouldTryDeinterlaceStream;
+}
+
+void LiveStreamFrameFormatter::deinterlaceFrame(AVFrame* avFrame)
+{
+    int ret = avpicture_deinterlace((AVPicture*)avFrame, (AVPicture*)avFrame,
+                                    m_stream->codec->pix_fmt, m_stream->codec->width, m_stream->codec->height);
+    if (ret < 0)
+        qDebug("deinterlacing failed");
+}
+
+AVFrame * LiveStreamFrameFormatter::scaleFrame(AVFrame* avFrame)
+{
+    updateSWSContext();
+
+    int bufSize  = avpicture_get_size(m_pixelFormat, m_stream->codec->width, m_stream->codec->height);
     uint8_t *buf = (uint8_t*) av_malloc(bufSize);
 
-    AVFrame *frame = avcodec_alloc_frame();
-    avpicture_fill((AVPicture*)frame, buf, fmt, m_stream->codec->width, m_stream->codec->height);
+    AVFrame *result = avcodec_alloc_frame();
+    avpicture_fill((AVPicture*)result, buf, m_pixelFormat, m_stream->codec->width, m_stream->codec->height);
     sws_scale(m_sws_context, (const uint8_t**)avFrame->data, avFrame->linesize, 0, m_stream->codec->height,
-              frame->data, frame->linesize);
+              result->data, result->linesize);
 
-    frame->width = m_stream->codec->width;
-    frame->height = m_stream->codec->height;
-    frame->pts = avFrame->pkt_pts;
+    result->width = m_stream->codec->width;
+    result->height = m_stream->codec->height;
+    result->pts = avFrame->pkt_pts;
 
-    return new LiveStreamFrame(frame);
+    return result;
+}
+
+void LiveStreamFrameFormatter::updateSWSContext()
+{
+    m_sws_context = sws_getCachedContext(m_sws_context,
+                                         m_stream->codec->width, m_stream->codec->height,
+                                         m_stream->codec->pix_fmt,
+                                         m_stream->codec->width, m_stream->codec->height,
+                                         m_pixelFormat,
+                                         SWS_BICUBIC, NULL, NULL, NULL);
 }

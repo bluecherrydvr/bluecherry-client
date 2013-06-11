@@ -18,6 +18,10 @@
 #ifndef LIVE_STREAM_FRAME_FORMATTER_H
 #define LIVE_STREAM_FRAME_FORMATTER_H
 
+extern "C" {
+#   include "libavutil/pixfmt.h"
+}
+
 class LiveStreamFrame;
 struct AVFrame;
 struct AVStream;
@@ -36,7 +40,15 @@ public:
 private:
     AVStream *m_stream;
     SwsContext *m_sws_context;
+    PixelFormat m_pixelFormat;
     bool m_autoDeinterlacing;
+    bool m_shouldTryDeinterlaceStream;
+
+    bool shouldTryDeinterlaceStream();
+    bool shouldTryDeinterlaceFrame(AVFrame *avFrame);
+    void deinterlaceFrame(AVFrame *avFrame);
+    AVFrame * scaleFrame(AVFrame *avFrame);
+    void updateSWSContext();
 
 };
 
