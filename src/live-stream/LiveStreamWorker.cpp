@@ -112,7 +112,6 @@ void LiveStreamWorker::run()
         uint8_t *data = packet.data;
         bcApp->globalRate->addSampleValue(packet.size);
 
-        int in_packet = 0;
         while (packet.size > 0)
         {
             int got_picture = 0;
@@ -126,10 +125,7 @@ void LiveStreamWorker::run()
             }
 
             if (got_picture)
-            {
                 processVideo(m_ctx->streams[0], frame);
-                in_packet++;
-            }
 
             packet.size -= re;
             packet.data += re;
