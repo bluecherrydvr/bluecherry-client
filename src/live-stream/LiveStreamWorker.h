@@ -64,8 +64,8 @@ private:
     bool setup();
     void pause();
     void processStreamLoop();
-    bool processStream(struct AVFrame *frame);
-    bool processPacket(struct AVFrame *frame, struct AVPacket packet);
+    bool processStream();
+    bool processPacket(struct AVPacket packet);
 
     void startInterruptableOperation();
     void processVideo(struct AVStream *stream, struct AVFrame *frame);

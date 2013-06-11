@@ -95,20 +95,16 @@ void LiveStreamWorker::run()
 
 void LiveStreamWorker::processStreamLoop()
 {
-    AVFrame *frame = avcodec_alloc_frame();
-
     bool abortFlag = false;
     while (!m_cancelFlag && !abortFlag)
     {
         if (m_threadPause.shouldPause())
             pause();
-        abortFlag = !processStream(frame);
+        abortFlag = !processStream();
     }
-
-    av_free(frame);
 }
 
-bool LiveStreamWorker::processStream(AVFrame *frame)
+bool LiveStreamWorker::processStream()
 {
     startInterruptableOperation();
     AVPacket packet;
@@ -122,12 +118,12 @@ bool LiveStreamWorker::processStream(AVFrame *frame)
         return false;
     }
 
-    bool result = processPacket(frame, packet);
+    bool result = processPacket(packet);
     av_free_packet(&packet);
     return result;
 }
 
-bool LiveStreamWorker::processPacket(struct AVFrame *frame, AVPacket packet)
+bool LiveStreamWorker::processPacket(struct AVPacket packet)
 {
     bcApp->globalRate->addSampleValue(packet.size);
 
@@ -137,6 +133,7 @@ bool LiveStreamWorker::processPacket(struct AVFrame *frame, AVPacket packet)
     AVPacket datapacket;
     while (packet.size > 0)
     {
+        AVFrame *frame = avcodec_alloc_frame();
         int re = avcodec_decode_video2(m_ctx->streams[0]->codec, frame, &got_picture, &packet);
         if (re == 0)
             break;
@@ -144,12 +141,14 @@ bool LiveStreamWorker::processPacket(struct AVFrame *frame, AVPacket packet)
         if (re < 0)
         {
             emit fatalError(QLatin1String("Decoding error"));
-            av_free_packet(&packet);
+            av_free(frame);
             return false;
         }
 
         if (got_picture)
             processVideo(m_ctx->streams[0], frame);
+
+        av_free(frame);
         
         packet.data += re;
         packet.size -= re;
