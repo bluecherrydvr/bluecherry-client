@@ -97,48 +97,54 @@ void LiveStreamWorker::run()
     {
         if (m_threadPause.shouldPause())
             pause();
-
-        startInterruptableOperation();
-        AVPacket packet;
-        int re = av_read_frame(m_ctx, &packet);
-        if (re < 0)
-        {
-            char error[512];
-            av_strerror(re, error, sizeof(error));
-            emit fatalError(QString::fromLatin1("%1 (in read_frame)").arg(QLatin1String(error)));
-            break;
-        }
-
-        uint8_t *data = packet.data;
-        bcApp->globalRate->addSampleValue(packet.size);
-
-        while (packet.size > 0)
-        {
-            int got_picture = 0;
-            startInterruptableOperation();
-            re = avcodec_decode_video2(m_ctx->streams[0]->codec, frame, &got_picture, &packet);
-            if (re < 0)
-            {
-                emit fatalError(QLatin1String("Decoding error"));
-                abortFlag = true;
-                break;
-            }
-
-            if (got_picture)
-                processVideo(m_ctx->streams[0], frame);
-
-            packet.size -= re;
-            packet.data += re;
-            break;
-        }
-
-        packet.data = data;
-        av_free_packet(&packet);
+        abortFlag = !processStream(frame);
     }
 
     av_free(frame);
 
     emit finished();
+}
+
+bool LiveStreamWorker::processStream(AVFrame *frame)
+{
+    startInterruptableOperation();
+    AVPacket packet;
+    int re = av_read_frame(m_ctx, &packet);
+    if (re < 0)
+    {
+        char error[512];
+        av_strerror(re, error, sizeof(error));
+        emit fatalError(QString::fromLatin1("%1 (in read_frame)").arg(QLatin1String(error)));
+        return false;
+    }
+
+    uint8_t *data = packet.data;
+    bcApp->globalRate->addSampleValue(packet.size);
+
+    while (packet.size > 0)
+    {
+        int got_picture = 0;
+        startInterruptableOperation();
+        re = avcodec_decode_video2(m_ctx->streams[0]->codec, frame, &got_picture, &packet);
+        if (re < 0)
+        {
+            emit fatalError(QLatin1String("Decoding error"));
+            packet.data = data;
+            av_free_packet(&packet);
+            return false;
+        }
+
+        if (got_picture)
+            processVideo(m_ctx->streams[0], frame);
+
+        packet.size -= re;
+        packet.data += re;
+        break;
+    }
+
+    packet.data = data;
+    av_free_packet(&packet);
+    return true;
 }
 
 bool LiveStreamWorker::setup()
