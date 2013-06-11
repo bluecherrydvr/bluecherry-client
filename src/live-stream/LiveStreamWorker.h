@@ -62,8 +62,6 @@ private:
     QScopedPointer<LiveStreamFrameQueue> m_frameQueue;
 
     bool setup();
-    void destroy();
-
     void pause();
 
     void startInterruptableOperation();
