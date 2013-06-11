@@ -121,10 +121,10 @@ bool LiveStreamWorker::processStream(AVFrame *frame)
     uint8_t *data = packet.data;
     bcApp->globalRate->addSampleValue(packet.size);
 
-    while (packet.size > 0)
+    if (packet.size > 0)
     {
-        int got_picture = 0;
         startInterruptableOperation();
+        int got_picture = 0;
         re = avcodec_decode_video2(m_ctx->streams[0]->codec, frame, &got_picture, &packet);
         if (re < 0)
         {
@@ -139,7 +139,6 @@ bool LiveStreamWorker::processStream(AVFrame *frame)
 
         packet.size -= re;
         packet.data += re;
-        break;
     }
 
     packet.data = data;
