@@ -32,7 +32,7 @@ LiveStreamThread::~LiveStreamThread()
 
 void LiveStreamThread::start(const QByteArray &url)
 {
-    qDebug() << Q_FUNC_INFO << m_worker.isNull();
+    qDebug() << Q_FUNC_INFO << url;
 
     if (!m_worker)
     {
