@@ -79,7 +79,7 @@ bool LiveStreamWorker::shouldInterrupt() const
     if (m_cancelFlag)
         return true;
 
-    if (m_lastInterruptableOperationStarted.secsTo(QDateTime::currentDateTime()) > 10)
+    if (m_lastInterruptableOperationStarted.secsTo(QDateTime::currentDateTime()) > 5)
         return true;
 
     return false;
@@ -210,94 +210,142 @@ bool LiveStreamWorker::setup()
 {
     ASSERT_WORKER_THREAD();
 
-    bool ok = false;
-
-    AVDictionary *opt = 0;
-    av_dict_set(&opt, "threads", "1", 0);
-    av_dict_set(&opt, "allowed_media_types", "-audio-data", 0);
-    av_dict_set(&opt, "max_delay", QByteArray::number(qint64(0.3*AV_TIME_BASE)).constData(), 0);
-    /* Because the server always starts streams on a keyframe, we don't need any time here.
-     * If the first frame is not a keyframe, this could result in failures or corruption. */
-    av_dict_set(&opt, "analyzeduration", "0", 0);
-
-    /* Only TCP is supported currently; speed up connection by trying that first */
-    av_dict_set(&opt, "rtsp_transport", "tcp", 0);
-
-    AVDictionary **opt_si = 0;
-    AVDictionary *opt_cpy = 0;
-    av_dict_copy(&opt_cpy, opt, 0);
-
     m_ctx = avformat_alloc_context();
     m_ctx->interrupt_callback.callback = liveStreamInterruptCallback;
     m_ctx->interrupt_callback.opaque = this;
 
-    int re;
-    startInterruptableOperation();
-    if ((re = avformat_open_input(&m_ctx, m_url.constData(), NULL, &opt_cpy)) != 0)
-    {
-        emit fatalError(QString::fromLatin1("Open error: %1").arg(errorMessageFromCode(re)));
-        goto end;
-    }
+    AVDictionary *options = createOptions();
+    bool prepared = prepareStream(&m_ctx, options);
+    av_dict_free(&options);
 
-    av_dict_free(&opt_cpy);
-
-    /* avformat_find_stream_info takes an array of AVDictionary ptrs for each stream */
-    opt_si = new AVDictionary*[m_ctx->nb_streams];
-    for (unsigned int i = 0; i < m_ctx->nb_streams; ++i)
-    {
-        opt_si[i] = 0;
-        av_dict_copy(&opt_si[i], opt, 0);
-    }
-
-    startInterruptableOperation();
-    if ((re = avformat_find_stream_info(m_ctx, opt_si)) < 0)
-    {
-        emit fatalError(QString::fromLatin1("Find stream error: %1").arg(errorMessageFromCode(re)));
-        goto end;
-    }
-
-    for (unsigned int i = 0; i < m_ctx->nb_streams; ++i)
-    {
-        char info[512];
-        startInterruptableOperation();
-        AVCodec *codec = avcodec_find_decoder(m_ctx->streams[i]->codec->codec_id);
-        av_dict_copy(&opt_cpy, opt, 0);
-        startInterruptableOperation();
-        if (!m_ctx->streams[i]->codec->codec &&
-            (re = avcodec_open2(m_ctx->streams[i]->codec, codec, &opt_cpy)) < 0)
-        {
-            qDebug() << "LiveStream: cannot find decoder for stream" << i << "codec" <<
-                        m_ctx->streams[i]->codec->codec_id;
-            av_dict_free(&opt_cpy);
-            continue;
-        }
-        av_dict_free(&opt_cpy);
-        avcodec_string(info, sizeof(info), m_ctx->streams[i]->codec, 0);
-        qDebug() << "LiveStream: stream #" << i << ":" << info;
-    }
-
-    ok = true;
-end:
-    av_dict_free(&opt);
-    if (opt_si)
-    {
-        for (unsigned int i = 0; i < m_ctx->nb_streams; ++i)
-            av_dict_free(&opt_si[i]);
-        delete[] opt_si;
-    }
-    if (!ok && m_ctx)
+    if (!prepared && m_ctx)
     {
         avformat_close_input(&m_ctx);
         m_ctx = 0;
     }
 
-    if (ok)
+    if (prepared)
     {
         m_frameFormatter.reset(new LiveStreamFrameFormatter(m_ctx->streams[0]));
         m_frameFormatter->setAutoDeinterlacing(m_autoDeinterlacing);
     }
 
-    return ok;
+    return prepared;
+}
+
+bool LiveStreamWorker::prepareStream(AVFormatContext **context, AVDictionary *options)
+{
+    if (!openInput(context, options))
+        return false;
+
+    if (!findStreamInfo(*context, options))
+        return false;
+
+    openCodecs(*context, options);
+    return true;
+}
+
+AVDictionary * LiveStreamWorker::createOptions() const
+{
+    AVDictionary *options = 0;
+
+    av_dict_set(&options, "threads", "1", 0);
+    av_dict_set(&options, "allowed_media_types", "-audio-data", 0);
+    av_dict_set(&options, "max_delay", QByteArray::number(qint64(0.3*AV_TIME_BASE)).constData(), 0);
+    /* Because the server always starts streams on a keyframe, we don't need any time here.
+     * If the first frame is not a keyframe, this could result in failures or corruption. */
+    av_dict_set(&options, "analyzeduration", "0", 0);
+    /* Only TCP is supported currently; speed up connection by trying that first */
+    av_dict_set(&options, "rtsp_transport", "tcp", 0);
+
+    return options;
+}
+
+bool LiveStreamWorker::openInput(AVFormatContext **context, AVDictionary *options)
+{
+    AVDictionary *optionsCopy = 0;
+    av_dict_copy(&optionsCopy, options, 0);
+    startInterruptableOperation();
+    int errorCode = avformat_open_input(context, m_url.constData(), NULL, &optionsCopy);
+    av_dict_free(&optionsCopy);
+
+    if (errorCode < 0)
+    {
+        emit fatalError(QString::fromLatin1("Open error: %1").arg(errorMessageFromCode(errorCode)));
+        return false;
+    }
+
+    return true;
+}
+
+bool LiveStreamWorker::findStreamInfo(AVFormatContext* context, AVDictionary* options)
+{
+    AVDictionary **streamOptions = createStreamsOptions(context, options);
+    startInterruptableOperation();
+    int errorCode = avformat_find_stream_info(context, streamOptions);
+    destroyStreamOptions(context, streamOptions);
+
+    if (errorCode < 0)
+    {
+        emit fatalError(QString::fromLatin1("Find stream error: %1").arg(errorMessageFromCode(errorCode)));
+        return false;
+    }
+
+    return true;
+}
+
+AVDictionary ** LiveStreamWorker::createStreamsOptions(AVFormatContext *context, AVDictionary *options) const
+{
+    AVDictionary **streamOptions = 0;
+    streamOptions = new AVDictionary*[context->nb_streams];
+    for (unsigned int i = 0; i < context->nb_streams; ++i)
+    {
+        streamOptions[i] = 0;
+        av_dict_copy(&streamOptions[i], options, 0);
+    }
+}
+
+void LiveStreamWorker::destroyStreamOptions(AVFormatContext *context, AVDictionary** streamOptions)
+{
+    if (!streamOptions)
+        return;
+
+    for (unsigned int i = 0; i < context->nb_streams; ++i)
+        av_dict_free(&streamOptions[i]);
+    delete[] streamOptions;
+}
+
+void LiveStreamWorker::openCodecs(AVFormatContext *context, AVDictionary *options)
+{
+    for (unsigned int i = 0; i < context->nb_streams; i++)
+    {
+        AVStream *stream = context->streams[i];
+        bool codecOpened = openCodec(stream, options);
+        if (!codecOpened)
+        {
+            qDebug() << "LiveStream: cannot find decoder for stream" << i << "codec" <<
+                        stream->codec->codec_id;
+            continue;
+        }
+
+        char info[512];
+        avcodec_string(info, sizeof(info), stream->codec, 0);
+        qDebug() << "LiveStream: stream #" << i << ":" << info;
+    }
+}
+
+bool LiveStreamWorker::openCodec(AVStream *stream, AVDictionary *options)
+{
+    startInterruptableOperation();
+    AVCodec *codec = avcodec_find_decoder(stream->codec->codec_id);
+
+    AVDictionary *optionsCopy = 0;
+    av_dict_copy(&optionsCopy, options, 0);
+    startInterruptableOperation();
+    int errorCode = avcodec_open2(stream->codec, codec, &optionsCopy);
+    av_dict_free(&optionsCopy);
+
+    return 0 == errorCode;
 }
 
 void LiveStreamWorker::startInterruptableOperation()

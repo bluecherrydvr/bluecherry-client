@@ -22,6 +22,9 @@
 #include <QDateTime>
 #include <QObject>
 
+struct AVDictionary;
+struct AVStream;
+
 class LiveStreamFrame;
 class LiveStreamFrameFormatter;
 class LiveStreamFrameQueue;
@@ -63,6 +66,15 @@ private:
     QScopedPointer<LiveStreamFrameQueue> m_frameQueue;
 
     bool setup();
+    bool prepareStream(AVFormatContext **context, AVDictionary *options);
+    AVDictionary * createOptions() const;
+    bool openInput(AVFormatContext **context, AVDictionary *options);
+    bool findStreamInfo(AVFormatContext *context, AVDictionary *options);
+    AVDictionary ** createStreamsOptions(AVFormatContext *context, AVDictionary *options) const;
+    void destroyStreamOptions(AVFormatContext *context, AVDictionary **streamOptions);
+    void openCodecs(AVFormatContext *context, AVDictionary *options);
+    bool openCodec(AVStream *stream, AVDictionary *options);
+
     void pause();
 
     void processStreamLoop();
