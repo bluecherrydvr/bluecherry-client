@@ -237,6 +237,9 @@ void LiveStream::updateFrame()
         m_fpsUpdateCnt = m_fpsUpdateHits = 0;
     }
 
+    if (!m_thread || !m_thread->worker())
+        return;
+
     LiveStreamFrame *sf = m_thread->worker()->frameToDisplay();
     if (!sf) // no new frame
         return;
