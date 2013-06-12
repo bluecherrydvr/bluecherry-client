@@ -274,12 +274,6 @@ void LiveStream::checkState()
 {
     if (state() == Error)
         start();
-
-    if (state() == Streaming && m_frameInterval.elapsed() >= 10000)
-    {
-        fatalError(QLatin1String("Stream timeout"));
-        stop();
-    }
 }
 
 void LiveStream::updateSettings()
