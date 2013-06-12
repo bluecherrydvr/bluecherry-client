@@ -263,6 +263,8 @@ void LiveStream::updateFrame()
 
 void LiveStream::fatalError(const QString &message)
 {
+    qDebug() << "Fatal error:" << url() << message;
+
     m_errorMessage = message;
     setState(Error);
     /* stateTimer will handle reconnection */
@@ -273,8 +275,7 @@ void LiveStream::checkState()
     if (state() == Error)
         start();
 
-    if ((state() == Streaming || state() == Connecting) &&
-        m_frameInterval.elapsed() >= 10000)
+    if (state() == Streaming && m_frameInterval.elapsed() >= 10000)
     {
         fatalError(QLatin1String("Stream timeout"));
         stop();
