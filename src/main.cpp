@@ -17,7 +17,7 @@
 
 #include "bluecherry-config.h"
 #include "core/BluecherryApp.h"
-#include "core/LiveStream.h"
+#include "live-stream/LiveStream.h"
 #include "ui/MainWindow.h"
 #include "ui/CrashReportDialog.h"
 #include <QApplication>
