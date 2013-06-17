@@ -218,16 +218,15 @@ bool LiveStreamWorker::setup()
     bool prepared = prepareStream(&m_ctx, options);
     av_dict_free(&options);
 
-    if (!prepared && m_ctx)
-    {
-        avformat_close_input(&m_ctx);
-        m_ctx = 0;
-    }
-
     if (prepared)
     {
         m_frameFormatter.reset(new LiveStreamFrameFormatter(m_ctx->streams[0]));
         m_frameFormatter->setAutoDeinterlacing(m_autoDeinterlacing);
+    }
+    else if (m_ctx)
+    {
+        avformat_close_input(&m_ctx);
+        m_ctx = 0;
     }
 
     return prepared;
