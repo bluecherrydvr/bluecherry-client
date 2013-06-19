@@ -65,7 +65,7 @@ public:
 
     QSize idealSize() const;
 
-    QDeclarativeItem *at(int row, int col) const { return m_items[coordinatesToIndex(row, col)].data(); }
+    QDeclarativeItem *at(int row, int col) const;
     Q_INVOKABLE void set(int row, int col, QDeclarativeItem *item);
 
     /* Add a new item, automatically placing it in the best available position */

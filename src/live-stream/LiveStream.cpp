@@ -16,9 +16,11 @@
  */
 
 #include "LiveStream.h"
-#include "LiveStreamWorker.h"
-#include "BluecherryApp.h"
-#include "LiveViewManager.h"
+#include "LiveStreamFrame.h"
+#include "LiveStreamThread.h"
+#include "core/BluecherryApp.h"
+#include "core/LiveViewManager.h"
+#include "live-stream/LiveStreamWorker.h"
 #include <QMutex>
 #include <QMetaObject>
 #include <QTimer>
@@ -26,9 +28,9 @@
 #include <QSettings>
 
 extern "C" {
-#include "libavcodec/avcodec.h"
-#include "libavformat/avformat.h"
-#include "libavutil/mathematics.h"
+#   include "libavcodec/avcodec.h"
+#   include "libavformat/avformat.h"
+#   include "libavutil/mathematics.h"
 }
 
 static int bc_av_lockmgr(void **mutex, enum AVLockOp op)
@@ -68,9 +70,9 @@ protected:
     }
 };
 
-QTimer *LiveStream::renderTimer = 0;
+QTimer *LiveStream::m_renderTimer = 0;
 static const int renderTimerFps = 30;
-QTimer *LiveStream::stateTimer = 0;
+QTimer *LiveStream::m_stateTimer = 0;
 
 void LiveStream::init()
 {
@@ -78,26 +80,29 @@ void LiveStream::init()
     av_register_all();
     avformat_network_init();
 
-    renderTimer = new AutoTimer;
-    renderTimer->setInterval(1000 / renderTimerFps);
-    renderTimer->setSingleShot(false);
+    m_renderTimer = new AutoTimer;
+    m_renderTimer->setInterval(1000 / renderTimerFps);
+    m_renderTimer->setSingleShot(false);
 
-    stateTimer = new AutoTimer;
-    stateTimer->setInterval(15000);
-    stateTimer->setSingleShot(false);
+    m_stateTimer = new AutoTimer;
+    m_stateTimer->setInterval(15000);
+    m_stateTimer->setSingleShot(false);
 }
 
 LiveStream::LiveStream(DVRCamera *camera, QObject *parent)
-    : QObject(parent), m_camera(camera), thread(0), worker(0), m_frame(0), m_state(NotConnected),
+    : QObject(parent), m_camera(camera), m_frame(0), m_state(NotConnected),
       m_autoStart(false), m_fpsUpdateCnt(0), m_fpsUpdateHits(0),
-      m_fps(0), m_ptsBase(AV_NOPTS_VALUE)
+      m_fps(0)
 {
     Q_ASSERT(m_camera);
     connect(m_camera.data(), SIGNAL(destroyed(QObject*)), this, SLOT(deleteLater()));
 
+    m_thread = new LiveStreamThread(this);
+    connect(m_thread, SIGNAL(fatalError(QString)), this, SLOT(fatalError(QString)));
+
     bcApp->liveView->addStream(this);
     connect(bcApp, SIGNAL(settingsChanged()), SLOT(updateSettings()));
-    connect(stateTimer, SIGNAL(timeout()), SLOT(checkState()));
+    connect(m_stateTimer, SIGNAL(timeout()), SLOT(checkState()));
 }
 
 LiveStream::~LiveStream()
@@ -166,51 +171,23 @@ void LiveStream::start()
         return;
     }
 
+    connect(m_renderTimer, SIGNAL(timeout()), SLOT(updateFrame()), Qt::UniqueConnection);
+
     m_frameInterval.start();
+    m_thread->start(url());
 
-    if (!worker)
-    {
-        Q_ASSERT(!thread);
-        thread = new QThread;
-        worker = new LiveStreamWorker;
-        worker->moveToThread(thread);
-        worker->setUrl(url());
-
-        connect(thread, SIGNAL(started()), worker, SLOT(run()));
-        connect(worker, SIGNAL(destroyed()), thread, SLOT(quit()));
-        connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-
-        connect(renderTimer, SIGNAL(timeout()), SLOT(updateFrame()));
-
-        connect(worker, SIGNAL(fatalError(QString)), SLOT(fatalError(QString)));
-
-        updateSettings();
-        setState(Connecting);
-        thread->start();
-    }
-    else
-    {
-        setState(Connecting);
-        worker->metaObject()->invokeMethod(worker, "run");
-    }
+    updateSettings();
+    setState(Connecting);
 }
 
 void LiveStream::stop()
 {
-    if (worker)
-    {
-        /* See LiveStreamWorker's destructor for how this frame is freed */
-        m_frame = 0;
-        /* Worker will delete itself, which will then destroy the thread */
-        worker->staticMetaObject.invokeMethod(worker, "stop");
-        worker = 0;
-        thread = 0;
-    }
+    disconnect(m_renderTimer, SIGNAL(timeout()), this, SLOT(updateFrame()));
 
-    Q_ASSERT(!m_frame);
-    Q_ASSERT(!thread);
+    m_thread->stop();
 
-    disconnect(renderTimer, SIGNAL(timeout()), this, SLOT(updateFrame()));
+    delete m_frame;
+    m_frame = 0;
 
     if (state() > NotConnected)
     {
@@ -237,10 +214,11 @@ void LiveStream::setOnline(bool online)
 
 void LiveStream::setPaused(bool pause)
 {
-    if (pause == (state() == Paused) || state() < Streaming || !worker)
+    if (pause == (state() == Paused) || state() < Streaming || !m_thread->worker())
         return;
 
-    worker->metaObject()->invokeMethod(worker, "setPaused", Q_ARG(bool, pause));
+    m_thread->setPaused(pause);
+
     if (pause)
         setState(Paused);
     else
@@ -248,10 +226,10 @@ void LiveStream::setPaused(bool pause)
     m_frameInterval.restart();
 }
 
-bool LiveStream::updateFrame()
+void LiveStream::updateFrame()
 {
-    if (state() < Connecting)
-        return false;
+    if (state() < Connecting || !m_thread->isRunning())
+        return;
 
     if (++m_fpsUpdateCnt == int(1.5*renderTimerFps))
     {
@@ -259,54 +237,15 @@ bool LiveStream::updateFrame()
         m_fpsUpdateCnt = m_fpsUpdateHits = 0;
     }
 
-    QMutexLocker l(&worker->frameLock);
-    StreamFrame *sf = worker->frameHead;
-    if (!sf)
-        return false;
+    if (!m_thread || !m_thread->worker())
+        return;
 
-    if (sf == m_frame)
-    {
-        qint64 now = m_ptsTimer.elapsed()*1000;
-        StreamFrame *next;
-        /* Cannot use the (AVRational){1,90000} syntax due to MSVC */
-        AVRational r = {1, 90000}, tb = {1, AV_TIME_BASE};
+    LiveStreamFrame *sf = m_thread->worker()->frameToDisplay();
+    if (!sf) // no new frame
+        return;
 
-        while ((next = sf->next))
-        {
-            qint64 rescale = av_rescale_q(next->d->pts - m_ptsBase, r, tb);
-            if (abs(rescale - now) >= AV_TIME_BASE/2)
-            {
-                m_ptsBase = next->d->pts;
-                m_ptsTimer.restart();
-                now = rescale = 0;
-            }
-
-            if (now >= rescale || (rescale - now) <= AV_TIME_BASE/(renderTimerFps*2))
-            {
-                /* Target rendering time is in the past, or is less than half a repaint interval in
-                 * the future, so it's time to draw this frame. */
-                delete sf;
-                sf = next;
-            }
-            else
-                break;
-        }
-
-        if (sf == m_frame)
-            return false;
-        worker->frameHead = sf;
-    }
-    else if (m_frame)
-        delete m_frame;
-
-    l.unlock();
-
+    delete m_frame;
     m_frame = sf;
-    if (m_ptsBase == (int64_t)AV_NOPTS_VALUE)
-    {
-        m_ptsBase = m_frame->d->pts;
-        m_ptsTimer.restart();
-    }
 
     m_fpsUpdateHits++;
 
@@ -314,20 +253,21 @@ bool LiveStream::updateFrame()
         setState(Streaming);
     m_frameInterval.restart();
 
-    bool sizeChanged = (m_currentFrame.width() != sf->d->width ||
-                        m_currentFrame.height() != sf->d->height);
+    bool sizeChanged = (m_currentFrame.width() != sf->avFrame()->width ||
+                        m_currentFrame.height() != sf->avFrame()->height);
 
-    m_currentFrame = QImage(sf->d->data[0], sf->d->width, sf->d->height,
-                            sf->d->linesize[0], QImage::Format_RGB32);
+    m_currentFrame = QImage(sf->avFrame()->data[0], sf->avFrame()->width, sf->avFrame()->height,
+                            sf->avFrame()->linesize[0], QImage::Format_RGB32);
 
     if (sizeChanged)
         emit streamSizeChanged(m_currentFrame.size());
     emit updated();
-    return true;
 }
 
 void LiveStream::fatalError(const QString &message)
 {
+    qDebug() << "Fatal error:" << url() << message;
+
     m_errorMessage = message;
     setState(Error);
     /* stateTimer will handle reconnection */
@@ -337,20 +277,13 @@ void LiveStream::checkState()
 {
     if (state() == Error)
         start();
-
-    if ((state() == Streaming || state() == Connecting) &&
-        m_frameInterval.elapsed() >= 10000)
-    {
-        fatalError(QLatin1String("Stream timeout"));
-        stop();
-    }
 }
 
 void LiveStream::updateSettings()
 {
-    if (!worker)
+    if (!m_thread->worker())
         return;
 
     QSettings settings;
-    worker->setAutoDeinterlacing(settings.value(QLatin1String("ui/liveview/autoDeinterlace"), false).toBool());
+    m_thread->worker()->setAutoDeinterlacing(settings.value(QLatin1String("ui/liveview/autoDeinterlace"), false).toBool());
 }

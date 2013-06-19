@@ -16,7 +16,7 @@
  */
 
 #include "LiveViewManager.h"
-#include "LiveStream.h"
+#include "live-stream/LiveStream.h"
 #include <QAction>
 
 LiveViewManager::LiveViewManager(QObject *parent)

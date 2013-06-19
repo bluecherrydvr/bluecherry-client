@@ -23,9 +23,9 @@
 #include <QImage>
 #include <QElapsedTimer>
 #include "camera/DVRCamera.h"
-#include "LiveViewManager.h"
+#include "core/LiveViewManager.h"
 
-class LiveStreamWorker;
+class LiveStreamThread;
 
 class LiveStream : public QObject
 {
@@ -89,19 +89,18 @@ signals:
     void updated();
 
 private slots:
-    bool updateFrame();
+    void updateFrame();
     void fatalError(const QString &message);
     void updateSettings();
     void checkState();
 
 private:
-    static QTimer *renderTimer, *stateTimer;
+    static QTimer *m_renderTimer, *m_stateTimer;
 
     QWeakPointer<DVRCamera> m_camera;
-    QThread *thread;
-    LiveStreamWorker *worker;
+    LiveStreamThread *m_thread;
     QImage m_currentFrame;
-    struct StreamFrame *m_frame;
+    class LiveStreamFrame *m_frame;
     QString m_errorMessage;
     State m_state;
     bool m_autoStart;
@@ -111,11 +110,10 @@ private:
     int m_fpsUpdateHits;
     float m_fps;
 
-    qint64 m_ptsBase;
-    QElapsedTimer m_ptsTimer;
     QElapsedTimer m_frameInterval;
 
     void setState(State newState);
+
 };
 
 #endif // LIVESTREAM_H

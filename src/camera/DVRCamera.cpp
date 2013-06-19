@@ -22,7 +22,7 @@
 #include "core/BluecherryApp.h"
 #include "core/CameraPtzControl.h"
 #include "core/MJpegStream.h"
-#include "core/LiveStream.h"
+#include "live-stream/LiveStream.h"
 #include <QMimeData>
 #include <QSettings>
 #include <QXmlStreamReader>
