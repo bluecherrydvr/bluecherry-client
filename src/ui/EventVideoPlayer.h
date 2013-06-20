@@ -73,8 +73,8 @@ private slots:
 
 private:
     EventData *m_event;
-    QThread *m_videoThread;
-    VideoPlayerBackend *m_video;
+    QWeakPointer<QThread> m_videoThread;
+    QWeakPointer<VideoPlayerBackend> m_video;
     GstSinkWidget *m_videoWidget;
     QToolButton *m_playBtn, *m_restartBtn, *m_fastBtn, *m_slowBtn;
     QPushButton *m_saveBtn;
