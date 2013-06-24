@@ -1,3 +1,28 @@
+bluecherry-client (1:2.1.2-1) lucid; urgency=low
+
+  * Bug #28: Timeline area off by several hours
+  * Bug #41: Integer overflow on event durations
+  * Bug #78: Live feeds still exist after deleting a server
+  * Bug #94: Only prompt for new updates when version < then installed version
+  * Bug #99: Playing in progress events crashes Windows client
+  * Bug #122: Server column should not be collapsed
+  * Bug #123: Memory leak on reconnect
+  * Bug #129: Do not allow to install bluecherry with gstreamer-vaapi
+  * Bug #135: On MacMini no live view is available when OpenGL is enabled
+  * Feature #29: Hide disabled devices from the main UI list
+  * Feature #32: Add Bluecherry icon to 12.04 desktop
+  * Feature #38: Sort servers alphabetically
+  * Feature #83: Port client from qmake to CMake
+
+ -- Rafał Malinowski <rafal.malinowski@corp.bluecherry.net>  Wed, 19 Jun 2013 11:40:00 +0200
+
+bluecherry-client (1:2.1.1-1) lucid; urgency=low
+
+  * Feature #94: Only report new version when it is greater that current
+  * Fixed issue with SSL handshake failures
+
+ -- Rafał Malinowski <rafal.malinowski@corp.bluecherry.net>  Fri, 26 Apr 2013 17:01:30 +0200
+
 bluecherry-client (1:2.1.0-1) lucid; urgency=low
 
   * Licence changed to GPL2+

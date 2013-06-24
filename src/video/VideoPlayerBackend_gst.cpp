@@ -77,8 +77,10 @@ bool VideoPlayerBackend::initGStreamer(QString *errorMessage)
         return false;
     }
 
+#ifdef Q_OS_LINUX
     if (QString::fromLatin1(GSTREAMER_PLUGINS).isEmpty())
         return true;
+#endif
 
 #ifdef Q_OS_WIN
 #define EXT ".dll"
@@ -108,7 +110,7 @@ bool VideoPlayerBackend::initGStreamer(QString *errorMessage)
     QString pluginPath = QDir::toNativeSeparators(QApplication::applicationDirPath() + QDir::separator());
 #endif
 
-#ifdef GSTREAMER_PLUGINS
+#if defined(GSTREAMER_PLUGINS) and not defined(Q_OS_MAC)
     QString ppx = QDir::toNativeSeparators(QString::fromLatin1(GSTREAMER_PLUGINS "/"));
     if (QDir::isAbsolutePath(ppx))
         pluginPath = ppx;

@@ -53,7 +53,6 @@ LiveStreamFrame * LiveStreamFrameQueue::dequeue()
     LiveStreamFrame *frame = m_frameQueue.dequeue();
     while (frame)
     {
-        qint64 frameDisplayTime = frame->avFrame()->pts - m_ptsBase;
         qint64 scaledFrameDisplayTime = av_rescale_rnd(frame->avFrame()->pts - m_ptsBase, AV_TIME_BASE, 90000, AV_ROUND_NEAR_INF);
         if (abs(scaledFrameDisplayTime - now) >= AV_TIME_BASE/2)
         {

@@ -147,9 +147,6 @@ bool LiveStreamWorker::processPacket(struct AVPacket packet)
 {
     bcApp->globalRate->addSampleValue(packet.size);
 
-    int got_picture = 0;
-
-    AVPacket datapacket;
     while (packet.size > 0)
     {
         AVFrame *frame = extractFrame(packet);
@@ -302,6 +299,8 @@ AVDictionary ** LiveStreamWorker::createStreamsOptions(AVFormatContext *context,
         streamOptions[i] = 0;
         av_dict_copy(&streamOptions[i], options, 0);
     }
+
+    return streamOptions;
 }
 
 void LiveStreamWorker::destroyStreamOptions(AVFormatContext *context, AVDictionary** streamOptions)
