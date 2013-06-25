@@ -49,7 +49,7 @@ if [ ! -z $2 ]; then
 fi
 
 echo "Removing unused plugins..."
-rm $1/Contents/PlugIns/imageformats/lib{qico,qjpeg,qmng,qsvg,qtiff}.dylib
+rm $1/Contents/PlugIns/imageformats/lib{qico,qmng,qsvg,qtiff}.dylib
 rm -r $1/Contents/PlugIns/{accessible,bearer,codecs,graphicssystems,iconengines,phonon_backend,qmltooling,script,sqldrivers}
 
 echo "Running lipo..."
