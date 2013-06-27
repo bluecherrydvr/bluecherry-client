@@ -59,7 +59,7 @@ public:
     QByteArray streamUrl() const;
 
     bool isOnline() const;
-    LiveStream * liveStream();
+    QSharedPointer<LiveStream> liveStream();
 
     PtzProtocol ptzProtocol() const;
     bool hasPtz() const;
