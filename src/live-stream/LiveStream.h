@@ -18,6 +18,7 @@
 #ifndef LIVESTREAM_H
 #define LIVESTREAM_H
 
+#include <QMutex>
 #include <QObject>
 #include <QThread>
 #include <QImage>
@@ -61,8 +62,8 @@ public:
     State state() const { return m_state; }
     QString errorMessage() const { return m_errorMessage; }
 
-    QImage currentFrame() const { return m_currentFrame; }
-    QSize streamSize() const { return m_currentFrame.size(); }
+    QImage currentFrame();
+    QSize streamSize();
 
     float receivedFps() const { return m_fps; }
 
@@ -100,6 +101,7 @@ private:
     QWeakPointer<DVRCamera> m_camera;
     LiveStreamThread *m_thread;
     QImage m_currentFrame;
+    QMutex m_currentFrameMutex;
     class LiveStreamFrame *m_frame;
     QString m_errorMessage;
     State m_state;

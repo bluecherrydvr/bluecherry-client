@@ -90,7 +90,8 @@ void LiveStream::init()
 }
 
 LiveStream::LiveStream(DVRCamera *camera, QObject *parent)
-    : QObject(parent), m_camera(camera), m_frame(0), m_state(NotConnected),
+    : QObject(parent), m_camera(camera), m_currentFrameMutex(QMutex::Recursive),
+      m_frame(0), m_state(NotConnected),
       m_autoStart(false), m_fpsUpdateCnt(0), m_fpsUpdateHits(0),
       m_fps(0)
 {
@@ -253,6 +254,7 @@ void LiveStream::updateFrame()
         setState(Streaming);
     m_frameInterval.restart();
 
+    QMutexLocker locker(&m_currentFrameMutex);
     bool sizeChanged = (m_currentFrame.width() != sf->avFrame()->width ||
                         m_currentFrame.height() != sf->avFrame()->height);
 
@@ -262,6 +264,18 @@ void LiveStream::updateFrame()
     if (sizeChanged)
         emit streamSizeChanged(m_currentFrame.size());
     emit updated();
+}
+
+QImage LiveStream::currentFrame()
+{
+    QMutexLocker locker(&m_currentFrameMutex);
+    return m_currentFrame.copy();
+}
+
+QSize LiveStream::streamSize()
+{
+    QMutexLocker locker(&m_currentFrameMutex);
+    return m_currentFrame.size();
 }
 
 void LiveStream::fatalError(const QString &message)
