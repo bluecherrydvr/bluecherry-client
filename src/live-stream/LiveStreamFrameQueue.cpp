@@ -50,8 +50,10 @@ LiveStreamFrame * LiveStreamFrameQueue::dequeue()
 
     qint64 now = m_ptsTimer.elapsed() * 1000;
 
+    // TODO: needs checking
+    // something is wrong with this code as after few minutes all frames are considered outdated - some calculation is off here
     LiveStreamFrame *frame = m_frameQueue.dequeue();
-    while (frame)
+    while (!m_frameQueue.isEmpty() && frame)
     {
         qint64 scaledFrameDisplayTime = av_rescale_rnd(frame->avFrame()->pts - m_ptsBase, AV_TIME_BASE, 90000, AV_ROUND_NEAR_INF);
         if (abs(scaledFrameDisplayTime - now) >= AV_TIME_BASE/2)
@@ -64,8 +66,6 @@ LiveStreamFrame * LiveStreamFrameQueue::dequeue()
         if (now >= scaledFrameDisplayTime || (scaledFrameDisplayTime - now) <= AV_TIME_BASE/(RENDER_TIMER_FPS*2))
         {
             delete frame;
-            if (m_frameQueue.isEmpty())
-                return 0;
             frame = m_frameQueue.dequeue();
         }
         else
