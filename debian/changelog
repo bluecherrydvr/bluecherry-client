@@ -1,3 +1,12 @@
+bluecherry-client (1:2.1.3-1) lucid; urgency=low
+
+  * Bug #25: Event video snapshots are corrupted
+  * Bug #137: Snapshot in OS X fails with 'An error occurred while saving the snapshot image.'
+  * Bug #138: Windows client shuts down and automatically reopens when a snapshot is saved, 0 byte JPEG file saved
+  * Bug #143: FPS drops to 0 after a few minutes
+
+ -- Rafał Malinowski <rafal.malinowski@corp.bluecherry.net>  Fri, 05 Jul 2013 23:46:32 +0200
+
 bluecherry-client (1:2.1.2-1) lucid; urgency=low
 
   * Bug #28: Timeline area off by several hours
