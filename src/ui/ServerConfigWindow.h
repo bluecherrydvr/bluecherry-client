@@ -32,7 +32,7 @@ class ServerConfigWindow : public QWidget
 
 public:
     explicit ServerConfigWindow(QWidget *parent = 0);
-    ~ServerConfigWindow();
+    virtual ~ServerConfigWindow();
 
     static ServerConfigWindow *instance();
 
