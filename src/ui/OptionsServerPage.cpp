@@ -46,7 +46,7 @@ OptionsServerPage::OptionsServerPage(DVRServerRepository *serverRepository, QWid
     /* Servers list */
     m_serversView = new QTreeView;
 
-    m_model = new DVRServersModel(bcApp->serverRepository(), false, m_serversView);
+    m_model = new DVRServersModel(serverRepository, false, m_serversView);
     m_proxyModel = new DVRServersProxyModel(m_model);
     m_proxyModel->setDynamicSortFilter(true);
     m_proxyModel->setSourceModel(m_model);
@@ -298,6 +298,8 @@ void OptionsServerPage::saveChanges(DVRServer *server)
 
     if (connectionModified || (m_autoConnect->isChecked() && !server->isOnline()))
         server->login();
+
+    m_serverRepository->storeServers();
 }
 
 void OptionsServerPage::setLoginSuccessful()
