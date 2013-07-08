@@ -178,49 +178,61 @@ void DVRServersView::checkOnlyIndex(const QModelIndex &index)
 
 void DVRServersView::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    QModelIndex index;
-    if (event->button() == Qt::LeftButton && (index = indexAt(event->pos())).isValid())
+    if (event->button() != Qt::LeftButton)
     {
-        DVRServer *server = index.data(DVRServersModel::DVRServerRole).value<DVRServer *>();
-        DVRCamera *camera = index.data(DVRServersModel::DVRCameraRole).value<DVRCamera *>();
-        if (index.flags() & Qt::ItemIsUserCheckable)
-        {
-            Qt::CheckState state = (index.data(Qt::CheckStateRole).toInt() == Qt::Checked) ? Qt::Unchecked : Qt::Checked;
-            model()->setData(index, state, Qt::CheckStateRole);
-
-            event->accept();
-        }
-        else if (server && !(index.flags() & Qt::ItemIsEnabled))
-        {
-            if (server->isLoginPending())
-            {
-                OptionsDialog *dlg = new OptionsDialog(bcApp->serverRepository(), this);
-                dlg->showPage(OptionsDialog::ServerPage);
-                dlg->setAttribute(Qt::WA_DeleteOnClose);
-
-                OptionsServerPage *pg = static_cast<OptionsServerPage*>(dlg->pageWidget(OptionsDialog::ServerPage));
-                pg->setCurrentServer(server);
-                dlg->show();
-            }
-            else
-                server->login();
-        }
-        else if (server)
-        {
-            ServerConfigWindow::instance()->setServer(server);
-            ServerConfigWindow::instance()->show();
-            ServerConfigWindow::instance()->raise();
-        }
-        else if (camera)
-        {
-            bcApp->mainWindow->liveView()->view()->addCamera(camera);
-        }
-
-        event->accept();
+        QAbstractItemView::mouseDoubleClickEvent(event);
         return;
     }
 
-    QAbstractItemView::mouseDoubleClickEvent(event);
+    QModelIndex index = indexAt(event->pos());
+    if (!index.isValid())
+    {
+        QAbstractItemView::mouseDoubleClickEvent(event);
+        return;
+    }
+
+    event->accept();
+
+    DVRServer *server = index.data(DVRServersModel::DVRServerRole).value<DVRServer *>();
+    DVRCamera *camera = index.data(DVRServersModel::DVRCameraRole).value<DVRCamera *>();
+    if (index.flags() & Qt::ItemIsUserCheckable)
+    {
+        Qt::CheckState state = (index.data(Qt::CheckStateRole).toInt() == Qt::Checked) ? Qt::Unchecked : Qt::Checked;
+        model()->setData(index, state, Qt::CheckStateRole);
+
+        return;
+    }
+
+    if (server && !(index.flags() & Qt::ItemIsEnabled))
+    {
+        if (server->isLoginPending())
+        {
+            OptionsDialog *dlg = new OptionsDialog(bcApp->serverRepository(), this);
+            dlg->showPage(OptionsDialog::ServerPage);
+            dlg->setAttribute(Qt::WA_DeleteOnClose);
+
+            OptionsServerPage *pg = static_cast<OptionsServerPage*>(dlg->pageWidget(OptionsDialog::ServerPage));
+            pg->setCurrentServer(server);
+            dlg->show();
+        }
+        else
+            server->login();
+
+        return;
+    }
+
+    if (server)
+    {
+        ServerConfigWindow::instance()->setServer(server);
+        ServerConfigWindow::instance()->show();
+        ServerConfigWindow::instance()->raise();
+        return;
+    }
+
+    if (camera)
+        bcApp->mainWindow->liveView()->view()->addCamera(camera);
+    
+    return;
 }
 
 void DVRServersView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
