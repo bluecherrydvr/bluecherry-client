@@ -497,9 +497,11 @@ void MainWindow::showOptionsDialog()
 
 void MainWindow::showEventsWindow()
 {
-    EventsWindow *window = EventsWindow::instance();
-    window->show();
-    window->raise();
+    if (!m_eventsWindow)
+        m_eventsWindow = new EventsWindow(m_serverRepository);
+
+    m_eventsWindow.data()->show();
+    m_eventsWindow.data()->raise();
 }
 
 void MainWindow::openAbout()

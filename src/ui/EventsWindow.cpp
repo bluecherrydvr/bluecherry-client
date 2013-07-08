@@ -49,11 +49,10 @@
 #include <QMenu>
 #include <QAction>
 
-EventsWindow *EventsWindow::m_instance = 0;
-
 EventsWindow::EventsWindow(DVRServerRepository *serverRepository, QWidget *parent)
     : QWidget(parent, Qt::Window), m_serverRepository(serverRepository)
 {
+    setAttribute(Qt::WA_DeleteOnClose);
     setWindowTitle(tr("Bluecherry - Event Browser"));
     resize(QSize(900, 600));
 
@@ -133,19 +132,6 @@ EventsWindow::EventsWindow(DVRServerRepository *serverRepository, QWidget *paren
 
 EventsWindow::~EventsWindow()
 {
-    if (m_instance == this)
-        m_instance = 0;
-}
-
-EventsWindow * EventsWindow::instance()
-{
-    if (!m_instance)
-    {
-        m_instance = new EventsWindow(bcApp->serverRepository(), bcApp->globalParentWindow());
-        m_instance->setAttribute(Qt::WA_DeleteOnClose);
-    }
-
-    return m_instance;
 }
 
 EventsModel *EventsWindow::model() const
