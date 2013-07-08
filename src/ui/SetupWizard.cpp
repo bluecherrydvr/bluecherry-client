@@ -202,6 +202,8 @@ void SetupServerPage::save()
     server->configuration().setAutoConnect(field(QLatin1String("serverAutoConnect")).toBool());
     server->login();
 
+    m_serverRepository->storeServers();
+
     saved = true;
 }
 
