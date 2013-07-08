@@ -21,6 +21,7 @@
 #include <QDeclarativeItem>
 #include <QBasicTimer>
 
+class DVRServerRepository;
 class LiveViewLayoutProps;
 
 class LiveViewLayout : public QDeclarativeItem
@@ -33,6 +34,7 @@ class LiveViewLayout : public QDeclarativeItem
     Q_PROPERTY(QDeclarativeComponent* item READ item WRITE setItem)
     Q_PROPERTY(QDeclarativeItem* dropTarget READ dropTarget NOTIFY dropTargetChanged)
     Q_PROPERTY(QDeclarativeItem* dragItem READ dragItem NOTIFY dragItemChanged)
+    Q_PROPERTY(DVRServerRepository *serverRepository READ serverRepository WRITE setServerRepository)
 
     enum LayoutChange {
         NoLayoutChanges = 0,
@@ -85,6 +87,8 @@ public:
     QByteArray saveLayout() const;
     bool loadLayout(const QByteArray &data);
 
+    DVRServerRepository * serverRepository() const;
+
     /* Called at the start of a drag movement operation for the item */
     Q_INVOKABLE void startDrag(QDeclarativeItem *item, DragDropMode mode = DragSwap);
     Q_INVOKABLE void updateDrag();
@@ -114,6 +118,8 @@ public slots:
 
     void removeItem(QDeclarativeItem *item);
 
+    void setServerRepository(DVRServerRepository *serverRepository);
+
 signals:
     void dropTargetChanged(QDeclarativeItem *item);
     void dragItemChanged(QDeclarativeItem *item);
@@ -131,6 +137,7 @@ protected:
 
 private:
     int m_rows, m_columns;
+    DVRServerRepository *m_serverRepository;
     QList<QWeakPointer<QDeclarativeItem> > m_items;
     QDeclarativeComponent *m_itemComponent;
     QBasicTimer m_layoutTimer;

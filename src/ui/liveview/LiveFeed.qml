@@ -23,6 +23,7 @@ LiveFeedBase {
     width: 200
     height: 150
     z: LiveViewLayout.isDragItem ? 10 : (LiveViewLayout.isDropTarget ? 1 : 0)
+    serverRepository: mainServerRepository
 
     LiveViewLayout.sizePadding: Qt.size(0, header.height)
     LiveViewLayout.fixedAspectRatio: false

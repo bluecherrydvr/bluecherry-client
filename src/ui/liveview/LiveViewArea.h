@@ -22,13 +22,14 @@
 
 class LiveViewLayout;
 class DVRCamera;
+class DVRServerRepository;
 
 class LiveViewArea : public QDeclarativeView
 {
     Q_OBJECT
 
 public:
-    explicit LiveViewArea(QWidget *parent = 0);
+    explicit LiveViewArea(DVRServerRepository *serverRepository, QWidget *parent = 0);
     virtual ~LiveViewArea();
 
     LiveViewLayout *layout() const { return m_layout; }

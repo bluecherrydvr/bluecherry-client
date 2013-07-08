@@ -51,8 +51,8 @@
 
 EventsWindow *EventsWindow::m_instance = 0;
 
-EventsWindow::EventsWindow(QWidget *parent)
-    : QWidget(parent, Qt::Window)
+EventsWindow::EventsWindow(DVRServerRepository *serverRepository, QWidget *parent)
+    : QWidget(parent, Qt::Window), m_serverRepository(serverRepository)
 {
     setWindowTitle(tr("Bluecherry - Event Browser"));
     resize(QSize(900, 600));
@@ -64,8 +64,8 @@ EventsWindow::EventsWindow(QWidget *parent)
     createResultsView();
 
     /* Filters */
-    m_sourcesView = new DVRServersView;
-    EventSourcesModel *sourcesModel = new EventSourcesModel(bcApp->serverRepository(), m_sourcesView);
+    m_sourcesView = new DVRServersView(m_serverRepository);
+    EventSourcesModel *sourcesModel = new EventSourcesModel(m_serverRepository, m_sourcesView);
 
     DVRServersProxyModel *proxyModel = new DVRServersProxyModel(sourcesModel);
     proxyModel->setDynamicSortFilter(true);
@@ -137,11 +137,11 @@ EventsWindow::~EventsWindow()
         m_instance = 0;
 }
 
-EventsWindow *EventsWindow::instance()
+EventsWindow * EventsWindow::instance()
 {
     if (!m_instance)
     {
-        m_instance = new EventsWindow(bcApp->globalParentWindow());
+        m_instance = new EventsWindow(bcApp->serverRepository(), bcApp->globalParentWindow());
         m_instance->setAttribute(Qt::WA_DeleteOnClose);
     }
 
@@ -288,7 +288,7 @@ QWidget *EventsWindow::createResultTitle()
 QWidget *EventsWindow::createResultsView()
 {
     m_resultsView = new EventsView;
-    m_resultsView->setModel(new EventsModel(bcApp->serverRepository(), this));
+    m_resultsView->setModel(new EventsModel(m_serverRepository, this));
     m_resultsView->setFrameStyle(QFrame::NoFrame);
     m_resultsView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_resultsView, SIGNAL(customContextMenuRequested(QPoint)), SLOT(eventContextMenu(QPoint)));

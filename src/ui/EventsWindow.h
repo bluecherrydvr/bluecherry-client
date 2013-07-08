@@ -43,8 +43,8 @@ class EventsWindow : public QWidget
     Q_OBJECT
 
 public:
-    explicit EventsWindow(QWidget *parent = 0);
-    ~EventsWindow();
+    explicit EventsWindow(DVRServerRepository *serverRepository, QWidget *parent = 0);
+    virtual ~EventsWindow();
 
     static EventsWindow *instance();
 
@@ -70,6 +70,8 @@ private slots:
 
 private:
     static EventsWindow *m_instance;
+
+    DVRServerRepository *m_serverRepository;
 
     /* Filter widgets */
     DVRServersView *m_sourcesView;

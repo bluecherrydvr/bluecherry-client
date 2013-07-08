@@ -29,14 +29,18 @@
 #include <QContextMenuEvent>
 #include <QMenu>
 
-DVRServersView::DVRServersView(QWidget *parent)
-    : QTreeView(parent)
+DVRServersView::DVRServersView(DVRServerRepository *serverRepository, QWidget *parent)
+    : QTreeView(parent), m_serverRepository(serverRepository)
 {
     header()->setVisible(false);
     setEditTriggers(QAbstractItemView::EditKeyPressed | QAbstractItemView::DoubleClicked);
     setContextMenuPolicy(Qt::DefaultContextMenu);
     setDragEnabled(true);
     setAnimated(true);
+}
+
+DVRServersView::~DVRServersView()
+{
 }
 
 void DVRServersView::setModel(QAbstractItemModel *m)
@@ -139,7 +143,7 @@ void DVRServersView::contextMenuEvent(QContextMenuEvent *event)
     {
         if (camera)
         {
-            LiveViewWindow *w = LiveViewWindow::openWindow(bcApp->mainWindow, (action == aOpenFull), camera);
+            LiveViewWindow *w = LiveViewWindow::openWindow(m_serverRepository, bcApp->mainWindow, (action == aOpenFull), camera);
             if (action == aOpenFull)
                 w->showFullScreen();
             else
@@ -207,7 +211,7 @@ void DVRServersView::mouseDoubleClickEvent(QMouseEvent *event)
     {
         if (server->isLoginPending())
         {
-            OptionsDialog *dlg = new OptionsDialog(bcApp->serverRepository(), this);
+            OptionsDialog *dlg = new OptionsDialog(m_serverRepository, this);
             dlg->showPage(OptionsDialog::ServerPage);
             dlg->setAttribute(Qt::WA_DeleteOnClose);
 

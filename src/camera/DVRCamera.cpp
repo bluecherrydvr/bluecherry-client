@@ -74,11 +74,11 @@ LiveStream * DVRCamera::liveStream()
     return m_liveStream.data();
 }
 
-QList<DVRCamera *> DVRCamera::fromMimeData(const QMimeData *mimeData)
+QList<DVRCamera *> DVRCamera::fromMimeData(DVRServerRepository *serverRepository, const QMimeData *mimeData)
 {
     QByteArray data = mimeData->data(QLatin1String("application/x-bluecherry-dvrcamera"));
     QDataStream stream(&data, QIODevice::ReadOnly);
-    DVRCameraStreamReader reader(bcApp->serverRepository(), stream);
+    DVRCameraStreamReader reader(serverRepository, stream);
 
     QList<DVRCamera *> result;
     while (!stream.atEnd() && stream.status() == QDataStream::Ok)

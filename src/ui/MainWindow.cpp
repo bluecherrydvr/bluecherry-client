@@ -93,7 +93,7 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
     m_centerSplit = new MacSplitter(Qt::Vertical);
 
     /* Live view */
-    m_liveView = new LiveViewWindow(this);
+    m_liveView = new LiveViewWindow(serverRepository, this);
 
     /* Recent events */
     QWidget *eventsWidget = createRecentEvents();
@@ -420,7 +420,7 @@ void MainWindow::updateServersMenu()
 
 QWidget *MainWindow::createSourcesList()
 {
-    m_sourcesList = new DVRServersView;
+    m_sourcesList = new DVRServersView(m_serverRepository);
     m_sourcesList->setMinimumHeight(220);
     m_sourcesList->setFrameStyle(QFrame::NoFrame);
     m_sourcesList->setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -544,7 +544,7 @@ void MainWindow::openSupport()
 
 void MainWindow::openLiveWindow()
 {
-    LiveViewWindow::openWindow(this, false)->show();
+    LiveViewWindow::openWindow(m_serverRepository, this, false)->show();
 }
 
 void MainWindow::addServer()
@@ -688,7 +688,7 @@ void MainWindow::eventsContextMenu(const QPoint &pos)
     {
         QSet<DVRCamera *> cameras = selectedCameraEvents.cameras();
         foreach (DVRCamera *camera, cameras)
-            LiveViewWindow::openWindow(this, false, camera)->show();
+            LiveViewWindow::openWindow(m_serverRepository, this, false, camera)->show();
     }
     else if (act == aSaveVideo)
     {

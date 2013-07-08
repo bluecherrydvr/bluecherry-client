@@ -26,6 +26,7 @@ Rectangle {
         id: viewLayout
         objectName: "viewLayout"
         anchors.fill: parent
+        serverRepository: mainServerRepository
 
         item: Qt.createComponent("LiveFeed.qml")
 

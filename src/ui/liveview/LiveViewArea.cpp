@@ -22,6 +22,7 @@
 #include "LiveViewGradients.h"
 #include "core/CameraPtzControl.h"
 #include "core/BluecherryApp.h"
+#include "server/DVRServerRepository.h"
 #include <QGLWidget>
 #include <QDeclarativeContext>
 #include <QDeclarativeEngine>
@@ -29,7 +30,7 @@
 #include <QShowEvent>
 #include <QApplication>
 
-LiveViewArea::LiveViewArea(QWidget *parent)
+LiveViewArea::LiveViewArea(DVRServerRepository *serverRepository, QWidget *parent)
     : QDeclarativeView(parent)
 {
     connect(bcApp, SIGNAL(settingsChanged()), SLOT(settingsChanged()));
@@ -39,6 +40,8 @@ LiveViewArea::LiveViewArea(QWidget *parent)
     qmlRegisterType<LiveFeedItem>("Bluecherry", 1, 0, "LiveFeedBase");
     qmlRegisterUncreatableType<CameraPtzControl>("Bluecherry", 1, 0, "CameraPtzControl", QLatin1String(""));
     qmlRegisterUncreatableType<LiveStream>("Bluecherry", 1, 0, "LiveStream", QLatin1String(""));
+
+    rootContext()->setContextProperty(QLatin1String("mainServerRepository"), QVariant::fromValue(serverRepository));
 
     QSettings settings;
     if (!settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration"), false).toBool())
