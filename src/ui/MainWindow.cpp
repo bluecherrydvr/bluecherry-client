@@ -427,7 +427,7 @@ QWidget *MainWindow::createSourcesList()
     m_sourcesList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_sourcesList->setMinimumWidth(140);
 
-    DVRServersModel *model = new DVRServersModel(bcApp->serverRepository(), true, m_sourcesList);
+    DVRServersModel *model = new DVRServersModel(m_serverRepository, true, m_sourcesList);
     model->setOfflineDisabled(true);
 
     DVRServersProxyModel *proxyModel = new DVRServersProxyModel(model);
@@ -472,7 +472,7 @@ QWidget *MainWindow::createRecentEvents()
     m_eventsView->setFrameStyle(QFrame::NoFrame);
     m_eventsView->setAttribute(Qt::WA_MacShowFocusRect, false);
 
-    m_eventsModel = new EventsModel(bcApp->serverRepository(), m_eventsView);
+    m_eventsModel = new EventsModel(m_serverRepository, m_eventsView);
     m_eventsView->setModel(m_eventsModel);
 
     QSettings settings;
