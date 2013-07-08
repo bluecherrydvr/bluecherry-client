@@ -42,13 +42,13 @@
 #include <QMacStyle>
 #endif
 
-LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, bool fullscreen, DVRCamera *camera)
+LiveViewWindow *LiveViewWindow::openWindow(DVRServerRepository *serverRepository, QWidget *parent, bool fullscreen, DVRCamera *camera)
 {
 #ifdef Q_OS_MAC
     /* Child windows are undesirable on Mac, and cause problems (QTBUG-20652) */
     parent = 0;
 #endif
-    LiveViewWindow *window = new LiveViewWindow(parent, fullscreen, Qt::Window);
+    LiveViewWindow *window = new LiveViewWindow(serverRepository, parent, fullscreen, Qt::Window);
     window->setAutoSized(!fullscreen);
     window->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -58,8 +58,8 @@ LiveViewWindow *LiveViewWindow::openWindow(QWidget *parent, bool fullscreen, DVR
     return window;
 }
 
-LiveViewWindow::LiveViewWindow(QWidget *parent, bool openfs, Qt::WindowFlags f)
-    : QWidget(parent, f), m_liveView(0), m_savedLayouts(new QComboBox),
+LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *parent, bool openfs, Qt::WindowFlags f)
+    : QWidget(parent, f), m_liveView(0), m_serverRepository(serverRepository), m_savedLayouts(new QComboBox),
       m_lastLayoutIndex(-1), m_autoSized(false), m_isLayoutChanging(false),
       m_wasOpenedFs(openfs)
 {
@@ -75,7 +75,7 @@ LiveViewWindow::LiveViewWindow(QWidget *parent, bool openfs, Qt::WindowFlags f)
     //toolBar->setStyleSheet(QLatin1String("QToolBar { border: none; }"));
 #endif
 
-    m_liveView = new LiveViewArea;
+    m_liveView = new LiveViewArea(m_serverRepository);
     LiveViewLayout *viewLayout = m_liveView->layout();
 
     /* Saved layouts box */
@@ -371,7 +371,7 @@ void LiveViewWindow::setFullScreen(bool on)
     {
         if (!isWindow())
         {
-            LiveViewWindow *wnd = LiveViewWindow::openWindow(this, true);
+            LiveViewWindow *wnd = LiveViewWindow::openWindow(m_serverRepository, this, true);
             wnd->setLayout(currentLayout());
             wnd->showFullScreen();
             m_fsSetWindow = wnd;

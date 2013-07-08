@@ -44,10 +44,8 @@
 #include <QDesktopWidget>
 
 LiveFeedItem::LiveFeedItem(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent), m_streamItem(0), m_customCursor(DefaultCursor)
+    : QDeclarativeItem(parent), m_streamItem(0), m_serverRepository(0), m_customCursor(DefaultCursor)
 {
-    connect(bcApp->serverRepository(), SIGNAL(serverRemoved(DVRServer*)), this, SLOT(serverRemoved(DVRServer*)));
-
     setAcceptedMouseButtons(acceptedMouseButtons() | Qt::RightButton);
 }
 
@@ -90,6 +88,22 @@ void LiveFeedItem::setCamera(DVRCamera *camera)
     emit recordingStateChanged();
 }
 
+DVRServerRepository * LiveFeedItem::serverRepository() const
+{
+    return m_serverRepository;
+}
+
+void LiveFeedItem::setServerRepository(DVRServerRepository* serverRepository)
+{
+    if (m_serverRepository)
+        disconnect(m_serverRepository, 0, this, 0);
+
+    m_serverRepository = serverRepository;
+
+    if (m_serverRepository)
+        connect(m_serverRepository, SIGNAL(serverRemoved(DVRServer*)), this, SLOT(serverRemoved(DVRServer*)));
+}
+
 void LiveFeedItem::cameraDataUpdated()
 {
     emit cameraNameChanged(cameraName());
@@ -101,13 +115,13 @@ void LiveFeedItem::cameraDataUpdated()
 void LiveFeedItem::openNewWindow()
 {
     if (m_camera)
-        LiveViewWindow::openWindow(bcApp->mainWindow, false, m_camera.data())->show();
+        LiveViewWindow::openWindow(m_serverRepository, bcApp->mainWindow, false, m_camera.data())->show();
 }
 
 void LiveFeedItem::openFullScreen()
 {
     if (m_camera)
-        LiveViewWindow::openWindow(bcApp->mainWindow, true, m_camera.data())->showFullScreen();
+        LiveViewWindow::openWindow(m_serverRepository, bcApp->mainWindow, true, m_camera.data())->showFullScreen();
 }
 
 void LiveFeedItem::close()
@@ -255,7 +269,7 @@ void LiveFeedItem::loadState(QDataStream *data, int version)
 {
     Q_ASSERT(data);
 
-    DVRCameraStreamReader reader(bcApp->serverRepository(), *data);
+    DVRCameraStreamReader reader(m_serverRepository, *data);
     DVRCamera *camera = reader.readCamera();
     if (camera)
         setCamera(camera);

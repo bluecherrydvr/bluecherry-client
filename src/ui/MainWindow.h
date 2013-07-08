@@ -26,6 +26,7 @@ class DVRServersView;
 class LiveViewWindow;
 class EventsModel;
 class EventsView;
+class EventsWindow;
 class QSplitter;
 class DVRServer;
 class DVRServerRepository;
@@ -100,6 +101,7 @@ private:
     QWidget *serverAlertWidget;
     QLabel *serverAlertText;
     QWeakPointer<EventVideoDownloadsWindow> m_eventVideoDownloadsWindow;
+    QWeakPointer<EventsWindow> m_eventsWindow;
 
     void createMenu();
 

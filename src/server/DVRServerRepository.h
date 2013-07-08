@@ -18,6 +18,7 @@
 #ifndef DVRSERVERREPOSITORY_H
 #define DVRSERVERREPOSITORY_H
 
+#include <QMetaType>
 #include <QObject>
 
 class DVRServer;
@@ -53,5 +54,7 @@ private:
     int m_maxServerId;
 
 };
+
+Q_DECLARE_METATYPE(DVRServerRepository *);
 
 #endif // DVRSERVERREPOSITORY_H

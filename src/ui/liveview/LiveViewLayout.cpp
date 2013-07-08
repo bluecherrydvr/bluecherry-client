@@ -48,8 +48,9 @@ struct LiveViewLayout::DragDropData
     }
 };
 
-LiveViewLayout::LiveViewLayout(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent), m_rows(0), m_columns(0), m_itemComponent(0), drag(0), layoutChanges(NoLayoutChanges)
+LiveViewLayout::LiveViewLayout(QDeclarativeItem *parent) :
+    QDeclarativeItem(parent), m_rows(0), m_columns(0), m_serverRepository(0),
+    m_itemComponent(0), drag(0), layoutChanges(NoLayoutChanges)
 {
     setAcceptDrops(true);
     setGridSize(1, 1);
@@ -685,7 +686,7 @@ void LiveViewLayout::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
     if (!event->mimeData()->hasFormat(QLatin1String("application/x-bluecherry-dvrcamera")))
         return;
 
-    QList<DVRCamera *> cameras = DVRCamera::fromMimeData(event->mimeData());
+    QList<DVRCamera *> cameras = DVRCamera::fromMimeData(m_serverRepository, event->mimeData());
     if (cameras.isEmpty())
         return;
 
@@ -824,6 +825,16 @@ int LiveViewLayout::coordinatesToIndex(int row, int column) const
         return -1;
     else
         return index;
+}
+
+DVRServerRepository * LiveViewLayout::serverRepository() const
+{
+    return m_serverRepository;
+}
+
+void LiveViewLayout::setServerRepository(DVRServerRepository* serverRepository)
+{
+    m_serverRepository = serverRepository;
 }
 
 void LiveViewLayoutProps::setFixedAspectRatio(bool v)

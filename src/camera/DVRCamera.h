@@ -29,6 +29,7 @@
 
 class CameraPtzControl;
 class DVRServer;
+class DVRServerRepository;
 class LiveStream;
 class QMimeData;
 
@@ -66,7 +67,7 @@ public:
 
     RecordingState recordingState() const;
 
-    static QList<DVRCamera *> fromMimeData(const QMimeData *mimeData);
+    static QList<DVRCamera *> fromMimeData(DVRServerRepository *serverRepository, const QMimeData *mimeData);
 
 signals:
     void onlineChanged(bool isOnline);

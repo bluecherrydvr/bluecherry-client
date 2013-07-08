@@ -33,24 +33,28 @@ DVRServersModel::DVRServersModel(DVRServerRepository *serverRepository, bool onl
 {
     Q_ASSERT(serverRepository);
 
-    statusIcon = QIcon(QLatin1String(":/icons/status.png"));
-    statusIcon.addFile(QLatin1String(":/icons/status-offline.png"), QSize(), QIcon::Disabled, QIcon::Off);
+    m_statusIcon = QIcon(QLatin1String(":/icons/status.png"));
+    m_statusIcon.addFile(QLatin1String(":/icons/status-offline.png"), QSize(), QIcon::Disabled, QIcon::Off);
 
-    statusErrorIcon = QIcon(QLatin1String(":/icons/status-error.png"));
-    statusErrorIcon.addPixmap(statusErrorIcon.pixmap(16), QIcon::Disabled);
+    m_statusErrorIcon = QIcon(QLatin1String(":/icons/status-error.png"));
+    m_statusErrorIcon.addPixmap(m_statusErrorIcon.pixmap(16), QIcon::Disabled);
 
-    statusAlertIcon = QIcon(QLatin1String(":/icons/status-alert.png"));
+    m_statusAlertIcon = QIcon(QLatin1String(":/icons/status-alert.png"));
 
     connect(serverRepository, SIGNAL(serverAdded(DVRServer*)), SLOT(serverAdded(DVRServer*)));
     connect(serverRepository, SIGNAL(serverRemoved(DVRServer*)), SLOT(serverRemoved(DVRServer*)));
 
     const QList<DVRServer *> &servers = serverRepository->servers();
-    items.reserve(servers.size());
+    m_items.reserve(servers.size());
 
     blockSignals(true);
     for (int i = 0; i < servers.size(); ++i)
         serverAdded(servers[i]);
     blockSignals(false);
+}
+
+DVRServersModel::~DVRServersModel()
+{
 }
 
 void DVRServersModel::serverAdded(DVRServer *server)
@@ -61,8 +65,8 @@ void DVRServersModel::serverAdded(DVRServer *server)
     foreach (DVRCamera *camera, server->cameras())
         i.cameras.append(camera);
 
-    beginInsertRows(QModelIndex(), items.size(), items.size());
-    items.append(i);
+    beginInsertRows(QModelIndex(), m_items.size(), m_items.size());
+    m_items.append(i);
     endInsertRows();
 
     connect(server, SIGNAL(changed()), SLOT(serverDataChanged()));
@@ -79,7 +83,7 @@ void DVRServersModel::serverRemoved(DVRServer *server)
         return;
 
     beginRemoveRows(QModelIndex(), row, row);
-    items.remove(row);
+    m_items.remove(row);
     endRemoveRows();
 
     server->disconnect(this);
@@ -93,7 +97,7 @@ void DVRServersModel::cameraAdded(DVRCamera *camera)
     if (!parent.isValid())
         return;
 
-    Item &it = items[parent.row()];
+    Item &it = m_items[parent.row()];
 
     connect(camera, SIGNAL(dataUpdated()), SLOT(cameraDataChanged()));
 
@@ -108,14 +112,14 @@ void DVRServersModel::cameraRemoved(DVRCamera *camera)
     if (!parent.isValid())
         return;
 
-    int row = items[parent.row()].cameras.indexOf(camera);
+    int row = m_items[parent.row()].cameras.indexOf(camera);
     if (row < 0)
         return;
 
     camera->disconnect(this);
 
     beginRemoveRows(parent, row, row);
-    items[parent.row()].cameras.removeAt(row);
+    m_items[parent.row()].cameras.removeAt(row);
     endRemoveRows();
 }
 
@@ -134,28 +138,28 @@ void DVRServersModel::cameraDataChanged()
 
 DVRServer * DVRServersModel::serverForRow(const QModelIndex &index) const
 {
-    if (index.internalPointer() || index.row() < 0 || index.row() >= items.size())
+    if (index.internalPointer() || index.row() < 0 || index.row() >= m_items.size())
         return 0;
 
-    return items[index.row()].server;
+    return m_items[index.row()].server;
 }
 
 DVRCamera * DVRServersModel::cameraForRow(const QModelIndex &index) const
 {
     DVRServer *server = static_cast<DVRServer*>(index.internalPointer());
     QModelIndex serverIndex;
-    if (!server || !(serverIndex = indexForServer(server)).isValid() || serverIndex.row() >= items.size()
-        || index.row() < 0 || index.row() >= items[serverIndex.row()].cameras.size())
+    if (!server || !(serverIndex = indexForServer(server)).isValid() || serverIndex.row() >= m_items.size()
+        || index.row() < 0 || index.row() >= m_items[serverIndex.row()].cameras.size())
         return 0;
 
-    return items[serverIndex.row()].cameras[index.row()];
+    return m_items[serverIndex.row()].cameras[index.row()];
 }
 
 QModelIndex DVRServersModel::indexForServer(DVRServer *server) const
 {
-    for (int i = 0; i < items.size(); ++i)
+    for (int i = 0; i < m_items.size(); ++i)
     {
-        if (items[i].server == server)
+        if (m_items[i].server == server)
             return index(i, 0);
     }
 
@@ -164,9 +168,9 @@ QModelIndex DVRServersModel::indexForServer(DVRServer *server) const
 
 QModelIndex DVRServersModel::indexForCamera(DVRCamera *camera) const
 {
-    for (int i = 0; i < items.size(); ++i)
+    for (int i = 0; i < m_items.size(); ++i)
     {
-        const Item &it = items[i];
+        const Item &it = m_items[i];
 
         if (it.server == camera->data().server())
         {
@@ -193,13 +197,13 @@ void DVRServersModel::setOfflineDisabled(bool offlineDisabled)
 int DVRServersModel::rowCount(const QModelIndex &parent) const
 {
     if (!parent.isValid())
-        return items.size();
+        return m_items.size();
 
     int row = parent.row();
-    if (row < 0 || row >= items.size() || !serverForRow(parent))
+    if (row < 0 || row >= m_items.size() || !serverForRow(parent))
         return 0;
 
-    return items[row].cameras.size();
+    return m_items[row].cameras.size();
 }
 
 int DVRServersModel::columnCount(const QModelIndex &parent) const
@@ -212,7 +216,7 @@ QModelIndex DVRServersModel::index(int row, int column, const QModelIndex &paren
 {
     if (!parent.isValid())
     {
-        if (row < 0 || column < 0 || row >= items.size() || column >= columnCount())
+        if (row < 0 || column < 0 || row >= m_items.size() || column >= columnCount())
             return QModelIndex();
 
         return createIndex(row, column, 0);
@@ -223,7 +227,7 @@ QModelIndex DVRServersModel::index(int row, int column, const QModelIndex &paren
         if (!(s = serverForRow(parent)) || row < 0 || column < 0 || column >= columnCount(parent))
             return QModelIndex();
 
-        if (row >= items[parent.row()].cameras.size())
+        if (row >= m_items[parent.row()].cameras.size())
             return QModelIndex();
 
         return createIndex(row, column, s);
@@ -294,15 +298,15 @@ QVariant DVRServersModel::data(const QModelIndex &index, int role) const
             else if (role == Qt::DecorationRole)
             {
                 if (server->status() == DVRServer::LoginError)
-                    return statusErrorIcon;
+                    return m_statusErrorIcon;
 
                 if (!server->statusAlertMessage().isEmpty())
-                    return statusAlertIcon;
+                    return m_statusAlertIcon;
 
                 if (m_offlineDisabled)
-                    return statusIcon;
+                    return m_statusIcon;
                 else
-                    return statusIcon.pixmap(16, server->isOnline() ? QIcon::Normal : QIcon::Disabled);
+                    return m_statusIcon.pixmap(16, server->isOnline() ? QIcon::Normal : QIcon::Disabled);
             }
             break;
         case 1:
