@@ -61,17 +61,16 @@ DVRCamera::PtzProtocol DVRCamera::parseProtocol(const QString &protocol)
         return UnknownProtocol;
 }
 
-LiveStream * DVRCamera::liveStream()
+QSharedPointer<LiveStream> DVRCamera::liveStream()
 {
-    if (!m_liveStream)
-    {
-        LiveStream * re = new LiveStream(this);
-        connect(this, SIGNAL(onlineChanged(bool)), re, SLOT(setOnline(bool)));
-        re->setOnline(isOnline());
-        m_liveStream = re;
-    }
+    if (m_liveStream)
+        return m_liveStream.toStrongRef();
 
-    return m_liveStream.data();
+    QSharedPointer<LiveStream> result(new LiveStream(this));
+    m_liveStream = result.toWeakRef();
+    connect(this, SIGNAL(onlineChanged(bool)), m_liveStream.data(), SLOT(setOnline(bool)));
+    m_liveStream.data()->setOnline(isOnline());
+    return result;
 }
 
 QList<DVRCamera *> DVRCamera::fromMimeData(DVRServerRepository *serverRepository, const QMimeData *mimeData)
