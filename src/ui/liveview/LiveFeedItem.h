@@ -28,6 +28,8 @@
 class QDataStream;
 class LiveStreamItem;
 
+class DVRServerRepository;
+
 class LiveFeedItem : public QDeclarativeItem
 {
     Q_OBJECT
@@ -36,6 +38,7 @@ class LiveFeedItem : public QDeclarativeItem
     Q_PROPERTY(LiveStreamItem *streamItem READ streamItem WRITE setStreamItem)
     Q_PROPERTY(LiveStream *stream READ stream NOTIFY cameraChanged)
     Q_PROPERTY(DVRCamera *camera READ camera WRITE setCamera NOTIFY cameraChanged)
+    Q_PROPERTY(DVRServerRepository *serverRepository READ serverRepository WRITE setServerRepository)
 
     Q_PROPERTY(QString cameraName READ cameraName NOTIFY cameraNameChanged)
     Q_PROPERTY(CustomCursor customCursor READ customCursor WRITE setCustomCursor)
@@ -74,6 +77,8 @@ public:
     DVRCamera * camera() const { return m_camera.data(); }
     QString cameraName() const { return m_camera ? m_camera.data()->data().displayName() : QLatin1String(" "); }
 
+    DVRServerRepository * serverRepository() const;
+
     CustomCursor customCursor() const { return m_customCursor; }
     CameraPtzControl *ptz() const { return m_ptz.data(); }
     bool hasPtz() const { return m_camera ? m_camera.data()->hasPtz() : false; }
@@ -84,6 +89,8 @@ public:
 
 public slots:
     void setCamera(DVRCamera *camera);
+    void setServerRepository(DVRServerRepository *serverRepository);
+
     void clear() { setCamera(0); }
 
     void close();
@@ -123,6 +130,7 @@ private slots:
 private:
     LiveStreamItem *m_streamItem;
     QWeakPointer<DVRCamera> m_camera;
+    DVRServerRepository *m_serverRepository;
     QSharedPointer<CameraPtzControl> m_ptz;
     CustomCursor m_customCursor;
 

@@ -21,13 +21,15 @@
 #include <QTreeView>
 
 class DVRServer;
+class DVRServerRepository;
 
 class DVRServersView : public QTreeView
 {
     Q_OBJECT
 
 public:
-    explicit DVRServersView(QWidget *parent = 0);
+    explicit DVRServersView(DVRServerRepository *serverRepository, QWidget *parent = 0);
+    virtual ~DVRServersView();
 
     DVRServer *currentServer() const;
 
@@ -43,6 +45,10 @@ protected:
 
 private slots:
     void rowsAboutToBeInserted(const QModelIndex &parent, int start, int end);
+
+private:
+    DVRServerRepository *m_serverRepository;
+
 };
 
 #endif // DVRSERVERSVIEW_H

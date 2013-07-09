@@ -22,6 +22,7 @@
 #include <QWeakPointer>
 #include "camera/DVRCamera.h"
 
+class DVRServerRepository;
 class LiveViewArea;
 class QComboBox;
 
@@ -30,12 +31,12 @@ class LiveViewWindow : public QWidget
     Q_OBJECT
 
 public:
-    explicit LiveViewWindow(QWidget *parent = 0, bool fullscreen = false, Qt::WindowFlags windowFlags = 0);
+    explicit LiveViewWindow(DVRServerRepository *serverRepository, QWidget *parent = 0, bool fullscreen = false, Qt::WindowFlags windowFlags = 0);
 
     /* Note that the returned window has the Qt::WA_DeleteOnClose attribute set.
      * If you intend to save this pointer long-term, put it in a guard (QWeakPointer) or
      * unset this attribute. */
-    static LiveViewWindow *openWindow(QWidget *parent, bool fullscreen, DVRCamera *camera = 0);
+    static LiveViewWindow *openWindow(DVRServerRepository *serverRepository, QWidget *parent, bool fullscreen, DVRCamera *camera = 0);
 
     LiveViewArea *view() const { return m_liveView; }
     QString currentLayout() const;
@@ -68,6 +69,7 @@ private slots:
 
 private:
     LiveViewArea *m_liveView;
+    DVRServerRepository *m_serverRepository;
     QComboBox * const m_savedLayouts;
     QAction *aRenameLayout, *aDelLayout;
     QAction *m_addRowAction, *m_removeRowAction;
