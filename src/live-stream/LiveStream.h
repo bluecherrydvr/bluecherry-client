@@ -55,7 +55,7 @@ public:
     explicit LiveStream(DVRCamera *camera, QObject *parent = 0);
     virtual ~LiveStream();
 
-    QByteArray url() const;
+    QUrl url() const;
 
     int bandwidthMode() const { return m_bandwidthMode; }
 

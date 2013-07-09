@@ -23,6 +23,7 @@
 
 class LiveStreamWorker;
 class QThread;
+class QUrl;
 
 class LiveStreamThread : public QObject
 {
@@ -32,7 +33,7 @@ public:
     explicit LiveStreamThread(QObject *parent = 0);
     virtual ~LiveStreamThread();
 
-    void start(const QByteArray &url);
+    void start(const QUrl &url);
     void stop();
     void setPaused(bool paused);
 

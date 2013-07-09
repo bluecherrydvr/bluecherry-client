@@ -21,6 +21,7 @@
 #include "core/ThreadPause.h"
 #include <QDateTime>
 #include <QObject>
+#include <QUrl>
 
 struct AVDictionary;
 struct AVStream;
@@ -37,7 +38,7 @@ public:
     explicit LiveStreamWorker(QObject *parent = 0);
     virtual ~LiveStreamWorker();
 
-    void setUrl(const QByteArray &url);
+    void setUrl(const QUrl &url);
 
     void stop();
     void setPaused(bool paused);
@@ -57,7 +58,7 @@ signals:
 private:
     struct AVFormatContext *m_ctx;
     QDateTime m_lastInterruptableOperationStarted;
-    QByteArray m_url;
+    QUrl m_url;
     bool m_cancelFlag;
     bool m_autoDeinterlacing;
 
