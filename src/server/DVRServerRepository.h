@@ -42,8 +42,12 @@ public:
     QList<DVRServer *> serversWithAlerts() const;
 
 signals:
+    void serverAboutToBeAdded(DVRServer *server);
     void serverAdded(DVRServer *server);
+
+    void serverAboutToBeRemoved(DVRServer *server);
     void serverRemoved(DVRServer *server);
+
     void serverAlertsChanged();
 
 private slots:

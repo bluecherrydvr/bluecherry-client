@@ -39,9 +39,11 @@ DVRServer * DVRServerRepository::createServer(const QString& name)
     DVRServer *server = new DVRServer(id, this);
     server->configuration().setDisplayName(name);
 
+    emit serverAboutToBeAdded(server);
+
     m_servers.append(server);
-        connect(server, SIGNAL(serverRemoved(DVRServer*)), this, SLOT(onServerRemoved(DVRServer*)));
-        connect(server, SIGNAL(statusAlertMessageChanged(QString)), this, SIGNAL(serverAlertsChanged()));
+    connect(server, SIGNAL(serverRemoved(DVRServer*)), this, SLOT(onServerRemoved(DVRServer*)));
+    connect(server, SIGNAL(statusAlertMessageChanged(QString)), this, SIGNAL(serverAlertsChanged()));
 
     emit serverAdded(server);
     return server;
@@ -121,6 +123,10 @@ QList<DVRServer *> DVRServerRepository::serversWithAlerts() const
 
 void DVRServerRepository::onServerRemoved(DVRServer *server)
 {
-    if (m_servers.removeOne(server))
-        emit serverRemoved(server);
+    if (!m_servers.contains(server))
+        return;
+
+    emit serverAboutToBeAdded(server);
+    m_servers.removeOne(server);
+    emit serverRemoved(server);
 }
