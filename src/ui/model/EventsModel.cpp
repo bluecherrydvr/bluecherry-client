@@ -38,8 +38,6 @@ EventsModel::EventsModel(DVRServerRepository *serverRepository, QObject *parent)
     connect(m_serverRepository, SIGNAL(serverRemoved(DVRServer*)), SLOT(clearServerEvents(DVRServer*)));
     connect(&updateTimer, SIGNAL(timeout()), SLOT(updateServers()));
 
-    //createTestData();
-
     sortColumn = DateColumn;
     sortOrder = Qt::DescendingOrder;
     applyFilters();
@@ -54,49 +52,6 @@ void EventsModel::serverAdded(DVRServer *server)
     connect(server, SIGNAL(disconnected()), SLOT(clearServerEvents()));
     updateServer(server);
 }
-
-#if 0
-/* Randomized events for testing until real ones are available */
-void EventsModel::createTestData()
-{
-    unsigned seed = QDateTime::currentDateTime().time().msec() * QDateTime::currentDateTime().time().second();
-    qsrand(seed);
-    qDebug("seed: %u", seed);
-
-    QList<DVRServer*> servers = bcApp->servers();
-    if (servers.isEmpty())
-        return;
-
-    QDateTime end = QDateTime::currentDateTime().addSecs(-3600);
-    int duration = 86400 * 7; /* one week */
-
-    int count = (qrand() % 285) + 15;
-    for (int i = 0; i < count; ++i)
-    {
-        EventData *event = new EventData(servers[qrand() % servers.size()]);
-        event->date = end.addSecs(-((qrand() * qrand()) % duration));
-        event->duration = 1 + (qrand() % 1299);
-
-        bool useCamera = qrand() % 6;
-        if (useCamera && !event->server->cameras().isEmpty())
-        {
-            event->setLocation(QString::fromLatin1("camera-%1").arg(qrand() % event->server->cameras().size()));
-            event->type = (qrand() % 10) ? QLatin1String("motion") : QLatin1String("video signal loss");
-            event->level = (qrand() % 3) ? EventLevel::Warning : EventLevel::Alarm;
-            if (event->type == EventType::CameraVideoLost)
-                event->level = EventLevel::Critical;
-        }
-        else
-        {
-            event->setLocation(QString::fromLatin1("system"));
-            event->type = (qrand() % 10) ? QLatin1String("disk-space") : QLatin1String("crash");
-            event->level = (qrand() % 5) ? EventLevel::Info : EventLevel::Critical;
-        }
-
-        cachedEvents[event->server].append(event);
-    }
-}
-#endif
 
 int EventsModel::rowCount(const QModelIndex &parent) const
 {
@@ -396,42 +351,6 @@ void EventsModel::applyFilters(bool fromCache)
             if (i == items.size())
                 break;
         }
-
-#if 0
-        /* Experimental concurrent implementation; would later be extended to be nonblocking */
-        QList<EventData*> newItems = QtConcurrent::blockingFiltered(items, m_filter);
-
-        int oFirstRemove = -1;
-        for (int oI = 0, nI = 0; oI < items.size(); ++oI)
-        {
-            if (nI >= newItems.size())
-            {
-                if (oFirstRemove < 0)
-                    oFirstRemove = oI;
-
-                beginRemoveRows(QModelIndex(), oFirstRemove, items.size()-1);
-                items.erase(items.begin()+oFirstRemove, items.end());
-                endRemoveRows();
-                break;
-            }
-
-            if (oFirstRemove < 0 && items[oI] != newItems[nI])
-                oFirstRemove = oI;
-            else if (oFirstRemove >= 0 && items[oI] == newItems[nI])
-            {
-                beginRemoveRows(QModelIndex(), oFirstRemove, oI-1);
-                items.erase(items.begin()+oFirstRemove, items.begin()+oI);
-                oI = oFirstRemove;
-                oFirstRemove = -1;
-                endRemoveRows();
-            }
-
-            if (oFirstRemove < 0)
-            {
-                ++nI;
-            }
-        }
-#endif
     }
 
     emit filtersChanged();
