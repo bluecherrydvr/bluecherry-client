@@ -120,7 +120,7 @@ private:
         QBitArray types;
         EventLevel level;
 
-        bool operator()(const EventData *d) const;
+        bool acceptEvent(const EventData *d) const;
     } m_filter;
 
     /* Sorting */

@@ -288,7 +288,7 @@ void EventsModel::sort(int column, Qt::SortOrder order)
     emit layoutChanged();
 }
 
-bool EventsModel::Filter::operator()(const EventData *data) const
+bool EventsModel::Filter::acceptEvent(const EventData *data) const
 {
     if (data->level() < level ||
             (!types.isNull() && (int)data->type() >= 0 && !types[(int)data->type()]) ||
@@ -317,7 +317,7 @@ void EventsModel::applyFilters(bool fromCache)
 
             for (QList<EventData*>::Iterator eit = it->begin(); eit != it->end(); ++eit)
             {
-                if (m_filter(*eit))
+                if (m_filter.acceptEvent(*eit))
                     items.append(*eit);
             }
         }
@@ -334,7 +334,7 @@ void EventsModel::applyFilters(bool fromCache)
         int removeFirst = -1;
         for (int i = 0; ; ++i)
         {
-            if (i < items.size() && !m_filter(items[i]))
+            if (i < items.size() && !m_filter.acceptEvent(items[i]))
             {
                 if (removeFirst < 0)
                     removeFirst = i;
