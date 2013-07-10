@@ -55,10 +55,15 @@ signals:
     void checkedSourcesChanged(QMap<DVRServer*,QList<int> > sources);
 
 private slots:
-    void serverAboutToBeAdded(DVRServer *server);
-    void serverAdded(DVRServer *server);
-    void serverAboutToBeRemoved(DVRServer *server);
-    void serverRemoved(DVRServer *server);
+    void repositoryServerAboutToBeAdded(DVRServer *server);
+    void repositoryServerAdded(DVRServer *server);
+    void repositoryServerAboutToBeRemoved(DVRServer *server);
+    void repositoryServerRemoved(DVRServer *server);
+
+    void serverCameraAboutToBeAdded(DVRCamera *camera);
+    void serverCameraAdded(DVRCamera *camera);
+    void cameraAboutToBeRemoved(DVRCamera *camera);
+    void serverCameraRemoved(DVRCamera *camera);
 
 private:
     DVRServerRepository *m_serverRepository;
@@ -66,6 +71,9 @@ private:
     QSet<DVRServer *> m_checkedServers;
     QSet<DVRServer *> m_partiallyCheckedServers;
     QSet<DVRCamera *> m_checkedCameras;
+
+    void addServer(DVRServer *server);
+    void removeServer(DVRServer *server);
 
     void addSystemCamera(DVRServer *server);
     void removeSystemCamera(DVRServer *server);

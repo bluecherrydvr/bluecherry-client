@@ -29,22 +29,53 @@ EventSourcesModel::EventSourcesModel(DVRServerRepository *serverRepository, QObj
 {
     Q_ASSERT(m_serverRepository);
 
-    connect(m_serverRepository, SIGNAL(serverAboutToBeAdded(DVRServer*)), this, SLOT(serverAboutToBeAdded(DVRServer*)));
-    connect(m_serverRepository, SIGNAL(serverAdded(DVRServer*)), this, SLOT(serverAdded(DVRServer*)));
-    connect(m_serverRepository, SIGNAL(serverAboutToBeRemoved(DVRServer*)), this, SLOT(serverAboutToBeRemoved(DVRServer*)));
-    connect(m_serverRepository, SIGNAL(serverRemoved(DVRServer*)), this, SLOT(serverRemoved(DVRServer*)));
+    connect(m_serverRepository, SIGNAL(repositoryServerAboutToBeAdded(DVRServer*)),
+            this, SLOT(serverAboutToBeAdded(DVRServer*)));
+    connect(m_serverRepository, SIGNAL(repositoryServerAdded(DVRServer*)),
+            this, SLOT(serverAdded(DVRServer*)));
+    connect(m_serverRepository, SIGNAL(repositoryServerAboutToBeRemoved(DVRServer*)),
+            this, SLOT(serverAboutToBeRemoved(DVRServer*)));
+    connect(m_serverRepository, SIGNAL(repositoryServerRemoved(DVRServer*)),
+            this, SLOT(serverRemoved(DVRServer*)));
 
     foreach (DVRServer *server, m_serverRepository->servers())
-    {
-        addSystemCamera(server);
-        checkServer(server);
-    }
+        addServer(server);
 }
 
 EventSourcesModel::~EventSourcesModel()
 {
     foreach (DVRServer *server, m_serverRepository->servers())
         removeSystemCamera(server);
+}
+
+void EventSourcesModel::addServer(DVRServer *server)
+{
+    addSystemCamera(server);
+    checkServer(server);
+
+    connect(server, SIGNAL(cameraAboutToBeAdded(DVRCamera*)),
+            this, SLOT(serverCameraAboutToBeAdded(DVRCamera*)));
+    connect(server, SIGNAL(cameraAdded(DVRCamera*)),
+            this, SLOT(serverCameraAdded(DVRCamera*)));
+    connect(server, SIGNAL(cameraAboutToBeRemoved(DVRCamera*)),
+            this, SLOT(cameraAboutToBeRemoved(DVRCamera*)));
+    connect(server, SIGNAL(cameraRemoved(DVRCamera*)),
+            this, SLOT(serverCameraRemoved(DVRCamera*)));
+}
+
+void EventSourcesModel::removeServer(DVRServer *server)
+{
+    disconnect(server, SIGNAL(cameraAboutToBeAdded(DVRCamera*)),
+               this, SLOT(serverCameraAboutToBeAdded(DVRCamera*)));
+    disconnect(server, SIGNAL(cameraAdded(DVRCamera*)),
+               this, SLOT(serverCameraAdded(DVRCamera*)));
+    disconnect(server, SIGNAL(cameraAboutToBeRemoved(DVRCamera*)),
+               this, SLOT(cameraAboutToBeRemoved(DVRCamera*)));
+    disconnect(server, SIGNAL(cameraRemoved(DVRCamera*)),
+               this, SLOT(serverCameraRemoved(DVRCamera*)));
+
+    uncheckServer(server);
+    removeSystemCamera(server);
 }
 
 void EventSourcesModel::addSystemCamera(DVRServer *server)
@@ -120,33 +151,60 @@ DVRCamera * EventSourcesModel::systemCameraForRow(int serverRow) const
     return m_systemCameras.value(serverForRow(serverRow));
 }
 
-void EventSourcesModel::serverAboutToBeAdded(DVRServer *server)
+void EventSourcesModel::repositoryServerAboutToBeAdded(DVRServer *server)
 {
     Q_UNUSED(server);
 
     beginInsertRows(QModelIndex(), m_serverRepository->servers().count(), m_serverRepository->servers().count());
 }
 
-void EventSourcesModel::serverAdded(DVRServer *server)
+void EventSourcesModel::repositoryServerAdded(DVRServer *server)
 {
-    addSystemCamera(server);
-    checkServer(server);
+    addServer(server);
+    endInsertRows();
+}
+
+void EventSourcesModel::repositoryServerAboutToBeRemoved(DVRServer *server)
+{
+    int row = rowOfServer(server);
+    beginRemoveRows(QModelIndex(), row, row);
+    removeServer(server);
+}
+
+void EventSourcesModel::repositoryServerRemoved(DVRServer *server)
+{
+    Q_UNUSED(server);
+
+    endRemoveRows();
+}
+
+void EventSourcesModel::serverCameraAboutToBeAdded(DVRCamera *camera)
+{
+    DVRServer *server = camera->data().server();
+    QModelIndex serverIndex = indexOfServer(camera->data().server());
+
+    beginInsertRows(serverIndex, server->cameras().count(), server->cameras().count());
+}
+
+void EventSourcesModel::serverCameraAdded(DVRCamera *camera)
+{
+    Q_UNUSED(camera);
 
     endInsertRows();
 }
 
-void EventSourcesModel::serverAboutToBeRemoved(DVRServer *server)
+void EventSourcesModel::cameraAboutToBeRemoved(DVRCamera *camera)
 {
-    int row = rowOfServer(server);
-    beginRemoveRows(QModelIndex(), row, row);
+    DVRServer *server = camera->data().server();
+    QModelIndex serverIndex = indexOfServer(camera->data().server());
+    int cameraRow = server->cameras().indexOf(camera);
 
-    uncheckServer(server);
-    removeSystemCamera(server);
+    beginRemoveRows(serverIndex, cameraRow, cameraRow);
 }
 
-void EventSourcesModel::serverRemoved(DVRServer *server)
+void EventSourcesModel::serverCameraRemoved(DVRCamera *camera)
 {
-    Q_UNUSED(server);
+    Q_UNUSED(camera);
 
     endRemoveRows();
 }
