@@ -52,9 +52,6 @@ protected:
     virtual void closeEvent(QCloseEvent *event);
 
 private slots:
-    void setStartDateEnabled(bool enabled);
-    void setEndDateEnabled(bool enabled);
-    void setEndDateMinimum(const QDateTime &date);
     void levelFilterChanged();
     void updateResultTitle();
     void cursorIndexUpdated();

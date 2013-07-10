@@ -141,27 +141,6 @@ EventsModel *EventsWindow::model() const
 
 void EventsWindow::createDateFilter(QBoxLayout *layout)
 {
-    QCheckBox *title = new QCheckBox(tr("Date after..."));
-    title->setStyleSheet(QLatin1String("font-weight:bold;"));
-    layout->addWidget(title);
-    connect(title, SIGNAL(clicked(bool)), SLOT(setStartDateEnabled(bool)));
-
-    m_startDate = new QDateEdit(QDate::currentDate());
-    m_startDate->setCalendarPopup(true);
-    m_startDate->setMaximumDate(QDate::currentDate());
-    m_startDate->setDisplayFormat(QLatin1String("dddd, MMM dd, yyyy"));
-    m_startDate->setVisible(false);
-    layout->addWidget(m_startDate);
-
-    connect(m_startDate, SIGNAL(dateTimeChanged(QDateTime)), m_resultsView->eventsModel(),
-            SLOT(setFilterBeginDate(QDateTime)));
-    connect(m_startDate, SIGNAL(dateTimeChanged(QDateTime)), SLOT(setEndDateMinimum(QDateTime)));
-    title->setChecked(false);
-
-    /* Start date disabled in favor of setFilterDay for now. */
-    title->hide();
-    m_startDate->hide();
-
     QLabel *title2 = new QLabel(tr("Date"));
     title2->setStyleSheet(QLatin1String("font-weight:bold;"));
     layout->addWidget(title2);
@@ -176,41 +155,6 @@ void EventsWindow::createDateFilter(QBoxLayout *layout)
 
     connect(m_endDate, SIGNAL(dateTimeChanged(QDateTime)), m_resultsView->eventsModel(),
             SLOT(setFilterDay(QDateTime)));
-}
-
-void EventsWindow::setStartDateEnabled(bool enabled)
-{
-    m_startDate->setVisible(enabled);
-    if (enabled)
-    {
-        m_resultsView->eventsModel()->setFilterBeginDate(m_startDate->dateTime());
-        setEndDateMinimum(m_startDate->dateTime());
-    }
-    else
-    {
-        m_resultsView->eventsModel()->setFilterBeginDate(QDateTime());
-        setEndDateMinimum(QDateTime());
-    }
-}
-
-void EventsWindow::setEndDateEnabled(bool enabled)
-{
-    m_endDate->setVisible(enabled);
-    if (enabled)
-        m_resultsView->eventsModel()->setFilterEndDate(m_endDate->dateTime());
-    else
-        m_resultsView->eventsModel()->setFilterEndDate(QDateTime());
-}
-
-void EventsWindow::setEndDateMinimum(const QDateTime &date)
-{
-    if (date.isValid())
-    {
-        m_endDate->setMinimumDate(date.date());
-        m_endDate->setTime(QTime(23, 59, 59, 999));
-    }
-    else
-        m_endDate->clearMinimumDateTime();
 }
 
 QWidget *EventsWindow::createLevelFilter()
