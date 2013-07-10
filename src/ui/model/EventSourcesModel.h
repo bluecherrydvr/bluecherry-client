@@ -80,6 +80,7 @@ private:
 
     void addSystemCamera(DVRServer *server);
     void removeSystemCamera(DVRServer *server);
+    void setAllCheckedState(bool checked);
     void checkServer(DVRServer *server);
     void uncheckServer(DVRServer *server);
     void setServerCheckedState(DVRServer *server, bool checked);

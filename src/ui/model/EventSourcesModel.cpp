@@ -91,6 +91,12 @@ void EventSourcesModel::removeSystemCamera(DVRServer *server)
     m_systemCameras.remove(server);
 }
 
+void EventSourcesModel::setAllCheckedState(bool checked)
+{
+    foreach (DVRServer *server, m_serverRepository->servers())
+        setServerCheckedState(server, checked);
+}
+
 void EventSourcesModel::checkServer(DVRServer *server)
 {
     m_partiallyCheckedServers.remove(server);
@@ -449,32 +455,20 @@ QVariant EventSourcesModel::data(DVRCamera *camera, int role) const
 
 bool EventSourcesModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    Q_UNUSED(index);
-    Q_UNUSED(value);
-
     if (role != Qt::CheckStateRole)
         return false;
 
     bool state = (value.toInt() == Qt::Checked);
-    if (!index.internalPointer())
-    {
-        m_checkedCameras.clear();
-        m_checkedServers.clear();
 
-        foreach (DVRServer *server, m_serverRepository->servers())
-            setServerCheckedState(server, state);
-    }
+    DVRServer *server = index.data(DVRServersModel::DVRServerRole).value<DVRServer *>();
+    DVRCamera *camera = index.data(DVRServersModel::DVRCameraRole).value<DVRCamera *>();
+
+    if (server)
+        setServerCheckedState(server, state);
+    else if (camera)
+        setCameraCheckedState(camera, state);
     else
-    {
-        QObject *indexObject = static_cast<QObject *>(index.internalPointer());
-        DVRServer *server = qobject_cast<DVRServer *>(indexObject);
-        DVRCamera *camera = qobject_cast<DVRCamera *>(indexObject);
-
-        if (server)
-            setServerCheckedState(server, state);
-        else if (camera)
-            setCameraCheckedState(camera, state);
-    }
+        setAllCheckedState(state);
 
     if (receivers(SIGNAL(checkedSourcesChanged(QMap<DVRServer*,QList<int>>))))
     {
