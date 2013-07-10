@@ -25,7 +25,7 @@
 #include <QStringList>
 
 EventSourcesModel::EventSourcesModel(DVRServerRepository *serverRepository, QObject *parent) :
-    QAbstractItemModel(parent), m_serverRepository(serverRepository)
+    QAbstractItemModel(parent), m_serverRepository(serverRepository), m_checkedSourcesDirty(false)
 {
     Q_ASSERT(m_serverRepository);
 
@@ -267,7 +267,7 @@ QModelIndex EventSourcesModel::indexOfCamera(DVRCamera *camera) const
     return index(cameraRow, 0, serverIndex);
 }
 
-QMap<DVRServer*,QList<int> > EventSourcesModel::checkedSources() const
+QMap<DVRServer *, QList<int> > EventSourcesModel::computeCheckedSources() const
 {
     QMap<DVRServer*,QList<int> > result;
 
@@ -290,6 +290,17 @@ QMap<DVRServer*,QList<int> > EventSourcesModel::checkedSources() const
     }
 
     return result;
+}
+
+QMap<DVRServer *, QList<int> > EventSourcesModel::checkedSources()
+{
+    if (m_checkedSourcesDirty)
+    {
+        m_checkedSources = computeCheckedSources();
+        m_checkedSourcesDirty = false;
+    }
+
+    return m_checkedSources;
 }
 
 int EventSourcesModel::rowCount(const QModelIndex &parent) const
@@ -465,10 +476,18 @@ bool EventSourcesModel::setData(const QModelIndex &index, const QVariant &value,
             setCameraCheckedState(camera, state);
     }
 
-    emit dataChanged(EventSourcesModel::index(0, 0), EventSourcesModel::index(rowCount() - 1, 0));
-
     if (receivers(SIGNAL(checkedSourcesChanged(QMap<DVRServer*,QList<int>>))))
-        emit checkedSourcesChanged(checkedSources());
+    {
+        QMap<DVRServer *, QList<int> > oldCheckedSources = checkedSources();
+        m_checkedSourcesDirty = true;
+        QMap<DVRServer *, QList<int> > newCheckedSources = checkedSources();
 
+        if (oldCheckedSources != newCheckedSources)
+            emit checkedSourcesChanged(checkedSources());
+    }
+    else
+        m_checkedSourcesDirty = true;
+
+    emit dataChanged(EventSourcesModel::index(0, 0), EventSourcesModel::index(rowCount() - 1, 0));
     return true;
 }

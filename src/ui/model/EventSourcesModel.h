@@ -37,7 +37,7 @@ public:
     explicit EventSourcesModel(DVRServerRepository *serverRepository, QObject *parent = 0);
     virtual ~EventSourcesModel();
 
-    QMap<DVRServer*,QList<int> > checkedSources() const;
+    QMap<DVRServer *, QList<int> > checkedSources();
 
     int rowOfServer(DVRServer *server) const;
     QModelIndex indexOfServer(DVRServer *server) const;
@@ -72,6 +72,9 @@ private:
     QSet<DVRServer *> m_partiallyCheckedServers;
     QSet<DVRCamera *> m_checkedCameras;
 
+    bool m_checkedSourcesDirty;
+    QMap<DVRServer *, QList<int> > m_checkedSources;
+
     void addServer(DVRServer *server);
     void removeServer(DVRServer *server);
 
@@ -93,6 +96,8 @@ private:
     QVariant everythingData(int role) const;
     QVariant data(DVRServer *server, int role) const;
     QVariant data(DVRCamera *camera, int role) const;
+
+    QMap<DVRServer *, QList<int> > computeCheckedSources() const;
 
 };
 
