@@ -87,7 +87,9 @@ signals:
 
     void serverRemoved(DVRServer *server);
 
+    void cameraAboutToBeAdded(DVRCamera *camera);
     void cameraAdded(DVRCamera *camera);
+    void cameraAboutToBeRemoved(DVRCamera *camera);
     void cameraRemoved(DVRCamera *camera);
 
     void statusAlertMessageChanged(const QString &message);

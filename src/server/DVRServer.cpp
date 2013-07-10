@@ -180,6 +180,7 @@ void DVRServer::updateCamerasReply()
 
                     if (!m_visibleCameras.contains(camera))
                     {
+                        emit cameraAboutToBeAdded(camera);
                         m_visibleCameras.append(camera);
                         emit cameraAdded(camera);
                     }
@@ -205,6 +206,7 @@ void DVRServer::updateCamerasReply()
         if (!idSet.contains(m_visibleCameras[i]->data().id()))
         {
             DVRCamera *c = m_visibleCameras[i];
+            emit cameraAboutToBeRemoved(c);
             m_visibleCameras.removeAt(i);
             m_camerasMap.remove(c->data().id());
             qDebug("DVRServer: camera %d removed", c->data().id());
@@ -281,7 +283,9 @@ void DVRServer::disconnectedSlot()
 {
     while (!m_visibleCameras.isEmpty())
     {
-        DVRCamera *c = m_visibleCameras.takeFirst();
+        DVRCamera *c = m_visibleCameras.first();
+        emit cameraAboutToBeRemoved(c);
+        m_visibleCameras.takeFirst();
         c->setOnline(false);
         emit cameraRemoved(c);
     }
