@@ -82,8 +82,6 @@ public slots:
     void setFilterTypes(const QBitArray &typemap);
     void setFilterLevel(EventLevel minimum);
 
-    void setFilterBeginDate(const QDateTime &begin) { setFilterDates(begin, m_filter.dateEnd); }
-    void setFilterEndDate(const QDateTime &end) { setFilterDates(m_filter.dateBegin, end); }
     void setFilterDay(const QDateTime &date);
 
     void clearFilters();
