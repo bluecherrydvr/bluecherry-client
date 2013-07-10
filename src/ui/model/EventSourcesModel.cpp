@@ -188,7 +188,8 @@ void EventSourcesModel::serverCameraAboutToBeAdded(DVRCamera *camera)
 
 void EventSourcesModel::serverCameraAdded(DVRCamera *camera)
 {
-    Q_UNUSED(camera);
+    if (m_checkedServers.contains(camera->data().server()))
+        m_checkedCameras.insert(camera);
 
     endInsertRows();
 }
