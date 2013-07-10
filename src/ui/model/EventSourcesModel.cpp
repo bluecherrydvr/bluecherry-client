@@ -58,7 +58,7 @@ void EventSourcesModel::addServer(DVRServer *server)
     connect(server, SIGNAL(cameraAdded(DVRCamera*)),
             this, SLOT(serverCameraAdded(DVRCamera*)));
     connect(server, SIGNAL(cameraAboutToBeRemoved(DVRCamera*)),
-            this, SLOT(cameraAboutToBeRemoved(DVRCamera*)));
+            this, SLOT(serverCameraAboutToBeRemoved(DVRCamera*)));
     connect(server, SIGNAL(cameraRemoved(DVRCamera*)),
             this, SLOT(serverCameraRemoved(DVRCamera*)));
 }
@@ -70,7 +70,7 @@ void EventSourcesModel::removeServer(DVRServer *server)
     disconnect(server, SIGNAL(cameraAdded(DVRCamera*)),
                this, SLOT(serverCameraAdded(DVRCamera*)));
     disconnect(server, SIGNAL(cameraAboutToBeRemoved(DVRCamera*)),
-               this, SLOT(cameraAboutToBeRemoved(DVRCamera*)));
+               this, SLOT(serverCameraAboutToBeRemoved(DVRCamera*)));
     disconnect(server, SIGNAL(cameraRemoved(DVRCamera*)),
                this, SLOT(serverCameraRemoved(DVRCamera*)));
 
@@ -225,7 +225,7 @@ void EventSourcesModel::serverCameraAdded(DVRCamera *camera)
     endInsertRows();
 }
 
-void EventSourcesModel::cameraAboutToBeRemoved(DVRCamera *camera)
+void EventSourcesModel::serverCameraAboutToBeRemoved(DVRCamera *camera)
 {
     DVRServer *server = camera->data().server();
     QModelIndex serverIndex = indexOfServer(camera->data().server());
@@ -236,7 +236,7 @@ void EventSourcesModel::cameraAboutToBeRemoved(DVRCamera *camera)
 
 void EventSourcesModel::serverCameraRemoved(DVRCamera *camera)
 {
-    Q_UNUSED(camera);
+    m_checkedCameras.remove(camera);
 
     endRemoveRows();
 }

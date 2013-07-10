@@ -62,7 +62,7 @@ private slots:
 
     void serverCameraAboutToBeAdded(DVRCamera *camera);
     void serverCameraAdded(DVRCamera *camera);
-    void cameraAboutToBeRemoved(DVRCamera *camera);
+    void serverCameraAboutToBeRemoved(DVRCamera *camera);
     void serverCameraRemoved(DVRCamera *camera);
 
 private:
