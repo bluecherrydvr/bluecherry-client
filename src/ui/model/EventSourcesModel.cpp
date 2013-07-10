@@ -452,18 +452,18 @@ bool EventSourcesModel::setData(const QModelIndex &index, const QVariant &value,
 
         foreach (DVRServer *server, m_serverRepository->servers())
             setServerCheckedState(server, state);
-
-        return true;
     }
+    else
+    {
+        QObject *indexObject = static_cast<QObject *>(index.internalPointer());
+        DVRServer *server = qobject_cast<DVRServer *>(indexObject);
+        DVRCamera *camera = qobject_cast<DVRCamera *>(indexObject);
 
-    QObject *indexObject = static_cast<QObject *>(index.internalPointer());
-    DVRServer *server = qobject_cast<DVRServer *>(indexObject);
-    DVRCamera *camera = qobject_cast<DVRCamera *>(indexObject);
-
-    if (server)
-        setServerCheckedState(server, state);
-    else if (camera)
-        setCameraCheckedState(camera, state);
+        if (server)
+            setServerCheckedState(server, state);
+        else if (camera)
+            setCameraCheckedState(camera, state);
+    }
 
     emit dataChanged(EventSourcesModel::index(0, 0), EventSourcesModel::index(rowCount() - 1, 0));
 
