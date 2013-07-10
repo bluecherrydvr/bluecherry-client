@@ -79,6 +79,10 @@ private:
     void removeSystemCamera(DVRServer *server);
     void checkServer(DVRServer *server);
     void uncheckServer(DVRServer *server);
+    void setServerCheckedState(DVRServer *server, bool checked);
+    void checkCamera(DVRCamera *camera);
+    void uncheckCamera(DVRCamera *camera);
+    void setCameraCheckedState(DVRCamera *camera, bool checked);
     void updateServerCheckState(DVRServer *server);
 
     DVRServer * serverForRow(int row) const;

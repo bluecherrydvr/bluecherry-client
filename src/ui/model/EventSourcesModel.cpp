@@ -109,6 +109,37 @@ void EventSourcesModel::uncheckServer(DVRServer* server)
     m_checkedCameras.remove(m_systemCameras.value(server));
 }
 
+void EventSourcesModel::setServerCheckedState(DVRServer *server, bool checked)
+{
+    if (checked)
+        checkServer(server);
+    else
+        uncheckServer(server);
+}
+
+void EventSourcesModel::checkCamera(DVRCamera *camera)
+{
+    if (!m_checkedCameras.contains(camera))
+    {
+        m_checkedCameras.insert(camera);
+        updateServerCheckState(camera->data().server());
+    }
+}
+
+void EventSourcesModel::uncheckCamera(DVRCamera *camera)
+{
+    if (m_checkedCameras.remove(camera))
+        updateServerCheckState(camera->data().server());
+}
+
+void EventSourcesModel::setCameraCheckedState(DVRCamera *camera, bool checked)
+{
+    if (checked)
+        checkCamera(camera);
+    else
+        uncheckCamera(camera);
+}
+
 void EventSourcesModel::updateServerCheckState(DVRServer *server)
 {
     int checkedCameras = 0;
@@ -420,11 +451,7 @@ bool EventSourcesModel::setData(const QModelIndex &index, const QVariant &value,
         m_checkedServers.clear();
 
         foreach (DVRServer *server, m_serverRepository->servers())
-        {
-            m_checkedServers.insert(server);
-            foreach (DVRCamera *camera, server->cameras())
-                m_checkedCameras.insert(camera);
-        }
+            setServerCheckedState(server, state);
 
         return true;
     }
@@ -434,21 +461,9 @@ bool EventSourcesModel::setData(const QModelIndex &index, const QVariant &value,
     DVRCamera *camera = qobject_cast<DVRCamera *>(indexObject);
 
     if (server)
-    {
-        if (state)
-            checkServer(server);
-        else
-            uncheckServer(server);
-    }
-
-    if (camera)
-    {
-        if (state)
-            m_checkedCameras.insert(camera);
-        else
-            m_checkedCameras.remove(camera);
-        updateServerCheckState(camera->data().server());
-    }
+        setServerCheckedState(server, state);
+    else if (camera)
+        setCameraCheckedState(camera, state);
 
     emit dataChanged(EventSourcesModel::index(0, 0), EventSourcesModel::index(rowCount() - 1, 0));
 
