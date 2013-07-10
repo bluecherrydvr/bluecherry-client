@@ -363,7 +363,7 @@ Qt::ItemFlags EventSourcesModel::flags(const QModelIndex &index) const
 QVariant EventSourcesModel::data(const QModelIndex &index, int role) const
 {
     QObject *indexObject = static_cast<QObject *>(index.internalPointer());
-    if (!indexObject && !index.parent().isValid())
+    if (!indexObject)
         return everythingData(role);
 
     DVRServer *server = qobject_cast<DVRServer *>(indexObject);
