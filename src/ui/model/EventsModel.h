@@ -75,8 +75,6 @@ public slots:
     void setFilterSource(DVRServer *server);
     void setFilterSources(const QMap<DVRServer*,QList<int> > &sources);
 
-    void setFilterTypes(const QBitArray &typemap);
-
     void setFilterDay(const QDateTime &date);
 
     /* Request the most recent events from the given server, the DVRServer* source, or the
@@ -109,7 +107,6 @@ private:
     {
         QHash<DVRServer*, QSet<int> > sources;
         QDateTime dateBegin, dateEnd;
-        QBitArray types;
 
         bool acceptEvent(const EventData *d) const;
     } m_filter;

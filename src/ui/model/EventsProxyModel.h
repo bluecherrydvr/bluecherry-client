@@ -19,6 +19,7 @@
 #define EVENTS_PROXY_MODEL_H
 
 #include "core/EventData.h"
+#include <QBitArray>
 #include <QSortFilterProxyModel>
 
 class EventsProxyModel : public QSortFilterProxyModel
@@ -43,11 +44,13 @@ public:
     void setIncompletePlace(IncompletePlace incompletePlace);
 
     void setMinimumLevel(EventLevel minimumLevel);
+    void setTypes(QBitArray types);
 
 private:
     int m_column;
     IncompletePlace m_incompletePlace;
     EventLevel m_minimumLevel;
+    QBitArray m_types;
 
     bool filterAcceptsRow(EventData *eventData) const;
     bool lessThan(EventData *left, EventData *right) const;

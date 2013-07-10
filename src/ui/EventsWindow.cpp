@@ -177,7 +177,7 @@ QWidget *EventsWindow::createTypeFilter()
     m_typeFilter->setMaximumWidth(180);
     m_typeFilter->setMaximumHeight(100);
 
-    connect(m_typeFilter, SIGNAL(checkedTypesChanged(QBitArray)), m_resultsView->eventsModel(), SLOT(setFilterTypes(QBitArray)));
+    connect(m_typeFilter, SIGNAL(checkedTypesChanged(QBitArray)), this, SLOT(setFilterTypes(QBitArray)));
 
     return m_typeFilter;
 }
@@ -390,4 +390,9 @@ void EventsWindow::sortEvents(int logicalIndex, Qt::SortOrder sortOrder)
     m_resultsView->eventsProxyModel()->setColumn(logicalIndex);
     m_resultsView->eventsProxyModel()->sort(0, sortOrder);
     m_resultsView->eventsProxyModel()->setDynamicSortFilter(true);
+}
+
+void EventsWindow::setFilterTypes(QBitArray types)
+{
+    m_resultsView->eventsProxyModel()->setTypes(types);
 }

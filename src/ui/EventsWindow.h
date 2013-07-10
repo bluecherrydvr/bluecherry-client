@@ -63,6 +63,7 @@ private slots:
     void showServerEvent(const EventData &eventData);
 
     void sortEvents(int logicalIndex, Qt::SortOrder sortOrder);
+    void setFilterTypes(QBitArray types);
 
 private:
     DVRServerRepository *m_serverRepository;

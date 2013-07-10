@@ -47,6 +47,9 @@ bool EventsProxyModel::filterAcceptsRow(EventData *eventData) const
     if (eventData->level() < m_minimumLevel)
         return false;
 
+    if (!m_types.isNull() && (int)eventData->type() >= 0 && !m_types[(int)eventData->type()])
+        return false;
+
     return true;
 }
 
@@ -114,5 +117,14 @@ void EventsProxyModel::setMinimumLevel(EventLevel minimumLevel)
         return;
 
     m_minimumLevel = minimumLevel;
+    invalidateFilter();
+}
+
+void EventsProxyModel::setTypes(QBitArray types)
+{
+    if (m_types == types)
+        return;
+
+    m_types = types;
     invalidateFilter();
 }

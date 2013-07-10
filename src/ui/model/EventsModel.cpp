@@ -213,8 +213,7 @@ void EventsModel::clearServerEvents(DVRServer *server)
 
 bool EventsModel::Filter::acceptEvent(const EventData *data) const
 {
-    if (    (!types.isNull() && (int)data->type() >= 0 && !types[(int)data->type()]) ||
-            (!dateBegin.isNull() && data->serverStartDate() < dateBegin) ||
+    if (    (!dateBegin.isNull() && data->serverStartDate() < dateBegin) ||
             (!dateEnd.isNull() && data->serverStartDate() > dateEnd))
         return false;
 
@@ -346,26 +345,6 @@ void EventsModel::setFilterSource(DVRServer *server)
     QMap<DVRServer*,QList<int> > sources;
     sources.insert(server, QList<int>());
     setFilterSources(sources);
-}
-
-void EventsModel::setFilterTypes(const QBitArray &typemap)
-{
-    bool fast = true;
-
-    if (!m_filter.types.isNull() && m_filter.types.size() == typemap.size())
-    {
-        for (int i = 0; i < typemap.size(); ++i)
-        {
-            if (typemap[i] && !m_filter.types[i])
-            {
-                fast = false;
-                break;
-            }
-        }
-    }
-
-    m_filter.types = typemap;
-    applyFilters(!fast);
 }
 
 void EventsModel::setUpdateInterval(int ms)
