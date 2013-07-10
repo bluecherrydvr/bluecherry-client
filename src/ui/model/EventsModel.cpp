@@ -272,28 +272,6 @@ void EventsModel::applyFilters(bool fromCache)
     }
 }
 
-void EventsModel::clearFilters()
-{
-    if (m_filter.sources.isEmpty() && m_filter.dateBegin.isNull() && m_filter.dateEnd.isNull() &&
-        m_filter.types.isNull())
-        return;
-
-    bool reload = !m_filter.dateBegin.isNull() || !m_filter.dateEnd.isNull();
-
-    m_filter.sources.clear();
-    m_filter.dateBegin = m_filter.dateEnd = QDateTime();
-    m_filter.types.clear();
-
-    if (reload)
-    {
-        beginResetModel();
-        items.clear();
-        updateServers();
-        endResetModel();
-    } else
-        applyFilters();
-}
-
 void EventsModel::setFilterDates(const QDateTime &begin, const QDateTime &end)
 {
     m_filter.dateBegin = begin;
