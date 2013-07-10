@@ -163,7 +163,7 @@ void DVRServer::updateCamerasReply()
                     if (camera)
                     {
                         camera->setOnline(true);
-                        
+
                         DVRCameraXMLReader xmlReader;
                         if (!xmlReader.readCamera(camera, xml))
                         {
