@@ -70,8 +70,6 @@ public:
     virtual QVariant data(const QModelIndex &index, int role) const;
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
-    virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
-
 public slots:
     void setFilterSource(DVRCamera *camera);
     void setFilterSource(DVRServer *server);
@@ -91,8 +89,6 @@ public slots:
 
     void setUpdateInterval(int ms);
     void stopUpdates() { setUpdateInterval(-1); }
-
-    void setIncompleteEventsFirst(bool enabled);
 
 signals:
     void filtersChanged();
@@ -125,11 +121,6 @@ private:
 
     /* Sorting */
     int serverEventsLimit;
-    int sortColumn;
-    Qt::SortOrder sortOrder;
-    bool incompleteEventsFirst;
-
-    void resort() { sort(sortColumn, sortOrder); }
 
     void applyFilters(bool fromCache = true);
     bool testFilter(EventData *data);

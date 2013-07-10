@@ -15,45 +15,39 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVENTSVIEW_H
-#define EVENTSVIEW_H
+#ifndef EVENTS_PROXY_MODEL_H
+#define EVENTS_PROXY_MODEL_H
 
-#include <QTreeView>
+#include <QSortFilterProxyModel>
 
 class EventData;
-class EventList;
-class EventsModel;
-class EventsProxyModel;
-class QLabel;
 
-class EventsView : public QTreeView
+class EventsProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
 
 public:
-    explicit EventsView(QWidget *parent = 0);
+    enum IncompletePlace
+    {
+        IncompleteInPlace,
+        IncompleteFirst,
+        IncompleteLast
+    };
 
-    EventsModel * eventsModel() const;
-    EventsProxyModel * eventsProxyModel() const;
+    explicit EventsProxyModel(QObject *parent);
+    virtual ~EventsProxyModel();
 
-    void setModel(EventsModel *model);
+    virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 
-    EventList selectedEvents() const;
-
-private slots:
-    void openEvent(const QModelIndex &index);
-    void loadingStarted();
-    void loadingFinished();
-
-protected:
-    virtual bool eventFilter(QObject *obj, QEvent *ev);
+    void setColumn(int column);
+    void setIncompletePlace(IncompletePlace incompletePlace);
 
 private:
-    QLabel *loadingIndicator;
-    EventsModel *m_eventsModel;
-    EventsProxyModel *m_eventsProxyModel;
+    int m_column;
+    IncompletePlace m_incompletePlace;
 
-    using QTreeView::setModel;
+    bool lessThan(EventData *left, EventData *right) const;
+
 };
 
-#endif // EVENTSVIEW_H
+#endif // EVENTS_PROXY_MODEL_H

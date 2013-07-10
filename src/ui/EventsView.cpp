@@ -17,6 +17,7 @@
 
 #include "EventsView.h"
 #include "model/EventsModel.h"
+#include "model/EventsProxyModel.h"
 #include "EventViewWindow.h"
 #include "core/EventData.h"
 #include "event/EventList.h"
@@ -26,19 +27,27 @@
 #include <QEvent>
 
 EventsView::EventsView(QWidget *parent)
-    : QTreeView(parent), loadingIndicator(0)
+    : QTreeView(parent), loadingIndicator(0), m_eventsModel(0)
 {
     setRootIsDecorated(false);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
     setUniformRowHeights(true);
 
     viewport()->installEventFilter(this);
+
+    m_eventsProxyModel = new EventsProxyModel(this);
+    m_eventsProxyModel->setColumn(EventsModel::DateColumn);
+    m_eventsProxyModel->setDynamicSortFilter(true);
+    m_eventsProxyModel->sort(0, Qt::DescendingOrder);
 }
 
 void EventsView::setModel(EventsModel *model)
 {
-    bool first = !this->model();
-    QTreeView::setModel(model);
+    bool first = !m_eventsModel;
+
+    m_eventsModel = model;
+    m_eventsProxyModel->setSourceModel(m_eventsModel);
+    QTreeView::setModel(m_eventsProxyModel);
 
     if (first)
     {
@@ -75,10 +84,14 @@ EventList EventsView::selectedEvents() const
     return result;
 }
 
-EventsModel *EventsView::eventsModel() const
+EventsModel * EventsView::eventsModel() const
 {
-    Q_ASSERT(!model() || qobject_cast<EventsModel*>(model()));
-    return static_cast<EventsModel*>(model());
+    return m_eventsModel;
+}
+
+EventsProxyModel* EventsView::eventsProxyModel() const
+{
+    return m_eventsProxyModel;
 }
 
 void EventsView::openEvent(const QModelIndex &index)

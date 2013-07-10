@@ -78,6 +78,7 @@ set (bluecherry_client_main_SRCS
     src/ui/model/DVRServersModel.cpp
     src/ui/model/DVRServersProxyModel.cpp
     src/ui/model/EventsModel.cpp
+    src/ui/model/EventsProxyModel.cpp
     src/ui/model/EventSourcesModel.cpp
     src/ui/model/EventTagsModel.cpp
     src/ui/model/SavedLayoutsModel.cpp

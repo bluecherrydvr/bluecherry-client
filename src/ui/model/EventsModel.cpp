@@ -30,7 +30,7 @@
 #include <QtConcurrentRun>
 
 EventsModel::EventsModel(DVRServerRepository *serverRepository, QObject *parent)
-    : QAbstractItemModel(parent), m_serverRepository(serverRepository), serverEventsLimit(-1), incompleteEventsFirst(false)
+    : QAbstractItemModel(parent), m_serverRepository(serverRepository), serverEventsLimit(-1)
 {
     Q_ASSERT(m_serverRepository);
 
@@ -38,8 +38,6 @@ EventsModel::EventsModel(DVRServerRepository *serverRepository, QObject *parent)
     connect(m_serverRepository, SIGNAL(serverRemoved(DVRServer*)), SLOT(clearServerEvents(DVRServer*)));
     connect(&updateTimer, SIGNAL(timeout()), SLOT(updateServers()));
 
-    sortColumn = DateColumn;
-    sortOrder = Qt::DescendingOrder;
     applyFilters();
 
     foreach (DVRServer *s, m_serverRepository->servers())
@@ -213,81 +211,6 @@ void EventsModel::clearServerEvents(DVRServer *server)
     cachedEvents.remove(server);
 }
 
-class EventSort
-{
-public:
-    const int column;
-    const bool lessThan;
-    const bool incompleteFirst;
-
-    EventSort(int c, bool l, bool incomplete = false)
-        : column(c), lessThan(l), incompleteFirst(incomplete)
-    {
-    }
-
-    bool operator()(const EventData *e1, const EventData *e2)
-    {
-        bool re;
-
-        if (incompleteFirst)
-        {
-            if (e1->inProgress() && !e2->inProgress())
-                return true;
-            else if (e2->inProgress() && !e1->inProgress())
-                return false;
-        }
-
-        switch (column)
-        {
-        case EventsModel::ServerColumn:
-            re = QString::localeAwareCompare(e1->server()->configuration().displayName(), e2->server()->configuration().displayName()) <= 0;
-            break;
-        case EventsModel::LocationColumn:
-            re = QString::localeAwareCompare(e1->uiLocation(), e2->uiLocation()) <= 0;
-            break;
-        case EventsModel::TypeColumn:
-            re = QString::localeAwareCompare(e1->uiType(), e2->uiType()) <= 0;
-            break;
-        case EventsModel::DurationColumn:
-            re = e1->durationInSeconds() <= e2->durationInSeconds();
-            break;
-        case EventsModel::LevelColumn:
-            re = e1->level() <= e2->level();
-            break;
-        case EventsModel::DateColumn:
-            re = e1->utcStartDate() <= e2->utcStartDate();
-            break;
-        default:
-            Q_ASSERT_X(false, "EventSort", "sorting not implemented for column");
-            re = true;
-        }
-
-        if (lessThan)
-            return re;
-        else
-            return !re;
-    }
-};
-
-void EventsModel::setIncompleteEventsFirst(bool enabled)
-{
-    if (incompleteEventsFirst == enabled)
-        return;
-    incompleteEventsFirst = enabled;
-    resort();
-}
-
-void EventsModel::sort(int column, Qt::SortOrder order)
-{
-    this->sortColumn = column;
-    this->sortOrder = order;
-
-    emit layoutAboutToBeChanged();
-    bool lessThan = order == Qt::AscendingOrder;
-    qSort(items.begin(), items.end(), EventSort(column, lessThan, incompleteEventsFirst));
-    emit layoutChanged();
-}
-
 bool EventsModel::Filter::acceptEvent(const EventData *data) const
 {
     if (data->level() < level ||
@@ -321,10 +244,6 @@ void EventsModel::applyFilters(bool fromCache)
                     items.append(*eit);
             }
         }
-
-        bool block = blockSignals(true);
-        resort();
-        blockSignals(block);
 
         endResetModel();
     }

@@ -25,6 +25,7 @@
 #include "EventTagsView.h"
 #include "model/EventTagsModel.h"
 #include "model/EventsModel.h"
+#include "model/EventsProxyModel.h"
 #include "core/BluecherryApp.h"
 #include "event/ModelEventsCursor.h"
 #include "ui/MainWindow.h"
@@ -201,7 +202,7 @@ QWidget *EventsWindow::createTagsInput()
     return tagInput;
 }
 
-QWidget *EventsWindow::createResultsView()
+QWidget * EventsWindow::createResultsView()
 {
     m_resultsView = new EventsView;
     m_resultsView->setModel(new EventsModel(m_serverRepository, this));
@@ -214,7 +215,8 @@ QWidget *EventsWindow::createResultsView()
     m_resultsView->header()->restoreState(settings.value(QLatin1String("ui/events/viewHeader")).toByteArray());
     m_resultsView->header()->setSortIndicatorShown(true);
     m_resultsView->header()->setSortIndicator(EventsModel::DateColumn, Qt::DescendingOrder);
-    m_resultsView->setSortingEnabled(true);
+    connect(m_resultsView->header(), SIGNAL(sortIndicatorChanged(int,Qt::SortOrder)),
+            this, SLOT(sortEvents(int,Qt::SortOrder)));
 
     return m_resultsView;
 }
@@ -380,4 +382,12 @@ void EventsWindow::eventContextMenu(const QPoint &pos)
                 sModel->setData(sModel->indexOfCamera(camera), Qt::Unchecked, Qt::CheckStateRole);
         }
     }
+}
+
+void EventsWindow::sortEvents(int logicalIndex, Qt::SortOrder sortOrder)
+{
+    m_resultsView->eventsProxyModel()->setDynamicSortFilter(false);
+    m_resultsView->eventsProxyModel()->setColumn(logicalIndex);
+    m_resultsView->eventsProxyModel()->sort(0, sortOrder);
+    m_resultsView->eventsProxyModel()->setDynamicSortFilter(true);
 }

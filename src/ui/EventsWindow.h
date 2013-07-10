@@ -62,6 +62,8 @@ private slots:
     void showServerEvent(const QModelIndex &index);
     void showServerEvent(const EventData &eventData);
 
+    void sortEvents(int logicalIndex, Qt::SortOrder sortOrder);
+
 private:
     DVRServerRepository *m_serverRepository;
 
@@ -99,6 +101,7 @@ private:
 
     QWidget *createResultsView();
     QWidget *createTimeline();
+
 };
 
 #endif // EVENTSWINDOW_H

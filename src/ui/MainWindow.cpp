@@ -38,6 +38,7 @@
 #include "core/BluecherryApp.h"
 #include "core/LiveViewManager.h"
 #include "event/ModelEventsCursor.h"
+#include "ui/model/EventsProxyModel.h"
 #include <QBoxLayout>
 #include <QGroupBox>
 #include <QMenuBar>
@@ -471,6 +472,7 @@ QWidget *MainWindow::createRecentEvents()
     m_eventsView->setContextMenuPolicy(Qt::CustomContextMenu);
     m_eventsView->setFrameStyle(QFrame::NoFrame);
     m_eventsView->setAttribute(Qt::WA_MacShowFocusRect, false);
+    m_eventsView->eventsProxyModel()->setIncompletePlace(EventsProxyModel::IncompleteLast);
 
     m_eventsModel = new EventsModel(m_serverRepository, m_eventsView);
     m_eventsView->setModel(m_eventsModel);
@@ -478,7 +480,6 @@ QWidget *MainWindow::createRecentEvents()
     QSettings settings;
     m_eventsModel->setUpdateInterval(settings.value(QLatin1String("ui/main/eventRefreshInterval"), 10000).toInt());
     m_eventsModel->setEventLimit(50);
-    m_eventsModel->setIncompleteEventsFirst(true);
 
     m_eventsView->header()->restoreState(settings.value(QLatin1String("ui/main/eventsView")).toByteArray());
 
