@@ -271,8 +271,6 @@ void EventsModel::applyFilters(bool fromCache)
                 break;
         }
     }
-
-    emit filtersChanged();
 }
 
 void EventsModel::clearFilters()

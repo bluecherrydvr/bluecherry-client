@@ -91,7 +91,6 @@ public slots:
     void stopUpdates() { setUpdateInterval(-1); }
 
 signals:
-    void filtersChanged();
     void loadingStarted();
     void loadingFinished();
 
