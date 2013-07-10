@@ -18,11 +18,13 @@
 #ifndef EVENTSOURCESMODEL_H
 #define EVENTSOURCESMODEL_H
 
-#include <QAbstractItemModel>
-#include <QVector>
-#include <QBitArray>
 #include "camera/DVRCamera.h"
+#include "server/DVRServer.h"
+#include <QAbstractItemModel>
+#include <QSet>
+#include <QVector>
 
+class DVRCamera;
 class DVRServer;
 class DVRServerRepository;
 class QStringList;
@@ -33,9 +35,12 @@ class EventSourcesModel : public QAbstractItemModel
 
 public:
     explicit EventSourcesModel(DVRServerRepository *serverRepository, QObject *parent = 0);
+    virtual ~EventSourcesModel();
 
-    virtual QMap<DVRServer*,QList<int> > checkedSources() const;
+    QMap<DVRServer*,QList<int> > checkedSources() const;
 
+    int rowOfServer(DVRServer *server) const;
+    QModelIndex indexOfServer(DVRServer *server) const;
     QModelIndex indexOfCamera(DVRCamera *camera) const;
 
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -47,22 +52,35 @@ public:
     virtual bool setData(const QModelIndex &index, const QVariant &value, int role);
 
 signals:
-    void checkedSourcesChanged(const QMap<DVRServer*,QList<int> > &checkedSources);
+    void checkedSourcesChanged(QMap<DVRServer*,QList<int> > sources);
 
 private slots:
+    void serverAboutToBeAdded(DVRServer *server);
     void serverAdded(DVRServer *server);
+    void serverAboutToBeRemoved(DVRServer *server);
     void serverRemoved(DVRServer *server);
 
 private:
-    struct ServerData
-    {
-        DVRServer *server;
-        QVector<QWeakPointer<DVRCamera> > cameras;
-        /* Note that the indexes are +1 from cameras */
-        QBitArray checkState;
-    };
+    DVRServerRepository *m_serverRepository;
+    QMap<DVRServer *, DVRCamera *> m_systemCameras;
+    QSet<DVRServer *> m_checkedServers;
+    QSet<DVRServer *> m_partiallyCheckedServers;
+    QSet<DVRCamera *> m_checkedCameras;
 
-    QVector<ServerData> servers;
+    void addSystemCamera(DVRServer *server);
+    void removeSystemCamera(DVRServer *server);
+    void checkServer(DVRServer *server);
+    void uncheckServer(DVRServer *server);
+    void updateServerCheckState(DVRServer *server);
+
+    DVRServer * serverForRow(int row) const;
+    DVRCamera * cameraForRow(DVRServer *server, int row) const;
+    DVRCamera * cameraForRow(int serverRow, int row) const;
+    DVRCamera * systemCameraForRow(int serverRow) const;
+
+    QVariant everythingData(int role) const;
+    QVariant data(DVRServer *server, int role) const;
+    QVariant data(DVRCamera *camera, int role) const;
 
 };
 
