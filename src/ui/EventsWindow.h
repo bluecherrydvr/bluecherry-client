@@ -53,7 +53,6 @@ protected:
 
 private slots:
     void levelFilterChanged();
-    void updateResultTitle();
     void cursorIndexUpdated();
 
     void timelineZoomChanged(int value);
@@ -98,7 +97,6 @@ private:
     QWidget *createTags();
     QWidget *createTagsInput();
 
-    QWidget *createResultTitle();
     QWidget *createResultsView();
     QWidget *createTimeline();
 };

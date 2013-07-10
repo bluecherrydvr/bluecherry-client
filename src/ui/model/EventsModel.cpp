@@ -356,66 +356,6 @@ void EventsModel::applyFilters(bool fromCache)
     emit filtersChanged();
 }
 
-QString EventsModel::filterDescription() const
-{
-    QString re;
-
-    if (m_filter.level > EventLevel::Info)
-        re = tr("%1 events").arg(m_filter.level.uiString());
-    else if (m_filter.dateBegin.isNull() && m_filter.dateEnd.isNull())
-        re = tr("Recent events");
-    else
-        re = tr("All events");
-
-    bool allCameras = true;
-    for (QHash<DVRServer*, QSet<int> >::ConstIterator it = m_filter.sources.begin();
-         it != m_filter.sources.end(); ++it)
-    {
-        if (it->count() != it.key()->cameras().size()+1)
-        {
-            allCameras = false;
-            break;
-        }
-    }
-
-    if (!m_filter.sources.isEmpty() && m_filter.sources.size() != m_serverRepository->servers().size())
-    {
-        if (m_filter.sources.size() == 1)
-        {
-            /* Single server */
-            if (!allCameras)
-            {
-                if (m_filter.sources.begin()->size() == 1)
-                    re += tr(" on %1").arg(*m_filter.sources.begin()->begin());
-                else
-                    re += tr(" on selected cameras");
-            }
-
-            re += tr(" from %1").arg(m_filter.sources.begin().key()->configuration().displayName());
-        }
-        else if (!allCameras)
-            re += tr(" on selected cameras");
-        else
-            re += tr(" from selected servers");
-    }
-    else if (!allCameras)
-        re += tr(" on selected cameras");
-
-    if (!m_filter.dateBegin.isNull() && !m_filter.dateEnd.isNull())
-    {
-        if (m_filter.dateBegin.date() == m_filter.dateEnd.date())
-            re += tr(" on %1").arg(m_filter.dateBegin.date().toString());
-        else
-            re += tr(" between %1 to %2").arg(m_filter.dateBegin.date().toString(), m_filter.dateEnd.date().toString());
-    }
-    else if (!m_filter.dateBegin.isNull())
-        re += tr(" after %1").arg(m_filter.dateBegin.date().toString());
-    else if (!m_filter.dateEnd.isNull())
-        re += tr(" before %1").arg(m_filter.dateEnd.date().toString());
-
-    return re;
-}
-
 void EventsModel::clearFilters()
 {
     if (m_filter.sources.isEmpty() && m_filter.dateBegin.isNull() && m_filter.dateEnd.isNull() &&

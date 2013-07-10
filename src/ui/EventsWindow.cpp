@@ -201,20 +201,6 @@ QWidget *EventsWindow::createTagsInput()
     return tagInput;
 }
 
-QWidget *EventsWindow::createResultTitle()
-{
-    m_resultTitle = new QLabel;
-    QFont font = m_resultTitle->font();
-    font.setPointSize(font.pointSize()+4);
-    m_resultTitle->setFont(font);
-    m_resultTitle->setWordWrap(true);
-
-    connect(m_resultsView->eventsModel(), SIGNAL(filtersChanged()), SLOT(updateResultTitle()));
-    updateResultTitle();
-
-    return m_resultTitle;
-}
-
 QWidget *EventsWindow::createResultsView()
 {
     m_resultsView = new EventsView;
@@ -276,11 +262,6 @@ void EventsWindow::levelFilterChanged()
         level = EventLevel::Minimum;
 
     m_resultsView->eventsModel()->setFilterLevel((EventLevel::Level)level);
-}
-
-void EventsWindow::updateResultTitle()
-{
-    m_resultTitle->setText(m_resultsView->eventsModel()->filterDescription());
 }
 
 void EventsWindow::cursorIndexUpdated()

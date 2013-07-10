@@ -63,8 +63,6 @@ public:
     void setFilterDates(const QDateTime &begin, const QDateTime &end);
     void setEventLimit(int limit) { serverEventsLimit = limit; }
 
-    QString filterDescription() const;
-
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
     virtual QModelIndex index(int row, int column, const QModelIndex &parent) const;
