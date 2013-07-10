@@ -68,7 +68,6 @@ private:
 
     /* Filter widgets */
     DVRServersView *m_sourcesView;
-    QDateEdit *m_startDate, *m_endDate;
     QComboBox *m_levelFilter;
     EventTypesFilter *m_typeFilter;
     EventTagsView *m_tagsView;

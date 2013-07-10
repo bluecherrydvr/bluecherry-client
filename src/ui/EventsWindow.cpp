@@ -141,19 +141,19 @@ EventsModel *EventsWindow::model() const
 
 void EventsWindow::createDateFilter(QBoxLayout *layout)
 {
-    QLabel *title2 = new QLabel(tr("Date"));
-    title2->setStyleSheet(QLatin1String("font-weight:bold;"));
-    layout->addWidget(title2);
+    QLabel *title = new QLabel(tr("Date"));
+    title->setStyleSheet(QLatin1String("font-weight:bold;"));
+    layout->addWidget(title);
 
-    m_endDate = new QDateEdit(QDate::currentDate());
-    m_endDate->setCalendarPopup(true);
-    m_endDate->setMaximumDate(QDate::currentDate());
-    m_endDate->setDisplayFormat(QLatin1String("ddd, MMM dd, yyyy"));
-    m_endDate->setTime(QTime(23, 59, 59, 999));
-    m_endDate->setFixedWidth(m_sourcesView->width());
-    layout->addWidget(m_endDate);
+    QDateEdit *dateEdit = new QDateEdit(QDate::currentDate());
+    dateEdit->setCalendarPopup(true);
+    dateEdit->setMaximumDate(QDate::currentDate());
+    dateEdit->setDisplayFormat(QLatin1String("ddd, MMM dd, yyyy"));
+    dateEdit->setTime(QTime(23, 59, 59, 999));
+    dateEdit->setFixedWidth(m_sourcesView->width());
+    layout->addWidget(dateEdit);
 
-    connect(m_endDate, SIGNAL(dateTimeChanged(QDateTime)), m_resultsView->eventsModel(),
+    connect(dateEdit, SIGNAL(dateTimeChanged(QDateTime)), m_resultsView->eventsModel(),
             SLOT(setFilterDay(QDateTime)));
 }
 
