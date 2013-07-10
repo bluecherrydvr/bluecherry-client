@@ -82,14 +82,14 @@ EventsWindow::EventsWindow(DVRServerRepository *serverRepository, QWidget *paren
 
     createDateFilter(filtersLayout);
 
-#if 0 /* This is not useful currently. */
+#if 1 /* This is not useful currently. */
     QLabel *label = new QLabel(tr("Minimum Level"));
     label->setStyleSheet(QLatin1String("font-weight:bold;"));
     filtersLayout->addWidget(label);
     filtersLayout->addWidget(createLevelFilter());
 #endif
 
-    QLabel *label = new QLabel(tr("Type"));
+    label = new QLabel(tr("Type"));
     label->setStyleSheet(QLatin1String("font-weight:bold;"));
     filtersLayout->addWidget(label);
     filtersLayout->addWidget(createTypeFilter());
