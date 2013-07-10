@@ -360,12 +360,10 @@ QModelIndex EventSourcesModel::parent(const QModelIndex &child) const
 
 Qt::ItemFlags EventSourcesModel::flags(const QModelIndex &index) const
 {
-    Q_UNUSED(index);
     Qt::ItemFlags re = Qt::ItemIsUserCheckable;
 
-    QObject *indexObject = static_cast<QObject *>(index.internalPointer());
-    DVRServer *server = qobject_cast<DVRServer *>(indexObject);
-    DVRCamera *camera = qobject_cast<DVRCamera *>(indexObject);
+    DVRServer *server = index.data(DVRServersModel::DVRServerRole).value<DVRServer *>();
+    DVRCamera *camera = index.data(DVRServersModel::DVRCameraRole).value<DVRCamera *>();
 
     if (server && server->isOnline())
         re |= Qt::ItemIsEnabled;
