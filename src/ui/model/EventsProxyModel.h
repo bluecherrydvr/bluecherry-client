@@ -18,9 +18,8 @@
 #ifndef EVENTS_PROXY_MODEL_H
 #define EVENTS_PROXY_MODEL_H
 
+#include "core/EventData.h"
 #include <QSortFilterProxyModel>
-
-class EventData;
 
 class EventsProxyModel : public QSortFilterProxyModel
 {
@@ -37,15 +36,20 @@ public:
     explicit EventsProxyModel(QObject *parent);
     virtual ~EventsProxyModel();
 
+    virtual bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const;
     virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 
     void setColumn(int column);
     void setIncompletePlace(IncompletePlace incompletePlace);
 
+    void setMinimumLevel(EventLevel minimumLevel);
+
 private:
     int m_column;
     IncompletePlace m_incompletePlace;
+    EventLevel m_minimumLevel;
 
+    bool filterAcceptsRow(EventData *eventData) const;
     bool lessThan(EventData *left, EventData *right) const;
 
 };

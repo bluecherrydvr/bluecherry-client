@@ -76,7 +76,6 @@ public slots:
     void setFilterSources(const QMap<DVRServer*,QList<int> > &sources);
 
     void setFilterTypes(const QBitArray &typemap);
-    void setFilterLevel(EventLevel minimum);
 
     void setFilterDay(const QDateTime &date);
 
@@ -113,7 +112,6 @@ private:
         QHash<DVRServer*, QSet<int> > sources;
         QDateTime dateBegin, dateEnd;
         QBitArray types;
-        EventLevel level;
 
         bool acceptEvent(const EventData *d) const;
     } m_filter;

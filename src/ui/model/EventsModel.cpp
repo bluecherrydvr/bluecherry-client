@@ -213,8 +213,7 @@ void EventsModel::clearServerEvents(DVRServer *server)
 
 bool EventsModel::Filter::acceptEvent(const EventData *data) const
 {
-    if (data->level() < level ||
-            (!types.isNull() && (int)data->type() >= 0 && !types[(int)data->type()]) ||
+    if (    (!types.isNull() && (int)data->type() >= 0 && !types[(int)data->type()]) ||
             (!dateBegin.isNull() && data->serverStartDate() < dateBegin) ||
             (!dateEnd.isNull() && data->serverStartDate() > dateEnd))
         return false;
@@ -276,7 +275,7 @@ void EventsModel::applyFilters(bool fromCache)
 void EventsModel::clearFilters()
 {
     if (m_filter.sources.isEmpty() && m_filter.dateBegin.isNull() && m_filter.dateEnd.isNull() &&
-        m_filter.types.isNull() && m_filter.level == EventLevel::Info)
+        m_filter.types.isNull())
         return;
 
     bool reload = !m_filter.dateBegin.isNull() || !m_filter.dateEnd.isNull();
@@ -284,7 +283,6 @@ void EventsModel::clearFilters()
     m_filter.sources.clear();
     m_filter.dateBegin = m_filter.dateEnd = QDateTime();
     m_filter.types.clear();
-    m_filter.level = EventLevel::Info;
 
     if (reload)
     {
@@ -310,17 +308,6 @@ void EventsModel::setFilterDates(const QDateTime &begin, const QDateTime &end)
 void EventsModel::setFilterDay(const QDateTime &date)
 {
     setFilterDates(QDateTime(date.date(), QTime(0, 0)), QDateTime(date.date(), QTime(23, 59, 59, 999)));
-}
-
-void EventsModel::setFilterLevel(EventLevel minimum)
-{
-    if (m_filter.level == minimum)
-        return;
-
-    bool fast = minimum > m_filter.level;
-    m_filter.level = minimum;
-
-    applyFilters(!fast);
 }
 
 void EventsModel::setFilterSources(const QMap<DVRServer*, QList<int> > &sources)

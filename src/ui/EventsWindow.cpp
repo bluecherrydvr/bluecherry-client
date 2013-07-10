@@ -263,7 +263,7 @@ void EventsWindow::levelFilterChanged()
     if (level < 0)
         level = EventLevel::Minimum;
 
-    m_resultsView->eventsModel()->setFilterLevel((EventLevel::Level)level);
+    m_resultsView->eventsProxyModel()->setMinimumLevel((EventLevel::Level)level);
 }
 
 void EventsWindow::cursorIndexUpdated()

@@ -21,12 +21,33 @@
 #include "ui/model/EventsModel.h"
 
 EventsProxyModel::EventsProxyModel(QObject *parent) :
-        QSortFilterProxyModel(parent), m_column(EventsModel::ServerColumn), m_incompletePlace(IncompleteInPlace)
+        QSortFilterProxyModel(parent), m_column(EventsModel::ServerColumn),
+        m_incompletePlace(IncompleteInPlace), m_minimumLevel(EventLevel::Minimum)
 {
 }
 
 EventsProxyModel::~EventsProxyModel()
 {
+}
+
+bool EventsProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
+{
+    if (sourceParent.isValid())
+        return true;
+
+    EventData *eventData = sourceModel()->index(sourceRow, 0).data(EventsModel::EventDataPtr).value<EventData *>();
+    if (!eventData)
+        return false;
+
+    return filterAcceptsRow(eventData);
+}
+
+bool EventsProxyModel::filterAcceptsRow(EventData *eventData) const
+{
+    if (eventData->level() < m_minimumLevel)
+        return false;
+
+    return true;
 }
 
 bool EventsProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
@@ -84,5 +105,14 @@ void EventsProxyModel::setIncompletePlace(IncompletePlace incompletePlace)
         return;
 
     m_incompletePlace = incompletePlace;
+    invalidateFilter();
+}
+
+void EventsProxyModel::setMinimumLevel(EventLevel minimumLevel)
+{
+    if (m_minimumLevel == minimumLevel)
+        return;
+
+    m_minimumLevel = minimumLevel;
     invalidateFilter();
 }
