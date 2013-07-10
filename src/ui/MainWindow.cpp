@@ -654,23 +654,6 @@ void MainWindow::eventsContextMenu(const QPoint &pos)
 
     menu.addSeparator();
 
-    /* Disabled for now. Browse needs logic to update the UI when model filters change,
-     * and save video is not yet implemented here. */
-#if 0
-    QMenu *searchMenu = menu.addMenu(tr("Browse events..."));
-
-    QAction *aBrowseCamera = 0;
-    if (event.isCamera())
-        aBrowseCamera = searchMenu->addAction(tr("From this camera"));
-    QAction *aBrowseServer = searchMenu->addAction(tr("From this server"));
-    searchMenu->addSeparator();
-    QAction *aBrowseMinute = searchMenu->addAction(tr("Within one minute"));
-    QAction *aBrowseTenMin = searchMenu->addAction(tr("Within 10 minutes"));
-    QAction *aBrowseHour = searchMenu->addAction(tr("Within one hour"));
-
-    menu.addSeparator();
-#endif
-
     QAction *aSaveVideo = 0;
     aSaveVideo = menu.addAction(tr("Save video"));
     aSaveVideo->setEnabled(!selectedMediaEvents.isEmpty());
@@ -700,32 +683,6 @@ void MainWindow::eventsContextMenu(const QPoint &pos)
         else
             bcApp->eventDownloadManager()->startMultipleEventDownloads(selectedMediaEvents);
     }
-#if 0
-    else if (act->parentWidget() == searchMenu)
-    {
-        EventsWindow *w = EventsWindow::instance();
-
-        EventsModel *model = w->model();
-        model->clearFilters();
-
-        QDateTime date = event.serverLocalDate();
-
-        if (act == aBrowseCamera)
-            model->setFilterSource(event.locationCamera());
-        else if (act == aBrowseServer)
-            model->setFilterSource(event.server);
-        else if (act == aBrowseMinute)
-            model->setFilterDates(date.addSecs(-60), date.addSecs(60 + qMax(0, event.duration)));
-        else if (act == aBrowseTenMin)
-            model->setFilterDates(date.addSecs(-600), date.addSecs(600 + qMax(0, event.duration)));
-        else if (act == aBrowseHour)
-            model->setFilterDates(date.addSecs(-3600), date.addSecs(3600 + qMax(0, event.duration)));
-        else
-            Q_ASSERT_X(false, "Set events window filter", "Unknown action");
-
-        showEventsWindow();
-    }
-#endif
 }
 
 void MainWindow::liveViewLayoutChanged(const QString &layout)
