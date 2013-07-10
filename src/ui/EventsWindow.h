@@ -64,6 +64,7 @@ private slots:
 
     void sortEvents(int logicalIndex, Qt::SortOrder sortOrder);
     void setFilterTypes(QBitArray types);
+    void setFilterDay(const QDateTime &day);
 
 private:
     DVRServerRepository *m_serverRepository;

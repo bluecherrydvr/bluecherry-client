@@ -50,6 +50,9 @@ bool EventsProxyModel::filterAcceptsRow(EventData *eventData) const
     if (!m_types.isNull() && (int)eventData->type() >= 0 && !m_types[(int)eventData->type()])
         return false;
 
+    if (!m_day.isNull() && eventData->utcStartDate().date() != m_day)
+        return false;
+
     return true;
 }
 
@@ -126,5 +129,14 @@ void EventsProxyModel::setTypes(QBitArray types)
         return;
 
     m_types = types;
+    invalidateFilter();
+}
+
+void EventsProxyModel::setDay(const QDate &day)
+{
+    if (m_day == day)
+        return;
+
+    m_day = day;
     invalidateFilter();
 }

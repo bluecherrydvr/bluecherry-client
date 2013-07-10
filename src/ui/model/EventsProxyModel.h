@@ -45,12 +45,14 @@ public:
 
     void setMinimumLevel(EventLevel minimumLevel);
     void setTypes(QBitArray types);
+    void setDay(const QDate &day);
 
 private:
     int m_column;
     IncompletePlace m_incompletePlace;
     EventLevel m_minimumLevel;
     QBitArray m_types;
+    QDate m_day;
 
     bool filterAcceptsRow(EventData *eventData) const;
     bool lessThan(EventData *left, EventData *right) const;

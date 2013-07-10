@@ -154,7 +154,7 @@ void EventsWindow::createDateFilter(QBoxLayout *layout)
     dateEdit->setFixedWidth(m_sourcesView->width());
     layout->addWidget(dateEdit);
 
-    connect(dateEdit, SIGNAL(dateTimeChanged(QDateTime)), m_resultsView->eventsModel(),
+    connect(dateEdit, SIGNAL(dateTimeChanged(QDateTime)), this,
             SLOT(setFilterDay(QDateTime)));
 }
 
@@ -395,4 +395,10 @@ void EventsWindow::sortEvents(int logicalIndex, Qt::SortOrder sortOrder)
 void EventsWindow::setFilterTypes(QBitArray types)
 {
     m_resultsView->eventsProxyModel()->setTypes(types);
+}
+
+void EventsWindow::setFilterDay(const QDateTime &day)
+{
+    m_resultsView->eventsModel()->setFilterDay(day);
+    m_resultsView->eventsProxyModel()->setDay(day.date());
 }

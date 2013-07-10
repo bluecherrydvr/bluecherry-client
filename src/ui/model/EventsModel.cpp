@@ -213,10 +213,6 @@ void EventsModel::clearServerEvents(DVRServer *server)
 
 bool EventsModel::Filter::acceptEvent(const EventData *data) const
 {
-    if (    (!dateBegin.isNull() && data->serverStartDate() < dateBegin) ||
-            (!dateEnd.isNull() && data->serverStartDate() > dateEnd))
-        return false;
-
     QHash<DVRServer*, QSet<int> >::ConstIterator it = sources.find(data->server());
     if (!sources.isEmpty() && (it == sources.end() || (!it->isEmpty() && !it->contains(data->locationId()))))
         return false;
@@ -273,8 +269,8 @@ void EventsModel::applyFilters(bool fromCache)
 
 void EventsModel::setFilterDates(const QDateTime &begin, const QDateTime &end)
 {
-    m_filter.dateBegin = begin;
-    m_filter.dateEnd = end;
+    dateBegin = begin;
+    dateEnd = end;
 
     beginResetModel();
     items.clear();
@@ -384,8 +380,8 @@ void EventsModel::updateServer(DVRServer *server)
 
     EventsLoader *eventsLoader = new EventsLoader(server);
     eventsLoader->setLimit(serverEventsLimit);
-    eventsLoader->setStartTime(m_filter.dateBegin);
-    eventsLoader->setEndTime(m_filter.dateEnd);
+    eventsLoader->setStartTime(dateBegin);
+    eventsLoader->setEndTime(dateEnd);
     connect(eventsLoader, SIGNAL(eventsLoaded(bool,QList<EventData*>)), this, SLOT(eventsLoaded(bool,QList<EventData*>)));
     eventsLoader->loadEvents();
 }

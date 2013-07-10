@@ -101,12 +101,13 @@ private:
     QHash<DVRServer*,QList<EventData*> > cachedEvents;
     QSet<DVRServer*> updatingServers;
     QTimer updateTimer;
+    QDateTime dateBegin;
+    QDateTime dateEnd;
 
     /* Filters */
     struct Filter
     {
         QHash<DVRServer*, QSet<int> > sources;
-        QDateTime dateBegin, dateEnd;
 
         bool acceptEvent(const EventData *d) const;
     } m_filter;
