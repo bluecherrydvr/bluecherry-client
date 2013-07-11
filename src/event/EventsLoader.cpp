@@ -33,7 +33,6 @@ EventsLoader::EventsLoader(DVRServer *server, QObject *parent)
 
 EventsLoader::~EventsLoader()
 {
-
 }
 
 void EventsLoader::setLimit(int limit)
