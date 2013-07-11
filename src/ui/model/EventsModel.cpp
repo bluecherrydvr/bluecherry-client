@@ -29,7 +29,7 @@ EventsModel::EventsModel(DVRServerRepository *serverRepository, QObject *parent)
     Q_ASSERT(m_serverRepository);
 
     connect(m_serverRepository, SIGNAL(serverAdded(DVRServer*)), SLOT(serverAdded(DVRServer*)));
-    connect(m_serverRepository, SIGNAL(serverRemoved(DVRServer*)), SLOT(clearServerEvents(DVRServer*)));
+    connect(m_serverRepository, SIGNAL(serverAboutToBeRemoved(DVRServer*)), SLOT(clearServerEvents(DVRServer*)));
     connect(&m_updateTimer, SIGNAL(timeout()), SLOT(updateServers()));
 
     foreach (DVRServer *s, m_serverRepository->servers())
@@ -164,45 +164,6 @@ QVariant EventsModel::headerData(int section, Qt::Orientation orientation, int r
     return QVariant();
 }
 
-void EventsModel::clearServerEvents(DVRServer *server)
-{
-    if (!server && !(server = qobject_cast<DVRServer*>(sender())))
-    {
-        ServerRequestManager *srm = qobject_cast<ServerRequestManager*>(sender());
-        if (srm)
-            server = srm->server;
-        else
-        {
-            Q_ASSERT_X(false, "clearServerEvents", "No server and no appropriate sender");
-            return;
-        }
-    }
-
-    /* Group contiguous removed rows together; provides a significant boost in performance */
-    int removeFirst = -1;
-    for (int i = 0; ; ++i)
-    {
-        if (i < m_items.size() && m_items[i]->server() == server)
-        {
-            if (removeFirst < 0)
-                removeFirst = i;
-        }
-        else if (removeFirst >= 0)
-        {
-            beginRemoveRows(QModelIndex(), removeFirst, i-1);
-            m_items.erase(m_items.begin()+removeFirst, m_items.begin()+i);
-            i = removeFirst;
-            removeFirst = -1;
-            endRemoveRows();
-        }
-
-        if (i == m_items.size())
-            break;
-    }
-
-    m_serverEventsCount.remove(server);
-}
-
 void EventsModel::computeBoundaries()
 {
     int begin = 0;
@@ -292,6 +253,36 @@ void EventsModel::eventsLoaded(bool ok, const QList<EventData *> &events)
 
 void EventsModel::setServerEvents(DVRServer *server, const QList<EventData *> &events)
 {
+    clearServerEvents(server);
+    computeBoundaries();
+
+    int insertedRowBegin = m_serverEventsBoundaries.value(server).first;
+    int insertedRowEnd = insertedRowBegin + events.count() - 1;
+
+    if (insertedRowEnd >= insertedRowBegin)
+    {
+        beginInsertRows(QModelIndex(), insertedRowBegin, insertedRowEnd);
+        m_items = m_items.mid(0, insertedRowBegin) + events + m_items.mid(insertedRowBegin);
+        endInsertRows();
+    }
+
+    m_serverEventsCount.insert(server, events.count());
+}
+
+void EventsModel::clearServerEvents(DVRServer *server)
+{
+    if (!server && !(server = qobject_cast<DVRServer*>(sender())))
+    {
+        ServerRequestManager *srm = qobject_cast<ServerRequestManager*>(sender());
+        if (srm)
+            server = srm->server;
+        else
+        {
+            Q_ASSERT_X(false, "clearServerEvents", "No server and no appropriate sender");
+            return;
+        }
+    }
+
     computeBoundaries();
 
     int removedRowBegin = m_serverEventsBoundaries.value(server).first;
@@ -306,15 +297,5 @@ void EventsModel::setServerEvents(DVRServer *server, const QList<EventData *> &e
         endRemoveRows();
     }
 
-    int insertedRowBegin = removedRowBegin;
-    int insertedRowEnd = insertedRowBegin + events.count() - 1;
-
-    if (insertedRowEnd >= insertedRowBegin)
-    {
-        beginInsertRows(QModelIndex(), insertedRowBegin, insertedRowEnd);
-        m_items = m_items.mid(0, insertedRowBegin) + events + m_items.mid(insertedRowBegin);
-        endInsertRows();
-    }
-
-    m_serverEventsCount.insert(server, events.count());
+    m_serverEventsCount.remove(server);
 }
