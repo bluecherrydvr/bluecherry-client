@@ -31,6 +31,7 @@ set (bluecherry_client_MOC_SRCS
     src/event/EventDownloadManager.h
     src/event/EventsCursor.h
     src/event/EventsLoader.h
+    src/event/EventsUpdater.h
     src/event/EventVideoDownload.h
     src/event/ModelEventsCursor.h
 

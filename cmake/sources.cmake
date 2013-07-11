@@ -46,6 +46,7 @@ set (bluecherry_client_main_SRCS
     src/event/EventParser.cpp
     src/event/EventsCursor.cpp
     src/event/EventsLoader.cpp
+    src/event/EventsUpdater.cpp
     src/event/EventVideoDownload.cpp
     src/event/MediaEventFilter.cpp
     src/event/ModelEventsCursor.cpp
