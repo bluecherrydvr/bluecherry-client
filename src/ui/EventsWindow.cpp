@@ -137,11 +137,6 @@ EventsWindow::~EventsWindow()
 {
 }
 
-EventsModel *EventsWindow::model() const
-{
-    return m_resultsView->eventsModel();
-}
-
 void EventsWindow::createDateFilter(QBoxLayout *layout)
 {
     QLabel *title = new QLabel(tr("Date"));

@@ -48,8 +48,6 @@ public:
     explicit EventsWindow(DVRServerRepository *serverRepository, QWidget *parent = 0);
     virtual ~EventsWindow();
 
-    EventsModel *model() const;
-
 protected:
     virtual void closeEvent(QCloseEvent *event);
 
