@@ -17,8 +17,10 @@
 
 #include "LiveStreamThread.h"
 #include "LiveStreamWorker.h"
+#include "core/LoggableUrl.h"
 #include <QDebug>
 #include <QThread>
+#include <QUrl>
 
 LiveStreamThread::LiveStreamThread(QObject *parent) : QObject(parent), m_isRunning(false)
 {
@@ -30,9 +32,9 @@ LiveStreamThread::~LiveStreamThread()
     qDebug() << Q_FUNC_INFO;
 }
 
-void LiveStreamThread::start(const QByteArray &url)
+void LiveStreamThread::start(const QUrl &url)
 {
-    qDebug() << Q_FUNC_INFO << url;
+    qDebug() << Q_FUNC_INFO << LoggableUrl(url);
 
     if (!m_worker)
     {

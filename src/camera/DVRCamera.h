@@ -22,6 +22,7 @@
 #include "camera/RecordingState.h"
 #include <QObject>
 #include <QSharedPointer>
+#include <QUrl>
 #include <QWeakPointer>
 #include <QHash>
 #include <QXmlStreamReader>
@@ -56,8 +57,8 @@ public:
 
     QSharedPointer<CameraPtzControl> sharedPtzControl();
 
-    void setStreamUrl(const QByteArray &streamUrl);
-    QByteArray streamUrl() const;
+    void setStreamUrl(const QUrl &streamUrl);
+    QUrl streamUrl() const;
 
     bool isOnline() const;
     QSharedPointer<LiveStream> liveStream();
@@ -78,7 +79,7 @@ private:
     DVRCameraData m_data;
     QWeakPointer<CameraPtzControl> m_ptzControl;
     QWeakPointer<LiveStream> m_liveStream;
-    QByteArray m_streamUrl;
+    QUrl m_streamUrl;
     bool m_isOnline;
     qint8 m_recordingState;
 

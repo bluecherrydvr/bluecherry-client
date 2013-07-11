@@ -62,7 +62,7 @@ LiveStreamWorker::~LiveStreamWorker()
     avformat_close_input(&m_ctx);
 }
 
-void LiveStreamWorker::setUrl(const QByteArray &url)
+void LiveStreamWorker::setUrl(const QUrl &url)
 {
     m_url = url;
 }
@@ -262,7 +262,7 @@ bool LiveStreamWorker::openInput(AVFormatContext **context, AVDictionary *option
     AVDictionary *optionsCopy = 0;
     av_dict_copy(&optionsCopy, options, 0);
     startInterruptableOperation();
-    int errorCode = avformat_open_input(context, m_url.constData(), NULL, &optionsCopy);
+    int errorCode = avformat_open_input(context, qPrintable(m_url.toString()), NULL, &optionsCopy);
     av_dict_free(&optionsCopy);
 
     if (errorCode < 0)
