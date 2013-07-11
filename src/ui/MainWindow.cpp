@@ -473,7 +473,7 @@ QWidget *MainWindow::createRecentEvents()
     m_eventsView->setContextMenuPolicy(Qt::CustomContextMenu);
     m_eventsView->setFrameStyle(QFrame::NoFrame);
     m_eventsView->setAttribute(Qt::WA_MacShowFocusRect, false);
-    m_eventsView->eventsProxyModel()->setIncompletePlace(EventsProxyModel::IncompleteLast);
+    m_eventsView->setIncompletePlace(EventsProxyModel::IncompleteLast);
 
     m_eventsModel = new EventsModel(m_serverRepository, m_eventsView);
 

@@ -82,7 +82,40 @@ EventList EventsView::selectedEvents() const
     return result;
 }
 
-EventsProxyModel* EventsView::eventsProxyModel() const
+void EventsView::setIncompletePlace(EventsProxyModel::IncompletePlace incompletePlace)
+{
+    m_eventsProxyModel->setIncompletePlace(incompletePlace);
+}
+
+void EventsView::setMinimumLevel(EventLevel minimumLevel)
+{
+    m_eventsProxyModel->setMinimumLevel(minimumLevel);
+}
+
+void EventsView::setTypes(QBitArray types)
+{
+    m_eventsProxyModel->setTypes(types);
+}
+
+void EventsView::setDay(const QDate &day)
+{
+    m_eventsProxyModel->setDay(day);
+}
+
+void EventsView::setSources(const QMap<DVRServer*, QSet<int> > &sources)
+{
+    m_eventsProxyModel->setSources(sources);
+}
+
+void EventsView::sortEvents(int logicalIndex, Qt::SortOrder sortOrder)
+{
+    m_eventsProxyModel->setDynamicSortFilter(false);
+    m_eventsProxyModel->setColumn(logicalIndex);
+    m_eventsProxyModel->sort(0, sortOrder);
+    m_eventsProxyModel->setDynamicSortFilter(true);
+}
+
+EventsProxyModel * EventsView::eventsProxyModel() const
 {
     return m_eventsProxyModel;
 }

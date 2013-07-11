@@ -221,7 +221,7 @@ QWidget * EventsWindow::createResultsView()
     m_resultsView->header()->setSortIndicatorShown(true);
     m_resultsView->header()->setSortIndicator(EventsModel::DateColumn, Qt::DescendingOrder);
     connect(m_resultsView->header(), SIGNAL(sortIndicatorChanged(int,Qt::SortOrder)),
-            this, SLOT(sortEvents(int,Qt::SortOrder)));
+            m_resultsView, SLOT(sortEvents(int,Qt::SortOrder)));
 
     return m_resultsView;
 }
@@ -268,7 +268,7 @@ void EventsWindow::levelFilterChanged()
     if (level < 0)
         level = EventLevel::Minimum;
 
-    m_resultsView->eventsProxyModel()->setMinimumLevel((EventLevel::Level)level);
+    m_resultsView->setMinimumLevel((EventLevel::Level)level);
 }
 
 void EventsWindow::cursorIndexUpdated()
@@ -389,26 +389,18 @@ void EventsWindow::eventContextMenu(const QPoint &pos)
     }
 }
 
-void EventsWindow::sortEvents(int logicalIndex, Qt::SortOrder sortOrder)
-{
-    m_resultsView->eventsProxyModel()->setDynamicSortFilter(false);
-    m_resultsView->eventsProxyModel()->setColumn(logicalIndex);
-    m_resultsView->eventsProxyModel()->sort(0, sortOrder);
-    m_resultsView->eventsProxyModel()->setDynamicSortFilter(true);
-}
-
 void EventsWindow::setFilterTypes(QBitArray types)
 {
-    m_resultsView->eventsProxyModel()->setTypes(types);
+    m_resultsView->setTypes(types);
 }
 
 void EventsWindow::setFilterDay(const QDateTime &day)
 {
     m_eventsUpdater->setDay(day.date());
-    m_resultsView->eventsProxyModel()->setDay(day.date());
+    m_resultsView->setDay(day.date());
 }
 
 void EventsWindow::setFilterSources(const QMap<DVRServer *, QSet<int> > &sources)
 {
-    m_resultsView->eventsProxyModel()->setSources(sources);
+    m_resultsView->setSources(sources);
 }

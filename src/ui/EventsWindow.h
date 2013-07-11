@@ -62,7 +62,6 @@ private slots:
     void showServerEvent(const QModelIndex &index);
     void showServerEvent(const EventData &eventData);
 
-    void sortEvents(int logicalIndex, Qt::SortOrder sortOrder);
     void setFilterTypes(QBitArray types);
     void setFilterDay(const QDateTime &day);
     void setFilterSources(const QMap<DVRServer *, QSet<int> > &sources);

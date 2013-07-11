@@ -18,12 +18,13 @@
 #ifndef EVENTSVIEW_H
 #define EVENTSVIEW_H
 
+#include "core/EventData.h"
+#include "ui/model/EventsProxyModel.h"
 #include <QTreeView>
 
 class EventData;
 class EventList;
 class EventsModel;
-class EventsProxyModel;
 class QLabel;
 
 class EventsView : public QTreeView
@@ -42,6 +43,14 @@ public:
 public slots:
     void loadingStarted();
     void loadingFinished();
+
+    void setIncompletePlace(EventsProxyModel::IncompletePlace incompletePlace);
+    void setMinimumLevel(EventLevel minimumLevel);
+    void setTypes(QBitArray types);
+    void setDay(const QDate &day);
+    void setSources(const QMap<DVRServer*, QSet<int> > &sources);
+
+    void sortEvents(int logicalIndex, Qt::SortOrder sortOrder);
 
 private slots:
     void openEvent(const QModelIndex &index);
