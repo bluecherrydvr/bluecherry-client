@@ -38,7 +38,7 @@ EventsModel::EventsModel(DVRServerRepository *serverRepository, QObject *parent)
 
 void EventsModel::serverAdded(DVRServer *server)
 {
-    connect(server, SIGNAL(loginSuccessful()), SLOT(updateServer()));
+    connect(server, SIGNAL(loginSuccessful(DVRServer*)), SLOT(updateServer(DVRServer*)));
     connect(server, SIGNAL(disconnected(DVRServer*)), SLOT(clearServerEvents(DVRServer*)));
     updateServer(server);
 }
@@ -211,15 +211,6 @@ void EventsModel::updateServers()
 
 void EventsModel::updateServer(DVRServer *server)
 {
-    if (!server && !(server = qobject_cast<DVRServer*>(sender())))
-    {
-        ServerRequestManager *srm = qobject_cast<ServerRequestManager*>(sender());
-        if (srm)
-            server = srm->server;
-        else
-            return;
-    }
-
     if (!server->isOnline() || m_updatingServers.contains(server))
         return;
 

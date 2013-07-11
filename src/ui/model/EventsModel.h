@@ -77,7 +77,7 @@ public slots:
 
     /* Request the most recent events from the given server, the DVRServer* source, or the
      * DVRServer represented by the ServerRequestManager* source */
-    void updateServer(DVRServer *server = 0);
+    void updateServer(DVRServer *server);
     void updateServers();
 
     void setUpdateInterval(int ms);
