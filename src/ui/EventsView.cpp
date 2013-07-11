@@ -82,11 +82,6 @@ EventList EventsView::selectedEvents() const
     return result;
 }
 
-EventsModel * EventsView::eventsModel() const
-{
-    return m_eventsModel;
-}
-
 EventsProxyModel* EventsView::eventsProxyModel() const
 {
     return m_eventsProxyModel;
@@ -126,7 +121,7 @@ void EventsView::loadingStarted()
 
 void EventsView::loadingFinished()
 {
-    if (eventsModel()->rowCount())
+    if (model()->rowCount())
     {
         delete loadingIndicator;
         loadingIndicator = 0;

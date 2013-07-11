@@ -33,7 +33,6 @@ class EventsView : public QTreeView
 public:
     explicit EventsView(QWidget *parent = 0);
 
-    EventsModel * eventsModel() const;
     EventsProxyModel * eventsProxyModel() const;
 
     void setModel(EventsModel *model, bool loading);
