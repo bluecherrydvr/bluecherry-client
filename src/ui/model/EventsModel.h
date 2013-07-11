@@ -80,7 +80,6 @@ public slots:
     void updateServers();
 
     void setUpdateInterval(int ms);
-    void stopUpdates() { setUpdateInterval(-1); }
 
 signals:
     void loadingStarted();
