@@ -115,11 +115,6 @@ void EventsView::sortEvents(int logicalIndex, Qt::SortOrder sortOrder)
     m_eventsProxyModel->setDynamicSortFilter(true);
 }
 
-EventsProxyModel * EventsView::eventsProxyModel() const
-{
-    return m_eventsProxyModel;
-}
-
 void EventsView::openEvent(const QModelIndex &index)
 {
     EventData *event = index.data(EventsModel::EventDataPtr).value<EventData*>();

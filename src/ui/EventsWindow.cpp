@@ -233,7 +233,7 @@ QWidget *EventsWindow::createTimeline()
 
     m_timeline = new EventTimelineWidget;
     m_timeline->setContextMenuPolicy(Qt::CustomContextMenu);
-    m_timeline->setModel(m_resultsView->eventsProxyModel());
+    m_timeline->setModel(m_resultsView->model());
 
     m_timelineZoom = new QSlider(Qt::Horizontal);
     m_timelineZoom->setRange(0, 100);
