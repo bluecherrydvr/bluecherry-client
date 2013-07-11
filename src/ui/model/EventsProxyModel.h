@@ -46,6 +46,7 @@ public:
     void setMinimumLevel(EventLevel minimumLevel);
     void setTypes(QBitArray types);
     void setDay(const QDate &day);
+    void setSources(const QMap<DVRServer*, QSet<int> > &sources);
 
 private:
     int m_column;
@@ -53,6 +54,7 @@ private:
     EventLevel m_minimumLevel;
     QBitArray m_types;
     QDate m_day;
+    QMap<DVRServer*, QSet<int> > m_sources;
 
     bool filterAcceptsRow(EventData *eventData) const;
     bool lessThan(EventData *left, EventData *right) const;

@@ -53,7 +53,20 @@ bool EventsProxyModel::filterAcceptsRow(EventData *eventData) const
     if (!m_day.isNull() && eventData->utcStartDate().date() != m_day)
         return false;
 
-    return true;
+    if (m_sources.isEmpty())
+        return true;
+
+    QMap<DVRServer*, QSet<int> >::ConstIterator it = m_sources.find(eventData->server());
+    if (it == m_sources.end())
+        return false;
+
+    if (it->isEmpty())
+        return true;
+
+    if (it->contains(eventData->locationId()))
+        return true;
+
+    return false;
 }
 
 bool EventsProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
@@ -138,5 +151,14 @@ void EventsProxyModel::setDay(const QDate &day)
         return;
 
     m_day = day;
+    invalidateFilter();
+}
+
+void EventsProxyModel::setSources(const QMap<DVRServer *, QSet<int> > &sources)
+{
+    if (m_sources == sources)
+        return;
+
+    m_sources = sources;
     invalidateFilter();
 }

@@ -211,15 +211,6 @@ void EventsModel::clearServerEvents(DVRServer *server)
     cachedEvents.remove(server);
 }
 
-bool EventsModel::Filter::acceptEvent(const EventData *data) const
-{
-    QHash<DVRServer*, QSet<int> >::ConstIterator it = sources.find(data->server());
-    if (!sources.isEmpty() && (it == sources.end() || (!it->isEmpty() && !it->contains(data->locationId()))))
-        return false;
-
-    return true;
-}
-
 void EventsModel::applyFilters(bool fromCache)
 {
     if (fromCache)
@@ -228,42 +219,10 @@ void EventsModel::applyFilters(bool fromCache)
         items.clear();
 
         for (QHash<DVRServer*,QList<EventData*> >::Iterator it = cachedEvents.begin(); it != cachedEvents.end(); ++it)
-        {
-            if (!m_filter.sources.isEmpty() && !m_filter.sources.contains(it.key()))
-                continue;
-
             for (QList<EventData*>::Iterator eit = it->begin(); eit != it->end(); ++eit)
-            {
-                if (m_filter.acceptEvent(*eit))
-                    items.append(*eit);
-            }
-        }
+                items.append(*eit);
 
         endResetModel();
-    }
-    else
-    {
-        /* Group contiguous removed rows together; provides a significant boost in performance */
-        int removeFirst = -1;
-        for (int i = 0; ; ++i)
-        {
-            if (i < items.size() && !m_filter.acceptEvent(items[i]))
-            {
-                if (removeFirst < 0)
-                    removeFirst = i;
-            }
-            else if (removeFirst >= 0)
-            {
-                beginRemoveRows(QModelIndex(), removeFirst, i-1);
-                items.erase(items.begin()+removeFirst, items.begin()+i);
-                i = removeFirst;
-                removeFirst = -1;
-                endRemoveRows();
-            }
-
-            if (i == items.size())
-                break;
-        }
     }
 }
 
@@ -281,66 +240,6 @@ void EventsModel::setFilterDates(const QDateTime &begin, const QDateTime &end)
 void EventsModel::setFilterDay(const QDateTime &date)
 {
     setFilterDates(QDateTime(date.date(), QTime(0, 0)), QDateTime(date.date(), QTime(23, 59, 59, 999)));
-}
-
-void EventsModel::setFilterSources(const QMap<DVRServer*, QList<int> > &sources)
-{
-    bool fast = false;
-
-    if (sources.size() <= m_filter.sources.size())
-    {
-        fast = true;
-        /* If the new sources contain any that the old don't, we can't do fast filtering */
-        for (QMap<DVRServer*,QList<int> >::ConstIterator nit = sources.begin(); nit != sources.end(); ++nit)
-        {
-            QHash<DVRServer*, QSet<int> >::Iterator oit = m_filter.sources.find(nit.key());
-            if (oit == m_filter.sources.end())
-            {
-                fast = false;
-                break;
-            }
-
-            for (QList<int>::ConstIterator it = nit->begin(); it != nit->end(); ++it)
-            {
-                if (!oit->contains(*it))
-                {
-                    fast = false;
-                    break;
-                }
-            }
-
-            if (!fast)
-                break;
-        }
-    }
-    else if (m_filter.sources.isEmpty())
-        fast = true;
-
-    m_filter.sources.clear();
-    for (QMap<DVRServer*, QList<int> >::ConstIterator nit = sources.begin(); nit != sources.end(); ++nit)
-        m_filter.sources.insert(nit.key(), nit->toSet());
-
-    applyFilters(!fast);
-}
-
-void EventsModel::setFilterSource(DVRCamera *camera)
-{
-    if (!camera)
-        return;
-
-    QMap<DVRServer*,QList<int> > sources;
-    sources.insert(camera->data().server(), QList<int>() << camera->data().id());
-    setFilterSources(sources);
-}
-
-void EventsModel::setFilterSource(DVRServer *server)
-{
-    if (!server)
-        return;
-
-    QMap<DVRServer*,QList<int> > sources;
-    sources.insert(server, QList<int>());
-    setFilterSources(sources);
 }
 
 void EventsModel::setUpdateInterval(int ms)

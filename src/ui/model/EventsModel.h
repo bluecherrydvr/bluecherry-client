@@ -71,10 +71,6 @@ public:
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
 public slots:
-    void setFilterSource(DVRCamera *camera);
-    void setFilterSource(DVRServer *server);
-    void setFilterSources(const QMap<DVRServer*,QList<int> > &sources);
-
     void setFilterDay(const QDateTime &date);
 
     /* Request the most recent events from the given server, the DVRServer* source, or the
@@ -104,21 +100,11 @@ private:
     QDateTime dateBegin;
     QDateTime dateEnd;
 
-    /* Filters */
-    struct Filter
-    {
-        QHash<DVRServer*, QSet<int> > sources;
-
-        bool acceptEvent(const EventData *d) const;
-    } m_filter;
-
     /* Sorting */
     int serverEventsLimit;
 
     void applyFilters(bool fromCache = true);
-    bool testFilter(EventData *data);
 
-    void createTestData();
 };
 
 #endif // EVENTSMODEL_H

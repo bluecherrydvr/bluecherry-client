@@ -77,8 +77,8 @@ EventsWindow::EventsWindow(DVRServerRepository *serverRepository, QWidget *paren
     //m_sourcesView->setMaximumHeight(150);
     filtersLayout->addWidget(m_sourcesView);
 
-    connect(sourcesModel, SIGNAL(checkedSourcesChanged(QMap<DVRServer*,QList<int>>)),
-            m_resultsView->eventsModel(), SLOT(setFilterSources(QMap<DVRServer*,QList<int>>)));
+    connect(sourcesModel, SIGNAL(checkedSourcesChanged(QMap<DVRServer*,QSet<int>>)),
+            this, SLOT(setFilterSources(QMap<DVRServer*,QSet<int>>)));
 
     createDateFilter(filtersLayout);
 
@@ -401,4 +401,9 @@ void EventsWindow::setFilterDay(const QDateTime &day)
 {
     m_resultsView->eventsModel()->setFilterDay(day);
     m_resultsView->eventsProxyModel()->setDay(day.date());
+}
+
+void EventsWindow::setFilterSources(const QMap<DVRServer *, QSet<int> > &sources)
+{
+    m_resultsView->eventsProxyModel()->setSources(sources);
 }

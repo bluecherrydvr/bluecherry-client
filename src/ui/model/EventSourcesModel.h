@@ -37,7 +37,7 @@ public:
     explicit EventSourcesModel(DVRServerRepository *serverRepository, QObject *parent = 0);
     virtual ~EventSourcesModel();
 
-    QMap<DVRServer *, QList<int> > checkedSources();
+    QMap<DVRServer *, QSet<int> > checkedSources();
 
     int rowOfServer(DVRServer *server) const;
     QModelIndex indexOfServer(DVRServer *server) const;
@@ -52,7 +52,7 @@ public:
     virtual bool setData(const QModelIndex &index, const QVariant &value, int role);
 
 signals:
-    void checkedSourcesChanged(QMap<DVRServer*,QList<int> > sources);
+    void checkedSourcesChanged(QMap<DVRServer*,QSet<int> > sources);
 
 private slots:
     void repositoryServerAboutToBeAdded(DVRServer *server);
@@ -73,7 +73,7 @@ private:
     QSet<DVRCamera *> m_checkedCameras;
 
     bool m_checkedSourcesDirty;
-    QMap<DVRServer *, QList<int> > m_checkedSources;
+    QMap<DVRServer *, QSet<int> > m_checkedSources;
 
     void addServer(DVRServer *server);
     void removeServer(DVRServer *server);
@@ -98,7 +98,7 @@ private:
     QVariant data(DVRServer *server, int role) const;
     QVariant data(DVRCamera *camera, int role) const;
 
-    QMap<DVRServer *, QList<int> > computeCheckedSources() const;
+    QMap<DVRServer *, QSet<int> > computeCheckedSources() const;
 
 };
 

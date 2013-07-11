@@ -273,9 +273,9 @@ QModelIndex EventSourcesModel::indexOfCamera(DVRCamera *camera) const
     return index(cameraRow, 0, serverIndex);
 }
 
-QMap<DVRServer *, QList<int> > EventSourcesModel::computeCheckedSources() const
+QMap<DVRServer *, QSet<int> > EventSourcesModel::computeCheckedSources() const
 {
-    QMap<DVRServer*,QList<int> > result;
+    QMap<DVRServer*,QSet<int> > result;
 
     foreach (DVRServer *server, m_serverRepository->servers())
     {
@@ -283,22 +283,22 @@ QMap<DVRServer *, QList<int> > EventSourcesModel::computeCheckedSources() const
             if (m_checkedCameras.contains(camera))
             {
                 if (!result.contains(server))
-                    result.insert(server, QList<int>());
-                result[server].append(camera->data().id());
+                    result.insert(server, QSet<int>());
+                result[server].insert(camera->data().id());
             }
 
         if (m_checkedCameras.contains(m_systemCameras.value(server)))
         {
             if (!result.contains(server))
-                result.insert(server, QList<int>());
-            result[server].append(-1);
+                result.insert(server, QSet<int>());
+            result[server].insert(-1);
         }
     }
 
     return result;
 }
 
-QMap<DVRServer *, QList<int> > EventSourcesModel::checkedSources()
+QMap<DVRServer *, QSet<int> > EventSourcesModel::checkedSources()
 {
     if (m_checkedSourcesDirty)
     {
@@ -468,11 +468,11 @@ bool EventSourcesModel::setData(const QModelIndex &index, const QVariant &value,
     else
         setAllCheckedState(state);
 
-    if (receivers(SIGNAL(checkedSourcesChanged(QMap<DVRServer*,QList<int>>))))
+    if (receivers(SIGNAL(checkedSourcesChanged(QMap<DVRServer*,QSet<int>>))))
     {
-        QMap<DVRServer *, QList<int> > oldCheckedSources = checkedSources();
+        QMap<DVRServer *, QSet<int> > oldCheckedSources = checkedSources();
         m_checkedSourcesDirty = true;
-        QMap<DVRServer *, QList<int> > newCheckedSources = checkedSources();
+        QMap<DVRServer *, QSet<int> > newCheckedSources = checkedSources();
 
         if (oldCheckedSources != newCheckedSources)
             emit checkedSourcesChanged(checkedSources());
