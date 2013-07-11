@@ -23,13 +23,13 @@
 #include <QIcon>
 
 EventsModel::EventsModel(DVRServerRepository *serverRepository, QObject *parent)
-    : QAbstractItemModel(parent), m_serverRepository(serverRepository), serverEventsLimit(-1)
+    : QAbstractItemModel(parent), m_serverRepository(serverRepository), m_serverEventsLimit(-1)
 {
     Q_ASSERT(m_serverRepository);
 
     connect(m_serverRepository, SIGNAL(serverAdded(DVRServer*)), SLOT(serverAdded(DVRServer*)));
     connect(m_serverRepository, SIGNAL(serverRemoved(DVRServer*)), SLOT(clearServerEvents(DVRServer*)));
-    connect(&updateTimer, SIGNAL(timeout()), SLOT(updateServers()));
+    connect(&m_updateTimer, SIGNAL(timeout()), SLOT(updateServers()));
 
     foreach (DVRServer *s, m_serverRepository->servers())
         serverAdded(s);
@@ -47,7 +47,7 @@ int EventsModel::rowCount(const QModelIndex &parent) const
     if (parent.isValid())
         return 0;
 
-    return items.size();
+    return m_items.size();
 }
 
 int EventsModel::columnCount(const QModelIndex &parent) const
@@ -60,10 +60,10 @@ int EventsModel::columnCount(const QModelIndex &parent) const
 
 QModelIndex EventsModel::index(int row, int column, const QModelIndex &parent) const
 {
-    if (parent.isValid() || row < 0 || column < 0 || row >= items.size() || column >= columnCount())
+    if (parent.isValid() || row < 0 || column < 0 || row >= m_items.size() || column >= columnCount())
         return QModelIndex();
 
-    return createIndex(row, column, items[row]);
+    return createIndex(row, column, m_items[row]);
 }
 
 QModelIndex EventsModel::parent(const QModelIndex &child) const
@@ -181,7 +181,7 @@ void EventsModel::clearServerEvents(DVRServer *server)
     int removeFirst = -1;
     for (int i = 0; ; ++i)
     {
-        if (i < items.size() && items[i]->server() == server)
+        if (i < m_items.size() && m_items[i]->server() == server)
         {
             if (removeFirst < 0)
                 removeFirst = i;
@@ -189,38 +189,38 @@ void EventsModel::clearServerEvents(DVRServer *server)
         else if (removeFirst >= 0)
         {
             beginRemoveRows(QModelIndex(), removeFirst, i-1);
-            items.erase(items.begin()+removeFirst, items.begin()+i);
+            m_items.erase(m_items.begin()+removeFirst, m_items.begin()+i);
             i = removeFirst;
             removeFirst = -1;
             endRemoveRows();
         }
 
-        if (i == items.size())
+        if (i == m_items.size())
             break;
     }
 
-    cachedEvents.remove(server);
+    m_cachedEvents.remove(server);
 }
 
 void EventsModel::applyFilters()
 {
     beginResetModel();
 
-    items.clear();
-    for (QHash<DVRServer*,QList<EventData*> >::Iterator it = cachedEvents.begin(); it != cachedEvents.end(); ++it)
+    m_items.clear();
+    for (QHash<DVRServer*,QList<EventData*> >::Iterator it = m_cachedEvents.begin(); it != m_cachedEvents.end(); ++it)
         for (QList<EventData*>::Iterator eit = it->begin(); eit != it->end(); ++eit)
-            items.append(*eit);
+            m_items.append(*eit);
 
     endResetModel();
 }
 
 void EventsModel::setFilterDates(const QDateTime &begin, const QDateTime &end)
 {
-    dateBegin = begin;
-    dateEnd = end;
+    m_dateBegin = begin;
+    m_dateEnd = end;
 
     beginResetModel();
-    items.clear();
+    m_items.clear();
     updateServers();
     endResetModel();
 }
@@ -234,11 +234,11 @@ void EventsModel::setUpdateInterval(int ms)
 {
     if (ms > 0)
     {
-        updateTimer.setInterval(ms);
-        updateTimer.start();
+        m_updateTimer.setInterval(ms);
+        m_updateTimer.start();
     }
     else
-        updateTimer.stop();
+        m_updateTimer.stop();
 }
 
 void EventsModel::updateServers()
@@ -258,17 +258,17 @@ void EventsModel::updateServer(DVRServer *server)
             return;
     }
 
-    if (!server->isOnline() || updatingServers.contains(server))
+    if (!server->isOnline() || m_updatingServers.contains(server))
         return;
 
-    updatingServers.insert(server);
-    if (updatingServers.size() == 1)
+    m_updatingServers.insert(server);
+    if (m_updatingServers.size() == 1)
         emit loadingStarted();
 
     EventsLoader *eventsLoader = new EventsLoader(server);
-    eventsLoader->setLimit(serverEventsLimit);
-    eventsLoader->setStartTime(dateBegin);
-    eventsLoader->setEndTime(dateEnd);
+    eventsLoader->setLimit(m_serverEventsLimit);
+    eventsLoader->setStartTime(m_dateBegin);
+    eventsLoader->setEndTime(m_dateEnd);
     connect(eventsLoader, SIGNAL(eventsLoaded(bool,QList<EventData*>)), this, SLOT(eventsLoaded(bool,QList<EventData*>)));
     eventsLoader->loadEvents();
 }
@@ -284,13 +284,13 @@ void EventsModel::eventsLoaded(bool ok, const QList<EventData *> &events)
 
     if (ok)
     {
-        QList<EventData*> &cache = cachedEvents[server];
+        QList<EventData*> &cache = m_cachedEvents[server];
         qDeleteAll(cache);
         cache = events;
 
         applyFilters();
     }
 
-    if (updatingServers.remove(server) && updatingServers.isEmpty())
+    if (m_updatingServers.remove(server) && m_updatingServers.isEmpty())
         emit loadingFinished();
 }

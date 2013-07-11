@@ -58,10 +58,10 @@ public:
 
     explicit EventsModel(DVRServerRepository *serverRepository, QObject *parent = 0);
 
-    bool isLoading() const { return !updatingServers.isEmpty(); }
+    bool isLoading() const { return !m_updatingServers.isEmpty(); }
 
     void setFilterDates(const QDateTime &begin, const QDateTime &end);
-    void setEventLimit(int limit) { serverEventsLimit = limit; }
+    void setEventLimit(int limit) { m_serverEventsLimit = limit; }
 
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
@@ -93,18 +93,18 @@ private slots:
 
 private:
     DVRServerRepository *m_serverRepository;
-    QList<EventData*> items;
-    QHash<DVRServer*,QList<EventData*> > cachedEvents;
-    QSet<DVRServer*> updatingServers;
-    QTimer updateTimer;
-    QDateTime dateBegin;
-    QDateTime dateEnd;
 
-    /* Sorting */
-    int serverEventsLimit;
+    QList<EventData *> m_items;
+    QHash<DVRServer *, QList<EventData *> > m_cachedEvents;
+    QSet<DVRServer *> m_updatingServers;
+    QTimer m_updateTimer;
+    QDateTime m_dateBegin;
+    QDateTime m_dateEnd;
+    int m_serverEventsLimit;
 
     void applyFilters();
 
 };
 
 #endif // EVENTSMODEL_H
+
