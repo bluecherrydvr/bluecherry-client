@@ -15,8 +15,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ui/model/EventsModel.h"
 #include "ModelEventsCursor.h"
+#include "core/EventData.h"
+#include "ui/model/EventsModel.h"
 #include <QDebug>
 
 ModelEventsCursor::ModelEventsCursor(QObject *parent)

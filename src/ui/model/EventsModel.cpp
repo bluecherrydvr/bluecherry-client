@@ -16,9 +16,9 @@
  */
 
 #include "EventsModel.h"
-#include "server/DVRServerRepository.h"
+#include "core/EventData.h"
 #include "core/ServerRequestManager.h"
-#include "event/EventsLoader.h"
+#include "server/DVRServerRepository.h"
 #include <QDebug>
 #include <QIcon>
 #include <QTextDocument>

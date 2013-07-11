@@ -18,20 +18,11 @@
 #ifndef EVENTSMODEL_H
 #define EVENTSMODEL_H
 
-#include "core/EventData.h"
 #include <QAbstractItemModel>
-#include <QDateTime>
-#include <QList>
-#include <QSet>
-#include <QColor>
-#include <QBitArray>
-#include <QHash>
 
 class DVRServer;
 class DVRServerRepository;
-class DVRCamera;
-
-Q_DECLARE_METATYPE(EventData*)
+class EventData;
 
 class EventsModel : public QAbstractItemModel
 {

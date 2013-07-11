@@ -159,4 +159,6 @@ public:
 
 };
 
+Q_DECLARE_METATYPE(EventData *)
+
 #endif // EVENTDATA_H

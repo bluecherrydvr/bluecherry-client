@@ -16,9 +16,9 @@
  */
 
 #include "EventsProxyModel.h"
-
 #include "core/EventData.h"
 #include "ui/model/EventsModel.h"
+#include <QSet>
 
 EventsProxyModel::EventsProxyModel(QObject *parent) :
         QSortFilterProxyModel(parent), m_column(EventsModel::ServerColumn),

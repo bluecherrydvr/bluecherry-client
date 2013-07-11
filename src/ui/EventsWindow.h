@@ -18,6 +18,7 @@
 #ifndef EVENTSWINDOW_H
 #define EVENTSWINDOW_H
 
+#include <QBitArray>
 #include <QWidget>
 #include "model/EventsModel.h"
 
