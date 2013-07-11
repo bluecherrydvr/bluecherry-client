@@ -284,33 +284,37 @@ void EventsModel::eventsLoaded(bool ok, const QList<EventData *> &events)
         return;
 
     if (ok)
-    {
-        computeBoundaries();
-        m_serverEventsCount.insert(server, events.count());
-
-        int removedRowBegin = m_serverEventsBoundaries.value(server).first;
-        int removedRowEnd = m_serverEventsBoundaries.value(server).second;
-
-        if (removedRowEnd >= removedRowBegin)
-        {
-            beginRemoveRows(QModelIndex(), removedRowBegin, removedRowEnd);
-            QList<EventData *> removedEvents = m_items.mid(removedRowBegin, removedRowEnd - removedRowBegin + 1);
-            qDeleteAll(removedEvents);
-            m_items = m_items.mid(0, removedRowBegin) + m_items.mid(removedRowEnd + 1);
-            endRemoveRows();
-        }
-
-        int insertedRowBegin = removedRowBegin;
-        int insertedRowEnd = insertedRowBegin + events.count() - 1;
-
-        if (insertedRowEnd >= insertedRowBegin)
-        {
-            beginInsertRows(QModelIndex(), insertedRowBegin, insertedRowEnd);
-            m_items = m_items.mid(0, insertedRowBegin) + events + m_items.mid(insertedRowBegin);
-            endInsertRows();
-        }
-    }
+        setServerEvents(server, events);
 
     if (m_updatingServers.remove(server) && m_updatingServers.isEmpty())
         emit loadingFinished();
+}
+
+void EventsModel::setServerEvents(DVRServer *server, const QList<EventData *> &events)
+{
+    computeBoundaries();
+
+    int removedRowBegin = m_serverEventsBoundaries.value(server).first;
+    int removedRowEnd = m_serverEventsBoundaries.value(server).second;
+
+    if (removedRowEnd >= removedRowBegin)
+    {
+        beginRemoveRows(QModelIndex(), removedRowBegin, removedRowEnd);
+        QList<EventData *> removedEvents = m_items.mid(removedRowBegin, removedRowEnd - removedRowBegin + 1);
+        qDeleteAll(removedEvents);
+        m_items = m_items.mid(0, removedRowBegin) + m_items.mid(removedRowEnd + 1);
+        endRemoveRows();
+    }
+
+    int insertedRowBegin = removedRowBegin;
+    int insertedRowEnd = insertedRowBegin + events.count() - 1;
+
+    if (insertedRowEnd >= insertedRowBegin)
+    {
+        beginInsertRows(QModelIndex(), insertedRowBegin, insertedRowEnd);
+        m_items = m_items.mid(0, insertedRowBegin) + events + m_items.mid(insertedRowBegin);
+        endInsertRows();
+    }
+
+    m_serverEventsCount.insert(server, events.count());
 }
