@@ -29,14 +29,14 @@ EventSourcesModel::EventSourcesModel(DVRServerRepository *serverRepository, QObj
 {
     Q_ASSERT(m_serverRepository);
 
-    connect(m_serverRepository, SIGNAL(repositoryServerAboutToBeAdded(DVRServer*)),
-            this, SLOT(serverAboutToBeAdded(DVRServer*)));
-    connect(m_serverRepository, SIGNAL(repositoryServerAdded(DVRServer*)),
-            this, SLOT(serverAdded(DVRServer*)));
-    connect(m_serverRepository, SIGNAL(repositoryServerAboutToBeRemoved(DVRServer*)),
-            this, SLOT(serverAboutToBeRemoved(DVRServer*)));
-    connect(m_serverRepository, SIGNAL(repositoryServerRemoved(DVRServer*)),
-            this, SLOT(serverRemoved(DVRServer*)));
+    connect(m_serverRepository, SIGNAL(serverAboutToBeAdded(DVRServer*)),
+            this, SLOT(repositoryServerAboutToBeAdded(DVRServer*)));
+    connect(m_serverRepository, SIGNAL(serverAdded(DVRServer*)),
+            this, SLOT(repositoryServerAdded(DVRServer*)));
+    connect(m_serverRepository, SIGNAL(serverAboutToBeRemoved(DVRServer*)),
+            this, SLOT(repositoryServerAboutToBeRemoved(DVRServer*)));
+    connect(m_serverRepository, SIGNAL(serverRemoved(DVRServer*)),
+            this, SLOT(repositoryServerRemoved(DVRServer*)));
 
     foreach (DVRServer *server, m_serverRepository->servers())
         addServer(server);
@@ -173,7 +173,10 @@ DVRCamera * EventSourcesModel::cameraForRow(DVRServer *server, int row) const
 {
     Q_ASSERT(row > 0);
 
-    return server->cameras().at(row - 1);
+    if (server->cameras().size() < row)
+        return 0;
+    else
+        return server->cameras().at(row - 1);
 }
 
 DVRCamera * EventSourcesModel::cameraForRow(int serverRow, int row) const
