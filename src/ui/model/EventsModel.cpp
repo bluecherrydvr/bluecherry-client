@@ -38,8 +38,6 @@ EventsModel::EventsModel(DVRServerRepository *serverRepository, QObject *parent)
     connect(m_serverRepository, SIGNAL(serverRemoved(DVRServer*)), SLOT(clearServerEvents(DVRServer*)));
     connect(&updateTimer, SIGNAL(timeout()), SLOT(updateServers()));
 
-    applyFilters();
-
     foreach (DVRServer *s, m_serverRepository->servers())
         serverAdded(s);
 }
@@ -211,19 +209,16 @@ void EventsModel::clearServerEvents(DVRServer *server)
     cachedEvents.remove(server);
 }
 
-void EventsModel::applyFilters(bool fromCache)
+void EventsModel::applyFilters()
 {
-    if (fromCache)
-    {
-        beginResetModel();
-        items.clear();
+    beginResetModel();
 
-        for (QHash<DVRServer*,QList<EventData*> >::Iterator it = cachedEvents.begin(); it != cachedEvents.end(); ++it)
-            for (QList<EventData*>::Iterator eit = it->begin(); eit != it->end(); ++eit)
-                items.append(*eit);
+    items.clear();
+    for (QHash<DVRServer*,QList<EventData*> >::Iterator it = cachedEvents.begin(); it != cachedEvents.end(); ++it)
+        for (QList<EventData*>::Iterator eit = it->begin(); eit != it->end(); ++eit)
+            items.append(*eit);
 
-        endResetModel();
-    }
+    endResetModel();
 }
 
 void EventsModel::setFilterDates(const QDateTime &begin, const QDateTime &end)

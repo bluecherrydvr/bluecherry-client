@@ -103,7 +103,7 @@ private:
     /* Sorting */
     int serverEventsLimit;
 
-    void applyFilters(bool fromCache = true);
+    void applyFilters();
 
 };
 
