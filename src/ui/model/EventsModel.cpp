@@ -16,18 +16,11 @@
  */
 
 #include "EventsModel.h"
-#include "server/DVRServer.h"
-#include "server/DVRServerConfiguration.h"
 #include "server/DVRServerRepository.h"
-#include "camera/DVRCamera.h"
-#include "core/EventData.h"
 #include "core/ServerRequestManager.h"
 #include "event/EventsLoader.h"
 #include <QTextDocument>
-#include <QColor>
-#include <QDebug>
 #include <QIcon>
-#include <QtConcurrentRun>
 
 EventsModel::EventsModel(DVRServerRepository *serverRepository, QObject *parent)
     : QAbstractItemModel(parent), m_serverRepository(serverRepository), serverEventsLimit(-1)
