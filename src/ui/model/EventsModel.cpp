@@ -222,16 +222,13 @@ void EventsModel::updateServer(DVRServer *server)
     eventsLoader->setLimit(m_serverEventsLimit);
     eventsLoader->setStartTime(m_dateBegin);
     eventsLoader->setEndTime(m_dateEnd);
-    connect(eventsLoader, SIGNAL(eventsLoaded(bool,QList<EventData*>)), this, SLOT(eventsLoaded(bool,QList<EventData*>)));
+    connect(eventsLoader, SIGNAL(eventsLoaded(DVRServer*,bool,QList<EventData*>)),
+            this, SLOT(eventsLoaded(DVRServer*,bool,QList<EventData*>)));
     eventsLoader->loadEvents();
 }
 
-void EventsModel::eventsLoaded(bool ok, const QList<EventData *> &events)
+void EventsModel::eventsLoaded(DVRServer *server, bool ok, const QList<EventData *> &events)
 {
-    EventsLoader *eventsLoader = qobject_cast<EventsLoader *>(sender());
-    Q_ASSERT(eventsLoader);
-
-    DVRServer *server = eventsLoader->server();
     if (!server)
         return;
 

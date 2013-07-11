@@ -41,7 +41,7 @@ public:
     void loadEvents();
 
 signals:
-    void eventsLoaded(bool ok, const QList<EventData *> &events);
+    void eventsLoaded(DVRServer *server, bool ok, const QList<EventData *> &events);
 
 private slots:
     void serverRequestFinished();

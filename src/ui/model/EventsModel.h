@@ -88,7 +88,7 @@ signals:
 
 private slots:
     void serverAdded(DVRServer *server);
-    void eventsLoaded(bool ok, const QList<EventData *> &events);
+    void eventsLoaded(DVRServer *server, bool ok, const QList<EventData *> &events);
 
 private:
     DVRServerRepository *m_serverRepository;
