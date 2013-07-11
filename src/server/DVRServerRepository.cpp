@@ -126,7 +126,7 @@ void DVRServerRepository::onServerRemoved(DVRServer *server)
     if (!m_servers.contains(server))
         return;
 
-    emit serverAboutToBeAdded(server);
+    emit serverAboutToBeRemoved(server);
     m_servers.removeOne(server);
     emit serverRemoved(server);
 }
