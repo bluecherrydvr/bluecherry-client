@@ -19,8 +19,9 @@
 #include "server/DVRServerRepository.h"
 #include "core/ServerRequestManager.h"
 #include "event/EventsLoader.h"
-#include <QTextDocument>
+#include <QDebug>
 #include <QIcon>
+#include <QTextDocument>
 
 EventsModel::EventsModel(DVRServerRepository *serverRepository, QObject *parent)
     : QAbstractItemModel(parent), m_serverRepository(serverRepository), m_serverEventsLimit(-1)
@@ -199,19 +200,19 @@ void EventsModel::clearServerEvents(DVRServer *server)
             break;
     }
 
-    m_cachedEvents.remove(server);
+    m_serverEventsCount.remove(server);
 }
 
-void EventsModel::applyFilters()
+void EventsModel::computeBoundaries()
 {
-    beginResetModel();
-
-    m_items.clear();
-    for (QHash<DVRServer*,QList<EventData*> >::Iterator it = m_cachedEvents.begin(); it != m_cachedEvents.end(); ++it)
-        for (QList<EventData*>::Iterator eit = it->begin(); eit != it->end(); ++eit)
-            m_items.append(*eit);
-
-    endResetModel();
+    int begin = 0;
+    m_serverEventsBoundaries.clear();
+    foreach (DVRServer *server, m_serverRepository->servers())
+    {
+        int count = !m_serverEventsCount.contains(server) ? 0 : m_serverEventsCount.value(server);
+        m_serverEventsBoundaries.insert(server, qMakePair(begin, begin + count - 1));
+        begin += count;
+    }
 }
 
 void EventsModel::setFilterDates(const QDateTime &begin, const QDateTime &end)
@@ -284,11 +285,30 @@ void EventsModel::eventsLoaded(bool ok, const QList<EventData *> &events)
 
     if (ok)
     {
-        QList<EventData*> &cache = m_cachedEvents[server];
-        qDeleteAll(cache);
-        cache = events;
+        computeBoundaries();
+        m_serverEventsCount.insert(server, events.count());
 
-        applyFilters();
+        int removedRowBegin = m_serverEventsBoundaries.value(server).first;
+        int removedRowEnd = m_serverEventsBoundaries.value(server).second;
+
+        if (removedRowEnd >= removedRowBegin)
+        {
+            beginRemoveRows(QModelIndex(), removedRowBegin, removedRowEnd);
+            QList<EventData *> removedEvents = m_items.mid(removedRowBegin, removedRowEnd - removedRowBegin + 1);
+            qDeleteAll(removedEvents);
+            m_items = m_items.mid(0, removedRowBegin) + m_items.mid(removedRowEnd + 1);
+            endRemoveRows();
+        }
+
+        int insertedRowBegin = removedRowBegin;
+        int insertedRowEnd = insertedRowBegin + events.count() - 1;
+
+        if (insertedRowEnd >= insertedRowBegin)
+        {
+            beginInsertRows(QModelIndex(), insertedRowBegin, insertedRowEnd);
+            m_items = m_items.mid(0, insertedRowBegin) + events + m_items.mid(insertedRowBegin);
+            endInsertRows();
+        }
     }
 
     if (m_updatingServers.remove(server) && m_updatingServers.isEmpty())

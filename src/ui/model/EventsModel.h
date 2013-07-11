@@ -95,14 +95,15 @@ private:
     DVRServerRepository *m_serverRepository;
 
     QList<EventData *> m_items;
-    QHash<DVRServer *, QList<EventData *> > m_cachedEvents;
+    QMap<DVRServer *, QPair<int, int> > m_serverEventsBoundaries;
+    QMap<DVRServer *, int> m_serverEventsCount;
     QSet<DVRServer *> m_updatingServers;
     QTimer m_updateTimer;
     QDateTime m_dateBegin;
     QDateTime m_dateEnd;
     int m_serverEventsLimit;
 
-    void applyFilters();
+    void computeBoundaries();
 
 };
 
