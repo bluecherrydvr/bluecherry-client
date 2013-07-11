@@ -102,7 +102,7 @@ QSharedPointer<CameraPtzControl> DVRCamera::sharedPtzControl()
     return result;
 }
 
-void DVRCamera::setStreamUrl(const QByteArray &streamUrl)
+void DVRCamera::setStreamUrl(const QUrl &streamUrl)
 {
     if (m_streamUrl == streamUrl)
         return;
@@ -112,7 +112,7 @@ void DVRCamera::setStreamUrl(const QByteArray &streamUrl)
     emit onlineChanged(isOnline());
 }
 
-QByteArray DVRCamera::streamUrl() const
+QUrl DVRCamera::streamUrl() const
 {
     return m_streamUrl;
 }

@@ -20,6 +20,7 @@
 #include "LiveStreamThread.h"
 #include "core/BluecherryApp.h"
 #include "core/LiveViewManager.h"
+#include "core/LoggableUrl.h"
 #include "live-stream/LiveStreamWorker.h"
 #include <QMutex>
 #include <QMetaObject>
@@ -134,16 +135,15 @@ void LiveStream::setState(State newState)
         emit pausedChanged(isPaused());
 }
 
-QByteArray LiveStream::url() const
+QUrl LiveStream::url() const
 {
     if (!m_camera)
-        return QByteArray();
+        return QUrl();
 
-    QByteArray re = m_camera.data()->streamUrl();
+    QUrl streamUrl = m_camera.data()->streamUrl();
     if (m_bandwidthMode == LiveViewManager::LowBandwidth)
-        re.append("/mode=keyframe");
-    qDebug() << re;
-    return re;
+        streamUrl.setPath(streamUrl.path() + QLatin1String("/mode=keyframe"));
+    return streamUrl;
 }
 
 void LiveStream::setBandwidthMode(int value)
@@ -280,7 +280,7 @@ QSize LiveStream::streamSize()
 
 void LiveStream::fatalError(const QString &message)
 {
-    qDebug() << "Fatal error:" << url() << message;
+    qDebug() << "Fatal error:" << LoggableUrl(url()) << message;
 
     m_errorMessage = message;
     setState(Error);
