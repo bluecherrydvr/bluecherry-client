@@ -73,7 +73,7 @@ public:
 public slots:
     void setFilterDay(const QDateTime &date);
     void setServerEvents(DVRServer *server, const QList<EventData *> &events);
-    void clearServerEvents(DVRServer *server = 0);
+    void clearServerEvents(DVRServer *server);
 
     /* Request the most recent events from the given server, the DVRServer* source, or the
      * DVRServer represented by the ServerRequestManager* source */

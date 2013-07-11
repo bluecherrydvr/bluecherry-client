@@ -39,7 +39,7 @@ EventsModel::EventsModel(DVRServerRepository *serverRepository, QObject *parent)
 void EventsModel::serverAdded(DVRServer *server)
 {
     connect(server, SIGNAL(loginSuccessful()), SLOT(updateServer()));
-    connect(server, SIGNAL(disconnected()), SLOT(clearServerEvents()));
+    connect(server, SIGNAL(disconnected(DVRServer*)), SLOT(clearServerEvents(DVRServer*)));
     updateServer(server);
 }
 
@@ -271,18 +271,6 @@ void EventsModel::setServerEvents(DVRServer *server, const QList<EventData *> &e
 
 void EventsModel::clearServerEvents(DVRServer *server)
 {
-    if (!server && !(server = qobject_cast<DVRServer*>(sender())))
-    {
-        ServerRequestManager *srm = qobject_cast<ServerRequestManager*>(sender());
-        if (srm)
-            server = srm->server;
-        else
-        {
-            Q_ASSERT_X(false, "clearServerEvents", "No server and no appropriate sender");
-            return;
-        }
-    }
-
     computeBoundaries();
 
     int removedRowBegin = m_serverEventsBoundaries.value(server).first;

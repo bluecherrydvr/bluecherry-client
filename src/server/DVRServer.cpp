@@ -51,7 +51,6 @@ DVRServer::DVRServer(int id, QObject *parent)
     connect(m_api, SIGNAL(loginSuccessful()), this, SIGNAL(loginSuccessful()));
     connect(m_api, SIGNAL(serverError(QString)), this, SIGNAL(serverError(QString)));
     connect(m_api, SIGNAL(loginError(QString)), this, SIGNAL(loginError(QString)));
-    connect(m_api, SIGNAL(disconnected()), this, SIGNAL(disconnected()));
     connect(m_api, SIGNAL(statusChanged(int)), this, SIGNAL(statusChanged(int)));
     connect(m_api, SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
 
@@ -293,6 +292,8 @@ void DVRServer::disconnectedSlot()
     m_devicesLoaded = false;
     m_statusAlertMessage.clear();
     emit statusAlertMessageChanged(QString());
+
+    emit disconnected(this);
 }
 
 bool DVRServer::isKnownCertificate(const QSslCertificate &certificate) const

@@ -98,7 +98,7 @@ signals:
     void loginSuccessful();
     void serverError(const QString &message);
     void loginError(const QString &message);
-    void disconnected();
+    void disconnected(DVRServer *server);
     void statusChanged(int status);
     void onlineChanged(bool online);
 
