@@ -33,6 +33,7 @@
 #include "event/CameraEventFilter.h"
 #include "event/EventDownloadManager.h"
 #include "event/EventList.h"
+#include "event/EventsUpdater.h"
 #include "event/MediaEventFilter.h"
 #include <QBoxLayout>
 #include <QGridLayout>
@@ -61,6 +62,7 @@ EventsWindow::EventsWindow(DVRServerRepository *serverRepository, QWidget *paren
     QBoxLayout *filtersLayout = new QVBoxLayout;
     layout->addLayout(filtersLayout);
 
+    m_eventsUpdater = new EventsUpdater(bcApp->serverRepository(), this);
     createResultsView();
 
     /* Filters */
@@ -205,7 +207,15 @@ QWidget *EventsWindow::createTagsInput()
 QWidget * EventsWindow::createResultsView()
 {
     m_resultsView = new EventsView;
-    m_resultsView->setModel(new EventsModel(m_serverRepository, this));
+    connect(m_eventsUpdater, SIGNAL(loadingStarted()), m_resultsView, SLOT(loadingStarted()));
+    connect(m_eventsUpdater, SIGNAL(loadingFinished()), m_resultsView, SLOT(loadingFinished()));
+
+    EventsModel *eventsModel = new EventsModel(m_serverRepository, this);
+    m_resultsView->setModel(eventsModel, m_eventsUpdater->isUpdating());
+
+    connect(m_eventsUpdater, SIGNAL(serverEventsAvailable(DVRServer*,QList<EventData*>)),
+            eventsModel, SLOT(setServerEvents(DVRServer*,QList<EventData*>)));
+
     m_resultsView->setFrameStyle(QFrame::NoFrame);
     m_resultsView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_resultsView, SIGNAL(customContextMenuRequested(QPoint)), SLOT(eventContextMenu(QPoint)));
@@ -399,7 +409,7 @@ void EventsWindow::setFilterTypes(QBitArray types)
 
 void EventsWindow::setFilterDay(const QDateTime &day)
 {
-    m_resultsView->eventsModel()->setFilterDay(day);
+    m_eventsUpdater->setDay(day.date());
     m_resultsView->eventsProxyModel()->setDay(day.date());
 }
 

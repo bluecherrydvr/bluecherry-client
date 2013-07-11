@@ -41,7 +41,7 @@ EventsView::EventsView(QWidget *parent)
     m_eventsProxyModel->sort(0, Qt::DescendingOrder);
 }
 
-void EventsView::setModel(EventsModel *model)
+void EventsView::setModel(EventsModel *model, bool loading)
 {
     bool first = !m_eventsModel;
 
@@ -59,12 +59,10 @@ void EventsView::setModel(EventsModel *model)
         header()->resizeSection(EventsModel::LevelColumn, fm.width(QLatin1String("Warning")) + 18);
     }
 
-    connect(model, SIGNAL(loadingStarted()), SLOT(loadingStarted()));
-    connect(model, SIGNAL(loadingFinished()), SLOT(loadingFinished()));
     connect(model, SIGNAL(rowsAboutToBeInserted(QModelIndex,int,int)), SLOT(loadingFinished()));
     connect(model, SIGNAL(modelReset()), SLOT(loadingFinished()));
 
-    if (model->isLoading())
+    if (loading)
         loadingStarted();
 }
 
@@ -128,7 +126,7 @@ void EventsView::loadingStarted()
 
 void EventsView::loadingFinished()
 {
-    if (!eventsModel()->isLoading() || eventsModel()->rowCount())
+    if (eventsModel()->rowCount())
     {
         delete loadingIndicator;
         loadingIndicator = 0;

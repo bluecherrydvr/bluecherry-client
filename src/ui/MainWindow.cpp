@@ -20,6 +20,7 @@
 #include "event/CameraEventFilter.h"
 #include "event/EventDownloadManager.h"
 #include "event/EventList.h"
+#include "event/EventsUpdater.h"
 #include "event/MediaEventFilter.h"
 #include "DVRServersView.h"
 #include "EventsWindow.h"
@@ -475,11 +476,19 @@ QWidget *MainWindow::createRecentEvents()
     m_eventsView->eventsProxyModel()->setIncompletePlace(EventsProxyModel::IncompleteLast);
 
     m_eventsModel = new EventsModel(m_serverRepository, m_eventsView);
-    m_eventsView->setModel(m_eventsModel);
+
+    EventsUpdater *updater = new EventsUpdater(m_serverRepository, m_eventsModel);
+    connect(updater, SIGNAL(serverEventsAvailable(DVRServer*,QList<EventData*>)),
+            m_eventsModel, SLOT(setServerEvents(DVRServer*,QList<EventData*>)));
+
+    m_eventsView->setModel(m_eventsModel, updater->isUpdating());
+
+    connect(updater, SIGNAL(loadingStarted()), m_eventsView, SLOT(loadingStarted()));
+    connect(updater, SIGNAL(loadingFinished()), m_eventsView, SLOT(loadingFinished()));
 
     QSettings settings;
-    m_eventsModel->setUpdateInterval(settings.value(QLatin1String("ui/main/eventRefreshInterval"), 10000).toInt());
-    m_eventsModel->setEventLimit(50);
+    updater->setUpdateInterval(settings.value(QLatin1String("ui/main/eventRefreshInterval"), 10000).toInt());
+    updater->setLimit(50);
 
     m_eventsView->header()->restoreState(settings.value(QLatin1String("ui/main/eventsView")).toByteArray());
 

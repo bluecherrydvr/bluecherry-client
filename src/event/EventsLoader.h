@@ -52,6 +52,7 @@ private:
     int m_limit;
     QDateTime m_startTime;
     QDateTime m_endTime;
+
 };
 
 #endif // EVENTSLOADER_H

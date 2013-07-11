@@ -22,6 +22,7 @@
 #include "model/EventsModel.h"
 
 class DVRServersView;
+class EventsUpdater;
 class EventsView;
 class EventTimelineWidget;
 class EventTypesFilter;
@@ -88,6 +89,7 @@ private:
 
     /* Result views */
     EventsView *m_resultsView;
+    EventsUpdater *m_eventsUpdater;
     EventTimelineWidget *m_timeline;
     QSlider *m_timelineZoom;
 

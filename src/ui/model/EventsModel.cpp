@@ -24,13 +24,12 @@
 #include <QTextDocument>
 
 EventsModel::EventsModel(DVRServerRepository *serverRepository, QObject *parent)
-    : QAbstractItemModel(parent), m_serverRepository(serverRepository), m_serverEventsLimit(-1)
+    : QAbstractItemModel(parent), m_serverRepository(serverRepository)
 {
     Q_ASSERT(m_serverRepository);
 
     connect(m_serverRepository, SIGNAL(serverAdded(DVRServer*)), SLOT(serverAdded(DVRServer*)));
     connect(m_serverRepository, SIGNAL(serverAboutToBeRemoved(DVRServer*)), SLOT(clearServerEvents(DVRServer*)));
-    connect(&m_updateTimer, SIGNAL(timeout()), SLOT(updateServers()));
 
     foreach (DVRServer *s, m_serverRepository->servers())
         serverAdded(s);
@@ -38,9 +37,7 @@ EventsModel::EventsModel(DVRServerRepository *serverRepository, QObject *parent)
 
 void EventsModel::serverAdded(DVRServer *server)
 {
-    connect(server, SIGNAL(loginSuccessful(DVRServer*)), SLOT(updateServer(DVRServer*)));
     connect(server, SIGNAL(disconnected(DVRServer*)), SLOT(clearServerEvents(DVRServer*)));
-    updateServer(server);
 }
 
 int EventsModel::rowCount(const QModelIndex &parent) const
@@ -174,69 +171,6 @@ void EventsModel::computeBoundaries()
         m_serverEventsBoundaries.insert(server, qMakePair(begin, begin + count - 1));
         begin += count;
     }
-}
-
-void EventsModel::setFilterDates(const QDateTime &begin, const QDateTime &end)
-{
-    m_dateBegin = begin;
-    m_dateEnd = end;
-
-    beginResetModel();
-    m_items.clear();
-    updateServers();
-    endResetModel();
-}
-
-void EventsModel::setFilterDay(const QDateTime &date)
-{
-    setFilterDates(QDateTime(date.date(), QTime(0, 0)), QDateTime(date.date(), QTime(23, 59, 59, 999)));
-}
-
-void EventsModel::setUpdateInterval(int ms)
-{
-    if (ms > 0)
-    {
-        m_updateTimer.setInterval(ms);
-        m_updateTimer.start();
-    }
-    else
-        m_updateTimer.stop();
-}
-
-void EventsModel::updateServers()
-{
-    foreach (DVRServer *s, m_serverRepository->servers())
-        updateServer(s);
-}
-
-void EventsModel::updateServer(DVRServer *server)
-{
-    if (!server->isOnline() || m_updatingServers.contains(server))
-        return;
-
-    m_updatingServers.insert(server);
-    if (m_updatingServers.size() == 1)
-        emit loadingStarted();
-
-    EventsLoader *eventsLoader = new EventsLoader(server);
-    eventsLoader->setLimit(m_serverEventsLimit);
-    eventsLoader->setStartTime(m_dateBegin);
-    eventsLoader->setEndTime(m_dateEnd);
-    connect(eventsLoader, SIGNAL(eventsLoaded(DVRServer*,bool,QList<EventData*>)),
-            this, SLOT(eventsLoaded(DVRServer*,bool,QList<EventData*>)));
-    eventsLoader->loadEvents();
-}
-
-void EventsModel::eventsLoaded(DVRServer *server, bool ok, const QList<EventData *> &events)
-{
-    if (!server)
-        return;
-
-    if (ok)
-        setServerEvents(server, events);
-
-    if (m_updatingServers.remove(server) && m_updatingServers.isEmpty())
-        emit loadingFinished();
 }
 
 void EventsModel::setServerEvents(DVRServer *server, const QList<EventData *> &events)

@@ -26,7 +26,6 @@
 #include <QColor>
 #include <QBitArray>
 #include <QHash>
-#include <QTimer>
 
 class DVRServer;
 class DVRServerRepository;
@@ -58,11 +57,6 @@ public:
 
     explicit EventsModel(DVRServerRepository *serverRepository, QObject *parent = 0);
 
-    bool isLoading() const { return !m_updatingServers.isEmpty(); }
-
-    void setFilterDates(const QDateTime &begin, const QDateTime &end);
-    void setEventLimit(int limit) { m_serverEventsLimit = limit; }
-
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
     virtual QModelIndex index(int row, int column, const QModelIndex &parent) const;
@@ -71,24 +65,11 @@ public:
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
 public slots:
-    void setFilterDay(const QDateTime &date);
     void setServerEvents(DVRServer *server, const QList<EventData *> &events);
     void clearServerEvents(DVRServer *server);
 
-    /* Request the most recent events from the given server, the DVRServer* source, or the
-     * DVRServer represented by the ServerRequestManager* source */
-    void updateServer(DVRServer *server);
-    void updateServers();
-
-    void setUpdateInterval(int ms);
-
-signals:
-    void loadingStarted();
-    void loadingFinished();
-
 private slots:
     void serverAdded(DVRServer *server);
-    void eventsLoaded(DVRServer *server, bool ok, const QList<EventData *> &events);
 
 private:
     DVRServerRepository *m_serverRepository;
@@ -96,11 +77,6 @@ private:
     QList<EventData *> m_items;
     QMap<DVRServer *, QPair<int, int> > m_serverEventsBoundaries;
     QMap<DVRServer *, int> m_serverEventsCount;
-    QSet<DVRServer *> m_updatingServers;
-    QTimer m_updateTimer;
-    QDateTime m_dateBegin;
-    QDateTime m_dateEnd;
-    int m_serverEventsLimit;
 
     void computeBoundaries();
 

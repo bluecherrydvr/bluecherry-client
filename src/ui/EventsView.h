@@ -36,14 +36,16 @@ public:
     EventsModel * eventsModel() const;
     EventsProxyModel * eventsProxyModel() const;
 
-    void setModel(EventsModel *model);
+    void setModel(EventsModel *model, bool loading);
 
     EventList selectedEvents() const;
 
-private slots:
-    void openEvent(const QModelIndex &index);
+public slots:
     void loadingStarted();
     void loadingFinished();
+
+private slots:
+    void openEvent(const QModelIndex &index);
 
 protected:
     virtual bool eventFilter(QObject *obj, QEvent *ev);
