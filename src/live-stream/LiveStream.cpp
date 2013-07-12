@@ -259,7 +259,7 @@ void LiveStream::updateFrame()
                         m_currentFrame.height() != sf->avFrame()->height);
 
     m_currentFrame = QImage(sf->avFrame()->data[0], sf->avFrame()->width, sf->avFrame()->height,
-                            sf->avFrame()->linesize[0], QImage::Format_RGB32);
+                            sf->avFrame()->linesize[0], QImage::Format_RGB32).copy();
 
     if (sizeChanged)
         emit streamSizeChanged(m_currentFrame.size());
