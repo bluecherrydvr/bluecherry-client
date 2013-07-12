@@ -15,8 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DVRCamera.h"
 #include "DVRCameraXMLReader.h"
+#include "camera/DVRCamera.h"
 #include "server/DVRServer.h"
 #include <QUrl>
 
