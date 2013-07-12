@@ -57,7 +57,8 @@ private:
     QMap<DVRServer*, QSet<int> > m_sources;
 
     bool filterAcceptsRow(EventData *eventData) const;
-    bool lessThan(EventData *left, EventData *right) const;
+    bool lessThan(EventData *left, EventData *right, int column) const;
+    int compare(EventData *left, EventData *right, int column) const;
 
 };
 

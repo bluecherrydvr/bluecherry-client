@@ -75,12 +75,12 @@ bool EventsProxyModel::lessThan(const QModelIndex &left, const QModelIndex &righ
     EventData *rightEvent = right.data(EventsModel::EventDataPtr).value<EventData *>();
 
     if (leftEvent && rightEvent)
-        return lessThan(leftEvent, rightEvent);
+        return lessThan(leftEvent, rightEvent, m_column);
 
     return QSortFilterProxyModel::lessThan(left, right);
 }
 
-bool EventsProxyModel::lessThan(EventData *left, EventData *right) const
+bool EventsProxyModel::lessThan(EventData *left, EventData *right, int column) const
 {
     if (m_incompletePlace != IncompleteInPlace)
     {
@@ -90,22 +90,31 @@ bool EventsProxyModel::lessThan(EventData *left, EventData *right) const
             return m_incompletePlace == IncompleteFirst ? false : true;
     }
 
-    switch (m_column)
+    int res = compare(left, right, column);
+    if (res == 0 && column != EventsModel::DateColumn)
+        return compare(left, right, EventsModel::DateColumn) < 0;
+    else
+        return res < 0;
+}
+
+int EventsProxyModel::compare(EventData *left, EventData *right, int column) const
+{
+    switch (column)
     {
         case EventsModel::ServerColumn:
-            return QString::localeAwareCompare(left->server()->configuration().displayName(), right->server()->configuration().displayName()) < 0;
+            return QString::localeAwareCompare(left->server()->configuration().displayName(), right->server()->configuration().displayName());
         case EventsModel::LocationColumn:
-            return QString::localeAwareCompare(left->uiLocation(), right->uiLocation()) < 0;
+            return QString::localeAwareCompare(left->uiLocation(), right->uiLocation());
         case EventsModel::TypeColumn:
-            return QString::localeAwareCompare(left->uiType(), right->uiType()) < 0;
+            return QString::localeAwareCompare(left->uiType(), right->uiType());
         case EventsModel::DurationColumn:
-            return left->durationInSeconds() < right->durationInSeconds();
+            return left->durationInSeconds() - right->durationInSeconds();
         case EventsModel::LevelColumn:
-            return left->level() < right->level();
+            return left->level() - right->level();
         case EventsModel::DateColumn:
-            return left->utcStartDate() < right->utcStartDate();
+            return right->utcStartDate().secsTo(left->utcStartDate());
         default:
-            return left < right;
+            return left - right;
     }
 }
 
