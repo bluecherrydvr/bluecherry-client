@@ -56,6 +56,8 @@ signals:
     void finished();
 
 private:
+    static int m_timeoutInSeconds;
+
     struct AVFormatContext *m_ctx;
     QDateTime m_lastInterruptableOperationStarted;
     QUrl m_url;
