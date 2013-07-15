@@ -22,6 +22,7 @@
 #include "video/gst/GstVideoPlayerBackend.h"
 #include "video/VideoHttpBuffer.h"
 #include "video/VideoPlayerBackend.h"
+#include "video/VideoPlayerBackendFactory.h"
 #include "core/BluecherryApp.h"
 #include "ui/MainWindow.h"
 #include "utils/FileUtils.h"
@@ -212,7 +213,7 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
         m_videoThread.data()->start();
     }
 
-    m_video = new GstVideoPlayerBackend();
+    m_video = bcApp->videoPlayerBackendFactory()->createBackend();
     m_video.data()->moveToThread(m_videoThread.data());
     connect(m_video.data(), SIGNAL(stateChanged(int,int)), SLOT(stateChanged(int)));
     connect(m_video.data(), SIGNAL(nonFatalError(QString)), SLOT(videoNonFatalError(QString)));

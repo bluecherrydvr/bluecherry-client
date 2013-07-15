@@ -26,6 +26,7 @@
 #include "server/DVRServerRepository.h"
 #include "video/gst/GstPluginLoader.h"
 #include "video/gst/GstWrapper.h"
+#include "video/gst/GstVideoPlayerBackendFactory.h"
 #include <QSettings>
 #include <QStringList>
 #include <QNetworkAccessManager>
@@ -94,6 +95,7 @@ BluecherryApp::BluecherryApp()
     m_eventDownloadManager = new EventDownloadManager(this);
     connect(m_serverRepository, SIGNAL(serverRemoved(DVRServer*)), m_eventDownloadManager, SLOT(serverRemoved(DVRServer*)));
 
+    registerVideoPlayerBackendFactory();
     registerGstPluginLoader();
     registerGstWrapper();
 
@@ -105,6 +107,17 @@ BluecherryApp::~BluecherryApp()
 {
     unregisterGstWrapper();
     unregisterGstPluginLoader();
+    unregisterVideoPlayerBackendFactory();
+}
+
+void BluecherryApp::registerVideoPlayerBackendFactory()
+{
+    m_videoPlayerBackendFactory.reset(new GstVideoPlayerBackendFactory());
+}
+
+void BluecherryApp::unregisterVideoPlayerBackendFactory()
+{
+    m_videoPlayerBackendFactory.reset();
 }
 
 void BluecherryApp::registerGstPluginLoader()
