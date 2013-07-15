@@ -23,7 +23,7 @@
 #include <QUrl>
 #include <QTimer>
 
-#include "video/GstVideoPlayerBackend.h"
+#include "video/gst/GstVideoPlayerBackend.h"
 
 class QToolButton;
 class QPushButton;

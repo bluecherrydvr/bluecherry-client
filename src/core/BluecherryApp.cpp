@@ -24,8 +24,8 @@
 #include "server/DVRServer.h"
 #include "server/DVRServerConfiguration.h"
 #include "server/DVRServerRepository.h"
-#include "video/GstPluginLoader.h"
-#include "video/GstWrapper.h"
+#include "video/gst/GstPluginLoader.h"
+#include "video/gst/GstWrapper.h"
 #include <QSettings>
 #include <QStringList>
 #include <QNetworkAccessManager>

@@ -18,9 +18,9 @@
 #include "GstVideoPlayerBackend.h"
 #include "bluecherry-config.h"
 #include "core/BluecherryApp.h"
-#include "video/GstPluginLoader.h"
-#include "video/GstWrapper.h"
-#include "VideoHttpBuffer.h"
+#include "video/gst/GstPluginLoader.h"
+#include "video/gst/GstWrapper.h"
+#include "video/VideoHttpBuffer.h"
 #include <QUrl>
 #include <QDebug>
 #include <QApplication>

@@ -18,7 +18,7 @@
 #include "EventVideoPlayer.h"
 #include "event/EventDownloadManager.h"
 #include "event/EventVideoDownload.h"
-#include "video/GstSinkWidget.h"
+#include "video/gst/GstSinkWidget.h"
 #include "video/VideoHttpBuffer.h"
 #include "core/BluecherryApp.h"
 #include "ui/MainWindow.h"

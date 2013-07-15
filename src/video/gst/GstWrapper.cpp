@@ -16,7 +16,7 @@
  */
 
 #include "GstWrapper.h"
-#include "video/GstPluginLoader.h"
+#include "video/gst/GstPluginLoader.h"
 
 #include <gst/gst.h>
 #include <QDebug>

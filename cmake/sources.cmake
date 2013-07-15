@@ -126,12 +126,13 @@ set (bluecherry_client_main_SRCS
     src/utils/ThreadTask.cpp
     src/utils/ThreadTaskCourier.cpp
 
-    src/video/GstPluginLoader.cpp
-    src/video/GstSinkWidget.cpp
-    src/video/GstVideoPlayerBackend.cpp
-    src/video/GstWrapper.cpp
     src/video/MediaDownload.cpp
     src/video/VideoHttpBuffer.cpp
+
+    src/video/gst/GstPluginLoader.cpp
+    src/video/gst/GstSinkWidget.cpp
+    src/video/gst/GstVideoPlayerBackend.cpp
+    src/video/gst/GstWrapper.cpp
 )
 
 if (NOT APPLE)
