@@ -19,7 +19,9 @@
 #include "event/EventDownloadManager.h"
 #include "event/EventVideoDownload.h"
 #include "video/gst/GstSinkWidget.h"
+#include "video/gst/GstVideoPlayerBackend.h"
 #include "video/VideoHttpBuffer.h"
+#include "video/VideoPlayerBackend.h"
 #include "core/BluecherryApp.h"
 #include "ui/MainWindow.h"
 #include "utils/FileUtils.h"
@@ -220,7 +222,7 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
 
     GstElement *sink = m_videoWidget->createElement();
     Q_ASSERT(sink);
-    m_video.data()->setSink(sink);
+    ((GstVideoPlayerBackend *)(m_video.data()))->setSink(sink);
 
     connect(m_video.data(), SIGNAL(bufferingStatus(int)), m_videoWidget, SLOT(setBufferStatus(int)));
     connect(m_video.data(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()), Qt::QueuedConnection);

@@ -23,8 +23,6 @@
 #include <QUrl>
 #include <QTimer>
 
-#include "video/gst/GstVideoPlayerBackend.h"
-
 class QToolButton;
 class QPushButton;
 class QSlider;
@@ -32,6 +30,7 @@ class QLabel;
 class GstSinkWidget;
 class QThread;
 class EventData;
+class VideoPlayerBackend;
 
 class EventVideoPlayer : public QWidget
 {
@@ -72,7 +71,7 @@ private slots:
 private:
     EventData *m_event;
     QWeakPointer<QThread> m_videoThread;
-    QWeakPointer<GstVideoPlayerBackend> m_video;
+    QWeakPointer<VideoPlayerBackend> m_video;
     GstSinkWidget *m_videoWidget;
     QToolButton *m_playBtn, *m_restartBtn, *m_fastBtn, *m_slowBtn;
     QPushButton *m_saveBtn;

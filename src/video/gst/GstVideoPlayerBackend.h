@@ -33,16 +33,6 @@ class GstVideoPlayerBackend : public VideoPlayerBackend
     Q_OBJECT
 
 public:
-    enum VideoState
-    {
-        PermanentError = -2, /* Permanent errors; i.e., playback will not work even if restarted */
-        Error = -1, /* Recoverable errors, generally by stopping and restarting the pipeline */
-        Stopped,
-        Playing,
-        Paused,
-        Done
-    };
-
     explicit GstVideoPlayerBackend(QObject *parent = 0);
     virtual ~GstVideoPlayerBackend();
 
@@ -52,40 +42,27 @@ public:
     /* setSink must be called exactly and only once prior to setting up the pipeline */
     void setSink(GstElement *sink);
 
-    qint64 duration() const;
-    qint64 position() const;
-    double playbackSpeed() const { return m_playbackSpeed; }
-    bool isSeekable() const;
-    bool atEnd() const { return m_state == Done; }
-    VideoState state() const { return m_state; }
-    bool isError() const { return m_state <= Error; }
-    bool isPermanentError() const { return m_state == PermanentError; }
-    QString errorMessage() const { return m_errorMessage; }
-    VideoHttpBuffer *videoBuffer() const { return m_videoBuffer; }
+    virtual qint64 duration() const;
+    virtual qint64 position() const;
+    virtual double playbackSpeed() const { return m_playbackSpeed; }
+    virtual bool isSeekable() const;
+    virtual bool atEnd() const { return m_state == Done; }
+    virtual VideoState state() const { return m_state; }
+    virtual bool isError() const { return m_state <= Error; }
+    virtual bool isPermanentError() const { return m_state == PermanentError; }
+    virtual QString errorMessage() const { return m_errorMessage; }
+    virtual VideoHttpBuffer *videoBuffer() const { return m_videoBuffer; }
 
 public slots:
-    bool start(const QUrl &url);
-    void clear();
+    virtual bool start(const QUrl &url);
+    virtual void clear();
 
-    void play();
-    void playIfReady();
-    void pause();
-    bool seek(qint64 position);
-    bool setSpeed(double speed);
-    void restart();
-
-signals:
-    void stateChanged(int newState, int oldState);
-    void durationChanged(qint64 duration);
-    void playbackSpeedChanged(double playbackSpeed);
-    void endOfStream();
-    /* This reports the status of buffering enough for playback, not the buffering of the entire file.
-     * The size of this buffer depends on how it's configured in decodebin2, currently 10 seconds of
-     * playback. */
-    void bufferingStatus(int percent);
-    void bufferingStarted();
-    void bufferingStopped();
-    void nonFatalError(const QString &message);
+    virtual void play();
+    virtual void playIfReady();
+    virtual void pause();
+    virtual bool seek(qint64 position);
+    virtual bool setSpeed(double speed);
+    virtual void restart();
 
 private slots:
     void streamError(const QString &message);
