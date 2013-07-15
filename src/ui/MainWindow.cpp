@@ -20,6 +20,7 @@
 #include "event/CameraEventFilter.h"
 #include "event/EventDownloadManager.h"
 #include "event/EventList.h"
+#include "event/EventsUpdater.h"
 #include "event/MediaEventFilter.h"
 #include "DVRServersView.h"
 #include "EventsWindow.h"
@@ -38,6 +39,7 @@
 #include "core/BluecherryApp.h"
 #include "core/LiveViewManager.h"
 #include "event/ModelEventsCursor.h"
+#include "ui/model/EventsProxyModel.h"
 #include <QBoxLayout>
 #include <QGroupBox>
 #include <QMenuBar>
@@ -471,14 +473,22 @@ QWidget *MainWindow::createRecentEvents()
     m_eventsView->setContextMenuPolicy(Qt::CustomContextMenu);
     m_eventsView->setFrameStyle(QFrame::NoFrame);
     m_eventsView->setAttribute(Qt::WA_MacShowFocusRect, false);
+    m_eventsView->setIncompletePlace(EventsProxyModel::IncompleteLast);
 
     m_eventsModel = new EventsModel(m_serverRepository, m_eventsView);
-    m_eventsView->setModel(m_eventsModel);
+
+    EventsUpdater *updater = new EventsUpdater(m_serverRepository, m_eventsModel);
+    connect(updater, SIGNAL(serverEventsAvailable(DVRServer*,QList<EventData*>)),
+            m_eventsModel, SLOT(setServerEvents(DVRServer*,QList<EventData*>)));
+
+    m_eventsView->setModel(m_eventsModel, updater->isUpdating());
+
+    connect(updater, SIGNAL(loadingStarted()), m_eventsView, SLOT(loadingStarted()));
+    connect(updater, SIGNAL(loadingFinished()), m_eventsView, SLOT(loadingFinished()));
 
     QSettings settings;
-    m_eventsModel->setUpdateInterval(settings.value(QLatin1String("ui/main/eventRefreshInterval"), 10000).toInt());
-    m_eventsModel->setEventLimit(50);
-    m_eventsModel->setIncompleteEventsFirst(true);
+    updater->setUpdateInterval(settings.value(QLatin1String("ui/main/eventRefreshInterval"), 10000).toInt());
+    updater->setLimit(50);
 
     m_eventsView->header()->restoreState(settings.value(QLatin1String("ui/main/eventsView")).toByteArray());
 
@@ -653,23 +663,6 @@ void MainWindow::eventsContextMenu(const QPoint &pos)
 
     menu.addSeparator();
 
-    /* Disabled for now. Browse needs logic to update the UI when model filters change,
-     * and save video is not yet implemented here. */
-#if 0
-    QMenu *searchMenu = menu.addMenu(tr("Browse events..."));
-
-    QAction *aBrowseCamera = 0;
-    if (event.isCamera())
-        aBrowseCamera = searchMenu->addAction(tr("From this camera"));
-    QAction *aBrowseServer = searchMenu->addAction(tr("From this server"));
-    searchMenu->addSeparator();
-    QAction *aBrowseMinute = searchMenu->addAction(tr("Within one minute"));
-    QAction *aBrowseTenMin = searchMenu->addAction(tr("Within 10 minutes"));
-    QAction *aBrowseHour = searchMenu->addAction(tr("Within one hour"));
-
-    menu.addSeparator();
-#endif
-
     QAction *aSaveVideo = 0;
     aSaveVideo = menu.addAction(tr("Save video"));
     aSaveVideo->setEnabled(!selectedMediaEvents.isEmpty());
@@ -699,32 +692,6 @@ void MainWindow::eventsContextMenu(const QPoint &pos)
         else
             bcApp->eventDownloadManager()->startMultipleEventDownloads(selectedMediaEvents);
     }
-#if 0
-    else if (act->parentWidget() == searchMenu)
-    {
-        EventsWindow *w = EventsWindow::instance();
-
-        EventsModel *model = w->model();
-        model->clearFilters();
-
-        QDateTime date = event.serverLocalDate();
-
-        if (act == aBrowseCamera)
-            model->setFilterSource(event.locationCamera());
-        else if (act == aBrowseServer)
-            model->setFilterSource(event.server);
-        else if (act == aBrowseMinute)
-            model->setFilterDates(date.addSecs(-60), date.addSecs(60 + qMax(0, event.duration)));
-        else if (act == aBrowseTenMin)
-            model->setFilterDates(date.addSecs(-600), date.addSecs(600 + qMax(0, event.duration)));
-        else if (act == aBrowseHour)
-            model->setFilterDates(date.addSecs(-3600), date.addSecs(3600 + qMax(0, event.duration)));
-        else
-            Q_ASSERT_X(false, "Set events window filter", "Unknown action");
-
-        showEventsWindow();
-    }
-#endif
 }
 
 void MainWindow::liveViewLayoutChanged(const QString &layout)

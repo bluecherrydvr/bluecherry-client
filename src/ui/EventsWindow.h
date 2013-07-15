@@ -18,10 +18,12 @@
 #ifndef EVENTSWINDOW_H
 #define EVENTSWINDOW_H
 
+#include <QBitArray>
 #include <QWidget>
 #include "model/EventsModel.h"
 
 class DVRServersView;
+class EventsUpdater;
 class EventsView;
 class EventTimelineWidget;
 class EventTypesFilter;
@@ -46,17 +48,11 @@ public:
     explicit EventsWindow(DVRServerRepository *serverRepository, QWidget *parent = 0);
     virtual ~EventsWindow();
 
-    EventsModel *model() const;
-
 protected:
     virtual void closeEvent(QCloseEvent *event);
 
 private slots:
-    void setStartDateEnabled(bool enabled);
-    void setEndDateEnabled(bool enabled);
-    void setEndDateMinimum(const QDateTime &date);
     void levelFilterChanged();
-    void updateResultTitle();
     void cursorIndexUpdated();
 
     void timelineZoomChanged(int value);
@@ -66,12 +62,15 @@ private slots:
     void showServerEvent(const QModelIndex &index);
     void showServerEvent(const EventData &eventData);
 
+    void setFilterTypes(QBitArray types);
+    void setFilterDay(const QDateTime &day);
+    void setFilterSources(const QMap<DVRServer *, QSet<int> > &sources);
+
 private:
     DVRServerRepository *m_serverRepository;
 
     /* Filter widgets */
     DVRServersView *m_sourcesView;
-    QDateEdit *m_startDate, *m_endDate;
     QComboBox *m_levelFilter;
     EventTypesFilter *m_typeFilter;
     EventTagsView *m_tagsView;
@@ -88,6 +87,7 @@ private:
 
     /* Result views */
     EventsView *m_resultsView;
+    EventsUpdater *m_eventsUpdater;
     EventTimelineWidget *m_timeline;
     QSlider *m_timelineZoom;
 
@@ -102,9 +102,9 @@ private:
     QWidget *createTags();
     QWidget *createTagsInput();
 
-    QWidget *createResultTitle();
     QWidget *createResultsView();
     QWidget *createTimeline();
+
 };
 
 #endif // EVENTSWINDOW_H

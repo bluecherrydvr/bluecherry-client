@@ -104,7 +104,7 @@ private:
     };
     Q_DECLARE_FLAGS(LayoutFlags, LayoutFlag)
     LayoutFlags pendingLayouts;
-    
+
     QDateTime earliestDate();
     QDateTime latestDate();
 
@@ -131,9 +131,9 @@ private:
     /* Mouse events */
     QPoint mouseClickPos;
     QRubberBand *mouseRubberBand;
-    
+
     QDateTime firstTickDateTime() const;
-    
+
     void paintDays(QPainter &p);
     void paintTickLines(QPainter &p, const QRect &rect);
     void paintLegend(QPainter &p);
@@ -155,7 +155,7 @@ private:
     void updateScrollBars();
 
     EventData *eventAt(const QPoint &point) const;
-    
+
     int utcOffset() const;
 
     /* Area of the viewport containing items */

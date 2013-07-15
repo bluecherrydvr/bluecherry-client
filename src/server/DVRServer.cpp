@@ -48,10 +48,9 @@ DVRServer::DVRServer(int id, QObject *parent)
     connect(m_api, SIGNAL(disconnected()), SLOT(disconnectedSlot()));
 
     connect(m_api, SIGNAL(loginRequestStarted()), this, SIGNAL(loginRequestStarted()));
-    connect(m_api, SIGNAL(loginSuccessful()), this, SIGNAL(loginSuccessful()));
+    connect(m_api, SIGNAL(loginSuccessful()), this, SLOT(loginSuccessfulSlot()));
     connect(m_api, SIGNAL(serverError(QString)), this, SIGNAL(serverError(QString)));
     connect(m_api, SIGNAL(loginError(QString)), this, SIGNAL(loginError(QString)));
-    connect(m_api, SIGNAL(disconnected()), this, SIGNAL(disconnected()));
     connect(m_api, SIGNAL(statusChanged(int)), this, SIGNAL(statusChanged(int)));
     connect(m_api, SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
 
@@ -163,7 +162,7 @@ void DVRServer::updateCamerasReply()
                     if (camera)
                     {
                         camera->setOnline(true);
-                        
+
                         DVRCameraXMLReader xmlReader;
                         if (!xmlReader.readCamera(camera, xml))
                         {
@@ -180,6 +179,7 @@ void DVRServer::updateCamerasReply()
 
                     if (!m_visibleCameras.contains(camera))
                     {
+                        emit cameraAboutToBeAdded(camera);
                         m_visibleCameras.append(camera);
                         emit cameraAdded(camera);
                     }
@@ -205,6 +205,7 @@ void DVRServer::updateCamerasReply()
         if (!idSet.contains(m_visibleCameras[i]->data().id()))
         {
             DVRCamera *c = m_visibleCameras[i];
+            emit cameraAboutToBeRemoved(c);
             m_visibleCameras.removeAt(i);
             m_camerasMap.remove(c->data().id());
             qDebug("DVRServer: camera %d removed", c->data().id());
@@ -281,7 +282,9 @@ void DVRServer::disconnectedSlot()
 {
     while (!m_visibleCameras.isEmpty())
     {
-        DVRCamera *c = m_visibleCameras.takeFirst();
+        DVRCamera *c = m_visibleCameras.first();
+        emit cameraAboutToBeRemoved(c);
+        m_visibleCameras.takeFirst();
         c->setOnline(false);
         emit cameraRemoved(c);
     }
@@ -289,6 +292,13 @@ void DVRServer::disconnectedSlot()
     m_devicesLoaded = false;
     m_statusAlertMessage.clear();
     emit statusAlertMessageChanged(QString());
+
+    emit disconnected(this);
+}
+
+void DVRServer::loginSuccessfulSlot()
+{
+    emit loginSuccessful(this);
 }
 
 bool DVRServer::isKnownCertificate(const QSslCertificate &certificate) const

@@ -15,44 +15,55 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVENTSLOADER_H
-#define EVENTSLOADER_H
+#ifndef EVENTS_UPDATER_H
+#define EVENTS_UPDATER_H
 
 #include <QDateTime>
 #include <QObject>
+#include <QSet>
+#include <QTimer>
 
 class DVRServer;
+class DVRServerRepository;
 class EventData;
 
-class EventsLoader : public QObject
+class EventsUpdater : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit EventsLoader(DVRServer *server, QObject *parent = 0);
-    virtual ~EventsLoader();
+    explicit EventsUpdater(DVRServerRepository *serverRepository, QObject *parent = 0);
+    virtual ~EventsUpdater();
 
-    DVRServer * server() const { return m_server.data(); }
+    bool isUpdating() const;
 
+public slots:
+    void setUpdateInterval(int miliseconds);
     void setLimit(int limit);
-    void setStartTime(const QDateTime &startTime);
-    void setEndTime(const QDateTime &endTime);
+    void setDay(const QDate &date);
 
-    void loadEvents();
+    void updateServer(DVRServer *server);
+    void updateServers();
 
 signals:
-    void eventsLoaded(DVRServer *server, bool ok, const QList<EventData *> &events);
+    void loadingStarted();
+    void loadingFinished();
+
+    void serverEventsAvailable(DVRServer *server, const QList<EventData *> &events);
 
 private slots:
-    void serverRequestFinished();
-    void eventParseFinished();
+    void serverAdded(DVRServer *server);
+    void eventsLoaded(DVRServer *server, bool ok, const QList<EventData *> &events);
 
 private:
-    QWeakPointer<DVRServer> m_server;
+    DVRServerRepository *m_serverRepository;
+    QSet<DVRServer *> m_updatingServers;
+
+    QTimer m_updateTimer;
     int m_limit;
     QDateTime m_startTime;
     QDateTime m_endTime;
 
 };
 
-#endif // EVENTSLOADER_H
+#endif // EVENTS_UPDATER_H

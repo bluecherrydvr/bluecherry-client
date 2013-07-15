@@ -15,8 +15,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ui/model/EventsModel.h"
 #include "ModelEventsCursor.h"
+#include "core/EventData.h"
+#include "ui/model/EventsModel.h"
 #include <QDebug>
 
 ModelEventsCursor::ModelEventsCursor(QObject *parent)
@@ -233,9 +234,6 @@ void ModelEventsCursor::rowsMoved(const QModelIndex &sourceParent, int sourceFir
 
 void ModelEventsCursor::rowsRemoved(const QModelIndex &parent, int start, int end)
 {
-    qDebug() << "rowsRemoved";
-    qDebug() << m_cameraFilter.data();
-
     if (parent.isValid())
         return;
 

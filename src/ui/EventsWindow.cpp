@@ -25,6 +25,7 @@
 #include "EventTagsView.h"
 #include "model/EventTagsModel.h"
 #include "model/EventsModel.h"
+#include "model/EventsProxyModel.h"
 #include "core/BluecherryApp.h"
 #include "event/ModelEventsCursor.h"
 #include "ui/MainWindow.h"
@@ -32,6 +33,7 @@
 #include "event/CameraEventFilter.h"
 #include "event/EventDownloadManager.h"
 #include "event/EventList.h"
+#include "event/EventsUpdater.h"
 #include "event/MediaEventFilter.h"
 #include <QBoxLayout>
 #include <QGridLayout>
@@ -60,6 +62,7 @@ EventsWindow::EventsWindow(DVRServerRepository *serverRepository, QWidget *paren
     QBoxLayout *filtersLayout = new QVBoxLayout;
     layout->addLayout(filtersLayout);
 
+    m_eventsUpdater = new EventsUpdater(bcApp->serverRepository(), this);
     createResultsView();
 
     /* Filters */
@@ -76,19 +79,19 @@ EventsWindow::EventsWindow(DVRServerRepository *serverRepository, QWidget *paren
     //m_sourcesView->setMaximumHeight(150);
     filtersLayout->addWidget(m_sourcesView);
 
-    connect(sourcesModel, SIGNAL(checkedSourcesChanged(QMap<DVRServer*,QList<int>>)),
-            m_resultsView->eventsModel(), SLOT(setFilterSources(QMap<DVRServer*,QList<int>>)));
+    connect(sourcesModel, SIGNAL(checkedSourcesChanged(QMap<DVRServer*,QSet<int>>)),
+            this, SLOT(setFilterSources(QMap<DVRServer*,QSet<int>>)));
 
     createDateFilter(filtersLayout);
 
-#if 0 /* This is not useful currently. */
+#if 1 /* This is not useful currently. */
     QLabel *label = new QLabel(tr("Minimum Level"));
     label->setStyleSheet(QLatin1String("font-weight:bold;"));
     filtersLayout->addWidget(label);
     filtersLayout->addWidget(createLevelFilter());
 #endif
 
-    QLabel *label = new QLabel(tr("Type"));
+    label = new QLabel(tr("Type"));
     label->setStyleSheet(QLatin1String("font-weight:bold;"));
     filtersLayout->addWidget(label);
     filtersLayout->addWidget(createTypeFilter());
@@ -134,83 +137,22 @@ EventsWindow::~EventsWindow()
 {
 }
 
-EventsModel *EventsWindow::model() const
-{
-    return m_resultsView->eventsModel();
-}
-
 void EventsWindow::createDateFilter(QBoxLayout *layout)
 {
-    QCheckBox *title = new QCheckBox(tr("Date after..."));
+    QLabel *title = new QLabel(tr("Date"));
     title->setStyleSheet(QLatin1String("font-weight:bold;"));
     layout->addWidget(title);
-    connect(title, SIGNAL(clicked(bool)), SLOT(setStartDateEnabled(bool)));
 
-    m_startDate = new QDateEdit(QDate::currentDate());
-    m_startDate->setCalendarPopup(true);
-    m_startDate->setMaximumDate(QDate::currentDate());
-    m_startDate->setDisplayFormat(QLatin1String("dddd, MMM dd, yyyy"));
-    m_startDate->setVisible(false);
-    layout->addWidget(m_startDate);
+    QDateEdit *dateEdit = new QDateEdit(QDate::currentDate());
+    dateEdit->setCalendarPopup(true);
+    dateEdit->setMaximumDate(QDate::currentDate());
+    dateEdit->setDisplayFormat(QLatin1String("ddd, MMM dd, yyyy"));
+    dateEdit->setTime(QTime(23, 59, 59, 999));
+    dateEdit->setFixedWidth(m_sourcesView->width());
+    layout->addWidget(dateEdit);
 
-    connect(m_startDate, SIGNAL(dateTimeChanged(QDateTime)), m_resultsView->eventsModel(),
-            SLOT(setFilterBeginDate(QDateTime)));
-    connect(m_startDate, SIGNAL(dateTimeChanged(QDateTime)), SLOT(setEndDateMinimum(QDateTime)));
-    title->setChecked(false);
-
-    /* Start date disabled in favor of setFilterDay for now. */
-    title->hide();
-    m_startDate->hide();
-
-    QLabel *title2 = new QLabel(tr("Date"));
-    title2->setStyleSheet(QLatin1String("font-weight:bold;"));
-    layout->addWidget(title2);
-
-    m_endDate = new QDateEdit(QDate::currentDate());
-    m_endDate->setCalendarPopup(true);
-    m_endDate->setMaximumDate(QDate::currentDate());
-    m_endDate->setDisplayFormat(QLatin1String("ddd, MMM dd, yyyy"));
-    m_endDate->setTime(QTime(23, 59, 59, 999));
-    m_endDate->setFixedWidth(m_sourcesView->width());
-    layout->addWidget(m_endDate);
-
-    connect(m_endDate, SIGNAL(dateTimeChanged(QDateTime)), m_resultsView->eventsModel(),
+    connect(dateEdit, SIGNAL(dateTimeChanged(QDateTime)), this,
             SLOT(setFilterDay(QDateTime)));
-}
-
-void EventsWindow::setStartDateEnabled(bool enabled)
-{
-    m_startDate->setVisible(enabled);
-    if (enabled)
-    {
-        m_resultsView->eventsModel()->setFilterBeginDate(m_startDate->dateTime());
-        setEndDateMinimum(m_startDate->dateTime());
-    }
-    else
-    {
-        m_resultsView->eventsModel()->setFilterBeginDate(QDateTime());
-        setEndDateMinimum(QDateTime());
-    }
-}
-
-void EventsWindow::setEndDateEnabled(bool enabled)
-{
-    m_endDate->setVisible(enabled);
-    if (enabled)
-        m_resultsView->eventsModel()->setFilterEndDate(m_endDate->dateTime());
-    else
-        m_resultsView->eventsModel()->setFilterEndDate(QDateTime());
-}
-
-void EventsWindow::setEndDateMinimum(const QDateTime &date)
-{
-    if (date.isValid())
-    {
-        m_endDate->setMinimumDate(date.date());
-        m_endDate->setTime(QTime(23, 59, 59, 999));
-    }
-    else
-        m_endDate->clearMinimumDateTime();
 }
 
 QWidget *EventsWindow::createLevelFilter()
@@ -232,7 +174,7 @@ QWidget *EventsWindow::createTypeFilter()
     m_typeFilter->setMaximumWidth(180);
     m_typeFilter->setMaximumHeight(100);
 
-    connect(m_typeFilter, SIGNAL(checkedTypesChanged(QBitArray)), m_resultsView->eventsModel(), SLOT(setFilterTypes(QBitArray)));
+    connect(m_typeFilter, SIGNAL(checkedTypesChanged(QBitArray)), this, SLOT(setFilterTypes(QBitArray)));
 
     return m_typeFilter;
 }
@@ -257,24 +199,18 @@ QWidget *EventsWindow::createTagsInput()
     return tagInput;
 }
 
-QWidget *EventsWindow::createResultTitle()
-{
-    m_resultTitle = new QLabel;
-    QFont font = m_resultTitle->font();
-    font.setPointSize(font.pointSize()+4);
-    m_resultTitle->setFont(font);
-    m_resultTitle->setWordWrap(true);
-
-    connect(m_resultsView->eventsModel(), SIGNAL(filtersChanged()), SLOT(updateResultTitle()));
-    updateResultTitle();
-
-    return m_resultTitle;
-}
-
-QWidget *EventsWindow::createResultsView()
+QWidget * EventsWindow::createResultsView()
 {
     m_resultsView = new EventsView;
-    m_resultsView->setModel(new EventsModel(m_serverRepository, this));
+    connect(m_eventsUpdater, SIGNAL(loadingStarted()), m_resultsView, SLOT(loadingStarted()));
+    connect(m_eventsUpdater, SIGNAL(loadingFinished()), m_resultsView, SLOT(loadingFinished()));
+
+    EventsModel *eventsModel = new EventsModel(m_serverRepository, this);
+    m_resultsView->setModel(eventsModel, m_eventsUpdater->isUpdating());
+
+    connect(m_eventsUpdater, SIGNAL(serverEventsAvailable(DVRServer*,QList<EventData*>)),
+            eventsModel, SLOT(setServerEvents(DVRServer*,QList<EventData*>)));
+
     m_resultsView->setFrameStyle(QFrame::NoFrame);
     m_resultsView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_resultsView, SIGNAL(customContextMenuRequested(QPoint)), SLOT(eventContextMenu(QPoint)));
@@ -284,7 +220,8 @@ QWidget *EventsWindow::createResultsView()
     m_resultsView->header()->restoreState(settings.value(QLatin1String("ui/events/viewHeader")).toByteArray());
     m_resultsView->header()->setSortIndicatorShown(true);
     m_resultsView->header()->setSortIndicator(EventsModel::DateColumn, Qt::DescendingOrder);
-    m_resultsView->setSortingEnabled(true);
+    connect(m_resultsView->header(), SIGNAL(sortIndicatorChanged(int,Qt::SortOrder)),
+            m_resultsView, SLOT(sortEvents(int,Qt::SortOrder)));
 
     return m_resultsView;
 }
@@ -296,7 +233,7 @@ QWidget *EventsWindow::createTimeline()
 
     m_timeline = new EventTimelineWidget;
     m_timeline->setContextMenuPolicy(Qt::CustomContextMenu);
-    m_timeline->setModel(m_resultsView->eventsModel());
+    m_timeline->setModel(m_resultsView->model());
 
     m_timelineZoom = new QSlider(Qt::Horizontal);
     m_timelineZoom->setRange(0, 100);
@@ -331,12 +268,7 @@ void EventsWindow::levelFilterChanged()
     if (level < 0)
         level = EventLevel::Minimum;
 
-    m_resultsView->eventsModel()->setFilterLevel((EventLevel::Level)level);
-}
-
-void EventsWindow::updateResultTitle()
-{
-    m_resultTitle->setText(m_resultsView->eventsModel()->filterDescription());
+    m_resultsView->setMinimumLevel((EventLevel::Level)level);
 }
 
 void EventsWindow::cursorIndexUpdated()
@@ -455,4 +387,20 @@ void EventsWindow::eventContextMenu(const QPoint &pos)
                 sModel->setData(sModel->indexOfCamera(camera), Qt::Unchecked, Qt::CheckStateRole);
         }
     }
+}
+
+void EventsWindow::setFilterTypes(QBitArray types)
+{
+    m_resultsView->setTypes(types);
+}
+
+void EventsWindow::setFilterDay(const QDateTime &day)
+{
+    m_eventsUpdater->setDay(day.date());
+    m_resultsView->setDay(day.date());
+}
+
+void EventsWindow::setFilterSources(const QMap<DVRServer *, QSet<int> > &sources)
+{
+    m_resultsView->setSources(sources);
 }
