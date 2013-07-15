@@ -31,6 +31,7 @@ set (bluecherry_client_MOC_SRCS
     src/event/EventDownloadManager.h
     src/event/EventsCursor.h
     src/event/EventsLoader.h
+    src/event/EventsUpdater.h
     src/event/EventVideoDownload.h
     src/event/ModelEventsCursor.h
 
@@ -55,6 +56,7 @@ set (bluecherry_client_MOC_SRCS
     src/ui/model/DVRServersModel.h
     src/ui/model/DVRServersProxyModel.h
     src/ui/model/EventsModel.h
+    src/ui/model/EventsProxyModel.h
     src/ui/model/EventSourcesModel.h
     src/ui/model/EventTagsModel.h
     src/ui/model/SavedLayoutsModel.h

@@ -65,6 +65,11 @@ bool DVRServersProxyModel::lessThan(const QModelIndex &left, const QModelIndex &
 
 bool DVRServersProxyModel::lessThan(DVRCamera *left, DVRCamera *right) const
 {
+    if (left->data().id() == -1)
+        return true;
+    if (right->data().id() == -1)
+        return false;
+
     return QString::localeAwareCompare(left->data().displayName(), right->data().displayName()) < 0;
 }
 

@@ -80,6 +80,7 @@ public slots:
     void login();
     void toggleOnline();
     void updateCameras();
+    void loginSuccessfulSlot();
 
 signals:
     void changed();
@@ -87,16 +88,18 @@ signals:
 
     void serverRemoved(DVRServer *server);
 
+    void cameraAboutToBeAdded(DVRCamera *camera);
     void cameraAdded(DVRCamera *camera);
+    void cameraAboutToBeRemoved(DVRCamera *camera);
     void cameraRemoved(DVRCamera *camera);
 
     void statusAlertMessageChanged(const QString &message);
 
     void loginRequestStarted();
-    void loginSuccessful();
+    void loginSuccessful(DVRServer *camera);
     void serverError(const QString &message);
     void loginError(const QString &message);
-    void disconnected();
+    void disconnected(DVRServer *server);
     void statusChanged(int status);
     void onlineChanged(bool online);
 

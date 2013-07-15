@@ -33,7 +33,6 @@ EventsLoader::EventsLoader(DVRServer *server, QObject *parent)
 
 EventsLoader::~EventsLoader()
 {
-
 }
 
 void EventsLoader::setLimit(int limit)
@@ -55,7 +54,7 @@ void EventsLoader::loadEvents()
 {
     if (!m_server || !m_server.data()->isOnline())
     {
-        emit eventsLoaded(false, QList<EventData*>());
+        emit eventsLoaded(m_server.data(), false, QList<EventData*>());
         deleteLater();
         return;
     }
@@ -88,7 +87,7 @@ void EventsLoader::serverRequestFinished()
     {
         qWarning() << "Event request error:" << reply->errorString();
         /* TODO: Handle errors properly */
-        emit eventsLoaded(false, QList<EventData*>());
+        emit eventsLoaded(m_server.data(), false, QList<EventData*>());
         deleteLater();
         return;
     }
@@ -97,7 +96,7 @@ void EventsLoader::serverRequestFinished()
     if (statusCode < 200 || statusCode >= 300)
     {
         qWarning() << "Event request error: HTTP code" << statusCode;
-        emit eventsLoaded(false, QList<EventData*>());
+        emit eventsLoaded(m_server.data(), false, QList<EventData*>());
         deleteLater();
         return;
     }
@@ -120,7 +119,7 @@ void EventsLoader::eventParseFinished()
 
     if (!m_server)
     {
-        emit eventsLoaded(false, QList<EventData*>());
+        emit eventsLoaded(m_server.data(), false, QList<EventData*>());
         deleteLater();
         return; // ignore data from removed servers
     }
@@ -128,6 +127,6 @@ void EventsLoader::eventParseFinished()
     QList<EventData*> events = qfw->result();
     qDebug() << "EventsLoader: Parsed event data into" << events.size() << "events";
 
-    emit eventsLoaded(true, events);
+    emit eventsLoaded(m_server.data(), true, events);
     deleteLater();
 }

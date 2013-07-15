@@ -15,13 +15,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DVRCAMERAXMLSREADER_H
-#define DVRCAMERAXMLREADER_H
-
-#include <QVariant>
+#ifndef DVR_CAMERA_XML_READER_H
+#define DVR_CAMERA_XML_READER_H
 
 class DVRCamera;
-class DVRServer;
 class QXmlStreamReader;
 
 class DVRCameraXMLReader
@@ -31,4 +28,4 @@ public:
 
 };
 
-#endif // DVRCAMERAXMLSREADER_H
+#endif // DVR_CAMERA_XML_READER_H
