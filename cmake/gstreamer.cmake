@@ -31,14 +31,14 @@ if (UNIX AND NOT APPLE)
         ${GSTREAMERAPP_0_10_LIBRARIES}
     )
 
-    set (GSTREAMER_PLUGIN_PATHS "")
+    set (GSTREAMER_PLUGIN_PATHS "${GSTREAMER_PLUGIN_PATHS}")
     set (GSTREAMER_PLUGIN_PREFIX "lib")
     set (GSTREAMER_PLUGIN_SUFFIX ".so")
     set (GSTREAMER_PLUGINS "gsttypefindfunctions:gstapp:gstdecodebin2:gstmatroska:gstffmpegcolorspace:gstcoreelements:gstffmpeg")
 endif (UNIX AND NOT APPLE)
 
 if (APPLE)
-    set (GSTREAMER_PLUGIN_PATHS "./../PlugIns/gstreamer/")
+    set (GSTREAMER_PLUGIN_PATHS "./../PlugIns/gstreamer/:${GSTREAMER_PLUGIN_PATHS}")
     set (GSTREAMER_PLUGIN_PREFIX "lib")
     set (GSTREAMER_PLUGIN_SUFFIX ".so")
     set (GSTREAMER_PLUGINS "gsttypefindfunctions:gstapp:gstdecodebin2:gstmatroska:gstffmpegcolorspace:gstcoreelements:gstffmpeg:gstosxaudio")
@@ -46,9 +46,9 @@ endif (APPLE)
 
 if (WIN32)
     if (CMAKE_BUILD_TYPE MATCHES Debug)
-        set (GSTREAMER_PLUGIN_PATHS ${CMAKE_SOURCE_DIR}/gstreamer-bin/win/plugins)
+        set (GSTREAMER_PLUGIN_PATHS "${CMAKE_SOURCE_DIR}/gstreamer-bin/win/plugins:${GSTREAMER_PLUGIN_PATHS}")
     else (CMAKE_BUILD_TYPE MATCHES Debug)
-        set (GSTREAMER_PLUGIN_PATHS "./plugins")
+        set (GSTREAMER_PLUGIN_PATHS "./plugins:${GSTREAMER_PLUGIN_PATHS}")
     endif (CMAKE_BUILD_TYPE MATCHES Debug)
 
     set (GSTREAMER_PLUGIN_PREFIX "lib")
