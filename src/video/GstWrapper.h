@@ -15,27 +15,31 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GST_PLUGIN_LOADER_H
-#define GST_PLUGIN_LOADER_H
+#ifndef GST_WRAPPER_H
+#define GST_WRAPPER_H
 
 #include <QStringList>
 
-class GstPluginLoader
+class GstPluginLoader;
+
+class GstWrapper
 {
 
 public:
-    void setPaths(const QStringList &paths);
-    void setPrefixes(const QStringList &prefixes);
-    void setSuffixes(const QStringList &suffixes);
+    GstWrapper();
 
-    bool loadGstPlugin(const QString &plugin);
-    bool loadGstPluginFullPath(const QString &pluginFullPath);
+    void setPluginLoader(GstPluginLoader *pluginLoader);
+    void setPlugins(const QStringList &plugins);
+
+    bool ensureInitialized();
+    QString errorMessage() const;
 
 private:
-    QStringList m_paths;
-    QStringList m_prefixes;
-    QStringList m_suffixes;
+    GstPluginLoader *m_pluginLoader;
+    QStringList m_plugins;
+    bool m_initialized;
+    QString m_errorMessage;
 
 };
 
-#endif // GST_PLUGIN_LOADER_H
+#endif // GST_WRAPPER_H

@@ -37,6 +37,8 @@ class LiveViewManager;
 class EventDownloadManager;
 class MediaDownloadManager;
 class UpdateChecker;
+class GstPluginLoader;
+class GstWrapper;
 
 class BluecherryApp : public QObject
 {
@@ -50,6 +52,7 @@ public:
     TransferRateCalculator * const globalRate;
 
     explicit BluecherryApp();
+    virtual ~BluecherryApp();
 
     MainWindow *globalParentWindow() const;
 
@@ -61,6 +64,8 @@ public:
     DVRServerRepository * serverRepository() const { return m_serverRepository; }
     MediaDownloadManager * mediaDownloadManager() const { return m_mediaDownloadManager; }
     EventDownloadManager * eventDownloadManager() const { return m_eventDownloadManager; }
+    GstWrapper * gstWrapper() const { return m_gstWrapper.data(); }
+    GstPluginLoader * gstPluginLoader() const { return m_gstPluginLoader.data(); }
 
     /* Temporarily pause live feeds to free up bandwidth for other intensive transfers
      * (particularly event video buffering). The live feed can be paused with pauseLive(),
@@ -98,12 +103,21 @@ private:
     MediaDownloadManager *m_mediaDownloadManager;
     EventDownloadManager *m_eventDownloadManager;
     UpdateChecker *m_updateChecker;
+    QScopedPointer<GstWrapper> m_gstWrapper;
+    QScopedPointer<GstPluginLoader> m_gstPluginLoader;
+
     bool m_livePaused, m_inPauseQuery, m_screensaverInhibited;
 #ifdef Q_OS_WIN
     int m_screensaveValue;
 #else
     QTimer *m_screensaveTimer;
 #endif
+
+    void registerGstPluginLoader();
+    void unregisterGstPluginLoader();
+
+    void registerGstWrapper();
+    void unregisterGstWrapper();
 
     void loadServers();
     bool shouldAddLocalServer() const;

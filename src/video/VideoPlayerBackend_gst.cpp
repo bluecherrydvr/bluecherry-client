@@ -16,7 +16,9 @@
  */
 
 #include "bluecherry-config.h"
-#include "GstPluginLoader.h"
+#include "core/BluecherryApp.h"
+#include "video/GstPluginLoader.h"
+#include "video/GstWrapper.h"
 #include "VideoPlayerBackend_gst.h"
 #include "VideoHttpBuffer.h"
 #include <QUrl>
@@ -32,8 +34,8 @@ VideoPlayerBackend::VideoPlayerBackend(QObject *parent)
     : QObject(parent), m_pipeline(0), m_videoLink(0), m_sink(0), m_videoBuffer(0), m_state(Stopped),
       m_playbackSpeed(1.0)
 {
-    if (!initGStreamer(&m_errorMessage))
-        setError(true, m_errorMessage);
+    if (!initGStreamer())
+        setError(true, bcApp->gstWrapper()->errorMessage()); // not the clearest solution, will be replaced
 }
 
 VideoPlayerBackend::~VideoPlayerBackend()
@@ -61,37 +63,10 @@ void VideoPlayerBackend::setVideoBuffer(VideoHttpBuffer *videoHttpBuffer)
     }
 }
 
-bool VideoPlayerBackend::initGStreamer(QString *errorMessage)
+bool VideoPlayerBackend::initGStreamer()
 {
-    static bool loaded = false;
-    if (loaded)
-        return true;
-
-    GError *err;
-    if (gst_init_check(0, 0, &err) == FALSE)
-    {
-        Q_ASSERT(err);
-        qWarning() << "GStreamer initialization failed:" << err->message;
-        if (errorMessage)
-            *errorMessage = QString::fromLatin1("initialization failed: ") + QString::fromLatin1(err->message);
-        g_error_free(err);
-        return false;
-    }
-
-    QStringList paths = QString::fromLatin1(GSTREAMER_PLUGIN_PATHS).split(QChar::fromAscii(':'), QString::SkipEmptyParts);
-    if (paths.isEmpty())
-        return true;
-
-    GstPluginLoader pluginLoader;
-    pluginLoader.setPaths(paths);
-    pluginLoader.setPrefixes(QStringList() << QString::fromLatin1(GSTREAMER_PLUGIN_PREFIX));
-    pluginLoader.setSuffixes(QStringList() << QString::fromLatin1(GSTREAMER_PLUGIN_SUFFIX));
-
-    QStringList plugins = QString::fromLatin1(GSTREAMER_PLUGINS).split(QChar::fromAscii(':'), QString::SkipEmptyParts);
-    foreach (const QString &plugin, plugins)
-        pluginLoader.loadGstPlugin(plugin);
-
-    return true;
+    GstWrapper *gstWrapper = bcApp->gstWrapper();
+    return gstWrapper->ensureInitialized();
 }
 
 GstBusSyncReply VideoPlayerBackend::staticBusHandler(GstBus *bus, GstMessage *msg, gpointer data)

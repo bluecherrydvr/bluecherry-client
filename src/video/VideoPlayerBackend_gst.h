@@ -46,7 +46,7 @@ public:
     explicit VideoPlayerBackend(QObject *parent = 0);
     ~VideoPlayerBackend();
 
-    static bool initGStreamer(QString *errorMessage = 0);
+    bool initGStreamer();
 
     GstElement *sink() const { return m_sink; }
     /* setSink must be called exactly and only once prior to setting up the pipeline */
