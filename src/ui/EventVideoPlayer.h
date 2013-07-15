@@ -23,9 +23,7 @@
 #include <QUrl>
 #include <QTimer>
 
-#ifdef USE_GSTREAMER
 #include "video/GstVideoPlayerBackend.h"
-#endif
 
 class QToolButton;
 class QPushButton;
