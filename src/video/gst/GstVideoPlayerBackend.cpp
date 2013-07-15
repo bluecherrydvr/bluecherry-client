@@ -31,7 +31,7 @@
 #include <glib.h>
 
 GstVideoPlayerBackend::GstVideoPlayerBackend(QObject *parent)
-    : QObject(parent), m_pipeline(0), m_videoLink(0), m_sink(0), m_videoBuffer(0), m_state(Stopped),
+    : VideoPlayerBackend(parent), m_pipeline(0), m_videoLink(0), m_sink(0), m_videoBuffer(0), m_state(Stopped),
       m_playbackSpeed(1.0)
 {
     if (!initGStreamer())

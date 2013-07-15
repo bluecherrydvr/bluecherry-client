@@ -18,7 +18,7 @@
 #ifndef GST_VIDEO_PLAYER_BACKEND_H
 #define GST_VIDEO_PLAYER_BACKEND_H
 
-#include <QObject>
+#include "video/VideoPlayerBackend.h"
 #include <QWidget>
 #include <QMutex>
 #include <gst/gst.h>
@@ -28,7 +28,7 @@ class VideoHttpBuffer;
 
 typedef struct _GstDecodeBin GstDecodeBin;
 
-class GstVideoPlayerBackend : public QObject
+class GstVideoPlayerBackend : public VideoPlayerBackend
 {
     Q_OBJECT
 
