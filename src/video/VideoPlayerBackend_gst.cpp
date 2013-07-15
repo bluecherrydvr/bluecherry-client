@@ -78,40 +78,38 @@ bool VideoPlayerBackend::initGStreamer(QString *errorMessage)
     }
 
 #ifdef Q_OS_LINUX
-    if (QString::fromLatin1(GSTREAMER_PLUGINS).isEmpty())
+    if (QString::fromLatin1(GSTREAMER_PLUGIN_PATHS).isEmpty())
         return true;
-#endif
-
-#ifdef Q_OS_WIN
-#define EXT ".dll"
-#else
-#define EXT ".so"
 #endif
 
     const char *plugins[] =
     {
-        "libgsttypefindfunctions"EXT, "libgstapp"EXT, "libgstdecodebin2"EXT, "libgstmatroska"EXT,
-        "libgstffmpegcolorspace"EXT, "libgstcoreelements"EXT,
+        GSTREAMER_PLUGIN_PREFIX"gsttypefindfunctions"GSTREAMER_PLUGIN_SUFFIX,
+        GSTREAMER_PLUGIN_PREFIX"gstapp"GSTREAMER_PLUGIN_SUFFIX,
+        GSTREAMER_PLUGIN_PREFIX"gstdecodebin2"GSTREAMER_PLUGIN_SUFFIX,
+        GSTREAMER_PLUGIN_PREFIX"gstmatroska"GSTREAMER_PLUGIN_SUFFIX,
+        GSTREAMER_PLUGIN_PREFIX"gstffmpegcolorspace"GSTREAMER_PLUGIN_SUFFIX,
+        GSTREAMER_PLUGIN_PREFIX"gstcoreelements"GSTREAMER_PLUGIN_SUFFIX,
 #ifndef Q_OS_WIN
-        "libgstffmpeg"EXT,
+        GSTREAMER_PLUGIN_PREFIX"gstffmpeg"GSTREAMER_PLUGIN_SUFFIX,
 #endif
 #ifdef Q_OS_WIN
-        "libgstffmpeg-lgpl"EXT, "libgstautodetect"EXT,
+        GSTREAMER_PLUGIN_PREFIX"gstffmpeg-lgpl"GSTREAMER_PLUGIN_SUFFIX,
+        GSTREAMER_PLUGIN_PREFIX"gstautodetect"GSTREAMER_PLUGIN_SUFFIX,
 #elif defined(Q_OS_MAC)
-        "libgstosxaudio"EXT,
+        GSTREAMER_PLUGIN_PREFIX"gstosxaudio"GSTREAMER_PLUGIN_SUFFIX,
 #endif
         0
     };
 
-#undef EXT
 #if defined(Q_OS_MAC)
     QString pluginPath = QApplication::applicationDirPath() + QLatin1String("/../PlugIns/gstreamer/");
 #else
     QString pluginPath = QDir::toNativeSeparators(QApplication::applicationDirPath() + QDir::separator());
 #endif
 
-#if defined(GSTREAMER_PLUGINS) and not defined(Q_OS_MAC)
-    QString ppx = QDir::toNativeSeparators(QString::fromLatin1(GSTREAMER_PLUGINS "/"));
+#if defined(GSTREAMER_PLUGIN_PATHS) and not defined(Q_OS_MAC)
+    QString ppx = QDir::toNativeSeparators(QString::fromLatin1(GSTREAMER_PLUGIN_PATHS "/"));
     if (QDir::isAbsolutePath(ppx))
         pluginPath = ppx;
     else

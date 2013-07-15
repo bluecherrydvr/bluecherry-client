@@ -30,12 +30,25 @@ if (UNIX AND NOT APPLE)
     list (APPEND bluecherry_client_LIBRARIES
         ${GSTREAMERAPP_0_10_LIBRARIES}
     )
+
+    set (GSTREAMER_PLUGIN_PATHS "")
+    set (GSTREAMER_PLUGIN_PREFIX "lib")
+    set (GSTREAMER_PLUGIN_SUFFIX ".so")
 endif (UNIX AND NOT APPLE)
+
+if (APPLE)
+    set (GSTREAMER_PLUGIN_PATHS "./../PlugIns/gstreamer/")
+    set (GSTREAMER_PLUGIN_PREFIX "lib")
+    set (GSTREAMER_PLUGIN_SUFFIX ".so")
+endif (APPLE)
 
 if (WIN32)
     if (CMAKE_BUILD_TYPE MATCHES Debug)
-        set (GSTREAMER_PLUGINS ${CMAKE_SOURCE_DIR}/gstreamer-bin/win/plugins)
+        set (GSTREAMER_PLUGIN_PATHS ${CMAKE_SOURCE_DIR}/gstreamer-bin/win/plugins)
     else (CMAKE_BUILD_TYPE MATCHES Debug)
-        set (GSTREAMER_PLUGINS plugins)
+        set (GSTREAMER_PLUGIN_PATHS "./plugins")
     endif (CMAKE_BUILD_TYPE MATCHES Debug)
+
+    set (GSTREAMER_PLUGIN_PREFIX "lib")
+    set (GSTREAMER_PLUGIN_SUFFIX ".dll")
 endif (WIN32)
