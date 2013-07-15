@@ -33,6 +33,8 @@ extern "C" {
 
 #define ASSERT_WORKER_THREAD() Q_ASSERT(QThread::currentThread() == thread())
 
+int LiveStreamWorker::m_timeoutInSeconds = 15;
+
 int liveStreamInterruptCallback(void *opaque)
 {
     LiveStreamWorker *worker = (LiveStreamWorker *)opaque;
@@ -79,7 +81,7 @@ bool LiveStreamWorker::shouldInterrupt() const
     if (m_cancelFlag)
         return true;
 
-    if (m_lastInterruptableOperationStarted.secsTo(QDateTime::currentDateTime()) > 5)
+    if (m_lastInterruptableOperationStarted.secsTo(QDateTime::currentDateTime()) > m_timeoutInSeconds)
         return true;
 
     return false;
