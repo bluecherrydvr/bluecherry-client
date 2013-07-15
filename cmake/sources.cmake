@@ -126,6 +126,7 @@ set (bluecherry_client_main_SRCS
     src/utils/ThreadTask.cpp
     src/utils/ThreadTaskCourier.cpp
 
+    src/video/GstPluginLoader.cpp
     src/video/GstSinkWidget.cpp
     src/video/MediaDownload.cpp
     src/video/VideoHttpBuffer.cpp

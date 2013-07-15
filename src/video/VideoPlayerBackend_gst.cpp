@@ -16,6 +16,7 @@
  */
 
 #include "bluecherry-config.h"
+#include "GstPluginLoader.h"
 #include "VideoPlayerBackend_gst.h"
 #include "VideoHttpBuffer.h"
 #include <QUrl>
@@ -77,66 +78,21 @@ bool VideoPlayerBackend::initGStreamer(QString *errorMessage)
         return false;
     }
 
-#ifdef Q_OS_LINUX
-    if (QString::fromLatin1(GSTREAMER_PLUGIN_PATHS).isEmpty())
+    QStringList paths = QString::fromLatin1(GSTREAMER_PLUGIN_PATHS).split(QChar::fromAscii(':'), QString::SkipEmptyParts);
+    if (paths.isEmpty())
         return true;
-#endif
+
+    GstPluginLoader pluginLoader;
+    pluginLoader.setPaths(paths);
+    pluginLoader.setPrefixes(QStringList() << QString::fromLatin1(GSTREAMER_PLUGIN_PREFIX));
+    pluginLoader.setSuffixes(QStringList() << QString::fromLatin1(GSTREAMER_PLUGIN_SUFFIX));
 
     QStringList plugins = QString::fromLatin1(GSTREAMER_PLUGINS).split(QChar::fromAscii(':'), QString::SkipEmptyParts);
+    foreach (const QString &plugin, plugins)
+        if (!pluginLoader.loadGstPlugin(plugin))
+            return false;
 
-#if defined(Q_OS_MAC)
-    QString pluginPath = QApplication::applicationDirPath() + QLatin1String("/../PlugIns/gstreamer/");
-#else
-    QString pluginPath = QDir::toNativeSeparators(QApplication::applicationDirPath() + QDir::separator());
-#endif
-
-#if defined(GSTREAMER_PLUGIN_PATHS) and not defined(Q_OS_MAC)
-    QString ppx = QDir::toNativeSeparators(QString::fromLatin1(GSTREAMER_PLUGIN_PATHS "/"));
-    if (QDir::isAbsolutePath(ppx))
-        pluginPath = ppx;
-    else
-        pluginPath += ppx;
-#endif
-
-    if (!QFile::exists(pluginPath))
-    {
-        qWarning() << "gstreamer: Plugin path" << pluginPath << "does not exist";
-        if (errorMessage)
-            *errorMessage = QString::fromLatin1("plugin path (%1) does not exist").arg(pluginPath);
-        return false;
-    }
-
-    bool success = true;
-    QByteArray path = QFile::encodeName(pluginPath);
-
-    if (errorMessage)
-        errorMessage->clear();
-
-    foreach (const QString &pluginName, plugins)
-    {
-        QByteArray path = QFile::encodeName(pluginPath + pluginName);
-
-        GError *err = 0;
-        GstPlugin *plugin = gst_plugin_load_file(path.constData(), &err);
-        if (!plugin)
-        {
-            Q_ASSERT(err);
-            qWarning() << "gstreamer: Failed to load plugin" << pluginName << ":" << err->message;
-            if (errorMessage)
-                errorMessage->append(QString::fromLatin1("plugin '%1' failed: %2\n").arg(pluginName).arg(QLatin1String(err->message)));
-            g_error_free(err);
-            success = false;
-        }
-        else
-        {
-            Q_ASSERT(!err);
-            gst_object_unref(plugin);
-        }
-    }
-
-    if (success)
-        loaded = true;
-    return success;
+    return true;
 }
 
 GstBusSyncReply VideoPlayerBackend::staticBusHandler(GstBus *bus, GstMessage *msg, gpointer data)
