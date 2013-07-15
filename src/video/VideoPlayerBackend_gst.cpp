@@ -82,25 +82,7 @@ bool VideoPlayerBackend::initGStreamer(QString *errorMessage)
         return true;
 #endif
 
-    const char *plugins[] =
-    {
-        GSTREAMER_PLUGIN_PREFIX"gsttypefindfunctions"GSTREAMER_PLUGIN_SUFFIX,
-        GSTREAMER_PLUGIN_PREFIX"gstapp"GSTREAMER_PLUGIN_SUFFIX,
-        GSTREAMER_PLUGIN_PREFIX"gstdecodebin2"GSTREAMER_PLUGIN_SUFFIX,
-        GSTREAMER_PLUGIN_PREFIX"gstmatroska"GSTREAMER_PLUGIN_SUFFIX,
-        GSTREAMER_PLUGIN_PREFIX"gstffmpegcolorspace"GSTREAMER_PLUGIN_SUFFIX,
-        GSTREAMER_PLUGIN_PREFIX"gstcoreelements"GSTREAMER_PLUGIN_SUFFIX,
-#ifndef Q_OS_WIN
-        GSTREAMER_PLUGIN_PREFIX"gstffmpeg"GSTREAMER_PLUGIN_SUFFIX,
-#endif
-#ifdef Q_OS_WIN
-        GSTREAMER_PLUGIN_PREFIX"gstffmpeg-lgpl"GSTREAMER_PLUGIN_SUFFIX,
-        GSTREAMER_PLUGIN_PREFIX"gstautodetect"GSTREAMER_PLUGIN_SUFFIX,
-#elif defined(Q_OS_MAC)
-        GSTREAMER_PLUGIN_PREFIX"gstosxaudio"GSTREAMER_PLUGIN_SUFFIX,
-#endif
-        0
-    };
+    QStringList plugins = QString::fromLatin1(GSTREAMER_PLUGINS).split(QChar::fromAscii(':'), QString::SkipEmptyParts);
 
 #if defined(Q_OS_MAC)
     QString pluginPath = QApplication::applicationDirPath() + QLatin1String("/../PlugIns/gstreamer/");
@@ -126,25 +108,22 @@ bool VideoPlayerBackend::initGStreamer(QString *errorMessage)
 
     bool success = true;
     QByteArray path = QFile::encodeName(pluginPath);
-    int pathEnd = path.size();
 
     if (errorMessage)
         errorMessage->clear();
 
-    for (const char **p = plugins; *p; ++p)
+    foreach (const QString &pluginName, plugins)
     {
-        path.truncate(pathEnd);
-        path.append(*p);
+        QByteArray path = QFile::encodeName(pluginPath + pluginName);
 
         GError *err = 0;
         GstPlugin *plugin = gst_plugin_load_file(path.constData(), &err);
         if (!plugin)
         {
             Q_ASSERT(err);
-            qWarning() << "gstreamer: Failed to load plugin" << *p << ":" << err->message;
+            qWarning() << "gstreamer: Failed to load plugin" << pluginName << ":" << err->message;
             if (errorMessage)
-                errorMessage->append(QString::fromLatin1("plugin '%1' failed: %2\n").arg(QLatin1String(*p))
-                                     .arg(QLatin1String(err->message)));
+                errorMessage->append(QString::fromLatin1("plugin '%1' failed: %2\n").arg(pluginName).arg(QLatin1String(err->message)));
             g_error_free(err);
             success = false;
         }
