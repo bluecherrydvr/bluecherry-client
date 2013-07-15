@@ -15,11 +15,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "GstVideoPlayerBackend.h"
 #include "bluecherry-config.h"
 #include "core/BluecherryApp.h"
 #include "video/GstPluginLoader.h"
 #include "video/GstWrapper.h"
-#include "VideoPlayerBackend_gst.h"
 #include "VideoHttpBuffer.h"
 #include <QUrl>
 #include <QDebug>
@@ -30,7 +30,7 @@
 #include <gst/video/video.h>
 #include <glib.h>
 
-VideoPlayerBackend::VideoPlayerBackend(QObject *parent)
+GstVideoPlayerBackend::GstVideoPlayerBackend(QObject *parent)
     : QObject(parent), m_pipeline(0), m_videoLink(0), m_sink(0), m_videoBuffer(0), m_state(Stopped),
       m_playbackSpeed(1.0)
 {
@@ -38,12 +38,12 @@ VideoPlayerBackend::VideoPlayerBackend(QObject *parent)
         setError(true, bcApp->gstWrapper()->errorMessage()); // not the clearest solution, will be replaced
 }
 
-VideoPlayerBackend::~VideoPlayerBackend()
+GstVideoPlayerBackend::~GstVideoPlayerBackend()
 {
     clear();
 }
 
-void VideoPlayerBackend::setVideoBuffer(VideoHttpBuffer *videoHttpBuffer)
+void GstVideoPlayerBackend::setVideoBuffer(VideoHttpBuffer *videoHttpBuffer)
 {
     if (m_videoBuffer)
     {
@@ -63,25 +63,25 @@ void VideoPlayerBackend::setVideoBuffer(VideoHttpBuffer *videoHttpBuffer)
     }
 }
 
-bool VideoPlayerBackend::initGStreamer()
+bool GstVideoPlayerBackend::initGStreamer()
 {
     GstWrapper *gstWrapper = bcApp->gstWrapper();
     return gstWrapper->ensureInitialized();
 }
 
-GstBusSyncReply VideoPlayerBackend::staticBusHandler(GstBus *bus, GstMessage *msg, gpointer data)
+GstBusSyncReply GstVideoPlayerBackend::staticBusHandler(GstBus *bus, GstMessage *msg, gpointer data)
 {
     Q_ASSERT(data);
-    return ((VideoPlayerBackend*)data)->busHandler(bus, msg);
+    return ((GstVideoPlayerBackend*)data)->busHandler(bus, msg);
 }
 
-void VideoPlayerBackend::staticDecodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast, gpointer user_data)
+void GstVideoPlayerBackend::staticDecodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast, gpointer user_data)
 {
     Q_ASSERT(user_data);
-    static_cast<VideoPlayerBackend*>(user_data)->decodePadReady(bin, pad, islast);
+    static_cast<GstVideoPlayerBackend*>(user_data)->decodePadReady(bin, pad, islast);
 }
 
-void VideoPlayerBackend::setSink(GstElement *sink)
+void GstVideoPlayerBackend::setSink(GstElement *sink)
 {
     Q_ASSERT(!m_pipeline);
     Q_ASSERT(!m_sink);
@@ -94,7 +94,7 @@ void VideoPlayerBackend::setSink(GstElement *sink)
     }
 }
 
-bool VideoPlayerBackend::start(const QUrl &url)
+bool GstVideoPlayerBackend::start(const QUrl &url)
 {
     Q_ASSERT(!m_pipeline);
     if (state() == PermanentError || m_pipeline)
@@ -184,7 +184,7 @@ bool VideoPlayerBackend::start(const QUrl &url)
     return true;
 }
 
-void VideoPlayerBackend::clear()
+void GstVideoPlayerBackend::clear()
 {
     if (m_sink)
         g_object_unref(m_sink);
@@ -215,7 +215,7 @@ void VideoPlayerBackend::clear()
     m_errorMessage.clear();
 }
 
-void VideoPlayerBackend::setError(bool permanent, const QString &message)
+void GstVideoPlayerBackend::setError(bool permanent, const QString &message)
 {
     VideoState old = m_state;
     m_state = permanent ? PermanentError : Error;
@@ -223,15 +223,15 @@ void VideoPlayerBackend::setError(bool permanent, const QString &message)
     emit stateChanged(m_state, old);
 }
 
-void VideoPlayerBackend::streamError(const QString &message)
+void GstVideoPlayerBackend::streamError(const QString &message)
 {
-    qDebug() << "VideoPlayerBackend: stopping stream due to error:" << message;
+    qDebug() << "GstVideoPlayerBackend: stopping stream due to error:" << message;
     if (m_pipeline)
         gst_element_set_state(m_pipeline, GST_STATE_NULL);
     setError(true, message);
 }
 
-void VideoPlayerBackend::playIfReady()
+void GstVideoPlayerBackend::playIfReady()
 {
     if (!m_pipeline)
         return;
@@ -241,7 +241,7 @@ void VideoPlayerBackend::playIfReady()
         play();
 }
 
-void VideoPlayerBackend::play()
+void GstVideoPlayerBackend::play()
 {
     if (!m_pipeline)
         return;
@@ -249,14 +249,14 @@ void VideoPlayerBackend::play()
     emit playbackSpeedChanged(m_playbackSpeed);
 }
 
-void VideoPlayerBackend::pause()
+void GstVideoPlayerBackend::pause()
 {
     if (!m_pipeline)
         return;
     gst_element_set_state(m_pipeline, GST_STATE_PAUSED);
 }
 
-void VideoPlayerBackend::restart()
+void GstVideoPlayerBackend::restart()
 {
     if (!m_pipeline)
         return;
@@ -267,7 +267,7 @@ void VideoPlayerBackend::restart()
     emit stateChanged(m_state, old);
 }
 
-qint64 VideoPlayerBackend::duration() const
+qint64 GstVideoPlayerBackend::duration() const
 {
     if (m_pipeline)
     {
@@ -280,7 +280,7 @@ qint64 VideoPlayerBackend::duration() const
     return -1;
 }
 
-qint64 VideoPlayerBackend::position() const
+qint64 GstVideoPlayerBackend::position() const
 {
     if (!m_pipeline)
         return -1;
@@ -296,7 +296,7 @@ qint64 VideoPlayerBackend::position() const
     return re;
 }
 
-bool VideoPlayerBackend::isSeekable() const
+bool GstVideoPlayerBackend::isSeekable() const
 {
     if (!m_pipeline)
         return false;
@@ -316,7 +316,7 @@ bool VideoPlayerBackend::isSeekable() const
     return re;
 }
 
-bool VideoPlayerBackend::seek(qint64 position)
+bool GstVideoPlayerBackend::seek(qint64 position)
 {
     if (!m_pipeline)
         return false;
@@ -343,7 +343,7 @@ bool VideoPlayerBackend::seek(qint64 position)
     return re ? true : false;
 }
 
-bool VideoPlayerBackend::setSpeed(double speed)
+bool GstVideoPlayerBackend::setSpeed(double speed)
 {
     if (!m_pipeline)
         return false;
@@ -373,7 +373,7 @@ bool VideoPlayerBackend::setSpeed(double speed)
     return re ? true : false;
 }
 
-void VideoPlayerBackend::decodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast)
+void GstVideoPlayerBackend::decodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast)
 {
     Q_UNUSED(islast);
 
@@ -402,7 +402,7 @@ void VideoPlayerBackend::decodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean
  * not be excessively delayed, deadlocked, or used for anything GUI-related. Primarily,
  * we want to emit signals (which will result in queued slot calls) or do queued method
  * invocation to handle GUI updates. */
-GstBusSyncReply VideoPlayerBackend::busHandler(GstBus *bus, GstMessage *msg)
+GstBusSyncReply GstVideoPlayerBackend::busHandler(GstBus *bus, GstMessage *msg)
 {
     Q_UNUSED(bus);
 

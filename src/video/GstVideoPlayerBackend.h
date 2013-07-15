@@ -15,8 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VIDEOPLAYERBACKEND_GST_H
-#define VIDEOPLAYERBACKEND_GST_H
+#ifndef GST_VIDEO_PLAYER_BACKEND_H
+#define GST_VIDEO_PLAYER_BACKEND_H
 
 #include <QObject>
 #include <QWidget>
@@ -28,7 +28,7 @@ class VideoHttpBuffer;
 
 typedef struct _GstDecodeBin GstDecodeBin;
 
-class VideoPlayerBackend : public QObject
+class GstVideoPlayerBackend : public QObject
 {
     Q_OBJECT
 
@@ -43,8 +43,8 @@ public:
         Done
     };
 
-    explicit VideoPlayerBackend(QObject *parent = 0);
-    ~VideoPlayerBackend();
+    explicit GstVideoPlayerBackend(QObject *parent = 0);
+    virtual ~GstVideoPlayerBackend();
 
     bool initGStreamer();
 
@@ -109,4 +109,4 @@ private:
     static void staticDecodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast, gpointer user_data);
 };
 
-#endif // VIDEOPLAYERBACKEND_GST_H
+#endif // GST_VIDEO_PLAYER_BACKEND_H

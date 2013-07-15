@@ -210,7 +210,7 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
         m_videoThread.data()->start();
     }
 
-    m_video = new VideoPlayerBackend;
+    m_video = new GstVideoPlayerBackend();
     m_video.data()->moveToThread(m_videoThread.data());
     connect(m_video.data(), SIGNAL(stateChanged(int,int)), SLOT(stateChanged(int)));
     connect(m_video.data(), SIGNAL(nonFatalError(QString)), SLOT(videoNonFatalError(QString)));
@@ -269,7 +269,7 @@ void EventVideoPlayer::playPause()
     if (!m_video)
         return;
 
-    if (m_video.data()->state() == VideoPlayerBackend::Playing)
+    if (m_video.data()->state() == GstVideoPlayerBackend::Playing)
     {
         m_video.data()->metaObject()->invokeMethod(m_video.data(), "pause", Qt::QueuedConnection);
     }
@@ -373,7 +373,7 @@ void EventVideoPlayer::queryLivePaused()
 
 bool EventVideoPlayer::uiRefreshNeeded() const
 {
-    return m_video && (m_video.data()->videoBuffer()) && (m_video.data()->videoBuffer()->isBuffering() || m_video.data()->state() == VideoPlayerBackend::Playing);
+    return m_video && (m_video.data()->videoBuffer()) && (m_video.data()->videoBuffer()->isBuffering() || m_video.data()->state() == GstVideoPlayerBackend::Playing);
 }
 
 void EventVideoPlayer::updateUI()
@@ -404,7 +404,7 @@ void EventVideoPlayer::bufferingStopped()
 {
     bcApp->releaseLive();
 
-    if (!m_video || !m_video.data()->videoBuffer() || (m_video.data()->videoBuffer()->isBufferingFinished() && m_video.data()->state() > VideoPlayerBackend::Error))
+    if (!m_video || !m_video.data()->videoBuffer() || (m_video.data()->videoBuffer()->isBufferingFinished() && m_video.data()->state() > GstVideoPlayerBackend::Error))
         m_statusText->clear();
 
     if (!uiRefreshNeeded())
@@ -425,7 +425,7 @@ void EventVideoPlayer::stateChanged(int state)
     Q_ASSERT(QThread::currentThread() == qApp->thread());
 
     qDebug("state change %d", state);
-    if (state == VideoPlayerBackend::Playing)
+    if (state == GstVideoPlayerBackend::Playing)
     {
         m_playBtn->setIcon(QIcon(QLatin1String(":/icons/control-pause.png")));
         m_uiTimer.start();
@@ -439,7 +439,7 @@ void EventVideoPlayer::stateChanged(int state)
             m_uiTimer.stop();
     }
 
-    if (state == VideoPlayerBackend::Error || state == VideoPlayerBackend::PermanentError)
+    if (state == GstVideoPlayerBackend::Error || state == GstVideoPlayerBackend::PermanentError)
     {
         m_statusText->setText(QLatin1String("<span style='color:red;font-weight:bold'>") +
                               m_video.data()->errorMessage() + QLatin1String("</span>"));
@@ -448,8 +448,8 @@ void EventVideoPlayer::stateChanged(int state)
     QSettings settings;
     if (settings.value(QLatin1String("ui/disableScreensaver/onVideo")).toBool())
     {
-        bcApp->setScreensaverInhibited(state == VideoPlayerBackend::Playing
-                                       || state == VideoPlayerBackend::Paused);
+        bcApp->setScreensaverInhibited(state == GstVideoPlayerBackend::Playing
+                                       || state == GstVideoPlayerBackend::Paused);
     }
 }
 
@@ -554,7 +554,7 @@ void EventVideoPlayer::videoContextMenu(const QPoint &rpos)
 
     QMenu menu(qobject_cast<QWidget*>(sender()));
 
-    if (m_video.data()->state() == VideoPlayerBackend::Playing)
+    if (m_video.data()->state() == GstVideoPlayerBackend::Playing)
         menu.addAction(tr("&Pause"), this, SLOT(playPause()));
     else
         menu.addAction(tr("&Play"), this, SLOT(playPause()));

@@ -128,10 +128,10 @@ set (bluecherry_client_main_SRCS
 
     src/video/GstPluginLoader.cpp
     src/video/GstSinkWidget.cpp
+    src/video/GstVideoPlayerBackend.cpp
     src/video/GstWrapper.cpp
     src/video/MediaDownload.cpp
     src/video/VideoHttpBuffer.cpp
-    src/video/VideoPlayerBackend_gst.cpp
 )
 
 if (NOT APPLE)

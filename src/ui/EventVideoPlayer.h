@@ -24,7 +24,7 @@
 #include <QTimer>
 
 #ifdef USE_GSTREAMER
-#include "video/VideoPlayerBackend_gst.h"
+#include "video/GstVideoPlayerBackend.h"
 #endif
 
 class QToolButton;
@@ -74,7 +74,7 @@ private slots:
 private:
     EventData *m_event;
     QWeakPointer<QThread> m_videoThread;
-    QWeakPointer<VideoPlayerBackend> m_video;
+    QWeakPointer<GstVideoPlayerBackend> m_video;
     GstSinkWidget *m_videoWidget;
     QToolButton *m_playBtn, *m_restartBtn, *m_fastBtn, *m_slowBtn;
     QPushButton *m_saveBtn;

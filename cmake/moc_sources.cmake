@@ -97,10 +97,10 @@ set (bluecherry_client_MOC_SRCS
     src/utils/ThreadTaskCourier.h
 
     src/video/GstSinkWidget.h
+    src/video/GstVideoPlayerBackend.h
     src/video/MediaDownload.h
     src/video/MediaDownload_p.h
     src/video/VideoHttpBuffer.h
-    src/video/VideoPlayerBackend_gst.h
 )
 
 if (WIN32)
