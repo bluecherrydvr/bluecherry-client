@@ -89,8 +89,7 @@ bool VideoPlayerBackend::initGStreamer(QString *errorMessage)
 
     QStringList plugins = QString::fromLatin1(GSTREAMER_PLUGINS).split(QChar::fromAscii(':'), QString::SkipEmptyParts);
     foreach (const QString &plugin, plugins)
-        if (!pluginLoader.loadGstPlugin(plugin))
-            return false;
+        pluginLoader.loadGstPlugin(plugin);
 
     return true;
 }
