@@ -21,7 +21,6 @@
 #include "server/DVRServerConfiguration.h"
 #include "core/BluecherryApp.h"
 #include "core/CameraPtzControl.h"
-#include "core/MJpegStream.h"
 #include "live-stream/LiveStream.h"
 #include <QMimeData>
 #include <QSettings>
