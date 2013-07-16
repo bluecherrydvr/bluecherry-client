@@ -39,7 +39,7 @@ class MediaDownloadManager;
 class UpdateChecker;
 class GstPluginLoader;
 class GstWrapper;
-class VideoPlayerBackendFactory;
+class VideoPlayerFactory;
 
 class BluecherryApp : public QObject
 {
@@ -65,7 +65,7 @@ public:
     DVRServerRepository * serverRepository() const { return m_serverRepository; }
     MediaDownloadManager * mediaDownloadManager() const { return m_mediaDownloadManager; }
     EventDownloadManager * eventDownloadManager() const { return m_eventDownloadManager; }
-    VideoPlayerBackendFactory * videoPlayerBackendFactory() const { return m_videoPlayerBackendFactory.data(); }
+    VideoPlayerFactory * videoPlayerFactory() const { return m_videoPlayerFactory.data(); }
     GstWrapper * gstWrapper() const { return m_gstWrapper.data(); }
     GstPluginLoader * gstPluginLoader() const { return m_gstPluginLoader.data(); }
 
@@ -105,7 +105,7 @@ private:
     MediaDownloadManager *m_mediaDownloadManager;
     EventDownloadManager *m_eventDownloadManager;
     UpdateChecker *m_updateChecker;
-    QScopedPointer<VideoPlayerBackendFactory> m_videoPlayerBackendFactory;
+    QScopedPointer<VideoPlayerFactory> m_videoPlayerFactory;
     QScopedPointer<GstWrapper> m_gstWrapper;
     QScopedPointer<GstPluginLoader> m_gstPluginLoader;
 
@@ -116,8 +116,8 @@ private:
     QTimer *m_screensaveTimer;
 #endif
 
-    void registerVideoPlayerBackendFactory();
-    void unregisterVideoPlayerBackendFactory();
+    void registerVideoPlayerFactory();
+    void unregisterVideoPlayerFactory();
 
     void registerGstPluginLoader();
     void unregisterGstPluginLoader();

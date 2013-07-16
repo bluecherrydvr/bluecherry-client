@@ -15,23 +15,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VIDEO_PLAYER_BACKEND_FACTORY_H
-#define VIDEO_PLAYER_BACKEND_FACTORY_H
+#ifndef VIDEO_PLAYER_FACTORY_H
+#define VIDEO_PLAYER_FACTORY_H
 
 class QObject;
 class QWidget;
 class VideoPlayerBackend;
 class VideoWidget;
 
-class VideoPlayerBackendFactory
+class VideoPlayerFactory
 {
 
 public:
-    virtual ~VideoPlayerBackendFactory() {}
+    virtual ~VideoPlayerFactory() {}
 
     virtual VideoWidget * createWidget(QWidget *parent = 0) = 0;
     virtual VideoPlayerBackend * createBackend(QObject *parent = 0) = 0;
 
 };
 
-#endif // VIDEO_PLAYER_BACKEND_FACTORY_H
+#endif // VIDEO_PLAYER_FACTORY_H

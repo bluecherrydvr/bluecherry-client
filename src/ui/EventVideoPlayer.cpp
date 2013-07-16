@@ -20,7 +20,7 @@
 #include "event/EventVideoDownload.h"
 #include "video/VideoHttpBuffer.h"
 #include "video/VideoPlayerBackend.h"
-#include "video/VideoPlayerBackendFactory.h"
+#include "video/VideoPlayerFactory.h"
 #include "video/VideoWidget.h"
 #include "core/BluecherryApp.h"
 #include "ui/MainWindow.h"
@@ -87,7 +87,7 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     QBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
 
-    m_videoWidget = bcApp->videoPlayerBackendFactory()->createWidget();
+    m_videoWidget = bcApp->videoPlayerFactory()->createWidget();
     m_videoWidget->setFrameStyle(QFrame::NoFrame);
     m_videoWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_videoWidget, SIGNAL(customContextMenuRequested(QPoint)), SLOT(videoContextMenu(QPoint)));
@@ -212,7 +212,7 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
         m_videoThread.data()->start();
     }
 
-    m_videoBackend = bcApp->videoPlayerBackendFactory()->createBackend();
+    m_videoBackend = bcApp->videoPlayerFactory()->createBackend();
     m_videoBackend.data()->moveToThread(m_videoThread.data());
     connect(m_videoBackend.data(), SIGNAL(stateChanged(int,int)), SLOT(stateChanged(int)));
     connect(m_videoBackend.data(), SIGNAL(nonFatalError(QString)), SLOT(videoNonFatalError(QString)));
