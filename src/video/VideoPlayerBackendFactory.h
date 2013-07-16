@@ -19,7 +19,9 @@
 #define VIDEO_PLAYER_BACKEND_FACTORY_H
 
 class QObject;
+class QWidget;
 class VideoPlayerBackend;
+class VideoWidget;
 
 class VideoPlayerBackendFactory
 {
@@ -27,6 +29,7 @@ class VideoPlayerBackendFactory
 public:
     virtual ~VideoPlayerBackendFactory() {}
 
+    virtual VideoWidget * createWidget(QWidget *parent = 0) = 0;
     virtual VideoPlayerBackend * createBackend(QObject *parent = 0) = 0;
 
 };

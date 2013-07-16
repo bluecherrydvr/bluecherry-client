@@ -16,10 +16,16 @@
  */
 
 #include "GstVideoPlayerBackendFactory.h"
+#include "GstSinkWidget.h"
 #include "GstVideoPlayerBackend.h"
 
 GstVideoPlayerBackendFactory::~GstVideoPlayerBackendFactory()
 {
+}
+
+VideoWidget * GstVideoPlayerBackendFactory::createWidget(QWidget *parent)
+{
+    return new GstSinkWidget(parent);
 }
 
 VideoPlayerBackend * GstVideoPlayerBackendFactory::createBackend(QObject *parent)

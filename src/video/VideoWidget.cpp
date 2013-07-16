@@ -15,20 +15,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GST_VIDEO_PLAYER_BACKEND_FACTORY_H
-#define GST_VIDEO_PLAYER_BACKEND_FACTORY_H
+#include "VideoWidget.h"
 
-#include "video/VideoPlayerBackendFactory.h"
-
-class GstVideoPlayerBackendFactory : public VideoPlayerBackendFactory
+VideoWidget::VideoWidget(QWidget *parent) :
+        QFrame(parent)
 {
+}
 
-public:
-    virtual ~GstVideoPlayerBackendFactory();
-
-    virtual VideoWidget * createWidget(QWidget *parent = 0);
-    virtual VideoPlayerBackend * createBackend(QObject *parent = 0);
-
-};
-
-#endif // VIDEO_PLAYER_BACKEND_FACTORY_H
+VideoWidget::~VideoWidget()
+{
+}

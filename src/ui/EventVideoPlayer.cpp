@@ -18,11 +18,10 @@
 #include "EventVideoPlayer.h"
 #include "event/EventDownloadManager.h"
 #include "event/EventVideoDownload.h"
-#include "video/gst/GstSinkWidget.h"
-#include "video/gst/GstVideoPlayerBackend.h"
 #include "video/VideoHttpBuffer.h"
 #include "video/VideoPlayerBackend.h"
 #include "video/VideoPlayerBackendFactory.h"
+#include "video/VideoWidget.h"
 #include "core/BluecherryApp.h"
 #include "ui/MainWindow.h"
 #include "utils/FileUtils.h"
@@ -88,7 +87,7 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     QBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
 
-    m_videoWidget = new GstSinkWidget;
+    m_videoWidget = bcApp->videoPlayerBackendFactory()->createWidget();
     m_videoWidget->setFrameStyle(QFrame::NoFrame);
     m_videoWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_videoWidget, SIGNAL(customContextMenuRequested(QPoint)), SLOT(videoContextMenu(QPoint)));
@@ -221,9 +220,7 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     connect(m_videoBackend.data(), SIGNAL(endOfStream()), SLOT(durationChanged()));
     connect(m_videoBackend.data(), SIGNAL(playbackSpeedChanged(double)), SLOT(playbackSpeedChanged(double)));
 
-    GstElement *sink = m_videoWidget->createElement();
-    Q_ASSERT(sink);
-    ((GstVideoPlayerBackend *)(m_videoBackend.data()))->setSink(sink);
+    m_videoWidget->initVideo(m_videoBackend.data());
 
     connect(m_videoBackend.data(), SIGNAL(bufferingStatus(int)), m_videoWidget, SLOT(setBufferStatus(int)));
     connect(m_videoBackend.data(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()), Qt::QueuedConnection);
@@ -263,7 +260,7 @@ void EventVideoPlayer::clearVideo()
     m_statusText->clear();
     m_rateText->clear();
     m_uiTimer.stop();
-    m_videoWidget->destroyElement();
+    m_videoWidget->clearVideo();
     setControlsEnabled(false);
 }
 
@@ -272,7 +269,7 @@ void EventVideoPlayer::playPause()
     if (!m_videoBackend)
         return;
 
-    if (m_videoBackend.data()->state() == GstVideoPlayerBackend::Playing)
+    if (m_videoBackend.data()->state() == VideoPlayerBackend::Playing)
     {
         m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "pause", Qt::QueuedConnection);
     }
@@ -376,7 +373,7 @@ void EventVideoPlayer::queryLivePaused()
 
 bool EventVideoPlayer::uiRefreshNeeded() const
 {
-    return m_videoBackend && (m_videoBackend.data()->videoBuffer()) && (m_videoBackend.data()->videoBuffer()->isBuffering() || m_videoBackend.data()->state() == GstVideoPlayerBackend::Playing);
+    return m_videoBackend && (m_videoBackend.data()->videoBuffer()) && (m_videoBackend.data()->videoBuffer()->isBuffering() || m_videoBackend.data()->state() == VideoPlayerBackend::Playing);
 }
 
 void EventVideoPlayer::updateUI()
@@ -407,7 +404,7 @@ void EventVideoPlayer::bufferingStopped()
 {
     bcApp->releaseLive();
 
-    if (!m_videoBackend || !m_videoBackend.data()->videoBuffer() || (m_videoBackend.data()->videoBuffer()->isBufferingFinished() && m_videoBackend.data()->state() > GstVideoPlayerBackend::Error))
+    if (!m_videoBackend || !m_videoBackend.data()->videoBuffer() || (m_videoBackend.data()->videoBuffer()->isBufferingFinished() && m_videoBackend.data()->state() > VideoPlayerBackend::Error))
         m_statusText->clear();
 
     if (!uiRefreshNeeded())
@@ -428,7 +425,7 @@ void EventVideoPlayer::stateChanged(int state)
     Q_ASSERT(QThread::currentThread() == qApp->thread());
 
     qDebug("state change %d", state);
-    if (state == GstVideoPlayerBackend::Playing)
+    if (state == VideoPlayerBackend::Playing)
     {
         m_playBtn->setIcon(QIcon(QLatin1String(":/icons/control-pause.png")));
         m_uiTimer.start();
@@ -442,7 +439,7 @@ void EventVideoPlayer::stateChanged(int state)
             m_uiTimer.stop();
     }
 
-    if (state == GstVideoPlayerBackend::Error || state == GstVideoPlayerBackend::PermanentError)
+    if (state == VideoPlayerBackend::Error || state == VideoPlayerBackend::PermanentError)
     {
         m_statusText->setText(QLatin1String("<span style='color:red;font-weight:bold'>") +
                               m_videoBackend.data()->errorMessage() + QLatin1String("</span>"));
@@ -451,8 +448,8 @@ void EventVideoPlayer::stateChanged(int state)
     QSettings settings;
     if (settings.value(QLatin1String("ui/disableScreensaver/onVideo")).toBool())
     {
-        bcApp->setScreensaverInhibited(state == GstVideoPlayerBackend::Playing
-                                       || state == GstVideoPlayerBackend::Paused);
+        bcApp->setScreensaverInhibited(state == VideoPlayerBackend::Playing
+                                       || state == VideoPlayerBackend::Paused);
     }
 }
 
@@ -557,7 +554,7 @@ void EventVideoPlayer::videoContextMenu(const QPoint &rpos)
 
     QMenu menu(qobject_cast<QWidget*>(sender()));
 
-    if (m_videoBackend.data()->state() == GstVideoPlayerBackend::Playing)
+    if (m_videoBackend.data()->state() == VideoPlayerBackend::Playing)
         menu.addAction(tr("&Pause"), this, SLOT(playPause()));
     else
         menu.addAction(tr("&Play"), this, SLOT(playPause()));

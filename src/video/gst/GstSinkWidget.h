@@ -18,25 +18,29 @@
 #ifndef GSTSINKWIDGET_H
 #define GSTSINKWIDGET_H
 
-#include <QFrame>
+#include "video/VideoWidget.h"
 #include <QMutex>
 #include <gst/gst.h> // needed for GstFlowReturn
 
 typedef struct _GstAppSink GstAppSink;
 typedef void* gpointer;
 
-class GstSinkWidget : public QFrame
+class GstSinkWidget : public VideoWidget
 {
     Q_OBJECT
 
 public:
     explicit GstSinkWidget(QWidget *parent = 0);
-    ~GstSinkWidget();
+    virtual ~GstSinkWidget();
+
+    virtual void initVideo(VideoPlayerBackend *videoPlayerBackend);
+    virtual void clearVideo();
+
+    virtual QImage currentFrame();
 
     GstElement *createElement();
     void destroyElement();
     GstElement *gstElement() const { return GST_ELEMENT(m_element); }
-    QImage currentFrame();
 
     virtual QSize sizeHint() const;
 
