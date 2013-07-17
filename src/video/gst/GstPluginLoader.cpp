@@ -38,17 +38,23 @@ void GstPluginLoader::setSuffixes(const QStringList &suffixes)
 
 bool GstPluginLoader::loadGstPlugin(const QString &plugin)
 {
+    qDebug() << "gstreamer: Loading plugin" << plugin;
+
     foreach (const QString &path, m_paths)
         foreach (const QString &prefix, m_prefixes)
             foreach (const QString &suffix, m_suffixes)
                 if (loadGstPluginFullPath(QString::fromAscii("%1/%2%3%4").arg(path).arg(prefix).arg(plugin).arg(suffix)))
                     return true;
 
+    qDebug() << "gstreamer: Plugin not found" << plugin;
+
     return false;
 }
 
 bool GstPluginLoader::loadGstPluginFullPath(const QString &pluginFullPath)
 {
+    qDebug() << "gstreamer: Loading plugin" << pluginFullPath;
+
     if (!QFile::exists(pluginFullPath))
         return false;
 
