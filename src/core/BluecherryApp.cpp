@@ -139,6 +139,9 @@ void BluecherryApp::registerGstWrapper()
 {
     m_gstWrapper.reset(new GstWrapper());
     m_gstWrapper.data()->setPluginLoader(m_gstPluginLoader.data());
+
+    QStringList plugins = QString::fromLatin1(GSTREAMER_PLUGINS).split(QChar::fromAscii(':'), QString::SkipEmptyParts);
+    m_gstWrapper.data()->setPlugins(plugins);
 }
 
 void BluecherryApp::unregisterGstWrapper()
