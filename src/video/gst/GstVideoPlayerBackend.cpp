@@ -65,6 +65,8 @@ void GstVideoPlayerBackend::setVideoBuffer(VideoHttpBuffer *videoHttpBuffer)
 
 bool GstVideoPlayerBackend::initGStreamer()
 {
+    qDebug() << Q_FUNC_INFO;
+
     GstWrapper *gstWrapper = bcApp->gstWrapper();
     return gstWrapper->ensureInitialized();
 }
