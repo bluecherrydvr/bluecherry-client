@@ -238,8 +238,8 @@ void LiveViewLayout::gridPos(const QPointF &pos, int *row, int *column)
     }
     else
     {
-        *row = floor(qMax(0.0,pos.y()-top)/h);
-        *column = floor(qMax(0.0,pos.x()-left)/w);
+        *row = floor(qMax((qreal)0.0,pos.y()-top)/h);
+        *column = floor(qMax((qreal)0.0,pos.x()-left)/w);
     }
 }
 
