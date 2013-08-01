@@ -127,6 +127,7 @@ set (bluecherry_client_main_SRCS
     src/utils/ThreadTaskCourier.cpp
 
     src/video/MediaDownload.cpp
+    src/video/MediaDownloadTask.cpp
     src/video/VideoHttpBuffer.cpp
     src/video/VideoPlayerBackend.cpp
     src/video/VideoWidget.cpp
