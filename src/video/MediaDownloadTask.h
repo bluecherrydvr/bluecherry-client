@@ -15,8 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MEDIADOWNLOAD_P_H
-#define MEDIADOWNLOAD_P_H
+#ifndef MEDIADOWNLOAD_TASK_H
+#define MEDIADOWNLOAD_TASK_H
 
 #include <QObject>
 #include <QUrl>
@@ -41,7 +41,7 @@ class MediaDownloadTask : public QObject
     Q_OBJECT
 
 public:
-    MediaDownloadTask(QObject *parent = 0);
+    explicit MediaDownloadTask(QObject *parent = 0);
     virtual ~MediaDownloadTask();
 
 public slots:
@@ -67,4 +67,4 @@ private:
     unsigned m_writePos;
 };
 
-#endif // MEDIADOWNLOAD_P_H
+#endif // MEDIADOWNLOAD_TASK_H
