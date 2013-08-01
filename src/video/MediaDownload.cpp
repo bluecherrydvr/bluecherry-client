@@ -229,7 +229,12 @@ void MediaDownload::startRequest(unsigned position, unsigned size)
         m_task->deleteLater();
     }
 
-    m_task = new MediaDownloadTask;
+    /* If size will reach the end of what we believe the file size to be, make it infinite instead,
+     * to ease behavior with still active files */
+    if (position + size >= m_fileSize)
+        size = 0;
+
+    m_task = new MediaDownloadTask(m_url, m_cookies, position, size);
     m_task->moveToThread(m_thread);
 
     connect(m_task, SIGNAL(requestReady(uint)), SLOT(requestReady(uint)),
@@ -239,15 +244,7 @@ void MediaDownload::startRequest(unsigned position, unsigned size)
     connect(m_task, SIGNAL(finished()), SLOT(taskFinished()), Qt::DirectConnection);
     connect(m_task, SIGNAL(error(QString)), SLOT(taskError(QString)), Qt::DirectConnection);
 
-    /* If size will reach the end of what we believe the file size to be, make it infinite instead,
-     * to ease behavior with still active files */
-    if (position + size >= m_fileSize)
-        size = 0;
-
-    bool ok = m_task->metaObject()->invokeMethod(m_task, "start", Q_ARG(QUrl, m_url),
-                                                 Q_ARG(QList<QNetworkCookie>, m_cookies),
-                                                 Q_ARG(unsigned, position),
-                                                 Q_ARG(unsigned, size));
+    bool ok = m_task->metaObject()->invokeMethod(m_task, "startDownload");
     Q_ASSERT(ok);
     Q_UNUSED(ok);
 }

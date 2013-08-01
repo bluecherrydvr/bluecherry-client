@@ -41,11 +41,11 @@ class MediaDownloadTask : public QObject
     Q_OBJECT
 
 public:
-    explicit MediaDownloadTask(QObject *parent = 0);
+    explicit MediaDownloadTask(const QUrl &url, const QList<QNetworkCookie> &cookies, unsigned position, unsigned size, QObject *parent = 0);
     virtual ~MediaDownloadTask();
 
 public slots:
-    void start(const QUrl &url, const QList<QNetworkCookie> &cookies, unsigned postion, unsigned size);
+    void startDownload();
     void abort();
     void abortLater();
 
@@ -63,8 +63,13 @@ private slots:
 private:
     friend class MediaDownload;
     static QThreadStorage<QNetworkAccessManager*> threadNAM;
+
+    QUrl m_url;
+    QList<QNetworkCookie> m_cookies;
+    unsigned m_position;
+    unsigned m_size;
     QNetworkReply *m_reply;
-    unsigned m_writePos;
+
 };
 
 #endif // MEDIADOWNLOAD_TASK_H

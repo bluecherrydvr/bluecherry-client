@@ -25,14 +25,15 @@
 #include <QNetworkReply>
 #include <QTextDocument>
 
-MediaDownloadTask::MediaDownloadTask(QObject *parent)
-    : QObject(parent), m_reply(0), m_writePos(0)
+MediaDownloadTask::MediaDownloadTask(const QUrl &url, const QList<QNetworkCookie> &cookies, unsigned position, unsigned size, QObject *parent)
+    : QObject(parent), m_url(url), m_cookies(cookies), m_position(position), m_size(size), m_reply(0)
 {
 }
 
-void MediaDownloadTask::start(const QUrl &url, const QList<QNetworkCookie> &cookies, unsigned position,
-                              unsigned size)
+void MediaDownloadTask::startDownload()
 {
+    qDebug() << Q_FUNC_INFO;
+
     Q_ASSERT(!m_reply);
 
     if (!threadNAM.hasLocalData())
@@ -41,20 +42,20 @@ void MediaDownloadTask::start(const QUrl &url, const QList<QNetworkCookie> &cook
         /* XXX certificate validation */
     }
 
-    threadNAM.localData()->cookieJar()->setCookiesFromUrl(cookies, url);
-    if (threadNAM.localData()->cookieJar()->cookiesForUrl(url).isEmpty())
+    threadNAM.localData()->cookieJar()->setCookiesFromUrl(m_cookies, m_url);
+    if (threadNAM.localData()->cookieJar()->cookiesForUrl(m_url).isEmpty())
         qDebug() << "MediaDownload: No cookies for media URL, likely to fail authentication";
 
-    QNetworkRequest req(url);
-    if (position || size)
+    QNetworkRequest req(m_url);
+    qDebug() << Q_FUNC_INFO << m_url << m_position << m_size;
+
+    if (m_position || m_size)
     {
-        QByteArray range = "bytes=" + QByteArray::number(position) + "-";
-        if (size)
-            range += QByteArray::number(position + size);
+        QByteArray range = "bytes=" + QByteArray::number(m_position) + "-";
+        if (m_size)
+            range += QByteArray::number(m_position + m_size);
         req.setRawHeader("Range", range);
     }
-
-    m_writePos = position;
 
     m_reply = threadNAM.localData()->get(req);
     m_reply->ignoreSslErrors(); // XXX Do this properly!
@@ -103,7 +104,7 @@ void MediaDownloadTask::metaDataReady()
 
     unsigned size = m_reply->header(QNetworkRequest::ContentLengthHeader).toUInt();
     if (size)
-        emit requestReady(m_writePos + size);
+        emit requestReady(m_position + size);
 }
 
 void MediaDownloadTask::read()
@@ -112,8 +113,8 @@ void MediaDownloadTask::read()
     if (data.isEmpty())
         return;
 
-    emit dataRead(data, m_writePos);
-    m_writePos += data.size();
+    emit dataRead(data, m_position);
+    m_position += data.size();
 
     /* Very carefully threadsafe: bcApp and the globalRate pointer are
      * const, and 'addSampleValue' is threadsafe and lockfree for the common case. */
