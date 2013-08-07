@@ -99,7 +99,7 @@ private:
     static QTimer *m_renderTimer, *m_stateTimer;
 
     QWeakPointer<DVRCamera> m_camera;
-    LiveStreamThread *m_thread;
+    QScopedPointer<LiveStreamThread> m_thread;
     QImage m_currentFrame;
     QMutex m_currentFrameMutex;
     class LiveStreamFrame *m_frame;
