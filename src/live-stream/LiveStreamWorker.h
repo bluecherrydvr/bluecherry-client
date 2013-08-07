@@ -56,13 +56,13 @@ signals:
     void finished();
 
 private:
-    static int m_timeoutInSeconds;
-
     struct AVFormatContext *m_ctx;
-    QDateTime m_lastInterruptableOperationStarted;
+    QDateTime m_timeout;
     QUrl m_url;
     bool m_cancelFlag;
     bool m_autoDeinterlacing;
+    mutable bool m_lastCancel;
+    mutable int m_lastSeconds;
 
     ThreadPause m_threadPause;
     QScopedPointer<LiveStreamFrameFormatter> m_frameFormatter;
@@ -88,7 +88,7 @@ private:
     void processFrame(struct AVFrame *frame);
 
     QString errorMessageFromCode(int errorCode);
-    void startInterruptableOperation();
+    void startInterruptableOperation(int timeoutInSeconds);
 
 };
 

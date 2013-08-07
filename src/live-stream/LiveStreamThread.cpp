@@ -24,12 +24,11 @@
 
 LiveStreamThread::LiveStreamThread(QObject *parent) : QObject(parent), m_isRunning(false)
 {
-    qDebug() << Q_FUNC_INFO;
 }
 
 LiveStreamThread::~LiveStreamThread()
 {
-    qDebug() << Q_FUNC_INFO;
+    stop();
 }
 
 void LiveStreamThread::start(const QUrl &url)
