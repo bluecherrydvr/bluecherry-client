@@ -91,16 +91,13 @@ void LiveStream::init()
 }
 
 LiveStream::LiveStream(DVRCamera *camera, QObject *parent)
-    : QObject(parent), m_camera(camera), m_currentFrameMutex(QMutex::Recursive),
+    : QObject(parent), m_camera(camera), m_thread(0), m_currentFrameMutex(QMutex::Recursive),
       m_frame(0), m_state(NotConnected),
       m_autoStart(false), m_fpsUpdateCnt(0), m_fpsUpdateHits(0),
       m_fps(0)
 {
     Q_ASSERT(m_camera);
     connect(m_camera.data(), SIGNAL(destroyed(QObject*)), this, SLOT(deleteLater()));
-
-    m_thread = new LiveStreamThread(this);
-    connect(m_thread, SIGNAL(fatalError(QString)), this, SLOT(fatalError(QString)));
 
     bcApp->liveView->addStream(this);
     connect(bcApp, SIGNAL(settingsChanged()), SLOT(updateSettings()));
@@ -175,6 +172,12 @@ void LiveStream::start()
     connect(m_renderTimer, SIGNAL(timeout()), SLOT(updateFrame()), Qt::UniqueConnection);
 
     m_frameInterval.start();
+
+    if (m_thread)
+        m_thread->stop();
+
+    m_thread.reset(new LiveStreamThread());
+    connect(m_thread.data(), SIGNAL(fatalError(QString)), this, SLOT(fatalError(QString)));
     m_thread->start(url());
 
     updateSettings();
@@ -185,7 +188,7 @@ void LiveStream::stop()
 {
     disconnect(m_renderTimer, SIGNAL(timeout()), this, SLOT(updateFrame()));
 
-    m_thread->stop();
+    m_thread.reset();
 
     delete m_frame;
     m_frame = 0;
@@ -215,7 +218,7 @@ void LiveStream::setOnline(bool online)
 
 void LiveStream::setPaused(bool pause)
 {
-    if (pause == (state() == Paused) || state() < Streaming || !m_thread->worker())
+    if (pause == (state() == Paused) || state() < Streaming || !m_thread || !m_thread->worker())
         return;
 
     m_thread->setPaused(pause);
@@ -229,7 +232,7 @@ void LiveStream::setPaused(bool pause)
 
 void LiveStream::updateFrame()
 {
-    if (state() < Connecting || !m_thread->isRunning())
+    if (state() < Connecting || !m_thread || !m_thread->isRunning())
         return;
 
     if (++m_fpsUpdateCnt == int(1.5*renderTimerFps))
@@ -295,7 +298,7 @@ void LiveStream::checkState()
 
 void LiveStream::updateSettings()
 {
-    if (!m_thread->worker())
+    if (!m_thread || !m_thread->worker())
         return;
 
     QSettings settings;
