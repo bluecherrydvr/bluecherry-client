@@ -18,7 +18,7 @@
 #include "DVRServerConfiguration.h"
 
 DVRServerConfiguration::DVRServerConfiguration(int id, QObject *parent)
-    : QObject(parent), m_id(id)
+    : QObject(parent), m_id(id), m_port(0), m_autoConnect(false)
 {
 }
 
