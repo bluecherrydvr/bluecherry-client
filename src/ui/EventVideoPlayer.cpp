@@ -18,7 +18,7 @@
 #include "EventVideoPlayer.h"
 #include "event/EventDownloadManager.h"
 #include "event/EventVideoDownload.h"
-#include "video/VideoHttpBuffer.h"
+#include "video/gst/GstVideoBuffer.h"
 #include "video/VideoPlayerBackend.h"
 #include "video/VideoPlayerFactory.h"
 #include "video/VideoWidget.h"

@@ -19,8 +19,8 @@
 #include "bluecherry-config.h"
 #include "core/BluecherryApp.h"
 #include "video/gst/GstPluginLoader.h"
+#include "video/gst/GstVideoBuffer.h"
 #include "video/gst/GstWrapper.h"
-#include "video/VideoHttpBuffer.h"
 #include <QUrl>
 #include <QDebug>
 #include <QApplication>
@@ -43,7 +43,7 @@ GstVideoPlayerBackend::~GstVideoPlayerBackend()
     clear();
 }
 
-void GstVideoPlayerBackend::setVideoBuffer(VideoHttpBuffer *videoHttpBuffer)
+void GstVideoPlayerBackend::setVideoBuffer(GstVideoBuffer *videoBuffer)
 {
     if (m_videoBuffer)
     {
@@ -52,7 +52,7 @@ void GstVideoPlayerBackend::setVideoBuffer(VideoHttpBuffer *videoHttpBuffer)
         m_videoBuffer->deleteLater();
     }
 
-    m_videoBuffer = videoHttpBuffer;
+    m_videoBuffer = videoBuffer;
 
     if (m_videoBuffer)
     {
@@ -117,7 +117,7 @@ bool GstVideoPlayerBackend::start(const QUrl &url)
     }
 
     /* Buffered HTTP source */
-    setVideoBuffer(new VideoHttpBuffer(url));
+    setVideoBuffer(new GstVideoBuffer(new VideoHttpBuffer(url)));
 
     GstElement *source = m_videoBuffer->setupSrcElement(m_pipeline);
     if (!source)
