@@ -23,17 +23,15 @@
 #include <QUrl>
 #include <QTimer>
 
-#ifdef USE_GSTREAMER
-#include "video/VideoPlayerBackend_gst.h"
-#endif
-
+class QFrame;
 class QToolButton;
 class QPushButton;
 class QSlider;
 class QLabel;
-class GstSinkWidget;
 class QThread;
 class EventData;
+class VideoPlayerBackend;
+class VideoWidget;
 
 class EventVideoPlayer : public QWidget
 {
@@ -74,8 +72,8 @@ private slots:
 private:
     EventData *m_event;
     QWeakPointer<QThread> m_videoThread;
-    QWeakPointer<VideoPlayerBackend> m_video;
-    GstSinkWidget *m_videoWidget;
+    QWeakPointer<VideoPlayerBackend> m_videoBackend;
+    VideoWidget *m_videoWidget;
     QToolButton *m_playBtn, *m_restartBtn, *m_fastBtn, *m_slowBtn;
     QPushButton *m_saveBtn;
     QSlider *m_seekSlider;
