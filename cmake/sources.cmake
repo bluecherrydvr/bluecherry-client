@@ -128,6 +128,7 @@ set (bluecherry_client_main_SRCS
 
     src/video/MediaDownload.cpp
     src/video/MediaDownloadTask.cpp
+    src/video/VideoBuffer.cpp
     src/video/VideoHttpBuffer.cpp
     src/video/VideoPlayerBackend.cpp
     src/video/VideoWidget.cpp

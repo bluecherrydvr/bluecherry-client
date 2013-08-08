@@ -26,7 +26,7 @@
 typedef struct _GstAppSrc GstAppSrc;
 typedef struct _GstElement GstElement;
 
-class GstVideoHttpBuffer : public QObject
+class GstVideoHttpBuffer : public VideoBuffer
 {
     Q_OBJECT
 
