@@ -19,8 +19,12 @@
 #define GST_VIDEO_BUFFER_H
 
 #include <QObject>
+#include <glib.h>
 
 #include "video/VideoHttpBuffer.h"
+
+typedef struct _GstAppSrc GstAppSrc;
+typedef struct _GstElement GstElement;
 
 class GstVideoBuffer : public QObject
 {
@@ -47,9 +51,22 @@ signals:
     void bufferingReady();
     void bufferingStopped();
     void bufferingFinished();
+    void sizeChanged(unsigned size);
 
 private:
     QScopedPointer<VideoHttpBuffer> m_buffer;
+    GstElement *m_pipeline;
+    GstAppSrc *m_element;
+
+    static void needDataWrap(GstAppSrc *src, unsigned size, gpointer user_data);
+    void needData(unsigned size);
+
+    static int seekDataWrap(GstAppSrc *src, guint64 offset, gpointer user_data);
+    bool seekData(qint64 offset);
+
+private slots:
+    void streamErrorSlot(const QString &error);
+    void sizeChangedSlot(unsigned size);
 
 };
 
