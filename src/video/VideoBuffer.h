@@ -28,6 +28,10 @@ public:
     explicit VideoBuffer(QObject *parent = 0);
     virtual ~VideoBuffer();
 
+    virtual bool isBuffering() const = 0;
+    virtual bool isBufferingFinished() const = 0;
+    virtual int bufferedPercent() const = 0;
+
 };
 
 #endif // VIDEO_BUFFER_H

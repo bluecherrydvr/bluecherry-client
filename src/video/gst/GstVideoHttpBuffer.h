@@ -35,9 +35,9 @@ public:
     virtual ~GstVideoHttpBuffer();
 
     void startBuffering();
-    bool isBuffering() const;
-    bool isBufferingFinished() const;
-    int bufferedPercent() const;
+    virtual bool isBuffering() const;
+    virtual bool isBufferingFinished() const;
+    virtual int bufferedPercent() const;
 
     void clearPlayback();
 

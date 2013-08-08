@@ -35,12 +35,12 @@ public:
     explicit VideoHttpBuffer(const QUrl &url, QObject *parent = 0);
     ~VideoHttpBuffer();
 
-    bool isBuffering() const { return media && !media->isFinished(); }
+    virtual bool isBuffering() const { return media && !media->isFinished(); }
+    virtual bool isBufferingFinished() const { return media && media->isFinished(); }
+    virtual int bufferedPercent() const;
 
     qint64 fileSize() const { return media ? media->fileSize() : 0; }
     qint64 bufferedSize() const { return media ? media->downloadedSize() : 0; }
-    int bufferedPercent() const;
-    bool isBufferingFinished() const { return media && media->isFinished(); }
     bool startBuffering();
 
     QUrl url() const { return m_url; }

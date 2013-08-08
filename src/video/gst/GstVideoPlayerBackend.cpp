@@ -43,7 +43,7 @@ GstVideoPlayerBackend::~GstVideoPlayerBackend()
     clear();
 }
 
-void GstVideoPlayerBackend::setVideoBuffer(GstVideoHttpBuffer *videoHttpBuffer)
+void GstVideoPlayerBackend::setVideoBuffer(GstVideoHttpBuffer *gstVideoHttpBuffer)
 {
     if (m_videoBuffer)
     {
@@ -52,7 +52,7 @@ void GstVideoPlayerBackend::setVideoBuffer(GstVideoHttpBuffer *videoHttpBuffer)
         m_videoBuffer->deleteLater();
     }
 
-    m_videoBuffer = videoHttpBuffer;
+    m_videoBuffer = gstVideoHttpBuffer;
 
     if (m_videoBuffer)
     {
@@ -507,4 +507,9 @@ GstBusSyncReply GstVideoPlayerBackend::busHandler(GstBus *bus, GstMessage *msg)
     }
 
     return GST_BUS_PASS;
+}
+
+VideoBuffer * GstVideoPlayerBackend::videoBuffer() const
+{
+    return m_videoBuffer;
 }

@@ -21,7 +21,7 @@
 #include <QObject>
 #include <QUrl>
 
-class GstVideoHttpBuffer;
+class VideoBuffer;
 
 class VideoPlayerBackend : public QObject
 {
@@ -50,7 +50,7 @@ public:
     virtual bool isError() const = 0;
     virtual bool isPermanentError() const = 0;
     virtual QString errorMessage() const = 0;
-    virtual GstVideoHttpBuffer * videoBuffer() const = 0;
+    virtual VideoBuffer * videoBuffer() const = 0;
 
 public slots:
     virtual bool start(const QUrl &url) = 0;
