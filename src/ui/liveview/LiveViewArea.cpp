@@ -29,6 +29,7 @@
 #include <QSettings>
 #include <QShowEvent>
 #include <QApplication>
+#include <QTimer>
 
 LiveViewArea::LiveViewArea(DVRServerRepository *serverRepository, QWidget *parent)
     : QDeclarativeView(parent)

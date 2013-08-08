@@ -17,6 +17,7 @@
 
 #include "GstSinkWidget.h"
 #include "core/BluecherryApp.h"
+#include "video/gst/GstVideoPlayerBackend.h"
 #include <QPaintEvent>
 #include <QPainter>
 #include <QDebug>
@@ -29,7 +30,7 @@
 #include <gst/app/gstappsink.h>
 
 GstSinkWidget::GstSinkWidget(QWidget *parent)
-    : QFrame(parent), m_viewport(0), m_element(0), m_framePtr(0), m_frameWidth(-1),
+    : VideoWidget(parent), m_viewport(0), m_element(0), m_framePtr(0), m_frameWidth(-1),
       m_frameHeight(-1), m_normalFrameStyle(0)
 {
     setAutoFillBackground(false);
@@ -55,6 +56,21 @@ GstSinkWidget::GstSinkWidget(QWidget *parent)
 }
 
 GstSinkWidget::~GstSinkWidget()
+{
+    destroyElement();
+}
+
+void GstSinkWidget::initVideo(VideoPlayerBackend *videoPlayerBackend)
+{
+    GstVideoPlayerBackend *gstVideoPlayerBackend = reinterpret_cast<GstVideoPlayerBackend *>(videoPlayerBackend);
+
+    GstElement *sink = createElement();
+    Q_ASSERT(sink);
+
+    gstVideoPlayerBackend->setSink(sink);
+}
+
+void GstSinkWidget::clearVideo()
 {
     destroyElement();
 }

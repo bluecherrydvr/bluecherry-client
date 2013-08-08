@@ -24,6 +24,9 @@
 #include "server/DVRServer.h"
 #include "server/DVRServerConfiguration.h"
 #include "server/DVRServerRepository.h"
+#include "video/gst/GstPluginLoader.h"
+#include "video/gst/GstWrapper.h"
+#include "video/gst/GstVideoPlayerFactory.h"
 #include <QSettings>
 #include <QStringList>
 #include <QNetworkAccessManager>
@@ -39,6 +42,8 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QAbstractButton>
+
+#include "bluecherry-config.h"
 
 BluecherryApp *bcApp = 0;
 
@@ -90,8 +95,59 @@ BluecherryApp::BluecherryApp()
     m_eventDownloadManager = new EventDownloadManager(this);
     connect(m_serverRepository, SIGNAL(serverRemoved(DVRServer*)), m_eventDownloadManager, SLOT(serverRemoved(DVRServer*)));
 
+    registerVideoPlayerFactory();
+    registerGstPluginLoader();
+    registerGstWrapper();
+
     connect(qApp, SIGNAL(commitDataRequest(QSessionManager&)), this, SLOT(commitDataRequest(QSessionManager&)));
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(saveSettings()));
+}
+
+BluecherryApp::~BluecherryApp()
+{
+    unregisterGstWrapper();
+    unregisterGstPluginLoader();
+    unregisterVideoPlayerFactory();
+}
+
+void BluecherryApp::registerVideoPlayerFactory()
+{
+    m_videoPlayerFactory.reset(new GstVideoPlayerFactory());
+}
+
+void BluecherryApp::unregisterVideoPlayerFactory()
+{
+    m_videoPlayerFactory.reset();
+}
+
+void BluecherryApp::registerGstPluginLoader()
+{
+    m_gstPluginLoader.reset(new GstPluginLoader());
+
+    QStringList paths = QString::fromLatin1(GSTREAMER_PLUGIN_PATHS).split(QChar::fromAscii(':'), QString::SkipEmptyParts);
+    m_gstPluginLoader.data()->setPaths(paths);
+    m_gstPluginLoader.data()->setPrefixes(QStringList() << QString::fromLatin1(GSTREAMER_PLUGIN_PREFIX));
+    m_gstPluginLoader.data()->setSuffixes(QStringList() << QString::fromLatin1(GSTREAMER_PLUGIN_SUFFIX));
+}
+
+void BluecherryApp::unregisterGstPluginLoader()
+{
+    m_gstPluginLoader.reset(0);
+}
+
+void BluecherryApp::registerGstWrapper()
+{
+    m_gstWrapper.reset(new GstWrapper());
+    m_gstWrapper.data()->setPluginLoader(m_gstPluginLoader.data());
+
+    QStringList plugins = QString::fromLatin1(GSTREAMER_PLUGINS).split(QChar::fromAscii(':'), QString::SkipEmptyParts);
+    m_gstWrapper.data()->setPlugins(plugins);
+}
+
+void BluecherryApp::unregisterGstWrapper()
+{
+    m_gstWrapper.data()->setPluginLoader(0);
+    m_gstWrapper.reset();
 }
 
 void BluecherryApp::commitDataRequest(QSessionManager &sessionManager)
