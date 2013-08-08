@@ -25,8 +25,8 @@
 #include <QThread>
 #include <QApplication>
 
-VideoHttpBuffer::VideoHttpBuffer(const QUrl &url, QObject *parent)
-    : QObject(parent), m_url(url), media(0)
+VideoHttpBuffer::VideoHttpBuffer(const QUrl &url, QObject *parent) :
+        VideoBuffer(parent), m_url(url), media(0)
 {
 }
 

@@ -21,10 +21,11 @@
 #include <QObject>
 #include <QUrl>
 #include "MediaDownload.h"
+#include "video/VideoBuffer.h"
 
 class QNetworkCookie;
 
-class VideoHttpBuffer : public QObject
+class VideoHttpBuffer : public VideoBuffer
 {
     Q_OBJECT
 
