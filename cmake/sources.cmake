@@ -134,6 +134,7 @@ set (bluecherry_client_main_SRCS
 
     src/video/gst/GstPluginLoader.cpp
     src/video/gst/GstSinkWidget.cpp
+    src/video/gst/GstVideoHttpBuffer.cpp
     src/video/gst/GstVideoPlayerBackend.cpp
     src/video/gst/GstVideoPlayerFactory.cpp
     src/video/gst/GstWrapper.cpp
