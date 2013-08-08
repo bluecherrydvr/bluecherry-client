@@ -508,3 +508,8 @@ GstBusSyncReply GstVideoPlayerBackend::busHandler(GstBus *bus, GstMessage *msg)
 
     return GST_BUS_PASS;
 }
+
+VideoBuffer * GstVideoPlayerBackend::videoBuffer() const
+{
+    return m_videoBuffer;
+}

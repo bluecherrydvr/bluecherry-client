@@ -25,6 +25,7 @@
 
 class QUrl;
 class GstVideoBuffer;
+class VideoBuffer;
 
 typedef struct _GstDecodeBin GstDecodeBin;
 
@@ -51,7 +52,7 @@ public:
     virtual bool isError() const { return m_state <= Error; }
     virtual bool isPermanentError() const { return m_state == PermanentError; }
     virtual QString errorMessage() const { return m_errorMessage; }
-    virtual GstVideoBuffer * videoBuffer() const { return m_videoBuffer; }
+    virtual VideoBuffer * videoBuffer() const;
 
 public slots:
     virtual bool start(const QUrl &url);
