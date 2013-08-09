@@ -62,6 +62,13 @@ unsigned int VideoHttpBuffer::totalBytes() const
     return media ? media->fileSize() : 0;
 }
 
+bool VideoHttpBuffer::seek(unsigned int offset)
+{
+    Q_ASSERT(media);
+
+    return media->seek(offset);
+}
+
 void VideoHttpBuffer::sendStreamError(const QString &message)
 {
     emit streamError(message);

@@ -41,6 +41,8 @@ public:
 
     virtual unsigned int totalBytes() const;
 
+    virtual bool seek(unsigned int offset);
+
     qint64 bufferedSize() const { return media ? media->downloadedSize() : 0; }
     bool startBuffering();
 
