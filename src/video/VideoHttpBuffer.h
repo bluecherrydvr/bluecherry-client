@@ -33,8 +33,8 @@ public:
     explicit VideoHttpBuffer(const QUrl &url, QObject *parent = 0);
     ~VideoHttpBuffer();
 
-    virtual bool isBuffering() const { return media && !media->isFinished(); }
-    virtual bool isBufferingFinished() const { return media && media->isFinished(); }
+    virtual bool isBuffering() const { return m_media && !m_media->isFinished(); }
+    virtual bool isBufferingFinished() const { return m_media && m_media->isFinished(); }
     virtual int bufferedPercent() const;
 
     virtual unsigned int totalBytes() const;
@@ -43,7 +43,7 @@ public:
     virtual QByteArray read(unsigned int bytes);
     virtual bool seek(unsigned int offset);
 
-    qint64 bufferedSize() const { return media ? media->downloadedSize() : 0; }
+    qint64 bufferedSize() const { return m_media ? m_media->downloadedSize() : 0; }
     bool startBuffering();
 
     QUrl url() const { return m_url; }
@@ -64,7 +64,7 @@ private slots:
 
 private:
     QUrl m_url;
-    MediaDownload *media;
+    MediaDownload *m_media;
 
 };
 

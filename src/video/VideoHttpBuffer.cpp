@@ -26,30 +26,30 @@
 #include <QApplication>
 
 VideoHttpBuffer::VideoHttpBuffer(const QUrl &url, QObject *parent) :
-        VideoBuffer(parent), m_url(url), media(0)
+        VideoBuffer(parent), m_url(url), m_media(0)
 {
 }
 
 VideoHttpBuffer::~VideoHttpBuffer()
 {
-    if (media)
+    if (m_media)
     {
         bcApp->mediaDownloadManager()->releaseMediaDownload(m_url);
-        media = 0;
+        m_media = 0;
     }
 }
 
 bool VideoHttpBuffer::startBuffering()
 {
-    Q_ASSERT(!media);
+    Q_ASSERT(!m_media);
 
-    media = bcApp->mediaDownloadManager()->acquireMediaDownload(m_url);
-    connect(media, SIGNAL(fileSizeChanged(uint)), this, SIGNAL(sizeChanged(uint)));
-    connect(media, SIGNAL(finished()), SIGNAL(bufferingFinished()));
-    connect(media, SIGNAL(stopped()), SIGNAL(bufferingStopped()));
-    connect(media, SIGNAL(error(QString)), SLOT(sendStreamError(QString)));
+    m_media = bcApp->mediaDownloadManager()->acquireMediaDownload(m_url);
+    connect(m_media, SIGNAL(fileSizeChanged(uint)), this, SIGNAL(sizeChanged(uint)));
+    connect(m_media, SIGNAL(finished()), SIGNAL(bufferingFinished()));
+    connect(m_media, SIGNAL(stopped()), SIGNAL(bufferingStopped()));
+    connect(m_media, SIGNAL(error(QString)), SLOT(sendStreamError(QString)));
 
-    media->start();
+    m_media->start();
 
     qDebug("VideoHttpBuffer: started");
     emit bufferingStarted();
@@ -59,24 +59,24 @@ bool VideoHttpBuffer::startBuffering()
 
 unsigned int VideoHttpBuffer::totalBytes() const
 {
-    return media ? media->fileSize() : 0;
+    return m_media ? m_media->fileSize() : 0;
 }
 
 bool VideoHttpBuffer::isEndOfStream() const
 {
-    return media ? (media->readPosition() >= media->fileSize() && media->isFinished()) : false;
+    return m_media ? (m_media->readPosition() >= m_media->fileSize() && m_media->isFinished()) : false;
 }
 
 QByteArray VideoHttpBuffer::read(unsigned int bytes)
 {
-    return media ? media->read(media->readPosition(), bytes) : QByteArray();
+    return m_media ? m_media->read(m_media->readPosition(), bytes) : QByteArray();
 }
 
 bool VideoHttpBuffer::seek(unsigned int offset)
 {
-    Q_ASSERT(media);
+    Q_ASSERT(m_media);
 
-    return media->seek(offset);
+    return m_media->seek(offset);
 }
 
 void VideoHttpBuffer::sendStreamError(const QString &message)
