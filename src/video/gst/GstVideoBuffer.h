@@ -42,6 +42,7 @@ public:
     virtual int bufferedPercent() const;
 
     virtual unsigned int totalBytes() const;
+    virtual bool isEndOfStream() const;
 
     virtual QByteArray read(unsigned int bytes);
     virtual bool seek(unsigned int offset);
