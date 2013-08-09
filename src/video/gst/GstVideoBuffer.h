@@ -43,6 +43,8 @@ public:
 
     virtual unsigned int totalBytes() const;
 
+    virtual bool seek(unsigned int offset);
+
     void clearPlayback();
 
     /* Create and prepare a source element; the element will be added to the pipeline,
@@ -66,7 +68,6 @@ private:
     void needData(unsigned size);
 
     static int seekDataWrap(GstAppSrc *src, guint64 offset, gpointer user_data);
-    bool seekData(qint64 offset);
 
 private slots:
     void streamErrorSlot(const QString &error);

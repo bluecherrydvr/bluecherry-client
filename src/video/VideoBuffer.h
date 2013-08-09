@@ -34,6 +34,8 @@ public:
 
     virtual unsigned int totalBytes() const = 0;
 
+    virtual bool seek(unsigned int offset) = 0;
+
 };
 
 #endif // VIDEO_BUFFER_H

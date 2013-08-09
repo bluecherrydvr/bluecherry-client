@@ -25,7 +25,7 @@ gboolean GstVideoBuffer::seekDataWrap(GstAppSrc *src, guint64 offset, gpointer u
 {
     Q_UNUSED(src);
 
-    return static_cast<GstVideoBuffer *>(user_data)->seekData(offset);
+    return static_cast<GstVideoBuffer *>(user_data)->seek(offset);
 }
 
 void GstVideoBuffer::needDataWrap(GstAppSrc *src, unsigned size, gpointer user_data)
@@ -72,6 +72,11 @@ int GstVideoBuffer::bufferedPercent() const
 unsigned int GstVideoBuffer::totalBytes() const
 {
     return m_buffer.data()->totalBytes();
+}
+
+bool GstVideoBuffer::seek(unsigned int offset)
+{
+    return m_buffer.data()->seek(offset);
 }
 
 GstElement * GstVideoBuffer::setupSrcElement(GstElement *pipeline)
@@ -162,12 +167,6 @@ void GstVideoBuffer::needData(unsigned int size)
 
     if (flow != GST_FLOW_OK)
         qDebug() << "GstVideoBuffer: Push result is" << flow;
-}
-
-bool GstVideoBuffer::seekData(qint64 offset)
-{
-    Q_ASSERT(m_buffer.data()->media);
-    return m_buffer.data()->media->seek((unsigned)offset);
 }
 
 void GstVideoBuffer::streamErrorSlot(const QString &error)
