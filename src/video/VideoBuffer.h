@@ -34,6 +34,7 @@ public:
 
     virtual unsigned int totalBytes() const = 0;
 
+    virtual QByteArray read(unsigned int bytes) = 0;
     virtual bool seek(unsigned int offset) = 0;
 
 };

@@ -43,6 +43,7 @@ public:
 
     virtual unsigned int totalBytes() const;
 
+    virtual QByteArray read(unsigned int bytes);
     virtual bool seek(unsigned int offset);
 
     void clearPlayback();
@@ -64,8 +65,8 @@ private:
     GstElement *m_pipeline;
     GstAppSrc *m_element;
 
-    static void needDataWrap(GstAppSrc *src, unsigned size, gpointer user_data);
-    void needData(unsigned size);
+    static void needDataWrap(GstAppSrc *src, unsigned bytes, gpointer user_data);
+    void needData(unsigned bytes);
 
     static int seekDataWrap(GstAppSrc *src, guint64 offset, gpointer user_data);
 

@@ -74,6 +74,11 @@ unsigned int GstVideoBuffer::totalBytes() const
     return m_buffer.data()->totalBytes();
 }
 
+QByteArray GstVideoBuffer::read(unsigned int bytes)
+{
+    return m_buffer.data()->read(bytes);
+}
+
 bool GstVideoBuffer::seek(unsigned int offset)
 {
     return m_buffer.data()->seek(offset);
@@ -134,11 +139,9 @@ void GstVideoBuffer::clearPlayback()
     m_pipeline = 0;
 }
 
-void GstVideoBuffer::needData(unsigned int size)
+void GstVideoBuffer::needData(unsigned int bytes)
 {
-    Q_ASSERT(m_buffer.data()->media);
-
-    QByteArray data = m_buffer.data()->media->read(m_buffer.data()->media->readPosition(), size);
+    QByteArray data = read(bytes);
     if (data.isNull())
     {
         /* Error reporting is handled by MediaDownload for this case */
