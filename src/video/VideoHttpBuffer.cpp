@@ -57,6 +57,11 @@ bool VideoHttpBuffer::startBuffering()
     return true;
 }
 
+unsigned int VideoHttpBuffer::totalBytes() const
+{
+    return media ? media->fileSize() : 0;
+}
+
 void VideoHttpBuffer::sendStreamError(const QString &message)
 {
     emit streamError(message);

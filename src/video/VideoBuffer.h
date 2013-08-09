@@ -32,6 +32,8 @@ public:
     virtual bool isBufferingFinished() const = 0;
     virtual int bufferedPercent() const = 0;
 
+    virtual unsigned int totalBytes() const = 0;
+
 };
 
 #endif // VIDEO_BUFFER_H
