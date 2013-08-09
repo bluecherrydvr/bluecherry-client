@@ -74,6 +74,11 @@ unsigned int GstVideoBuffer::totalBytes() const
     return m_buffer.data()->totalBytes();
 }
 
+bool GstVideoBuffer::isEndOfStream() const
+{
+    return m_buffer.data()->isEndOfStream();
+}
+
 QByteArray GstVideoBuffer::read(unsigned int bytes)
 {
     return m_buffer.data()->read(bytes);
@@ -150,7 +155,7 @@ void GstVideoBuffer::needData(unsigned int bytes)
     }
     else if (data.isEmpty())
     {
-        if (m_buffer.data()->media->readPosition() >= m_buffer.data()->media->fileSize() && m_buffer.data()->media->isFinished())
+        if (isEndOfStream())
         {
             qDebug() << "GstVideoBuffer: end of stream";
             gst_app_src_end_of_stream(m_element);
