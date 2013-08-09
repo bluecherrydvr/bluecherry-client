@@ -21,7 +21,9 @@
 #include <QObject>
 #include <glib.h>
 
-#include "video/VideoHttpBuffer.h"
+#include "video/VideoBuffer.h"
+
+class VideoHttpBuffer;
 
 typedef struct _GstAppSrc GstAppSrc;
 typedef struct _GstElement GstElement;

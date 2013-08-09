@@ -16,6 +16,7 @@
  */
 
 #include "GstVideoBuffer.h"
+#include "video/VideoHttpBuffer.h"
 
 #include <gst/gst.h>
 #include <gst/app/gstappsrc.h>
@@ -137,33 +138,35 @@ void GstVideoBuffer::needData(unsigned int size)
 {
     Q_ASSERT(m_buffer.data()->media);
 
-    /* Refactor to use gst_pad_alloc_buffer? Probably wouldn't provide any benefit. */
-    GstBuffer *buffer = gst_buffer_new_and_alloc(size);
-
-    int re = m_buffer.data()->media->read(m_buffer.data()->media->readPosition(), (char*)GST_BUFFER_DATA(buffer), size);
-    if (re < 0)
+    QByteArray data = m_buffer.data()->media->read(m_buffer.data()->media->readPosition(), size);
+    if (data.isNull())
     {
         /* Error reporting is handled by MediaDownload for this case */
-        qDebug() << "GstVideoHttpBuffer: read error";
+        qDebug() << "GstVideoBuffer: read error";
         return;
     }
-    else if (re == 0)
+    else if (data.isEmpty())
     {
         if (m_buffer.data()->media->readPosition() >= m_buffer.data()->media->fileSize() && m_buffer.data()->media->isFinished())
         {
-            qDebug() << "GstVideoHttpBuffer: end of stream";
+            qDebug() << "GstVideoBuffer: end of stream";
             gst_app_src_end_of_stream(m_element);
         }
         else
-            qDebug() << "GstVideoHttpBuffer: read aborted";
+            qDebug() << "GstVideoBuffer: read aborted";
         return;
     }
 
-    GST_BUFFER_SIZE(buffer) = re;
+    GstBuffer *buffer = gst_buffer_new();
+    GST_BUFFER_SIZE(buffer) = data.size();
+    GST_BUFFER_MALLOCDATA(buffer) = (guint8 *)g_malloc(data.size());
+    GST_BUFFER_DATA(buffer) = GST_BUFFER_MALLOCDATA(buffer);
+    memcpy(GST_BUFFER_DATA(buffer), data.constData(), data.size());
 
     GstFlowReturn flow = gst_app_src_push_buffer(m_element, buffer);
+
     if (flow != GST_FLOW_OK)
-        qDebug() << "GstVideoHttpBuffer: Push result is" << flow;
+        qDebug() << "GstVideoBuffer: Push result is" << flow;
 }
 
 void GstVideoBuffer::streamErrorSlot(const QString &error)
