@@ -41,6 +41,7 @@ public:
 
     virtual unsigned int totalBytes() const;
 
+    virtual QByteArray read(unsigned int bytes);
     virtual bool seek(unsigned int offset);
 
     qint64 bufferedSize() const { return media ? media->downloadedSize() : 0; }

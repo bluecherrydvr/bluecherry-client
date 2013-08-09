@@ -62,6 +62,11 @@ unsigned int VideoHttpBuffer::totalBytes() const
     return media ? media->fileSize() : 0;
 }
 
+QByteArray VideoHttpBuffer::read(unsigned int bytes)
+{
+    return media ? media->read(media->readPosition(), bytes) : QByteArray();
+}
+
 bool VideoHttpBuffer::seek(unsigned int offset)
 {
     Q_ASSERT(media);
