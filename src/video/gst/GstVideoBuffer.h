@@ -39,6 +39,8 @@ public:
     virtual bool isBufferingFinished() const;
     virtual int bufferedPercent() const;
 
+    virtual unsigned int totalBytes() const;
+
     void clearPlayback();
 
     /* Create and prepare a source element; the element will be added to the pipeline,

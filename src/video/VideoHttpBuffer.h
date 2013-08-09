@@ -39,7 +39,8 @@ public:
     virtual bool isBufferingFinished() const { return media && media->isFinished(); }
     virtual int bufferedPercent() const;
 
-    qint64 fileSize() const { return media ? media->fileSize() : 0; }
+    virtual unsigned int totalBytes() const;
+
     qint64 bufferedSize() const { return media ? media->downloadedSize() : 0; }
     bool startBuffering();
 
@@ -67,7 +68,7 @@ private:
 
 inline int VideoHttpBuffer::bufferedPercent() const
 {
-    double file = fileSize(), avail = bufferedSize();
+    double file = totalBytes(), avail = bufferedSize();
     if (!file || !avail)
         return 0;
     return qMin(qRound((avail / file) * 100), 100);

@@ -68,6 +68,11 @@ int GstVideoBuffer::bufferedPercent() const
     return m_buffer.data()->bufferedPercent();
 }
 
+unsigned int GstVideoBuffer::totalBytes() const
+{
+    return m_buffer.data()->totalBytes();
+}
+
 GstElement * GstVideoBuffer::setupSrcElement(GstElement *pipeline)
 {
     Q_ASSERT(!m_element && !m_pipeline);
@@ -95,8 +100,8 @@ GstElement * GstVideoBuffer::setupSrcElement(GstElement *pipeline)
     callbacks.seek_data = seekDataWrap;
     gst_app_src_set_callbacks(m_element, &callbacks, this, 0);
 
-    if (m_buffer.data()->media && m_buffer.data()->media->fileSize())
-        gst_app_src_set_size(m_element, m_buffer.data()->media->fileSize());
+    if (totalBytes())
+        gst_app_src_set_size(m_element, totalBytes());
 
     gst_bin_add(GST_BIN(m_pipeline), GST_ELEMENT(m_element));
     return GST_ELEMENT(m_element);
