@@ -24,7 +24,7 @@
 #include <gst/gst.h>
 
 class QUrl;
-class GstVideoHttpBuffer;
+class GstVideoBuffer;
 class VideoBuffer;
 
 typedef struct _GstDecodeBin GstDecodeBin;
@@ -72,13 +72,13 @@ private:
     QThread *m_controlThread;
     QMutex m_mutex;
     GstElement *m_pipeline, *m_videoLink, *m_sink;
-    GstVideoHttpBuffer *m_videoBuffer;
+    GstVideoBuffer *m_videoBuffer;
     VideoState m_state;
     QString m_errorMessage;
     double m_playbackSpeed;
 
     void setError(bool permanent, const QString &message);
-    void setVideoBuffer(GstVideoHttpBuffer *gstVideoHttpBuffer);
+    void setVideoBuffer(GstVideoBuffer *gstVideoBuffer);
 
     GstBusSyncReply busHandler(GstBus *bus, GstMessage *msg);
     void decodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast);

@@ -15,24 +15,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GST_VIDEO_HTTP_BUFFER_H
-#define GST_VIDEO_HTTP_BUFFER_H
+#ifndef GST_VIDEO_BUFFER_H
+#define GST_VIDEO_BUFFER_H
 
 #include <QObject>
 #include <glib.h>
 
-#include "video/VideoHttpBuffer.h"
+#include "video/VideoBuffer.h"
+
+class VideoHttpBuffer;
 
 typedef struct _GstAppSrc GstAppSrc;
 typedef struct _GstElement GstElement;
 
-class GstVideoHttpBuffer : public VideoBuffer
+class GstVideoBuffer : public VideoBuffer
 {
     Q_OBJECT
 
 public:
-    explicit GstVideoHttpBuffer(VideoHttpBuffer *buffer, QObject *parent = 0);
-    virtual ~GstVideoHttpBuffer();
+    explicit GstVideoBuffer(VideoHttpBuffer *buffer, QObject *parent = 0);
+    virtual ~GstVideoBuffer();
 
     void startBuffering();
     virtual bool isBuffering() const;
@@ -70,4 +72,4 @@ private slots:
 
 };
 
-#endif // GST_VIDEO_HTTP_BUFFER_H
+#endif // GST_VIDEO_BUFFER_H

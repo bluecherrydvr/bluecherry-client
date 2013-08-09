@@ -29,7 +29,7 @@ class VideoHttpBuffer : public VideoBuffer
 {
     Q_OBJECT
 
-    friend class GstVideoHttpBuffer;
+    friend class GstVideoBuffer;
 
 public:
     explicit VideoHttpBuffer(const QUrl &url, QObject *parent = 0);

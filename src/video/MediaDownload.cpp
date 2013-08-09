@@ -173,11 +173,11 @@ bool MediaDownload::seek(unsigned offset)
     return true;
 }
 
-int MediaDownload::read(unsigned position, char *buffer, int reqSize)
+QByteArray MediaDownload::read(unsigned position, int reqSize)
 {
     QMutexLocker l(&m_bufferLock);
     if (m_hasError)
-        return -1;
+        return QByteArray();
 
     unsigned oldRdPos = m_readPos;
     int size = qMin(reqSize, (m_fileSize >= position) ? int(m_fileSize - position) : 0);
@@ -191,7 +191,7 @@ int MediaDownload::read(unsigned position, char *buffer, int reqSize)
             return 0;
         }
         if (m_hasError)
-            return -1;
+            return QByteArray();
 
         size = qMin(reqSize, (m_fileSize >= position) ? int(m_fileSize - position) : 0);
     }
@@ -201,22 +201,22 @@ int MediaDownload::read(unsigned position, char *buffer, int reqSize)
     if (!m_readFile.seek(position))
     {
         sendError(QLatin1String("Buffer seek error: ") + m_readFile.errorString());
-        return -1;
+        return QByteArray();
     }
 
-    int re = m_readFile.read(buffer, size);
-    if (re < 0)
+    QByteArray result = m_readFile.read(size);
+    if (QFile::NoError != m_readFile.error())
     {
         /* Called from VideoHttpBuffer::needData. We handle error reporting,
          * as we have more information here. */
         sendError(QLatin1String("Buffer read error: ") + m_readFile.errorString());
-        return -1;
+        return QByteArray();
     }
 
     if (m_readPos == position)
-        m_readPos += re;
+        m_readPos += result.size();
 
-    return re;
+    return result;
 }
 
 void MediaDownload::startRequest(unsigned position, unsigned size)

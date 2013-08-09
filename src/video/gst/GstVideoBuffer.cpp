@@ -15,26 +15,27 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "GstVideoHttpBuffer.h"
+#include "GstVideoBuffer.h"
+#include "video/VideoHttpBuffer.h"
 
 #include <gst/gst.h>
 #include <gst/app/gstappsrc.h>
 
-gboolean GstVideoHttpBuffer::seekDataWrap(GstAppSrc *src, guint64 offset, gpointer user_data)
+gboolean GstVideoBuffer::seekDataWrap(GstAppSrc *src, guint64 offset, gpointer user_data)
 {
     Q_UNUSED(src);
 
-    return static_cast<GstVideoHttpBuffer *>(user_data)->seekData(offset);
+    return static_cast<GstVideoBuffer *>(user_data)->seekData(offset);
 }
 
-void GstVideoHttpBuffer::needDataWrap(GstAppSrc *src, unsigned size, gpointer user_data)
+void GstVideoBuffer::needDataWrap(GstAppSrc *src, unsigned size, gpointer user_data)
 {
     Q_UNUSED(src);
 
-    return static_cast<GstVideoHttpBuffer *>(user_data)->needData(size);
+    return static_cast<GstVideoBuffer *>(user_data)->needData(size);
 }
 
-GstVideoHttpBuffer::GstVideoHttpBuffer(VideoHttpBuffer *buffer, QObject *parent) :
+GstVideoBuffer::GstVideoBuffer(VideoHttpBuffer *buffer, QObject *parent) :
         VideoBuffer(parent), m_buffer(buffer), m_pipeline(0), m_element(0)
 {
     connect(buffer, SIGNAL(streamError(QString)), this, SLOT(streamErrorSlot(QString)));
@@ -44,31 +45,31 @@ GstVideoHttpBuffer::GstVideoHttpBuffer(VideoHttpBuffer *buffer, QObject *parent)
     connect(buffer, SIGNAL(bufferingFinished()), this, SIGNAL(bufferingFinished()));
 }
 
-GstVideoHttpBuffer::~GstVideoHttpBuffer()
+GstVideoBuffer::~GstVideoBuffer()
 {
 }
 
-void GstVideoHttpBuffer::startBuffering()
+void GstVideoBuffer::startBuffering()
 {
     m_buffer.data()->startBuffering();
 }
 
-bool GstVideoHttpBuffer::isBuffering() const
+bool GstVideoBuffer::isBuffering() const
 {
     return m_buffer.data()->isBuffering();
 }
 
-bool GstVideoHttpBuffer::isBufferingFinished() const
+bool GstVideoBuffer::isBufferingFinished() const
 {
     return m_buffer.data()->isBufferingFinished();
 }
 
-int GstVideoHttpBuffer::bufferedPercent() const
+int GstVideoBuffer::bufferedPercent() const
 {
     return m_buffer.data()->bufferedPercent();
 }
 
-GstElement * GstVideoHttpBuffer::setupSrcElement(GstElement *pipeline)
+GstElement * GstVideoBuffer::setupSrcElement(GstElement *pipeline)
 {
     Q_ASSERT(!m_element && !m_pipeline);
     if (m_element || m_pipeline)
@@ -102,7 +103,7 @@ GstElement * GstVideoHttpBuffer::setupSrcElement(GstElement *pipeline)
     return GST_ELEMENT(m_element);
 }
 
-void GstVideoHttpBuffer::clearPlayback()
+void GstVideoBuffer::clearPlayback()
 {
     if (m_element)
     {
@@ -123,52 +124,54 @@ void GstVideoHttpBuffer::clearPlayback()
     m_pipeline = 0;
 }
 
-void GstVideoHttpBuffer::needData(unsigned int size)
+void GstVideoBuffer::needData(unsigned int size)
 {
     Q_ASSERT(m_buffer.data()->media);
 
-    /* Refactor to use gst_pad_alloc_buffer? Probably wouldn't provide any benefit. */
-    GstBuffer *buffer = gst_buffer_new_and_alloc(size);
-
-    int re = m_buffer.data()->media->read(m_buffer.data()->media->readPosition(), (char*)GST_BUFFER_DATA(buffer), size);
-    if (re < 0)
+    QByteArray data = m_buffer.data()->media->read(m_buffer.data()->media->readPosition(), size);
+    if (data.isNull())
     {
         /* Error reporting is handled by MediaDownload for this case */
-        qDebug() << "GstVideoHttpBuffer: read error";
+        qDebug() << "GstVideoBuffer: read error";
         return;
     }
-    else if (re == 0)
+    else if (data.isEmpty())
     {
         if (m_buffer.data()->media->readPosition() >= m_buffer.data()->media->fileSize() && m_buffer.data()->media->isFinished())
         {
-            qDebug() << "GstVideoHttpBuffer: end of stream";
+            qDebug() << "GstVideoBuffer: end of stream";
             gst_app_src_end_of_stream(m_element);
         }
         else
-            qDebug() << "GstVideoHttpBuffer: read aborted";
+            qDebug() << "GstVideoBuffer: read aborted";
         return;
     }
 
-    GST_BUFFER_SIZE(buffer) = re;
+    GstBuffer *buffer = gst_buffer_new();
+    GST_BUFFER_SIZE(buffer) = data.size();
+    GST_BUFFER_MALLOCDATA(buffer) = (guint8 *)g_malloc(data.size());
+    GST_BUFFER_DATA(buffer) = GST_BUFFER_MALLOCDATA(buffer);
+    memcpy(GST_BUFFER_DATA(buffer), data.constData(), data.size());
 
     GstFlowReturn flow = gst_app_src_push_buffer(m_element, buffer);
+
     if (flow != GST_FLOW_OK)
-        qDebug() << "GstVideoHttpBuffer: Push result is" << flow;
+        qDebug() << "GstVideoBuffer: Push result is" << flow;
 }
 
-bool GstVideoHttpBuffer::seekData(qint64 offset)
+bool GstVideoBuffer::seekData(qint64 offset)
 {
     Q_ASSERT(m_buffer.data()->media);
     return m_buffer.data()->media->seek((unsigned)offset);
 }
 
-void GstVideoHttpBuffer::streamErrorSlot(const QString &error)
+void GstVideoBuffer::streamErrorSlot(const QString &error)
 {
     gst_element_set_state(GST_ELEMENT(m_element), GST_STATE_NULL);
     emit streamError(error);
 }
 
-void GstVideoHttpBuffer::sizeChangedSlot(unsigned size)
+void GstVideoBuffer::sizeChangedSlot(unsigned size)
 {
     if (!size)
         qDebug() << "VideoHttpBuffer: fileSize is 0, may cause problems!";
