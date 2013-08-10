@@ -43,7 +43,6 @@ public:
     virtual QByteArray read(unsigned int bytes);
     virtual bool seek(unsigned int offset);
 
-    qint64 bufferedSize() const;
     bool startBuffering();
 
     QUrl url() const;

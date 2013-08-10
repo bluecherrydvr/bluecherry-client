@@ -51,8 +51,11 @@ bool VideoHttpBuffer::isBufferingFinished() const
 
 int VideoHttpBuffer::bufferedPercent() const
 {
+    if (!m_media)
+        return 0;
+
     unsigned int file = totalBytes();
-    qint64 avail = bufferedSize();
+    qint64 avail = m_media->downloadedSize();
     if (!file || !avail)
         return 0;
     return qMin(qRound(((float)avail / file) * 100), 100);
@@ -78,11 +81,6 @@ bool VideoHttpBuffer::seek(unsigned int offset)
     Q_ASSERT(m_media);
 
     return m_media->seek(offset);
-}
-
-qint64 VideoHttpBuffer::bufferedSize() const
-{
-    return m_media ? m_media->downloadedSize() : 0;
 }
 
 bool VideoHttpBuffer::startBuffering()
