@@ -36,7 +36,7 @@ public:
     explicit GstVideoBuffer(VideoHttpBuffer *buffer, QObject *parent = 0);
     virtual ~GstVideoBuffer();
 
-    void startBuffering();
+    virtual void startBuffering();
     virtual bool isBuffering() const;
     virtual bool isBufferingFinished() const;
     virtual int bufferedPercent() const;

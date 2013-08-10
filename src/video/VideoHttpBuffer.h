@@ -33,6 +33,7 @@ public:
     explicit VideoHttpBuffer(const QUrl &url, QObject *parent = 0);
     virtual ~VideoHttpBuffer();
 
+    virtual void startBuffering();
     virtual bool isBuffering() const;
     virtual bool isBufferingFinished() const;
     virtual int bufferedPercent() const;
@@ -42,8 +43,6 @@ public:
 
     virtual QByteArray read(unsigned int bytes);
     virtual bool seek(unsigned int offset);
-
-    bool startBuffering();
 
     QUrl url() const;
 
