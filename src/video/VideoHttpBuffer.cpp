@@ -39,6 +39,22 @@ VideoHttpBuffer::~VideoHttpBuffer()
     }
 }
 
+void VideoHttpBuffer::startBuffering()
+{
+    Q_ASSERT(!m_media);
+
+    m_media = bcApp->mediaDownloadManager()->acquireMediaDownload(m_url);
+    connect(m_media, SIGNAL(fileSizeChanged(uint)), this, SIGNAL(totalBytesChanged(uint)));
+    connect(m_media, SIGNAL(finished()), SIGNAL(bufferingFinished()));
+    connect(m_media, SIGNAL(stopped()), SIGNAL(bufferingStopped()));
+    connect(m_media, SIGNAL(error(QString)), SLOT(sendError(QString)));
+
+    m_media->start();
+
+    qDebug("VideoHttpBuffer: started");
+    emit bufferingStarted();
+}
+
 bool VideoHttpBuffer::isBuffering() const
 {
     return m_media && !m_media->isFinished();
@@ -81,24 +97,6 @@ bool VideoHttpBuffer::seek(unsigned int offset)
     Q_ASSERT(m_media);
 
     return m_media->seek(offset);
-}
-
-bool VideoHttpBuffer::startBuffering()
-{
-    Q_ASSERT(!m_media);
-
-    m_media = bcApp->mediaDownloadManager()->acquireMediaDownload(m_url);
-    connect(m_media, SIGNAL(fileSizeChanged(uint)), this, SIGNAL(sizeChanged(uint)));
-    connect(m_media, SIGNAL(finished()), SIGNAL(bufferingFinished()));
-    connect(m_media, SIGNAL(stopped()), SIGNAL(bufferingStopped()));
-    connect(m_media, SIGNAL(error(QString)), SLOT(sendError(QString)));
-
-    m_media->start();
-
-    qDebug("VideoHttpBuffer: started");
-    emit bufferingStarted();
-
-    return true;
 }
 
 void VideoHttpBuffer::sendError(const QString &errorMessage)
