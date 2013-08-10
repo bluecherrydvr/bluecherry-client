@@ -31,10 +31,10 @@ class VideoHttpBuffer : public VideoBuffer
 
 public:
     explicit VideoHttpBuffer(const QUrl &url, QObject *parent = 0);
-    ~VideoHttpBuffer();
+    virtual ~VideoHttpBuffer();
 
-    virtual bool isBuffering() const { return m_media && !m_media->isFinished(); }
-    virtual bool isBufferingFinished() const { return m_media && m_media->isFinished(); }
+    virtual bool isBuffering() const;
+    virtual bool isBufferingFinished() const;
     virtual int bufferedPercent() const;
 
     virtual unsigned int totalBytes() const;
@@ -43,10 +43,10 @@ public:
     virtual QByteArray read(unsigned int bytes);
     virtual bool seek(unsigned int offset);
 
-    qint64 bufferedSize() const { return m_media ? m_media->downloadedSize() : 0; }
+    qint64 bufferedSize() const;
     bool startBuffering();
 
-    QUrl url() const { return m_url; }
+    QUrl url() const;
 
 private slots:
     void sendError(const QString &errorMessage);
@@ -56,13 +56,5 @@ private:
     MediaDownload *m_media;
 
 };
-
-inline int VideoHttpBuffer::bufferedPercent() const
-{
-    double file = totalBytes(), avail = bufferedSize();
-    if (!file || !avail)
-        return 0;
-    return qMin(qRound((avail / file) * 100), 100);
-}
 
 #endif // VIDEOHTTPBUFFER_H

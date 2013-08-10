@@ -39,22 +39,23 @@ VideoHttpBuffer::~VideoHttpBuffer()
     }
 }
 
-bool VideoHttpBuffer::startBuffering()
+bool VideoHttpBuffer::isBuffering() const
 {
-    Q_ASSERT(!m_media);
+    return m_media && !m_media->isFinished();
+}
 
-    m_media = bcApp->mediaDownloadManager()->acquireMediaDownload(m_url);
-    connect(m_media, SIGNAL(fileSizeChanged(uint)), this, SIGNAL(sizeChanged(uint)));
-    connect(m_media, SIGNAL(finished()), SIGNAL(bufferingFinished()));
-    connect(m_media, SIGNAL(stopped()), SIGNAL(bufferingStopped()));
-    connect(m_media, SIGNAL(error(QString)), SLOT(sendError(QString)));
+bool VideoHttpBuffer::isBufferingFinished() const
+{
+    return m_media && m_media->isFinished();
+}
 
-    m_media->start();
-
-    qDebug("VideoHttpBuffer: started");
-    emit bufferingStarted();
-
-    return true;
+int VideoHttpBuffer::bufferedPercent() const
+{
+    unsigned int file = totalBytes();
+    qint64 avail = bufferedSize();
+    if (!file || !avail)
+        return 0;
+    return qMin(qRound(((float)avail / file) * 100), 100);
 }
 
 unsigned int VideoHttpBuffer::totalBytes() const
@@ -79,8 +80,36 @@ bool VideoHttpBuffer::seek(unsigned int offset)
     return m_media->seek(offset);
 }
 
+qint64 VideoHttpBuffer::bufferedSize() const
+{
+    return m_media ? m_media->downloadedSize() : 0;
+}
+
+bool VideoHttpBuffer::startBuffering()
+{
+    Q_ASSERT(!m_media);
+
+    m_media = bcApp->mediaDownloadManager()->acquireMediaDownload(m_url);
+    connect(m_media, SIGNAL(fileSizeChanged(uint)), this, SIGNAL(sizeChanged(uint)));
+    connect(m_media, SIGNAL(finished()), SIGNAL(bufferingFinished()));
+    connect(m_media, SIGNAL(stopped()), SIGNAL(bufferingStopped()));
+    connect(m_media, SIGNAL(error(QString)), SLOT(sendError(QString)));
+
+    m_media->start();
+
+    qDebug("VideoHttpBuffer: started");
+    emit bufferingStarted();
+
+    return true;
+}
+
 void VideoHttpBuffer::sendError(const QString &errorMessage)
 {
     emit error(errorMessage);
     emit bufferingStopped();
+}
+
+QUrl VideoHttpBuffer::url() const
+{
+    return m_url;
 }
