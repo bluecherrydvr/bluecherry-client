@@ -38,7 +38,7 @@ public:
     QString errorMessage() const { return m_errorMessage; }
 
     void login(const QString &username, const QString &password);
-    void setError(const QString &message) { setStatus(DVRServer::ServerError, message); }
+    void setError(const QString &errorMessage) { setStatus(DVRServer::ServerError, errorMessage); }
 
     QUrl serverUrl() const;
     QNetworkRequest buildRequest(const QUrl &relativeUrl);
@@ -48,8 +48,8 @@ public:
 signals:
     void loginRequestStarted();
     void loginSuccessful();
-    void serverError(const QString &message);
-    void loginError(const QString &message);
+    void serverErrorMessage(const QString &errorMessage);
+    void loginErrorMessage(const QString &errorMessage);
     void disconnected();
     void statusChanged(int status);
     void onlineChanged(bool online);

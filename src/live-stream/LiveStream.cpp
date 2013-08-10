@@ -281,11 +281,11 @@ QSize LiveStream::streamSize()
     return m_currentFrame.size();
 }
 
-void LiveStream::fatalError(const QString &message)
+void LiveStream::fatalError(const QString &errorMessage)
 {
-    qDebug() << "Fatal error:" << LoggableUrl(url()) << message;
+    qDebug() << "Fatal error:" << LoggableUrl(url()) << errorMessage;
 
-    m_errorMessage = message;
+    m_errorMessage = errorMessage;
     setState(Error);
     /* stateTimer will handle reconnection */
 }

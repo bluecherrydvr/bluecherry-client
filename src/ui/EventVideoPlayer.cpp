@@ -411,12 +411,12 @@ void EventVideoPlayer::bufferingStopped()
         m_uiTimer.stop();
 }
 
-void EventVideoPlayer::videoNonFatalError(const QString &message)
+void EventVideoPlayer::videoNonFatalError(const QString &errorMessage)
 {
-    if (message.isEmpty())
+    if (errorMessage.isEmpty())
         return;
 
-    m_statusText->setText(QLatin1String("<span style='color:red;font-weight:bold'>") + message +
+    m_statusText->setText(QLatin1String("<span style='color:red;font-weight:bold'>") + errorMessage +
                           QLatin1String("</span>"));
 }
 

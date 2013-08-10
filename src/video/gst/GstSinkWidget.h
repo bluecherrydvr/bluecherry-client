@@ -50,7 +50,7 @@ public slots:
     void setFullScreen(bool on);
     void toggleFullScreen() { setFullScreen(!isFullScreen()); }
 
-    void setOverlayMessage(const QString &message);
+    void setOverlayMessage(const QString &overlayMessage);
     void clearOverlayMessage() { setOverlayMessage(QString()); }
 
 private slots:

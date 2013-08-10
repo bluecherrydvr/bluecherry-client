@@ -66,7 +66,7 @@ public slots:
     virtual void restart();
 
 private slots:
-    void streamError(const QString &message);
+    void bufferingError(const QString &bufferingErrorMessage);
 
 private:
     QThread *m_controlThread;
@@ -77,7 +77,7 @@ private:
     QString m_errorMessage;
     double m_playbackSpeed;
 
-    void setError(bool permanent, const QString &message);
+    void setErrorMessage(bool permanent, const QString &errorMessage);
     void setVideoBuffer(GstVideoBuffer *gstVideoBuffer);
 
     GstBusSyncReply busHandler(GstBus *bus, GstMessage *msg);

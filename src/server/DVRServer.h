@@ -93,12 +93,12 @@ signals:
     void cameraAboutToBeRemoved(DVRCamera *camera);
     void cameraRemoved(DVRCamera *camera);
 
-    void statusAlertMessageChanged(const QString &message);
+    void statusAlertMessageChanged(const QString &errorMessage);
 
     void loginRequestStarted();
     void loginSuccessful(DVRServer *camera);
-    void serverError(const QString &message);
-    void loginError(const QString &message);
+    void serverErrorMessage(const QString &errorMessage);
+    void loginErrorMessage(const QString &errorMessage);
     void disconnected(DVRServer *server);
     void statusChanged(int status);
     void onlineChanged(bool online);

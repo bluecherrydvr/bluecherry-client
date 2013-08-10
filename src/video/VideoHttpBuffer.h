@@ -48,19 +48,8 @@ public:
 
     QUrl url() const { return m_url; }
 
-signals:
-    void streamError(const QString &message);
-
-    /* Emitted when buffering starts, i.e. upon start() */
-    void bufferingStarted();
-    /* Emitted when buffering stops for any reason, including errors */
-    void bufferingStopped();
-    /* Emitted when buffering is finished, and the entire file is cached locally */
-    void bufferingFinished();
-    void sizeChanged(unsigned size);
-
 private slots:
-    void sendStreamError(const QString &message);
+    void sendError(const QString &errorMessage);
 
 private:
     QUrl m_url;

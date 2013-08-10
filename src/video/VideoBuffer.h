@@ -38,6 +38,14 @@ public:
     virtual QByteArray read(unsigned int bytes) = 0;
     virtual bool seek(unsigned int offset) = 0;
 
+signals:
+    void error(const QString &errorMessage);
+    void bufferingStarted();
+    void bufferingReady();
+    void bufferingStopped();
+    void bufferingFinished();
+    void totalBytesChanged(unsigned size);
+
 };
 
 #endif // VIDEO_BUFFER_H

@@ -36,7 +36,7 @@ GstVideoPlayerBackend::GstVideoPlayerBackend(QObject *parent)
       m_playbackSpeed(1.0)
 {
     if (!initGStreamer())
-        setError(true, bcApp->gstWrapper()->errorMessage()); // not the clearest solution, will be replaced
+        setErrorMessage(true, bcApp->gstWrapper()->errorMessage()); // not the clearest solution, will be replaced
 }
 
 GstVideoPlayerBackend::~GstVideoPlayerBackend()
@@ -60,7 +60,7 @@ void GstVideoPlayerBackend::setVideoBuffer(GstVideoBuffer *gstVideoBuffer)
         connect(m_videoBuffer, SIGNAL(bufferingStarted()), this, SIGNAL(bufferingStarted()));
         connect(m_videoBuffer, SIGNAL(bufferingStopped()), this, SIGNAL(bufferingStopped()));
         connect(m_videoBuffer, SIGNAL(bufferingReady()), SLOT(playIfReady()));
-        connect(m_videoBuffer, SIGNAL(streamError(QString)), SLOT(streamError(QString)));
+        connect(m_videoBuffer, SIGNAL(error(QString)), SLOT(bufferingError(QString)));
     }
 }
 
@@ -105,7 +105,7 @@ bool GstVideoPlayerBackend::start(const QUrl &url)
 
     if (!m_sink)
     {
-        setError(true, QLatin1String("Internal error: improper usage"));
+        setErrorMessage(true, QLatin1String("Internal error: improper usage"));
         return false;
     }
 
@@ -113,7 +113,7 @@ bool GstVideoPlayerBackend::start(const QUrl &url)
     m_pipeline = gst_pipeline_new("stream");
     if (!m_pipeline)
     {
-        setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("stream")));
+        setErrorMessage(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("stream")));
         return false;
     }
 
@@ -123,7 +123,7 @@ bool GstVideoPlayerBackend::start(const QUrl &url)
     GstElement *source = m_videoBuffer->setupSrcElement(m_pipeline);
     if (!source)
     {
-        setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("source")));
+        setErrorMessage(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("source")));
         setVideoBuffer(0);
         return false;
     }
@@ -134,7 +134,7 @@ bool GstVideoPlayerBackend::start(const QUrl &url)
     GstElement *decoder = gst_element_factory_make("decodebin2", "decoder");
     if (!decoder)
     {
-        setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("decoder")));
+        setErrorMessage(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("decoder")));
         return false;
     }
 
@@ -149,20 +149,20 @@ bool GstVideoPlayerBackend::start(const QUrl &url)
     GstElement *colorspace = gst_element_factory_make("ffmpegcolorspace", "colorspace");
     if (!colorspace)
     {
-        setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("colorspace")));
+        setErrorMessage(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("colorspace")));
         return false;
     }
 
     gst_bin_add_many(GST_BIN(m_pipeline), decoder, colorspace, m_sink, NULL);
     if (!gst_element_link(source, decoder))
     {
-        setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("link decoder")));
+        setErrorMessage(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("link decoder")));
         return false;
     }
 
     if (!gst_element_link(colorspace, m_sink))
     {
-        setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("link sink")));
+        setErrorMessage(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("link sink")));
         return false;
     }
 
@@ -218,20 +218,20 @@ void GstVideoPlayerBackend::clear()
     m_errorMessage.clear();
 }
 
-void GstVideoPlayerBackend::setError(bool permanent, const QString &message)
+void GstVideoPlayerBackend::setErrorMessage(bool permanent, const QString &errorMessage)
 {
     VideoState old = m_state;
     m_state = permanent ? PermanentError : Error;
-    m_errorMessage = message;
+    m_errorMessage = errorMessage;
     emit stateChanged(m_state, old);
 }
 
-void GstVideoPlayerBackend::streamError(const QString &message)
+void GstVideoPlayerBackend::bufferingError(const QString &bufferingErrorMessage)
 {
-    qDebug() << "GstVideoPlayerBackend: stopping stream due to error:" << message;
+    qDebug() << "GstVideoPlayerBackend: stopping stream due to error:" << bufferingErrorMessage;
     if (m_pipeline)
         gst_element_set_state(m_pipeline, GST_STATE_NULL);
-    setError(true, message);
+    setErrorMessage(true, bufferingErrorMessage);
 }
 
 void GstVideoPlayerBackend::playIfReady()
@@ -391,7 +391,7 @@ void GstVideoPlayerBackend::decodePadReady(GstDecodeBin *bin, GstPad *pad, gbool
         qDebug("gstreamer: linking video decoder to pipeline");
         if (!gst_element_link(GST_ELEMENT(bin), m_videoLink))
         {
-            setError(false, tr("Building video pipeline failed"));
+            setErrorMessage(false, tr("Building video pipeline failed"));
             return;
         }
     }

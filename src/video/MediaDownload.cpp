@@ -102,11 +102,11 @@ void MediaDownload::cancel()
 
 }
 
-void MediaDownload::sendError(const QString &message)
+void MediaDownload::sendError(const QString &errorMessage)
 {
-    qDebug() << "MediaDownload: sending error:" << message;
+    qDebug() << "MediaDownload: sending error:" << errorMessage;
     m_hasError = true;
-    emit error(message);
+    emit error(errorMessage);
     emit stopped();
     m_bufferWait.wakeAll();
 }
@@ -328,12 +328,12 @@ void MediaDownload::incomingData(const QByteArray &data, unsigned position)
     m_bufferWait.wakeAll();
 }
 
-void MediaDownload::taskError(const QString &message)
+void MediaDownload::taskError(const QString &errorMessage)
 {
     /* We probably want some smart retrying behavior for tasks */
-    qDebug() << "MediaDownload: Task reports error:" << message;
+    qDebug() << "MediaDownload: Task reports error:" << errorMessage;
     m_isFinished = true;
-    sendError(message);
+    sendError(errorMessage);
 }
 
 void MediaDownload::taskFinished()

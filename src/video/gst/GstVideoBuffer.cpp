@@ -38,8 +38,8 @@ void GstVideoBuffer::needDataWrap(GstAppSrc *src, unsigned size, gpointer user_d
 GstVideoBuffer::GstVideoBuffer(VideoHttpBuffer *buffer, QObject *parent) :
         VideoBuffer(parent), m_buffer(buffer), m_pipeline(0), m_element(0)
 {
-    connect(buffer, SIGNAL(streamError(QString)), this, SLOT(streamErrorSlot(QString)));
-    connect(buffer, SIGNAL(sizeChanged(uint)), this, SLOT(sizeChangedSlot(uint)));
+    connect(buffer, SIGNAL(error(QString)), this, SLOT(errorSlot(QString)));
+    connect(buffer, SIGNAL(totalBytesChanged(uint)), this, SLOT(totalBytesChangedSlot(uint)));
     connect(buffer, SIGNAL(bufferingStarted()), this, SIGNAL(bufferingStarted()));
     connect(buffer, SIGNAL(bufferingStopped()), this, SIGNAL(bufferingStopped()));
     connect(buffer, SIGNAL(bufferingFinished()), this, SIGNAL(bufferingFinished()));
@@ -177,13 +177,13 @@ void GstVideoBuffer::needData(unsigned int bytes)
         qDebug() << "GstVideoBuffer: Push result is" << flow;
 }
 
-void GstVideoBuffer::streamErrorSlot(const QString &error)
+void GstVideoBuffer::errorSlot(const QString &errorMessage)
 {
     gst_element_set_state(GST_ELEMENT(m_element), GST_STATE_NULL);
-    emit streamError(error);
+    emit error(errorMessage);
 }
 
-void GstVideoBuffer::sizeChangedSlot(unsigned size)
+void GstVideoBuffer::totalBytesChangedSlot(unsigned size)
 {
     if (!size)
         qDebug() << "VideoHttpBuffer: fileSize is 0, may cause problems!";
@@ -195,4 +195,6 @@ void GstVideoBuffer::sizeChangedSlot(unsigned size)
 
     if (firstTime && size)
         emit bufferingReady();
+
+    emit totalBytesChanged(size);
 }

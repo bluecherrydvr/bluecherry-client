@@ -52,7 +52,7 @@ public slots:
     void setAutoDeinterlacing(bool autoDeinterlacing);
 
 signals:
-    void fatalError(const QString &message);
+    void fatalError(const QString &errorMessage);
     void finished();
 
 private:

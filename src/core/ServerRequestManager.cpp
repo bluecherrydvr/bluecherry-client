@@ -46,10 +46,10 @@ void ServerRequestManager::setStatus(DVRServer::Status s, const QString &errmsg)
     switch (m_status)
     {
     case DVRServer::LoginError:
-        emit loginError(m_errorMessage);
+        emit loginErrorMessage(m_errorMessage);
         break;
     case DVRServer::ServerError:
-        emit serverError(m_errorMessage);
+        emit serverErrorMessage(m_errorMessage);
         break;
     case DVRServer::Online:
         emit loginSuccessful();
