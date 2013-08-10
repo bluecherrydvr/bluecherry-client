@@ -112,12 +112,12 @@ QSize GstSinkWidget::sizeHint() const
     return QSize(m_frameWidth, m_frameHeight);
 }
 
-void GstSinkWidget::setOverlayMessage(const QString &message)
+void GstSinkWidget::setOverlayMessage(const QString &overlayMessage)
 {
-    if (message == m_overlayMsg)
+    if (overlayMessage == m_overlayMsg)
         return;
 
-    m_overlayMsg = message;
+    m_overlayMsg = overlayMessage;
     m_viewport->update();
 }
 

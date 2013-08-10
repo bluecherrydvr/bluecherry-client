@@ -47,7 +47,7 @@ bool VideoHttpBuffer::startBuffering()
     connect(m_media, SIGNAL(fileSizeChanged(uint)), this, SIGNAL(sizeChanged(uint)));
     connect(m_media, SIGNAL(finished()), SIGNAL(bufferingFinished()));
     connect(m_media, SIGNAL(stopped()), SIGNAL(bufferingStopped()));
-    connect(m_media, SIGNAL(error(QString)), SLOT(sendStreamError(QString)));
+    connect(m_media, SIGNAL(error(QString)), SLOT(sendError(QString)));
 
     m_media->start();
 
@@ -79,8 +79,8 @@ bool VideoHttpBuffer::seek(unsigned int offset)
     return m_media->seek(offset);
 }
 
-void VideoHttpBuffer::sendStreamError(const QString &message)
+void VideoHttpBuffer::sendError(const QString &errorMessage)
 {
-    emit streamError(message);
+    emit error(errorMessage);
     emit bufferingStopped();
 }

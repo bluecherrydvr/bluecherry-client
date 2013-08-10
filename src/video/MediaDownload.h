@@ -91,10 +91,10 @@ private slots:
     void requestReady(unsigned fileSize);
     void incomingData(const QByteArray &data, unsigned position);
 
-    void taskError(const QString &message);
+    void taskError(const QString &errorMessage);
     void taskFinished();
 
-    void sendError(const QString &message);
+    void sendError(const QString &errorMessage);
 
 private:
     QUrl m_url;

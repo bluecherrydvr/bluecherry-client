@@ -135,7 +135,7 @@ private:
     qint8 m_interval;
 
     void setState(State newState);
-    void setError(const QString &message);
+    void setErrorMessage(const QString &errorMessage);
 
     bool processHeaders();
     bool parseBuffer();

@@ -49,8 +49,8 @@ DVRServer::DVRServer(int id, QObject *parent)
 
     connect(m_api, SIGNAL(loginRequestStarted()), this, SIGNAL(loginRequestStarted()));
     connect(m_api, SIGNAL(loginSuccessful()), this, SLOT(loginSuccessfulSlot()));
-    connect(m_api, SIGNAL(serverError(QString)), this, SIGNAL(serverError(QString)));
-    connect(m_api, SIGNAL(loginError(QString)), this, SIGNAL(loginError(QString)));
+    connect(m_api, SIGNAL(serverErrorMessage(QString)), this, SIGNAL(serverErrorMessage(QString)));
+    connect(m_api, SIGNAL(loginErrorMessage(QString)), this, SIGNAL(loginErrorMessage(QString)));
     connect(m_api, SIGNAL(statusChanged(int)), this, SIGNAL(statusChanged(int)));
     connect(m_api, SIGNAL(onlineChanged(bool)), this, SIGNAL(onlineChanged(bool)));
 

@@ -74,7 +74,7 @@ signals:
     void bufferingStatus(int percent);
     void bufferingStarted();
     void bufferingStopped();
-    void nonFatalError(const QString &message);
+    void nonFatalError(const QString &errorMessage);
 
 };
 

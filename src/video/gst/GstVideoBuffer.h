@@ -53,14 +53,6 @@ public:
      * but not linked. */
     GstElement * setupSrcElement(GstElement *pipeline);
 
-signals:
-    void streamError(const QString &message);
-    void bufferingStarted();
-    void bufferingReady();
-    void bufferingStopped();
-    void bufferingFinished();
-    void sizeChanged(unsigned size);
-
 private:
     QScopedPointer<VideoHttpBuffer> m_buffer;
     GstElement *m_pipeline;
@@ -72,8 +64,8 @@ private:
     static int seekDataWrap(GstAppSrc *src, guint64 offset, gpointer user_data);
 
 private slots:
-    void streamErrorSlot(const QString &error);
-    void sizeChangedSlot(unsigned size);
+    void errorSlot(const QString &errorMessage);
+    void totalBytesChangedSlot(unsigned size);
 
 };
 
