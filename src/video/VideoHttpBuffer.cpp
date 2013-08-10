@@ -104,8 +104,3 @@ void VideoHttpBuffer::sendError(const QString &errorMessage)
     emit error(errorMessage);
     emit bufferingStopped();
 }
-
-QUrl VideoHttpBuffer::url() const
-{
-    return m_url;
-}

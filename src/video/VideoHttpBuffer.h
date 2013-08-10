@@ -44,8 +44,6 @@ public:
     virtual QByteArray read(unsigned int bytes);
     virtual bool seek(unsigned int offset);
 
-    QUrl url() const;
-
 private slots:
     void sendError(const QString &errorMessage);
 
