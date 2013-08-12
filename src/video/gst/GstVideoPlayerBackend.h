@@ -52,10 +52,12 @@ public:
     virtual bool isError() const { return m_state <= Error; }
     virtual bool isPermanentError() const { return m_state == PermanentError; }
     virtual QString errorMessage() const { return m_errorMessage; }
+
+    virtual void setVideoBuffer(VideoBuffer *videoBuffer);
     virtual VideoBuffer * videoBuffer() const;
 
 public slots:
-    virtual bool start(const QUrl &url);
+    virtual bool start();
     virtual void clear();
 
     virtual void play();
@@ -78,7 +80,7 @@ private:
     double m_playbackSpeed;
 
     void setErrorMessage(bool permanent, const QString &errorMessage);
-    void setVideoBuffer(GstVideoBuffer *gstVideoBuffer);
+    void setGstVideoBuffer(GstVideoBuffer *gstVideoBuffer);
 
     GstBusSyncReply busHandler(GstBus *bus, GstMessage *msg);
     void decodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast);

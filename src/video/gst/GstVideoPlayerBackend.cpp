@@ -44,7 +44,12 @@ GstVideoPlayerBackend::~GstVideoPlayerBackend()
     clear();
 }
 
-void GstVideoPlayerBackend::setVideoBuffer(GstVideoBuffer *gstVideoBuffer)
+void GstVideoPlayerBackend::setVideoBuffer(VideoBuffer *videoBuffer)
+{
+    setGstVideoBuffer(new GstVideoBuffer(videoBuffer));
+}
+
+void GstVideoPlayerBackend::setGstVideoBuffer(GstVideoBuffer *gstVideoBuffer)
 {
     if (m_videoBuffer)
     {
@@ -97,7 +102,7 @@ void GstVideoPlayerBackend::setSink(GstElement *sink)
     }
 }
 
-bool GstVideoPlayerBackend::start(const QUrl &url)
+bool GstVideoPlayerBackend::start()
 {
     Q_ASSERT(!m_pipeline);
     if (state() == PermanentError || m_pipeline)
@@ -116,9 +121,6 @@ bool GstVideoPlayerBackend::start(const QUrl &url)
         setErrorMessage(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("stream")));
         return false;
     }
-
-    /* Buffered HTTP source */
-    setVideoBuffer(new GstVideoBuffer(new VideoHttpBuffer(url)));
 
     GstElement *source = m_videoBuffer->setupSrcElement(m_pipeline);
     if (!source)
