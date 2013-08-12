@@ -102,6 +102,7 @@ signals:
     void buildScaleSizes(QVector<QSize> &sizes);
 
     void updateFrame(const MJpegFrame &frame, const QVector<QImage> &scaledFrames);
+    void bytesDownloaded(unsigned int bytes);
 
 private slots:
     void readable();

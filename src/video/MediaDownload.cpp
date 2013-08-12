@@ -243,6 +243,7 @@ void MediaDownload::startRequest(unsigned position, unsigned size)
             Qt::DirectConnection);
     connect(m_task, SIGNAL(finished()), SLOT(taskFinished()), Qt::DirectConnection);
     connect(m_task, SIGNAL(error(QString)), SLOT(taskError(QString)), Qt::DirectConnection);
+    connect(m_task, SIGNAL(bytesDownloaded(uint)), bcApp->globalRate, SLOT(addSampleValue(uint)));
 
     bool ok = m_task->metaObject()->invokeMethod(m_task, "startDownload");
     Q_ASSERT(ok);

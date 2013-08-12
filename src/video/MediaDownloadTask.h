@@ -54,6 +54,7 @@ signals:
     void dataRead(const QByteArray &data, unsigned position);
     void error(const QString &errorMessage);
     void finished();
+    void bytesDownloaded(unsigned int bytes);
 
 private slots:
     void metaDataReady();

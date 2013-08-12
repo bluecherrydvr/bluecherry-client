@@ -29,12 +29,7 @@ void TransferRateCalculator::addSampleValue(unsigned bytes)
     Q_ASSERT(bytes < 0x80000000);
     m_nextSample.fetchAndAddAcquire((int)bytes);
     if (!m_timer.isActive())
-        metaObject()->invokeMethod(this, "startTimer", Qt::AutoConnection);
-}
-
-void TransferRateCalculator::startTimer()
-{
-    m_timer.start(interval, this);
+        m_timer.start(interval, this);
 }
 
 unsigned TransferRateCalculator::currentRate()
