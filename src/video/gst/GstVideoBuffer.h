@@ -23,8 +23,6 @@
 
 #include "video/VideoBuffer.h"
 
-class VideoHttpBuffer;
-
 typedef struct _GstAppSrc GstAppSrc;
 typedef struct _GstElement GstElement;
 
@@ -33,7 +31,7 @@ class GstVideoBuffer : public VideoBuffer
     Q_OBJECT
 
 public:
-    explicit GstVideoBuffer(VideoHttpBuffer *buffer, QObject *parent = 0);
+    explicit GstVideoBuffer(VideoBuffer *buffer, QObject *parent = 0);
     virtual ~GstVideoBuffer();
 
     virtual void startBuffering();
@@ -54,7 +52,7 @@ public:
     GstElement * setupSrcElement(GstElement *pipeline);
 
 private:
-    QScopedPointer<VideoHttpBuffer> m_buffer;
+    QScopedPointer<VideoBuffer> m_buffer;
     GstElement *m_pipeline;
     GstAppSrc *m_element;
 
