@@ -53,6 +53,7 @@ public slots:
 signals:
     void fatalError(const QString &message);
     void finished();
+    void bytesDownloaded(unsigned int bytes);
 
 private:
     struct AVFormatContext *m_ctx;
