@@ -18,7 +18,7 @@
 #include "EventVideoPlayer.h"
 #include "event/EventDownloadManager.h"
 #include "event/EventVideoDownload.h"
-#include "video/gst/GstVideoBuffer.h"
+#include "video/VideoHttpBuffer.h"
 #include "video/VideoPlayerBackend.h"
 #include "video/VideoPlayerFactory.h"
 #include "video/VideoWidget.h"
@@ -226,7 +226,8 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     connect(m_videoBackend.data(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()), Qt::QueuedConnection);
     connect(m_videoBackend.data(), SIGNAL(bufferingStarted()), SLOT(bufferingStarted()));
 
-    bool ok = m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "start", Qt::QueuedConnection, Q_ARG(QUrl, url));
+    m_videoBackend.data()->setVideoBuffer(new VideoHttpBuffer(url));
+    bool ok = m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "start", Qt::QueuedConnection);
     Q_ASSERT(ok);
     Q_UNUSED(ok);
 
