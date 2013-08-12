@@ -23,6 +23,7 @@
 #include "core/BluecherryApp.h"
 #include "core/CameraPtzControl.h"
 #include "core/LiveViewManager.h"
+#include "LiveViewLayout.h"
 #include "LiveViewWindow.h"
 #include "ui/MainWindow.h"
 #include "utils/FileUtils.h"
@@ -126,9 +127,9 @@ void LiveFeedItem::openFullScreen()
 
 void LiveFeedItem::close()
 {
-    bool closeFeedItem = parentItem()->metaObject()->invokeMethod(parentItem(), "removeItem", Q_ARG(QDeclarativeItem*, this));
-    Q_ASSERT(closeFeedItem);
-    Q_UNUSED(closeFeedItem);
+    LiveViewLayout *layout = qobject_cast<LiveViewLayout *>(parentItem());
+    if (layout)
+        layout->removeItem(this);
 }
 
 void LiveFeedItem::saveSnapshot(const QString &ifile)
