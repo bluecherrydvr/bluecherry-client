@@ -339,7 +339,7 @@ void GstSinkWidget::updateFrame(GstBuffer *buffer)
     m_framePtr = buffer;
     m_frameLock.unlock();
 
-    QMetaObject::invokeMethod(m_viewport, "update", Qt::QueuedConnection);
+    m_viewport->update();
 }
 
 GstFlowReturn GstSinkWidget::newPreroll()
