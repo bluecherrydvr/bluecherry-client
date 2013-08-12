@@ -30,14 +30,12 @@ class LiveStreamThread : public QObject
     Q_OBJECT
 
 public:
-    explicit LiveStreamThread(QObject *parent = 0);
+    explicit LiveStreamThread(const QUrl &url, QObject *parent = 0);
     virtual ~LiveStreamThread();
 
-    void start(const QUrl &url);
     void stop();
     void setPaused(bool paused);
 
-    bool isRunning() const;
     LiveStreamWorker * worker() const;
 
 signals:
@@ -47,10 +45,6 @@ signals:
 private:
     QWeakPointer<QThread> m_thread;
     QWeakPointer<LiveStreamWorker> m_worker;
-    bool m_isRunning;
-
-private slots:
-    void threadFinished();
 
 };
 
