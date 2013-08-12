@@ -55,10 +55,9 @@ public:
     virtual VideoBuffer * videoBuffer() const = 0;
 
     virtual bool start() = 0;
-
-public slots:
     virtual void clear() = 0;
 
+public slots:
     virtual void play() = 0;
     virtual void playIfReady() = 0;
     virtual void pause() = 0;

@@ -245,10 +245,8 @@ void EventVideoPlayer::clearVideo()
     if (m_videoBackend)
     {
         m_videoBackend.data()->disconnect(this);
-        bool ok = m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "clear", Qt::QueuedConnection);
-        ok &= m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "deleteLater", Qt::QueuedConnection);
-        Q_ASSERT(ok);
-        Q_UNUSED(ok);
+        m_videoBackend.data()->clear();
+        m_videoBackend.data()->deleteLater();
     }
 
     m_videoBackend.clear();
