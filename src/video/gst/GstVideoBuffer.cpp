@@ -35,7 +35,7 @@ void GstVideoBuffer::needDataWrap(GstAppSrc *src, unsigned size, gpointer user_d
     return static_cast<GstVideoBuffer *>(user_data)->needData(size);
 }
 
-GstVideoBuffer::GstVideoBuffer(VideoHttpBuffer *buffer, QObject *parent) :
+GstVideoBuffer::GstVideoBuffer(VideoBuffer *buffer, QObject *parent) :
         VideoBuffer(parent), m_buffer(buffer), m_pipeline(0), m_element(0)
 {
     connect(buffer, SIGNAL(error(QString)), this, SLOT(errorSlot(QString)));
