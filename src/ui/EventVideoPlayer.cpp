@@ -223,11 +223,11 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     m_videoWidget->initVideo(m_videoBackend.data());
 
     connect(m_videoBackend.data(), SIGNAL(bufferingStatus(int)), m_videoWidget, SLOT(setBufferStatus(int)));
-    connect(m_videoBackend.data(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()), Qt::QueuedConnection);
+    connect(m_videoBackend.data(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()));
     connect(m_videoBackend.data(), SIGNAL(bufferingStarted()), SLOT(bufferingStarted()));
 
     m_videoBackend.data()->setVideoBuffer(new VideoHttpBuffer(url));
-    bool ok = m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "start", Qt::QueuedConnection);
+    bool ok = m_videoBackend.data()->start();
     Q_ASSERT(ok);
     Q_UNUSED(ok);
 
