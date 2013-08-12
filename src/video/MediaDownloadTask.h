@@ -47,7 +47,6 @@ public:
 public slots:
     void startDownload();
     void abort();
-    void abortLater();
 
 signals:
     void requestReady(unsigned fileSize);

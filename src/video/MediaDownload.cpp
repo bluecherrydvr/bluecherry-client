@@ -225,7 +225,7 @@ void MediaDownload::startRequest(unsigned position, unsigned size)
 
     if (m_task)
     {
-        m_task->abortLater();
+        m_task->abort();
         m_task->deleteLater();
     }
 

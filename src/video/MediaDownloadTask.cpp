@@ -69,14 +69,6 @@ MediaDownloadTask::~MediaDownloadTask()
     abort();
 }
 
-void MediaDownloadTask::abortLater()
-{
-    /* Mostly threadsafe; caller must know that the instance will not be deleted at this time. */
-    if (m_reply)
-        m_reply->disconnect(this);
-    metaObject()->invokeMethod(this, "abort", Qt::QueuedConnection);
-}
-
 void MediaDownloadTask::abort()
 {
     if (!m_reply)
