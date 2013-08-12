@@ -181,7 +181,7 @@ EventVideoPlayer::~EventVideoPlayer()
     bcApp->releaseLive();
 
     if (m_videoBackend)
-        m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "deleteLater", Qt::QueuedConnection);
+        m_videoBackend.data()->deleteLater();
 
     if (m_videoThread)
     {
