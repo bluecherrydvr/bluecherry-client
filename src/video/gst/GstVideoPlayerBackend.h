@@ -56,10 +56,10 @@ public:
     virtual void setVideoBuffer(VideoBuffer *videoBuffer);
     virtual VideoBuffer * videoBuffer() const;
 
+public slots:
     virtual bool start();
     virtual void clear();
 
-public slots:
     virtual void play();
     virtual void playIfReady();
     virtual void pause();
