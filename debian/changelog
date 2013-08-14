@@ -1,4 +1,10 @@
-bluecherry-client (1:2.1.4-1) lucid; urgency=low
+bluecherry-client (1:2.1.5-1) lucid; urgency=low
+
+  * Bug #151: Improve sorting time of events in events window
+
+ -- Rafał Malinowski <rafal.malinowski@corp.bluecherry.net>  Fri, 12 Jul 2013 13:23:50 +0200
+
+ bluecherry-client (1:2.1.4-1) lucid; urgency=low
 
   * Bug #145: Server settings are not stored until program is closed
   * Bug #148: Do not show passwords in log
