@@ -87,6 +87,11 @@ bool VideoHttpBuffer::isEndOfStream() const
     return m_media ? (m_media->readPosition() >= m_media->fileSize() && m_media->isFinished()) : false;
 }
 
+bool VideoHttpBuffer::hasData(unsigned int offset, unsigned int bytes) const
+{
+    return m_media ? m_media->hasData(offset, bytes) : false;
+}
+
 QByteArray VideoHttpBuffer::read(unsigned int bytes)
 {
     return m_media ? m_media->read(m_media->readPosition(), bytes) : QByteArray();

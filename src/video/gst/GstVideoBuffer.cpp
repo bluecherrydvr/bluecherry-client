@@ -36,7 +36,7 @@ void GstVideoBuffer::needDataWrap(GstAppSrc *src, unsigned size, gpointer user_d
 }
 
 GstVideoBuffer::GstVideoBuffer(VideoBuffer *buffer, QObject *parent) :
-        VideoBuffer(parent), m_buffer(buffer), m_pipeline(0), m_element(0)
+        VideoBuffer(parent), m_buffer(buffer), m_pipeline(0), m_element(0), m_position(0)
 {
     connect(buffer, SIGNAL(error(QString)), this, SLOT(errorSlot(QString)));
     connect(buffer, SIGNAL(totalBytesChanged(uint)), this, SLOT(totalBytesChangedSlot(uint)));
@@ -79,6 +79,11 @@ bool GstVideoBuffer::isEndOfStream() const
     return m_buffer.data()->isEndOfStream();
 }
 
+bool GstVideoBuffer::hasData(unsigned int offset, unsigned int bytes) const
+{
+    return m_buffer.data()->hasData(offset, bytes);
+}
+
 QByteArray GstVideoBuffer::read(unsigned int bytes)
 {
     return m_buffer.data()->read(bytes);
@@ -86,6 +91,8 @@ QByteArray GstVideoBuffer::read(unsigned int bytes)
 
 bool GstVideoBuffer::seek(unsigned int offset)
 {
+    m_position = offset;
+
     return m_buffer.data()->seek(offset);
 }
 
@@ -146,6 +153,11 @@ void GstVideoBuffer::clearPlayback()
 
 void GstVideoBuffer::needData(unsigned int bytes)
 {
+    if (hasData(m_position, bytes))
+        qDebug() << Q_FUNC_INFO << "have data!";
+    else
+        qDebug() << Q_FUNC_INFO << "does not have data!";
+
     QByteArray data = read(bytes);
     tryPushBuffer(data);
 }
@@ -191,6 +203,8 @@ void GstVideoBuffer::pushBuffer(const QByteArray& buffer)
 
     if (flow != GST_FLOW_OK)
         qDebug() << "GstVideoBuffer: Push result is" << flow;
+    else
+        m_position += buffer.size();
 }
 
 void GstVideoBuffer::errorSlot(const QString &errorMessage)

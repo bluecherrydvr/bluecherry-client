@@ -173,6 +173,15 @@ bool MediaDownload::seek(unsigned offset)
     return true;
 }
 
+bool MediaDownload::hasData(unsigned int offset, unsigned int bytes)
+{
+    QMutexLocker l(&m_bufferLock);
+    if (m_hasError)
+        return false;
+
+     return m_bufferRanges.contains(Range::fromStartSize(offset, bytes));
+}
+
 QByteArray MediaDownload::read(unsigned position, int reqSize)
 {
     QMutexLocker l(&m_bufferLock);

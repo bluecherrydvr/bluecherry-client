@@ -42,6 +42,7 @@ public:
     virtual unsigned int totalBytes() const;
     virtual bool isEndOfStream() const;
 
+    virtual bool hasData(unsigned int offset, unsigned int bytes) const;
     virtual QByteArray read(unsigned int bytes);
     virtual bool seek(unsigned int offset);
 
@@ -55,6 +56,7 @@ private:
     QScopedPointer<VideoBuffer> m_buffer;
     GstElement *m_pipeline;
     GstAppSrc *m_element;
+    unsigned int m_position;
 
     static void needDataWrap(GstAppSrc *src, unsigned bytes, gpointer user_data);
     void needData(unsigned bytes);

@@ -52,6 +52,7 @@ public:
 
     QString bufferFilePath() const;
 
+    bool hasData(unsigned int offset, unsigned int bytes);
     /* Read (up to) 'size' bytes at 'position' into 'buffer'
      *
      * This may block for a long time, because some reads may spawn
