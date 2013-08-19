@@ -47,6 +47,7 @@ signals:
     void bufferingStopped();
     void bufferingFinished();
     void totalBytesChanged(unsigned size);
+    void newDataAvailable();
 
 };
 

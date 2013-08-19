@@ -86,6 +86,7 @@ signals:
     void finished();
     void stopped();
     void error(const QString &errorMessage);
+    void newDataAvailable();
 
 private slots:
     /* Called on the network thread, beware! */

@@ -43,6 +43,7 @@ GstVideoBuffer::GstVideoBuffer(VideoBuffer *buffer, QObject *parent) :
     connect(buffer, SIGNAL(bufferingStarted()), this, SIGNAL(bufferingStarted()));
     connect(buffer, SIGNAL(bufferingStopped()), this, SIGNAL(bufferingStopped()));
     connect(buffer, SIGNAL(bufferingFinished()), this, SIGNAL(bufferingFinished()));
+    connect(buffer, SIGNAL(newDataAvailable()), this, SLOT(newDataAvailableSlot()));
 }
 
 GstVideoBuffer::~GstVideoBuffer()
@@ -153,13 +154,20 @@ void GstVideoBuffer::clearPlayback()
 
 void GstVideoBuffer::needData(unsigned int bytes)
 {
-    if (hasData(m_position, bytes))
+    m_requestedBytes = bytes;
+
+    tryPushRequiredData();
+}
+
+void GstVideoBuffer::tryPushRequiredData()
+{
+    if (hasData(m_position, m_requestedBytes))
+    {
+        tryPushBuffer(read(m_requestedBytes));
         qDebug() << Q_FUNC_INFO << "have data!";
+    }
     else
         qDebug() << Q_FUNC_INFO << "does not have data!";
-
-    QByteArray data = read(bytes);
-    tryPushBuffer(data);
 }
 
 void GstVideoBuffer::tryPushBuffer(const QByteArray &buffer)
@@ -227,4 +235,11 @@ void GstVideoBuffer::totalBytesChangedSlot(unsigned size)
         emit bufferingReady();
 
     emit totalBytesChanged(size);
+}
+
+void GstVideoBuffer::newDataAvailableSlot()
+{
+    tryPushRequiredData();
+
+    emit newDataAvailable();
 }

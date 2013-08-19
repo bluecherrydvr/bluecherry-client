@@ -57,9 +57,11 @@ private:
     GstElement *m_pipeline;
     GstAppSrc *m_element;
     unsigned int m_position;
+    unsigned int m_requestedBytes;
 
     static void needDataWrap(GstAppSrc *src, unsigned bytes, gpointer user_data);
     void needData(unsigned bytes);
+    void tryPushRequiredData();
     void tryPushBuffer(const QByteArray &buffer);
     bool isBufferValid(const QByteArray &buffer) const;
     void pushBuffer(const QByteArray &buffer);
@@ -69,6 +71,7 @@ private:
 private slots:
     void errorSlot(const QString &errorMessage);
     void totalBytesChangedSlot(unsigned size);
+    void newDataAvailableSlot();
 
 };
 

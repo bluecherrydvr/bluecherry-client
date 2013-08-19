@@ -335,6 +335,8 @@ void MediaDownload::incomingData(const QByteArray &data, unsigned position)
         emit fileSizeChanged(m_fileSize);
 
     m_bufferWait.wakeAll();
+
+    emit newDataAvailable();
 }
 
 void MediaDownload::taskError(const QString &errorMessage)

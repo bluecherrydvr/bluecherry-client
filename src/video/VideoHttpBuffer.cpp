@@ -48,6 +48,7 @@ void VideoHttpBuffer::startBuffering()
     connect(m_media, SIGNAL(finished()), SIGNAL(bufferingFinished()));
     connect(m_media, SIGNAL(stopped()), SIGNAL(bufferingStopped()));
     connect(m_media, SIGNAL(error(QString)), SLOT(sendError(QString)));
+    connect(m_media, SIGNAL(newDataAvailable()), SIGNAL(newDataAvailable()));
 
     m_media->start();
 
