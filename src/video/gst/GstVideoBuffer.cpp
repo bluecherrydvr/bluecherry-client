@@ -147,31 +147,47 @@ void GstVideoBuffer::clearPlayback()
 void GstVideoBuffer::needData(unsigned int bytes)
 {
     QByteArray data = read(bytes);
-    if (data.isNull())
+    tryPushBuffer(data);
+}
+
+void GstVideoBuffer::tryPushBuffer(const QByteArray &buffer)
+{
+
+    if (isBufferValid(buffer))
+        pushBuffer(buffer);
+    else if (isEndOfStream())
+    {
+        qDebug() << "GstVideoBuffer: end of stream";
+        gst_app_src_end_of_stream(m_element);
+    }
+    else
+        qDebug() << "GstVideoBuffer: read aborted";
+}
+
+bool GstVideoBuffer::isBufferValid(const QByteArray &buffer) const
+{
+    if (!buffer.isEmpty())
+        return true;
+
+    if (buffer.isNull())
     {
         /* Error reporting is handled by MediaDownload for this case */
         qDebug() << "GstVideoBuffer: read error";
-        return;
-    }
-    else if (data.isEmpty())
-    {
-        if (isEndOfStream())
-        {
-            qDebug() << "GstVideoBuffer: end of stream";
-            gst_app_src_end_of_stream(m_element);
-        }
-        else
-            qDebug() << "GstVideoBuffer: read aborted";
-        return;
+        return false;
     }
 
-    GstBuffer *buffer = gst_buffer_new();
-    GST_BUFFER_SIZE(buffer) = data.size();
-    GST_BUFFER_MALLOCDATA(buffer) = (guint8 *)g_malloc(data.size());
-    GST_BUFFER_DATA(buffer) = GST_BUFFER_MALLOCDATA(buffer);
-    memcpy(GST_BUFFER_DATA(buffer), data.constData(), data.size());
+    return false;
+}
 
-    GstFlowReturn flow = gst_app_src_push_buffer(m_element, buffer);
+void GstVideoBuffer::pushBuffer(const QByteArray& buffer)
+{
+    GstBuffer *gstBuffer = gst_buffer_new();
+    GST_BUFFER_SIZE(gstBuffer) = buffer.size();
+    GST_BUFFER_MALLOCDATA(gstBuffer) = (guint8 *)g_malloc(buffer.size());
+    GST_BUFFER_DATA(gstBuffer) = GST_BUFFER_MALLOCDATA(gstBuffer);
+    memcpy(GST_BUFFER_DATA(gstBuffer), buffer.constData(), buffer.size());
+
+    GstFlowReturn flow = gst_app_src_push_buffer(m_element, gstBuffer);
 
     if (flow != GST_FLOW_OK)
         qDebug() << "GstVideoBuffer: Push result is" << flow;

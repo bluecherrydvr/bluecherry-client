@@ -58,6 +58,9 @@ private:
 
     static void needDataWrap(GstAppSrc *src, unsigned bytes, gpointer user_data);
     void needData(unsigned bytes);
+    void tryPushBuffer(const QByteArray &buffer);
+    bool isBufferValid(const QByteArray &buffer) const;
+    void pushBuffer(const QByteArray &buffer);
 
     static int seekDataWrap(GstAppSrc *src, guint64 offset, gpointer user_data);
 
