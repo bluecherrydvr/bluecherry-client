@@ -84,8 +84,8 @@ public:
     bool hasPtz() const { return m_camera ? m_camera.data()->hasPtz() : false; }
     RecordingState recordingState() const { return m_camera ? RecordingState(m_camera.data()->recordingState()) : NoRecording; }
 
-    Q_INVOKABLE void saveState(QDataStream *stream);
-    Q_INVOKABLE void loadState(QDataStream *stream, int version);
+    void saveState(QDataStream *stream);
+    void loadState(QDataStream *stream, int version);
 
 public slots:
     void setCamera(DVRCamera *camera);

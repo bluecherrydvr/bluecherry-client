@@ -24,7 +24,8 @@
 #include <gst/gst.h>
 
 class QUrl;
-class VideoHttpBuffer;
+class GstVideoBuffer;
+class VideoBuffer;
 
 typedef struct _GstDecodeBin GstDecodeBin;
 
@@ -51,10 +52,12 @@ public:
     virtual bool isError() const { return m_state <= Error; }
     virtual bool isPermanentError() const { return m_state == PermanentError; }
     virtual QString errorMessage() const { return m_errorMessage; }
-    virtual VideoHttpBuffer *videoBuffer() const { return m_videoBuffer; }
+
+    virtual void setVideoBuffer(VideoBuffer *videoBuffer);
+    virtual VideoBuffer * videoBuffer() const;
 
 public slots:
-    virtual bool start(const QUrl &url);
+    virtual bool start();
     virtual void clear();
 
     virtual void play();
@@ -65,19 +68,19 @@ public slots:
     virtual void restart();
 
 private slots:
-    void streamError(const QString &message);
+    void bufferingError(const QString &bufferingErrorMessage);
 
 private:
     QThread *m_controlThread;
     QMutex m_mutex;
     GstElement *m_pipeline, *m_videoLink, *m_sink;
-    VideoHttpBuffer *m_videoBuffer;
+    GstVideoBuffer *m_videoBuffer;
     VideoState m_state;
     QString m_errorMessage;
     double m_playbackSpeed;
 
-    void setError(bool permanent, const QString &message);
-    void setVideoBuffer(VideoHttpBuffer *videoHttpBuffer);
+    void setErrorMessage(bool permanent, const QString &errorMessage);
+    void setGstVideoBuffer(GstVideoBuffer *gstVideoBuffer);
 
     GstBusSyncReply busHandler(GstBus *bus, GstMessage *msg);
     void decodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast);

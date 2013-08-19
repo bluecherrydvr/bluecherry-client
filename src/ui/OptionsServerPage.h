@@ -54,7 +54,7 @@ private slots:
 
     void setLoginSuccessful();
     void setLoginConnecting();
-    void setLoginError(const QString &message);
+    void setLoginErrorMessage(const QString &errorMessage);
 
 private:
     DVRServerRepository *m_serverRepository;

@@ -91,7 +91,7 @@ signals:
 
 private slots:
     void updateFrame();
-    void fatalError(const QString &message);
+    void fatalError(const QString &errorMessage);
     void updateSettings();
     void checkState();
 

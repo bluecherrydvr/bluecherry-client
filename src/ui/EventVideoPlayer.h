@@ -30,6 +30,7 @@ class QSlider;
 class QLabel;
 class QThread;
 class EventData;
+class VideoController;
 class VideoPlayerBackend;
 class VideoWidget;
 
@@ -58,7 +59,7 @@ private slots:
     void durationChanged(qint64 duration = -1);
     void playbackSpeedChanged(double playbackSpeed);
     void updatePosition();
-    void videoNonFatalError(const QString &message);
+    void videoNonFatalError(const QString &errorMessage);
 
     void videoContextMenu(const QPoint &pos);
 
@@ -71,8 +72,8 @@ private slots:
 
 private:
     EventData *m_event;
+    VideoController *m_videoController;
     QWeakPointer<QThread> m_videoThread;
-    QWeakPointer<VideoPlayerBackend> m_videoBackend;
     VideoWidget *m_videoWidget;
     QToolButton *m_playBtn, *m_restartBtn, *m_fastBtn, *m_slowBtn;
     QPushButton *m_saveBtn;

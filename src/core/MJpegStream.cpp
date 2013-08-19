@@ -92,10 +92,10 @@ void MJpegStream::setState(State newState)
     }
 }
 
-void MJpegStream::setError(const QString &message)
+void MJpegStream::setErrorMessage(const QString &errorMessage)
 {
-    m_errorMessage = message;
-    qDebug() << "mjpeg: error:" << message;
+    m_errorMessage = errorMessage;
+    qDebug() << "mjpeg: error:" << errorMessage;
     setState(Error);
     stop();
 
@@ -127,7 +127,7 @@ void MJpegStream::start()
 
     if (!url().isValid())
     {
-        setError(QLatin1String("Internal Error"));
+        setErrorMessage(QLatin1String("Internal Error"));
         return;
     }
 
@@ -263,7 +263,7 @@ bool MJpegStream::processHeaders()
 
     if (mimeType != "multipart/x-mixed-replace" || m_httpBoundary.isEmpty())
     {
-        setError(QLatin1String("Invalid content type"));
+        setErrorMessage(QLatin1String("Invalid content type"));
         return false;
     }
 
@@ -304,13 +304,13 @@ void MJpegStream::readable()
     for (;;)
     {
         qint64 avail = m_httpReply->bytesAvailable();
-        bcApp->globalRate->addSampleValue(avail);
+        emit bytesDownloaded(avail);
         if (avail < 1)
             break;
 
         if (m_httpBuffer.size() >= maxBuffer)
         {
-            setError(QLatin1String("Exceeded maximum buffer size"));
+            setErrorMessage(QLatin1String("Exceeded maximum buffer size"));
             return;
         }
 
@@ -321,7 +321,7 @@ void MJpegStream::readable()
         int rd = m_httpReply->read(m_httpBuffer.data()+readPos, maxRead);
         if (rd < 0)
         {
-            setError(QLatin1String("Read error"));
+            setErrorMessage(QLatin1String("Read error"));
             return;
         }
 
@@ -470,15 +470,15 @@ bool MJpegStream::parseBuffer()
 void MJpegStream::checkActivity()
 {
     if (QDateTime::currentDateTime().toTime_t() - m_lastActivity > 30)
-        setError(QLatin1String("Stream timeout"));
+        setErrorMessage(QLatin1String("Stream timeout"));
 }
 
 void MJpegStream::requestError()
 {
     if (m_httpReply->error() == QNetworkReply::NoError)
-        setError(QLatin1String("Connection lost"));
+        setErrorMessage(QLatin1String("Connection lost"));
     else
-        setError(QString::fromLatin1("HTTP error: %1").arg(m_httpReply->errorString()));
+        setErrorMessage(QString::fromLatin1("HTTP error: %1").arg(m_httpReply->errorString()));
 }
 
 void MJpegStream::updateScaleSizes()

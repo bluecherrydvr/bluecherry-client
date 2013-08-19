@@ -15,23 +15,24 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VIDEOHTTPBUFFER_H
-#define VIDEOHTTPBUFFER_H
+#ifndef GST_VIDEO_BUFFER_H
+#define GST_VIDEO_BUFFER_H
 
 #include <QObject>
-#include <QUrl>
-#include "MediaDownload.h"
+#include <glib.h>
+
 #include "video/VideoBuffer.h"
 
-class QNetworkCookie;
+typedef struct _GstAppSrc GstAppSrc;
+typedef struct _GstElement GstElement;
 
-class VideoHttpBuffer : public VideoBuffer
+class GstVideoBuffer : public VideoBuffer
 {
     Q_OBJECT
 
 public:
-    explicit VideoHttpBuffer(const QUrl &url, QObject *parent = 0);
-    virtual ~VideoHttpBuffer();
+    explicit GstVideoBuffer(VideoBuffer *buffer, QObject *parent = 0);
+    virtual ~GstVideoBuffer();
 
     virtual void startBuffering();
     virtual bool isBuffering() const;
@@ -44,13 +45,26 @@ public:
     virtual QByteArray read(unsigned int bytes);
     virtual bool seek(unsigned int offset);
 
-private slots:
-    void sendError(const QString &errorMessage);
+    void clearPlayback();
+
+    /* Create and prepare a source element; the element will be added to the pipeline,
+     * but not linked. */
+    GstElement * setupSrcElement(GstElement *pipeline);
 
 private:
-    QUrl m_url;
-    MediaDownload *m_media;
+    QScopedPointer<VideoBuffer> m_buffer;
+    GstElement *m_pipeline;
+    GstAppSrc *m_element;
+
+    static void needDataWrap(GstAppSrc *src, unsigned bytes, gpointer user_data);
+    void needData(unsigned bytes);
+
+    static int seekDataWrap(GstAppSrc *src, guint64 offset, gpointer user_data);
+
+private slots:
+    void errorSlot(const QString &errorMessage);
+    void totalBytesChangedSlot(unsigned size);
 
 };
 
-#endif // VIDEOHTTPBUFFER_H
+#endif // GST_VIDEO_BUFFER_H

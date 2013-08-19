@@ -15,37 +15,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIVE_STREAM_THREAD_H
-#define LIVE_STREAM_THREAD_H
+#include "VideoBuffer.h"
 
-#include <QObject>
-#include <QWeakPointer>
-
-class LiveStreamWorker;
-class QThread;
-class QUrl;
-
-class LiveStreamThread : public QObject
+VideoBuffer::VideoBuffer(QObject *parent) :
+        QObject(parent)
 {
-    Q_OBJECT
+}
 
-public:
-    explicit LiveStreamThread(const QUrl &url, QObject *parent = 0);
-    virtual ~LiveStreamThread();
-
-    void stop();
-    void setPaused(bool paused);
-
-    LiveStreamWorker * worker() const;
-
-signals:
-    void fatalError(const QString &error);
-    void finished();
-
-private:
-    QWeakPointer<QThread> m_thread;
-    QWeakPointer<LiveStreamWorker> m_worker;
-
-};
-
-#endif // LIVE_STREAM_THREAD_H
+VideoBuffer::~VideoBuffer()
+{
+}

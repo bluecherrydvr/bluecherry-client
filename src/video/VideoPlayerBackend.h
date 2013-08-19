@@ -21,7 +21,7 @@
 #include <QObject>
 #include <QUrl>
 
-class VideoHttpBuffer;
+class VideoBuffer;
 
 class VideoPlayerBackend : public QObject
 {
@@ -50,10 +50,12 @@ public:
     virtual bool isError() const = 0;
     virtual bool isPermanentError() const = 0;
     virtual QString errorMessage() const = 0;
-    virtual VideoHttpBuffer * videoBuffer() const = 0;
+
+    virtual void setVideoBuffer(VideoBuffer *videoBuffer) = 0;
+    virtual VideoBuffer * videoBuffer() const = 0;
 
 public slots:
-    virtual bool start(const QUrl &url) = 0;
+    virtual bool start() = 0;
     virtual void clear() = 0;
 
     virtual void play() = 0;
@@ -74,7 +76,7 @@ signals:
     void bufferingStatus(int percent);
     void bufferingStarted();
     void bufferingStopped();
-    void nonFatalError(const QString &message);
+    void nonFatalError(const QString &errorMessage);
 
 };
 

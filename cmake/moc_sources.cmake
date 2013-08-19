@@ -97,12 +97,15 @@ set (bluecherry_client_MOC_SRCS
     src/utils/ThreadTaskCourier.h
 
     src/video/MediaDownload.h
-    src/video/MediaDownload_p.h
+    src/video/MediaDownloadTask.h
+    src/video/VideoBuffer.h
+    src/video/VideoController.h
     src/video/VideoHttpBuffer.h
     src/video/VideoPlayerBackend.h
     src/video/VideoWidget.h
 
     src/video/gst/GstSinkWidget.h
+    src/video/gst/GstVideoBuffer.h
     src/video/gst/GstVideoPlayerBackend.h
 )
 

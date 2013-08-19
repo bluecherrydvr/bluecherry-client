@@ -112,12 +112,12 @@ QSize GstSinkWidget::sizeHint() const
     return QSize(m_frameWidth, m_frameHeight);
 }
 
-void GstSinkWidget::setOverlayMessage(const QString &message)
+void GstSinkWidget::setOverlayMessage(const QString &overlayMessage)
 {
-    if (message == m_overlayMsg)
+    if (overlayMessage == m_overlayMsg)
         return;
 
-    m_overlayMsg = message;
+    m_overlayMsg = overlayMessage;
     m_viewport->update();
 }
 
@@ -339,7 +339,7 @@ void GstSinkWidget::updateFrame(GstBuffer *buffer)
     m_framePtr = buffer;
     m_frameLock.unlock();
 
-    QMetaObject::invokeMethod(m_viewport, "update", Qt::QueuedConnection);
+    m_viewport->update();
 }
 
 GstFlowReturn GstSinkWidget::newPreroll()

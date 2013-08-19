@@ -59,10 +59,8 @@ public:
      * be available.
      *
      * Pending calls to read will be aborted (returning 0) if seek()
-     * is called. Returning -1 is a fatal error (and will be accompanied
-     * by emitting the error(QString) signal). Otherwise, the return
-     * value is the number of bytes read. */
-    int read(unsigned position, char *buffer, int size);
+     * is called. */
+    QByteArray read(unsigned position, int size);
 
     void start();
 
@@ -93,10 +91,10 @@ private slots:
     void requestReady(unsigned fileSize);
     void incomingData(const QByteArray &data, unsigned position);
 
-    void taskError(const QString &message);
+    void taskError(const QString &errorMessage);
     void taskFinished();
 
-    void sendError(const QString &message);
+    void sendError(const QString &errorMessage);
 
 private:
     QUrl m_url;

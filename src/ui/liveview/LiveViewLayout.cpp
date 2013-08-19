@@ -34,9 +34,9 @@
 
 struct LiveViewLayout::DragDropData
 {
-    QDeclarativeItem *item;
+    LiveFeedItem *item;
     int sourceRow, sourceColumn;
-    QDeclarativeItem *target;
+    LiveFeedItem *target;
     int targetRow, targetColumn;
     DragDropMode mode;
 
@@ -72,7 +72,7 @@ int LiveViewLayout::maxColumns()
     return MAX_COLUMNS;
 }
 
-QDeclarativeItem *LiveViewLayout::createNewItem()
+LiveFeedItem * LiveViewLayout::createNewItem()
 {
     if (!m_itemComponent)
         return 0;
@@ -80,7 +80,7 @@ QDeclarativeItem *LiveViewLayout::createNewItem()
     QDeclarativeContext *context = QDeclarativeEngine::contextForObject(this);
     Q_ASSERT(context);
 
-    QDeclarativeItem *element = qobject_cast<QDeclarativeItem*>(m_itemComponent->create(context));
+    LiveFeedItem *element = qobject_cast<LiveFeedItem *>(m_itemComponent->create(context));
     Q_ASSERT(element);
     if (!element)
         return 0;
@@ -243,7 +243,7 @@ void LiveViewLayout::gridPos(const QPointF &pos, int *row, int *column)
     }
 }
 
-bool LiveViewLayout::gridPos(QDeclarativeItem *item, int *row, int *column)
+bool LiveViewLayout::gridPos(LiveFeedItem *item, int *row, int *column)
 {
     Q_ASSERT(item && row && column);
     int i = m_items.indexOf(item);
@@ -300,7 +300,7 @@ void LiveViewLayout::insertRow(int row)
     m_rows++;
 
     for (int i = (row * m_columns), n = i+m_columns; i < n; ++i)
-        m_items.insert(i, QWeakPointer<QDeclarativeItem>());
+        m_items.insert(i, QWeakPointer<LiveFeedItem>());
 
     scheduleLayout(DoItemsLayout | EmitLayoutChanged);
 }
@@ -319,7 +319,7 @@ void LiveViewLayout::removeRow(int row)
             item->deleteLater();
     }
 
-    QList<QWeakPointer<QDeclarativeItem> >::Iterator st = m_items.begin() + (row * m_columns);
+    QList<QWeakPointer<LiveFeedItem> >::Iterator st = m_items.begin() + (row * m_columns);
     m_items.erase(st, st+m_columns);
 
     /* Ensure that we always have at least one row, but still clear it if asked to remove */
@@ -335,7 +335,7 @@ void LiveViewLayout::insertColumn(int column)
 
     for (int i = column, n = 0; n < m_rows; i += m_columns, ++n)
     {
-        m_items.insert(i, QWeakPointer<QDeclarativeItem>());
+        m_items.insert(i, QWeakPointer<LiveFeedItem>());
         ++i;
     }
 
@@ -447,7 +447,8 @@ void LiveViewLayout::setGridSize(int rows, int columns)
 
     Q_ASSERT(m_items.size() == (m_rows*m_columns));
 }
-QDeclarativeItem * LiveViewLayout::at(int row, int col) const
+
+LiveFeedItem * LiveViewLayout::at(int row, int col) const
 {
     int index = coordinatesToIndex(row, col);
     if (index >= 0 && index < m_items.size())
@@ -456,12 +457,12 @@ QDeclarativeItem * LiveViewLayout::at(int row, int col) const
         return 0;
 }
 
-void LiveViewLayout::set(int row, int col, QDeclarativeItem *item)
+void LiveViewLayout::set(int row, int col, LiveFeedItem *item)
 {
     if (row >= m_rows || col >= m_columns || (item == at(row, col)))
         return;
 
-    QDeclarativeItem *ip = m_items[coordinatesToIndex(row, col)].data();
+    LiveFeedItem *ip = m_items[coordinatesToIndex(row, col)].data();
     if (ip == item)
         return;
 
@@ -473,7 +474,7 @@ void LiveViewLayout::set(int row, int col, QDeclarativeItem *item)
     scheduleLayout(DoItemsLayout | EmitLayoutChanged);
 }
 
-void LiveViewLayout::removeItem(QDeclarativeItem *item)
+void LiveViewLayout::removeItem(LiveFeedItem *item)
 {
     int index = m_items.indexOf(item);
     if (index < 0 || !item)
@@ -484,7 +485,7 @@ void LiveViewLayout::removeItem(QDeclarativeItem *item)
     scheduleLayout(DoItemsLayout | EmitLayoutChanged);
 }
 
-QDeclarativeItem *LiveViewLayout::addItemAuto()
+LiveFeedItem * LiveViewLayout::addItemAuto()
 {
     /* Put the item in the first empty space, top-left to bottom-right */
     int index = -1;
@@ -517,7 +518,7 @@ QDeclarativeItem *LiveViewLayout::addItemAuto()
     return m_items[index].data();
 }
 
-QDeclarativeItem *LiveViewLayout::addItem(int row, int column)
+LiveFeedItem * LiveViewLayout::addItem(int row, int column)
 {
     if (row < 0 || column < 0)
         return 0;
@@ -528,7 +529,7 @@ QDeclarativeItem *LiveViewLayout::addItem(int row, int column)
     if (row < rows() - 1 || column < columns() - 1)
         return 0;
 
-    QDeclarativeItem *re = createNewItem();
+    LiveFeedItem *re = createNewItem();
     m_items[coordinatesToIndex(row, column)] = re;
 
     scheduleLayout(EmitLayoutChanged);
@@ -537,13 +538,13 @@ QDeclarativeItem *LiveViewLayout::addItem(int row, int column)
     return re;
 }
 
-QDeclarativeItem *LiveViewLayout::takeItem(int row, int column)
+LiveFeedItem * LiveViewLayout::takeItem(int row, int column)
 {
     if (row < 0 || column < 0 || row >= m_rows || column >= m_columns)
         return 0;
 
     int i = coordinatesToIndex(row, column);
-    QDeclarativeItem *item = m_items[i].data();
+    LiveFeedItem *item = m_items[i].data();
     m_items[i].clear();
 
     scheduleLayout(EmitLayoutChanged);
@@ -551,7 +552,7 @@ QDeclarativeItem *LiveViewLayout::takeItem(int row, int column)
     return item;
 }
 
-QDeclarativeItem *LiveViewLayout::takeItem(QDeclarativeItem *item)
+LiveFeedItem * LiveViewLayout::takeItem(LiveFeedItem *item)
 {
     if (!item)
         return 0;
@@ -562,17 +563,17 @@ QDeclarativeItem *LiveViewLayout::takeItem(QDeclarativeItem *item)
     return 0;
 }
 
-QDeclarativeItem *LiveViewLayout::dropTarget() const
+LiveFeedItem * LiveViewLayout::dropTarget() const
 {
     return drag ? drag->target : 0;
 }
 
-QDeclarativeItem *LiveViewLayout::dragItem() const
+LiveFeedItem * LiveViewLayout::dragItem() const
 {
     return drag ? drag->item : 0;
 }
 
-void LiveViewLayout::startDrag(QDeclarativeItem *item, DragDropMode mode)
+void LiveViewLayout::startDrag(LiveFeedItem *item, DragDropMode mode)
 {
     Q_ASSERT(item);
     Q_ASSERT(!drag);
@@ -604,7 +605,7 @@ void LiveViewLayout::updateDrag()
     int row, column;
     gridPos(pos, &row, &column);
 
-    QDeclarativeItem *newTarget = (row >= 0 && column >= 0) ? at(row, column) : 0;
+    LiveFeedItem *newTarget = (row >= 0 && column >= 0) ? at(row, column) : 0;
 
     if (drag->target != newTarget || row != drag->targetRow || column != drag->targetColumn)
     {
@@ -660,7 +661,7 @@ bool LiveViewLayout::drop()
 
     if (drag->mode == DragSwap)
     {
-        QDeclarativeItem *target = takeItem(drag->targetRow, drag->targetColumn);
+        LiveFeedItem *target = takeItem(drag->targetRow, drag->targetColumn);
         Q_ASSERT(target == drag->target);
         set(drag->sourceRow, drag->sourceColumn, target);
     }
@@ -692,7 +693,7 @@ void LiveViewLayout::dragEnterEvent(QGraphicsSceneDragDropEvent *event)
 
     Q_ASSERT(!drag);
 
-    QDeclarativeItem *item = createNewItem();
+    LiveFeedItem *item = createNewItem();
     Q_ASSERT(item);
     if (!item)
         return;
@@ -741,15 +742,12 @@ QByteArray LiveViewLayout::saveLayout() const
     /* -1, then version */
     data << -1 << 1;
     data << m_rows << m_columns;
-    foreach (QWeakPointer<QDeclarativeItem> item, m_items)
+    foreach (QWeakPointer<LiveFeedItem> item, m_items)
     {
         if (!item)
             data << -1;
-        else if (!item.data()->metaObject()->invokeMethod(item.data(), "saveState", Qt::DirectConnection, Q_ARG(QDataStream*,&data)))
-        {
-            qWarning() << "Failed to save LiveViewLayout state for item" << item.data();
-            data << -1;
-        }
+        else
+            item.data()->saveState(&data);
     }
 
     return re;
@@ -792,7 +790,7 @@ bool LiveViewLayout::loadLayout(const QByteArray &buf)
             int value = -1;
             data >> value;
 
-            QDeclarativeItem *item = 0;
+            LiveFeedItem *item = 0;
 
             if (value != -1)
             {
@@ -800,14 +798,7 @@ bool LiveViewLayout::loadLayout(const QByteArray &buf)
                 data.device()->seek(pos);
 
                 item = createNewItem();
-                if (!item->metaObject()->invokeMethod(item, "loadState", Qt::DirectConnection,
-                                                      Q_ARG(QDataStream*,&data),
-                                                      Q_ARG(int,version)))
-                {
-                    qWarning() << "Failed to load LiveViewLayout state";
-                    delete item;
-                    item = 0;
-                }
+                item->loadState(&data, version);
             }
 
             set(r, c, item);

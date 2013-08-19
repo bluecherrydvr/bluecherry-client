@@ -16,7 +16,7 @@
  */
 
 #include "MediaDownload.h"
-#include "MediaDownload_p.h"
+#include "MediaDownloadTask.h"
 #include "core/BluecherryApp.h"
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -102,11 +102,11 @@ void MediaDownload::cancel()
 
 }
 
-void MediaDownload::sendError(const QString &message)
+void MediaDownload::sendError(const QString &errorMessage)
 {
-    qDebug() << "MediaDownload: sending error:" << message;
+    qDebug() << "MediaDownload: sending error:" << errorMessage;
     m_hasError = true;
-    emit error(message);
+    emit error(errorMessage);
     emit stopped();
     m_bufferWait.wakeAll();
 }
@@ -173,11 +173,11 @@ bool MediaDownload::seek(unsigned offset)
     return true;
 }
 
-int MediaDownload::read(unsigned position, char *buffer, int reqSize)
+QByteArray MediaDownload::read(unsigned position, int reqSize)
 {
     QMutexLocker l(&m_bufferLock);
     if (m_hasError)
-        return -1;
+        return QByteArray();
 
     unsigned oldRdPos = m_readPos;
     int size = qMin(reqSize, (m_fileSize >= position) ? int(m_fileSize - position) : 0);
@@ -191,7 +191,7 @@ int MediaDownload::read(unsigned position, char *buffer, int reqSize)
             return 0;
         }
         if (m_hasError)
-            return -1;
+            return QByteArray();
 
         size = qMin(reqSize, (m_fileSize >= position) ? int(m_fileSize - position) : 0);
     }
@@ -201,22 +201,22 @@ int MediaDownload::read(unsigned position, char *buffer, int reqSize)
     if (!m_readFile.seek(position))
     {
         sendError(QLatin1String("Buffer seek error: ") + m_readFile.errorString());
-        return -1;
+        return QByteArray();
     }
 
-    int re = m_readFile.read(buffer, size);
-    if (re < 0)
+    QByteArray result = m_readFile.read(size);
+    if (QFile::NoError != m_readFile.error())
     {
         /* Called from VideoHttpBuffer::needData. We handle error reporting,
          * as we have more information here. */
         sendError(QLatin1String("Buffer read error: ") + m_readFile.errorString());
-        return -1;
+        return QByteArray();
     }
 
     if (m_readPos == position)
-        m_readPos += re;
+        m_readPos += result.size();
 
-    return re;
+    return result;
 }
 
 void MediaDownload::startRequest(unsigned position, unsigned size)
@@ -225,11 +225,16 @@ void MediaDownload::startRequest(unsigned position, unsigned size)
 
     if (m_task)
     {
-        m_task->abortLater();
+        m_task->abort();
         m_task->deleteLater();
     }
 
-    m_task = new MediaDownloadTask;
+    /* If size will reach the end of what we believe the file size to be, make it infinite instead,
+     * to ease behavior with still active files */
+    if (position + size >= m_fileSize)
+        size = 0;
+
+    m_task = new MediaDownloadTask(m_url, m_cookies, position, size);
     m_task->moveToThread(m_thread);
 
     connect(m_task, SIGNAL(requestReady(uint)), SLOT(requestReady(uint)),
@@ -238,16 +243,9 @@ void MediaDownload::startRequest(unsigned position, unsigned size)
             Qt::DirectConnection);
     connect(m_task, SIGNAL(finished()), SLOT(taskFinished()), Qt::DirectConnection);
     connect(m_task, SIGNAL(error(QString)), SLOT(taskError(QString)), Qt::DirectConnection);
+    connect(m_task, SIGNAL(bytesDownloaded(uint)), bcApp->globalRate, SLOT(addSampleValue(uint)));
 
-    /* If size will reach the end of what we believe the file size to be, make it infinite instead,
-     * to ease behavior with still active files */
-    if (position + size >= m_fileSize)
-        size = 0;
-
-    bool ok = m_task->metaObject()->invokeMethod(m_task, "start", Q_ARG(QUrl, m_url),
-                                                 Q_ARG(QList<QNetworkCookie>, m_cookies),
-                                                 Q_ARG(unsigned, position),
-                                                 Q_ARG(unsigned, size));
+    bool ok = m_task->metaObject()->invokeMethod(m_task, "startDownload");
     Q_ASSERT(ok);
     Q_UNUSED(ok);
 }
@@ -331,16 +329,16 @@ void MediaDownload::incomingData(const QByteArray &data, unsigned position)
     m_bufferWait.wakeAll();
 }
 
-void MediaDownload::taskError(const QString &message)
+void MediaDownload::taskError(const QString &errorMessage)
 {
     /* We probably want some smart retrying behavior for tasks */
-    qDebug() << "MediaDownload: Task reports error:" << message;
+    qDebug() << "MediaDownload: Task reports error:" << errorMessage;
     m_isFinished = true;
-    sendError(message);
+    sendError(errorMessage);
 }
 
 void MediaDownload::taskFinished()
-{    
+{
     QMutexLocker l(&m_bufferLock);
 
     /* These should both be true or both be false, anything else is a logic error.
@@ -367,110 +365,4 @@ void MediaDownload::taskFinished()
         m_writePos = missingRange.start();
         startRequest(missingRange.start(), missingRange.size());
     }
-}
-
-MediaDownloadTask::MediaDownloadTask(QObject *parent)
-    : QObject(parent), m_reply(0), m_writePos(0)
-{
-}
-
-void MediaDownloadTask::start(const QUrl &url, const QList<QNetworkCookie> &cookies, unsigned position,
-                              unsigned size)
-{
-    Q_ASSERT(!m_reply);
-
-    if (!threadNAM.hasLocalData())
-    {
-        threadNAM.setLocalData(new QNetworkAccessManager);
-        /* XXX certificate validation */
-    }
-
-    threadNAM.localData()->cookieJar()->setCookiesFromUrl(cookies, url);
-    if (threadNAM.localData()->cookieJar()->cookiesForUrl(url).isEmpty())
-        qDebug() << "MediaDownload: No cookies for media URL, likely to fail authentication";
-
-    QNetworkRequest req(url);
-    if (position || size)
-    {
-        QByteArray range = "bytes=" + QByteArray::number(position) + "-";
-        if (size)
-            range += QByteArray::number(position + size);
-        req.setRawHeader("Range", range);
-    }
-
-    m_writePos = position;
-
-    m_reply = threadNAM.localData()->get(req);
-    m_reply->ignoreSslErrors(); // XXX Do this properly!
-    connect(m_reply, SIGNAL(metaDataChanged()), SLOT(metaDataReady()));
-    connect(m_reply, SIGNAL(readyRead()), SLOT(read()));
-    connect(m_reply, SIGNAL(finished()), SLOT(requestFinished()));
-}
-
-MediaDownloadTask::~MediaDownloadTask()
-{
-    abort();
-}
-
-void MediaDownloadTask::abortLater()
-{
-    /* Mostly threadsafe; caller must know that the instance will not be deleted at this time. */
-    if (m_reply)
-        m_reply->disconnect(this);
-    metaObject()->invokeMethod(this, "abort", Qt::QueuedConnection);
-}
-
-void MediaDownloadTask::abort()
-{
-    if (!m_reply)
-        return;
-
-    m_reply->disconnect(this);
-    m_reply->abort();
-    m_reply->deleteLater();
-    m_reply = 0;
-}
-
-void MediaDownloadTask::metaDataReady()
-{
-    int status = m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-    if (m_reply->error() != QNetworkReply::NoError || status < 200 || status > 299) {
-        if (m_reply->error() != QNetworkReply::NoError)
-            emit error(m_reply->errorString());
-        else
-            emit error(Qt::escape(m_reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString()));
-        disconnect(m_reply, 0, this, 0);
-        m_reply->deleteLater();
-        m_reply = 0;
-        return;
-    }
-
-    unsigned size = m_reply->header(QNetworkRequest::ContentLengthHeader).toUInt();
-    if (size)
-        emit requestReady(m_writePos + size);
-}
-
-void MediaDownloadTask::read()
-{
-    QByteArray data = m_reply->readAll();
-    if (data.isEmpty())
-        return;
-
-    emit dataRead(data, m_writePos);
-    m_writePos += data.size();
-
-    /* Very carefully threadsafe: bcApp and the globalRate pointer are
-     * const, and 'addSampleValue' is threadsafe and lockfree for the common case. */
-    bcApp->globalRate->addSampleValue(data.size());
-}
-
-void MediaDownloadTask::requestFinished()
-{
-    if (m_reply->error() != QNetworkReply::NoError && m_reply->error() != QNetworkReply::UnknownNetworkError)
-        emit error(m_reply->errorString());
-    else
-        emit finished();
-
-    m_reply->deleteLater();
-    m_reply = 0;
 }

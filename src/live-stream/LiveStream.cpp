@@ -93,7 +93,7 @@ void LiveStream::init()
 LiveStream::LiveStream(DVRCamera *camera, QObject *parent)
     : QObject(parent), m_camera(camera), m_thread(0), m_currentFrameMutex(QMutex::Recursive),
       m_frame(0), m_state(NotConnected),
-      m_autoStart(false), m_fpsUpdateCnt(0), m_fpsUpdateHits(0),
+      m_autoStart(false), m_bandwidthMode(LiveViewManager::FullBandwidth), m_fpsUpdateCnt(0), m_fpsUpdateHits(0),
       m_fps(0)
 {
     Q_ASSERT(m_camera);
@@ -173,12 +173,8 @@ void LiveStream::start()
 
     m_frameInterval.start();
 
-    if (m_thread)
-        m_thread->stop();
-
-    m_thread.reset(new LiveStreamThread());
+    m_thread.reset(new LiveStreamThread(url()));
     connect(m_thread.data(), SIGNAL(fatalError(QString)), this, SLOT(fatalError(QString)));
-    m_thread->start(url());
 
     updateSettings();
     setState(Connecting);
@@ -232,7 +228,7 @@ void LiveStream::setPaused(bool pause)
 
 void LiveStream::updateFrame()
 {
-    if (state() < Connecting || !m_thread || !m_thread->isRunning())
+    if (state() < Connecting || !m_thread)
         return;
 
     if (++m_fpsUpdateCnt == int(1.5*renderTimerFps))
@@ -281,11 +277,11 @@ QSize LiveStream::streamSize()
     return m_currentFrame.size();
 }
 
-void LiveStream::fatalError(const QString &message)
+void LiveStream::fatalError(const QString &errorMessage)
 {
-    qDebug() << "Fatal error:" << LoggableUrl(url()) << message;
+    qDebug() << "Fatal error:" << LoggableUrl(url()) << errorMessage;
 
-    m_errorMessage = message;
+    m_errorMessage = errorMessage;
     setState(Error);
     /* stateTimer will handle reconnection */
 }

@@ -17,65 +17,45 @@
 
 #include "LiveStreamThread.h"
 #include "LiveStreamWorker.h"
+#include "core/BluecherryApp.h"
 #include "core/LoggableUrl.h"
 #include <QDebug>
 #include <QThread>
 #include <QUrl>
 
-LiveStreamThread::LiveStreamThread(QObject *parent) : QObject(parent), m_isRunning(false)
+LiveStreamThread::LiveStreamThread(const QUrl &url, QObject *parent) :
+        QObject(parent)
 {
+    qDebug() << Q_FUNC_INFO << LoggableUrl(url);
+
+    m_thread = new QThread();
+
+    LiveStreamWorker *worker = new LiveStreamWorker();
+    worker->moveToThread(m_thread.data());
+
+    m_worker = worker;
+    m_worker.data()->setUrl(url);
+
+    connect(m_thread.data(), SIGNAL(started()), m_worker.data(), SLOT(run()));
+    connect(m_worker.data(), SIGNAL(destroyed()), m_thread.data(), SLOT(quit()));
+    connect(m_worker.data(), SIGNAL(finished()), m_worker.data(), SLOT(deleteLater()));
+    connect(m_thread.data(), SIGNAL(finished()), m_thread.data(), SLOT(deleteLater()));
+
+    connect(m_worker.data(), SIGNAL(finished()), this, SIGNAL(finished()));
+    connect(m_worker.data(), SIGNAL(fatalError(QString)), this, SIGNAL(fatalError(QString)));
+
+    connect(m_worker.data(), SIGNAL(bytesDownloaded(uint)), bcApp->globalRate, SLOT(addSampleValue(uint)));
+
+    m_thread.data()->start();
 }
 
 LiveStreamThread::~LiveStreamThread()
 {
-    stop();
-}
-
-void LiveStreamThread::start(const QUrl &url)
-{
-    qDebug() << Q_FUNC_INFO << LoggableUrl(url);
-
-    if (!m_worker)
-    {
-        Q_ASSERT(!m_thread);
-        m_thread = new QThread();
-
-        LiveStreamWorker *worker = new LiveStreamWorker();
-        worker->moveToThread(m_thread.data());
-
-        m_worker = worker;
-        m_worker.data()->setUrl(url);
-
-        connect(m_thread.data(), SIGNAL(started()), m_worker.data(), SLOT(run()));
-        connect(m_worker.data(), SIGNAL(destroyed()), m_thread.data(), SLOT(quit()));
-        connect(m_worker.data(), SIGNAL(finished()), m_worker.data(), SLOT(deleteLater()));
-        connect(m_thread.data(), SIGNAL(finished()), m_thread.data(), SLOT(deleteLater()));
-
-        connect(m_worker.data(), SIGNAL(finished()), this, SIGNAL(finished()));
-        connect(m_worker.data(), SIGNAL(finished()), this, SLOT(threadFinished()));
-        connect(m_worker.data(), SIGNAL(fatalError(QString)), this, SIGNAL(fatalError(QString)));
-
-        m_thread.data()->start();
-    }
-    else
-        m_worker.data()->metaObject()->invokeMethod(m_worker.data(), "run");
-
-    m_isRunning = true;
-}
-
-void LiveStreamThread::stop()
-{
-    m_isRunning = false;
-
-    if (m_worker)
-    {
-        /* Worker will delete itself, which will then destroy the thread */
+    if (m_worker.data())
         m_worker.data()->stop();
-        m_worker.clear();
-        m_thread.clear();
-    }
 
-    Q_ASSERT(!m_thread);
+    m_worker.clear();
+    m_thread.clear();
 }
 
 void LiveStreamThread::setPaused(bool paused)
@@ -86,14 +66,4 @@ void LiveStreamThread::setPaused(bool paused)
 LiveStreamWorker * LiveStreamThread::worker() const
 {
     return m_worker.data();
-}
-
-void LiveStreamThread::threadFinished()
-{
-    m_isRunning = false;
-}
-
-bool LiveStreamThread::isRunning() const
-{
-    return m_isRunning;
 }

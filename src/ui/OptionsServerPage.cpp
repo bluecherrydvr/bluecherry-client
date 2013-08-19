@@ -190,7 +190,7 @@ void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const 
     m_autoConnect->setChecked(server->configuration().autoConnect());
 
     connect(server, SIGNAL(loginSuccessful()), SLOT(setLoginSuccessful()));
-    connect(server, SIGNAL(loginError(QString)), SLOT(setLoginError(QString)));
+    connect(server, SIGNAL(loginErrorMessage(QString)), SLOT(loginErrorMessage(QString)));
     connect(server, SIGNAL(loginRequestStarted()), SLOT(setLoginConnecting()));
 
     checkServer();
@@ -200,7 +200,7 @@ void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const 
     else if (server->isLoginPending())
         setLoginConnecting();
     else if (!server->errorMessage().isEmpty())
-        setLoginError(server->errorMessage());
+        setLoginErrorMessage(server->errorMessage());
 }
 
 void OptionsServerPage::checkServer()
@@ -313,8 +313,8 @@ void OptionsServerPage::setLoginConnecting()
     m_connectionStatus->setVisible(true);
 }
 
-void OptionsServerPage::setLoginError(const QString &message)
+void OptionsServerPage::setLoginErrorMessage(const QString &errorMessage)
 {
-    m_connectionStatus->setText(tr("<b>Login error:</b> %1").arg(Qt::escape(message)));
+    m_connectionStatus->setText(tr("<b>Login error:</b> %1").arg(Qt::escape(errorMessage)));
     m_connectionStatus->setVisible(true);
 }
