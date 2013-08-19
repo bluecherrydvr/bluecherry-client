@@ -46,7 +46,10 @@ GstVideoPlayerBackend::~GstVideoPlayerBackend()
 
 void GstVideoPlayerBackend::setVideoBuffer(VideoBuffer *videoBuffer)
 {
-    setGstVideoBuffer(new GstVideoBuffer(videoBuffer));
+    if (videoBuffer)
+        setGstVideoBuffer(new GstVideoBuffer(videoBuffer));
+    else
+        setGstVideoBuffer(0);
 }
 
 void GstVideoPlayerBackend::setGstVideoBuffer(GstVideoBuffer *gstVideoBuffer)
