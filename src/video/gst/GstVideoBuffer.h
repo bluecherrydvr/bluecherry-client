@@ -43,7 +43,7 @@ public:
     virtual bool isEndOfStream() const;
 
     virtual bool hasData(unsigned int offset, unsigned int bytes) const;
-    virtual QByteArray read(unsigned int bytes);
+    virtual QByteArray read(unsigned int offset, unsigned int bytes);
     virtual bool seek(unsigned int offset);
 
     void clearPlayback();

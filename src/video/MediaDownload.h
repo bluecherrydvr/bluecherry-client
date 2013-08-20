@@ -61,7 +61,7 @@ public:
      *
      * Pending calls to read will be aborted (returning 0) if seek()
      * is called. */
-    QByteArray read(unsigned position, int size);
+    QByteArray read(unsigned position, int bytes);
 
     void start();
 

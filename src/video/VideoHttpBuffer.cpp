@@ -93,9 +93,9 @@ bool VideoHttpBuffer::hasData(unsigned int offset, unsigned int bytes) const
     return m_media ? m_media->hasData(offset, bytes) : false;
 }
 
-QByteArray VideoHttpBuffer::read(unsigned int bytes)
+QByteArray VideoHttpBuffer::read(unsigned int offset, unsigned int bytes)
 {
-    return m_media ? m_media->read(m_media->readPosition(), bytes) : QByteArray();
+    return m_media ? m_media->read(offset, bytes) : QByteArray();
 }
 
 bool VideoHttpBuffer::seek(unsigned int offset)

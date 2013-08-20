@@ -85,9 +85,9 @@ bool GstVideoBuffer::hasData(unsigned int offset, unsigned int bytes) const
     return m_buffer.data()->hasData(offset, bytes);
 }
 
-QByteArray GstVideoBuffer::read(unsigned int bytes)
+QByteArray GstVideoBuffer::read(unsigned int offset, unsigned int bytes)
 {
-    return m_buffer.data()->read(bytes);
+    return m_buffer.data()->read(offset, bytes);
 }
 
 bool GstVideoBuffer::seek(unsigned int offset)
@@ -163,7 +163,7 @@ void GstVideoBuffer::tryPushRequiredData()
 {
     if (hasData(m_position, m_requestedBytes))
     {
-        tryPushBuffer(read(m_requestedBytes));
+        tryPushBuffer(read(m_position, m_requestedBytes));
         qDebug() << Q_FUNC_INFO << "have data!";
     }
     else

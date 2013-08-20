@@ -37,7 +37,7 @@ public:
     virtual bool isEndOfStream() const = 0;
 
     virtual bool hasData(unsigned int offset, unsigned int bytes) const = 0;
-    virtual QByteArray read(unsigned int bytes) = 0;
+    virtual QByteArray read(unsigned int offset, unsigned int bytes) = 0;
     virtual bool seek(unsigned int offset) = 0;
 
 signals:

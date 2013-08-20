@@ -182,30 +182,10 @@ bool MediaDownload::hasData(unsigned int offset, unsigned int bytes)
      return m_bufferRanges.contains(Range::fromStartSize(offset, bytes));
 }
 
-QByteArray MediaDownload::read(unsigned position, int reqSize)
+QByteArray MediaDownload::read(unsigned position, int bytes)
 {
-    QMutexLocker l(&m_bufferLock);
     if (m_hasError)
         return QByteArray();
-
-    unsigned oldRdPos = m_readPos;
-    int size = qMin(reqSize, (m_fileSize >= position) ? int(m_fileSize - position) : 0);
-
-    while (!m_bufferRanges.contains(Range::fromStartSize(position, size)))
-    {
-        m_bufferWait.wait(&m_bufferLock);
-        if (oldRdPos != m_readPos)
-        {
-            /* reading stream has seeked, abort this read */
-            return 0;
-        }
-        if (m_hasError)
-            return QByteArray();
-
-        size = qMin(reqSize, (m_fileSize >= position) ? int(m_fileSize - position) : 0);
-    }
-
-    l.unlock();
 
     if (!m_readFile.seek(position))
     {
@@ -213,7 +193,7 @@ QByteArray MediaDownload::read(unsigned position, int reqSize)
         return QByteArray();
     }
 
-    QByteArray result = m_readFile.read(size);
+    QByteArray result = m_readFile.read(qMin(bytes, (m_fileSize >= position) ? int(m_fileSize - position) : 0));
     if (QFile::NoError != m_readFile.error())
     {
         /* Called from VideoHttpBuffer::needData. We handle error reporting,
@@ -221,9 +201,6 @@ QByteArray MediaDownload::read(unsigned position, int reqSize)
         sendError(QLatin1String("Buffer read error: ") + m_readFile.errorString());
         return QByteArray();
     }
-
-    if (m_readPos == position)
-        m_readPos += result.size();
 
     return result;
 }
