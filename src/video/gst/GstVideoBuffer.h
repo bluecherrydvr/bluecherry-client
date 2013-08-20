@@ -34,7 +34,6 @@ public:
     explicit GstVideoBuffer(VideoBuffer *buffer, QObject *parent = 0);
     virtual ~GstVideoBuffer();
 
-    virtual void startBuffering();
     virtual bool isBuffering() const;
     virtual bool isBufferingFinished() const;
     virtual int bufferedPercent() const;
@@ -51,6 +50,9 @@ public:
     /* Create and prepare a source element; the element will be added to the pipeline,
      * but not linked. */
     GstElement * setupSrcElement(GstElement *pipeline);
+
+public slots:
+    virtual void startBuffering();
 
 private:
     QScopedPointer<VideoBuffer> m_buffer;

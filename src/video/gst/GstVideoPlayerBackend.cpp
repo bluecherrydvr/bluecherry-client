@@ -56,6 +56,7 @@ void GstVideoPlayerBackend::setGstVideoBuffer(GstVideoBuffer *gstVideoBuffer)
 {
     if (m_videoBuffer)
     {
+        disconnect(this, 0, m_videoBuffer, 0);
         disconnect(m_videoBuffer, 0, this, 0);
         m_videoBuffer->clearPlayback();
         m_videoBuffer->deleteLater();
@@ -65,6 +66,7 @@ void GstVideoPlayerBackend::setGstVideoBuffer(GstVideoBuffer *gstVideoBuffer)
 
     if (m_videoBuffer)
     {
+        connect(this, SIGNAL(bufferingRequested()), m_videoBuffer, SLOT(startBuffering()));
         connect(m_videoBuffer, SIGNAL(bufferingStarted()), this, SIGNAL(bufferingStarted()));
         connect(m_videoBuffer, SIGNAL(bufferingStopped()), this, SIGNAL(bufferingStopped()));
         connect(m_videoBuffer, SIGNAL(bufferingReady()), SLOT(playIfReady()));
@@ -133,7 +135,7 @@ bool GstVideoPlayerBackend::start()
         return false;
     }
 
-    m_videoBuffer->startBuffering();
+    emit bufferingRequested();
 
     /* Decoder */
     GstElement *decoder = gst_element_factory_make("decodebin2", "decoder");

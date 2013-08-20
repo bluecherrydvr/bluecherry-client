@@ -67,6 +67,9 @@ public slots:
     virtual bool setSpeed(double speed);
     virtual void restart();
 
+signals:
+    void bufferingRequested();
+
 private slots:
     void bufferingError(const QString &bufferingErrorMessage);
 
@@ -87,6 +90,7 @@ private:
 
     static GstBusSyncReply staticBusHandler(GstBus *bus, GstMessage *msg, gpointer data);
     static void staticDecodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast, gpointer user_data);
+
 };
 
 #endif // GST_VIDEO_PLAYER_BACKEND_H

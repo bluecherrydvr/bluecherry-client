@@ -221,7 +221,6 @@ void MediaDownload::startRequest(unsigned position, unsigned size)
         size = 0;
 
     m_task = new MediaDownloadTask(m_url, m_cookies, position, size);
-    m_task->moveToThread(m_thread);
 
     connect(m_task, SIGNAL(requestReady(uint)), SLOT(requestReady(uint)),
             Qt::DirectConnection);
@@ -230,9 +229,7 @@ void MediaDownload::startRequest(unsigned position, unsigned size)
     connect(m_task, SIGNAL(finished()), SLOT(taskFinished()), Qt::DirectConnection);
     connect(m_task, SIGNAL(error(QString)), SLOT(taskError(QString)), Qt::DirectConnection);
 
-    bool ok = m_task->metaObject()->invokeMethod(m_task, "startDownload");
-    Q_ASSERT(ok);
-    Q_UNUSED(ok);
+    m_task->startDownload();
 }
 
 void MediaDownload::requestReady(unsigned fileSize)

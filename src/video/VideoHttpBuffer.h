@@ -33,7 +33,6 @@ public:
     explicit VideoHttpBuffer(MediaDownload *media, QObject *parent = 0);
     virtual ~VideoHttpBuffer();
 
-    virtual void startBuffering();
     virtual bool isBuffering() const;
     virtual bool isBufferingFinished() const;
     virtual int bufferedPercent() const;
@@ -46,6 +45,9 @@ public:
     virtual bool seek(unsigned int offset);
 
     QUrl url() const;
+
+public slots:
+    virtual void startBuffering();
 
 private slots:
     void sendError(const QString &errorMessage);

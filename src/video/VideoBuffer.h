@@ -28,7 +28,6 @@ public:
     explicit VideoBuffer(QObject *parent = 0);
     virtual ~VideoBuffer();
 
-    virtual void startBuffering() = 0;
     virtual bool isBuffering() const = 0;
     virtual bool isBufferingFinished() const = 0;
     virtual int bufferedPercent() const = 0;
@@ -39,6 +38,9 @@ public:
     virtual bool hasData(unsigned int offset, unsigned int bytes) const = 0;
     virtual QByteArray read(unsigned int offset, unsigned int bytes) = 0;
     virtual bool seek(unsigned int offset) = 0;
+
+public slots:
+    virtual void startBuffering() = 0;
 
 signals:
     void error(const QString &errorMessage);
