@@ -25,31 +25,29 @@
 #include <QThread>
 #include <QApplication>
 
-VideoHttpBuffer::VideoHttpBuffer(const QUrl &url, QObject *parent) :
-        VideoBuffer(parent), m_url(url), m_media(0)
+VideoHttpBuffer::VideoHttpBuffer(MediaDownload *media, QObject *parent) :
+        VideoBuffer(parent), m_media(media)
 {
+    Q_ASSERT(m_media);
+
+    connect(m_media, SIGNAL(fileSizeChanged(uint)), this, SIGNAL(totalBytesChanged(uint)));
+    connect(m_media, SIGNAL(finished()), SIGNAL(bufferingFinished()));
+    connect(m_media, SIGNAL(stopped()), SIGNAL(bufferingStopped()));
+    connect(m_media, SIGNAL(error(QString)), SLOT(sendError(QString)));
+    connect(m_media, SIGNAL(newDataAvailable()), SIGNAL(newDataAvailable()));
 }
 
 VideoHttpBuffer::~VideoHttpBuffer()
 {
     if (m_media)
     {
-        bcApp->mediaDownloadManager()->releaseMediaDownload(m_url);
+        bcApp->mediaDownloadManager()->releaseMediaDownload(m_media->url());
         m_media = 0;
     }
 }
 
 void VideoHttpBuffer::startBuffering()
 {
-    Q_ASSERT(!m_media);
-
-    m_media = bcApp->mediaDownloadManager()->acquireMediaDownload(m_url);
-    connect(m_media, SIGNAL(fileSizeChanged(uint)), this, SIGNAL(totalBytesChanged(uint)));
-    connect(m_media, SIGNAL(finished()), SIGNAL(bufferingFinished()));
-    connect(m_media, SIGNAL(stopped()), SIGNAL(bufferingStopped()));
-    connect(m_media, SIGNAL(error(QString)), SLOT(sendError(QString)));
-    connect(m_media, SIGNAL(newDataAvailable()), SIGNAL(newDataAvailable()));
-
     m_media->start();
 
     qDebug("VideoHttpBuffer: started");
@@ -58,19 +56,16 @@ void VideoHttpBuffer::startBuffering()
 
 bool VideoHttpBuffer::isBuffering() const
 {
-    return m_media && !m_media->isFinished();
+    return !m_media->isFinished();
 }
 
 bool VideoHttpBuffer::isBufferingFinished() const
 {
-    return m_media && m_media->isFinished();
+    return m_media->isFinished();
 }
 
 int VideoHttpBuffer::bufferedPercent() const
 {
-    if (!m_media)
-        return 0;
-
     unsigned int file = totalBytes();
     qint64 avail = m_media->downloadedSize();
     if (!file || !avail)
@@ -80,28 +75,26 @@ int VideoHttpBuffer::bufferedPercent() const
 
 unsigned int VideoHttpBuffer::totalBytes() const
 {
-    return m_media ? m_media->fileSize() : 0;
+    return m_media->fileSize();
 }
 
 bool VideoHttpBuffer::isEndOfStream() const
 {
-    return m_media ? (m_media->readPosition() >= m_media->fileSize() && m_media->isFinished()) : false;
+    return m_media->readPosition() >= m_media->fileSize() && m_media->isFinished();
 }
 
 bool VideoHttpBuffer::hasData(unsigned int offset, unsigned int bytes) const
 {
-    return m_media ? m_media->hasData(offset, bytes) : false;
+    return m_media->hasData(offset, bytes);
 }
 
 QByteArray VideoHttpBuffer::read(unsigned int offset, unsigned int bytes)
 {
-    return m_media ? m_media->read(offset, bytes) : QByteArray();
+    return m_media->read(offset, bytes);
 }
 
 bool VideoHttpBuffer::seek(unsigned int offset)
 {
-    Q_ASSERT(m_media);
-
     return m_media->seek(offset);
 }
 

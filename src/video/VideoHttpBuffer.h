@@ -30,7 +30,7 @@ class VideoHttpBuffer : public VideoBuffer
     Q_OBJECT
 
 public:
-    explicit VideoHttpBuffer(const QUrl &url, QObject *parent = 0);
+    explicit VideoHttpBuffer(MediaDownload *media, QObject *parent = 0);
     virtual ~VideoHttpBuffer();
 
     virtual void startBuffering();

@@ -18,6 +18,7 @@
 #include "EventVideoPlayer.h"
 #include "event/EventDownloadManager.h"
 #include "event/EventVideoDownload.h"
+#include "network/MediaDownloadManager.h"
 #include "video/VideoController.h"
 #include "video/VideoHttpBuffer.h"
 #include "video/VideoPlayerBackend.h"
@@ -225,7 +226,8 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     connect(videoBackend, SIGNAL(bufferingStopped()), SLOT(bufferingStopped()));
     connect(videoBackend, SIGNAL(bufferingStarted()), SLOT(bufferingStarted()));
 
-    videoBackend->setVideoBuffer(new VideoHttpBuffer(url));
+    MediaDownload *media = bcApp->mediaDownloadManager()->acquireMediaDownload(url);
+    videoBackend->setVideoBuffer(new VideoHttpBuffer(media));
 
     m_videoController->start();
 
