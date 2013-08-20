@@ -101,7 +101,6 @@ private slots:
 private:
     QUrl m_url;
     QList<QNetworkCookie> m_cookies;
-    QThread *m_thread;
     MediaDownloadTask *m_task;
     QMutex m_bufferLock;
     QWaitCondition m_bufferWait;
