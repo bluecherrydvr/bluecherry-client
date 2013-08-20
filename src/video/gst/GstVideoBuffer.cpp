@@ -162,12 +162,7 @@ void GstVideoBuffer::needData(unsigned int bytes)
 void GstVideoBuffer::tryPushRequiredData()
 {
     if (hasData(m_position, m_requestedBytes))
-    {
         tryPushBuffer(read(m_position, m_requestedBytes));
-        qDebug() << Q_FUNC_INFO << "have data!";
-    }
-    else
-        qDebug() << Q_FUNC_INFO << "does not have data!";
 }
 
 void GstVideoBuffer::tryPushBuffer(const QByteArray &buffer)
@@ -176,12 +171,7 @@ void GstVideoBuffer::tryPushBuffer(const QByteArray &buffer)
     if (isBufferValid(buffer))
         pushBuffer(buffer);
     else if (isEndOfStream())
-    {
-        qDebug() << "GstVideoBuffer: end of stream";
         gst_app_src_end_of_stream(m_element);
-    }
-    else
-        qDebug() << "GstVideoBuffer: read aborted";
 }
 
 bool GstVideoBuffer::isBufferValid(const QByteArray &buffer) const
