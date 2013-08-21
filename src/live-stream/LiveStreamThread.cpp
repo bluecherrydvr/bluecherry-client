@@ -22,7 +22,8 @@
 #include <QThread>
 #include <QUrl>
 
-LiveStreamThread::LiveStreamThread(QObject *parent) : QObject(parent), m_isRunning(false)
+LiveStreamThread::LiveStreamThread(QObject *parent) :
+        QObject(parent), m_workerMutex(QMutex::Recursive), m_isRunning(false)
 {
 }
 
@@ -33,6 +34,8 @@ LiveStreamThread::~LiveStreamThread()
 
 void LiveStreamThread::start(const QUrl &url)
 {
+    QMutexLocker locker(&m_workerMutex);
+
     qDebug() << Q_FUNC_INFO << LoggableUrl(url);
 
     if (!m_worker)
@@ -47,12 +50,7 @@ void LiveStreamThread::start(const QUrl &url)
         m_worker.data()->setUrl(url);
 
         connect(m_thread.data(), SIGNAL(started()), m_worker.data(), SLOT(run()));
-        connect(m_worker.data(), SIGNAL(destroyed()), m_thread.data(), SLOT(quit()));
-        connect(m_worker.data(), SIGNAL(finished()), m_worker.data(), SLOT(deleteLater()));
-        connect(m_thread.data(), SIGNAL(finished()), m_thread.data(), SLOT(deleteLater()));
-
-        connect(m_worker.data(), SIGNAL(finished()), this, SIGNAL(finished()));
-        connect(m_worker.data(), SIGNAL(finished()), this, SLOT(threadFinished()));
+        connect(m_thread.data(), SIGNAL(finished()), this, SLOT(threadFinished()));
         connect(m_worker.data(), SIGNAL(fatalError(QString)), this, SIGNAL(fatalError(QString)));
 
         m_thread.data()->start();
@@ -65,6 +63,8 @@ void LiveStreamThread::start(const QUrl &url)
 
 void LiveStreamThread::stop()
 {
+    QMutexLocker locker(&m_workerMutex);
+
     m_isRunning = false;
 
     if (m_worker)
@@ -80,16 +80,27 @@ void LiveStreamThread::stop()
 
 void LiveStreamThread::setPaused(bool paused)
 {
+    QMutexLocker locker(&m_workerMutex);
+
     m_worker.data()->setPaused(paused);
 }
 
-bool LiveStreamThread::hasWorker() const
+bool LiveStreamThread::hasWorker()
 {
+    QMutexLocker locker(&m_workerMutex);
+
     return !m_worker.isNull();
 }
 
 void LiveStreamThread::threadFinished()
 {
+    QMutexLocker locker(&m_workerMutex);
+
+    if (m_worker.data())
+        m_worker.data()->deleteLater();
+    if (m_thread.data())
+        m_thread.data()->deleteLater();
+
     m_isRunning = false;
 }
 
@@ -100,12 +111,16 @@ bool LiveStreamThread::isRunning() const
 
 void LiveStreamThread::setAutoDeinterlacing(bool autoDeinterlacing)
 {
+    QMutexLocker locker(&m_workerMutex);
+
     if (hasWorker())
         m_worker.data()->setAutoDeinterlacing(autoDeinterlacing);
 }
 
-LiveStreamFrame * LiveStreamThread::frameToDisplay() const
+LiveStreamFrame * LiveStreamThread::frameToDisplay()
 {
+    QMutexLocker locker(&m_workerMutex);
+
     if (hasWorker())
         return m_worker.data()->frameToDisplay();
     else

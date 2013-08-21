@@ -52,7 +52,6 @@ public slots:
 
 signals:
     void fatalError(const QString &message);
-    void finished();
 
 private:
     struct AVFormatContext *m_ctx;

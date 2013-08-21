@@ -96,8 +96,6 @@ void LiveStreamWorker::run()
 
     if (setup())
         processStreamLoop();
-
-    emit finished();
 }
 
 void LiveStreamWorker::processStreamLoop()
