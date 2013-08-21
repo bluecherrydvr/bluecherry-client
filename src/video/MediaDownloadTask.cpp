@@ -36,14 +36,10 @@ void MediaDownloadTask::startDownload()
 
     Q_ASSERT(!m_reply);
 
-    if (!threadNAM.hasLocalData())
-    {
-        threadNAM.setLocalData(new QNetworkAccessManager);
-        /* XXX certificate validation */
-    }
+    QNetworkAccessManager *nam = bcApp->createNam(this);
 
-    threadNAM.localData()->cookieJar()->setCookiesFromUrl(m_cookies, m_url);
-    if (threadNAM.localData()->cookieJar()->cookiesForUrl(m_url).isEmpty())
+    nam->cookieJar()->setCookiesFromUrl(m_cookies, m_url);
+    if (nam->cookieJar()->cookiesForUrl(m_url).isEmpty())
         qDebug() << "MediaDownload: No cookies for media URL, likely to fail authentication";
 
     QNetworkRequest req(m_url);
@@ -57,7 +53,7 @@ void MediaDownloadTask::startDownload()
         req.setRawHeader("Range", range);
     }
 
-    m_reply = threadNAM.localData()->get(req);
+    m_reply = nam->get(req);
     m_reply->ignoreSslErrors(); // XXX Do this properly!
     connect(m_reply, SIGNAL(metaDataChanged()), SLOT(metaDataReady()));
     connect(m_reply, SIGNAL(readyRead()), SLOT(read()));

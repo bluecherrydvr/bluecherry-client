@@ -34,8 +34,6 @@
  * of time rather than any fixed number of bytes. */
 static const unsigned seekMinimumSkip = 96000;
 
-QThreadStorage<QNetworkAccessManager*> MediaDownloadTask::threadNAM;
-
 MediaDownload::MediaDownload(const QUrl &url, const QList<QNetworkCookie> &cookies, QObject *parent)
     : QObject(parent), m_url(url), m_cookies(cookies), m_task(0), m_fileSize(0),
       m_downloadedSize(0), m_readPos(0), m_writePos(0), m_refCount(0), m_isFinished(false), m_hasError(false)

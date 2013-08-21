@@ -48,7 +48,7 @@
 BluecherryApp *bcApp = 0;
 
 BluecherryApp::BluecherryApp()
-    : nam(new QNetworkAccessManager(this)), liveView(new LiveViewManager(this)),
+    : liveView(new LiveViewManager(this)),
       globalRate(new TransferRateCalculator(this)),
       m_livePaused(false), m_inPauseQuery(false),
       m_screensaverInhibited(false)
@@ -57,6 +57,7 @@ BluecherryApp::BluecherryApp()
     bcApp = this;
 
     m_serverRepository = new DVRServerRepository(this);
+    nam = createNam(this);
 
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(aboutToQuit()));
 
@@ -65,8 +66,6 @@ BluecherryApp::BluecherryApp()
     appIcon.addFile(QLatin1String(":/icons/icon64.png"));
     appIcon.addFile(QLatin1String(":/icons/bluecherry-client.png"));
     qApp->setWindowIcon(appIcon);
-
-    connect(nam, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)), SLOT(sslErrors(QNetworkReply*,QList<QSslError>)));
 
     /* Don't use the system CAs to verify certificates */
     QSslConfiguration sslConfig = QSslConfiguration::defaultConfiguration();
@@ -193,9 +192,9 @@ void BluecherryApp::sendSettingsChanged()
     setScreensaverInhibited(settings.value(QLatin1String("ui/disableScreensaver/always"), true).toBool());
 }
 
-QNetworkAccessManager *BluecherryApp::createNam()
+QNetworkAccessManager *BluecherryApp::createNam(QObject *parent)
 {
-    QNetworkAccessManager *n = new QNetworkAccessManager(this);
+    QNetworkAccessManager *n = new QNetworkAccessManager(parent);
     connect(n, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)), SLOT(sslErrors(QNetworkReply*,QList<QSslError>)));
     return n;
 }

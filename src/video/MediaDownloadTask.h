@@ -20,7 +20,6 @@
 
 #include <QObject>
 #include <QUrl>
-#include <QThreadStorage>
 
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -62,7 +61,6 @@ private slots:
 
 private:
     friend class MediaDownload;
-    static QThreadStorage<QNetworkAccessManager*> threadNAM;
 
     QUrl m_url;
     QList<QNetworkCookie> m_cookies;

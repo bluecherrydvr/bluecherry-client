@@ -46,7 +46,7 @@ class BluecherryApp : public QObject
     Q_OBJECT
 
 public:
-    QNetworkAccessManager * const nam;
+    QNetworkAccessManager *nam;
     MainWindow *mainWindow;
     QIcon appIcon;
     LiveViewManager * const liveView;
@@ -60,7 +60,7 @@ public:
     /* Used to create other QNAM instances, for use on other threads.
      * Keeps the correct SSL verification behavior, although changes in fingerprints
      * will error rather than prompting the user on any but the default (GUI thread). */
-    QNetworkAccessManager *createNam();
+    QNetworkAccessManager *createNam(QObject *parent);
 
     DVRServerRepository * serverRepository() const { return m_serverRepository; }
     MediaDownloadManager * mediaDownloadManager() const { return m_mediaDownloadManager; }
