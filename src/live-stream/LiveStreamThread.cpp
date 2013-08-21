@@ -83,9 +83,9 @@ void LiveStreamThread::setPaused(bool paused)
     m_worker.data()->setPaused(paused);
 }
 
-LiveStreamWorker * LiveStreamThread::worker() const
+bool LiveStreamThread::hasWorker() const
 {
-    return m_worker.data();
+    return !m_worker.isNull();
 }
 
 void LiveStreamThread::threadFinished()
@@ -96,4 +96,18 @@ void LiveStreamThread::threadFinished()
 bool LiveStreamThread::isRunning() const
 {
     return m_isRunning;
+}
+
+void LiveStreamThread::setAutoDeinterlacing(bool autoDeinterlacing)
+{
+    if (hasWorker())
+        m_worker.data()->setAutoDeinterlacing(autoDeinterlacing);
+}
+
+LiveStreamFrame * LiveStreamThread::frameToDisplay() const
+{
+    if (hasWorker())
+        return m_worker.data()->frameToDisplay();
+    else
+        return 0;
 }

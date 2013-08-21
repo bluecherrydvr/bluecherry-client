@@ -21,6 +21,7 @@
 #include <QObject>
 #include <QWeakPointer>
 
+class LiveStreamFrame;
 class LiveStreamWorker;
 class QThread;
 class QUrl;
@@ -38,7 +39,10 @@ public:
     void setPaused(bool paused);
 
     bool isRunning() const;
-    LiveStreamWorker * worker() const;
+    bool hasWorker() const;
+
+    void setAutoDeinterlacing(bool autoDeinterlacing);
+    LiveStreamFrame * frameToDisplay() const;
 
 signals:
     void fatalError(const QString &error);
