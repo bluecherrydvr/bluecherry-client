@@ -18,9 +18,11 @@
 #ifndef LIVE_STREAM_THREAD_H
 #define LIVE_STREAM_THREAD_H
 
+#include <QMutex>
 #include <QObject>
 #include <QWeakPointer>
 
+class LiveStreamFrame;
 class LiveStreamWorker;
 class QThread;
 class QUrl;
@@ -38,7 +40,10 @@ public:
     void setPaused(bool paused);
 
     bool isRunning() const;
-    LiveStreamWorker * worker() const;
+    bool hasWorker();
+
+    void setAutoDeinterlacing(bool autoDeinterlacing);
+    LiveStreamFrame * frameToDisplay();
 
 signals:
     void fatalError(const QString &error);
@@ -47,6 +52,7 @@ signals:
 private:
     QWeakPointer<QThread> m_thread;
     QWeakPointer<LiveStreamWorker> m_worker;
+    QMutex m_workerMutex;
     bool m_isRunning;
 
 private slots:

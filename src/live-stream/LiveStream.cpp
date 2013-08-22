@@ -218,7 +218,7 @@ void LiveStream::setOnline(bool online)
 
 void LiveStream::setPaused(bool pause)
 {
-    if (pause == (state() == Paused) || state() < Streaming || !m_thread || !m_thread->worker())
+    if (pause == (state() == Paused) || state() < Streaming || !m_thread || !m_thread->hasWorker())
         return;
 
     m_thread->setPaused(pause);
@@ -241,10 +241,10 @@ void LiveStream::updateFrame()
         m_fpsUpdateCnt = m_fpsUpdateHits = 0;
     }
 
-    if (!m_thread || !m_thread->worker())
+    if (!m_thread || !m_thread->hasWorker())
         return;
 
-    LiveStreamFrame *sf = m_thread->worker()->frameToDisplay();
+    LiveStreamFrame *sf = m_thread->frameToDisplay();
     if (!sf) // no new frame
         return;
 
@@ -298,9 +298,9 @@ void LiveStream::checkState()
 
 void LiveStream::updateSettings()
 {
-    if (!m_thread || !m_thread->worker())
+    if (!m_thread || !m_thread->hasWorker())
         return;
 
     QSettings settings;
-    m_thread->worker()->setAutoDeinterlacing(settings.value(QLatin1String("ui/liveview/autoDeinterlace"), false).toBool());
+    m_thread->setAutoDeinterlacing(settings.value(QLatin1String("ui/liveview/autoDeinterlace"), false).toBool());
 }
