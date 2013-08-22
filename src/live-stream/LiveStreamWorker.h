@@ -42,6 +42,7 @@ public:
 
     void stop();
     void setPaused(bool paused);
+    void setAutoDeinterlacing(bool autoDeinterlacing);
 
     bool shouldInterrupt() const;
     LiveStreamFrame * frameToDisplay();
@@ -49,11 +50,8 @@ public:
 public slots:
     void run();
 
-    void setAutoDeinterlacing(bool autoDeinterlacing);
-
 signals:
     void fatalError(const QString &message);
-    void finished();
 
 private:
     struct AVFormatContext *m_ctx;
