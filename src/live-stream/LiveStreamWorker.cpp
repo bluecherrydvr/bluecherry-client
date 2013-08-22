@@ -86,8 +86,6 @@ bool LiveStreamWorker::shouldInterrupt() const
 
 void LiveStreamWorker::run()
 {
-    qDebug() << Q_FUNC_INFO;
-
     ASSERT_WORKER_THREAD();
 
     // Prevent concurrent invocations
@@ -96,6 +94,8 @@ void LiveStreamWorker::run()
 
     if (setup())
         processStreamLoop();
+
+    emit finished();
 }
 
 void LiveStreamWorker::processStreamLoop()

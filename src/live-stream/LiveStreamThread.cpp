@@ -52,6 +52,7 @@ void LiveStreamThread::start(const QUrl &url)
         connect(m_thread.data(), SIGNAL(started()), m_worker.data(), SLOT(run()));
         connect(m_thread.data(), SIGNAL(finished()), this, SLOT(threadFinished()));
         connect(m_worker.data(), SIGNAL(fatalError(QString)), this, SIGNAL(fatalError(QString)));
+        connect(m_worker.data(), SIGNAL(finished()), m_thread.data(), SLOT(quit()));
 
         m_thread.data()->start();
     }
