@@ -185,12 +185,8 @@ EventVideoPlayer::~EventVideoPlayer()
 
     if (m_videoThread)
     {
-        connect(m_videoThread.data(), SIGNAL(finished()), m_videoThread.data(), SLOT(deleteLater()));
-
-        if (m_videoBackend)
-            connect(m_videoBackend.data(), SIGNAL(destroyed()), m_videoThread.data(), SLOT(quit()));
-        else
-            m_videoThread.data()->quit();
+        m_videoThread.data()->quit();
+        m_videoThread.data()->deleteLater();
     }
 }
 
