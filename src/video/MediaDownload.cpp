@@ -55,7 +55,7 @@ MediaDownload::~MediaDownload()
     if (m_thread)
     {
         m_thread->quit();
-        m_thread->wait();
+        m_thread = 0;
     }
 }
 
@@ -89,7 +89,8 @@ void MediaDownload::start()
         return;
     }
 
-    m_thread = new QThread(this);
+    m_thread = new QThread();
+    connect(m_thread, SIGNAL(finished()), m_thread, SLOT(deleteLater()));
     m_thread->start();
 
     qDebug() << "MediaDownload: started for" << m_url;
@@ -340,7 +341,7 @@ void MediaDownload::taskError(const QString &message)
 }
 
 void MediaDownload::taskFinished()
-{    
+{
     QMutexLocker l(&m_bufferLock);
 
     /* These should both be true or both be false, anything else is a logic error.
@@ -356,6 +357,12 @@ void MediaDownload::taskFinished()
         ok = metaObject()->invokeMethod(this, "stopped", Qt::QueuedConnection);
         Q_ASSERT(ok);
         Q_UNUSED(ok);
+
+        if (m_thread)
+        {
+            m_thread->quit();
+            m_thread = 0;
+        }
     }
     else
     {
