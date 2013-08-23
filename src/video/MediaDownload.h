@@ -106,7 +106,6 @@ private:
     QMutex m_bufferLock;
     QWaitCondition m_bufferWait;
     QTemporaryFile m_bufferFile;
-    QFile m_readFile;
     unsigned m_fileSize, m_downloadedSize, m_readPos, m_writePos;
     RangeMap m_bufferRanges;
     QAtomicInt m_refCount;

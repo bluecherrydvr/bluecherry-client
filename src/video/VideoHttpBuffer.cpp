@@ -75,7 +75,7 @@ GstElement *VideoHttpBuffer::setupSrcElement(GstElement *pipeline)
     m_pipeline = pipeline;
 
     gst_app_src_set_max_bytes(m_element, 0);
-    gst_app_src_set_stream_type(m_element, GST_APP_STREAM_TYPE_RANDOM_ACCESS);
+    gst_app_src_set_stream_type(m_element, GST_APP_STREAM_TYPE_SEEKABLE);
 
     GstAppSrcCallbacks callbacks;
     memset(&callbacks, 0, sizeof(callbacks));
