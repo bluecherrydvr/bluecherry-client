@@ -120,13 +120,6 @@ bool MediaDownload::openFiles()
         return false;
     }
 
-    m_readFile.setFileName(m_bufferFile.fileName());
-    if (!m_readFile.open(QIODevice::ReadOnly))
-    {
-        sendError(QLatin1String("Failed to open read buffer: ") + m_readFile.errorString());
-        return false;
-    }
-
     return true;
 }
 
@@ -196,22 +189,23 @@ int MediaDownload::read(unsigned position, char *buffer, int reqSize)
         size = qMin(reqSize, (m_fileSize >= position) ? int(m_fileSize - position) : 0);
     }
 
-    l.unlock();
-
-    if (!m_readFile.seek(position))
+    if (!m_bufferFile.seek(position))
     {
-        sendError(QLatin1String("Buffer seek error: ") + m_readFile.errorString());
+        sendError(QLatin1String("Buffer seek error: ") + m_bufferFile.errorString());
         return -1;
     }
 
-    int re = m_readFile.read(buffer, size);
+    int re = m_bufferFile.read(buffer, size);
+
     if (re < 0)
     {
         /* Called from VideoHttpBuffer::needData. We handle error reporting,
          * as we have more information here. */
-        sendError(QLatin1String("Buffer read error: ") + m_readFile.errorString());
+        sendError(QLatin1String("Buffer read error: ") + m_bufferFile.errorString());
         return -1;
     }
+
+    l.unlock();
 
     if (m_readPos == position)
         m_readPos += re;
@@ -282,6 +276,7 @@ void MediaDownload::requestReady(unsigned fileSize)
 void MediaDownload::incomingData(const QByteArray &data, unsigned position)
 {
     QMutexLocker l(&m_bufferLock);
+
     bool emitFileSize = false;
 
     if (position+data.size() > m_fileSize)
@@ -305,6 +300,7 @@ void MediaDownload::incomingData(const QByteArray &data, unsigned position)
     }
 
     qint64 re = m_bufferFile.write(data);
+
     if (re < 0)
     {
         sendError(QLatin1String("Buffer write failed: ") + m_bufferFile.errorString());
@@ -323,10 +319,10 @@ void MediaDownload::incomingData(const QByteArray &data, unsigned position)
 
     m_downloadedSize += re;
 
-    l.unlock();
-
     if (emitFileSize)
         emit fileSizeChanged(m_fileSize);
+
+    l.unlock();
 
     m_bufferWait.wakeAll();
 }
