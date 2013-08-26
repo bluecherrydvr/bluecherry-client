@@ -41,6 +41,8 @@ MediaDownload::MediaDownload(const QUrl &url, const QList<QNetworkCookie> &cooki
       m_downloadedSize(0), m_readPos(0), m_writePos(0), m_refCount(0), m_isFinished(false), m_hasError(false)
 {
     Q_ASSERT(m_url.isValid());
+
+    m_bufferFile.setFileTemplate(QDir::tempPath() + QLatin1String("/bc_vbuf_XXXXXX.mkv"));
 }
 
 MediaDownload::~MediaDownload()
@@ -55,8 +57,11 @@ MediaDownload::~MediaDownload()
     if (m_thread)
     {
         m_thread->quit();
-        m_thread->wait();
+        m_thread = 0;
     }
+
+    if (m_bufferFile.isOpen())
+        m_bufferFile.close();
 }
 
 void MediaDownload::ref()
@@ -81,15 +86,14 @@ void MediaDownload::start()
     if (m_thread)
         return; // already started
 
-    m_bufferFile.setFileTemplate(QDir::tempPath() + QLatin1String("/bc_vbuf_XXXXXX.mkv"));
-
     if (!openFiles())
     {
         /* openFiles calls sendError */
         return;
     }
 
-    m_thread = new QThread(this);
+    m_thread = new QThread();
+    connect(m_thread, SIGNAL(finished()), m_thread, SLOT(deleteLater()));
     m_thread->start();
 
     qDebug() << "MediaDownload: started for" << m_url;
@@ -104,7 +108,8 @@ void MediaDownload::cancel()
 
 void MediaDownload::sendError(const QString &message)
 {
-    qDebug() << "MediaDownload: sending error:" << message;
+    qDebug() << Q_FUNC_INFO << message;
+
     m_hasError = true;
     emit error(message);
     emit stopped();
@@ -113,7 +118,9 @@ void MediaDownload::sendError(const QString &message)
 
 bool MediaDownload::openFiles()
 {
-    Q_ASSERT(!m_bufferFile.isOpen());
+    if (m_bufferFile.isOpen())
+        return true;
+
     if (!m_bufferFile.open())
     {
         sendError(QLatin1String("Failed to open write buffer: ") + m_bufferFile.errorString());
@@ -329,14 +336,14 @@ void MediaDownload::incomingData(const QByteArray &data, unsigned position)
 
 void MediaDownload::taskError(const QString &message)
 {
-    /* We probably want some smart retrying behavior for tasks */
-    qDebug() << "MediaDownload: Task reports error:" << message;
+    qDebug() << Q_FUNC_INFO << message;
+
     m_isFinished = true;
     sendError(message);
 }
 
 void MediaDownload::taskFinished()
-{    
+{
     QMutexLocker l(&m_bufferLock);
 
     /* These should both be true or both be false, anything else is a logic error.
@@ -352,6 +359,12 @@ void MediaDownload::taskFinished()
         ok = metaObject()->invokeMethod(this, "stopped", Qt::QueuedConnection);
         Q_ASSERT(ok);
         Q_UNUSED(ok);
+
+        if (m_thread)
+        {
+            m_thread->quit();
+            m_thread = 0;
+        }
     }
     else
     {
