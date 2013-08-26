@@ -33,7 +33,7 @@ QDebug & operator << (QDebug &debug, const LoggableUrl &loggableUrl)
 {
     QUrl urlWithHiddenPassword = loggableUrl.url();
     urlWithHiddenPassword.setPassword(QLatin1String("***"));
-    debug << urlWithHiddenPassword;
+    debug << urlWithHiddenPassword.toString();
 
     return debug;
 }
