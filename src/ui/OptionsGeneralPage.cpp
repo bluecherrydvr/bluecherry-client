@@ -46,7 +46,7 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     layout->addWidget(m_eventsPauseLive);
 
     m_liveHwAccel = new QCheckBox(tr("Use hardware acceleration (OpenGL)"));
-    m_liveHwAccel->setChecked(!settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration"), false).toBool());
+    m_liveHwAccel->setChecked(!settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration"), true).toBool());
     m_liveHwAccel->setToolTip(tr("Disable hardware acceleration only if you do not see anything in the live view area."));
     layout->addWidget(m_liveHwAccel);
 
