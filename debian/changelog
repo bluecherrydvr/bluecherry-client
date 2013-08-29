@@ -1,8 +1,13 @@
 bluecherry-client (1:2.1.5-1) lucid; urgency=low
 
-  * Bug #151: Improve sorting time of events in events window
+  * Bug #147: Events view does not update list of cameras when server connects
+  * Bug #150: Improve sorting time of events in events window
+  * Bug #164: Switching video's stream mode fails
+  * Bug #171: Random crash
+  * Bug #173: Thousands of threads are created
+  * Bug #174: User have to wait for video to play for a long time
 
- -- Rafał Malinowski <rafal.malinowski@corp.bluecherry.net>  Fri, 12 Jul 2013 13:23:50 +0200
+ -- Rafał Malinowski <rafal.malinowski@corp.bluecherry.net>  Thu, 29 Aug 2013 16:35:28 +0200
 
  bluecherry-client (1:2.1.4-1) lucid; urgency=low
 
