@@ -330,11 +330,8 @@ bool GstVideoPlayerBackend::seek(qint64 position)
     }
 
     gboolean re = gst_element_seek(m_pipeline, m_playbackSpeed, GST_FORMAT_TIME,
-                            (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SKIP |
-                                           GST_SEEK_FLAG_KEY_UNIT /* removing this will seek between
-                                                                   * keyframes, but is much slower */
-                                           ),
-                            GST_SEEK_TYPE_SET, position, GST_SEEK_TYPE_SET, GST_CLOCK_TIME_NONE);
+                                   (GstSeekFlags)(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_SKIP),
+                                   GST_SEEK_TYPE_SET, position, GST_SEEK_TYPE_SET, GST_CLOCK_TIME_NONE);
 
     if (!re)
     {
