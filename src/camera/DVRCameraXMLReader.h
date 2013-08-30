@@ -18,8 +18,9 @@
 #ifndef DVR_CAMERA_XML_READER_H
 #define DVR_CAMERA_XML_READER_H
 
+#include <QXmlStreamReader>
+
 class DVRCamera;
-class QXmlStreamReader;
 
 class DVRCameraXMLReader
 {
