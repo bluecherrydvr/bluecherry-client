@@ -18,6 +18,7 @@
 #include "GstVideoPlayerBackend.h"
 #include "bluecherry-config.h"
 #include "core/BluecherryApp.h"
+#include "video/VideoHttpBuffer.h"
 #include "video/gst/GstPluginLoader.h"
 #include "video/gst/GstVideoBuffer.h"
 #include "video/gst/GstWrapper.h"
