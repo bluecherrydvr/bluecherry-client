@@ -53,6 +53,8 @@ GstVideoBuffer::~GstVideoBuffer()
 void GstVideoBuffer::startBuffering()
 {
     m_buffer.data()->startBuffering();
+    if (m_buffer.data()->totalBytes() > 0)
+        emit bufferingReady();
 }
 
 bool GstVideoBuffer::isBuffering() const
