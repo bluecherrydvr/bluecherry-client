@@ -112,8 +112,10 @@ private:
     bool m_isFinished, m_hasError;
 
     /* size may be 0, which will continue to the end of the file */
-    Q_INVOKABLE void startRequest(unsigned position, unsigned size);
+    void startRequest(unsigned position, unsigned size);
     bool openFiles();
+    void fillGaps();
+
 };
 
 #endif // MEDIADOWNLOAD_H

@@ -80,7 +80,10 @@ void MediaDownload::start()
 
     qDebug() << "MediaDownload: started for" << m_url;
 
-    startRequest(0, 0);
+    if (0 == m_downloadedSize)
+        startRequest(0, 0);
+    else
+        fillGaps();
 }
 
 void MediaDownload::cancel()
@@ -99,7 +102,9 @@ void MediaDownload::sendError(const QString &errorMessage)
 
 bool MediaDownload::openFiles()
 {
-    Q_ASSERT(!m_bufferFile.isOpen());
+    if (m_bufferFile.isOpen())
+        return true;
+
     if (!m_bufferFile.open())
     {
         sendError(QLatin1String("Failed to open write buffer: ") + m_bufferFile.errorString());
@@ -326,13 +331,14 @@ void MediaDownload::taskFinished()
         Q_UNUSED(ok);
     }
     else
-    {
-        /* Launch a new task to fill in gaps. Prioritize anything that is missing and is closest
-         * to the current read position. */
-        Range missingRange = m_bufferRanges.nextMissingRange(Range::fromStartEnd(m_readPos, m_fileSize));
-        Q_ASSERT(missingRange.isValid());
+        fillGaps();
+}
 
-        m_writePos = missingRange.start();
-        startRequest(missingRange.start(), missingRange.size());
-    }
+void MediaDownload::fillGaps()
+{
+    Range missingRange = m_bufferRanges.nextMissingRange(Range::fromStartEnd(m_readPos, m_fileSize));
+    Q_ASSERT(missingRange.isValid());
+
+    m_writePos = missingRange.start();
+    startRequest(missingRange.start(), missingRange.size());
 }
