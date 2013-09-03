@@ -26,7 +26,6 @@ EventsUpdater::EventsUpdater(DVRServerRepository *serverRepository, QObject *par
     Q_ASSERT(m_serverRepository);
 
     connect(m_serverRepository, SIGNAL(serverAdded(DVRServer*)), SLOT(serverAdded(DVRServer*)));
-    connect(m_serverRepository, SIGNAL(serverAboutToBeRemoved(DVRServer*)), SLOT(clearServerEvents(DVRServer*)));
     connect(&m_updateTimer, SIGNAL(timeout()), SLOT(updateServers()));
 
     foreach (DVRServer *s, m_serverRepository->servers())

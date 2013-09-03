@@ -33,6 +33,11 @@ endif (BUILD_TESTING)
 find_package (Qt4 4.8.0 REQUIRED)
 include (cmake/Modules/UseQt4.cmake)
 
+if (CMAKE_BUILD_TYPE STREQUAL Release)
+    add_definitions (-DQT_NO_WARNING_OUTPUT)
+    add_definitions (-DQT_NO_DEBUG_OUTPUT)
+endif (CMAKE_BUILD_TYPE STREQUAL Release)
+
 if (UNIX AND NOT APPLE)
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,${QT_LIBRARY_DIR}")
 endif (UNIX AND NOT APPLE)
