@@ -42,6 +42,7 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QAbstractButton>
+#include <QDebug>
 
 #include "bluecherry-config.h"
 
