@@ -54,7 +54,8 @@ private:
     unsigned m_samples[sampleCount];
     qint8 m_nSample;
 
-    Q_INVOKABLE void startTimer();
+    void startTimer();
+
 };
 
 #endif // TRANSFERRATECALCULATOR_H

@@ -142,7 +142,7 @@ AVPacket LiveStreamWorker::readPacket(bool *ok)
 
 bool LiveStreamWorker::processPacket(struct AVPacket packet)
 {
-    bcApp->globalRate->addSampleValue(packet.size);
+    emit bytesDownloaded(packet.size);
 
     while (packet.size > 0)
     {

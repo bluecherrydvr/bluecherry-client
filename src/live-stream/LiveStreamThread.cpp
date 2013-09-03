@@ -17,6 +17,7 @@
 
 #include "LiveStreamThread.h"
 #include "LiveStreamWorker.h"
+#include "core/BluecherryApp.h"
 #include "core/LoggableUrl.h"
 #include <QDebug>
 #include <QThread>
@@ -53,6 +54,8 @@ void LiveStreamThread::start(const QUrl &url)
         connect(m_thread.data(), SIGNAL(finished()), this, SLOT(threadFinished()));
         connect(m_worker.data(), SIGNAL(fatalError(QString)), this, SIGNAL(fatalError(QString)));
         connect(m_worker.data(), SIGNAL(finished()), m_thread.data(), SLOT(quit()));
+
+        connect(m_worker.data(), SIGNAL(bytesDownloaded(uint)), bcApp->globalRate, SLOT(addSampleValue(uint)));
 
         m_thread.data()->start();
     }
