@@ -45,7 +45,7 @@ LiveViewArea::LiveViewArea(DVRServerRepository *serverRepository, QWidget *paren
     rootContext()->setContextProperty(QLatin1String("mainServerRepository"), QVariant::fromValue(serverRepository));
 
     QSettings settings;
-    if (!settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration"), false).toBool())
+    if (!settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration"), true).toBool())
         setViewport(new QGLWidget);
     else
         qDebug("Hardware-accelerated live view is DISABLED");
@@ -141,7 +141,7 @@ QSize LiveViewArea::sizeHint() const
 void LiveViewArea::settingsChanged()
 {
     QSettings settings;
-    bool hwaccel = !settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration"), false).toBool();
+    bool hwaccel = !settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration"), true).toBool();
     if (hwaccel != isHardwareAccelerated())
     {
         qDebug("%s hardware acceleration for live view", hwaccel ? "Enabled" : "Disabled");
