@@ -44,7 +44,7 @@ GstSinkWidget::GstSinkWidget(QWidget *parent)
     setPalette(p);
 
     QSettings settings;
-    if (!settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration"), false).toBool())
+    if (!settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration"), true).toBool())
         setViewport(new QGLWidget);
     else
     {
@@ -95,7 +95,7 @@ void GstSinkWidget::setViewport(QWidget *w)
 void GstSinkWidget::settingsChanged()
 {
     QSettings settings;
-    bool hwaccel = !settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration"), false).toBool();
+    bool hwaccel = !settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration"), true).toBool();
     bool old = m_viewport->inherits("QGLWidget");
     if (hwaccel != old)
     {
