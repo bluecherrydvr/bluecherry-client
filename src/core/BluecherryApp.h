@@ -124,6 +124,7 @@ private:
 
     void registerGstWrapper();
     void unregisterGstWrapper();
+    QStringList absolutePaths(const QStringList &paths);
 
     void loadServers();
     bool shouldAddLocalServer() const;
