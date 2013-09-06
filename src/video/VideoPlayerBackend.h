@@ -38,6 +38,11 @@ public:
         Done
     };
 
+protected:
+    double m_lastspeed;
+
+public:
+    void setLastSpeed(double speed) { m_lastspeed = speed; }
     explicit VideoPlayerBackend(QObject *parent = 0);
     virtual ~VideoPlayerBackend();
 
