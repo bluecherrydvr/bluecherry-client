@@ -79,6 +79,7 @@ private:
     QSlider *m_seekSlider;
     QLabel *m_startTime, *m_endTime, *m_statusText, *m_rateText;
     QTimer m_uiTimer;
+    double m_lastspeed;
 
     void setControlsEnabled(bool enabled);
     bool uiRefreshNeeded() const;

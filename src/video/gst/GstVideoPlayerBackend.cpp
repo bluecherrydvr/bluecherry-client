@@ -263,7 +263,6 @@ void GstVideoPlayerBackend::restart()
     if (!m_pipeline)
         return;
     gst_element_set_state(m_pipeline, GST_STATE_READY);
-
     VideoState old = m_state;
     m_state = Stopped;
     emit stateChanged(m_state, old);
@@ -365,6 +364,7 @@ bool GstVideoPlayerBackend::setSpeed(double speed)
     else
     {
         m_playbackSpeed = speed;
+        m_lastspeed = speed;
         qDebug() << "gstreamer: set playback speed to" << m_playbackSpeed;
         emit playbackSpeedChanged(m_playbackSpeed);
     }
@@ -441,6 +441,7 @@ GstBusSyncReply GstVideoPlayerBackend::busHandler(GstBus *bus, GstMessage *msg)
             case GST_STATE_PLAYING:
                 vpState = Playing;
                 emit durationChanged(duration());
+                setSpeed(m_lastspeed);
                 break;
             }
 

@@ -173,6 +173,8 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     connect(sc, SIGNAL(activated()), SLOT(saveSnapshot()));
 
     setControlsEnabled(false);
+
+    m_lastspeed = 1.0;
 }
 
 EventVideoPlayer::~EventVideoPlayer()
@@ -210,6 +212,7 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
 
     m_videoBackend = bcApp->videoPlayerFactory()->createBackend();
     m_videoBackend.data()->moveToThread(m_videoThread.data());
+    m_videoBackend.data()->setLastSpeed(m_lastspeed);
     connect(m_videoBackend.data(), SIGNAL(stateChanged(int,int)), SLOT(stateChanged(int)));
     connect(m_videoBackend.data(), SIGNAL(nonFatalError(QString)), SLOT(videoNonFatalError(QString)));
     connect(m_videoBackend.data(), SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
@@ -330,7 +333,7 @@ void EventVideoPlayer::faster()
     }
 
     speed = qBound(playbackRates[0], speed, playbackRates[playbackRateCount-1]);
-
+    m_lastspeed = speed;
     m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "setSpeed", Qt::QueuedConnection,
                                         Q_ARG(double, speed));
 }
