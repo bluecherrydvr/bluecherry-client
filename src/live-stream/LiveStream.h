@@ -39,6 +39,7 @@ class LiveStream : public QObject
     Q_PROPERTY(float receivedFps READ receivedFps CONSTANT)
     Q_PROPERTY(QSize streamSize READ streamSize NOTIFY streamSizeChanged)
     Q_PROPERTY(State state READ state NOTIFY stateChanged)
+    Q_PROPERTY(QString errdesc READ errorMessage CONSTANT)
 
 public:
     enum State
@@ -46,6 +47,7 @@ public:
         Error,
         StreamOffline,
         NotConnected,
+        Reconnecting,
         Connecting,
         Streaming,
         Paused
@@ -111,6 +113,7 @@ private:
     int m_fpsUpdateCnt;
     int m_fpsUpdateHits;
     float m_fps;
+    bool m_isReconn;
 
     QElapsedTimer m_frameInterval;
 
