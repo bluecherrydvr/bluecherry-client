@@ -102,6 +102,7 @@ LiveStream::LiveStream(DVRCamera *camera, QObject *parent)
     bcApp->liveView->addStream(this);
     connect(bcApp, SIGNAL(settingsChanged()), SLOT(updateSettings()));
     connect(m_stateTimer, SIGNAL(timeout()), SLOT(checkState()));
+    m_isReconn = false;
 }
 
 LiveStream::~LiveStream()
@@ -181,7 +182,13 @@ void LiveStream::start()
     m_thread->start(url());
 
     updateSettings();
-    setState(Connecting);
+    if (m_isReconn == false)
+    {
+        setState(Connecting);
+        m_isReconn = true;
+    }
+    else
+        setState(Reconnecting);
 }
 
 void LiveStream::stop()
@@ -232,7 +239,7 @@ void LiveStream::setPaused(bool pause)
 
 void LiveStream::updateFrame()
 {
-    if (state() < Connecting || !m_thread || !m_thread->isRunning())
+    if (state() < Reconnecting || !m_thread || !m_thread->isRunning())
         return;
 
     if (++m_fpsUpdateCnt == int(1.5*renderTimerFps))
@@ -253,7 +260,7 @@ void LiveStream::updateFrame()
 
     m_fpsUpdateHits++;
 
-    if (state() == Connecting)
+    if (state() >= Reconnecting)
         setState(Streaming);
     m_frameInterval.restart();
 
