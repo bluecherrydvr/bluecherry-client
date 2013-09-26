@@ -333,7 +333,8 @@ LiveFeedBase {
 
     function statusOverlayMessage(state) {
         switch (state) {
-            case LiveStream.Error: return "<span style='color:#ff0000'>Error</span>";
+            case LiveStream.Error: return "<span style='color:#ff0000'>Error<br><font size=10px>"
+                                   + stream.errdesc +"</font></span>";
             case LiveStream.StreamOffline: return "<span style='color:#888888'>Offline</span>";
             case LiveStream.NotConnected: return "Disconnected";
             case LiveStream.Connecting: return "Connecting...";

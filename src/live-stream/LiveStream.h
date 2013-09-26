@@ -39,6 +39,7 @@ class LiveStream : public QObject
     Q_PROPERTY(float receivedFps READ receivedFps CONSTANT)
     Q_PROPERTY(QSize streamSize READ streamSize NOTIFY streamSizeChanged)
     Q_PROPERTY(State state READ state NOTIFY stateChanged)
+    Q_PROPERTY(QString errdesc READ errorMessage CONSTANT)
 
 public:
     enum State
