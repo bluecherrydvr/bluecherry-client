@@ -139,9 +139,6 @@ void LiveViewLayout::doLayout()
 
     QSizeF cellSz(floor(width() / m_columns), floor(height() / m_rows));
 
-    int extraX = floor(width() - (cellSz.width() * m_columns)),
-        extraY = floor(height() - (cellSz.height() * m_rows));
-
     qreal x = 0, y = 0;
 
     for (int r = 0, c = 0;;)
@@ -149,10 +146,6 @@ void LiveViewLayout::doLayout()
         QDeclarativeItem *i = at(r, c);
 
         QSizeF sz = cellSz;
-        if (c < extraX)
-            sz.rwidth()++;
-        if (r < extraY)
-            sz.rheight()++;
 
         if (i)
         {
