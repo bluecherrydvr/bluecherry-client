@@ -73,11 +73,13 @@ void initBreakpad()
     new ExceptionHandler(std::wstring(reinterpret_cast<const wchar_t*>(tmp.utf16()), tmp.size()), 0,
                          &breakpadDumpCallback, 0, ExceptionHandler::HANDLER_ALL);
 }
-
-#elif defined(Q_OS_MAC) || defined(Q_OS_LINUX)
-/* Shared code for Mac OS X and Linux */
+#elif defined(Q_OS_MAC)
+/* Platform-specific code for Mac OS X */
+#include "client/mac/handler/exception_handler.h"
 #include <limits.h>
 #include <unistd.h>
+#include <mach-o/dyld.h>
+
 static QByteArray executablePath;
 
 bool breakpadDumpCallback(const char *dump_path, const char *minidump_id, void *, bool succeeded)
@@ -103,11 +105,6 @@ bool breakpadDumpCallback(const char *dump_path, const char *minidump_id, void *
 #endif
 }
 
-#if defined(Q_OS_MAC)
-/* Platform-specific code for Mac OS X */
-#include "client/mac/handler/exception_handler.h"
-#include <mach-o/dyld.h>
-
 void initBreakpad()
 {
     quint32 size = 0;
@@ -123,7 +120,30 @@ void initBreakpad()
 #else
 /* Platform-specific code for Linux */
 #include "client/linux/handler/exception_handler.h"
+#include <client/linux/handler/minidump_descriptor.h>
+
 using namespace google_breakpad;
+
+static QByteArray executablePath;
+
+bool breakpadDumpCallback(const MinidumpDescriptor& descriptor, void *context, bool succeeded)
+{
+    Q_UNUSED(context)
+    char param[] = "--crash";
+
+    char dumpFile[PATH_MAX];
+    if (succeeded)
+        strcpy(dumpFile, descriptor.path());
+
+    char * const args[] = { (char*)executablePath.data(), param, succeeded ? dumpFile : 0, 0 };
+
+    execv(executablePath.constData(), args);
+#ifndef QT_NO_DEBUG
+    return false;
+#else
+    return true;
+#endif
+}
 
 void initBreakpad()
 {
@@ -132,8 +152,8 @@ void initBreakpad()
 
     QString tmp = QDesktopServices::storageLocation(QDesktopServices::TempLocation);
 
-    new ExceptionHandler(tmp.toStdString(), 0, &breakpadDumpCallback, 0, true);
+    MinidumpDescriptor dumpDescriptor(tmp.toStdString());
+    new ExceptionHandler(dumpDescriptor, 0, &breakpadDumpCallback, 0, true, -1);
 }
 
 #endif /* !defined(Q_OS_MAC) */
-#endif /* defined(Q_OS_MAC) || defined(Q_OS_LINUX) */
