@@ -19,7 +19,7 @@ configure_file (src/bluecherry-config.h.in src/bluecherry-config.h)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/src)
 
 if (UNIX AND NOT APPLE)
-    set (CMAKE_CXX_FLAGS "-Werror -Wall -Wextra -Wundef -Wcast-align -Wpointer-arith -Woverloaded-virtual -Wnon-virtual-dtor ${CMAKE_CXX_FLAGS}")
+    set (CMAKE_CXX_FLAGS "-Werror -Wall -Wextra -Wundef -Wcast-align -Wpointer-arith -Woverloaded-virtual -Wnon-virtual-dtor -Wno-unused-local-typedefs ${CMAKE_CXX_FLAGS}")
 endif (UNIX AND NOT APPLE)
 
 add_executable (bluecherry-client WIN32 MACOSX_BUNDLE ${bluecherry_client_SRCS} src/main.cpp)

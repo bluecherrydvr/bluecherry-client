@@ -43,6 +43,7 @@ elseif (UNIX)
             ${CMAKE_BINARY_DIR}/bluecherry-client
         DEPENDS bluecherry-client
     )
+
 elseif (WIN32)
     set (CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} /DEBUG)
     list (APPEND CMAKE_INCLUDE_PATH ${WIN32_BREAKPAD_SRC_DIR})
@@ -51,3 +52,11 @@ endif (APPLE)
 list (APPEND bluecherry_client_LIBRARIES
     ${BREAKPADCLIENT_LIBRARIES_${CMAKE_BUILD_TYPE}}
 )
+
+#this has to ba added after appending breakpadclient libs
+if (UNIX)
+    FIND_PACKAGE ( Threads REQUIRED )
+    list (APPEND bluecherry_client_LIBRARIES
+        ${CMAKE_THREAD_LIBS_INIT}
+    )
+endif (UNIX)

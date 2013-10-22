@@ -14,7 +14,7 @@ Requirements:
 Breakpad is not available in standard installation. To install it use:
   mkdir -p ~/dev/
   cd ~/dev/
-  git clone https://github.com/vogel/bluecherry-client-scripts/
+  git clone https://github.com/pgalisz/bluecherry-client-scripts/
   chmod +x ./bluecherry-client-scripts/dependencies/build-breakpad.sh
   ./bluecherry-client-scripts/dependencies/build-breakpad.sh
 

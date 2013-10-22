@@ -34,6 +34,7 @@ if (UNIX AND NOT APPLE)
     set (GSTREAMER_PLUGIN_PREFIX "lib")
     set (GSTREAMER_PLUGIN_SUFFIX ".so")
     set (GSTREAMER_PLUGINS "gsttypefindfunctions:gstapp:gstdecodebin2:gstmatroska:gstffmpegcolorspace:gstcoreelements:gstffmpeg")
+
 endif (UNIX AND NOT APPLE)
 
 if (APPLE)
