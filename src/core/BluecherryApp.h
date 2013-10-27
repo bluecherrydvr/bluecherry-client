@@ -81,6 +81,8 @@ public:
 
     bool screensaverInhibited() const { return m_screensaverInhibited; }
 
+    void setLanguageController(const QSharedPointer<LanguageController> &controller);
+
     static QStringList absolutePaths(const QStringList &paths);
 
 public slots:

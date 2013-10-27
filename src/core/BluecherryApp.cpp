@@ -208,6 +208,11 @@ void BluecherryApp::sendSettingsChanged()
     setScreensaverInhibited(settings.value(QLatin1String("ui/disableScreensaver/always"), true).toBool());
 }
 
+void BluecherryApp::setLanguageController(const QSharedPointer<LanguageController> &controller)
+{
+    m_languageController = controller;
+}
+
 QNetworkAccessManager *BluecherryApp::createNam()
 {
     QNetworkAccessManager *n = new QNetworkAccessManager(this);
