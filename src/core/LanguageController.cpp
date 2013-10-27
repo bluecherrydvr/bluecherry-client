@@ -27,57 +27,68 @@ LanguageController::LanguageController()
 
 void LanguageController::setTranslationFilesPaths(const QStringList &paths)
 {
-    m_paths = paths;
+	m_paths = paths;
 }
 
 QMap<QString, QString> LanguageController::supportedLanguages()
 {
-    if (m_languages.isEmpty())
-        loadLanguages();
+	if (m_languages.isEmpty())
+		loadLanguages();
 
-    return m_languages;
+	return m_languages;
 }
 
 void LanguageController::loadLanguages()
 {
-    foreach (const QString &path, paths)
-    {
-        QDir tranlationsDir(path);
+	foreach (const QString &path, m_paths)
+	{
+		QDir tranlationsDir(path);
 
-        QStringList languagesFilter;
-        languagesFilter << "bluecherryclient_*.qm";
-        QStringList languages = tranlationsDir.entryList(languagesFilter, QDir::Files);
+		QStringList languagesFilter;
+		languagesFilter << QLatin1String("bluecherryclient_*.qm");
+		QStringList languages = tranlationsDir.entryList(languagesFilter, QDir::Files);
 
-        foreach (const QString &languageFile, languages)
-        {
-            QString localeCode = languageFile.remove(0, locale.indexOf('_') + 1);
-            localeCode.chop(3);
+		foreach (QString languageFile, languages)
+		{
+			QString localeCode = languageFile.remove(0, languageFile.indexOf(QLatin1Char('_')) + 1);
+			localeCode.chop(3);
 
-            QLocale locale(localeCode);
+			QLocale locale(localeCode);
 
-            QString localizedLanguageName = locale.nativeLanguageName();
+			QString localizedLanguageName = locale.nativeLanguageName();
 
-            m_languages.insert(localeCode, localizedLanguageName);
-        }
-    }
+			m_languages.insert(localeCode, localizedLanguageName);
+		}
+	}
 }
 
 void LanguageController::switchTranslator(QTranslator &translator, const QString &filename)
 {
-    qApp->removeTranslator(&translator);
+	qApp->removeTranslator(&translator);
 
-    if (translator.load(filename))
-        qApp->installTranslator(&translator);
+	if (translator.load(filename))
+		qApp->installTranslator(&translator);
 }
 
 void LanguageController::loadLanguage(const QString &languageCode)
 {
-    if (m_currentLanguageCode != languageCode && m_languages.contains(languageCode))
-    {
-        m_currentLanguageCode = languageCode;
-        QLocale locale = QLocale(m_currentLanguageCode);
-        QLocale::setDefault(locale);
-        switchTranslator(m_translator, QString("bluecherryclient_%1.qm").arg(m_currentLanguageCode));
-        switchTranslator(m_translatorQt, QString("qt_%1.qm").arg(m_currentLanguageCode));
-    }
+	if (m_languages.isEmpty())
+		loadLanguages();
+
+	if (m_currentLanguageCode != languageCode && m_languages.contains(languageCode))
+	{
+		m_currentLanguageCode = languageCode;
+		QLocale locale = QLocale(m_currentLanguageCode);
+		QLocale::setDefault(locale);
+		switchTranslator(m_appTranslator, QString(QLatin1String("bluecherryclient_%1.qm")).arg(m_currentLanguageCode));
+		switchTranslator(m_QtTranslator, QString(QLatin1String("qt_%1.qm")).arg(m_currentLanguageCode));
+	}
+}
+
+bool LanguageController::supportsLanguage(const QString &languageCode)
+{
+	if (m_languages.isEmpty())
+		loadLanguages();
+
+	return m_languages.contains(languageCode);
 }

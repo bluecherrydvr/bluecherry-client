@@ -32,12 +32,14 @@ public:
     QMap<QString, QString> supportedLanguages();
     void loadLanguage(const QString &languageCode);
 
+    bool supportsLanguage(const QString &languageCode);
+
 private:
     void loadLanguages();
     void switchTranslator(QTranslator &translator, const QString &filename);
 
     QStringList m_paths;
-    QMap<QString, QString> m_languages;
+    mutable QMap<QString, QString> m_languages;
     QString m_currentLanguageCode;
 
     QTranslator m_appTranslator;

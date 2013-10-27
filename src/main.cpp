@@ -17,16 +17,18 @@
 
 #include "bluecherry-config.h"
 #include "core/BluecherryApp.h"
+#include "core/LanguageController.h"
 #include "live-stream/LiveStream.h"
 #include "ui/MainWindow.h"
 #include "ui/CrashReportDialog.h"
 #include <QApplication>
-#include <QSettings>
-#include <QtPlugin>
-#include <QMessageBox>
 #include <QDateTime>
 #include <QGLFormat>
 #include <QImageReader>
+#include <QLocale>
+#include <QMessageBox>
+#include <QSettings>
+#include <QtPlugin>
 
 #ifdef Q_OS_WIN
 #include <utils/explorerstyle.h>
@@ -42,7 +44,7 @@ void initBreakpad();
 #endif
 
 const char *jpegFormatName = "jpeg";
-
+#include <QDebug>
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -62,11 +64,21 @@ int main(int argc, char *argv[])
     QSettings::setDefaultFormat(QSettings::IniFormat);
 #endif
 
+	QSharedPointer<LanguageController> languageController(new LanguageController);
+	languageController->setTranslationFilesPaths(BluecherryApp::absolutePaths(QStringList() << QLatin1String("translations")));
+	QString defaultLocale = QLocale::system().name(); // e.g. "de_DE"
+	if (!languageController->supportsLanguage(defaultLocale))
+		defaultLocale.truncate(defaultLocale.lastIndexOf(QLatin1Char('_'))); // e.g. "de"
+
+	QSettings settings;
+	QString languageCode = settings.value(QLatin1String("ui/main/language"), defaultLocale).toString();
+	languageController->loadLanguage(languageCode);
+
     {
         QStringList args = a.arguments();
         args.takeFirst();
         if (args.size() >= 1 && args[0] == QLatin1String("--crash"))
-        {
+		{
             CrashReportDialog dlg((args.size() >= 2) ? args[1] : QString());
             dlg.exec();
             if (dlg.result() != QDialog::Accepted)
@@ -80,7 +92,7 @@ int main(int argc, char *argv[])
 
     if (!QGLFormat::hasOpenGL())
     {
-        QMessageBox::critical(0, a.translate("@default", "Error"), a.translate("@default", "This application is designed to utilize OpenGL "
+		QMessageBox::critical(0, a.translate("@default", "Error"), a.translate("@default", "This application is designed to utilize OpenGL "
                                                     "acceleration, which is not supported by your system. "
                                                     "The application may not function correctly.\n\n"
                                                     "For help, contact support@bluecherrydvr.com."),
@@ -88,6 +100,7 @@ int main(int argc, char *argv[])
     }
 
     bcApp = new BluecherryApp;
+	bcApp->setLanguageController(languageController);
 
     if (QImageReader::supportedImageFormats().contains("jpeg-turbo"))
     {
