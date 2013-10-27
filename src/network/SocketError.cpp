@@ -6,45 +6,45 @@ QString SocketError::toString(QAbstractSocket::SocketError socketError)
     switch (socketError)
     {
     case QAbstractSocket::ConnectionRefusedError:
-        return qApp->tr("Connection refused");
+        return qApp->translate("@default" ,"Connection refused");
     case QAbstractSocket::RemoteHostClosedError:
-        return qApp->tr("Remote host closed connection");
+        return qApp->translate("@default" ,"Remote host closed connection");
     case QAbstractSocket::HostNotFoundError:
-        return qApp->tr("Host not found");
+        return qApp->translate("@default" ,"Host not found");
     case QAbstractSocket::SocketAccessError:
-        return qApp->tr("Socket access error");
+        return qApp->translate("@default" ,"Socket access error");
     case QAbstractSocket::SocketResourceError:
-        return qApp->tr("Socket resource error");
+        return qApp->translate("@default" ,"Socket resource error");
     case QAbstractSocket::SocketTimeoutError:
-        return qApp->tr("Socket operation timed out");
+        return qApp->translate("@default" ,"Socket operation timed out");
     case QAbstractSocket::DatagramTooLargeError:
-        return qApp->tr("Datagram too large");
+        return qApp->translate("@default" ,"Datagram too large");
     case QAbstractSocket::NetworkError:
-        return qApp->tr("Network error");
+        return qApp->translate("@default" ,"Network error");
     case QAbstractSocket::AddressInUseError:
-        return qApp->tr("Address already in use");
+        return qApp->translate("@default" ,"Address already in use");
     case QAbstractSocket::SocketAddressNotAvailableError:
-        return qApp->tr("Socket address not available");
+        return qApp->translate("@default" ,"Socket address not available");
     case QAbstractSocket::UnsupportedSocketOperationError:
-        return qApp->tr("Unsupported socket operation");
+        return qApp->translate("@default" ,"Unsupported socket operation");
     case QAbstractSocket::ProxyAuthenticationRequiredError:
-        return qApp->tr("Proxy authentication required");
+        return qApp->translate("@default" ,"Proxy authentication required");
     case QAbstractSocket::SslHandshakeFailedError:
-        return qApp->tr("SSL handshake failed");
+        return qApp->translate("@default" ,"SSL handshake failed");
     case QAbstractSocket::UnfinishedSocketOperationError:
-        return qApp->tr("Unfinished socket operation");
+        return qApp->translate("@default" ,"Unfinished socket operation");
     case QAbstractSocket::ProxyConnectionRefusedError:
-        return qApp->tr("Proxy connection refused");
+        return qApp->translate("@default" ,"Proxy connection refused");
     case QAbstractSocket::ProxyConnectionClosedError:
-        return qApp->tr("Proxy connection closed");
+        return qApp->translate("@default" ,"Proxy connection closed");
     case QAbstractSocket::ProxyConnectionTimeoutError:
-        return qApp->tr("Proxy connection timeout");
+        return qApp->translate("@default" ,"Proxy connection timeout");
     case QAbstractSocket::ProxyNotFoundError:
-        return qApp->tr("Proxy not found");
+        return qApp->translate("@default" ,"Proxy not found");
     case QAbstractSocket::ProxyProtocolError:
-        return qApp->tr("Proxy error");
+        return qApp->translate("@default" ,"Proxy error");
     case QAbstractSocket::UnknownSocketError:
     default:
-        return qApp->tr("Unknown error");
+        return qApp->translate("@default" ,"Unknown error");
     }
 }
