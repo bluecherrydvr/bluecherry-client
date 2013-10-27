@@ -22,6 +22,7 @@
 #include <QList>
 #include <QIcon>
 #include <QSessionManager>
+#include "core/LanguageController.h"
 #include "core/TransferRateCalculator.h"
 #include "core/Version.h"
 
@@ -68,6 +69,7 @@ public:
     VideoPlayerFactory * videoPlayerFactory() const { return m_videoPlayerFactory.data(); }
     GstWrapper * gstWrapper() const { return m_gstWrapper.data(); }
     GstPluginLoader * gstPluginLoader() const { return m_gstPluginLoader.data(); }
+    LanguageController * languageController() const { return m_languageController.data(); }
 
     /* Temporarily pause live feeds to free up bandwidth for other intensive transfers
      * (particularly event video buffering). The live feed can be paused with pauseLive(),
@@ -78,6 +80,8 @@ public:
     void sendSettingsChanged();
 
     bool screensaverInhibited() const { return m_screensaverInhibited; }
+
+    static QStringList absolutePaths(const QStringList &paths);
 
 public slots:
     void pauseLive();
@@ -109,6 +113,8 @@ private:
     QScopedPointer<GstWrapper> m_gstWrapper;
     QScopedPointer<GstPluginLoader> m_gstPluginLoader;
 
+    QSharedPointer<LanguageController> m_languageController;
+
     bool m_livePaused, m_inPauseQuery, m_screensaverInhibited;
 #ifdef Q_OS_WIN
     int m_screensaveValue;
@@ -124,7 +130,6 @@ private:
 
     void registerGstWrapper();
     void unregisterGstWrapper();
-    QStringList absolutePaths(const QStringList &paths);
 
     void loadServers();
     bool shouldAddLocalServer() const;
