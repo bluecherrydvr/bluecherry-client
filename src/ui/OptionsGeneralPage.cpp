@@ -18,10 +18,13 @@
 #include "OptionsGeneralPage.h"
 #include "MainWindow.h"
 #include "core/BluecherryApp.h"
-#include <QCheckBox>
 #include <QBoxLayout>
+#include <QCheckBox>
+#include <QComboBox>
 #include <QGridLayout>
 #include <QGroupBox>
+#include <QFormLayout>
+#include <QLabel>
 #include <QSettings>
 #include <QSystemTrayIcon>
 
@@ -31,6 +34,14 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     QBoxLayout *layout = new QVBoxLayout(this);
 
     QSettings settings;
+
+	QFormLayout *languagesLayout = new QFormLayout();
+	m_languages = new QComboBox();
+	fillLanguageComboBox();
+	m_languages->setCurrentIndex(m_languages->findData(bcApp->languageController()->currentLanguage()));
+	languagesLayout->addRow(new QLabel(tr("Language:")), m_languages);
+
+	layout->addLayout(languagesLayout);
 
     m_closeToTray = new QCheckBox(tr("Close to tray"));
     m_closeToTray->setChecked(settings.value(QLatin1String("ui/main/closeToTray"), false).toBool());
@@ -103,7 +114,14 @@ void OptionsGeneralPage::ssUpdateForNever()
 void OptionsGeneralPage::ssUpdateForOthers(bool checked)
 {
     if (!checked && m_ssNever->isChecked())
-        m_ssNever->setChecked(false);
+		m_ssNever->setChecked(false);
+}
+
+void OptionsGeneralPage::fillLanguageComboBox()
+{
+	QMap<QString, QString> supportedLanguages = bcApp->languageController()->supportedLanguages();
+	for (QMap<QString, QString>::const_iterator it = supportedLanguages.constBegin(), end = supportedLanguages.constEnd(); it != end; ++it)
+		m_languages->addItem(it.value(), it.key());
 }
 
 void OptionsGeneralPage::saveChanges()
@@ -111,6 +129,7 @@ void OptionsGeneralPage::saveChanges()
     QSettings settings;
     settings.setValue(QLatin1String("eventPlayer/pauseLive"), m_eventsPauseLive->isChecked());
     bcApp->releaseLive();
+	settings.setValue(QLatin1String("ui/main/language"), m_languages->itemData(m_languages->currentIndex()));
     settings.setValue(QLatin1String("ui/main/closeToTray"), m_closeToTray->isChecked());
     bcApp->mainWindow->updateTrayIcon();
     settings.setValue(QLatin1String("ui/liveview/disableHardwareAcceleration"), !m_liveHwAccel->isChecked());
