@@ -25,25 +25,27 @@
 class LanguageController
 {
 public:
-    LanguageController();
+	LanguageController();
 
-    void setTranslationFilesPaths(const QStringList &paths);
+	void setTranslationFilesPaths(const QStringList &paths);
 
-    QMap<QString, QString> supportedLanguages();
-    void loadLanguage(const QString &languageCode);
+	QMap<QString, QString> supportedLanguages();
+	void loadLanguage(const QString &languageCode);
 
-    bool supportsLanguage(const QString &languageCode);
+	bool supportsLanguage(const QString &languageCode);
+
+	QString currentLanguage() const { return m_currentLanguageCode; }
 
 private:
-    void loadLanguages();
-    void switchTranslator(QTranslator &translator, const QString &filename);
+	void loadLanguages();
+	void switchTranslator(QTranslator &translator, const QString &filename);
 
-    QStringList m_paths;
-    mutable QMap<QString, QString> m_languages;
-    QString m_currentLanguageCode;
+	QStringList m_paths;
+	mutable QMap<QString, QString> m_languages;
+	QString m_currentLanguageCode;
 
-    QTranslator m_appTranslator;
-    QTranslator m_QtTranslator;
+	QTranslator m_appTranslator;
+	QTranslator m_QtTranslator;
 
 };
 
