@@ -34,6 +34,7 @@ private slots:
     void updateAlert();
 
 protected:
+	virtual void changeEvent(QEvent *event);
     virtual void mousePressEvent(QMouseEvent *);
 
 private:

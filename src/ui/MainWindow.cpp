@@ -67,8 +67,7 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
             this, SLOT(showDownloadsWindow()));
 
     setUnifiedTitleAndToolBarOnMac(true);
-    setWindowTitle(tr("Bluecherry"));
-    resize(1100, 750);
+	resize(1100, 750);
     createMenu();
     updateTrayIcon();
 
@@ -86,8 +85,8 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
     m_mainToolbar->setMovable(false);
     m_mainToolbar->setIconSize(QSize(16, 16));
     m_mainToolbar->addAction(QIcon(QLatin1String(":/icons/cassette.png")), tr("Events"), this, SLOT(showEventsWindow()));
-    QAction *expandAllServersAction = m_mainToolbar->addAction(QIcon(QLatin1String(":/icons/expand-all.png")), tr("Expand All Servers"));
-    QAction *collapseAllServersAction = m_mainToolbar->addAction(QIcon(QLatin1String(":/icons/collapse-all.png")), tr("Collapse All Servers"));
+	m_expandAllServersAction = m_mainToolbar->addAction(QIcon(QLatin1String(":/icons/expand-all.png")), tr("Expand All Servers"));
+	m_collapseAllServersAction = m_mainToolbar->addAction(QIcon(QLatin1String(":/icons/collapse-all.png")), tr("Collapse All Servers"));
     addToolBar(Qt::TopToolBarArea, m_mainToolbar);
 
     /* Splitters */
@@ -172,8 +171,10 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
 
     m_sourcesList->setFocus(Qt::OtherFocusReason);
 
-    connect(expandAllServersAction, SIGNAL(triggered()), m_sourcesList, SLOT(expandAll()));
-    connect(collapseAllServersAction, SIGNAL(triggered()), m_sourcesList, SLOT(collapseAll()));
+	connect(m_expandAllServersAction, SIGNAL(triggered()), m_sourcesList, SLOT(expandAll()));
+	connect(m_collapseAllServersAction, SIGNAL(triggered()), m_sourcesList, SLOT(collapseAll()));
+
+	retranslateUI();
 }
 
 MainWindow::~MainWindow()
@@ -252,12 +253,12 @@ void MainWindow::updateTrayIcon()
     else
     {
         m_trayIcon = new QSystemTrayIcon(windowIcon(), this);
-        m_trayIcon->setToolTip(tr("Bluecherry Client"));
+		m_trayIcon->setToolTip(tr("Bluecherry Client"));
 
-        QMenu *menu = new QMenu(this);
-        menu->setDefaultAction(menu->addAction(tr("Open Bluecherry Client"), this, SLOT(showFront())));
-        menu->addAction(tr("Quit"), qApp, SLOT(quit()));
-        m_trayIcon->setContextMenu(menu);
+		QMenu *menu = new QMenu(this);
+		menu->setDefaultAction(menu->addAction(tr("Open Bluecherry Client"), this, SLOT(showFront())));
+		menu->addAction(tr("Quit"), qApp, SLOT(quit()));
+		m_trayIcon->setContextMenu(menu);
 
         connect(m_trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
                 SLOT(trayActivated(QSystemTrayIcon::ActivationReason)));
@@ -298,41 +299,48 @@ void MainWindow::showDownloadsWindow()
 
 void MainWindow::createMenu()
 {
-    QMenu *appMenu = menuBar()->addMenu(tr("&Bluecherry"));
-    appMenu->addAction(tr("Browse &events"), this, SLOT(showEventsWindow()));
-    appMenu->addAction(tr("Show &download manager"), this, SLOT(showDownloadsWindow()));
-    appMenu->addSeparator();
-    appMenu->addAction(tr("Add another server"), this, SLOT(addServer()));
-    appMenu->addAction(tr("&Options"), this, SLOT(showOptionsDialog()));
-    appMenu->addSeparator();
-    appMenu->addAction(tr("&Quit"), qApp, SLOT(quit()));
+	m_appMenu = menuBar()->addMenu(tr("&Bluecherry"));
+	m_browseEventsAction = m_appMenu->addAction(tr("Browse &events"), this, SLOT(showEventsWindow()));
+	m_downloadManagerAction = m_appMenu->addAction(tr("Show &download manager"), this, SLOT(showDownloadsWindow()));
+	m_appMenu->addSeparator();
+	m_addServerAction = m_appMenu->addAction(tr("Add another server"), this, SLOT(addServer()));
+	m_optionsAction = m_appMenu->addAction(tr("&Options"), this, SLOT(showOptionsDialog()));
+	m_appMenu->addSeparator();
+	m_quitAction = m_appMenu->addAction(tr("&Quit"), qApp, SLOT(quit()));
 
     m_serversMenu = menuBar()->addMenu(QString());
     updateServersMenu();
 
+	m_liveMenu = menuBar()->addMenu(tr("&Live"));
+	updateLiveMenu();
+
     connect(m_serverRepository, SIGNAL(serverAdded(DVRServer*)), SLOT(updateServersMenu()));
     connect(m_serverRepository, SIGNAL(serverRemoved(DVRServer*)), SLOT(updateServersMenu()));
 
-    QMenu *liveMenu = menuBar()->addMenu(tr("&Live"));
-    liveMenu->addAction(tr("New window"), this, SLOT(openLiveWindow()));
-    liveMenu->addSeparator();
-    liveMenu->setObjectName(QLatin1String("globalLiveMenu"));
-
-    QList<QAction*> fpsActions = bcApp->liveView->bandwidthActions(bcApp->liveView->bandwidthMode(),
-                                                                   bcApp->liveView,
-                                                                   SLOT(setBandwidthModeFromAction()));
-    foreach (QAction *a, fpsActions)
-        a->setParent(liveMenu);
-    liveMenu->addActions(fpsActions);
-
     connect(bcApp->liveView, SIGNAL(bandwidthModeChanged(int)), SLOT(bandwidthModeChanged(int)));
 
-    QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
-    helpMenu->addAction(tr("&Documentation"), this, SLOT(openDocumentation()));
-    helpMenu->addAction(tr("Bluecherry &support"), this, SLOT(openSupport()));
-    helpMenu->addAction(tr("Suggest a &feature"), this, SLOT(openIdeas()));
-    helpMenu->addSeparator();
-    helpMenu->addAction(tr("&About Bluecherry"), this, SLOT(openAbout()));
+	m_helpMenu = menuBar()->addMenu(tr("&Help"));
+	m_documentationAction = m_helpMenu->addAction(tr("&Documentation"), this, SLOT(openDocumentation()));
+	m_supportAction = m_helpMenu->addAction(tr("Bluecherry &support"), this, SLOT(openSupport()));
+	m_suggestionsAction = m_helpMenu->addAction(tr("Suggest a &feature"), this, SLOT(openIdeas()));
+	m_helpMenu->addSeparator();
+	m_aboutAction = m_helpMenu->addAction(tr("&About Bluecherry"), this, SLOT(openAbout()));
+}
+
+void MainWindow::updateLiveMenu()
+{
+	m_liveMenu->clear();
+
+	m_newWindowAction = m_liveMenu->addAction(tr("New window"), this, SLOT(openLiveWindow()));
+	m_liveMenu->addSeparator();
+	m_liveMenu->setObjectName(QLatin1String("globalLiveMenu"));
+
+	QList<QAction*> fpsActions = bcApp->liveView->bandwidthActions(bcApp->liveView->bandwidthMode(),
+																   bcApp->liveView,
+																   SLOT(setBandwidthModeFromAction()));
+	foreach (QAction *a, fpsActions)
+		a->setParent(m_liveMenu);
+	m_liveMenu->addActions(fpsActions);
 }
 
 QMenu *MainWindow::serverMenu(DVRServer *server)
@@ -490,6 +498,33 @@ QWidget *MainWindow::createRecentEvents()
 
 void MainWindow::retranslateUI()
 {
+	setWindowTitle(tr("Bluecherry"));
+
+	m_mainToolbar->setWindowTitle(tr("Main"));
+	m_expandAllServersAction->setText(tr("Expand All Servers"));
+	m_collapseAllServersAction->setText(tr("Collapse All Servers"));
+
+	m_appMenu->setTitle(tr("&Bluecherry"));
+	m_browseEventsAction->setText(tr("Browse &events"));
+	m_downloadManagerAction->setText(tr("Show &download manager"));
+	m_addServerAction->setText(tr("Add another server"));
+	m_optionsAction->setText(tr("&Options"));
+	m_quitAction->setText(tr("&Quit"));
+
+	m_liveMenu->setTitle(tr("&Live"));
+	m_newWindowAction->setText(tr("New window"));
+
+	m_helpMenu->setTitle(tr("&Help"));
+	m_documentationAction->setText(tr("&Documentation"));
+	m_supportAction->setText(tr("Bluecherry &support"));
+	m_suggestionsAction->setText(tr("Suggest a &feature"));
+	m_aboutAction->setText(tr("&About Bluecherry"));
+
+	updateLiveMenu();
+
+	updateServersMenu();
+
+	updateTrayIcon();
 }
 
 void MainWindow::showOptionsDialog()

@@ -44,6 +44,9 @@ public slots:
 signals:
     void serverChanged(DVRServer *server);
 
+protected:
+	virtual void changeEvent(QEvent *event);
+
 private:
     static ServerConfigWindow *m_instance;
 
