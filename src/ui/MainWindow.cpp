@@ -457,16 +457,6 @@ QWidget *MainWindow::createSourcesList()
     return m_sourcesList;
 }
 
-QWidget *MainWindow::createServerBox()
-{
-    QGroupBox *box = new QGroupBox(tr("Server Information"));
-
-    /* Placeholder */
-    box->setMinimumHeight(200);
-
-    return box;
-}
-
 QWidget *MainWindow::createRecentEvents()
 {
     m_eventsView = new EventsView;
@@ -495,7 +485,11 @@ QWidget *MainWindow::createRecentEvents()
     connect(m_eventsView, SIGNAL(doubleClicked(QModelIndex)), m_eventsView, SLOT(openEvent(QModelIndex)));
     connect(m_eventsView, SIGNAL(customContextMenuRequested(QPoint)), SLOT(eventsContextMenu(QPoint)));
 
-    return m_eventsView;
+	return m_eventsView;
+}
+
+void MainWindow::retranslateUI()
+{
 }
 
 void MainWindow::showOptionsDialog()
@@ -758,4 +752,13 @@ void MainWindow::serverDevicesLoaded()
             ServerConfigWindow::instance()->raise();
         }
     }
+}
+
+
+void MainWindow::changeEvent(QEvent *event)
+{
+	if (event && event->type() == QEvent::LanguageChange)
+		retranslateUI();
+
+	QWidget::changeEvent(event);
 }

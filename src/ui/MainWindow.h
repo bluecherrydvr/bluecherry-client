@@ -84,6 +84,7 @@ signals:
     void closing();
 
 protected:
+	virtual void changeEvent(QEvent *event);
     virtual void showEvent(QShowEvent *event);
     virtual void hideEvent(QHideEvent *event);
     virtual void closeEvent(QCloseEvent *event);
@@ -106,9 +107,10 @@ private:
     void createMenu();
 
     QWidget *createSourcesList();
-    QWidget *createServerBox();
 
     QWidget *createRecentEvents();
+
+	void retranslateUI();
 };
 
 #endif // MAINWINDOW_H
