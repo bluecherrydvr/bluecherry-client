@@ -44,7 +44,7 @@ void initBreakpad();
 #endif
 
 const char *jpegFormatName = "jpeg";
-#include <QDebug>
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -65,7 +65,9 @@ int main(int argc, char *argv[])
 #endif
 
 	QSharedPointer<LanguageController> languageController(new LanguageController);
-	languageController->setTranslationFilesPaths(BluecherryApp::absolutePaths(QStringList() << QLatin1String("translations")));
+	QStringList translationPaths;
+	translationPaths << QLatin1String("/../share/bluecherry-client/translations") << QLatin1String("./") << QLatin1String("./translations") << QLatin1String("/../Resources/translations");
+	languageController->setTranslationFilesPaths(BluecherryApp::absolutePaths(translationPaths));
 	QString defaultLocale = QLocale::system().name(); // e.g. "de_DE"
 	if (!languageController->supportsLanguage(defaultLocale))
 		defaultLocale.truncate(defaultLocale.lastIndexOf(QLatin1Char('_'))); // e.g. "de"

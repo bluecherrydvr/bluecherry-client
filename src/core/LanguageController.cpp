@@ -18,6 +18,7 @@
 #include "LanguageController.h"
 
 #include <QApplication>
+#include <QDebug>
 #include <QDir>
 #include <QLocale>
 

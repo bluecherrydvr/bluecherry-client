@@ -76,5 +76,6 @@ if (APPLE)
 endif (APPLE)
 
 include (cmake/build.cmake)
+include (cmake/translations.cmake)
 include (cmake/install.cmake)
 include (cmake/display-status.cmake)
