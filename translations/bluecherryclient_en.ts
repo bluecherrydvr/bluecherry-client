@@ -1091,6 +1091,10 @@ For help, contact support@bluecherrydvr.com.</source>
         <source>Prevent the computer from going to sleep when...</source>
         <translation>Prevent the computer from going to sleep when...</translation>
     </message>
+    <message>
+        <source>Language:</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>OptionsServerPage</name>
