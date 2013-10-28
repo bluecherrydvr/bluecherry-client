@@ -130,6 +130,7 @@ void OptionsGeneralPage::saveChanges()
     settings.setValue(QLatin1String("eventPlayer/pauseLive"), m_eventsPauseLive->isChecked());
     bcApp->releaseLive();
 	settings.setValue(QLatin1String("ui/main/language"), m_languages->itemData(m_languages->currentIndex()));
+	bcApp->languageController()->loadLanguage(m_languages->itemData(m_languages->currentIndex()).toString());
     settings.setValue(QLatin1String("ui/main/closeToTray"), m_closeToTray->isChecked());
     bcApp->mainWindow->updateTrayIcon();
     settings.setValue(QLatin1String("ui/liveview/disableHardwareAcceleration"), !m_liveHwAccel->isChecked());

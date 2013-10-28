@@ -16,6 +16,7 @@
  */
 
 #include "AboutDialog.h"
+#include <QEvent>
 #include <QGridLayout>
 #include <QTextBrowser>
 #include <QLabel>
@@ -25,7 +26,6 @@
 AboutDialog::AboutDialog(QWidget *parent)
     : QDialog(parent)
 {
-    setWindowTitle(tr("Bluecherry Client - About"));
     setFixedSize(500, 400);
     setModal(true);
 
@@ -37,15 +37,14 @@ AboutDialog::AboutDialog(QWidget *parent)
     logo->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     layout->addWidget(logo, 0, 0);
 
-    QLabel *text = new QLabel;
-    text->setText(tr("Bluecherry DVR Client<br>Version %1").arg(QApplication::applicationVersion()));
-    text->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
+	m_versionText = new QLabel;
+	m_versionText->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
 
-    QFont font = text->font();
+	QFont font = m_versionText->font();
     font.setPixelSize(15);
-    text->setFont(font);
+	m_versionText->setFont(font);
 
-    layout->addWidget(text, 0, 1);
+	layout->addWidget(m_versionText, 0, 1);
     layout->setColumnStretch(1, 1);
 
     QTextBrowser *license = new QTextBrowser;
@@ -60,7 +59,18 @@ AboutDialog::AboutDialog(QWidget *parent)
     font.setStyleHint(QFont::SansSerif);
     font.setPixelSize(13);
     license->setFont(font);
+
+	retranslateUI();
 }
+
+void AboutDialog::changeEvent(QEvent *event)
+{
+	if (event && event->type() == QEvent::LanguageChange)
+		retranslateUI();
+
+	QDialog::changeEvent(event);
+}
+
 
 QString AboutDialog::getLicenseText() const
 {
@@ -68,5 +78,11 @@ QString AboutDialog::getLicenseText() const
     if (!file.open(QIODevice::ReadOnly))
         return QString();
 
-    return QString::fromUtf8(file.readAll());
+	return QString::fromUtf8(file.readAll());
+}
+
+void AboutDialog::retranslateUI()
+{
+	setWindowTitle(tr("Bluecherry Client - About"));
+	m_versionText->setText(tr("Bluecherry DVR Client<br>Version %1").arg(QApplication::applicationVersion()));
 }

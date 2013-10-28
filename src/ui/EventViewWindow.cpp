@@ -47,7 +47,6 @@
 EventViewWindow::EventViewWindow(QWidget *parent)
     : QWidget(parent, Qt::Window)
 {
-    setWindowTitle(tr("Bluecherry - Event Playback"));
     resize(590, 380);
 
     QBoxLayout *layout = new QVBoxLayout(this);
@@ -89,6 +88,8 @@ EventViewWindow::EventViewWindow(QWidget *parent)
     if (!m_splitter->restoreState(settings.value(QLatin1String("ui/eventView/splitState2")).toByteArray()))
         m_splitter->setSizes(QList<int>() << 1000 << 160);
 #endif
+
+	retranslateUI();
 }
 
 EventViewWindow *EventViewWindow::open(const EventData &event, EventsCursor *eventsCursor)
@@ -169,7 +170,15 @@ void EventViewWindow::setEventsCursor(EventsCursor *eventsCursor)
     if (m_eventsCursor.data())
         connect(m_eventsCursor.data(), SIGNAL(eventSwitched(EventData*)), this, SLOT(setEvent(EventData*)));
 
-    m_switchEventsWidget->setEventsCursor(m_eventsCursor);
+	m_switchEventsWidget->setEventsCursor(m_eventsCursor);
+}
+
+void EventViewWindow::changeEvent(QEvent *event)
+{
+	if (event && event->type() == QEvent::LanguageChange)
+		retranslateUI();
+
+	QWidget::changeEvent(event);
 }
 
 QWidget *EventViewWindow::createInfoArea()
@@ -257,7 +266,12 @@ QWidget *EventViewWindow::createInfoArea()
 QWidget *EventViewWindow::createPlaybackArea()
 {
     m_videoPlayer = new EventVideoPlayer;
-    return m_videoPlayer;
+	return m_videoPlayer;
+}
+
+void EventViewWindow::retranslateUI()
+{
+	setWindowTitle(tr("Bluecherry - Event Playback"));
 }
 
 void EventViewWindow::commentInputChanged()

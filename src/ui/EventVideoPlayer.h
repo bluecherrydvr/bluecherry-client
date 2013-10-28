@@ -53,6 +53,9 @@ public slots:
     void faster();
     void slower();
 
+protected:
+	virtual void changeEvent(QEvent *event);
+
 private slots:
     void stateChanged(int state);
     void durationChanged(qint64 duration = -1);
@@ -83,6 +86,7 @@ private:
 
     void setControlsEnabled(bool enabled);
     bool uiRefreshNeeded() const;
+	void retranslateUI();
 };
 
 #endif // EVENTVIDEOPLAYER_H

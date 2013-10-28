@@ -153,7 +153,7 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
 
     btnLayout->addStretch();
 
-    m_saveBtn = new QPushButton(tr("Save"));
+	m_saveBtn = new QPushButton;
     btnLayout->addWidget(m_saveBtn);
     connect(m_saveBtn, SIGNAL(clicked()), SLOT(saveVideo()));
 
@@ -356,7 +356,15 @@ void EventVideoPlayer::slower()
     speed = qBound(playbackRates[0], speed, playbackRates[playbackRateCount-1]);
 
     m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "setSpeed", Qt::QueuedConnection,
-                                        Q_ARG(double, speed));
+													  Q_ARG(double, speed));
+}
+
+void EventVideoPlayer::changeEvent(QEvent *event)
+{
+	if (event && event->type() == QEvent::LanguageChange)
+		retranslateUI();
+
+	QWidget::changeEvent(event);
 }
 
 void EventVideoPlayer::queryLivePaused()
@@ -372,7 +380,13 @@ void EventVideoPlayer::queryLivePaused()
 
 bool EventVideoPlayer::uiRefreshNeeded() const
 {
-    return m_videoBackend && (m_videoBackend.data()->videoBuffer()) && (m_videoBackend.data()->videoBuffer()->isBuffering() || m_videoBackend.data()->state() == VideoPlayerBackend::Playing);
+	return m_videoBackend && (m_videoBackend.data()->videoBuffer()) && (m_videoBackend.data()->videoBuffer()->isBuffering() || m_videoBackend.data()->state() == VideoPlayerBackend::Playing);
+}
+
+void EventVideoPlayer::retranslateUI()
+{
+	m_saveBtn->setText(tr("Save"));
+	updateBufferStatus();
 }
 
 void EventVideoPlayer::updateUI()

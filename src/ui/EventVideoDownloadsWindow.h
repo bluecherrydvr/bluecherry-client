@@ -36,6 +36,9 @@ public:
 
     void setEventDownloadManager(EventDownloadManager *eventDownloadManager);
 
+protected:
+	virtual void changeEvent(QEvent *event);
+
 private slots:
     void eventVideoDownloadAdded(EventVideoDownload *eventVideoDownload);
     void eventVideoDownloadRemoved(EventVideoDownload *eventVideoDownload);

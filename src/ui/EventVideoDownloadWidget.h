@@ -33,6 +33,9 @@ public:
     explicit EventVideoDownloadWidget(EventVideoDownload *eventVideoDownload, QWidget *parent = 0);
     virtual ~EventVideoDownloadWidget();
 
+protected:
+	virtual void changeEvent(QEvent *event);
+
 private slots:
     void closeClicked();
     void updateProgress();
@@ -43,6 +46,8 @@ private:
     QProgressBar *m_progressBar;
     QLabel *m_progressLabel;
     QTimer *m_progressTimer;
+
+	void retranslateUI();
 };
 
 #endif // EVENTVIDEODOWNLOADWIDGET_H

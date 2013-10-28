@@ -42,7 +42,6 @@ static const char * const reportUrl = "http://crashdump.bluecherrydvr.com/report
 CrashReportDialog::CrashReportDialog(const QString &dumpFile, QWidget *parent)
     : QDialog(parent), m_dumpFile(dumpFile), m_uploadReply(0), m_finalResult(QDialog::Accepted)
 {
-    setWindowTitle(tr("Bluecherry - Report Crash"));
     setFixedSize(430, 270);
 
     QBoxLayout *mainLayout = new QVBoxLayout(this);
@@ -54,10 +53,10 @@ CrashReportDialog::CrashReportDialog(const QString &dumpFile, QWidget *parent)
     icon->setPixmap(style()->standardPixmap(QStyle::SP_MessageBoxCritical));
     topLayout->addWidget(icon, 0, Qt::AlignLeft | Qt::AlignVCenter);
 
-    QLabel *title = new QLabel(tr("The Bluecherry client crashed!"));
-    title->setStyleSheet(QLatin1String("font-size:16px;color:#003399;"));
-    title->setAlignment(Qt::AlignCenter);
-    topLayout->addWidget(title, 1, Qt::AlignCenter);
+	m_titleLabel = new QLabel();
+	m_titleLabel->setStyleSheet(QLatin1String("font-size:16px;color:#003399;"));
+	m_titleLabel->setAlignment(Qt::AlignCenter);
+	topLayout->addWidget(m_titleLabel, 1, Qt::AlignCenter);
 
     m_stackLayout = new QStackedLayout(mainLayout);
 
@@ -68,7 +67,7 @@ CrashReportDialog::CrashReportDialog(const QString &dumpFile, QWidget *parent)
 
     layout->addStretch();
 
-    m_allowReport = new QCheckBox(tr("Send an automatic crash report"));
+	m_allowReport = new QCheckBox;
     m_allowReport->setChecked(true);
     m_allowReport->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_allowReport, SIGNAL(customContextMenuRequested(QPoint)), SLOT(reportContextMenu(QPoint)));
@@ -77,27 +76,27 @@ CrashReportDialog::CrashReportDialog(const QString &dumpFile, QWidget *parent)
     QBoxLayout *emailLayout = new QHBoxLayout;
     layout->addLayout(emailLayout);
 
-    QLabel *label = new QLabel(tr("Email:"));
-    emailLayout->addWidget(label);
+	m_emailLabel = new QLabel;
+	emailLayout->addWidget(m_emailLabel);
 
     m_emailInput = new QLineEdit;
     emailLayout->addWidget(m_emailInput);
 
-    label = new QLabel(tr("If you enter your email address, we will update you on our progress with this bug"));
-    label->setStyleSheet(QLatin1String("color:#606060;font-size:9px"));
-    label->setWordWrap(true);
-    label->setAlignment(Qt::AlignRight | Qt::AlignTop);
-    layout->addWidget(label);
+	m_emailInformationLabel= new QLabel;
+	m_emailInformationLabel->setStyleSheet(QLatin1String("color:#606060;font-size:9px"));
+	m_emailInformationLabel->setWordWrap(true);
+	m_emailInformationLabel->setAlignment(Qt::AlignRight | Qt::AlignTop);
+	layout->addWidget(m_emailInformationLabel);
 
     layout->addStretch();
     layout->addSpacing(15);
 
-    QCommandLinkButton *restartBtn = new QCommandLinkButton(tr("Restart Client"));
+	QCommandLinkButton *restartBtn = new QCommandLinkButton;
     restartBtn->setDefault(true);
     connect(restartBtn, SIGNAL(clicked()), SLOT(uploadAndRestart()));
     layout->addWidget(restartBtn);
 
-    QCommandLinkButton *exitBtn = new QCommandLinkButton(tr("Exit"));
+	QCommandLinkButton *exitBtn = new QCommandLinkButton;
     connect(exitBtn, SIGNAL(clicked()), SLOT(uploadAndExit()));
     layout->addWidget(exitBtn);
 
@@ -109,8 +108,8 @@ CrashReportDialog::CrashReportDialog(const QString &dumpFile, QWidget *parent)
     uploadLayout->setMargin(0);
     uploadLayout->addStretch();
 
-    label = new QLabel(tr("Sending crash report..."));
-    uploadLayout->addWidget(label);
+	m_progressLabel = new QLabel;
+	uploadLayout->addWidget(m_progressLabel);
 
     m_uploadProgress = new QProgressBar;
     m_uploadProgress->setTextVisible(false);
@@ -120,6 +119,8 @@ CrashReportDialog::CrashReportDialog(const QString &dumpFile, QWidget *parent)
 
     QDialogButtonBox *btn = new QDialogButtonBox(QDialogButtonBox::Cancel, Qt::Horizontal);
     uploadLayout->addWidget(btn);
+
+	retranslateUI();
 }
 
 CrashReportDialog::~CrashReportDialog()
@@ -163,7 +164,15 @@ void CrashReportDialog::saveCrashReport()
         QFile::remove(path);
 
     if (!m_dumpFile.copy(path))
-        QMessageBox::critical(this, tr("Error"), tr("An error occurred while saving the crash report:\n\n%1").arg(m_dumpFile.errorString()));
+		QMessageBox::critical(this, tr("Error"), tr("An error occurred while saving the crash report:\n\n%1").arg(m_dumpFile.errorString()));
+}
+
+void CrashReportDialog::changeEvent(QEvent *event)
+{
+	if (event && event->type() == QEvent::LanguageChange)
+		retranslateUI();
+
+	QDialog::changeEvent(event);
 }
 
 void CrashReportDialog::uploadAndRestart()
@@ -262,4 +271,22 @@ void CrashReportDialog::uploadFinished()
     m_uploadReply = 0;
 
     done(m_finalResult);
+}
+
+
+void CrashReportDialog::retranslateUI()
+{
+	setWindowTitle(tr("Bluecherry - Report Crash"));
+
+	m_titleLabel->setText(tr("The Bluecherry client crashed!"));
+	m_allowReport->setText(tr("Send an automatic crash report"));
+	m_emailLabel->setText(tr("Email:"));
+	m_emailInformationLabel->setText(tr("If you enter your email address, we will update you on our progress with this bug"));
+	m_progressLabel->setText(tr("Sending crash report..."));
+
+	m_allowReport->setText(tr("Send an automatic crash report"));
+
+	m_restartBtn->setText(tr("Restart Client"));
+	m_exitBtn->setText(tr("Exit"));
+
 }

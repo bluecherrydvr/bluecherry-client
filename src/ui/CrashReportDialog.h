@@ -21,9 +21,11 @@
 #include <QDialog>
 #include <QFile>
 
-class QNetworkReply;
-class QLineEdit;
 class QCheckBox;
+class QCommandLinkButton;
+class QLabel;
+class QLineEdit;
+class QNetworkReply;
 class QProgressBar;
 class QStackedLayout;
 
@@ -46,6 +48,7 @@ private slots:
     void saveCrashReport();
 
 protected:
+	virtual void changeEvent(QEvent *event);
     virtual void showEvent(QShowEvent *event);
 
 private:
@@ -58,8 +61,19 @@ private:
     QStackedLayout *m_stackLayout;
     int m_finalResult;
 
+	QLabel *m_emailLabel;
+	QLabel *m_emailInformationLabel;
+	QLabel *m_titleLabel;
+	QLabel *m_progressLabel;
+
+	QCommandLinkButton *m_restartBtn;
+	QCommandLinkButton *m_exitBtn;
+
+
     void sendReport();
     void deleteDump();
+
+	void retranslateUI();
 };
 
 #endif // CRASHREPORTDIALOG_H
