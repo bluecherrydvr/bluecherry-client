@@ -22,7 +22,9 @@
 #include <QModelIndex>
 
 class CameraPtzControl;
+class QAction;
 class QModelIndex;
+class QToolBar;
 class QTreeView;
 class PtzPresetsModel;
 
@@ -32,6 +34,9 @@ class PtzPresetsWindow : public QWidget
 
 public:
     explicit PtzPresetsWindow(CameraPtzControl *ptzControl, QWidget *parent = 0);
+
+protected:
+	virtual void changeEvent(QEvent *event);
 
 private slots:
     void newPreset();
@@ -44,7 +49,16 @@ private slots:
 private:
     CameraPtzControl *m_ptz;
     PtzPresetsModel *m_presetsModel;
-    QTreeView *m_presetsView;
+
+	QAction *m_newAction;
+	QAction *m_goToAction;
+	QAction *m_renameAction;
+	QAction *m_deleteAction;
+	QAction *m_refreshPresetAction;
+	QTreeView *m_presetsView;
+	QToolBar *m_tb;
+
+	void retranslateUI();
 };
 
 #endif // PTZPRESETSWINDOW_H

@@ -61,15 +61,15 @@ LiveViewWindow *LiveViewWindow::openWindow(DVRServerRepository *serverRepository
 LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *parent, bool openfs, Qt::WindowFlags f)
     : QWidget(parent, f), m_liveView(0), m_serverRepository(serverRepository), m_savedLayouts(new QComboBox),
       m_lastLayoutIndex(-1), m_autoSized(false), m_isLayoutChanging(false),
-      m_wasOpenedFs(openfs)
+	  m_wasOpenedFs(openfs)
 {
     QBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
     layout->setSpacing(0);
 
-    QToolBar *toolBar = new QToolBar(tr("Live View"));
-    toolBar->setIconSize(QSize(16, 16));
-    toolBar->setMovable(false);
+	m_toolBar = new QToolBar(tr("Live View"));
+	m_toolBar->setIconSize(QSize(16, 16));
+	m_toolBar->setMovable(false);
 
 #ifndef Q_OS_MAC
     //toolBar->setStyleSheet(QLatin1String("QToolBar { border: none; }"));
@@ -85,71 +85,71 @@ LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *p
     m_savedLayouts->setMinimumWidth(100);
     m_savedLayouts->setContextMenuPolicy(Qt::CustomContextMenu);
     m_savedLayouts->setCurrentIndex(-1);
-    toolBar->addWidget(m_savedLayouts);
+	m_toolBar->addWidget(m_savedLayouts);
 
     QWidget *spacer = new QWidget;
     spacer->setFixedWidth(20);
-    toolBar->addWidget(spacer);
+	m_toolBar->addWidget(spacer);
 
-    toolBar->addAction(QIcon(QLatin1String(":/icons/plus.png")), tr("New Layout"), this, SLOT(createNewLayout()));
-    aRenameLayout = toolBar->addAction(QIcon(QLatin1String(":/icons/pencil.png")), tr("Rename Layout"), this, SLOT(renameLayout()));
-    aDelLayout = toolBar->addAction(QIcon(QLatin1String(":/icons/cross.png")), tr("Delete Layout"), this, SLOT(deleteCurrentLayout()));
+	aNewLayout = m_toolBar->addAction(QIcon(QLatin1String(":/icons/plus.png")), tr("New Layout"), this, SLOT(createNewLayout()));
+	aRenameLayout = m_toolBar->addAction(QIcon(QLatin1String(":/icons/pencil.png")), tr("Rename Layout"), this, SLOT(renameLayout()));
+	aDelLayout = m_toolBar->addAction(QIcon(QLatin1String(":/icons/cross.png")), tr("Delete Layout"), this, SLOT(deleteCurrentLayout()));
 
     aRenameLayout->setEnabled(false);
     aDelLayout->setEnabled(false);
 
     spacer = new QWidget;
     spacer->setFixedWidth(16);
-    toolBar->addWidget(spacer);
+	m_toolBar->addWidget(spacer);
 
     connect(m_savedLayouts, SIGNAL(currentIndexChanged(int)), SLOT(savedLayoutChanged(int)));
     connect(m_savedLayouts, SIGNAL(customContextMenuRequested(QPoint)), SLOT(showLayoutMenu(QPoint)));
 
-    m_addRowAction = toolBar->addAction(QIcon(QLatin1String(":/icons/layout-split-vertical.png")),
+	m_addRowAction = m_toolBar->addAction(QIcon(QLatin1String(":/icons/layout-split-vertical.png")),
                      tr("Add Row"), viewLayout, SLOT(appendRow()));
-    m_removeRowAction = toolBar->addAction(QIcon(QLatin1String(":/icons/layout-join-vertical.png")),
+	m_removeRowAction = m_toolBar->addAction(QIcon(QLatin1String(":/icons/layout-join-vertical.png")),
                         tr("Remove Row"), viewLayout, SLOT(removeRow()));
 
     spacer = new QWidget;
     spacer->setFixedWidth(16);
-    toolBar->addWidget(spacer);
+	m_toolBar->addWidget(spacer);
 
-    m_addColumnAction = toolBar->addAction(QIcon(QLatin1String(":/icons/layout-split.png")),
+	m_addColumnAction = m_toolBar->addAction(QIcon(QLatin1String(":/icons/layout-split.png")),
                         tr("Add Column"), viewLayout, SLOT(appendColumn()));
-    m_removeColumnAction = toolBar->addAction(QIcon(QLatin1String(":/icons/layout-join.png")),
+	m_removeColumnAction = m_toolBar->addAction(QIcon(QLatin1String(":/icons/layout-join.png")),
                            tr("Remove Column"), viewLayout, SLOT(removeColumn()));
 
     spacer = new QWidget;
     spacer->setFixedWidth(16);
-    toolBar->addWidget(spacer);
+	m_toolBar->addWidget(spacer);
 
     QSignalMapper *mapper = new QSignalMapper(this);
     connect(mapper, SIGNAL(mapped(int)), viewLayout, SLOT(setGridSize(int)));
 
-    QAction *a = toolBar->addAction(QIcon(QLatin1String(":/icons/layout.png")),
+	m_singleAction = m_toolBar->addAction(QIcon(QLatin1String(":/icons/layout.png")),
                                     tr("Single"), mapper, SLOT(map()));
-    mapper->setMapping(a, 1);
-    a = toolBar->addAction(QIcon(QLatin1String(":/icons/layout-4.png")),
+	mapper->setMapping(m_singleAction, 1);
+	QAction *a = m_toolBar->addAction(QIcon(QLatin1String(":/icons/layout-4.png")),
                            tr("2x2"), mapper, SLOT(map()));
     mapper->setMapping(a, 2);
-    a = toolBar->addAction(QIcon(QLatin1String(":/icons/layout-9.png")),
+	a = m_toolBar->addAction(QIcon(QLatin1String(":/icons/layout-9.png")),
                            tr("3x3"), mapper, SLOT(map()));
     mapper->setMapping(a, 3);
-    a = toolBar->addAction(QIcon(QLatin1String(":/icons/layout-16.png")),
+	a = m_toolBar->addAction(QIcon(QLatin1String(":/icons/layout-16.png")),
                            tr("4x4"), mapper, SLOT(map()));
     mapper->setMapping(a, 4);
 
     spacer = new QWidget;
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    toolBar->addWidget(spacer);
+	m_toolBar->addWidget(spacer);
 
-    a = toolBar->addAction(QIcon(QLatin1String(":/icons/application-resize-full.png")),
+	m_fullscreenAction = m_toolBar->addAction(QIcon(QLatin1String(":/icons/application-resize-full.png")),
                        tr("Fullscreen"), this, SLOT(toggleFullScreen()));
-    a->setShortcut(Qt::Key_F11);
+	m_fullscreenAction->setShortcut(Qt::Key_F11);
 
     if (m_wasOpenedFs)
     {
-        toolBar->addAction(QIcon(QLatin1String(":/icons/cross.png")), tr("Exit"),
+		m_closeAction = m_toolBar->addAction(QIcon(QLatin1String(":/icons/cross.png")), tr("Exit"),
                            this, SLOT(close()));
         new QShortcut(Qt::Key_Escape, this, SLOT(close()), 0, Qt::WindowShortcut);
     }
@@ -161,9 +161,9 @@ LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *p
 
     QMainWindow *wnd = qobject_cast<QMainWindow*>(window());
     if (wnd)
-        wnd->addToolBar(Qt::TopToolBarArea, toolBar);
+		wnd->addToolBar(Qt::TopToolBarArea, m_toolBar);
     else
-        layout->addWidget(toolBar);
+		layout->addWidget(m_toolBar);
     layout->addWidget(m_liveView);
 
     updateLayoutActionStates();
@@ -405,5 +405,33 @@ void LiveViewWindow::updateLayoutActionStates()
     m_addRowAction->setEnabled(liveLayout->rows() < LiveViewLayout::maxRows());
     m_removeRowAction->setEnabled(liveLayout->rows() > 1);
     m_addColumnAction->setEnabled(liveLayout->columns() < LiveViewLayout::maxColumns());
-    m_removeColumnAction->setEnabled(liveLayout->columns() > 1);
+	m_removeColumnAction->setEnabled(liveLayout->columns() > 1);
+}
+
+void LiveViewWindow::retranslateUI()
+{
+	m_toolBar->setWindowTitle(tr("Live View"));
+
+	aNewLayout->setText(tr("New Layout"));
+	aRenameLayout->setText(tr("Rename Layout"));
+	aDelLayout->setText(tr("Delete Layout"));
+	m_addRowAction->setText(tr("Add Row"));
+	m_removeRowAction->setText(tr("Remove Row"));
+	m_addColumnAction->setText(tr("Add Column"));
+	m_removeColumnAction->setText(tr("Remove Column"));
+	m_singleAction->setText(tr("Single"));
+	m_fullscreenAction->setText(tr("Fullscreen"));
+
+	if (m_wasOpenedFs)
+		m_closeAction->setText(tr("Exit"));
+
+
+}
+
+void LiveViewWindow::changeEvent(QEvent *event)
+{
+	if (event && event->type() == QEvent::LanguageChange)
+		retranslateUI();
+
+	QWidget::changeEvent(event);
 }

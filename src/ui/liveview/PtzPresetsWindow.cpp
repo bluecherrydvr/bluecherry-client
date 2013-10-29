@@ -18,22 +18,20 @@
 #include "PtzPresetsWindow.h"
 #include "core/CameraPtzControl.h"
 #include "core/PtzPresetsModel.h"
-#include <QTreeView>
-#include <QBoxLayout>
-#include <QMenu>
+
 #include <QAction>
-#include <QToolBar>
+#include <QBoxLayout>
+#include <QEvent>
 #include <QInputDialog>
+#include <QMenu>
+#include <QToolBar>
+#include <QTreeView>
 
 PtzPresetsWindow::PtzPresetsWindow(CameraPtzControl *ptzControl, QWidget *parent)
     : QWidget(parent, Qt::Tool), m_ptz(ptzControl)
 {
     connect(ptzControl, SIGNAL(destroyed()), SLOT(close()));
 
-    if (m_ptz->camera())
-        setWindowTitle(tr("PTZ - %1").arg(m_ptz->camera()->data().displayName()));
-    else
-        setWindowTitle(tr("PTZ"));
     resize(150, 200);
 
     QBoxLayout *layout = new QVBoxLayout(this);
@@ -52,19 +50,27 @@ PtzPresetsWindow::PtzPresetsWindow(CameraPtzControl *ptzControl, QWidget *parent
     m_presetsModel->setPtzController(ptzControl);
     m_presetsView->setModel(m_presetsModel);
 
-    QToolBar *tb = new QToolBar(tr("Presets"));
-    tb->setIconSize(QSize(20, 20));
-    tb->setStyleSheet(QLatin1String("QToolBar { border: none; }"));
+	m_tb = new QToolBar(tr("Presets"));
+	m_tb->setIconSize(QSize(20, 20));
+	m_tb->setStyleSheet(QLatin1String("QToolBar { border: none; }"));
 
-    tb->addAction(QIcon(QLatin1String(":/icons/plus.png")), tr("New Preset"), this, SLOT(newPreset()));
-    tb->addSeparator();
-    tb->addAction(QIcon(QLatin1String(":/icons/tick.png")), tr("Go to Preset"), this, SLOT(moveToPreset()));
-    tb->addAction(QIcon(QLatin1String(":/icons/pencil.png")), tr("Rename Preset"), this, SLOT(renamePreset()));
-    tb->addAction(QIcon(QLatin1String(":/icons/cross.png")), tr("Delete Preset"), this, SLOT(deletePreset()));
-    tb->addSeparator();
-    tb->addAction(QIcon(QLatin1String(":/icons/arrow-circle-double.png")), tr("Refresh Presets"), m_ptz, SLOT(updateInfo()));
+	m_newAction = m_tb->addAction(QIcon(QLatin1String(":/icons/plus.png")), tr("New Preset"), this, SLOT(newPreset()));
+	m_tb->addSeparator();
+	m_goToAction = m_tb->addAction(QIcon(QLatin1String(":/icons/tick.png")), tr("Go to Preset"), this, SLOT(moveToPreset()));
+	m_renameAction = m_tb->addAction(QIcon(QLatin1String(":/icons/pencil.png")), tr("Rename Preset"), this, SLOT(renamePreset()));
+	m_deleteAction = m_tb->addAction(QIcon(QLatin1String(":/icons/cross.png")), tr("Delete Preset"), this, SLOT(deletePreset()));
+	m_tb->addSeparator();
+	m_refreshPresetAction = m_tb->addAction(QIcon(QLatin1String(":/icons/arrow-circle-double.png")), tr("Refresh Presets"), m_ptz, SLOT(updateInfo()));
 
-    layout->addWidget(tb);
+	layout->addWidget(m_tb);
+}
+
+void PtzPresetsWindow::changeEvent(QEvent *event)
+{
+	if (event && event->type() == QEvent::LanguageChange)
+		retranslateUI();
+
+	QWidget::changeEvent(event);
 }
 
 void PtzPresetsWindow::newPreset()
@@ -164,5 +170,22 @@ void PtzPresetsWindow::presetsViewContextMenu(const QPoint &pos)
     else if (a == remove)
         deletePreset(idx);
     else if (a == newPreset)
-        this->newPreset();
+		this->newPreset();
+}
+
+void PtzPresetsWindow::retranslateUI()
+{
+	if (m_ptz->camera())
+		setWindowTitle(tr("PTZ - %1").arg(m_ptz->camera()->data().displayName()));
+	else
+		setWindowTitle(tr("PTZ"));
+
+	m_tb->setWindowTitle(tr("Presets"));
+
+	m_newAction->setText(tr("New Preset"));
+	m_goToAction->setText(tr("Go to Preset"));
+	m_renameAction->setText(tr("Rename Preset"));
+	m_deleteAction->setText(tr("Delete Preset"));
+	m_refreshPresetAction->setText(tr("Refresh Presets"));
+
 }
