@@ -3,7 +3,7 @@
     <name>@default</name>
     <message>
         <source>Error</source>
-        <translation type="unfinished"/>
+        <translation>Feil</translation>
     </message>
     <message>
         <source>This application is designed to utilize OpenGL acceleration, which is not supported by your system. The application may not function correctly.
@@ -13,83 +13,83 @@ For help, contact support@bluecherrydvr.com.</source>
     </message>
     <message>
         <source>Connection refused</source>
-        <translation type="unfinished"/>
+        <translation>Tilkobling nektet</translation>
     </message>
     <message>
         <source>Remote host closed connection</source>
-        <translation type="unfinished"/>
+        <translation>Ekstern vert stengte ned tilkobling</translation>
     </message>
     <message>
         <source>Host not found</source>
-        <translation type="unfinished"/>
+        <translation>Vert ikke funnet</translation>
     </message>
     <message>
         <source>Socket access error</source>
-        <translation type="unfinished"/>
+        <translation>Socket tilgangs feil</translation>
     </message>
     <message>
         <source>Socket resource error</source>
-        <translation type="unfinished"/>
+        <translation>Socket ressurs feil</translation>
     </message>
     <message>
         <source>Socket operation timed out</source>
-        <translation type="unfinished"/>
+        <translation>Socket operasjonen ble tidsavbrutt</translation>
     </message>
     <message>
         <source>Datagram too large</source>
-        <translation type="unfinished"/>
+        <translation>Datagram for stor</translation>
     </message>
     <message>
         <source>Network error</source>
-        <translation type="unfinished"/>
+        <translation>Nettverksfeil</translation>
     </message>
     <message>
         <source>Address already in use</source>
-        <translation type="unfinished"/>
+        <translation>Adresse allerede i bruk</translation>
     </message>
     <message>
         <source>Socket address not available</source>
-        <translation type="unfinished"/>
+        <translation>Socket adresse er ikke tilgjengelig</translation>
     </message>
     <message>
         <source>Unsupported socket operation</source>
-        <translation type="unfinished"/>
+        <translation>Socket operasjon er ikke støttet</translation>
     </message>
     <message>
         <source>Proxy authentication required</source>
-        <translation type="unfinished"/>
+        <translation>Proxy godkjenning påkrevd</translation>
     </message>
     <message>
         <source>SSL handshake failed</source>
-        <translation type="unfinished"/>
+        <translation>SSL-håndtrykk mislyktes</translation>
     </message>
     <message>
         <source>Unfinished socket operation</source>
-        <translation type="unfinished"/>
+        <translation>Uferdig socket operasjon</translation>
     </message>
     <message>
         <source>Proxy connection refused</source>
-        <translation type="unfinished"/>
+        <translation>Proxy tilkobling nektet</translation>
     </message>
     <message>
         <source>Proxy connection closed</source>
-        <translation type="unfinished"/>
+        <translation>Proxy tilkobling lukket</translation>
     </message>
     <message>
         <source>Proxy connection timeout</source>
-        <translation type="unfinished"/>
+        <translation>Proxy tilkobling ble tidsavbrutt</translation>
     </message>
     <message>
         <source>Proxy not found</source>
-        <translation type="unfinished"/>
+        <translation>Proxy ikke funnet</translation>
     </message>
     <message>
         <source>Proxy error</source>
-        <translation type="unfinished"/>
+        <translation>Proxy feil</translation>
     </message>
     <message>
         <source>Unknown error</source>
-        <translation type="unfinished"/>
+        <translation>Ukjent feil</translation>
     </message>
 </context>
 <context>
@@ -145,6 +145,26 @@ For help, contact support@bluecherrydvr.com.</source>
 <context>
     <name>CrashReportDialog</name>
     <message>
+        <source>Save crash report</source>
+        <translation>Lagrer krasj rapport</translation>
+    </message>
+    <message>
+        <source>Crash report (*.dmp)</source>
+        <translation>Krasj rapport (*.dmp)</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Feil</translation>
+    </message>
+    <message>
+        <source>An error occurred while saving the crash report:
+
+%1</source>
+        <translation>Det oppstod en feil under lagring av krasjrapport: ⏎
+⏎
+% 1</translation>
+    </message>
+    <message>
         <source>Bluecherry - Report Crash</source>
         <translation>Bluecherry - Rapporter krasj</translation>
     </message>
@@ -165,36 +185,16 @@ For help, contact support@bluecherrydvr.com.</source>
         <translation>Om du oppgir e-post adresse, vil vi oppdatere deg på vår fremgang med denne feilen</translation>
     </message>
     <message>
+        <source>Sending crash report...</source>
+        <translation>Sender krasj rapport...</translation>
+    </message>
+    <message>
         <source>Restart Client</source>
         <translation>Klient omstart</translation>
     </message>
     <message>
         <source>Exit</source>
         <translation>Avslutt</translation>
-    </message>
-    <message>
-        <source>Sending crash report...</source>
-        <translation>Sender krasj rapport...</translation>
-    </message>
-    <message>
-        <source>Save crash report</source>
-        <translation>Lagrer krasj rapport</translation>
-    </message>
-    <message>
-        <source>Crash report (*.dmp)</source>
-        <translation>Krasj rapport (*.dmp)</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>Feil</translation>
-    </message>
-    <message>
-        <source>An error occurred while saving the crash report:
-
-%1</source>
-        <translation>Det oppstod en feil under lagring av krasjrapport: ⏎
-⏎
-% 1</translation>
     </message>
 </context>
 <context>
@@ -499,10 +499,6 @@ For help, contact support@bluecherrydvr.com.</source>
 <context>
     <name>EventViewWindow</name>
     <message>
-        <source>Bluecherry - Event Playback</source>
-        <translation>Bluecherry - Hendelses avspiller</translation>
-    </message>
-    <message>
         <source>&lt;b&gt;%2&lt;/b&gt; (%1)&lt;br&gt;&lt;br&gt;%3 (%4)&lt;br&gt;%5</source>
         <translation>&lt;b&gt;%2&lt;/b&gt; (%1)&lt;br&gt;&lt;br&gt;%3 (%4)&lt;br&gt;%5</translation>
     </message>
@@ -521,6 +517,10 @@ For help, contact support@bluecherrydvr.com.</source>
     <message>
         <source>Add comment</source>
         <translation>Legg til kommentar</translation>
+    </message>
+    <message>
+        <source>Bluecherry - Event Playback</source>
+        <translation>Bluecherry - Hendelses avspiller</translation>
     </message>
 </context>
 <context>
@@ -557,20 +557,8 @@ For help, contact support@bluecherrydvr.com.</source>
 <context>
     <name>EventsWindow</name>
     <message>
-        <source>Bluecherry - Event Browser</source>
-        <translation>Bluecherry - Hendelses utforsker</translation>
-    </message>
-    <message>
-        <source>Minimum Level</source>
-        <translation>Minimum nivå</translation>
-    </message>
-    <message>
         <source>Type</source>
         <translation>Type</translation>
-    </message>
-    <message>
-        <source>Tags</source>
-        <translation>Merking</translation>
     </message>
     <message>
         <source>List</source>
@@ -579,10 +567,6 @@ For help, contact support@bluecherrydvr.com.</source>
     <message>
         <source>Timeline</source>
         <translation>Tidslinje</translation>
-    </message>
-    <message>
-        <source>Date</source>
-        <translation>Dato</translation>
     </message>
     <message>
         <source>Any</source>
@@ -605,12 +589,28 @@ For help, contact support@bluecherrydvr.com.</source>
         <translation>Alvorlig</translation>
     </message>
     <message>
-        <source>Type or select a tag to filter</source>
-        <translation>Skriv eller velg en merking for å filtrere</translation>
+        <source>Bluecherry - Event Browser</source>
+        <translation>Bluecherry - Hendelses utforsker</translation>
+    </message>
+    <message>
+        <source>Minimum Level</source>
+        <translation>Minimum nivå</translation>
+    </message>
+    <message>
+        <source>Tags</source>
+        <translation>Merking</translation>
     </message>
     <message>
         <source>Zoom:</source>
         <translation>Zoom:</translation>
+    </message>
+    <message>
+        <source>Type or select a tag to filter</source>
+        <translation>Skriv eller velg en merking for å filtrere</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Dato</translation>
     </message>
     <message>
         <source>Play video</source>
@@ -836,10 +836,6 @@ For help, contact support@bluecherrydvr.com.</source>
 <context>
     <name>MainWindow</name>
     <message>
-        <source>Bluecherry</source>
-        <translation>Bluecherry</translation>
-    </message>
-    <message>
         <source>Main</source>
         <translation>Hoved</translation>
     </message>
@@ -900,10 +896,6 @@ For help, contact support@bluecherrydvr.com.</source>
         <translation>%Sanntid</translation>
     </message>
     <message>
-        <source>New window</source>
-        <translation>Nytt vindu</translation>
-    </message>
-    <message>
         <source>&amp;Help</source>
         <translation>&amp;Hjelp</translation>
     </message>
@@ -924,24 +916,8 @@ For help, contact support@bluecherrydvr.com.</source>
         <translation>&amp;Om Bluecherry</translation>
     </message>
     <message>
-        <source>Connect</source>
-        <translation>Koble til</translation>
-    </message>
-    <message>
-        <source>&amp;Configure server</source>
-        <translation>&amp;Konfigurer server</translation>
-    </message>
-    <message>
-        <source>Refresh devices</source>
-        <translation>Oppfrisk enheter</translation>
-    </message>
-    <message>
-        <source>Settings</source>
-        <translation>Innstillinger</translation>
-    </message>
-    <message>
-        <source>Disconnect</source>
-        <translation>Koble fra</translation>
+        <source>New window</source>
+        <translation>Nytt vindu</translation>
     </message>
     <message>
         <source>&amp;Servers</source>
@@ -956,8 +932,8 @@ For help, contact support@bluecherrydvr.com.</source>
         <translation>Legg til server</translation>
     </message>
     <message>
-        <source>Server Information</source>
-        <translation>Server informasjon</translation>
+        <source>Bluecherry</source>
+        <translation>Bluecherry</translation>
     </message>
     <message>
         <source>Error</source>
@@ -1037,6 +1013,10 @@ For help, contact support@bluecherrydvr.com.</source>
 </context>
 <context>
     <name>OptionsGeneralPage</name>
+    <message>
+        <source>Language:</source>
+        <translation type="unfinished"/>
+    </message>
     <message>
         <source>Close to tray</source>
         <translation>Minimer til systemstatusfeltet</translation>
@@ -1237,6 +1217,33 @@ For help, contact support@bluecherrydvr.com.</source>
     </message>
 </context>
 <context>
+    <name>ServerMenu</name>
+    <message>
+        <source>Connect</source>
+        <translation>Koble til</translation>
+    </message>
+    <message>
+        <source>Browse &amp;events</source>
+        <translation>Utforsk &amp;hendelser</translation>
+    </message>
+    <message>
+        <source>&amp;Configure server</source>
+        <translation>&amp;Konfigurer server</translation>
+    </message>
+    <message>
+        <source>Refresh devices</source>
+        <translation>Oppfrisk enheter</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>Innstillinger</translation>
+    </message>
+    <message>
+        <source>Disconnect</source>
+        <translation>Koble fra</translation>
+    </message>
+</context>
+<context>
     <name>ServerRequestManager</name>
     <message>
         <source>Request failed: %1</source>
@@ -1349,89 +1356,6 @@ For help, contact support@bluecherrydvr.com.</source>
     <message>
         <source>Bluecherry - Setup</source>
         <translation>Bluecherry - Oppsett</translation>
-    </message>
-</context>
-<context>
-    <name>SocketError</name>
-    <message>
-        <source>Connection refused</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Remote host closed connection</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Host not found</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Socket access error</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Socket resource error</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Socket operation timed out</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Datagram too large</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Network error</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Address already in use</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Socket address not available</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Unsupported socket operation</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Proxy authentication required</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>SSL handshake failed</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Unfinished socket operation</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Proxy connection refused</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Proxy connection closed</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Proxy connection timeout</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Proxy not found</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Proxy error</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <source>Unknown error</source>
-        <translation type="unfinished"/>
     </message>
 </context>
 <context>
