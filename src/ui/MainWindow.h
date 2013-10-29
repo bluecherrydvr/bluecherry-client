@@ -68,7 +68,6 @@ public slots:
     void showDownloadsWindow();
 
 private slots:
-    void updateMenuForServer(DVRServer *server = 0);
     void updateServersMenu();
     void sslConfirmRequired(DVRServer *server, const QList<QSslError> &errors, const QSslConfiguration &config);
     void trayActivated(QSystemTrayIcon::ActivationReason);

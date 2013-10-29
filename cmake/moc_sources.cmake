@@ -85,6 +85,7 @@ set (bluecherry_client_MOC_SRCS
     src/ui/OptionsServerPage.h
     src/ui/RemotePortCheckerWidget.h
     src/ui/ServerConfigWindow.h
+    src/ui/ServerMenu.h
     src/ui/SetupWizard.h
     src/ui/SetupWizard_p.h
     src/ui/StatusBandwidthWidget.h

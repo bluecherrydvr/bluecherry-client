@@ -40,6 +40,7 @@
 #include "core/LiveViewManager.h"
 #include "event/ModelEventsCursor.h"
 #include "ui/model/EventsProxyModel.h"
+#include "ui/ServerMenu.h"
 #include <QBoxLayout>
 #include <QGroupBox>
 #include <QMenuBar>
@@ -340,6 +341,7 @@ void MainWindow::updateLiveMenu()
 																   SLOT(setBandwidthModeFromAction()));
 	foreach (QAction *a, fpsActions)
 		a->setParent(m_liveMenu);
+
 	m_liveMenu->addActions(fpsActions);
 }
 
@@ -349,58 +351,11 @@ QMenu *MainWindow::serverMenu(DVRServer *server)
     if (m)
         return m;
 
-    m = new QMenu(server->configuration().displayName());
-
-    m->addAction(tr("Connect"), server, SLOT(toggleOnline()))->setObjectName(QLatin1String("aConnect"));
-    m->addSeparator();
-
-    QAction *a = m->addAction(tr("Browse &events"), this, SLOT(showEventsWindow()));
-    a->setEnabled(server->isOnline());
-    connect(server, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
-
-    a = m->addAction(tr("&Configure server"), this, SLOT(openServerConfig()));
-    a->setProperty("associatedServer", QVariant::fromValue<QObject*>(server));
-    a->setEnabled(server->isOnline());
-    connect(server, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
-
-    m->addSeparator();
-
-    a = m->addAction(tr("Refresh devices"), server, SLOT(updateCameras()));
-    a->setEnabled(server->isOnline());
-    connect(server, SIGNAL(onlineChanged(bool)), a, SLOT(setEnabled(bool)));
-
-    a = m->addAction(tr("Settings"), this, SLOT(openServerSettings()));
-    a->setProperty("associatedServer", QVariant::fromValue<QObject*>(server));
-
-    connect(server, SIGNAL(serverRemoved(DVRServer*)), m, SLOT(deleteLater()));
-    connect(server, SIGNAL(changed()), SLOT(updateMenuForServer()));
-    connect(server, SIGNAL(statusChanged(int)), SLOT(updateMenuForServer()));
+	m = new ServerMenu(server, server->configuration().displayName());
 
     server->setProperty("uiMenu", QVariant::fromValue<QObject*>(m));
-    updateMenuForServer(server);
 
     return m;
-}
-
-void MainWindow::updateMenuForServer(DVRServer *server)
-{
-    if (!server)
-    {
-        server = qobject_cast<DVRServer*>(sender());
-        /* Handle ServerRequestManager signals by testing the object's parent as well */
-        if (!server && (!sender() || !(server = qobject_cast<DVRServer*>(sender()->parent()))))
-            return;
-    }
-
-    QMenu *m = serverMenu(server);
-    m->setTitle(server->configuration().displayName());
-    m->setIcon(QIcon(server->isOnline() ? QLatin1String(":/icons/status.png") :
-                                          QLatin1String(":/icons/status-offline.png")));
-
-    QAction *connect = m->findChild<QAction*>(QLatin1String("aConnect"));
-    Q_ASSERT(connect);
-    if (connect)
-        connect->setText(server->isOnline() ? tr("Disconnect") : tr("Connect"));
 }
 
 void MainWindow::updateServersMenu()
