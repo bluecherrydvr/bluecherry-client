@@ -24,6 +24,8 @@
 ServerMenu::ServerMenu(DVRServer *server, const QString &title, QWidget *parent)
 	: QMenu(title, parent), m_server(server)
 {
+	setProperty("associatedServer", QVariant::fromValue<QObject*>(m_server));
+
 	createActions();
 
 	connect(m_server, SIGNAL(serverRemoved(DVRServer*)), SLOT(deleteLater()));
@@ -45,12 +47,11 @@ void ServerMenu::createActions()
 
 	addSeparator();
 
-	m_browseEventsAction = addAction(tr("Browse &events"), this, SLOT(showEventsWindow()));
+	m_browseEventsAction = addAction(tr("Browse &events"), this, SIGNAL(showEventsWindow()));
 	m_browseEventsAction->setEnabled(m_server->isOnline());
 	connect(m_server, SIGNAL(onlineChanged(bool)), m_browseEventsAction, SLOT(setEnabled(bool)));
 
-	m_configureServerAction = addAction(tr("&Configure server"), this, SLOT(openServerConfig()));
-	m_configureServerAction->setProperty("associatedServer", QVariant::fromValue<QObject*>(m_server));
+	m_configureServerAction = addAction(tr("&Configure server"), this, SIGNAL(openServerConfig()));
 	m_configureServerAction->setEnabled(m_server->isOnline());
 	connect(m_server, SIGNAL(onlineChanged(bool)), m_configureServerAction, SLOT(setEnabled(bool)));
 
@@ -60,8 +61,7 @@ void ServerMenu::createActions()
 	m_configureServerAction->setEnabled(m_server->isOnline());
 	connect(m_server, SIGNAL(onlineChanged(bool)), m_configureServerAction, SLOT(setEnabled(bool)));
 
-	m_configureServerAction = addAction(tr("Settings"), this, SLOT(openServerSettings()));
-	m_configureServerAction->setProperty("associatedServer", QVariant::fromValue<QObject*>(m_server));
+	m_configureServerAction = addAction(tr("Settings"), this, SIGNAL(openServerSettings()));
 
 	updateMenuForServer();
 }

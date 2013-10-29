@@ -32,6 +32,11 @@ class ServerMenu : public QMenu
 public:
 	explicit ServerMenu(DVRServer *server, const QString &title, QWidget *parent = 0);
 
+signals:
+	void showEventsWindow();
+	void openServerConfig();
+	void openServerSettings();
+
 protected:
 	virtual void changeEvent(QEvent *event);
 

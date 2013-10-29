@@ -351,11 +351,14 @@ QMenu *MainWindow::serverMenu(DVRServer *server)
     if (m)
         return m;
 
-	m = new ServerMenu(server, server->configuration().displayName());
+	ServerMenu *menu = new ServerMenu(server, server->configuration().displayName());
+	connect(menu, SIGNAL(openServerConfig()), SLOT(openServerConfig()));
+	connect(menu, SIGNAL(openServerSettings()), SLOT(openServerSettings()));
+	connect(menu, SIGNAL(showEventsWindow()), SLOT(showEventsWindow()));
 
-    server->setProperty("uiMenu", QVariant::fromValue<QObject*>(m));
+	server->setProperty("uiMenu", QVariant::fromValue<QObject*>(menu));
 
-    return m;
+	return menu;
 }
 
 void MainWindow::updateServersMenu()
