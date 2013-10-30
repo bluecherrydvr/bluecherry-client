@@ -20,6 +20,8 @@
 
 #include <QDialog>
 
+class QLabel;
+
 class AboutDialog : public QDialog
 {
     Q_OBJECT
@@ -27,8 +29,14 @@ class AboutDialog : public QDialog
 public:
     explicit AboutDialog(QWidget *parent = 0);
 
+protected:
+	virtual void changeEvent(QEvent *event);
+
 private:
     QString getLicenseText() const;
+	void retranslateUI();
+
+	QLabel *m_versionText;
 };
 
 #endif // ABOUTDIALOG_H

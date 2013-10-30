@@ -22,6 +22,7 @@
 #include "server/DVRServer.h"
 #include "server/DVRServerConfiguration.h"
 #include "video/MediaDownload.h"
+#include <QEvent>
 #include <QFrame>
 #include <QGridLayout>
 #include <QLabel>
@@ -45,7 +46,7 @@ EventVideoDownloadWidget::EventVideoDownloadWidget(EventVideoDownload *eventVide
                                );
     layout->addWidget(label, 0, 0);
 
-    m_closeButton = new QPushButton(tr("Close"));
+	m_closeButton = new QPushButton;
     m_closeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(m_closeButton, SIGNAL(clicked()), this, SLOT(closeClicked()));
     layout->addWidget(m_closeButton, 0, 1);
@@ -57,7 +58,7 @@ EventVideoDownloadWidget::EventVideoDownloadWidget(EventVideoDownload *eventVide
     m_progressBar->setRange(0, 0);
     layout->addWidget(m_progressBar, 1, 0, 1, 2);
 
-    m_progressLabel = new QLabel(EventVideoDownload::statusToString(m_eventVideoDownload.data()->status()));
+	m_progressLabel = new QLabel;
     connect(m_eventVideoDownload.data(), SIGNAL(statusChanged(EventVideoDownload::DownloadStatus)),
             this, SLOT(updateProgress()));
     layout->addWidget(m_progressLabel, 2, 0, 1, 2);
@@ -71,10 +72,20 @@ EventVideoDownloadWidget::EventVideoDownloadWidget(EventVideoDownload *eventVide
     connect(m_progressTimer, SIGNAL(timeout()), SLOT(updateProgress()));
 
     updateProgress();
+
+	retranslateUI();
 }
 
 EventVideoDownloadWidget::~EventVideoDownloadWidget()
 {
+}
+
+void EventVideoDownloadWidget::changeEvent(QEvent *event)
+{
+	if (event && event->type() == QEvent::LanguageChange)
+		retranslateUI();
+
+	QWidget::changeEvent(event);
 }
 
 void EventVideoDownloadWidget::closeClicked()
@@ -123,5 +134,11 @@ void EventVideoDownloadWidget::updateProgress()
         break;
     }
 
-    m_closeButton->setVisible(EventVideoDownload::Finished == status || EventVideoDownload::Failed == status);
+	m_closeButton->setVisible(EventVideoDownload::Finished == status || EventVideoDownload::Failed == status);
+}
+
+void EventVideoDownloadWidget::retranslateUI()
+{
+	m_closeButton->setText(tr("Close"));
+	m_progressLabel->setText(EventVideoDownload::statusToString(m_eventVideoDownload.data()->status()));
 }

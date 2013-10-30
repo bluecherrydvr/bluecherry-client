@@ -17,6 +17,8 @@
 
 #include "EventTypesFilter.h"
 #include "core/EventData.h"
+
+#include <QEvent>
 #include <QHeaderView>
 
 EventTypesFilter::EventTypesFilter(QWidget *parent)
@@ -116,4 +118,21 @@ QBitArray EventTypesFilter::checkedTypes() const
     }
 
     return re;
+}
+
+
+void EventTypesFilter::changeEvent(QEvent *event)
+{
+	if (event && event->type() == QEvent::LanguageChange && topLevelItemCount())
+	{
+		QTreeWidgetItem *p = topLevelItem(0);
+		p->setText(0, tr("Camera"));
+
+		for (int i = 0; i < p->childCount(); ++i)
+		{
+			QTreeWidgetItem *item = p->child(i);
+			item->setText(0, EventType((EventType::Type)item->data(0, Qt::UserRole).toInt()).uiString());
+		}
+	}
+	QTreeWidget::changeEvent(event);
 }

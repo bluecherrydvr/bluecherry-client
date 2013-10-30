@@ -35,6 +35,10 @@ public:
 signals:
     void checkedTypesChanged(const QBitArray &checkedTypes);
 
+protected:
+	virtual void changeEvent(QEvent *event);
+
+
 private slots:
     void checkStateChanged(QTreeWidgetItem *item);
 

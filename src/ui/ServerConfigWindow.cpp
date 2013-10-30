@@ -21,6 +21,7 @@
 #include "core/BluecherryApp.h"
 #include "ui/MainWindow.h"
 #include <QBoxLayout>
+#include <QEvent>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QWebView>
@@ -97,4 +98,13 @@ void ServerConfigWindow::setServer(DVRServer *server)
     }
 
     emit serverChanged(m_server);
+}
+
+
+void ServerConfigWindow::changeEvent(QEvent *event)
+{
+	if (event && event->type() == QEvent::LanguageChange)
+		setWindowTitle(m_server ? (tr("Bluecherry - %1").arg(m_server->configuration().displayName())) : tr("Bluecherry - Server Configuration"));
+
+	QWidget::changeEvent(event);
 }

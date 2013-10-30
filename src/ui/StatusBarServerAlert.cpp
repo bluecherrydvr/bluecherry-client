@@ -59,7 +59,15 @@ void StatusBarServerAlert::updateAlert()
         message = tr("Alerts on %1 servers").arg(servers.size());
 
     alertText->setText(Qt::escape(message));
-    setVisible(!message.isEmpty());
+	setVisible(!message.isEmpty());
+}
+
+void StatusBarServerAlert::changeEvent(QEvent *event)
+{
+	if (event && event->type() == QEvent::LanguageChange)
+		updateAlert();
+
+	QWidget::changeEvent(event);
 }
 
 void StatusBarServerAlert::mousePressEvent(QMouseEvent *ev)

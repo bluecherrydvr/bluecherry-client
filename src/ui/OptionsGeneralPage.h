@@ -21,6 +21,7 @@
 #include "OptionsDialog.h"
 
 class QCheckBox;
+class QComboBox;
 
 class OptionsGeneralPage : public OptionsDialogPage
 {
@@ -39,6 +40,10 @@ private slots:
 private:
     QCheckBox *m_eventsPauseLive, *m_closeToTray, *m_liveHwAccel, *m_advancedOpengl, *m_deinterlace;
     QCheckBox *m_ssFullscreen, *m_ssVideo, *m_ssNever;
+
+	QComboBox *m_languages;
+
+	void fillLanguageComboBox();
 };
 
 #endif // OPTIONSGENERALPAGE_H

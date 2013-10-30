@@ -1,6 +1,7 @@
 #include "SwitchEventsWidget.h"
 #include "event/EventsCursor.h"
 #include <QDebug>
+#include <QEvent>
 #include <QHBoxLayout>
 #include <QPushButton>
 
@@ -10,13 +11,15 @@ SwitchEventsWidget::SwitchEventsWidget(QWidget *parent)
     QHBoxLayout *layout = new QHBoxLayout(this);
     // layout->setMargin(0);
 
-    m_previousButton = new QPushButton(tr("Previous"));
-    m_nextButton = new QPushButton(tr("Next"));
+	m_previousButton = new QPushButton;
+	m_nextButton = new QPushButton;
 
     layout->addWidget(m_previousButton);
     layout->addWidget(m_nextButton);
 
     updateButtonsState();
+
+	retranslateUI();
 }
 
 SwitchEventsWidget::~SwitchEventsWidget()
@@ -56,5 +59,19 @@ void SwitchEventsWidget::updateButtonsState()
     {
         m_previousButton->setEnabled(m_eventsCursor.data()->hasPrevious());
         m_nextButton->setEnabled(m_eventsCursor.data()->hasNext());
-    }
+	}
+}
+
+void SwitchEventsWidget::changeEvent(QEvent *event)
+{
+	if (event && event->type() == QEvent::LanguageChange)
+		retranslateUI();
+
+	QWidget::changeEvent(event);
+}
+
+void SwitchEventsWidget::retranslateUI()
+{
+	m_previousButton->setText(tr("Previous"));
+	m_nextButton->setText(tr("Next"));
 }

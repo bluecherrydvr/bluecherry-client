@@ -49,6 +49,7 @@ public:
     EventsCursor * eventsCursor() const { return m_eventsCursor.data(); }
 
 protected:
+	virtual void changeEvent(QEvent *event);
     virtual void closeEvent(QCloseEvent *event);
 
 private slots:
@@ -74,6 +75,7 @@ private:
     QWidget *createInfoArea();
     QWidget *createPlaybackArea();
 
+	void retranslateUI();
 };
 
 #endif // EVENTVIEWWINDOW_H

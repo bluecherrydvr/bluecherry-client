@@ -29,6 +29,7 @@ set (bluecherry_client_main_SRCS
     src/core/BluecherryApp.cpp
     src/core/CameraPtzControl.cpp
     src/core/EventData.cpp
+    src/core/LanguageController.cpp
     src/core/LiveViewManager.cpp
     src/core/LoggableUrl.cpp
     src/core/MJpegStream.cpp
@@ -109,6 +110,7 @@ set (bluecherry_client_main_SRCS
     src/ui/OptionsServerPage.cpp
     src/ui/RemotePortCheckerWidget.cpp
     src/ui/ServerConfigWindow.cpp
+    src/ui/ServerMenu.cpp
     src/ui/SetupWizard.cpp
     src/ui/StatusBarServerAlert.cpp
     src/ui/SwitchEventsWidget.cpp

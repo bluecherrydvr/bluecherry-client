@@ -20,10 +20,15 @@ public:
 private slots:
     void updateButtonsState();
 
+protected:
+	virtual void changeEvent(QEvent *event);
+
 private:
     QSharedPointer<EventsCursor> m_eventsCursor;
     QPushButton *m_previousButton;
     QPushButton *m_nextButton;
+
+	void retranslateUI();
 };
 
 #endif // SWITCHEVENTSWIDGET_H

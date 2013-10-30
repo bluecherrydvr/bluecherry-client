@@ -24,7 +24,9 @@
 
 class DVRServerRepository;
 class LiveViewArea;
+class QAction;
 class QComboBox;
+class QToolBar;
 
 class LiveViewWindow : public QWidget
 {
@@ -61,6 +63,9 @@ public slots:
 signals:
     void layoutChanged(const QString &layout);
 
+protected:
+	virtual void changeEvent(QEvent *event);
+
 private slots:
     void savedLayoutChanged(int index);
     void showLayoutMenu(const QPoint &pos, int index = -1);
@@ -70,13 +75,17 @@ private slots:
 private:
     LiveViewArea *m_liveView;
     DVRServerRepository *m_serverRepository;
+	QToolBar *m_toolBar;
     QComboBox * const m_savedLayouts;
-    QAction *aRenameLayout, *aDelLayout;
+	QAction *aNewLayout, *aRenameLayout, *aDelLayout;
     QAction *m_addRowAction, *m_removeRowAction;
     QAction *m_addColumnAction, *m_removeColumnAction;
+	QAction *m_singleAction, *m_fullscreenAction, *m_closeAction;
     QWeakPointer<LiveViewWindow> m_fsSetWindow;
-    int m_lastLayoutIndex;
+	int m_lastLayoutIndex;
     bool m_autoSized, m_isLayoutChanging, m_wasOpenedFs;
+
+	void retranslateUI();
 };
 
 #endif // LIVEVIEWWINDOW_H

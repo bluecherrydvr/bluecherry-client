@@ -50,12 +50,13 @@
 #include <QTabWidget>
 #include <QMenu>
 #include <QAction>
+#include <QEvent>
 
 EventsWindow::EventsWindow(DVRServerRepository *serverRepository, QWidget *parent)
-    : QWidget(parent, Qt::Window), m_serverRepository(serverRepository)
+	: QWidget(parent, Qt::Window), m_serverRepository(serverRepository),
+	  m_tagsLabel(0), m_tagInput(0)
 {
     setAttribute(Qt::WA_DeleteOnClose);
-    setWindowTitle(tr("Bluecherry - Event Browser"));
     resize(QSize(900, 600));
 
     QBoxLayout *layout = new QHBoxLayout(this);
@@ -85,21 +86,21 @@ EventsWindow::EventsWindow(DVRServerRepository *serverRepository, QWidget *paren
     createDateFilter(filtersLayout);
 
 #if 1 /* This is not useful currently. */
-    QLabel *label = new QLabel(tr("Minimum Level"));
-    label->setStyleSheet(QLatin1String("font-weight:bold;"));
-    filtersLayout->addWidget(label);
+	m_minimumLevelLabel = new QLabel;
+	m_minimumLevelLabel->setStyleSheet(QLatin1String("font-weight:bold;"));
+	filtersLayout->addWidget(m_minimumLevelLabel);
     filtersLayout->addWidget(createLevelFilter());
 #endif
 
-    label = new QLabel(tr("Type"));
-    label->setStyleSheet(QLatin1String("font-weight:bold;"));
-    filtersLayout->addWidget(label);
+	m_typeLabel = new QLabel(tr("Type"));
+	m_typeLabel->setStyleSheet(QLatin1String("font-weight:bold;"));
+	filtersLayout->addWidget(m_typeLabel);
     filtersLayout->addWidget(createTypeFilter());
 
 #if 0 /* Tags are not fully implemented yet */
-    label = new QLabel(tr("Tags"));
-    label->setStyleSheet(QLatin1String("font-weight:bold;"));
-    filtersLayout->addWidget(label);
+	m_tagsLabel= new QLabel;
+	m_tagsLabel->setStyleSheet(QLatin1String("font-weight:bold;"));
+	filtersLayout->addWidget(m_tagsLabel);
     filtersLayout->addWidget(createTags());
     filtersLayout->addWidget(createTagsInput());
 #endif
@@ -113,8 +114,10 @@ EventsWindow::EventsWindow(DVRServerRepository *serverRepository, QWidget *paren
     m_videoSplitter->addWidget(m_resultTabs);
     m_videoSplitter->setCollapsible(0, false);
 
+	m_timelineContainer = createTimeline();
+
     m_resultTabs->addTab(m_resultsView, tr("List"));
-    m_resultTabs->addTab(createTimeline(), tr("Timeline"));
+	m_resultTabs->addTab(m_timelineContainer, tr("Timeline"));
 
     /* Playback */
     m_eventViewer = new EventViewWindow;
@@ -131,17 +134,27 @@ EventsWindow::EventsWindow(DVRServerRepository *serverRepository, QWidget *paren
     QSettings settings;
     restoreGeometry(settings.value(QLatin1String("ui/events/geometry")).toByteArray());
     m_videoSplitter->restoreState(settings.value(QLatin1String("ui/events/videoSplitter")).toByteArray());
+
+	retranslateUI();
 }
 
 EventsWindow::~EventsWindow()
 {
 }
 
+void EventsWindow::changeEvent(QEvent *event)
+{
+	if (event && event->type() == QEvent::LanguageChange)
+		retranslateUI();
+
+	QWidget::changeEvent(event);
+}
+
 void EventsWindow::createDateFilter(QBoxLayout *layout)
 {
-    QLabel *title = new QLabel(tr("Date"));
-    title->setStyleSheet(QLatin1String("font-weight:bold;"));
-    layout->addWidget(title);
+	m_dateLabel = new QLabel;
+	m_dateLabel->setStyleSheet(QLatin1String("font-weight:bold;"));
+	layout->addWidget(m_dateLabel);
 
     QDateEdit *dateEdit = new QDateEdit(QDate::currentDate());
     dateEdit->setCalendarPopup(true);
@@ -189,14 +202,11 @@ QWidget *EventsWindow::createTags()
 
 QWidget *EventsWindow::createTagsInput()
 {
-    QComboBox *tagInput = new QComboBox;
-    tagInput->setEditable(true);
-    tagInput->setInsertPolicy(QComboBox::NoInsert);
-#if QT_VERSION >= 0x040700
-    tagInput->lineEdit()->setPlaceholderText(tr("Type or select a tag to filter"));
-#endif
+	m_tagInput = new QComboBox;
+	m_tagInput->setEditable(true);
+	m_tagInput->setInsertPolicy(QComboBox::NoInsert);
 
-    return tagInput;
+	return m_tagInput;
 }
 
 QWidget * EventsWindow::createResultsView()
@@ -246,11 +256,37 @@ QWidget *EventsWindow::createTimeline()
 
     layout->addWidget(m_timeline, 0, 0, 1, 2);
 
-    QLabel *label = new QLabel(tr("Zoom:"));
-    layout->addWidget(label, 1, 0, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
+	m_zoomLabel = new QLabel;
+	layout->addWidget(m_zoomLabel, 1, 0, 1, 1, Qt::AlignLeft | Qt::AlignVCenter);
 
     layout->addWidget(m_timelineZoom, 1, 1);
-    return container;
+	return container;
+}
+
+void EventsWindow::retranslateUI()
+{
+	setWindowTitle(tr("Bluecherry - Event Browser"));
+	m_minimumLevelLabel->setText(tr("Minimum Level"));
+	m_typeLabel->setText(tr("Type"));
+	if (m_tagsLabel)
+		m_tagsLabel->setText(tr("Tags"));
+
+	m_resultTabs->setTabText(m_resultTabs->indexOf(m_resultsView), tr("List"));
+	m_resultTabs->setTabText(m_resultTabs->indexOf(m_timelineContainer), tr("Timeline"));
+
+	m_zoomLabel->setText(tr("Zoom:"));
+	if (m_tagInput)
+		m_tagInput->lineEdit()->setPlaceholderText(tr("Type or select a tag to filter"));
+	m_dateLabel->setText(tr("Date"));
+
+	m_levelFilter->blockSignals(true);
+	m_levelFilter->setItemText(0, tr("Any"));
+	m_levelFilter->setItemText(1, tr("Info"));
+	m_levelFilter->setItemText(2, tr("Warning"));
+	m_levelFilter->setItemText(3, tr("Alarm"));
+	m_levelFilter->setItemText(4, tr("Critical"));
+	m_levelFilter->blockSignals(false);
+
 }
 
 void EventsWindow::closeEvent(QCloseEvent *event)

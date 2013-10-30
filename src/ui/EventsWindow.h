@@ -49,6 +49,7 @@ public:
     virtual ~EventsWindow();
 
 protected:
+	virtual void changeEvent(QEvent *event);
     virtual void closeEvent(QCloseEvent *event);
 
 private slots:
@@ -90,11 +91,19 @@ private:
     EventsUpdater *m_eventsUpdater;
     EventTimelineWidget *m_timeline;
     QSlider *m_timelineZoom;
+	QWidget *m_timelineContainer;
 
     /* Playback */
     QSplitter *m_videoSplitter;
     EventViewWindow *m_eventViewer;
     ModelEventsCursor *m_modelEventsCursor;
+
+	QLabel *m_minimumLevelLabel;
+	QLabel *m_typeLabel;
+	QLabel *m_tagsLabel;
+	QLabel *m_dateLabel;
+	QComboBox *m_tagInput;
+	QLabel *m_zoomLabel;
 
     void createDateFilter(QBoxLayout *layout);
     QWidget *createLevelFilter();
@@ -104,6 +113,8 @@ private:
 
     QWidget *createResultsView();
     QWidget *createTimeline();
+
+	void retranslateUI();
 
 };
 

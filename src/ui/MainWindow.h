@@ -32,6 +32,7 @@ class DVRServer;
 class DVRServerRepository;
 class QSslError;
 class QSslConfiguration;
+class QAction;
 class QLabel;
 
 class MainWindow : public QMainWindow
@@ -67,7 +68,6 @@ public slots:
     void showDownloadsWindow();
 
 private slots:
-    void updateMenuForServer(DVRServer *server = 0);
     void updateServersMenu();
     void sslConfirmRequired(DVRServer *server, const QList<QSslError> &errors, const QSslConfiguration &config);
     void trayActivated(QSystemTrayIcon::ActivationReason);
@@ -84,6 +84,7 @@ signals:
     void closing();
 
 protected:
+	virtual void changeEvent(QEvent *event);
     virtual void showEvent(QShowEvent *event);
     virtual void hideEvent(QHideEvent *event);
     virtual void closeEvent(QCloseEvent *event);
@@ -103,12 +104,35 @@ private:
     QWeakPointer<EventVideoDownloadsWindow> m_eventVideoDownloadsWindow;
     QWeakPointer<EventsWindow> m_eventsWindow;
 
+	QAction *m_expandAllServersAction;
+	QAction *m_collapseAllServersAction;
+
+	QMenu *m_appMenu;
+	QAction *m_browseEventsAction;
+	QAction *m_downloadManagerAction;
+	QAction *m_addServerAction;
+	QAction *m_optionsAction;
+	QAction *m_quitAction;
+
+	QMenu *m_liveMenu;
+	QAction *m_newWindowAction;
+
+	QMenu *m_helpMenu;
+	QAction *m_documentationAction;
+	QAction *m_supportAction;
+	QAction *m_suggestionsAction;
+	QAction *m_aboutAction;
+
+
     void createMenu();
 
     QWidget *createSourcesList();
-    QWidget *createServerBox();
 
     QWidget *createRecentEvents();
+
+	void updateLiveMenu();
+
+	void retranslateUI();
 };
 
 #endif // MAINWINDOW_H

@@ -15,15 +15,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-if (UNIX AND NOT APPLE)
-	include (GNUInstallDirs)
+message (STATUS " * trans direcgorry: ${CMAKE_CURRENT_SOURCE_DIR}/translations")
 
-	configure_file ("linux/bluecherry-client.desktop.in" "linux/bluecherry-client.desktop")
+file (GLOB_RECURSE TRANSLATION_SOURCES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.ts")
 
-	install (TARGETS bluecherry-client RUNTIME DESTINATION bin)
-	install (FILES "${CMAKE_CURRENT_BINARY_DIR}/linux/bluecherry-client.desktop" DESTINATION share/applications)
-	install (FILES "res/bluecherry-client.png" DESTINATION share/icons)
+qt4_add_translation (TRANSLATION_FILES ${TRANSLATION_SOURCES})
 
-        install (FILES ${TRANSLATION_FILES} DESTINATION "${CMAKE_INSTALL_DATADIR}/bluecherry-client/translations")
+add_custom_target (translations DEPENDS ${TRANSLATION_FILES})
+add_dependencies (bluecherry-client translations)
 
-endif (UNIX AND NOT APPLE)

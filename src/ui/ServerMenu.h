@@ -15,43 +15,49 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SERVERCONFIGWINDOW_H
-#define SERVERCONFIGWINDOW_H
+#ifndef SERVERMENU_H
+#define SERVERMENU_H
 
-#include <QWidget>
+#include <QMenu>
+#include <QObject>
 
 class DVRServer;
-class QWebView;
-class QUrl;
 
-class ServerConfigWindow : public QWidget
+class QAction;
+
+class ServerMenu : public QMenu
 {
-    Q_OBJECT
-
-    Q_PROPERTY(DVRServer* server READ server WRITE setServer NOTIFY serverChanged)
+	Q_OBJECT
 
 public:
-    explicit ServerConfigWindow(QWidget *parent = 0);
-    virtual ~ServerConfigWindow();
-
-    static ServerConfigWindow *instance();
-
-    DVRServer *server() const { return m_server; }
-
-public slots:
-    void setServer(DVRServer *server);
+	explicit ServerMenu(DVRServer *server, const QString &title, QWidget *parent = 0);
 
 signals:
-    void serverChanged(DVRServer *server);
+	void showEventsWindow();
+	void openServerConfig();
+	void openServerSettings();
 
 protected:
 	virtual void changeEvent(QEvent *event);
 
 private:
-    static ServerConfigWindow *m_instance;
+	DVRServer *m_server;
 
-    DVRServer *m_server;
-    QWebView *m_webView;
+	QAction *m_connectAction;
+	QAction *m_browseEventsAction;
+	QAction *m_configureServerAction;
+	QAction *m_refreshDevicesAction;
+	QAction *m_settingsAction;
+
+	void createActions();
+	void retranslateUI();
+
+private slots:
+	void updateMenuForServer();
+
 };
 
-#endif // SERVERCONFIGWINDOW_H
+Q_DECLARE_METATYPE(ServerMenu*)
+
+
+#endif // SERVERMENU_H
