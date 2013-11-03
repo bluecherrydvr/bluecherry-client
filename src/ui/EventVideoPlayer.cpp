@@ -183,9 +183,13 @@ EventVideoPlayer::~EventVideoPlayer()
     bcApp->releaseLive();
 
     if (m_videoBackend)
-        m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "deleteLater", Qt::QueuedConnection);
+    {
+        connect(m_videoBackend.data(), SIGNAL(destroyed()), m_videoThread.data(), SLOT(quit()));
+        connect(m_videoThread.data(), SIGNAL(finished()), m_videoThread.data(), SLOT(deleteLater()));
 
-    if (m_videoThread)
+        m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "deleteLater", Qt::QueuedConnection);
+    }
+    else if (m_videoThread)
     {
         m_videoThread.data()->quit();
         m_videoThread.data()->deleteLater();
@@ -195,7 +199,7 @@ EventVideoPlayer::~EventVideoPlayer()
 void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
 {
     if (m_videoBackend)
-        clearVideo();
+            clearVideo();
 
     if (url.isEmpty())
         return;
@@ -211,8 +215,8 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     }
 
     m_videoBackend = bcApp->videoPlayerFactory()->createBackend();
-    m_videoBackend.data()->moveToThread(m_videoThread.data());
-    m_videoBackend.data()->setLastSpeed(m_lastspeed);
+	m_videoBackend.data()->moveToThread(m_videoThread.data());
+	m_videoBackend.data()->setLastSpeed(m_lastspeed);
     connect(m_videoBackend.data(), SIGNAL(stateChanged(int,int)), SLOT(stateChanged(int)));
     connect(m_videoBackend.data(), SIGNAL(nonFatalError(QString)), SLOT(videoNonFatalError(QString)));
     connect(m_videoBackend.data(), SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
