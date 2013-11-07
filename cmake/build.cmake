@@ -20,6 +20,15 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR}/src)
 
 if (UNIX AND NOT APPLE)
     set (CMAKE_CXX_FLAGS "-Werror -Wall -Wextra -Wundef -Wcast-align -Wpointer-arith -Woverloaded-virtual -Wnon-virtual-dtor -Wno-unused-local-typedefs ${CMAKE_CXX_FLAGS}")
+
+    if (CMAKE_COMPILER_IS_GNUCC)
+        execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
+                        OUTPUT_VARIABLE GCC_VERSION)
+        if (GCC_VERSION VERSION_GREATER 4.7 OR GCC_VERSION VERSION_EQUAL 4.7)
+            set (CMAKE_CXX_FLAGS "-Wno-unused-local-typedefs ${CMAKE_CXX_FLAGS}")
+        endif ()
+    endif (CMAKE_COMPILER_IS_GNUCC)
+
 endif (UNIX AND NOT APPLE)
 
 add_executable (bluecherry-client WIN32 MACOSX_BUNDLE ${bluecherry_client_SRCS} src/main.cpp)
