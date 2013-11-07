@@ -30,7 +30,7 @@ if (UNIX AND NOT APPLE)
     endif (CMAKE_COMPILER_IS_GNUCC)
 
     if (DEVBUILD)
-        set (CMAKE_CXX_FLAGS "-Werror -ftrapv -fno-omit-frame-pointer  ${CMAKE_CXX_FLAGS}")
+        set (CMAKE_CXX_FLAGS "-Werror -fno-omit-frame-pointer  ${CMAKE_CXX_FLAGS}")
     endif (DEVBUILD)
 
 endif (UNIX AND NOT APPLE)
