@@ -26,8 +26,21 @@ if (${CMAKE_MAJOR_VERSION} EQUAL 2 AND ${CMAKE_MINOR_VERSION} EQUAL 8 AND ${CMAK
     cmake_policy (SET CMP0017 NEW)
 endif (${CMAKE_MAJOR_VERSION} EQUAL 2 AND ${CMAKE_MINOR_VERSION} EQUAL 8 AND ${CMAKE_PATCH_VERSION} GREATER 3) 
 
+option (DEVBUILD "Turn on some compiler flags helpful during development process" OFF)
 option (ENABLE_BREAKPAD "Enable Breakpad integration" ON)
 option (BUILD_TESTING "Build the test suite" ON)
+
+if (NOT DEFINED CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+        if (DEVBUILD)
+                set (default Debug)
+        else (DEVBUILD)
+                set (default RelWithDebInfo)
+        endif (DEVBUILD)
+
+        set (CMAKE_BUILD_TYPE "${default}")
+
+endif (NOT DEFINED CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+
 
 # hack for < 2.8.0 CMake
 if ("${CMAKE_CURRENT_LIST_DIR}" STREQUAL "")

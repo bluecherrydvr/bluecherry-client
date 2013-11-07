@@ -19,7 +19,7 @@ configure_file (src/bluecherry-config.h.in src/bluecherry-config.h)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/src)
 
 if (UNIX AND NOT APPLE)
-    set (CMAKE_CXX_FLAGS "-Werror -Wall -Wextra -Wundef -Wcast-align -Wpointer-arith -Woverloaded-virtual -Wnon-virtual-dtor ${CMAKE_CXX_FLAGS}")
+    set (CMAKE_CXX_FLAGS "-Wall -Wextra -Wundef -Wcast-align -Wpointer-arith -Woverloaded-virtual -Wnon-virtual-dtor  ${CMAKE_CXX_FLAGS}")
 
     if (CMAKE_COMPILER_IS_GNUCC)
         execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
@@ -28,6 +28,10 @@ if (UNIX AND NOT APPLE)
             set (CMAKE_CXX_FLAGS "-Wno-unused-local-typedefs ${CMAKE_CXX_FLAGS}")
         endif ()
     endif (CMAKE_COMPILER_IS_GNUCC)
+
+    if (DEVBUILD)
+        set (CMAKE_CXX_FLAGS "-Werror -ftrapv -fno-omit-frame-pointer  ${CMAKE_CXX_FLAGS}")
+    endif (DEVBUILD)
 
 endif (UNIX AND NOT APPLE)
 

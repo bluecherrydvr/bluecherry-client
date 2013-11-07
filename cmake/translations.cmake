@@ -15,8 +15,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-message (STATUS " * trans direcgorry: ${CMAKE_CURRENT_SOURCE_DIR}/translations")
-
 file (GLOB_RECURSE TRANSLATION_SOURCES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.ts")
 
 qt4_add_translation (TRANSLATION_FILES ${TRANSLATION_SOURCES})
