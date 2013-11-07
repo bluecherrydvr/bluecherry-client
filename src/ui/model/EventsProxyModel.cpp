@@ -47,7 +47,7 @@ bool EventsProxyModel::filterAcceptsRow(EventData *eventData) const
     if (eventData->level() < m_minimumLevel)
         return false;
 
-    if (!m_types.isNull() && (int)eventData->type() >= 0 && !m_types[(int)eventData->type()])
+    if (!m_types.isNull() && (int)eventData->type() >= 0 && !m_types.testBit((int)eventData->type()))
         return false;
 
     if (!m_day.isNull() && eventData->utcStartDate().date() != m_day)
