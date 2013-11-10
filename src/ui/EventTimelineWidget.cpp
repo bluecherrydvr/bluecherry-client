@@ -156,7 +156,7 @@ QRect EventTimelineWidget::visualRect(const QModelIndex &index) const
     const_cast<EventTimelineWidget*>(this)->ensureLayout();
     QRect itemArea = viewportItemArea();
 
-    QRect re = timeCellRect(event->utcStartDate(), event->durationInSeconds());
+    QRect re = timeCellRect(event->localStartDate(), event->durationInSeconds());
     re.translate(itemArea.topLeft());
     re.moveTop(itemArea.top() + locationData->y - verticalScrollBar()->value());
     re.setHeight(rowHeight());
@@ -217,7 +217,7 @@ void EventTimelineWidget::scrollTo(const QModelIndex &index, ScrollHint hint)
     }
 
     if (!isEventVisible(event))
-        horizontalScrollBar()->setValue(visibleTimeRange.range().start().secsTo(event->utcStartDate()));
+        horizontalScrollBar()->setValue(visibleTimeRange.range().start().secsTo(event->localStartDate()));
 }
 
 bool rowDataLessThan(const RowData *a, const RowData *b)
@@ -260,7 +260,7 @@ EventData *EventTimelineWidget::eventAt(const QPoint &point) const
     /* This is slow and can likely be improved. */
     for (QList<EventData*>::ConstIterator evit = location->events.begin(); evit != location->events.end(); ++evit)
     {
-        QRect eventRect = timeCellRect((*evit)->utcStartDate(), (*evit)->durationInSeconds()).translated(itemArea.left(), 0);
+        QRect eventRect = timeCellRect((*evit)->localStartDate(), (*evit)->durationInSeconds()).translated(itemArea.left(), 0);
         if (point.x() >= eventRect.left() && point.x() <= eventRect.right())
             return *evit;
     }
@@ -328,7 +328,7 @@ void EventTimelineWidget::setSelection(const QRect &irect, QItemSelectionModel::
 
         for (QList<EventData*>::ConstIterator evit = location->events.begin(); evit != location->events.end(); ++evit)
         {
-            QRect eventRect = timeCellRect((*evit)->utcStartDate(), (*evit)->durationInSeconds()).translated(itemArea.left(), 0);
+            QRect eventRect = timeCellRect((*evit)->localStartDate(), (*evit)->durationInSeconds()).translated(itemArea.left(), 0);
             if (eventRect.x() >= rect.x())
             {
                 if (eventRect.x() > rect.right())
@@ -413,7 +413,7 @@ bool EventTimelineWidget::findEvent(EventData *event, bool create, ServerData **
         int p = 0;
         for (int n = locationData->events.size(); p < n; ++p)
         {
-            if (event->utcStartDate() < locationData->events[p]->utcStartDate())
+            if (event->localStartDate() < locationData->events[p]->localStartDate())
                 break;
         }
         *position = p;
@@ -430,7 +430,7 @@ QDateTime EventTimelineWidget::earliestDate()
 
     for (QHash<EventData *, int>::Iterator it = rowsMap.begin(); it != rowsMap.end(); ++it)
     {
-        QDateTime date = it.key()->utcStartDate();
+        QDateTime date = it.key()->localStartDate();
         if (result.isNull() || date < result)
             result = date;
     }
@@ -444,7 +444,7 @@ QDateTime EventTimelineWidget::latestDate()
 
     for (QHash<EventData *, int>::Iterator it = rowsMap.begin(); it != rowsMap.end(); ++it)
     {
-        QDateTime date = it.key()->utcEndDate();
+        QDateTime date = it.key()->localEndDate();
         if (result.isNull() || date > result)
             result = date;
     }
@@ -455,7 +455,7 @@ QDateTime EventTimelineWidget::latestDate()
 void EventTimelineWidget::updateTimeRange(bool fromData)
 {
     if (fromData)
-        visibleTimeRange.setDateTimeRange(DateTimeRange(earliestDate().toUTC(), latestDate().toUTC()));
+        visibleTimeRange.setDateTimeRange(DateTimeRange(earliestDate(), latestDate()));
 
     /* Determine the minimum width for the primary tick (the tick with a label),
      * which is then used to determine its interval. */
@@ -470,6 +470,8 @@ void EventTimelineWidget::updateTimeRange(bool fromData)
 
     updateScrollBars();
     viewport()->update();
+
+    scheduleDelayedItemsLayout(DoUpdateTimeRange);
 }
 
 void EventTimelineWidget::updateRowsMap(int row)
@@ -596,8 +598,8 @@ void EventTimelineWidget::addModelRows(int first, int last)
         locationData->events.insert(pos, data);
         rowsMap.insert(data, i);
 
-        dateTimeRange = dateTimeRange.extendWith(data->utcStartDate());
-        dateTimeRange = dateTimeRange.extendWith(data->utcEndDate());
+        dateTimeRange = dateTimeRange.extendWith(data->localStartDate());
+        dateTimeRange = dateTimeRange.extendWith(data->localEndDate());
     }
 
     visibleTimeRange.setDateTimeRange(dateTimeRange);
@@ -780,7 +782,8 @@ void EventTimelineWidget::paintDays(QPainter &p)
     EventTimelineDatePainter datePainter(p);
     datePainter.setStartDate(visibleTimeRange.visibleRange().start().date().addDays(-1));
     datePainter.setEndDate(visibleTimeRange.visibleRange().end().date());
-    datePainter.setVisibleTimeStart(visibleTimeRange.visibleRange().start().addSecs(utcOffset()));
+//    datePainter.setVisibleTimeStart(visibleTimeRange.visibleRange().start().addSecs(utcOffset()));
+    datePainter.setVisibleTimeStart(visibleTimeRange.visibleRange().start());
     datePainter.setPixelsPerSecondRatio(pixelsPerSeconds(1));
 
     QFont font = p.font();
@@ -796,7 +799,7 @@ int EventTimelineWidget::utcOffset() const
     if (rowsMap.isEmpty())
         return 0;
 
-    return rowsMap.begin().key()->dateTzOffsetMins() * 60;
+    return rowsMap.begin().key()->serverDateTzOffsetMins() * 60;
 }
 
 void EventTimelineWidget::paintEvent(QPaintEvent *event)
@@ -842,7 +845,8 @@ void EventTimelineWidget::paintEvent(QPaintEvent *event)
 
 QDateTime EventTimelineWidget::firstTickDateTime() const
 {
-    QDateTime firstTickDateTime = visibleTimeRange.visibleRange().start().addSecs(utcOffset());
+    QDateTime firstTickDateTime = visibleTimeRange.visibleRange().start();
+//    QDateTime firstTickDateTime = visibleTimeRange.visibleRange().start().addSecs(utcOffset());
     int preAreaSecs = visibleTimeRange.visibleRange().start().toTime_t() % visibleTimeRange.primaryTickSecs();
     if (preAreaSecs)
         return firstTickDateTime.addSecs(visibleTimeRange.primaryTickSecs() - preAreaSecs);
@@ -852,7 +856,8 @@ QDateTime EventTimelineWidget::firstTickDateTime() const
 
 int EventTimelineWidget::secondsFromVisibleStart(const QDateTime& serverTime) const
 {
-    return visibleTimeRange.visibleRange().start().addSecs(utcOffset()).secsTo(serverTime);
+    return visibleTimeRange.visibleRange().start().secsTo(serverTime);
+//    return visibleTimeRange.visibleRange().start().addSecs(utcOffset()).secsTo(serverTime);
 }
 
 void EventTimelineWidget::paintTickLines(QPainter &p, const QRect &rect)
@@ -933,9 +938,9 @@ void EventTimelineWidget::paintChart(QPainter& p, int width)
 
 bool EventTimelineWidget::isEventVisible(EventData *data) const
 {
-    if (data->utcEndDate() < visibleTimeRange.visibleRange().start())
+    if (data->localEndDate() < visibleTimeRange.visibleRange().start())
         return false;
-    if (data->utcStartDate() > visibleTimeRange.visibleRange().end())
+    if (data->localStartDate() > visibleTimeRange.visibleRange().end())
         return false;
 
     return true;
@@ -964,7 +969,7 @@ void EventTimelineWidget::paintEvent(QPainter &p, int boxHeight, EventData *even
 
     int modelRow = rowsMap[event];
 
-    QRect cellRect = timeCellRect(event->utcStartDate(), event->durationInSeconds(), 0, boxHeight);
+    QRect cellRect = timeCellRect(event->localStartDate(), event->durationInSeconds(), 0, boxHeight);
 
     p.setBrush(event->uiColor());
     p.drawRoundedRect(cellRect.adjusted(0, 1, 0, -1), 2, 2);

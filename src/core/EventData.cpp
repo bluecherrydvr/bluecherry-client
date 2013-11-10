@@ -115,16 +115,16 @@ EventType &EventType::operator=(const QString &str)
     return *this;
 }
 
-QDateTime EventData::utcEndDate() const
+QDateTime EventData::localEndDate() const
 {
-    return m_utcStartDate.addSecs(qMax(0, m_durationInSeconds));
+    return m_localStartDate.addSecs(qMax(0, m_durationInSeconds));
 }
 
 QDateTime EventData::serverStartDate() const
 {
     Q_ASSERT(m_utcStartDate.timeSpec() == Qt::UTC);
 
-    int dateTzOffsetSeconds = int(dateTzOffsetMins()) * 60;
+    int dateTzOffsetSeconds = int(serverDateTzOffsetMins()) * 60;
     QDateTime result = m_utcStartDate.addSecs(dateTzOffsetSeconds);
     result.setUtcOffset(dateTzOffsetSeconds);
     return result;
@@ -132,18 +132,19 @@ QDateTime EventData::serverStartDate() const
 
 QDateTime EventData::serverEndDate() const
 {
-    if (!hasDuration())
-        return serverStartDate();
+    QDateTime result = serverStartDate();
 
-    int dateTzOffsetSeconds = int(dateTzOffsetMins()) * 60;
-    QDateTime result = utcEndDate().addSecs(dateTzOffsetSeconds);
-    result.setUtcOffset(dateTzOffsetSeconds);
+    if (!hasDuration())
+        return result;
+
+    result.addSecs(qMax(0, m_durationInSeconds));
     return result;
 }
 
 void EventData::setUtcStartDate(const QDateTime utcStartDate)
 {
     m_utcStartDate = utcStartDate;
+    m_localStartDate = utcStartDate.toLocalTime();
 }
 
 bool EventData::hasDuration() const
@@ -194,9 +195,9 @@ void EventData::setMediaId(qint64 mediaId)
     m_mediaId = mediaId;
 }
 
-void EventData::setDateTzOffsetMins(qint16 dateTzOffsetMins)
+void EventData::setServerDateTzOffsetMins(qint16 dateTzOffsetMins)
 {
-    m_dateTzOffsetMins = dateTzOffsetMins;
+    m_serverDateTzOffsetMins = dateTzOffsetMins;
 }
 
 void EventData::setLocation(const QString &location)
@@ -256,7 +257,7 @@ QString EventData::baseFileName() const
     QString fileName = QString::fromLatin1("%1.%2.%3")
         .arg(uiServer())
         .arg(uiLocation())
-        .arg(utcStartDate().toString(QLatin1String("yyyy-MM-dd hh-mm-ss")));
+        .arg(localStartDate().toString(QLatin1String("yyyy-MM-dd hh-mm-ss")));
 
     return sanitizeFilename(fileName);
 }

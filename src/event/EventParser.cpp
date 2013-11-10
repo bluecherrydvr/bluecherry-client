@@ -92,7 +92,7 @@ EventData * EventParser::parseEntry(DVRServer *server, QXmlStreamReader &reader)
         {
             qint16 dateTzOffsetMins;
             data->setUtcStartDate(isoToDateTime(reader.readElementText(), &dateTzOffsetMins));
-            data->setDateTzOffsetMins(dateTzOffsetMins);
+            data->setServerDateTzOffsetMins(dateTzOffsetMins);
         }
         else if (reader.name() == QLatin1String("updated"))
         {
@@ -100,7 +100,7 @@ EventData * EventParser::parseEntry(DVRServer *server, QXmlStreamReader &reader)
             if (d.isEmpty())
                 data->setInProgress();
             else
-                data->setDurationInSeconds(data->utcStartDate().secsTo(isoToDateTime(d)));
+                data->setDurationInSeconds(data->localStartDate().secsTo(isoToDateTime(d)));
         }
         else if (reader.name() == QLatin1String("content"))
         {
@@ -135,7 +135,7 @@ EventData * EventParser::parseEntry(DVRServer *server, QXmlStreamReader &reader)
             reader.raiseError(QLatin1String("Unexpected <entry> element"));
     }
 
-    if (!reader.hasError() && (data->eventId() < 0 || !data->utcStartDate().isValid()))
+    if (!reader.hasError() && (data->eventId() < 0 || !data->localStartDate().isValid()))
         reader.raiseError(QLatin1String("Missing required elements for entry"));
 
     return data;
