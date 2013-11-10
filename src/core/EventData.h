@@ -85,6 +85,7 @@ public:
 class EventData
 {
     QDateTime m_utcStartDate;
+    QDateTime m_localStartDate;
     QWeakPointer<DVRServer> m_server;
     qint64 m_eventId;
     qint64 m_mediaId;
@@ -92,11 +93,11 @@ class EventData
     int m_locationId;
     EventLevel m_level;
     EventType m_type;
-    qint16 m_dateTzOffsetMins; /* Offset in minutes for the server's timezone as of this event */
+    qint16 m_serverDateTzOffsetMins; /* Offset in minutes for the server's timezone as of this event */
 
 public:
     EventData(DVRServer *s = 0)
-        : m_server(s), m_eventId(-1), m_mediaId(-1), m_durationInSeconds(0), m_locationId(-1), m_dateTzOffsetMins(0)
+        : m_server(s), m_eventId(-1), m_mediaId(-1), m_durationInSeconds(0), m_locationId(-1), m_serverDateTzOffsetMins(0)
     {
     }
 
@@ -105,8 +106,8 @@ public:
         return (o.m_server == m_server && o.m_eventId == m_eventId);
     }
 
-    QDateTime utcStartDate() const { return m_utcStartDate; }
-    QDateTime utcEndDate() const;
+    QDateTime localStartDate() const { return m_localStartDate; }
+    QDateTime localEndDate() const;
     QDateTime serverStartDate() const;
     QDateTime serverEndDate() const;
     void setUtcStartDate(const QDateTime utcStartDate);
@@ -135,8 +136,8 @@ public:
     qint64 mediaId() const { return m_mediaId; }
     void setMediaId(qint64 mediaId);
 
-    qint16 dateTzOffsetMins() const { return m_dateTzOffsetMins; }
-    void setDateTzOffsetMins(qint16 dateTzOffsetMins);
+    qint16 serverDateTzOffsetMins() const { return m_serverDateTzOffsetMins; }
+    void setServerDateTzOffsetMins(qint16 serverDateTzOffsetMins);
 
     void setLocation(const QString &location);
 

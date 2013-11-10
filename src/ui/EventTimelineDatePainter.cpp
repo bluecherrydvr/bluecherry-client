@@ -58,7 +58,7 @@ void EventTimelineDatePainter::paintDates()
 
 void EventTimelineDatePainter::paintDate(const QDate &date)
 {
-    QDateTime dt = QDateTime(date, QTime(), Qt::UTC);
+    QDateTime dt = QDateTime(date, QTime(), Qt::LocalTime);
 
     if (m_visibleTimeStart >= dt.addDays(1))
         return;
@@ -92,7 +92,7 @@ QRect EventTimelineDatePainter::dateStringToRect(const QDate &date, const QStrin
     QRect result;
 
     result.setTop(0);
-    result.setLeft(qMax(0, qRound(m_pixelsPerSecondRatio * m_visibleTimeStart.secsTo(QDateTime(date, QTime(), Qt::UTC)))));
+    result.setLeft(qMax(0, qRound(m_pixelsPerSecondRatio * m_visibleTimeStart.secsTo(QDateTime(date, QTime(), Qt::LocalTime)))));
     result.setWidth(m_painter.fontMetrics().width(dateString) + 15);
     result.setHeight(m_fontHeight);
 
