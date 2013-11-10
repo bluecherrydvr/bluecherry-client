@@ -470,6 +470,8 @@ void EventTimelineWidget::updateTimeRange(bool fromData)
 
     updateScrollBars();
     viewport()->update();
+
+    scheduleDelayedItemsLayout(DoUpdateTimeRange);
 }
 
 void EventTimelineWidget::updateRowsMap(int row)
