@@ -50,7 +50,7 @@ bool EventsProxyModel::filterAcceptsRow(EventData *eventData) const
     if (!m_types.isNull() && (int)eventData->type() >= 0 && !m_types.testBit((int)eventData->type()))
         return false;
 
-    if (!m_day.isNull() && eventData->utcStartDate().date() != m_day)
+    if (!m_day.isNull() && eventData->localStartDate().date() != m_day)
         return false;
 
     if (m_sources.isEmpty())
@@ -112,7 +112,7 @@ int EventsProxyModel::compare(EventData *left, EventData *right, int column) con
         case EventsModel::LevelColumn:
             return left->level() - right->level();
         case EventsModel::DateColumn:
-            return right->utcStartDate().secsTo(left->utcStartDate());
+            return right->localStartDate().secsTo(left->localStartDate());
         default:
             return left - right;
     }

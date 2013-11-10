@@ -77,8 +77,8 @@ void EventParserTestCase::testSingleItems()
 {
     QFETCH(QString, fileName);
     QFETCH(long long, eventId);
-    QFETCH(QDateTime, utcStartDate);
-    QFETCH(Qt::TimeSpec, utcStartDateTimeSpec);
+    QFETCH(QDateTime, localStartDate);
+    QFETCH(Qt::TimeSpec, localStartDateTimeSpec);
     QFETCH(QDateTime, utcEndDate);
     QFETCH(Qt::TimeSpec, utcEndDateTimeSpec);
     QFETCH(QDateTime, serverStartDate);
@@ -100,10 +100,10 @@ void EventParserTestCase::testSingleItems()
     EventData *event = parseSingleEventFile(fileName);
     QVERIFY(!event->server());
     QCOMPARE(event->eventId(), eventId);
-    QCOMPARE(event->utcStartDate(), utcStartDate);
-    QCOMPARE(event->utcStartDate().timeSpec(), utcStartDateTimeSpec);
-    QCOMPARE(event->utcEndDate(), utcEndDate);
-    QCOMPARE(event->utcEndDate().timeSpec(), utcEndDateTimeSpec);
+    QCOMPARE(event->localStartDate(), localStartDate);
+    QCOMPARE(event->localStartDate().timeSpec(), localStartDateTimeSpec);
+    QCOMPARE(event->localEndDate(), utcEndDate);
+    QCOMPARE(event->localEndDate().timeSpec(), utcEndDateTimeSpec);
     QCOMPARE(event->serverStartDate(), serverStartDate);
     QCOMPARE(event->serverStartDate().timeSpec(), serverStartDateTimeSpec);
     QCOMPARE(event->serverEndDate(), serverEndDate);
@@ -115,7 +115,7 @@ void EventParserTestCase::testSingleItems()
     QCOMPARE(event->level().level, level);
     QCOMPARE(event->type().type, type);
     QCOMPARE(event->mediaId(), mediaId);
-    QCOMPARE(event->dateTzOffsetMins(), dateTzOffsetMins);
+    QCOMPARE(event->serverDateTzOffsetMins(), dateTzOffsetMins);
     QCOMPARE(event->isSystem(), isSystem);
     QCOMPARE(event->isCamera(), isCamera);
     QCOMPARE(event->hasMedia(), hasMedia);
@@ -125,8 +125,8 @@ void EventParserTestCase::testSingleItems_data()
 {
     QTest::addColumn<QString>("fileName");
     QTest::addColumn<long long>("eventId");
-    QTest::addColumn<QDateTime>("utcStartDate");
-    QTest::addColumn<Qt::TimeSpec>("utcStartDateTimeSpec");
+    QTest::addColumn<QDateTime>("localStartDate");
+    QTest::addColumn<Qt::TimeSpec>("localStartDateTimeSpec");
     QTest::addColumn<QDateTime>("utcEndDate");
     QTest::addColumn<Qt::TimeSpec>("utcEndDateTimeSpec");
     QTest::addColumn<QDateTime>("serverStartDate");

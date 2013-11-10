@@ -86,7 +86,7 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
     else if (role == Qt::ToolTipRole)
     {
         return tr("%1 (%2)<br>%3 on %4<br>%5").arg(data->uiType(), data->uiLevel(), Qt::escape(data->uiLocation()),
-                                                   Qt::escape(data->uiServer()), data->serverStartDate().toString());
+                                                   Qt::escape(data->uiServer()), data->localStartDate().toString());
     }
     else if (role == Qt::ForegroundRole)
     {
@@ -134,9 +134,9 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
         break;
     case DateColumn:
         if (role == Qt::DisplayRole)
-            return data->serverStartDate().toString();
+            return data->localStartDate().toString();
         else if (role == Qt::EditRole)
-            return data->utcStartDate();
+            return data->localStartDate();
         break;
     }
 

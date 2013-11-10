@@ -234,10 +234,10 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     Q_UNUSED(ok);
 
     setControlsEnabled(true);
-    QDateTime evd = event->serverStartDate();
+    QDateTime evd = event->localStartDate();
     m_startTime->setText(evd.time().toString());
     if (event->hasDuration())
-        m_endTime->setText(event->serverEndDate().time().toString());
+        m_endTime->setText(event->localEndDate().time().toString());
     else
         m_endTime->clear();
 }
@@ -535,7 +535,7 @@ void EventVideoPlayer::saveSnapshot(const QString &ifile)
         if (m_event)
         {
             filename = QString::fromLatin1("%1 - %2.jpg").arg(m_event->uiLocation(),
-                                                              m_event->utcStartDate().addSecs(int(m_videoBackend.data()->position() / 1000000000))
+                                                              m_event->localStartDate().addSecs(int(m_videoBackend.data()->position() / 1000000000))
                                                               .toString(QLatin1String("yyyy-MM-dd hh-mm-ss")));
         }
 
