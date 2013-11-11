@@ -44,6 +44,12 @@
 #include <QAbstractButton>
 #include <QDebug>
 
+#ifdef Q_OS_LINUX
+#include <QtDBus/QDBusConnection>
+#include <QtDBus/QDBusMessage>
+#include <QtDBus/QDBusReply>
+#endif
+
 #include "bluecherry-config.h"
 
 BluecherryApp *bcApp = 0;
@@ -52,7 +58,7 @@ BluecherryApp::BluecherryApp()
     : nam(new QNetworkAccessManager(this)), liveView(new LiveViewManager(this)),
       globalRate(new TransferRateCalculator(this)),
       m_livePaused(false), m_inPauseQuery(false),
-      m_screensaverInhibited(false)
+      m_screensaverInhibited(false), m_screensaveValue(0)
 {
     Q_ASSERT(!bcApp);
     bcApp = this;
@@ -367,6 +373,14 @@ void BluecherryApp::setScreensaverInhibited(bool inhibit)
         connect(m_screensaveTimer, SIGNAL(timeout()), SLOT(resetSystemActivity()));
         m_screensaveTimer->start(30000);
         resetSystemActivity();
+#elif defined(Q_OS_LINUX)
+        QDBusMessage message = QDBusMessage::createMethodCall(QLatin1String("org.freedesktop.ScreenSaver"), QLatin1String("/ScreenSaver"),
+                                                          QLatin1String("org.freedesktop.ScreenSaver"), QLatin1String("Inhibit"));
+        message << QLatin1String("bluecherry");
+        message << QLatin1String("");
+        QDBusReply<uint> reply = QDBusConnection::sessionBus().call(message);
+        if (reply.isValid())
+            m_screensaveValue = reply.value();
 #else
         qCritical("Screensaver inhibit is not supported on this platform");
 #endif
@@ -378,6 +392,14 @@ void BluecherryApp::setScreensaverInhibited(bool inhibit)
 #elif defined(Q_OS_MAC)
         delete m_screensaveTimer;
         m_screensaveTimer = 0;
+#elif defined(Q_OS_LINUX)
+        if (m_screensaveValue)
+        {
+            QDBusMessage message = QDBusMessage::createMethodCall(QLatin1String("org.freedesktop.ScreenSaver"), QLatin1String("/ScreenSaver"),
+                                                 QLatin1String("org.freedesktop.ScreenSaver"), QLatin1String("UnInhibit"));
+            message << m_screensaveValue;
+            QDBusConnection::sessionBus().send(message);
+        }
 #endif
     }
 }

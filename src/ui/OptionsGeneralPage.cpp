@@ -72,7 +72,7 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     m_deinterlace->setChecked(settings.value(QLatin1String("ui/liveview/autoDeinterlace"), false).toBool());
     layout->addWidget(m_deinterlace);
 
-#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
+#if defined(Q_OS_WIN) || defined(Q_OS_MAC) || defined(Q_OS_LINUX)
     m_ssFullscreen = new QCheckBox(tr("Viewing live or recorded video in fullscreen"));
     m_ssVideo = new QCheckBox(tr("Playing recorded video"));
     m_ssNever = new QCheckBox(tr("Always prevent the computer from going to sleep"));

@@ -22,6 +22,10 @@ set (QT_USE_QTNETWORK 1)
 set (QT_USE_QTOPENGL 1)
 set (QT_USE_QTWEBKIT 1)
 
+if (UNIX AND NOT APPLE)
+    set (QT_USE_QTDBUS 1)
+endif (UNIX AND NOT APPLE)
+
 if (WIN32)
     set (QT_USE_QTMAIN 1)
 endif (WIN32)
