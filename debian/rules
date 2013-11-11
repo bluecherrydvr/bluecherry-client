@@ -17,6 +17,8 @@ override_dh_auto_install:
 	cp -a /usr/lib/bluecherry/qt4.8/lib/libQtScript*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.8/lib/
 	cp -a /usr/lib/bluecherry/qt4.8/lib/libQtWebKit*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.8/lib/
 	cp -a /usr/lib/bluecherry/qt4.8/lib/libQtDBus*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.8/lib/
+	cp -a /usr/lib/bluecherry/qt4.8/lib/libQtSql*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.8/lib/
+	cp -a /usr/lib/bluecherry/qt4.8/lib/libQtXml*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.8/lib/
 	mkdir -p debian/bluecherry-client/usr/lib/bluecherry/qt4.8/plugins/imageformats
 	cp -a /usr/lib/bluecherry/qt4.8/plugins/imageformats/libqjpeg.so debian/bluecherry-client/usr/lib/bluecherry/qt4.8/plugins/imageformats
 	cp -a /usr/lib/bluecherry/qt4.8/plugins/imageformats/libqgif.so debian/bluecherry-client/usr/lib/bluecherry/qt4.8/plugins/imageformats
