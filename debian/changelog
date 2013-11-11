@@ -8,11 +8,11 @@ bluecherry-client (1:2.1.6-1) lucid; urgency=low
   * Bug #192: Camera windows on the left side of view are partially cut off
   * Bug #196: Events are loaded starting at the wrong time
   * Feature: multilanguage support
-  * Feature: Spanish, Swedish and Norvegian translations added
+  * Feature: Russian, Norvegian, Spanish and Swedish translations added
   * Other: breakpad update
   * Other: GCC 4.8 compilation fixes
 
- -- Piotr Galiszewski <pgaliszewski@corp.bluecherry.net>  Sun, 11 Nov 2013 21:17:50 +0200
+ -- Piotr Galiszewski <pgaliszewski@corp.bluecherry.net>  Sun, 11 Nov 2013 23:17:50 +0200
 
 bluecherry-client (1:2.1.5-1) lucid; urgency=low
 
