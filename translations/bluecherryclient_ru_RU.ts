@@ -9,89 +9,89 @@
         <source>This application is designed to utilize OpenGL acceleration, which is not supported by your system. The application may not function correctly.
 
 For help, contact support@bluecherrydvr.com.</source>
-        <translation>Это приложение использует графическое ускорение OpenGL но оно не доступно на Вашей системе. Приложение может функционировать некорректно.
+        <translation>Это приложение использует графическое ускорение OpenGL, но оно не доступно на Вашей системе. Приложение может функционировать некорректно.
 
 Попробуйте отключить аппаратное ускорение в настройках.</translation>
     </message>
     <message>
         <source>Connection refused</source>
-        <translation>Загрузка готовится</translation>
+        <translation>Соединение отклонено</translation>
     </message>
     <message>
         <source>Remote host closed connection</source>
-        <translation type="unfinished"/>
+        <translation>Сервер закрыл соединение</translation>
     </message>
     <message>
         <source>Host not found</source>
-        <translation type="unfinished"/>
+        <translation>IP адрес/хост не найдены.</translation>
     </message>
     <message>
         <source>Socket access error</source>
-        <translation type="unfinished"/>
+        <translation>Socket access error</translation>
     </message>
     <message>
         <source>Socket resource error</source>
-        <translation type="unfinished"/>
+        <translation>Socket resource error</translation>
     </message>
     <message>
         <source>Socket operation timed out</source>
-        <translation type="unfinished"/>
+        <translation>Socket operation timed out</translation>
     </message>
     <message>
         <source>Datagram too large</source>
-        <translation type="unfinished"/>
+        <translation>Datagram too large</translation>
     </message>
     <message>
         <source>Network error</source>
-        <translation type="unfinished"/>
+        <translation>Ошибка сети</translation>
     </message>
     <message>
         <source>Address already in use</source>
-        <translation type="unfinished"/>
+        <translation>Адрес уже используется</translation>
     </message>
     <message>
         <source>Socket address not available</source>
-        <translation type="unfinished"/>
+        <translation>Socket address not available</translation>
     </message>
     <message>
         <source>Unsupported socket operation</source>
-        <translation type="unfinished"/>
+        <translation>Unsupported socket operation</translation>
     </message>
     <message>
         <source>Proxy authentication required</source>
-        <translation type="unfinished"/>
+        <translation>Proxy authentication required</translation>
     </message>
     <message>
         <source>SSL handshake failed</source>
-        <translation type="unfinished"/>
+        <translation>Ошибка при установлении безопасного соединения (SSL)</translation>
     </message>
     <message>
         <source>Unfinished socket operation</source>
-        <translation type="unfinished"/>
+        <translation>Unfinished socket operation</translation>
     </message>
     <message>
         <source>Proxy connection refused</source>
-        <translation type="unfinished"/>
+        <translation>Соединение с прокси отклонено</translation>
     </message>
     <message>
         <source>Proxy connection closed</source>
-        <translation type="unfinished"/>
+        <translation>Соединение с прокси закрыто</translation>
     </message>
     <message>
         <source>Proxy connection timeout</source>
-        <translation type="unfinished"/>
+        <translation>Соединение с прокси превысило лимит ожидания</translation>
     </message>
     <message>
         <source>Proxy not found</source>
-        <translation type="unfinished"/>
+        <translation>Прокси не найдено</translation>
     </message>
     <message>
         <source>Proxy error</source>
-        <translation type="unfinished"/>
+        <translation>Ошибка прокси</translation>
     </message>
     <message>
         <source>Unknown error</source>
-        <translation type="unfinished"/>
+        <translation>Неизвестная ошибка</translation>
     </message>
 </context>
 <context>
@@ -113,7 +113,7 @@ For help, contact support@bluecherrydvr.com.</source>
     </message>
     <message>
         <source>A new Bluecherry client update is available</source>
-        <translation>Доступно обновление клиента Блючерри</translation>
+        <translation>Доступно обновление клиентского приложения Блючерри</translation>
     </message>
     <message>
         <source>Would you like to download version %2 now?</source>
@@ -129,11 +129,11 @@ For help, contact support@bluecherrydvr.com.</source>
     </message>
     <message>
         <source>Local</source>
-        <translation type="unfinished"/>
+        <translation>Локальный</translation>
     </message>
     <message>
         <source>Unrecognized SSL certificate</source>
-        <translation type="unfinished"/>
+        <translation>Неизвестный сертификат SSL</translation>
     </message>
 </context>
 <context>
@@ -203,15 +203,15 @@ For help, contact support@bluecherrydvr.com.</source>
     <name>DVRServer</name>
     <message>
         <source>Status request error: %1</source>
-        <translation type="unfinished"/>
+        <translation>Status request error: %1</translation>
     </message>
     <message>
         <source>Server process stopped</source>
-        <translation type="unfinished"/>
+        <translation>Сервер не запущен</translation>
     </message>
     <message>
         <source>Status request error: invalid server response</source>
-        <translation type="unfinished"/>
+        <translation>Ошибка запроса статуса: некорректный ответ сервера</translation>
     </message>
 </context>
 <context>
@@ -277,7 +277,7 @@ For help, contact support@bluecherrydvr.com.</source>
     </message>
     <message>
         <source>In progress</source>
-        <translation type="unfinished"/>
+        <translation>Текущее</translation>
     </message>
 </context>
 <context>
@@ -288,7 +288,7 @@ For help, contact support@bluecherrydvr.com.</source>
     </message>
     <message>
         <source>Matroska Video (*.mkv)</source>
-        <translation type="unfinished"/>
+        <translation>Matroska Video (*.mkv)</translation>
     </message>
     <message>
         <source>Save event videos</source>
@@ -299,110 +299,110 @@ For help, contact support@bluecherrydvr.com.</source>
     <name>EventLevel</name>
     <message>
         <source>Info</source>
-        <translation type="unfinished"/>
+        <translation>Информ.</translation>
     </message>
     <message>
         <source>Warning</source>
-        <translation type="unfinished"/>
+        <translation>Предупреждение</translation>
     </message>
     <message>
         <source>Alarm</source>
-        <translation type="unfinished"/>
+        <translation>Тревога</translation>
     </message>
     <message>
         <source>Critical</source>
-        <translation type="unfinished"/>
+        <translation>Критическое</translation>
     </message>
     <message>
         <source>Unknown</source>
-        <translation type="unfinished"/>
+        <translation>Неизвестное</translation>
     </message>
 </context>
 <context>
     <name>EventSourcesModel</name>
     <message>
         <source>System</source>
-        <translation type="unfinished"/>
+        <translation>Системное</translation>
     </message>
     <message>
         <source>Everything</source>
-        <translation type="unfinished"/>
+        <translation>Все</translation>
     </message>
 </context>
 <context>
     <name>EventTimelineWidget</name>
     <message>
         <source>22:22</source>
-        <translation type="unfinished"/>
+        <translation>22:22</translation>
     </message>
     <message>
         <source>h:mm</source>
-        <translation type="unfinished"/>
+        <translation>h:mm</translation>
     </message>
 </context>
 <context>
     <name>EventType</name>
     <message>
         <source>Motion</source>
-        <translation type="unfinished"/>
+        <translation>Движение</translation>
     </message>
     <message>
         <source>Continuous</source>
-        <translation type="unfinished"/>
+        <translation>Последовательное</translation>
     </message>
     <message>
         <source>Not Found</source>
-        <translation type="unfinished"/>
+        <translation>Потеряно подключение</translation>
     </message>
     <message>
         <source>Video Lost</source>
-        <translation type="unfinished"/>
+        <translation>Потеряно видео</translation>
     </message>
     <message>
         <source>Audio Lost</source>
-        <translation type="unfinished"/>
+        <translation>Потеряно аудио</translation>
     </message>
     <message>
         <source>Disk Space</source>
-        <translation type="unfinished"/>
+        <translation>Дисковое пространство</translation>
     </message>
     <message>
         <source>Crash</source>
-        <translation type="unfinished"/>
+        <translation>Нештатное завершение</translation>
     </message>
     <message>
         <source>Startup</source>
-        <translation type="unfinished"/>
+        <translation>Загрузка</translation>
     </message>
     <message>
         <source>Shutdown</source>
-        <translation type="unfinished"/>
+        <translation>Выключение</translation>
     </message>
     <message>
         <source>Reboot</source>
-        <translation type="unfinished"/>
+        <translation>Перезагрузка</translation>
     </message>
     <message>
         <source>Power Lost</source>
-        <translation type="unfinished"/>
+        <translation>Потеря питания</translation>
     </message>
     <message>
         <source>Unknown</source>
-        <translation type="unfinished"/>
+        <translation>Неизвестное</translation>
     </message>
 </context>
 <context>
     <name>EventTypesFilter</name>
     <message>
         <source>Camera</source>
-        <translation type="unfinished"/>
+        <translation>Камера</translation>
     </message>
 </context>
 <context>
     <name>EventVideoDownload</name>
     <message>
         <source>Preparing to download</source>
-        <translation type="unfinished"/>
+        <translation>Загрузка готовится</translation>
     </message>
     <message>
         <source>Downloading video</source>
@@ -425,7 +425,7 @@ For help, contact support@bluecherrydvr.com.</source>
     <name>EventVideoDownloadWidget</name>
     <message>
         <source>Close</source>
-        <translation type="unfinished"/>
+        <translation>Закрыть</translation>
     </message>
 </context>
 <context>
@@ -639,19 +639,19 @@ For help, contact support@bluecherrydvr.com.</source>
     <name>GstVideoPlayerBackend</name>
     <message>
         <source>Failed to create video pipeline (%1)</source>
-        <translation type="unfinished"/>
+        <translation>Failed to create video pipeline (%1)</translation>
     </message>
     <message>
         <source>Seeking failed</source>
-        <translation type="unfinished"/>
+        <translation>Ошибка проматывания</translation>
     </message>
     <message>
         <source>Playback speed failed</source>
-        <translation type="unfinished"/>
+        <translation>Оишбка изменения скорости проигрывания</translation>
     </message>
     <message>
         <source>Building video pipeline failed</source>
-        <translation type="unfinished"/>
+        <translation>Building video pipeline failed</translation>
     </message>
 </context>
 <context>
@@ -907,11 +907,11 @@ For help, contact support@bluecherrydvr.com.</source>
     </message>
     <message>
         <source>Bluecherry &amp;support</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Поддержка Блючерри</translation>
     </message>
     <message>
         <source>Suggest a &amp;feature</source>
-        <translation type="unfinished"/>
+        <translation>Обратная связь</translation>
     </message>
     <message>
         <source>&amp;About Bluecherry</source>
@@ -994,430 +994,430 @@ For help, contact support@bluecherrydvr.com.</source>
     <name>OptionsDialog</name>
     <message>
         <source>Bluecherry - Options</source>
-        <translation type="unfinished"/>
+        <translation>Блючерри - Настройки приложения</translation>
     </message>
     <message>
         <source>General</source>
-        <translation type="unfinished"/>
+        <translation>Общие</translation>
     </message>
     <message>
         <source>DVR Servers</source>
-        <translation type="unfinished"/>
+        <translation>Сервера</translation>
     </message>
     <message>
         <source>Options</source>
-        <translation type="unfinished"/>
+        <translation>Настройки</translation>
     </message>
     <message>
         <source>Do you want to save your changes?</source>
-        <translation type="unfinished"/>
+        <translation>Сохранить изменения?</translation>
     </message>
 </context>
 <context>
     <name>OptionsGeneralPage</name>
     <message>
         <source>Language:</source>
-        <translation type="unfinished"/>
+        <translation>Язык:</translation>
     </message>
     <message>
         <source>Close to tray</source>
-        <translation type="unfinished"/>
+        <translation>Скрыть в панель задач</translation>
     </message>
     <message>
         <source>When the main window is closed, minimize to the system tray</source>
-        <translation type="unfinished"/>
+        <translation>Когда основное окно закрывается, минимизировать в панель задач</translation>
     </message>
     <message>
         <source>Pause live feeds while buffering event video</source>
-        <translation type="unfinished"/>
+        <translation>Останавливать живое видео, когда закачивается запись</translation>
     </message>
     <message>
         <source>Pausing live feeds can speed up video downloads over slow internet connections</source>
-        <translation type="unfinished"/>
+        <translation>Может ускорить скорость загрузки записей</translation>
     </message>
     <message>
         <source>Use hardware acceleration (OpenGL)</source>
-        <translation type="unfinished"/>
+        <translation>Использовать аппаратное ускорение (OpenGL)</translation>
     </message>
     <message>
         <source>Disable hardware acceleration only if you do not see anything in the live view area.</source>
-        <translation type="unfinished"/>
+        <translation>Если есть проблемы с просмотром живого видео попробуйте отключить аппаратное ускорение.</translation>
     </message>
     <message>
         <source>Use advanced OpenGL features</source>
-        <translation type="unfinished"/>
+        <translation>Использовать дополнительные опции OpenGL</translation>
     </message>
     <message>
         <source>Disable advanced OpenGL features if live video doesn&apos;t appear correctly</source>
-        <translation type="unfinished"/>
+        <translation>Если видео показывается некорректно, отключите аппаратное ускорение в опциях.</translation>
     </message>
     <message>
         <source>Automatic deinterlacing</source>
-        <translation type="unfinished"/>
+        <translation>Автоматическое фильтр для устранения чересстрочности</translation>
     </message>
     <message>
         <source>Viewing live or recorded video in fullscreen</source>
-        <translation type="unfinished"/>
+        <translation>Просмотр живого или записанного видео в полноэкранном режиме</translation>
     </message>
     <message>
         <source>Playing recorded video</source>
-        <translation type="unfinished"/>
+        <translation>Проигрывание записей</translation>
     </message>
     <message>
         <source>Always prevent the computer from going to sleep</source>
-        <translation type="unfinished"/>
+        <translation>Предотвращать остановку компьютера</translation>
     </message>
     <message>
         <source>Prevent the computer from going to sleep when...</source>
-        <translation type="unfinished"/>
+        <translation>Предотвращать остановку компьютера если...</translation>
     </message>
 </context>
 <context>
     <name>OptionsServerPage</name>
     <message>
         <source>Name:</source>
-        <translation type="unfinished"/>
+        <translation>Имя:</translation>
     </message>
     <message>
         <source>Hostname:</source>
-        <translation type="unfinished"/>
+        <translation>IP адрес:</translation>
     </message>
     <message>
         <source>Username:</source>
-        <translation type="unfinished"/>
+        <translation>Имя пользователя:</translation>
     </message>
     <message>
         <source>Password:</source>
-        <translation type="unfinished"/>
+        <translation>Пароль:</translation>
     </message>
     <message>
         <source>Connect Automatically</source>
-        <translation type="unfinished"/>
+        <translation>Соединяться автоматически</translation>
     </message>
     <message>
         <source>Add Server</source>
-        <translation type="unfinished"/>
+        <translation>Добавить сервер</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation type="unfinished"/>
+        <translation>Удалить</translation>
     </message>
     <message>
         <source>Apply</source>
-        <translation type="unfinished"/>
+        <translation>Применить</translation>
     </message>
     <message>
         <source>New Server</source>
-        <translation type="unfinished"/>
+        <translation>Новый сервер</translation>
     </message>
     <message>
         <source>Delete DVR Server</source>
-        <translation type="unfinished"/>
+        <translation>Удаление сервера</translation>
     </message>
     <message>
         <source>Are you sure you want to delete &lt;b&gt;%1&lt;/b&gt;?</source>
-        <translation type="unfinished"/>
+        <translation>Вы уверены что хотите удалить из списка &lt;b&gt;%1&lt;/b&gt;?</translation>
     </message>
     <message>
         <source>Connecting to server...</source>
-        <translation type="unfinished"/>
+        <translation>Соединяемся с сервером...</translation>
     </message>
     <message>
         <source>&lt;b&gt;Login error:&lt;/b&gt; %1</source>
-        <translation type="unfinished"/>
+        <translation>&lt;b&gt;Ошибка подключения:&lt;/b&gt; %1</translation>
     </message>
 </context>
 <context>
     <name>PtzPresetsModel</name>
     <message>
         <source>Presets</source>
-        <translation type="unfinished"/>
+        <translation>Установки</translation>
     </message>
 </context>
 <context>
     <name>PtzPresetsWindow</name>
     <message>
         <source>PTZ - %1</source>
-        <translation type="unfinished"/>
+        <translation>PTZ - %1</translation>
     </message>
     <message>
         <source>PTZ</source>
-        <translation type="unfinished"/>
+        <translation>PTZ</translation>
     </message>
     <message>
         <source>Presets</source>
-        <translation type="unfinished"/>
+        <translation>Установки</translation>
     </message>
     <message>
         <source>New Preset</source>
-        <translation type="unfinished"/>
+        <translation>Новая установка</translation>
     </message>
     <message>
         <source>Go to Preset</source>
-        <translation type="unfinished"/>
+        <translation>Перейти на установку</translation>
     </message>
     <message>
         <source>Rename Preset</source>
-        <translation type="unfinished"/>
+        <translation>Переименовать установку</translation>
     </message>
     <message>
         <source>Delete Preset</source>
-        <translation type="unfinished"/>
+        <translation>Удалить установку</translation>
     </message>
     <message>
         <source>Refresh Presets</source>
-        <translation type="unfinished"/>
+        <translation>Обновить список установок</translation>
     </message>
     <message>
         <source>Save PTZ preset</source>
-        <translation type="unfinished"/>
+        <translation>Сохранить установку</translation>
     </message>
     <message>
         <source>Enter a name for the new PTZ preset:</source>
-        <translation type="unfinished"/>
+        <translation>Введите имя для новой установки:</translation>
     </message>
     <message>
         <source>Update preset</source>
-        <translation type="unfinished"/>
+        <translation>Обновить установку</translation>
     </message>
     <message>
         <source>Rename preset</source>
-        <translation type="unfinished"/>
+        <translation>Переименовать установку</translation>
     </message>
     <message>
         <source>Delete preset</source>
-        <translation type="unfinished"/>
+        <translation>Удалить установку</translation>
     </message>
 </context>
 <context>
     <name>RemotePortChecker</name>
     <message>
         <source>Invalid server address</source>
-        <translation type="unfinished"/>
+        <translation>Неверный адрес сервера</translation>
     </message>
 </context>
 <context>
     <name>SavedLayoutsModel</name>
     <message>
         <source>Default</source>
-        <translation type="unfinished"/>
+        <translation>По умолчанию</translation>
     </message>
     <message>
         <source>New layout...</source>
-        <translation type="unfinished"/>
+        <translation>Новый вид...</translation>
     </message>
 </context>
 <context>
     <name>ServerConfigWindow</name>
     <message>
         <source>Bluecherry - Server Configuration</source>
-        <translation type="unfinished"/>
+        <translation>Блючерри - Настройка сервера</translation>
     </message>
     <message>
         <source>Bluecherry - %1</source>
-        <translation type="unfinished"/>
+        <translation>Bluecherry - %1</translation>
     </message>
 </context>
 <context>
     <name>ServerMenu</name>
     <message>
         <source>Connect</source>
-        <translation type="unfinished"/>
+        <translation>Подключиться</translation>
     </message>
     <message>
         <source>Browse &amp;events</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Просмотреть записи</translation>
     </message>
     <message>
         <source>&amp;Configure server</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Настроить сервер</translation>
     </message>
     <message>
         <source>Refresh devices</source>
-        <translation type="unfinished"/>
+        <translation>Обновить список камер</translation>
     </message>
     <message>
         <source>Settings</source>
-        <translation type="unfinished"/>
+        <translation>Настройки подключения</translation>
     </message>
     <message>
         <source>Disconnect</source>
-        <translation type="unfinished"/>
+        <translation>Отключиться</translation>
     </message>
 </context>
 <context>
     <name>ServerRequestManager</name>
     <message>
         <source>Request failed: %1</source>
-        <translation type="unfinished"/>
+        <translation>Запрос не удался: %1</translation>
     </message>
     <message>
         <source>Unknown error</source>
-        <translation type="unfinished"/>
+        <translation>Неизвестная ошибка</translation>
     </message>
 </context>
 <context>
     <name>SetupFinishPage</name>
     <message>
         <source>Let&apos;s Go!</source>
-        <translation type="unfinished"/>
+        <translation>Готово!</translation>
     </message>
     <message>
         <source>Here&apos;s some tips on how to get started:</source>
-        <translation type="unfinished"/>
+        <translation>Несколько советов:</translation>
     </message>
     <message>
         <source>Close</source>
-        <translation type="unfinished"/>
+        <translation>Закрыть</translation>
     </message>
     <message>
         <source>&lt;ul&gt;&lt;li&gt;Cameras are shown on the left. You can double-click or drag a camera into the live view area to view it&lt;br&gt;&lt;/li&gt;&lt;li&gt;Use the buttons above the live view to create, save, and switch layouts - even with cameras from multiple servers!&lt;br&gt;&lt;/li&gt;&lt;li&gt;Double-click on a server to open its configuration page in a new window, where you can configure cameras and recordings&lt;br&gt;&lt;/li&gt;&lt;li&gt;Click the events icon ( &lt;img src=&apos;:/icons/cassette.png&apos;&gt; ) to open the event browser and watch or save recordings&lt;br&gt;&lt;/li&gt;&lt;/ul&gt;</source>
-        <translation type="unfinished"/>
+        <translation>&lt;ul&gt;&lt;li&gt;Список доступных серверов и камер находится слева. Вы можете добавить камеру к виду нажав дважды на ее имя или перетащив ее на текущий вид.&lt;br&gt;&lt;/li&gt;&lt;li&gt;Дважды нажав на имя сервера вы можете открыть панель настроек этого сервера, где Вы сможете настроить камеры и параметры записи&lt;br&gt;&lt;/li&gt;&lt;li&gt;Нажмите на иконку записей ( &lt;img src=&apos;:/icons/cassette.png&apos;&gt; ) чтобы открыть список доступных для просмотра/сохранения записей.&lt;br&gt;&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
         <source>If you need help, browse our online documentation through the Help menu at the top of the window.</source>
-        <translation type="unfinished"/>
+        <translation>Если Вам требуется дополнительная помощь, пожалйста обратитесь в Блючерри support@bcip.ru или по телефону +7 (495) 225-95-12</translation>
     </message>
 </context>
 <context>
     <name>SetupServerPage</name>
     <message>
         <source>Configure a DVR Server</source>
-        <translation type="unfinished"/>
+        <translation>Добавить видео сервер</translation>
     </message>
     <message>
         <source>Setup a connection to your remote DVR server. You can connect to any number of servers, from anywhere in the world.</source>
-        <translation type="unfinished"/>
+        <translation>Настройка соединения в Вашим сидео сервером. Вы можете подключиться к нескольким серверам.</translation>
     </message>
     <message>
         <source>Finish</source>
-        <translation type="unfinished"/>
+        <translation>Закончить</translation>
     </message>
     <message>
         <source>Skip</source>
-        <translation type="unfinished"/>
+        <translation>Пропустить</translation>
     </message>
     <message>
         <source>Hostname:</source>
-        <translation type="unfinished"/>
+        <translation>IP адрес:</translation>
     </message>
     <message>
         <source>Port:</source>
-        <translation type="unfinished"/>
+        <translation>Порт:</translation>
     </message>
     <message>
         <source>Name:</source>
-        <translation type="unfinished"/>
+        <translation>Название:</translation>
     </message>
     <message>
         <source>Username:</source>
-        <translation type="unfinished"/>
+        <translation>Имя пользователя:</translation>
     </message>
     <message>
         <source>Use Default</source>
-        <translation type="unfinished"/>
+        <translation>Использовать стандартные</translation>
     </message>
     <message>
         <source>Password:</source>
-        <translation type="unfinished"/>
+        <translation>Пароль:</translation>
     </message>
     <message>
         <source>Save password</source>
-        <translation type="unfinished"/>
+        <translation>Сохранить пароль</translation>
     </message>
     <message>
         <source>Connect automatically at startup</source>
-        <translation type="unfinished"/>
+        <translation>Соединяться автоматически при запуске</translation>
     </message>
     <message>
         <source>Connecting...</source>
-        <translation type="unfinished"/>
+        <translation>Соединяемся...</translation>
     </message>
     <message>
         <source>Unknown login error</source>
-        <translation type="unfinished"/>
+        <translation>Неверное имя пользователя/пароль</translation>
     </message>
     <message>
         <source>Login successful! Click &lt;b&gt;Finish&lt;/b&gt; to continue.</source>
-        <translation type="unfinished"/>
+        <translation>Подключение к серверу успешно. Нажмите &lt;b&gt;закончить&lt;/b&gt; чтобы продолжить работу.</translation>
     </message>
 </context>
 <context>
     <name>SetupWelcomePage</name>
     <message>
         <source>Welcome</source>
-        <translation type="unfinished"/>
+        <translation>Добро пожаловать</translation>
     </message>
     <message>
         <source>Welcome to the Bluecherry Surveillance DVR! This wizard will help you connect to your DVR server and get started.</source>
-        <translation type="unfinished"/>
+        <translation>Добро пожаловать в мастер настройки клиентского приложения Блючерри. Мастер поможет Вам подключиться к Вашему серверу.</translation>
     </message>
 </context>
 <context>
     <name>SetupWizard</name>
     <message>
         <source>Bluecherry - Setup</source>
-        <translation type="unfinished"/>
+        <translation>Блючерри - Настройка</translation>
     </message>
 </context>
 <context>
     <name>StatusBarServerAlert</name>
     <message>
         <source>Alert on %1</source>
-        <translation type="unfinished"/>
+        <translation>Запись на %1</translation>
     </message>
     <message>
         <source>Alerts on %1 servers</source>
-        <translation type="unfinished"/>
+        <translation>Запись на %1 серверах</translation>
     </message>
 </context>
 <context>
     <name>SwitchEventsWidget</name>
     <message>
         <source>Previous</source>
-        <translation type="unfinished"/>
+        <translation>Предыдущее</translation>
     </message>
     <message>
         <source>Next</source>
-        <translation type="unfinished"/>
+        <translation>Следующее</translation>
     </message>
 </context>
 <context>
     <name>WebRtpPortCheckerWidget</name>
     <message>
         <source>Web port</source>
-        <translation type="unfinished"/>
+        <translation>Порт данных:</translation>
     </message>
     <message>
         <source>RTP port</source>
-        <translation type="unfinished"/>
+        <translation>Порт видео:</translation>
     </message>
 </context>
 <context>
     <name>byteSizeString</name>
     <message>
         <source>KB</source>
-        <translation type="unfinished"/>
+        <translation>KB</translation>
     </message>
     <message>
         <source>MB</source>
-        <translation type="unfinished"/>
+        <translation>MB</translation>
     </message>
     <message>
         <source>GB</source>
-        <translation type="unfinished"/>
+        <translation>GB</translation>
     </message>
     <message>
         <source>KB/s</source>
-        <translation type="unfinished"/>
+        <translation>KB/s</translation>
     </message>
     <message>
         <source>MB/s</source>
-        <translation type="unfinished"/>
+        <translation>MB/s</translation>
     </message>
     <message>
         <source>GB/s</source>
-        <translation type="unfinished"/>
+        <translation>GB/s</translation>
     </message>
 </context>
 </TS>
