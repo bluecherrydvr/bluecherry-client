@@ -3,6 +3,8 @@
 %:
 	dh $@
 
+override_dh_strip:	
+	
 override_dh_auto_install:
 	dh_auto_install
 	mkdir -p debian/bluecherry-client/usr/lib/bluecherry/qt4.8/lib
