@@ -13,3 +13,12 @@ Conflicts: gstreamer0.10-vaapi
 Description: Bluecherry DVR Client
  This package contains the client for the Bluecherry DVR system. It can
  also be used to connect to remote instances of the Bluecherry DVR server.
+
+Package: bluecherry-client-dbg
+Architecture: any
+Section: debug
+Priority: extra
+Depends:
+    bluecherry-client (= ${binary:Version}), ${misc:Depends}
+Description: debugging symbols for bluecherry-client
+ This package contains the debugging symbols for Bluecherry DVR Client
