@@ -19,6 +19,7 @@
 #define LANGUAGECONTROLLER_H
 
 #include <QMap>
+#include <QPair>
 #include <QStringList>
 #include <QTranslator>
 
@@ -38,10 +39,11 @@ public:
 
 private:
 	void loadLanguages();
-	void switchTranslator(QTranslator &translator, const QString &filename);
+	void switchTranslator(QTranslator &translator, const QString &filename, const QString &directory);
 
 	QStringList m_paths;
 	mutable QMap<QString, QString> m_languages;
+	mutable QMap<QString, QString> m_languagesPaths;
 	QString m_currentLanguageCode;
 
 	QTranslator m_appTranslator;

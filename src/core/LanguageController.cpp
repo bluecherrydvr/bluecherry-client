@@ -20,6 +20,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <QDir>
+#include <QLibraryInfo>
 #include <QLocale>
 
 LanguageController::LanguageController()
@@ -50,7 +51,7 @@ void LanguageController::loadLanguages()
 		QStringList languages = tranlationsDir.entryList(languagesFilter, QDir::Files);
 
 		foreach (QString languageFile, languages)
-		{
+		{			
 			QString localeCode = languageFile.remove(0, languageFile.indexOf(QLatin1Char('_')) + 1);
 			localeCode.chop(3);
 
@@ -59,15 +60,16 @@ void LanguageController::loadLanguages()
 			QString localizedLanguageName = locale.nativeLanguageName();
 
 			m_languages.insert(localeCode, localizedLanguageName);
+			m_languagesPaths.insert(localeCode, tranlationsDir.absolutePath());
 		}
 	}
 }
 
-void LanguageController::switchTranslator(QTranslator &translator, const QString &filename)
+void LanguageController::switchTranslator(QTranslator &translator, const QString &filename, const QString &directory)
 {
 	qApp->removeTranslator(&translator);
 
-	if (translator.load(filename))
+	if (translator.load(filename, directory))
 		qApp->installTranslator(&translator);
 }
 
@@ -81,8 +83,8 @@ void LanguageController::loadLanguage(const QString &languageCode)
 		m_currentLanguageCode = languageCode;
 		QLocale locale = QLocale(m_currentLanguageCode);
 		QLocale::setDefault(locale);
-		switchTranslator(m_appTranslator, QString(QLatin1String("bluecherryclient_%1.qm")).arg(m_currentLanguageCode));
-		switchTranslator(m_QtTranslator, QString(QLatin1String("qt_%1.qm")).arg(m_currentLanguageCode));
+		switchTranslator(m_appTranslator, QString(QLatin1String("bluecherryclient_%1.qm")).arg(m_currentLanguageCode), m_languagesPaths.value(languageCode));
+		switchTranslator(m_QtTranslator, QString(QLatin1String("qt_%1.qm")).arg(m_currentLanguageCode), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
 	}
 }
 
