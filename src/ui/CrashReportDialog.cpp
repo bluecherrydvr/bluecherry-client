@@ -91,14 +91,14 @@ CrashReportDialog::CrashReportDialog(const QString &dumpFile, QWidget *parent)
     layout->addStretch();
     layout->addSpacing(15);
 
-	QCommandLinkButton *restartBtn = new QCommandLinkButton;
-    restartBtn->setDefault(true);
-    connect(restartBtn, SIGNAL(clicked()), SLOT(uploadAndRestart()));
-    layout->addWidget(restartBtn);
+    m_restartBtn = new QCommandLinkButton;
+    m_restartBtn->setDefault(true);
+    connect(m_restartBtn, SIGNAL(clicked()), SLOT(uploadAndRestart()));
+    layout->addWidget(m_restartBtn);
 
-	QCommandLinkButton *exitBtn = new QCommandLinkButton;
-    connect(exitBtn, SIGNAL(clicked()), SLOT(uploadAndExit()));
-    layout->addWidget(exitBtn);
+    m_exitBtn = new QCommandLinkButton;
+    connect(m_exitBtn, SIGNAL(clicked()), SLOT(uploadAndExit()));
+    layout->addWidget(m_exitBtn);
 
     /* Upload progress widgets */
     QWidget *uploadContainer = new QWidget;
