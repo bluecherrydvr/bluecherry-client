@@ -18,7 +18,7 @@ To compile bluecherry-client on Windows install following applications and libra
   http://www.microsoft.com/en-us/download/details.aspx?id=23691
 
 * libav for Windows
-  http://win32.libav.org/releases/libav-9.1-win32.7z
+  http://win32.libav.org/releases/libav-9.7-win32.7z
   unpack under C:\bluecherry\deps\libav
 
 * msinttypes

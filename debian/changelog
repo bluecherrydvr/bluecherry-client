@@ -1,3 +1,11 @@
+bluecherry-client (1:2.1.6-2) lucid; urgency=low
+
+  * Bug: Crash reporter broken in 2.1.6 build
+  * Other: Update libav to 9.10 release
+
+ -- Piotr Galiszewski <pgaliszewski@corp.bluecherry.net>  Fri, 15 Nov 2013 22:17:50 +0200
+
+
 bluecherry-client (1:2.1.6-1) lucid; urgency=low
 
   * Bug #59: Add an option to disable screensavers on Linux
