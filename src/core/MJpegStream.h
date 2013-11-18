@@ -24,12 +24,13 @@
 #include <QTimer>
 #include "camera/DVRCamera.h"
 #include "core/LiveViewManager.h"
+#include "core/LiveStream.h"
 
 class QNetworkReply;
 class ThreadTask;
 class ImageDecodeTask;
 
-class MJpegStream : public QObject
+class MJpegStream : public LiveStream
 {
     Q_OBJECT
     Q_ENUMS(State)

@@ -91,7 +91,7 @@ void RtspStream::init()
 }
 
 RtspStream::RtspStream(DVRCamera *camera, QObject *parent)
-    : QObject(parent), m_camera(camera), m_thread(0), m_currentFrameMutex(QMutex::Recursive),
+    : LiveStream(parent), m_camera(camera), m_thread(0), m_currentFrameMutex(QMutex::Recursive),
       m_frame(0), m_state(NotConnected),
       m_autoStart(false), m_bandwidthMode(LiveViewManager::FullBandwidth), m_fpsUpdateCnt(0), m_fpsUpdateHits(0),
       m_fps(0)

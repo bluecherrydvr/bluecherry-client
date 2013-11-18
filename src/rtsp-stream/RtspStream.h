@@ -24,11 +24,12 @@
 #include <QImage>
 #include <QElapsedTimer>
 #include "camera/DVRCamera.h"
+#include "core/LiveStream.h"
 #include "core/LiveViewManager.h"
 
 class RtspStreamThread;
 
-class RtspStream : public QObject
+class RtspStream : public LiveStream
 {
     Q_OBJECT
     Q_ENUMS(State)

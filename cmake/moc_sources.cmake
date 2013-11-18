@@ -21,6 +21,7 @@ set (bluecherry_client_MOC_SRCS
 
     src/core/BluecherryApp.h
     src/core/CameraPtzControl.h
+    src/core/LiveStream.h
     src/core/LiveViewManager.h
     src/core/MJpegStream.h
     src/core/PtzPresetsModel.h

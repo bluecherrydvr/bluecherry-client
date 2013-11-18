@@ -30,6 +30,7 @@ set (bluecherry_client_main_SRCS
     src/core/CameraPtzControl.cpp
     src/core/EventData.cpp
     src/core/LanguageController.cpp
+    src/core/LiveStream.cpp
     src/core/LiveViewManager.cpp
     src/core/LoggableUrl.cpp
     src/core/MJpegStream.cpp

@@ -29,7 +29,7 @@
 #include <QDateTime>
 
 MJpegStream::MJpegStream(DVRCamera *camera, QObject *parent)
-    : QObject(parent), m_camera(camera), m_httpReply(0), m_currentFrameNo(0), m_latestFrameNo(0), m_fpsRecvTs(0), m_fpsRecvNo(0),
+    : LiveStream(parent), m_camera(camera), m_httpReply(0), m_currentFrameNo(0), m_latestFrameNo(0), m_fpsRecvTs(0), m_fpsRecvNo(0),
       m_decodeTask(0), m_lastActivity(0), m_receivedFps(0), m_httpBodyLength(0), m_state(NotConnected),
       m_parserState(ParserBoundary), m_autoStart(false), m_paused(false), m_interval(1)
 {
