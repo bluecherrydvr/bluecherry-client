@@ -28,35 +28,20 @@
 #include <QTimer>
 #include <QDateTime>
 
-MJpegStream::MJpegStream(QObject *parent)
-    : QObject(parent), m_httpReply(0), m_currentFrameNo(0), m_latestFrameNo(0), m_fpsRecvTs(0), m_fpsRecvNo(0),
+MJpegStream::MJpegStream(DVRCamera *camera, QObject *parent)
+    : QObject(parent), m_camera(camera), m_httpReply(0), m_currentFrameNo(0), m_latestFrameNo(0), m_fpsRecvTs(0), m_fpsRecvNo(0),
       m_decodeTask(0), m_lastActivity(0), m_receivedFps(0), m_httpBodyLength(0), m_state(NotConnected),
-      m_parserState(ParserBoundary), m_recordingState(NoRecording), m_autoStart(false),
-      m_paused(false), m_interval(1)
+      m_parserState(ParserBoundary), m_autoStart(false), m_paused(false), m_interval(1)
 {
-    //bcApp->liveView->addStream(this);
-    connect(&m_activityTimer, SIGNAL(timeout()), SLOT(checkActivity()));
-}
+    Q_ASSERT(m_camera);
+    connect(m_camera.data(), SIGNAL(destroyed(QObject*)), this, SLOT(deleteLater()));
 
-MJpegStream::MJpegStream(const QUrl &url, QObject *parent)
-    : QObject(parent), m_httpReply(0), m_currentFrameNo(0), m_latestFrameNo(0), m_fpsRecvTs(0), m_fpsRecvNo(0),
-      m_decodeTask(0), m_lastActivity(0), m_receivedFps(0), m_httpBodyLength(0), m_state(NotConnected),
-      m_parserState(ParserBoundary), m_recordingState(NoRecording), m_autoStart(false),
-      m_paused(false), m_interval(1)
-{
     //bcApp->liveView->addStream(this);
-    setUrl(url);
     connect(&m_activityTimer, SIGNAL(timeout()), SLOT(checkActivity()));
 }
 
 MJpegStream::~MJpegStream()
 {
-    if (m_recordingState != NoRecording)
-    {
-        m_recordingState = NoRecording;
-        emit recordingStateChanged(m_recordingState);
-    }
-
     //bcApp->liveView->removeStream(this);
 
     if (m_httpReply)
@@ -77,19 +62,9 @@ void MJpegStream::setState(State newState)
     emit stateChanged(newState);
 
     if (newState >= Buffering && oldState < Buffering)
-    {
         emit streamRunning();
-        updateScaleSizes();
-    }
     else if (oldState >= Buffering && newState < Buffering)
-    {
         emit streamStopped();
-        if (m_recordingState != NoRecording)
-        {
-            m_recordingState = NoRecording;
-            emit recordingStateChanged(m_recordingState);
-        }
-    }
 }
 
 void MJpegStream::setError(const QString &message)
@@ -100,11 +75,6 @@ void MJpegStream::setError(const QString &message)
     stop();
 
     QTimer::singleShot(15000, this, SLOT(start()));
-}
-
-void MJpegStream::setUrl(const QUrl &url)
-{
-    m_url = url;
 }
 
 void MJpegStream::start()
@@ -198,6 +168,35 @@ void MJpegStream::setOnline(bool online)
     }
 }
 
+QUrl MJpegStream::url() const
+{
+    if (!m_camera)
+        return QUrl();
+
+    QUrl streamUrl = m_camera.data()->streamUrl();
+    return streamUrl;
+}
+
+void MJpegStream::setBandwidthMode(int value)
+{
+    if (value == m_bandwidthMode)
+        return;
+
+    m_bandwidthMode = (LiveViewManager::BandwidthMode)value;
+    //TODO:
+    m_interval = m_bandwidthMode == LiveViewManager::FullBandwidth
+            ? 1
+            : 8;
+
+    emit bandwidthModeChanged(value);
+
+    if (state() >= Connecting)
+    {
+        stop();
+        start();
+    }
+}
+
 void MJpegStream::setPaused(bool pause)
 {
     if (pause == m_paused)
@@ -221,25 +220,6 @@ void MJpegStream::setPaused(bool pause)
     }
 
     emit pausedChanged(pause);
-}
-
-void MJpegStream::setInterval(int interval)
-{
-    /* "low" FPS, a static 1fps option */
-    if (interval < 1)
-        interval = 0;
-
-    if (interval == m_interval)
-        return;
-
-    m_interval = interval;
-    emit intervalChanged(m_interval);
-
-    if (state() > NotConnected)
-    {
-        stop();
-        start();
-    }
 }
 
 bool MJpegStream::processHeaders()
@@ -304,7 +284,6 @@ void MJpegStream::readable()
     for (;;)
     {
         qint64 avail = m_httpReply->bytesAvailable();
-        emit bytesDownloaded(avail);
         if (avail < 1)
             break;
 
@@ -408,23 +387,6 @@ bool MJpegStream::parseBuffer()
                 if (!ok)
                     m_httpBodyLength = 0;
             }
-            else if ((lnEnd - lnStart) > 18 && qstrnicmp(m_httpBuffer.data()+lnStart, "Bluecherry-Active:", 18) == 0)
-            {
-                QByteArray active = m_httpBuffer.mid(lnStart+18, lnEnd-lnStart-18).trimmed();
-
-                /* Because we remove processed headers, we can guarantee that the header is
-                 * only parsed once, so it's safe to set and emit here. */
-                RecordingState newState = NoRecording;
-
-                if (active == "true")
-                    newState = MotionActive;
-
-                if (newState != m_recordingState)
-                {
-                    m_recordingState = newState;
-                    emit recordingStateChanged(m_recordingState);
-                }
-            }
         }
 
         /* All processed headers can be removed */
@@ -481,13 +443,6 @@ void MJpegStream::requestError()
         setError(QString::fromLatin1("HTTP error: %1").arg(m_httpReply->errorString()));
 }
 
-void MJpegStream::updateScaleSizes()
-{
-    /* Remove duplicates and such? */
-    m_scaleSizes.clear();
-    emit buildScaleSizes(m_scaleSizes);
-}
-
 void MJpegStream::decodeFrame(const QByteArray &data)
 {
     /* This will cancel the task if it hasn't started yet; in-progress or completed tasks will still
@@ -497,7 +452,6 @@ void MJpegStream::decodeFrame(const QByteArray &data)
 
     m_decodeTask = new ImageDecodeTask(this, "decodeFrameResult", ++m_latestFrameNo);
     m_decodeTask->setData(data);
-    m_decodeTask->setScaleSizes(m_scaleSizes);
 
     QThreadPool::globalInstance()->start(m_decodeTask);
 
@@ -531,7 +485,7 @@ void MJpegStream::decodeFrameResult(ThreadTask *task)
 
     if (sizeChanged)
         emit streamSizeChanged(m_currentFrame.size());
-    emit updateFrame(m_currentFrame, decodeTask->scaleResults());
+    emit updated();
 
     if (m_state == Buffering)
         setState(Streaming);

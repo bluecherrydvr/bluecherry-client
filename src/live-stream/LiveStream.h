@@ -48,6 +48,7 @@ public:
         StreamOffline,
         NotConnected,
         Connecting,
+        Buffering,
         Streaming,
         Paused
     };
@@ -68,8 +69,8 @@ public:
 
     float receivedFps() const { return m_fps; }
 
-    bool isPaused() { return state() == Paused; }
-    bool isConnected() { return state() > Connecting; }
+    bool isPaused() const { return state() == Paused; }
+    bool isConnected() const { return state() > Connecting; }
 
 public slots:
     void start();
