@@ -25,16 +25,6 @@
 #include "camera/DVRCamera.h"
 #include "core/LiveViewManager.h"
 
-#if defined(Q_OS_MAC) || defined(Q_OS_WIN)
-/* On mac, it is very expensive to convert between QImage and QPixmap, and
- * QImage is required when uploading textures to OpenGL. We can save significantly
- * by never using pixmaps in this case. */
-typedef QImage MJpegFrame;
-#else
-#define MJPEGFRAME_IS_PIXMAP
-typedef QPixmap MJpegFrame;
-#endif
-
 class QNetworkReply;
 class ThreadTask;
 class ImageDecodeTask;
@@ -74,7 +64,7 @@ public:
     State state() const { return m_state; }
     QString errorMessage() const { return m_errorMessage; }
 
-    QImage currentFrame() const { return m_currentFrame.toImage(); }
+    QImage currentFrame() const { return m_currentFrame; }
     QSize streamSize() const { return m_currentFrame.size(); }
 
     float receivedFps() const { return m_receivedFps; }
@@ -113,7 +103,7 @@ private:
     QNetworkReply *m_httpReply;
     QByteArray m_httpBoundary;
     QByteArray m_httpBuffer;
-    MJpegFrame m_currentFrame;
+    QImage m_currentFrame;
     quint64 m_currentFrameNo, m_latestFrameNo;
     quint64 m_fpsRecvTs, m_fpsRecvNo;
     ImageDecodeTask *m_decodeTask;
