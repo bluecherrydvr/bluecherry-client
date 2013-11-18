@@ -15,25 +15,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIVE_STREAM_THREAD_H
-#define LIVE_STREAM_THREAD_H
+#ifndef RTSP_STREAM_THREAD_H
+#define RTSP_STREAM_THREAD_H
 
 #include <QMutex>
 #include <QObject>
 #include <QWeakPointer>
 
-class LiveStreamFrame;
-class LiveStreamWorker;
+class RtspStreamFrame;
+class RtspStreamWorker;
 class QThread;
 class QUrl;
 
-class LiveStreamThread : public QObject
+class RtspStreamThread : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit LiveStreamThread(QObject *parent = 0);
-    virtual ~LiveStreamThread();
+    explicit RtspStreamThread(QObject *parent = 0);
+    virtual ~RtspStreamThread();
 
     void start(const QUrl &url);
     void stop();
@@ -43,7 +43,7 @@ public:
     bool hasWorker();
 
     void setAutoDeinterlacing(bool autoDeinterlacing);
-    LiveStreamFrame * frameToDisplay();
+    RtspStreamFrame * frameToDisplay();
 
 signals:
     void fatalError(const QString &error);
@@ -51,7 +51,7 @@ signals:
 
 private:
     QWeakPointer<QThread> m_thread;
-    QWeakPointer<LiveStreamWorker> m_worker;
+    QWeakPointer<RtspStreamWorker> m_worker;
     QMutex m_workerMutex;
     bool m_isRunning;
 
@@ -60,4 +60,4 @@ private slots:
 
 };
 
-#endif // LIVE_STREAM_THREAD_H
+#endif // RTSP_STREAM_THREAD_H

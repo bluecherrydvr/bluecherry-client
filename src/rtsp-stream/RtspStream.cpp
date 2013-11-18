@@ -15,13 +15,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "LiveStream.h"
-#include "LiveStreamFrame.h"
-#include "LiveStreamThread.h"
+#include "RtspStream.h"
+#include "RtspStreamFrame.h"
+#include "RtspStreamThread.h"
+#include "RtspStreamWorker.h"
 #include "core/BluecherryApp.h"
 #include "core/LiveViewManager.h"
 #include "core/LoggableUrl.h"
-#include "live-stream/LiveStreamWorker.h"
 #include <QMutex>
 #include <QMetaObject>
 #include <QTimer>
@@ -71,11 +71,11 @@ protected:
     }
 };
 
-QTimer *LiveStream::m_renderTimer = 0;
+QTimer *RtspStream::m_renderTimer = 0;
 static const int renderTimerFps = 30;
-QTimer *LiveStream::m_stateTimer = 0;
+QTimer *RtspStream::m_stateTimer = 0;
 
-void LiveStream::init()
+void RtspStream::init()
 {
     av_lockmgr_register(bc_av_lockmgr);
     av_register_all();
@@ -90,7 +90,7 @@ void LiveStream::init()
     m_stateTimer->setSingleShot(false);
 }
 
-LiveStream::LiveStream(DVRCamera *camera, QObject *parent)
+RtspStream::RtspStream(DVRCamera *camera, QObject *parent)
     : QObject(parent), m_camera(camera), m_thread(0), m_currentFrameMutex(QMutex::Recursive),
       m_frame(0), m_state(NotConnected),
       m_autoStart(false), m_bandwidthMode(LiveViewManager::FullBandwidth), m_fpsUpdateCnt(0), m_fpsUpdateHits(0),
@@ -104,13 +104,13 @@ LiveStream::LiveStream(DVRCamera *camera, QObject *parent)
     connect(m_stateTimer, SIGNAL(timeout()), SLOT(checkState()));
 }
 
-LiveStream::~LiveStream()
+RtspStream::~RtspStream()
 {
     stop();
     bcApp->liveView->removeStream(this);
 }
 
-void LiveStream::setState(State newState)
+void RtspStream::setState(State newState)
 {
     if (m_state == newState)
         return;
@@ -132,7 +132,7 @@ void LiveStream::setState(State newState)
         emit pausedChanged(isPaused());
 }
 
-QUrl LiveStream::url() const
+QUrl RtspStream::url() const
 {
     if (!m_camera)
         return QUrl();
@@ -143,7 +143,7 @@ QUrl LiveStream::url() const
     return streamUrl;
 }
 
-void LiveStream::setBandwidthMode(int value)
+void RtspStream::setBandwidthMode(int value)
 {
     if (value == m_bandwidthMode)
         return;
@@ -158,7 +158,7 @@ void LiveStream::setBandwidthMode(int value)
     }
 }
 
-void LiveStream::start()
+void RtspStream::start()
 {
     if (state() >= Connecting)
         return;
@@ -176,7 +176,7 @@ void LiveStream::start()
     if (m_thread)
         m_thread->stop();
 
-    m_thread.reset(new LiveStreamThread());
+    m_thread.reset(new RtspStreamThread());
     connect(m_thread.data(), SIGNAL(fatalError(QString)), this, SLOT(fatalError(QString)));
     m_thread->start(url());
 
@@ -184,7 +184,7 @@ void LiveStream::start()
     setState(Connecting);
 }
 
-void LiveStream::stop()
+void RtspStream::stop()
 {
     disconnect(m_renderTimer, SIGNAL(timeout()), this, SLOT(updateFrame()));
 
@@ -200,7 +200,7 @@ void LiveStream::stop()
     }
 }
 
-void LiveStream::setOnline(bool online)
+void RtspStream::setOnline(bool online)
 {
     if (!online && state() != StreamOffline)
     {
@@ -216,7 +216,7 @@ void LiveStream::setOnline(bool online)
     }
 }
 
-void LiveStream::setPaused(bool pause)
+void RtspStream::setPaused(bool pause)
 {
     if (pause == (state() == Paused) || state() < Streaming || !m_thread || !m_thread->hasWorker())
         return;
@@ -230,7 +230,7 @@ void LiveStream::setPaused(bool pause)
     m_frameInterval.restart();
 }
 
-void LiveStream::updateFrame()
+void RtspStream::updateFrame()
 {
     if (state() < Connecting || !m_thread || !m_thread->isRunning())
         return;
@@ -244,7 +244,7 @@ void LiveStream::updateFrame()
     if (!m_thread || !m_thread->hasWorker())
         return;
 
-    LiveStreamFrame *sf = m_thread->frameToDisplay();
+    RtspStreamFrame *sf = m_thread->frameToDisplay();
     if (!sf) // no new frame
         return;
 
@@ -269,19 +269,19 @@ void LiveStream::updateFrame()
     emit updated();
 }
 
-QImage LiveStream::currentFrame()
+QImage RtspStream::currentFrame()
 {
     QMutexLocker locker(&m_currentFrameMutex);
     return m_currentFrame.copy();
 }
 
-QSize LiveStream::streamSize()
+QSize RtspStream::streamSize()
 {
     QMutexLocker locker(&m_currentFrameMutex);
     return m_currentFrame.size();
 }
 
-void LiveStream::fatalError(const QString &message)
+void RtspStream::fatalError(const QString &message)
 {
     qDebug() << "Fatal error:" << LoggableUrl(url()) << message;
 
@@ -290,13 +290,13 @@ void LiveStream::fatalError(const QString &message)
     /* stateTimer will handle reconnection */
 }
 
-void LiveStream::checkState()
+void RtspStream::checkState()
 {
     if (state() == Error)
         start();
 }
 
-void LiveStream::updateSettings()
+void RtspStream::updateSettings()
 {
     if (!m_thread || !m_thread->hasWorker())
         return;

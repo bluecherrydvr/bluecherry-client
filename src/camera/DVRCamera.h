@@ -31,7 +31,7 @@
 class CameraPtzControl;
 class DVRServer;
 class DVRServerRepository;
-class LiveStream;
+class RtspStream;
 class QMimeData;
 
 class DVRCamera : public QObject
@@ -61,7 +61,7 @@ public:
     QUrl streamUrl() const;
 
     bool isOnline() const;
-    QSharedPointer<LiveStream> liveStream();
+    QSharedPointer<RtspStream> rtspStream();
 
     PtzProtocol ptzProtocol() const;
     bool hasPtz() const;
@@ -78,7 +78,7 @@ signals:
 private:
     DVRCameraData m_data;
     QWeakPointer<CameraPtzControl> m_ptzControl;
-    QWeakPointer<LiveStream> m_liveStream;
+    QWeakPointer<RtspStream> m_rtspStream;
     QUrl m_streamUrl;
     bool m_isOnline;
     qint8 m_recordingState;

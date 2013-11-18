@@ -18,7 +18,7 @@
 #include "bluecherry-config.h"
 #include "core/BluecherryApp.h"
 #include "core/LanguageController.h"
-#include "live-stream/LiveStream.h"
+#include "rtsp-stream/RtspStream.h"
 #include "ui/MainWindow.h"
 #include "ui/CrashReportDialog.h"
 #include <QApplication>
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
         qDebug("Using qjpeg-turbo");
     }
 
-    LiveStream::init();
+    RtspStream::init();
 
     MainWindow w(bcApp->serverRepository());
     w.show();

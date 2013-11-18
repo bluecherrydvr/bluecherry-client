@@ -20,7 +20,7 @@
 
 #include <QDeclarativeItem>
 #include <QSharedPointer>
-#include "live-stream/LiveStream.h"
+#include "rtsp-stream/RtspStream.h"
 
 class QGLContext;
 
@@ -28,7 +28,7 @@ class LiveStreamItem : public QDeclarativeItem
 {
     Q_OBJECT
 
-    Q_PROPERTY(LiveStream *stream READ stream NOTIFY streamChanged)
+    Q_PROPERTY(RtspStream *stream READ stream NOTIFY streamChanged)
     Q_PROPERTY(QSizeF frameSize READ frameSize NOTIFY frameSizeChanged)
 
 public:
@@ -37,14 +37,14 @@ public:
 
     virtual void paint(QPainter *, const QStyleOptionGraphicsItem *, QWidget *);
 
-    LiveStream * stream() const { return m_stream.data(); }
-    void setStream(QSharedPointer<LiveStream> stream);
+    RtspStream * stream() const { return m_stream.data(); }
+    void setStream(QSharedPointer<RtspStream> stream);
     void clear();
 
     QSizeF frameSize() const { return m_stream ? m_stream.data()->streamSize() : QSize(0, 0); }
 
 signals:
-    void streamChanged(LiveStream *stream);
+    void streamChanged(RtspStream *stream);
     void frameSizeChanged(const QSizeF &frameSize);
 
 private slots:
@@ -57,7 +57,7 @@ private slots:
     void updateSettings();
 
 private:
-    QSharedPointer<LiveStream> m_stream;
+    QSharedPointer<RtspStream> m_stream;
     bool m_useAdvancedGL;
     unsigned m_texId;
     const QGLContext *m_texLastContext;

@@ -15,8 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIVESTREAMWORKER_H
-#define LIVESTREAMWORKER_H
+#ifndef RTSPSTREAMWORKER_H
+#define RTSPSTREAMWORKER_H
 
 #include "core/ThreadPause.h"
 #include <QDateTime>
@@ -26,17 +26,17 @@
 struct AVDictionary;
 struct AVStream;
 
-class LiveStreamFrame;
-class LiveStreamFrameFormatter;
-class LiveStreamFrameQueue;
+class RtspStreamFrame;
+class RtspStreamFrameFormatter;
+class RtspStreamFrameQueue;
 
-class LiveStreamWorker : public QObject
+class RtspStreamWorker : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit LiveStreamWorker(QObject *parent = 0);
-    virtual ~LiveStreamWorker();
+    explicit RtspStreamWorker(QObject *parent = 0);
+    virtual ~RtspStreamWorker();
 
     void setUrl(const QUrl &url);
 
@@ -45,7 +45,7 @@ public:
     void setAutoDeinterlacing(bool autoDeinterlacing);
 
     bool shouldInterrupt() const;
-    LiveStreamFrame * frameToDisplay();
+    RtspStreamFrame * frameToDisplay();
 
 public slots:
     void run();
@@ -65,8 +65,8 @@ private:
     mutable int m_lastSeconds;
 
     ThreadPause m_threadPause;
-    QScopedPointer<LiveStreamFrameFormatter> m_frameFormatter;
-    QScopedPointer<LiveStreamFrameQueue> m_frameQueue;
+    QScopedPointer<RtspStreamFrameFormatter> m_frameFormatter;
+    QScopedPointer<RtspStreamFrameQueue> m_frameQueue;
 
     bool setup();
     bool prepareStream(AVFormatContext **context, AVDictionary *options);
@@ -92,4 +92,4 @@ private:
 
 };
 
-#endif // LIVESTREAMWORKER_H
+#endif // RTSPSTREAMWORKER_H

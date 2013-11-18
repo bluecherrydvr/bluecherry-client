@@ -21,7 +21,7 @@
 #include "server/DVRServerConfiguration.h"
 #include "core/BluecherryApp.h"
 #include "core/CameraPtzControl.h"
-#include "live-stream/LiveStream.h"
+#include "rtsp-stream/RtspStream.h"
 #include <QMimeData>
 #include <QSettings>
 #include <QXmlStreamReader>
@@ -60,15 +60,15 @@ DVRCamera::PtzProtocol DVRCamera::parseProtocol(const QString &protocol)
         return UnknownProtocol;
 }
 
-QSharedPointer<LiveStream> DVRCamera::liveStream()
+QSharedPointer<RtspStream> DVRCamera::rtspStream()
 {
-    if (m_liveStream)
-        return m_liveStream.toStrongRef();
+    if (m_rtspStream)
+        return m_rtspStream.toStrongRef();
 
-    QSharedPointer<LiveStream> result(new LiveStream(this));
-    m_liveStream = result.toWeakRef();
-    connect(this, SIGNAL(onlineChanged(bool)), m_liveStream.data(), SLOT(setOnline(bool)));
-    m_liveStream.data()->setOnline(isOnline());
+    QSharedPointer<RtspStream> result(new RtspStream(this));
+    m_rtspStream = result.toWeakRef();
+    connect(this, SIGNAL(onlineChanged(bool)), m_rtspStream.data(), SLOT(setOnline(bool)));
+    m_rtspStream.data()->setOnline(isOnline());
     return result;
 }
 

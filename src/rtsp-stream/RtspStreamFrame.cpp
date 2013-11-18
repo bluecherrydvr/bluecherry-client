@@ -15,24 +15,24 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "LiveStreamFrame.h"
+#include "RtspStreamFrame.h"
 
 extern "C" {
 #   include "libavformat/avformat.h"
 }
 
-LiveStreamFrame::LiveStreamFrame(AVFrame *avFrame) : m_avFrame(avFrame)
+RtspStreamFrame::RtspStreamFrame(AVFrame *avFrame) : m_avFrame(avFrame)
 {
     Q_ASSERT(m_avFrame);
 }
 
-LiveStreamFrame::~LiveStreamFrame()
+RtspStreamFrame::~RtspStreamFrame()
 {
     av_free(m_avFrame->data[0]);
     av_free(m_avFrame);
 }
 
-AVFrame * LiveStreamFrame::avFrame() const
+AVFrame * RtspStreamFrame::avFrame() const
 {
     return m_avFrame;
 }

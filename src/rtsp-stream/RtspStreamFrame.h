@@ -15,20 +15,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIVE_STREAM_FRAME_H
-#define LIVE_STREAM_FRAME_H
+#ifndef RTSP_STREAM_FRAME_H
+#define RTSP_STREAM_FRAME_H
 
 #include <QtGlobal>
 
 struct AVFrame;
 
-class LiveStreamFrame
+class RtspStreamFrame
 {
-    Q_DISABLE_COPY(LiveStreamFrame);
+    Q_DISABLE_COPY(RtspStreamFrame);
 
 public:
-    explicit LiveStreamFrame(AVFrame *avFrame);
-    ~LiveStreamFrame();
+    explicit RtspStreamFrame(AVFrame *avFrame);
+    ~RtspStreamFrame();
 
     AVFrame * avFrame() const;
 
@@ -37,4 +37,4 @@ private:
 
 };
 
-#endif // LIVE_STREAM_FRAME_H
+#endif // RTSP_STREAM_FRAME_H

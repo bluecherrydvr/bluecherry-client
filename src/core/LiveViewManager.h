@@ -20,7 +20,7 @@
 
 #include <QObject>
 
-class LiveStream;
+class RtspStream;
 class QAction;
 
 class LiveViewManager : public QObject
@@ -39,7 +39,7 @@ public:
 
     explicit LiveViewManager(QObject *parent = 0);
 
-    QList<LiveStream*> streams() const;
+    QList<RtspStream*> streams() const;
 
     BandwidthMode bandwidthMode() const { return m_bandwidthMode; }
 
@@ -53,12 +53,12 @@ signals:
     void bandwidthModeChanged(int value);
 
 private:
-    QList<LiveStream*> m_streams;
+    QList<RtspStream*> m_streams;
     BandwidthMode m_bandwidthMode;
 
-    friend class LiveStream;
-    void addStream(LiveStream *stream);
-    void removeStream(LiveStream *stream);
+    friend class RtspStream;
+    void addStream(RtspStream *stream);
+    void removeStream(RtspStream *stream);
 };
 
 #endif // LIVEVIEWMANAGER_H

@@ -15,8 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIVESTREAM_H
-#define LIVESTREAM_H
+#ifndef RTSPSTREAM_H
+#define RTSPSTREAM_H
 
 #include <QMutex>
 #include <QObject>
@@ -26,9 +26,9 @@
 #include "camera/DVRCamera.h"
 #include "core/LiveViewManager.h"
 
-class LiveStreamThread;
+class RtspStreamThread;
 
-class LiveStream : public QObject
+class RtspStream : public QObject
 {
     Q_OBJECT
     Q_ENUMS(State)
@@ -54,8 +54,8 @@ public:
     };
 
     static void init();
-    explicit LiveStream(DVRCamera *camera, QObject *parent = 0);
-    virtual ~LiveStream();
+    explicit RtspStream(DVRCamera *camera, QObject *parent = 0);
+    virtual ~RtspStream();
 
     QUrl url() const;
 
@@ -101,10 +101,10 @@ private:
     static QTimer *m_renderTimer, *m_stateTimer;
 
     QWeakPointer<DVRCamera> m_camera;
-    QScopedPointer<LiveStreamThread> m_thread;
+    QScopedPointer<RtspStreamThread> m_thread;
     QImage m_currentFrame;
     QMutex m_currentFrameMutex;
-    class LiveStreamFrame *m_frame;
+    class RtspStreamFrame *m_frame;
     QString m_errorMessage;
     State m_state;
     bool m_autoStart;
@@ -120,4 +120,4 @@ private:
 
 };
 
-#endif // LIVESTREAM_H
+#endif // RTSPSTREAM_H

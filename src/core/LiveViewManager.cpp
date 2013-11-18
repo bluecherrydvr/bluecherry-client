@@ -16,7 +16,7 @@
  */
 
 #include "LiveViewManager.h"
-#include "live-stream/LiveStream.h"
+#include "rtsp-stream/RtspStream.h"
 #include <QAction>
 
 LiveViewManager::LiveViewManager(QObject *parent)
@@ -24,14 +24,14 @@ LiveViewManager::LiveViewManager(QObject *parent)
 {
 }
 
-void LiveViewManager::addStream(LiveStream *stream)
+void LiveViewManager::addStream(RtspStream *stream)
 {
     m_streams.append(stream);
     connect(this, SIGNAL(bandwidthModeChanged(int)), stream, SLOT(setBandwidthMode(int)));
     stream->setBandwidthMode(bandwidthMode());
 }
 
-void LiveViewManager::removeStream(LiveStream *stream)
+void LiveViewManager::removeStream(RtspStream *stream)
 {
     m_streams.removeOne(stream);
 }

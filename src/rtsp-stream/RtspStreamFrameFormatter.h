@@ -15,27 +15,27 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIVE_STREAM_FRAME_FORMATTER_H
-#define LIVE_STREAM_FRAME_FORMATTER_H
+#ifndef RTSP_STREAM_FRAME_FORMATTER_H
+#define RTSP_STREAM_FRAME_FORMATTER_H
 
 extern "C" {
 #   include "libavutil/pixfmt.h"
 }
 
-class LiveStreamFrame;
+class RtspStreamFrame;
 struct AVFrame;
 struct AVStream;
 
 struct SwsContext;
  
-class LiveStreamFrameFormatter
+class RtspStreamFrameFormatter
 {
 public:
-    explicit LiveStreamFrameFormatter(AVStream *stream);
-    ~LiveStreamFrameFormatter();
+    explicit RtspStreamFrameFormatter(AVStream *stream);
+    ~RtspStreamFrameFormatter();
 
     void setAutoDeinterlacing(bool autoDeinterlacing);
-    LiveStreamFrame * formatFrame(AVFrame *avFrame);
+    RtspStreamFrame * formatFrame(AVFrame *avFrame);
 
 private:
     AVStream *m_stream;
@@ -52,4 +52,4 @@ private:
 
 };
 
-#endif // LIVE_STREAM_FRAME_FORMATTER_H
+#endif // RTSP_STREAM_FRAME_FORMATTER_H

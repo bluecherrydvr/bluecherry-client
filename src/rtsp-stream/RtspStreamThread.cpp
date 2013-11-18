@@ -15,25 +15,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "LiveStreamThread.h"
-#include "LiveStreamWorker.h"
+#include "RtspStreamThread.h"
+#include "RtspStreamWorker.h"
 #include "core/BluecherryApp.h"
 #include "core/LoggableUrl.h"
 #include <QDebug>
 #include <QThread>
 #include <QUrl>
 
-LiveStreamThread::LiveStreamThread(QObject *parent) :
+RtspStreamThread::RtspStreamThread(QObject *parent) :
         QObject(parent), m_workerMutex(QMutex::Recursive), m_isRunning(false)
 {
 }
 
-LiveStreamThread::~LiveStreamThread()
+RtspStreamThread::~RtspStreamThread()
 {
     stop();
 }
 
-void LiveStreamThread::start(const QUrl &url)
+void RtspStreamThread::start(const QUrl &url)
 {
     QMutexLocker locker(&m_workerMutex);
 
@@ -44,7 +44,7 @@ void LiveStreamThread::start(const QUrl &url)
         Q_ASSERT(!m_thread);
         m_thread = new QThread();
 
-        LiveStreamWorker *worker = new LiveStreamWorker();
+        RtspStreamWorker *worker = new RtspStreamWorker();
         worker->moveToThread(m_thread.data());
 
         m_worker = worker;
@@ -65,7 +65,7 @@ void LiveStreamThread::start(const QUrl &url)
     m_isRunning = true;
 }
 
-void LiveStreamThread::stop()
+void RtspStreamThread::stop()
 {
     QMutexLocker locker(&m_workerMutex);
 
@@ -82,21 +82,21 @@ void LiveStreamThread::stop()
     Q_ASSERT(!m_thread);
 }
 
-void LiveStreamThread::setPaused(bool paused)
+void RtspStreamThread::setPaused(bool paused)
 {
     QMutexLocker locker(&m_workerMutex);
 
     m_worker.data()->setPaused(paused);
 }
 
-bool LiveStreamThread::hasWorker()
+bool RtspStreamThread::hasWorker()
 {
     QMutexLocker locker(&m_workerMutex);
 
     return !m_worker.isNull();
 }
 
-void LiveStreamThread::threadFinished()
+void RtspStreamThread::threadFinished()
 {
     QMutexLocker locker(&m_workerMutex);
 
@@ -108,12 +108,12 @@ void LiveStreamThread::threadFinished()
     m_isRunning = false;
 }
 
-bool LiveStreamThread::isRunning() const
+bool RtspStreamThread::isRunning() const
 {
     return m_isRunning;
 }
 
-void LiveStreamThread::setAutoDeinterlacing(bool autoDeinterlacing)
+void RtspStreamThread::setAutoDeinterlacing(bool autoDeinterlacing)
 {
     QMutexLocker locker(&m_workerMutex);
 
@@ -121,7 +121,7 @@ void LiveStreamThread::setAutoDeinterlacing(bool autoDeinterlacing)
         m_worker.data()->setAutoDeinterlacing(autoDeinterlacing);
 }
 
-LiveStreamFrame * LiveStreamThread::frameToDisplay()
+RtspStreamFrame * RtspStreamThread::frameToDisplay()
 {
     QMutexLocker locker(&m_workerMutex);
 
