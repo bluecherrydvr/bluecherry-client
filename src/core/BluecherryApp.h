@@ -123,6 +123,7 @@ private:
 #elif defined (Q_OS_LINUX)
     uint m_screensaveValue;
 #else
+    int m_screensaveValue;
     QTimer *m_screensaveTimer;
 #endif
 
