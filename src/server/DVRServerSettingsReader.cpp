@@ -17,6 +17,7 @@
 
 #include "DVRServer.h"
 #include "DVRServerConfiguration.h"
+#include "DVRServerConnectionType.h"
 #include "DVRServerSettingsReader.h"
 #include <QSettings>
 
@@ -32,6 +33,7 @@ DVRServer * DVRServerSettingsReader::readServer(int serverId) const
     server->configuration().setPassword(readSetting(serverId, QLatin1String("password")).toString());
     server->configuration().setAutoConnect(readSetting(serverId, QLatin1String("autoConnect"), true).toBool());
     server->configuration().setSslDigest(readSetting(serverId, QLatin1String("sslDigest")).toByteArray());
+    server->configuration().setConnectionType(readSetting(serverId, QLatin1String("connectionType"), DVRServerConnectionType::RTSP).toInt());
 
     return server;
 }

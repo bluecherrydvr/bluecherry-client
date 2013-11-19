@@ -21,18 +21,20 @@
 #include "core/BluecherryApp.h"
 #include "server/DVRServer.h"
 #include "server/DVRServerConfiguration.h"
+#include "server/DVRServerConnectionType.h"
 #include "server/DVRServerRepository.h"
 #include "ui/WebRtpPortCheckerWidget.h"
-#include <QTreeView>
-#include <QHeaderView>
 #include <QBoxLayout>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QHeaderView>
+#include <QIntValidator>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QTextDocument>
 #include <QMessageBox>
-#include <QIntValidator>
-#include <QCheckBox>
+#include <QTextDocument>
+#include <QTreeView>
 
 OptionsServerPage::OptionsServerPage(DVRServerRepository *serverRepository, QWidget *parent)
     : OptionsDialogPage(parent), m_serverRepository(serverRepository)
@@ -109,6 +111,11 @@ OptionsServerPage::OptionsServerPage(DVRServerRepository *serverRepository, QWid
     m_passwordEdit->setEchoMode(QLineEdit::PasswordEchoOnEdit);
     editsLayout->addWidget(m_passwordEdit, 1, 3);
 
+    label = new QLabel(tr("Connection Type:"));
+    m_connectionType = new QComboBox;
+    m_connectionType->addItem(tr("RTSP"));
+    m_connectionType->addItem(tr("MJPEG"));
+
     m_autoConnect = new QCheckBox(tr("Connect Automatically"));
     m_autoConnect->setChecked(true);
     editsLayout->addWidget(m_autoConnect, 2, 1, 1, 1);
@@ -179,6 +186,7 @@ void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const 
         m_portEdit->clear();
         m_usernameEdit->clear();
         m_passwordEdit->clear();
+        m_connectionType->setCurrentIndex(DVRServerConnectionType::RTSP);
         return;
     }
 
@@ -188,6 +196,7 @@ void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const 
     m_usernameEdit->setText(server->configuration().username());
     m_passwordEdit->setText(server->configuration().password());
     m_autoConnect->setChecked(server->configuration().autoConnect());
+    m_connectionType->setCurrentIndex(server->configuration().connectionType());
 
     connect(server, SIGNAL(loginSuccessful()), SLOT(setLoginSuccessful()));
     connect(server, SIGNAL(loginError(QString)), SLOT(setLoginError(QString)));
@@ -213,6 +222,7 @@ void OptionsServerPage::addNewServer()
     DVRServer *server = m_serverRepository->createServer(tr("New Server"));
     server->configuration().setAutoConnect(true);
     server->configuration().setPort(7001);
+    server->configuration().setConnectionType(DVRServerConnectionType::RTSP);
 
     if (!m_serversView->currentIndex().isValid())
         saveChanges(server);
@@ -295,6 +305,7 @@ void OptionsServerPage::saveChanges(DVRServer *server)
     }
 
     server->configuration().setAutoConnect(m_autoConnect->isChecked());
+    server->configuration().setConnectionType(m_connectionType->currentIndex());
 
     if (connectionModified || (m_autoConnect->isChecked() && !server->isOnline()))
         server->login();

@@ -18,7 +18,7 @@
 #include "DVRServerConfiguration.h"
 
 DVRServerConfiguration::DVRServerConfiguration(int id, QObject *parent)
-    : QObject(parent), m_id(id), m_port(0), m_autoConnect(false)
+    : QObject(parent), m_id(id), m_port(0), m_autoConnect(false), m_connectionType(0)
 {
 }
 
@@ -89,6 +89,15 @@ void DVRServerConfiguration::setSslDigest(const QByteArray &sslDigest)
     emit changed();
 }
 
+void DVRServerConfiguration::setConnectionType(int type)
+{
+    if (m_connectionType == type)
+        return;
+
+    m_connectionType = type;
+    emit changed();
+}
+
 int DVRServerConfiguration::id() const
 {
     return m_id;
@@ -127,4 +136,9 @@ bool DVRServerConfiguration::autoConnect() const
 QByteArray DVRServerConfiguration::sslDigest() const
 {
     return m_sslDigest;
+}
+
+int DVRServerConfiguration::connectionType() const
+{
+    return m_connectionType;
 }

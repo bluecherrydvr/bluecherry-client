@@ -36,13 +36,13 @@ MJpegStream::MJpegStream(DVRCamera *camera, QObject *parent)
     Q_ASSERT(m_camera);
     connect(m_camera.data(), SIGNAL(destroyed(QObject*)), this, SLOT(deleteLater()));
 
-    //bcApp->liveView->addStream(this);
+    bcApp->liveView->addStream(this);
     connect(&m_activityTimer, SIGNAL(timeout()), SLOT(checkActivity()));
 }
 
 MJpegStream::~MJpegStream()
 {
-    //bcApp->liveView->removeStream(this);
+    bcApp->liveView->removeStream(this);
 
     if (m_httpReply)
         m_httpReply->deleteLater();
