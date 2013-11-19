@@ -21,13 +21,15 @@
 #include "server/DVRServerConfiguration.h"
 #include "core/BluecherryApp.h"
 #include "core/CameraPtzControl.h"
+#include "core/MJpegStream.h"
 #include "rtsp-stream/RtspStream.h"
 #include <QMimeData>
 #include <QSettings>
 #include <QXmlStreamReader>
 
 DVRCamera::DVRCamera(int id, DVRServer *server)
-    : QObject(), m_data(id, server), m_isOnline(false), m_recordingState(NoRecording)
+    : QObject(), m_data(id, server), m_isOnline(false), m_recordingState(NoRecording),
+      m_currentConnectionType((DVRServerConnectionType::Type)server->configuration().connectionType())
 {
     connect(&m_data, SIGNAL(changed()), this, SIGNAL(dataUpdated()));
 }
@@ -62,10 +64,16 @@ DVRCamera::PtzProtocol DVRCamera::parseProtocol(const QString &protocol)
 
 QSharedPointer<LiveStream> DVRCamera::liveStream()
 {
-    if (m_liveStream)
+    if (m_liveStream && m_currentConnectionType && data().server()->configuration().connectionType())
         return m_liveStream.toStrongRef();
 
-    QSharedPointer<RtspStream> result(new RtspStream(this));
+    m_currentConnectionType = (DVRServerConnectionType::Type)data().server()->configuration().connectionType();
+    QSharedPointer<LiveStream> result;
+    if (m_currentConnectionType == DVRServerConnectionType::MJPEG)
+        result = QSharedPointer<LiveStream>(new MJpegStream(this));
+    else
+        result = QSharedPointer<LiveStream>(new RtspStream(this));
+
     m_liveStream = result.toWeakRef();
     connect(this, SIGNAL(onlineChanged(bool)), m_liveStream.data(), SLOT(setOnline(bool)));
     m_liveStream.data()->setOnline(isOnline());
