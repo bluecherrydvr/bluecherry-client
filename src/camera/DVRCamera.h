@@ -20,6 +20,7 @@
 
 #include "camera/DVRCameraData.h"
 #include "camera/RecordingState.h"
+#include "server/DVRServerConnectionType.h"
 #include <QObject>
 #include <QSharedPointer>
 #include <QUrl>
@@ -82,7 +83,7 @@ private:
     QUrl m_streamUrl;
     bool m_isOnline;
     qint8 m_recordingState;
-
+    DVRServerConnectionType::Type m_currentConnectionType;
     void setOnline(bool on);
 
 };

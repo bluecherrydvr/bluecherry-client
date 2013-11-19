@@ -3,7 +3,7 @@
 
 namespace DVRServerConnectionType
 {
-    enum DVRServerConnectionType
+    enum Type
     {
         RTSP = 0,
         MJPEG = 1

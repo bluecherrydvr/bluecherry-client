@@ -52,7 +52,7 @@ public:
     float receivedFps() const { return m_receivedFps; }
 
     bool isPaused() const { return m_paused; }
-    int interval() const { return m_interval; }
+    bool isConnected() const { return state() > Connecting; }
 
 public slots:
     void start();
