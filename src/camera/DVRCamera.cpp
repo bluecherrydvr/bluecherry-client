@@ -124,6 +124,21 @@ QUrl DVRCamera::rtspStreamUrl() const
     return m_rtspStreamUrl;
 }
 
+void DVRCamera::setMjpegStreamUrl(const QUrl &mjpegStreamUrl)
+{
+    if (m_mjpegStreamUrl == mjpegStreamUrl)
+        return;
+
+    m_mjpegStreamUrl = mjpegStreamUrl;
+    emit dataUpdated();
+    emit onlineChanged(isOnline());
+}
+
+QUrl DVRCamera::mjpegStreamUrl() const
+{
+    return m_mjpegStreamUrl;
+}
+
 bool DVRCamera::isOnline() const
 {
     return m_isOnline && !m_data.disabled() && !m_rtspStreamUrl.isEmpty();

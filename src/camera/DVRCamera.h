@@ -61,6 +61,9 @@ public:
     void setRtspStreamUrl(const QUrl &rtspStreamUrl);
     QUrl rtspStreamUrl() const;
 
+    void setMjpegStreamUrl(const QUrl &mjpegStreamUrl);
+    QUrl mjpegStreamUrl() const;
+
     bool isOnline() const;
     QSharedPointer<LiveStream> liveStream();
 
@@ -81,6 +84,7 @@ private:
     QWeakPointer<CameraPtzControl> m_ptzControl;
     QWeakPointer<LiveStream> m_liveStream;
     QUrl m_rtspStreamUrl;
+    QUrl m_mjpegStreamUrl;
     bool m_isOnline;
     qint8 m_recordingState;
     DVRServerConnectionType::Type m_currentConnectionType;

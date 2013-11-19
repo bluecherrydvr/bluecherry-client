@@ -98,6 +98,14 @@ OptionsServerPage::OptionsServerPage(DVRServerRepository *serverRepository, QWid
 
     editsLayout->addLayout(hnLayout, 1, 1);
 
+    label = new QLabel(tr("Connection Type:"));
+    editsLayout->addWidget(label, 2, 0, Qt::AlignRight);
+
+    m_connectionType = new QComboBox;
+    m_connectionType->addItem(tr("RTSP"));
+    m_connectionType->addItem(tr("MJPEG"));
+    editsLayout->addWidget(m_connectionType, 2, 1);
+
     label = new QLabel(tr("Username:"));
     editsLayout->addWidget(label, 0, 2, Qt::AlignRight);
 
@@ -111,14 +119,9 @@ OptionsServerPage::OptionsServerPage(DVRServerRepository *serverRepository, QWid
     m_passwordEdit->setEchoMode(QLineEdit::PasswordEchoOnEdit);
     editsLayout->addWidget(m_passwordEdit, 1, 3);
 
-    label = new QLabel(tr("Connection Type:"));
-    m_connectionType = new QComboBox;
-    m_connectionType->addItem(tr("RTSP"));
-    m_connectionType->addItem(tr("MJPEG"));
-
     m_autoConnect = new QCheckBox(tr("Connect Automatically"));
     m_autoConnect->setChecked(true);
-    editsLayout->addWidget(m_autoConnect, 2, 1, 1, 1);
+    editsLayout->addWidget(m_autoConnect, 3, 1, 1, 1);
 
     /* Errors */
     m_connectionStatus = new QLabel;

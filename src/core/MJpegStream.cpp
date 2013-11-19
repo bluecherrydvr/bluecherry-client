@@ -173,7 +173,7 @@ QUrl MJpegStream::url() const
     if (!m_camera)
         return QUrl();
 
-    QUrl streamUrl = m_camera.data()->rtspStreamUrl();
+    QUrl streamUrl = m_camera.data()->mjpegStreamUrl();
     return streamUrl;
 }
 
