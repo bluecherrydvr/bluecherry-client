@@ -33,27 +33,8 @@ class ImageDecodeTask;
 class MJpegStream : public LiveStream
 {
     Q_OBJECT
-    Q_ENUMS(State)
-
-    Q_PROPERTY(bool paused READ isPaused WRITE setPaused NOTIFY pausedChanged)
-    Q_PROPERTY(int bandwidthMode READ bandwidthMode WRITE setBandwidthMode NOTIFY bandwidthModeChanged)
-    Q_PROPERTY(float receivedFps READ receivedFps CONSTANT)
-    Q_PROPERTY(QSize streamSize READ streamSize NOTIFY streamSizeChanged)
-    Q_PROPERTY(State state READ state NOTIFY stateChanged)
-    Q_PROPERTY(QString errdesc READ errorMessage CONSTANT)
 
 public:
-    enum State
-    {
-        Error,
-        StreamOffline,
-        NotConnected,
-        Connecting,
-        Buffering,
-        Streaming,
-        Paused
-
-    };
 
     explicit MJpegStream(DVRCamera *camera, QObject *parent = 0);
     virtual ~MJpegStream();
@@ -81,16 +62,6 @@ public slots:
     void togglePaused() { setPaused(!isPaused()); }
     void setOnline(bool online);
     void setBandwidthMode(int bandwidthMode);
-
-signals:
-    void stateChanged(int newState);
-    void pausedChanged(bool isPaused);
-    void bandwidthModeChanged(int mode);
-
-    void streamRunning();
-    void streamStopped();
-    void streamSizeChanged(const QSize &size);
-    void updated();
 
 private slots:
     void readable();

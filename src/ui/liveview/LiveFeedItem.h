@@ -22,6 +22,7 @@
 #include <QSharedPointer>
 #include "camera/DVRCamera.h"
 #include "core/CameraPtzControl.h"
+#include "core/LiveStream.h"
 
 /* Base of LiveFeed.qml, used to implement some features that are currently missing in pure QML. */
 
@@ -36,7 +37,7 @@ class LiveFeedItem : public QDeclarativeItem
     Q_ENUMS(CustomCursor RecordingState)
 
     Q_PROPERTY(LiveStreamItem *streamItem READ streamItem WRITE setStreamItem)
-    Q_PROPERTY(RtspStream *stream READ stream NOTIFY cameraChanged)
+    Q_PROPERTY(LiveStream *stream READ stream NOTIFY cameraChanged)
     Q_PROPERTY(DVRCamera *camera READ camera WRITE setCamera NOTIFY cameraChanged)
     Q_PROPERTY(DVRServerRepository *serverRepository READ serverRepository WRITE setServerRepository)
 
@@ -72,7 +73,7 @@ public:
     LiveStreamItem *streamItem() const { return m_streamItem; }
     void setStreamItem(LiveStreamItem *item);
 
-    RtspStream *stream() const;
+    LiveStream *stream() const;
 
     DVRCamera * camera() const { return m_camera.data(); }
     QString cameraName() const { return m_camera ? m_camera.data()->data().displayName() : QLatin1String(" "); }

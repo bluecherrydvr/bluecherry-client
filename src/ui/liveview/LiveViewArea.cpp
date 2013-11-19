@@ -22,6 +22,7 @@
 #include "LiveViewGradients.h"
 #include "core/CameraPtzControl.h"
 #include "core/BluecherryApp.h"
+#include "core/LiveStream.h"
 #include "server/DVRServerRepository.h"
 #include <QGLWidget>
 #include <QDeclarativeContext>
@@ -37,10 +38,10 @@ LiveViewArea::LiveViewArea(DVRServerRepository *serverRepository, QWidget *paren
     connect(bcApp, SIGNAL(settingsChanged()), SLOT(settingsChanged()));
 
     qmlRegisterType<LiveViewLayout>("Bluecherry", 1, 0, "LiveViewLayout");
-    qmlRegisterType<LiveStreamItem>("Bluecherry", 1, 0, "RtspStreamDisplay");
+    qmlRegisterType<LiveStreamItem>("Bluecherry", 1, 0, "LiveStreamDisplay");
     qmlRegisterType<LiveFeedItem>("Bluecherry", 1, 0, "LiveFeedBase");
     qmlRegisterUncreatableType<CameraPtzControl>("Bluecherry", 1, 0, "CameraPtzControl", QLatin1String(""));
-    qmlRegisterUncreatableType<RtspStream>("Bluecherry", 1, 0, "RtspStream", QLatin1String(""));
+    qmlRegisterUncreatableType<LiveStream>("Bluecherry", 1, 0, "LiveStream", QLatin1String(""));
 
     rootContext()->setContextProperty(QLatin1String("mainServerRepository"), QVariant::fromValue(serverRepository));
 

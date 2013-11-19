@@ -89,7 +89,7 @@ void LiveStreamItem::clearTexture()
     }
 }
 
-void LiveStreamItem::setStream(QSharedPointer<RtspStream> stream)
+void LiveStreamItem::setStream(QSharedPointer<LiveStream> stream)
 {
     if (stream == m_stream)
         return;
@@ -112,7 +112,7 @@ void LiveStreamItem::setStream(QSharedPointer<RtspStream> stream)
 
 void LiveStreamItem::clear()
 {
-    setStream(QSharedPointer<RtspStream>());
+    setStream(QSharedPointer<LiveStream>());
     clearTexture();
 }
 

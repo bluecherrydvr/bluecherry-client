@@ -269,13 +269,13 @@ void RtspStream::updateFrame()
     emit updated();
 }
 
-QImage RtspStream::currentFrame()
+QImage RtspStream::currentFrame() const
 {
     QMutexLocker locker(&m_currentFrameMutex);
     return m_currentFrame.copy();
 }
 
-QSize RtspStream::streamSize()
+QSize RtspStream::streamSize() const
 {
     QMutexLocker locker(&m_currentFrameMutex);
     return m_currentFrame.size();

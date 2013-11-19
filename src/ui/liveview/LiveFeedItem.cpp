@@ -43,6 +43,8 @@
 #include <QApplication>
 #include <QDesktopWidget>
 
+#include "rtsp-stream/RtspStream.h"
+
 LiveFeedItem::LiveFeedItem(QDeclarativeItem *parent)
     : QDeclarativeItem(parent), m_streamItem(0), m_serverRepository(0), m_customCursor(DefaultCursor)
 {
@@ -58,7 +60,7 @@ void LiveFeedItem::setStreamItem(LiveStreamItem *item)
     m_streamItem = item;
 }
 
-RtspStream * LiveFeedItem::stream() const
+LiveStream *LiveFeedItem::stream() const
 {
     return m_streamItem ? m_streamItem->stream() : 0;
 }
