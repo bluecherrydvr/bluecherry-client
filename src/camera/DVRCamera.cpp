@@ -60,15 +60,15 @@ DVRCamera::PtzProtocol DVRCamera::parseProtocol(const QString &protocol)
         return UnknownProtocol;
 }
 
-QSharedPointer<RtspStream> DVRCamera::rtspStream()
+QSharedPointer<LiveStream> DVRCamera::liveStream()
 {
-    if (m_rtspStream)
-        return m_rtspStream.toStrongRef();
+    if (m_liveStream)
+        return m_liveStream.toStrongRef();
 
     QSharedPointer<RtspStream> result(new RtspStream(this));
-    m_rtspStream = result.toWeakRef();
-    connect(this, SIGNAL(onlineChanged(bool)), m_rtspStream.data(), SLOT(setOnline(bool)));
-    m_rtspStream.data()->setOnline(isOnline());
+    m_liveStream = result.toWeakRef();
+    connect(this, SIGNAL(onlineChanged(bool)), m_liveStream.data(), SLOT(setOnline(bool)));
+    m_liveStream.data()->setOnline(isOnline());
     return result;
 }
 

@@ -111,7 +111,7 @@ void LiveFeedItem::cameraDataUpdated()
     emit cameraNameChanged(cameraName());
     emit hasPtzChanged();
 
-    m_streamItem->setStream(m_camera.data()->rtspStream());
+    m_streamItem->setStream(m_camera.data()->liveStream());
 }
 
 void LiveFeedItem::openNewWindow()
@@ -139,7 +139,7 @@ void LiveFeedItem::saveSnapshot(const QString &ifile)
         return;
 
     /* Grab the current frame, so the user gets what they expect regardless of the time taken by the dialog */
-    QImage frame = m_camera.data()->rtspStream()->currentFrame();
+    QImage frame = m_camera.data()->liveStream()->currentFrame();
     if (frame.isNull())
         return;
 
