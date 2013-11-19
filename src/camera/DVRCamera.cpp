@@ -109,24 +109,24 @@ QSharedPointer<CameraPtzControl> DVRCamera::sharedPtzControl()
     return result;
 }
 
-void DVRCamera::setStreamUrl(const QUrl &streamUrl)
+void DVRCamera::setRtspStreamUrl(const QUrl &streamUrl)
 {
-    if (m_streamUrl == streamUrl)
+    if (m_rtspStreamUrl == streamUrl)
         return;
 
-    m_streamUrl = streamUrl;
+    m_rtspStreamUrl = streamUrl;
     emit dataUpdated();
     emit onlineChanged(isOnline());
 }
 
-QUrl DVRCamera::streamUrl() const
+QUrl DVRCamera::rtspStreamUrl() const
 {
-    return m_streamUrl;
+    return m_rtspStreamUrl;
 }
 
 bool DVRCamera::isOnline() const
 {
-    return m_isOnline && !m_data.disabled() && !m_streamUrl.isEmpty();
+    return m_isOnline && !m_data.disabled() && !m_rtspStreamUrl.isEmpty();
 }
 
 DVRCamera::PtzProtocol DVRCamera::ptzProtocol() const
