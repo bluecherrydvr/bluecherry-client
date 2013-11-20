@@ -43,8 +43,6 @@
 #include <QApplication>
 #include <QDesktopWidget>
 
-#include "rtsp-stream/RtspStream.h"
-
 LiveFeedItem::LiveFeedItem(QDeclarativeItem *parent)
     : QDeclarativeItem(parent), m_streamItem(0), m_serverRepository(0), m_customCursor(DefaultCursor)
 {
@@ -80,6 +78,7 @@ void LiveFeedItem::setCamera(DVRCamera *camera)
 
     if (m_camera)
     {
+        connect(m_camera.data()->data().server(), SIGNAL(changed()), SLOT(cameraDataUpdated()));
         connect(m_camera.data(), SIGNAL(dataUpdated()), SLOT(cameraDataUpdated()));
         connect(m_camera.data(), SIGNAL(onlineChanged(bool)), SLOT(cameraDataUpdated()));
         connect(m_camera.data(), SIGNAL(recordingStateChanged(int)), SIGNAL(recordingStateChanged()));
