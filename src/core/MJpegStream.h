@@ -23,86 +23,45 @@
 #include <QPixmap>
 #include <QTimer>
 #include "camera/DVRCamera.h"
-
-#if defined(Q_OS_MAC) || defined(Q_OS_WIN)
-/* On mac, it is very expensive to convert between QImage and QPixmap, and
- * QImage is required when uploading textures to OpenGL. We can save significantly
- * by never using pixmaps in this case. */
-typedef QImage MJpegFrame;
-#else
-#define MJPEGFRAME_IS_PIXMAP
-typedef QPixmap MJpegFrame;
-#endif
+#include "core/LiveViewManager.h"
+#include "core/LiveStream.h"
 
 class QNetworkReply;
 class ThreadTask;
 class ImageDecodeTask;
 
-class MJpegStream : public QObject
+class MJpegStream : public LiveStream
 {
     Q_OBJECT
-    Q_ENUMS(RecordingState)
-
-    Q_PROPERTY(bool paused READ isPaused WRITE setPaused NOTIFY pausedChanged)
-    Q_PROPERTY(int interval READ interval WRITE setInterval RESET clearInterval NOTIFY intervalChanged)
 
 public:
-    enum State
-    {
-        Error = -3,
-        StreamOffline = -2,
-        Paused = -1,
-        NotConnected,
-        Connecting,
-        Buffering,
-        Streaming
-    };
 
-    explicit MJpegStream(QObject *parent = 0);
-    explicit MJpegStream(const QUrl &url, QObject *parent = 0);
+    explicit MJpegStream(DVRCamera *camera, QObject *parent = 0);
     virtual ~MJpegStream();
 
-    QUrl url() const { return m_url; }
-    void setUrl(const QUrl &url);
+    QUrl url() const;
+
+    int bandwidthMode() const { return m_bandwidthMode; }
 
     State state() const { return m_state; }
     QString errorMessage() const { return m_errorMessage; }
 
+    QImage currentFrame() const { return m_currentFrame; }
     QSize streamSize() const { return m_currentFrame.size(); }
-    MJpegFrame currentFrame() const { return m_currentFrame; }
-
-    bool isPaused() const { return m_paused; }
-    int interval() const { return m_interval; }
-    RecordingState recordingState() const { return m_recordingState; }
 
     float receivedFps() const { return m_receivedFps; }
+
+    bool isPaused() const { return m_paused; }
+    bool isConnected() const { return state() > Connecting; }
 
 public slots:
     void start();
     void stop();
 
-    void setPaused(bool paused = true);
-    void setInterval(int interval);
-    void clearInterval() { setInterval(1); }
-
+    void setPaused(bool paused);
+    void togglePaused() { setPaused(!isPaused()); }
     void setOnline(bool online);
-
-    void updateScaleSizes();
-
-signals:
-    void stateChanged(int newState);
-    void streamRunning();
-    void streamStopped();
-    void streamSizeChanged(const QSize &size);
-
-    void pausedChanged(bool isPaused);
-    void intervalChanged(int interval);
-    void recordingStateChanged(int state);
-
-    void buildScaleSizes(QVector<QSize> &sizes);
-
-    void updateFrame(const MJpegFrame &frame, const QVector<QImage> &scaledFrames);
-    void bytesDownloaded(unsigned int bytes);
+    void setBandwidthMode(int bandwidthMode);
 
 private slots:
     void readable();
@@ -110,16 +69,16 @@ private slots:
     void checkActivity();
 
 private:
+    QWeakPointer<DVRCamera> m_camera;
+
     QString m_errorMessage;
     QNetworkReply *m_httpReply;
     QByteArray m_httpBoundary;
     QByteArray m_httpBuffer;
-    QUrl m_url;
-    MJpegFrame m_currentFrame;
+    QImage m_currentFrame;
     quint64 m_currentFrameNo, m_latestFrameNo;
     quint64 m_fpsRecvTs, m_fpsRecvNo;
     ImageDecodeTask *m_decodeTask;
-    QVector<QSize> m_scaleSizes;
     QTimer m_activityTimer;
     uint m_lastActivity;
     float m_receivedFps;
@@ -131,9 +90,9 @@ private:
         ParserHeaders,
         ParserBody
     } m_parserState;
-    RecordingState m_recordingState;
     bool m_autoStart, m_paused;
     qint8 m_interval;
+    LiveViewManager::BandwidthMode m_bandwidthMode;
 
     void setState(State newState);
     void setError(const QString &message);

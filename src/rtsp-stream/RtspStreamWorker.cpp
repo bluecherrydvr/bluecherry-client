@@ -15,10 +15,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "LiveStreamWorker.h"
-#include "LiveStreamFrame.h"
-#include "LiveStreamFrameFormatter.h"
-#include "LiveStreamFrameQueue.h"
+#include "RtspStreamWorker.h"
+#include "RtspStreamFrame.h"
+#include "RtspStreamFrameFormatter.h"
+#include "RtspStreamFrameQueue.h"
 #include "core/BluecherryApp.h"
 #include <QDebug>
 #include <QCoreApplication>
@@ -33,20 +33,20 @@ extern "C" {
 
 #define ASSERT_WORKER_THREAD() Q_ASSERT(QThread::currentThread() == thread())
 
-int liveStreamInterruptCallback(void *opaque)
+int rtspStreamInterruptCallback(void *opaque)
 {
-    LiveStreamWorker *worker = (LiveStreamWorker *)opaque;
+    RtspStreamWorker *worker = (RtspStreamWorker *)opaque;
     return worker->shouldInterrupt();
 }
 
-LiveStreamWorker::LiveStreamWorker(QObject *parent)
+RtspStreamWorker::RtspStreamWorker(QObject *parent)
     : QObject(parent), m_ctx(0),
       m_cancelFlag(false), m_autoDeinterlacing(true),
-      m_frameQueue(new LiveStreamFrameQueue(6))
+      m_frameQueue(new RtspStreamFrameQueue(6))
 {
 }
 
-LiveStreamWorker::~LiveStreamWorker()
+RtspStreamWorker::~RtspStreamWorker()
 {
     if (!m_ctx)
         return;
@@ -61,19 +61,19 @@ LiveStreamWorker::~LiveStreamWorker()
     avformat_close_input(&m_ctx);
 }
 
-void LiveStreamWorker::setUrl(const QUrl &url)
+void RtspStreamWorker::setUrl(const QUrl &url)
 {
     m_url = url;
 }
 
-void LiveStreamWorker::setAutoDeinterlacing(bool autoDeinterlacing)
+void RtspStreamWorker::setAutoDeinterlacing(bool autoDeinterlacing)
 {
     m_autoDeinterlacing = autoDeinterlacing;
     if (m_frameFormatter)
         m_frameFormatter->setAutoDeinterlacing(autoDeinterlacing);
 }
 
-bool LiveStreamWorker::shouldInterrupt() const
+bool RtspStreamWorker::shouldInterrupt() const
 {
     if (m_cancelFlag)
         return true;
@@ -84,7 +84,7 @@ bool LiveStreamWorker::shouldInterrupt() const
     return false;
 }
 
-void LiveStreamWorker::run()
+void RtspStreamWorker::run()
 {
     ASSERT_WORKER_THREAD();
 
@@ -98,7 +98,7 @@ void LiveStreamWorker::run()
     emit finished();
 }
 
-void LiveStreamWorker::processStreamLoop()
+void RtspStreamWorker::processStreamLoop()
 {
     bool abortFlag = false;
     while (!m_cancelFlag && !abortFlag)
@@ -109,7 +109,7 @@ void LiveStreamWorker::processStreamLoop()
     }
 }
 
-bool LiveStreamWorker::processStream()
+bool RtspStreamWorker::processStream()
 {
     bool ok;
     AVPacket packet = readPacket(&ok);
@@ -121,7 +121,7 @@ bool LiveStreamWorker::processStream()
     return result;
 }
 
-AVPacket LiveStreamWorker::readPacket(bool *ok)
+AVPacket RtspStreamWorker::readPacket(bool *ok)
 {
     if (ok)
         *ok = true;
@@ -140,7 +140,7 @@ AVPacket LiveStreamWorker::readPacket(bool *ok)
     return packet;
 }
 
-bool LiveStreamWorker::processPacket(struct AVPacket packet)
+bool RtspStreamWorker::processPacket(struct AVPacket packet)
 {
     emit bytesDownloaded(packet.size);
 
@@ -157,7 +157,7 @@ bool LiveStreamWorker::processPacket(struct AVPacket packet)
     return true;
 }
 
-AVFrame * LiveStreamWorker::extractFrame(AVPacket &packet)
+AVFrame * RtspStreamWorker::extractFrame(AVPacket &packet)
 {
     AVFrame *frame = avcodec_alloc_frame();
     startInterruptableOperation(5);
@@ -186,26 +186,26 @@ AVFrame * LiveStreamWorker::extractFrame(AVPacket &packet)
     return frame;
 }
 
-void LiveStreamWorker::processFrame(struct AVFrame *rawFrame)
+void RtspStreamWorker::processFrame(struct AVFrame *rawFrame)
 {
     Q_ASSERT(m_frameFormatter);
     startInterruptableOperation(5);
     m_frameQueue->enqueue(m_frameFormatter->formatFrame(rawFrame));
 }
 
-QString LiveStreamWorker::errorMessageFromCode(int errorCode)
+QString RtspStreamWorker::errorMessageFromCode(int errorCode)
 {
     char error[512];
     av_strerror(errorCode, error, sizeof(error));
     return QString::fromLatin1(error);
 }
 
-bool LiveStreamWorker::setup()
+bool RtspStreamWorker::setup()
 {
     ASSERT_WORKER_THREAD();
 
     m_ctx = avformat_alloc_context();
-    m_ctx->interrupt_callback.callback = liveStreamInterruptCallback;
+    m_ctx->interrupt_callback.callback = rtspStreamInterruptCallback;
     m_ctx->interrupt_callback.opaque = this;
 
     AVDictionary *options = createOptions();
@@ -214,7 +214,7 @@ bool LiveStreamWorker::setup()
 
     if (prepared)
     {
-        m_frameFormatter.reset(new LiveStreamFrameFormatter(m_ctx->streams[0]));
+        m_frameFormatter.reset(new RtspStreamFrameFormatter(m_ctx->streams[0]));
         m_frameFormatter->setAutoDeinterlacing(m_autoDeinterlacing);
     }
     else if (m_ctx)
@@ -226,7 +226,7 @@ bool LiveStreamWorker::setup()
     return prepared;
 }
 
-bool LiveStreamWorker::prepareStream(AVFormatContext **context, AVDictionary *options)
+bool RtspStreamWorker::prepareStream(AVFormatContext **context, AVDictionary *options)
 {
     if (!openInput(context, options))
         return false;
@@ -238,7 +238,7 @@ bool LiveStreamWorker::prepareStream(AVFormatContext **context, AVDictionary *op
     return true;
 }
 
-AVDictionary * LiveStreamWorker::createOptions() const
+AVDictionary * RtspStreamWorker::createOptions() const
 {
     AVDictionary *options = 0;
 
@@ -254,7 +254,7 @@ AVDictionary * LiveStreamWorker::createOptions() const
     return options;
 }
 
-bool LiveStreamWorker::openInput(AVFormatContext **context, AVDictionary *options)
+bool RtspStreamWorker::openInput(AVFormatContext **context, AVDictionary *options)
 {
     AVDictionary *optionsCopy = 0;
     av_dict_copy(&optionsCopy, options, 0);
@@ -271,7 +271,7 @@ bool LiveStreamWorker::openInput(AVFormatContext **context, AVDictionary *option
     return true;
 }
 
-bool LiveStreamWorker::findStreamInfo(AVFormatContext* context, AVDictionary* options)
+bool RtspStreamWorker::findStreamInfo(AVFormatContext* context, AVDictionary* options)
 {
     AVDictionary **streamOptions = createStreamsOptions(context, options);
     startInterruptableOperation(20);
@@ -287,7 +287,7 @@ bool LiveStreamWorker::findStreamInfo(AVFormatContext* context, AVDictionary* op
     return true;
 }
 
-AVDictionary ** LiveStreamWorker::createStreamsOptions(AVFormatContext *context, AVDictionary *options) const
+AVDictionary ** RtspStreamWorker::createStreamsOptions(AVFormatContext *context, AVDictionary *options) const
 {
     AVDictionary **streamOptions = 0;
     streamOptions = new AVDictionary*[context->nb_streams];
@@ -300,7 +300,7 @@ AVDictionary ** LiveStreamWorker::createStreamsOptions(AVFormatContext *context,
     return streamOptions;
 }
 
-void LiveStreamWorker::destroyStreamOptions(AVFormatContext *context, AVDictionary** streamOptions)
+void RtspStreamWorker::destroyStreamOptions(AVFormatContext *context, AVDictionary** streamOptions)
 {
     if (!streamOptions)
         return;
@@ -310,7 +310,7 @@ void LiveStreamWorker::destroyStreamOptions(AVFormatContext *context, AVDictiona
     delete[] streamOptions;
 }
 
-void LiveStreamWorker::openCodecs(AVFormatContext *context, AVDictionary *options)
+void RtspStreamWorker::openCodecs(AVFormatContext *context, AVDictionary *options)
 {
     for (unsigned int i = 0; i < context->nb_streams; i++)
     {
@@ -318,18 +318,18 @@ void LiveStreamWorker::openCodecs(AVFormatContext *context, AVDictionary *option
         bool codecOpened = openCodec(stream, options);
         if (!codecOpened)
         {
-            qDebug() << "LiveStream: cannot find decoder for stream" << i << "codec" <<
+            qDebug() << "RtspStream: cannot find decoder for stream" << i << "codec" <<
                         stream->codec->codec_id;
             continue;
         }
 
         char info[512];
         avcodec_string(info, sizeof(info), stream->codec, 0);
-        qDebug() << "LiveStream: stream #" << i << ":" << info;
+        qDebug() << "RtspStream: stream #" << i << ":" << info;
     }
 }
 
-bool LiveStreamWorker::openCodec(AVStream *stream, AVDictionary *options)
+bool RtspStreamWorker::openCodec(AVStream *stream, AVDictionary *options)
 {
     startInterruptableOperation(5);
     AVCodec *codec = avcodec_find_decoder(stream->codec->codec_id);
@@ -343,23 +343,23 @@ bool LiveStreamWorker::openCodec(AVStream *stream, AVDictionary *options)
     return 0 == errorCode;
 }
 
-void LiveStreamWorker::startInterruptableOperation(int timeoutInSeconds)
+void RtspStreamWorker::startInterruptableOperation(int timeoutInSeconds)
 {
     m_timeout = QDateTime::currentDateTime().addSecs(timeoutInSeconds);
 }
 
-LiveStreamFrame * LiveStreamWorker::frameToDisplay()
+RtspStreamFrame * RtspStreamWorker::frameToDisplay()
 {
     return m_frameQueue.data()->dequeue();
 }
 
-void LiveStreamWorker::stop()
+void RtspStreamWorker::stop()
 {
     m_cancelFlag = true;
     m_threadPause.setPaused(false);
 }
 
-void LiveStreamWorker::setPaused(bool paused)
+void RtspStreamWorker::setPaused(bool paused)
 {
     if (!m_ctx)
         return;
@@ -367,7 +367,7 @@ void LiveStreamWorker::setPaused(bool paused)
     m_threadPause.setPaused(paused);
 }
 
-void LiveStreamWorker::pause()
+void RtspStreamWorker::pause()
 {
     av_read_pause(m_ctx);
     m_threadPause.pause();

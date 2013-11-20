@@ -20,6 +20,7 @@
 
 #include "camera/DVRCameraData.h"
 #include "camera/RecordingState.h"
+#include "server/DVRServerConnectionType.h"
 #include <QObject>
 #include <QSharedPointer>
 #include <QUrl>
@@ -57,8 +58,13 @@ public:
 
     QSharedPointer<CameraPtzControl> sharedPtzControl();
 
-    void setStreamUrl(const QUrl &streamUrl);
-    QUrl streamUrl() const;
+    void setRtspStreamUrl(const QUrl &rtspStreamUrl);
+    QUrl rtspStreamUrl() const;
+
+    void setMjpegStreamUrl(const QUrl &mjpegStreamUrl);
+    QUrl mjpegStreamUrl() const;
+
+    void streamsInitialized();
 
     bool isOnline() const;
     QSharedPointer<LiveStream> liveStream();
@@ -79,10 +85,11 @@ private:
     DVRCameraData m_data;
     QWeakPointer<CameraPtzControl> m_ptzControl;
     QWeakPointer<LiveStream> m_liveStream;
-    QUrl m_streamUrl;
+    QUrl m_rtspStreamUrl;
+    QUrl m_mjpegStreamUrl;
     bool m_isOnline;
     qint8 m_recordingState;
-
+    DVRServerConnectionType::Type m_currentConnectionType;
     void setOnline(bool on);
 
 };

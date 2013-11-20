@@ -15,30 +15,39 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef IMAGEDECODETASK_H
-#define IMAGEDECODETASK_H
+#ifndef RTSP_STREAM_FRAME_QUEUE_H
+#define RTSP_STREAM_FRAME_QUEUE_H
 
-#include "ThreadTask.h"
-#include <QImage>
-#include <QVector>
+#include "core/ThreadPause.h"
+#include <QDateTime>
+#include <QElapsedTimer>
+#include <QMutex>
+#include <QObject>
+#include <QQueue>
 
-class ImageDecodeTask : public ThreadTask
+class RtspStreamFrame;
+
+class RtspStreamFrameQueue
 {
+    Q_DISABLE_COPY(RtspStreamFrameQueue)
+
 public:
-    const quint64 imageId;
+    RtspStreamFrameQueue(quint16 sizeLimit);
+    ~RtspStreamFrameQueue();
 
-    ImageDecodeTask(QObject *caller, const char *callback, quint64 imageId = 0);
-
-    void setData(const QByteArray &data) { m_data = data; }
-
-    QImage result() const { return m_result; }
-
-protected:
-    virtual void runTask();
+    RtspStreamFrame * dequeue();
+    void enqueue(RtspStreamFrame *frame);
+    void clear();
 
 private:
-    QByteArray m_data;
-    QImage m_result;
+    QMutex m_frameQueueLock;
+    QQueue<RtspStreamFrame *> m_frameQueue;
+    quint16 m_sizeLimit;
+    qint64 m_ptsBase;
+    QElapsedTimer m_ptsTimer;
+
+    void dropOldFrames();
+
 };
 
-#endif // IMAGEDECODETASK_H
+#endif // RTSP_STREAM_FRAME_QUEUE_H

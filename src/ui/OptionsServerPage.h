@@ -20,15 +20,17 @@
 
 #include "OptionsDialog.h"
 
-class QTreeView;
-class QLineEdit;
 class DVRServer;
 class DVRServerRepository;
 class DVRServersModel;
 class DVRServersProxyModel;
-class QModelIndex;
-class QLabel;
 class QCheckBox;
+class QComboBox;
+class QLabel;
+class QLineEdit;
+class QModelIndex;
+class QTreeView;
+
 class WebRtpPortCheckerWidget;
 
 class OptionsServerPage : public OptionsDialogPage
@@ -67,6 +69,7 @@ private:
     QLineEdit *m_nameEdit, *m_hostnameEdit, *m_portEdit, *m_usernameEdit, *m_passwordEdit;
     WebRtpPortCheckerWidget *m_portChecker;
     QCheckBox *m_autoConnect;
+    QComboBox *m_connectionType;
 };
 
 #endif // OPTIONSSERVERPAGE_H

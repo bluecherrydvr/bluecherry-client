@@ -52,6 +52,9 @@ public:
     QByteArray sslDigest() const;
     void setSslDigest(const QByteArray &sslDigest);
 
+    int connectionType() const;
+    void setConnectionType(int type);
+
 signals:
     void changed();
 
@@ -64,6 +67,7 @@ private:
     QString m_password;
     bool m_autoConnect;
     QByteArray m_sslDigest;
+    int m_connectionType;
 
 };
 

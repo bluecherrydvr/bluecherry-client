@@ -22,6 +22,7 @@
 #include <QSharedPointer>
 #include "camera/DVRCamera.h"
 #include "core/CameraPtzControl.h"
+#include "core/LiveStream.h"
 
 /* Base of LiveFeed.qml, used to implement some features that are currently missing in pure QML. */
 

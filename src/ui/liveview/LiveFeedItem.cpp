@@ -58,7 +58,7 @@ void LiveFeedItem::setStreamItem(LiveStreamItem *item)
     m_streamItem = item;
 }
 
-LiveStream * LiveFeedItem::stream() const
+LiveStream *LiveFeedItem::stream() const
 {
     return m_streamItem ? m_streamItem->stream() : 0;
 }
@@ -78,6 +78,7 @@ void LiveFeedItem::setCamera(DVRCamera *camera)
 
     if (m_camera)
     {
+        connect(m_camera.data()->data().server(), SIGNAL(changed()), SLOT(cameraDataUpdated()));
         connect(m_camera.data(), SIGNAL(dataUpdated()), SLOT(cameraDataUpdated()));
         connect(m_camera.data(), SIGNAL(onlineChanged(bool)), SLOT(cameraDataUpdated()));
         connect(m_camera.data(), SIGNAL(recordingStateChanged(int)), SIGNAL(recordingStateChanged()));

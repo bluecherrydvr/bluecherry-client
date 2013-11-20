@@ -22,6 +22,7 @@
 #include "LiveViewGradients.h"
 #include "core/CameraPtzControl.h"
 #include "core/BluecherryApp.h"
+#include "core/LiveStream.h"
 #include "server/DVRServerRepository.h"
 #include <QGLWidget>
 #include <QDeclarativeContext>

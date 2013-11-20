@@ -15,8 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIVESTREAM_H
-#define LIVESTREAM_H
+#ifndef RTSPSTREAM_H
+#define RTSPSTREAM_H
 
 #include <QMutex>
 #include <QObject>
@@ -24,37 +24,20 @@
 #include <QImage>
 #include <QElapsedTimer>
 #include "camera/DVRCamera.h"
+#include "core/LiveStream.h"
 #include "core/LiveViewManager.h"
 
-class LiveStreamThread;
+class RtspStreamThread;
 
-class LiveStream : public QObject
+class RtspStream : public LiveStream
 {
     Q_OBJECT
-    Q_ENUMS(State)
-
-    Q_PROPERTY(bool connected READ isConnected NOTIFY stateChanged)
-    Q_PROPERTY(bool paused READ isPaused WRITE setPaused NOTIFY pausedChanged)
-    Q_PROPERTY(int bandwidthMode READ bandwidthMode WRITE setBandwidthMode NOTIFY bandwidthModeChanged)
-    Q_PROPERTY(float receivedFps READ receivedFps CONSTANT)
-    Q_PROPERTY(QSize streamSize READ streamSize NOTIFY streamSizeChanged)
-    Q_PROPERTY(State state READ state NOTIFY stateChanged)
-    Q_PROPERTY(QString errdesc READ errorMessage CONSTANT)
 
 public:
-    enum State
-    {
-        Error,
-        StreamOffline,
-        NotConnected,
-        Connecting,
-        Streaming,
-        Paused
-    };
 
     static void init();
-    explicit LiveStream(DVRCamera *camera, QObject *parent = 0);
-    virtual ~LiveStream();
+    explicit RtspStream(DVRCamera *camera, QObject *parent = 0);
+    virtual ~RtspStream();
 
     QUrl url() const;
 
@@ -63,13 +46,13 @@ public:
     State state() const { return m_state; }
     QString errorMessage() const { return m_errorMessage; }
 
-    QImage currentFrame();
-    QSize streamSize();
+    QImage currentFrame() const;
+    QSize streamSize() const;
 
     float receivedFps() const { return m_fps; }
 
-    bool isPaused() { return state() == Paused; }
-    bool isConnected() { return state() > Connecting; }
+    bool isPaused() const { return state() == Paused; }
+    bool isConnected() const { return state() > Connecting; }
 
 public slots:
     void start();
@@ -79,16 +62,6 @@ public slots:
     void togglePaused() { setPaused(!isPaused()); }
     void setOnline(bool online);
     void setBandwidthMode(int bandwidthMode);
-
-signals:
-    void stateChanged(int newState);
-    void pausedChanged(bool paused);
-    void bandwidthModeChanged(int mode);
-
-    void streamRunning();
-    void streamStopped();
-    void streamSizeChanged(const QSize &size);
-    void updated();
 
 private slots:
     void updateFrame();
@@ -100,10 +73,10 @@ private:
     static QTimer *m_renderTimer, *m_stateTimer;
 
     QWeakPointer<DVRCamera> m_camera;
-    QScopedPointer<LiveStreamThread> m_thread;
+    QScopedPointer<RtspStreamThread> m_thread;
     QImage m_currentFrame;
-    QMutex m_currentFrameMutex;
-    class LiveStreamFrame *m_frame;
+    mutable QMutex m_currentFrameMutex;
+    class RtspStreamFrame *m_frame;
     QString m_errorMessage;
     State m_state;
     bool m_autoStart;
@@ -119,4 +92,4 @@ private:
 
 };
 
-#endif // LIVESTREAM_H
+#endif // RTSPSTREAM_H

@@ -21,6 +21,7 @@ set (bluecherry_client_MOC_SRCS
 
     src/core/BluecherryApp.h
     src/core/CameraPtzControl.h
+    src/core/LiveStream.h
     src/core/LiveViewManager.h
     src/core/MJpegStream.h
     src/core/PtzPresetsModel.h
@@ -35,9 +36,9 @@ set (bluecherry_client_MOC_SRCS
     src/event/EventVideoDownload.h
     src/event/ModelEventsCursor.h
 
-    src/live-stream/LiveStream.h
-    src/live-stream/LiveStreamThread.h
-    src/live-stream/LiveStreamWorker.h
+    src/rtsp-stream/RtspStream.h
+    src/rtsp-stream/RtspStreamThread.h
+    src/rtsp-stream/RtspStreamWorker.h
 
     src/network/MediaDownloadManager.h
     src/network/RemotePortChecker.h

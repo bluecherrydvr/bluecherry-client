@@ -30,6 +30,7 @@ set (bluecherry_client_main_SRCS
     src/core/CameraPtzControl.cpp
     src/core/EventData.cpp
     src/core/LanguageController.cpp
+    src/core/LiveStream.cpp
     src/core/LiveViewManager.cpp
     src/core/LoggableUrl.cpp
     src/core/MJpegStream.cpp
@@ -52,12 +53,12 @@ set (bluecherry_client_main_SRCS
     src/event/MediaEventFilter.cpp
     src/event/ModelEventsCursor.cpp
 
-    src/live-stream/LiveStream.cpp
-    src/live-stream/LiveStreamFrame.cpp
-    src/live-stream/LiveStreamFrameFormatter.cpp
-    src/live-stream/LiveStreamFrameQueue.cpp
-    src/live-stream/LiveStreamThread.cpp
-    src/live-stream/LiveStreamWorker.cpp
+    src/rtsp-stream/RtspStream.cpp
+    src/rtsp-stream/RtspStreamFrame.cpp
+    src/rtsp-stream/RtspStreamFrameFormatter.cpp
+    src/rtsp-stream/RtspStreamFrameQueue.cpp
+    src/rtsp-stream/RtspStreamThread.cpp
+    src/rtsp-stream/RtspStreamWorker.cpp
 
     src/network/MediaDownloadManager.cpp
     src/network/RemotePortChecker.cpp

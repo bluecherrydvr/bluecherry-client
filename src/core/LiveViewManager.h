@@ -39,7 +39,7 @@ public:
 
     explicit LiveViewManager(QObject *parent = 0);
 
-    QList<LiveStream*> streams() const;
+    QList<LiveStream *> streams() const;
 
     BandwidthMode bandwidthMode() const { return m_bandwidthMode; }
 
@@ -56,7 +56,9 @@ private:
     QList<LiveStream*> m_streams;
     BandwidthMode m_bandwidthMode;
 
-    friend class LiveStream;
+    friend class RtspStream;
+    friend class MJpegStream;
+
     void addStream(LiveStream *stream);
     void removeStream(LiveStream *stream);
 };

@@ -15,8 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "LiveStreamFrameFormatter.h"
-#include "LiveStreamFrame.h"
+#include "RtspStreamFrameFormatter.h"
+#include "RtspStreamFrame.h"
 #include <QDebug>
 
 extern "C" {
@@ -25,23 +25,23 @@ extern "C" {
 #   include "libswscale/swscale.h"
 }
 
-LiveStreamFrameFormatter::LiveStreamFrameFormatter(AVStream *stream) :
+RtspStreamFrameFormatter::RtspStreamFrameFormatter(AVStream *stream) :
         m_stream(stream), m_sws_context(0), m_pixelFormat(PIX_FMT_BGRA),
         m_autoDeinterlacing(true), m_shouldTryDeinterlaceStream(shouldTryDeinterlaceStream())
 {
 }
 
-LiveStreamFrameFormatter::~LiveStreamFrameFormatter()
+RtspStreamFrameFormatter::~RtspStreamFrameFormatter()
 {
     sws_freeContext(m_sws_context);
 }
 
-void LiveStreamFrameFormatter::setAutoDeinterlacing(bool autoDeinterlacing)
+void RtspStreamFrameFormatter::setAutoDeinterlacing(bool autoDeinterlacing)
 {
     m_autoDeinterlacing = autoDeinterlacing;
 }
 
-bool LiveStreamFrameFormatter::shouldTryDeinterlaceStream()
+bool RtspStreamFrameFormatter::shouldTryDeinterlaceStream()
 {
     /* Assume that H.264 D1-resolution video is interlaced, to work around a solo(?) bug
      * that results in interlaced_frame not being set for videos from solo6110. */
@@ -58,15 +58,15 @@ bool LiveStreamFrameFormatter::shouldTryDeinterlaceStream()
     return false;
 }
 
-LiveStreamFrame * LiveStreamFrameFormatter::formatFrame(AVFrame* avFrame)
+RtspStreamFrame * RtspStreamFrameFormatter::formatFrame(AVFrame* avFrame)
 {
     if (shouldTryDeinterlaceFrame(avFrame))
         deinterlaceFrame(avFrame);
 
-    return new LiveStreamFrame(scaleFrame(avFrame));
+    return new RtspStreamFrame(scaleFrame(avFrame));
 }
 
-bool LiveStreamFrameFormatter::shouldTryDeinterlaceFrame(AVFrame *avFrame)
+bool RtspStreamFrameFormatter::shouldTryDeinterlaceFrame(AVFrame *avFrame)
 {
     if (!m_autoDeinterlacing)
         return false;
@@ -77,7 +77,7 @@ bool LiveStreamFrameFormatter::shouldTryDeinterlaceFrame(AVFrame *avFrame)
     return m_shouldTryDeinterlaceStream;
 }
 
-void LiveStreamFrameFormatter::deinterlaceFrame(AVFrame* avFrame)
+void RtspStreamFrameFormatter::deinterlaceFrame(AVFrame* avFrame)
 {
     int ret = avpicture_deinterlace((AVPicture*)avFrame, (AVPicture*)avFrame,
                                     m_stream->codec->pix_fmt, m_stream->codec->width, m_stream->codec->height);
@@ -85,7 +85,7 @@ void LiveStreamFrameFormatter::deinterlaceFrame(AVFrame* avFrame)
         qDebug("deinterlacing failed");
 }
 
-AVFrame * LiveStreamFrameFormatter::scaleFrame(AVFrame* avFrame)
+AVFrame * RtspStreamFrameFormatter::scaleFrame(AVFrame* avFrame)
 {
     updateSWSContext();
 
@@ -104,7 +104,7 @@ AVFrame * LiveStreamFrameFormatter::scaleFrame(AVFrame* avFrame)
     return result;
 }
 
-void LiveStreamFrameFormatter::updateSWSContext()
+void RtspStreamFrameFormatter::updateSWSContext()
 {
     m_sws_context = sws_getCachedContext(m_sws_context,
                                          m_stream->codec->width, m_stream->codec->height,

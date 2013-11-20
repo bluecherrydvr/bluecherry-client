@@ -57,6 +57,7 @@ bool DVRCameraXMLReader::readCamera(DVRCamera *camera, QXmlStreamReader &xmlStre
         name = QString::fromLatin1("#%2").arg(camera->data().id());
 
     camera->data().setDisplayName(name);
+
     QUrl url;
     url.setScheme(QLatin1String("rtsp"));
     url.setUserName(camera->data().server()->configuration().username());
@@ -64,7 +65,21 @@ bool DVRCameraXMLReader::readCamera(DVRCamera *camera, QXmlStreamReader &xmlStre
     url.setHost(camera->data().server()->url().host());
     url.setPort(camera->data().server()->rtspPort());
     url.setPath(QString::fromLatin1("live/") + QString::number(camera->data().id()));
-    camera->setStreamUrl(url);
+    camera->setRtspStreamUrl(url);
+
+    QUrl mjpegUrl;
+    mjpegUrl.setUserName(camera->data().server()->configuration().username());
+    mjpegUrl.setPassword(camera->data().server()->configuration().password());
+    mjpegUrl.setScheme(QLatin1String("https"));
+    mjpegUrl.setHost(camera->data().server()->url().host());
+    mjpegUrl.setPort(camera->data().server()->serverPort());
+    mjpegUrl.setPath(QLatin1String("/media/mjpeg.php"));
+    mjpegUrl.addQueryItem(QLatin1String("id"), QString::number(camera->data().id()));
+    mjpegUrl.addQueryItem(QLatin1String("multipart"), QLatin1String("true"));
+
+    camera->setMjpegStreamUrl(mjpegUrl);
+
+    camera->streamsInitialized();
 
     return true;
 }

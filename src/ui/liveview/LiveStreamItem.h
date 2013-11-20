@@ -20,7 +20,7 @@
 
 #include <QDeclarativeItem>
 #include <QSharedPointer>
-#include "live-stream/LiveStream.h"
+#include "core/LiveStream.h"
 
 class QGLContext;
 

@@ -34,6 +34,7 @@ void DVRServerSettingsWriter::writeServer(DVRServer *server) const
     writeSetting(serverId, QLatin1String("password"), server->configuration().password());
     writeSetting(serverId, QLatin1String("autoConnect"), server->configuration().autoConnect());
     writeSetting(serverId, QLatin1String("sslDigest"), server->configuration().sslDigest());
+    writeSetting(serverId, QLatin1String("connectionType"), server->configuration().connectionType());
 }
 
 void DVRServerSettingsWriter::writeSetting(int serverId, const QString &key, const QVariant &value) const

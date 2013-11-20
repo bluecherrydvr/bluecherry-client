@@ -15,39 +15,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIVE_STREAM_FRAME_QUEUE_H
-#define LIVE_STREAM_FRAME_QUEUE_H
+#ifndef RTSP_STREAM_FRAME_H
+#define RTSP_STREAM_FRAME_H
 
-#include "core/ThreadPause.h"
-#include <QDateTime>
-#include <QElapsedTimer>
-#include <QMutex>
-#include <QObject>
-#include <QQueue>
+#include <QtGlobal>
 
-class LiveStreamFrame;
+struct AVFrame;
 
-class LiveStreamFrameQueue
+class RtspStreamFrame
 {
-    Q_DISABLE_COPY(LiveStreamFrameQueue);
+    Q_DISABLE_COPY(RtspStreamFrame);
 
 public:
-    LiveStreamFrameQueue(quint16 sizeLimit);
-    ~LiveStreamFrameQueue();
+    explicit RtspStreamFrame(AVFrame *avFrame);
+    ~RtspStreamFrame();
 
-    LiveStreamFrame * dequeue();
-    void enqueue(LiveStreamFrame *frame);
-    void clear();
+    AVFrame * avFrame() const;
 
 private:
-    QMutex m_frameQueueLock;
-    QQueue<LiveStreamFrame *> m_frameQueue;
-    quint16 m_sizeLimit;
-    qint64 m_ptsBase;
-    QElapsedTimer m_ptsTimer;
-
-    void dropOldFrames();
+    AVFrame *m_avFrame;
 
 };
 
-#endif // LIVE_STREAM_FRAME_QUEUE_H
+#endif // RTSP_STREAM_FRAME_H

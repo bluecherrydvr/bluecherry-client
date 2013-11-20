@@ -15,8 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "LiveStreamFrameQueue.h"
-#include "LiveStreamFrame.h"
+#include "RtspStreamFrameQueue.h"
+#include "RtspStreamFrame.h"
 
 extern "C" {
 #   include "libavcodec/avcodec.h"
@@ -26,17 +26,17 @@ extern "C" {
 
 #define RENDER_TIMER_FPS 30
 
-LiveStreamFrameQueue::LiveStreamFrameQueue(quint16 sizeLimit) :
+RtspStreamFrameQueue::RtspStreamFrameQueue(quint16 sizeLimit) :
         m_frameQueueLock(QMutex::Recursive), m_sizeLimit(sizeLimit), m_ptsBase(AV_NOPTS_VALUE)
 {
 }
 
-LiveStreamFrameQueue::~LiveStreamFrameQueue()
+RtspStreamFrameQueue::~RtspStreamFrameQueue()
 {
     clear();
 }
 
-LiveStreamFrame * LiveStreamFrameQueue::dequeue()
+RtspStreamFrame * RtspStreamFrameQueue::dequeue()
 {
     QMutexLocker locker(&m_frameQueueLock);
     if (m_frameQueue.isEmpty())
@@ -52,7 +52,7 @@ LiveStreamFrame * LiveStreamFrameQueue::dequeue()
 
     // TODO: needs checking
     // something is wrong with this code as after few minutes all frames are considered outdated - some calculation is off here
-    LiveStreamFrame *frame = m_frameQueue.dequeue();
+    RtspStreamFrame *frame = m_frameQueue.dequeue();
     while (!m_frameQueue.isEmpty() && frame)
     {
         qint64 scaledFrameDisplayTime = av_rescale_rnd(frame->avFrame()->pts - m_ptsBase, AV_TIME_BASE, 90000, AV_ROUND_NEAR_INF);
@@ -75,26 +75,26 @@ LiveStreamFrame * LiveStreamFrameQueue::dequeue()
     return frame;
 }
 
-void LiveStreamFrameQueue::enqueue(LiveStreamFrame *frame)
+void RtspStreamFrameQueue::enqueue(RtspStreamFrame *frame)
 {
     QMutexLocker locker(&m_frameQueueLock);
     m_frameQueue.enqueue(frame);
     dropOldFrames();
 }
 
-void LiveStreamFrameQueue::clear()
+void RtspStreamFrameQueue::clear()
 {
     QMutexLocker locker(&m_frameQueueLock);
     qDeleteAll(m_frameQueue);
     m_frameQueue.clear();
 }
 
-void LiveStreamFrameQueue::dropOldFrames()
+void RtspStreamFrameQueue::dropOldFrames()
 {
     QMutexLocker locker(&m_frameQueueLock);
     while (m_frameQueue.size() >= 6)
     {
-        LiveStreamFrame *frame = m_frameQueue.dequeue();
+        RtspStreamFrame *frame = m_frameQueue.dequeue();
         delete frame;
     }
 }

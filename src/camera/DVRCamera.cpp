@@ -21,13 +21,15 @@
 #include "server/DVRServerConfiguration.h"
 #include "core/BluecherryApp.h"
 #include "core/CameraPtzControl.h"
-#include "live-stream/LiveStream.h"
+#include "core/MJpegStream.h"
+#include "rtsp-stream/RtspStream.h"
 #include <QMimeData>
 #include <QSettings>
 #include <QXmlStreamReader>
 
 DVRCamera::DVRCamera(int id, DVRServer *server)
-    : QObject(), m_data(id, server), m_isOnline(false), m_recordingState(NoRecording)
+    : QObject(), m_data(id, server), m_isOnline(false), m_recordingState(NoRecording),
+      m_currentConnectionType((DVRServerConnectionType::Type)server->configuration().connectionType())
 {
     connect(&m_data, SIGNAL(changed()), this, SIGNAL(dataUpdated()));
 }
@@ -62,10 +64,16 @@ DVRCamera::PtzProtocol DVRCamera::parseProtocol(const QString &protocol)
 
 QSharedPointer<LiveStream> DVRCamera::liveStream()
 {
-    if (m_liveStream)
+    if (m_liveStream && m_currentConnectionType == data().server()->configuration().connectionType())
         return m_liveStream.toStrongRef();
 
-    QSharedPointer<LiveStream> result(new LiveStream(this));
+    m_currentConnectionType = (DVRServerConnectionType::Type)data().server()->configuration().connectionType();
+    QSharedPointer<LiveStream> result;
+    if (m_currentConnectionType == DVRServerConnectionType::MJPEG)
+        result = QSharedPointer<LiveStream>(new MJpegStream(this));
+    else
+        result = QSharedPointer<LiveStream>(new RtspStream(this));
+
     m_liveStream = result.toWeakRef();
     connect(this, SIGNAL(onlineChanged(bool)), m_liveStream.data(), SLOT(setOnline(bool)));
     m_liveStream.data()->setOnline(isOnline());
@@ -101,24 +109,41 @@ QSharedPointer<CameraPtzControl> DVRCamera::sharedPtzControl()
     return result;
 }
 
-void DVRCamera::setStreamUrl(const QUrl &streamUrl)
+void DVRCamera::setRtspStreamUrl(const QUrl &streamUrl)
 {
-    if (m_streamUrl == streamUrl)
+    if (m_rtspStreamUrl == streamUrl)
         return;
 
-    m_streamUrl = streamUrl;
+    m_rtspStreamUrl = streamUrl;
+}
+
+QUrl DVRCamera::rtspStreamUrl() const
+{
+    return m_rtspStreamUrl;
+}
+
+void DVRCamera::setMjpegStreamUrl(const QUrl &mjpegStreamUrl)
+{
+    if (m_mjpegStreamUrl == mjpegStreamUrl)
+        return;
+
+    m_mjpegStreamUrl = mjpegStreamUrl;
+}
+
+QUrl DVRCamera::mjpegStreamUrl() const
+{
+    return m_mjpegStreamUrl;
+}
+
+void DVRCamera::streamsInitialized()
+{
     emit dataUpdated();
     emit onlineChanged(isOnline());
 }
 
-QUrl DVRCamera::streamUrl() const
-{
-    return m_streamUrl;
-}
-
 bool DVRCamera::isOnline() const
 {
-    return m_isOnline && !m_data.disabled() && !m_streamUrl.isEmpty();
+    return m_isOnline && !m_data.disabled() && !m_rtspStreamUrl.isEmpty();
 }
 
 DVRCamera::PtzProtocol DVRCamera::ptzProtocol() const

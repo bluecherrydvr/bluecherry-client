@@ -15,26 +15,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIVE_STREAM_FRAME_H
-#define LIVE_STREAM_FRAME_H
+#include "LiveStream.h"
 
-#include <QtGlobal>
-
-struct AVFrame;
-
-class LiveStreamFrame
+LiveStream::LiveStream(QObject *parent) :
+    QObject(parent)
 {
-    Q_DISABLE_COPY(LiveStreamFrame);
-
-public:
-    explicit LiveStreamFrame(AVFrame *avFrame);
-    ~LiveStreamFrame();
-
-    AVFrame * avFrame() const;
-
-private:
-    AVFrame *m_avFrame;
-
-};
-
-#endif // LIVE_STREAM_FRAME_H
+}
