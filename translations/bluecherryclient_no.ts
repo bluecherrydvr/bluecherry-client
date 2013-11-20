@@ -9,7 +9,9 @@
         <source>This application is designed to utilize OpenGL acceleration, which is not supported by your system. The application may not function correctly.
 
 For help, contact support@bluecherrydvr.com.</source>
-        <translation type="unfinished"/>
+        <translation>Denne applikasjonen er utviklet for å utnytte OpenGL akselerasjon, som ikke støttes av systemet. Applikasjonen kan dermed ikke fungere skikkelig.
+
+For mer hjelp, kontakt support@bluecherrydvr.com.</translation>
     </message>
     <message>
         <source>Connection refused</source>
@@ -893,7 +895,7 @@ For help, contact support@bluecherrydvr.com.</source>
     </message>
     <message>
         <source>&amp;Live</source>
-        <translation>%Sanntid</translation>
+        <translation>Sanntid</translation>
     </message>
     <message>
         <source>&amp;Help</source>
@@ -1015,7 +1017,7 @@ For help, contact support@bluecherrydvr.com.</source>
     <name>OptionsGeneralPage</name>
     <message>
         <source>Language:</source>
-        <translation type="unfinished"/>
+        <translation>Språk:</translation>
     </message>
     <message>
         <source>Close to tray</source>
