@@ -115,8 +115,6 @@ void DVRCamera::setRtspStreamUrl(const QUrl &streamUrl)
         return;
 
     m_rtspStreamUrl = streamUrl;
-    emit dataUpdated();
-    emit onlineChanged(isOnline());
 }
 
 QUrl DVRCamera::rtspStreamUrl() const
@@ -130,13 +128,17 @@ void DVRCamera::setMjpegStreamUrl(const QUrl &mjpegStreamUrl)
         return;
 
     m_mjpegStreamUrl = mjpegStreamUrl;
-    emit dataUpdated();
-    emit onlineChanged(isOnline());
 }
 
 QUrl DVRCamera::mjpegStreamUrl() const
 {
     return m_mjpegStreamUrl;
+}
+
+void DVRCamera::streamsInitialized()
+{
+    emit dataUpdated();
+    emit onlineChanged(isOnline());
 }
 
 bool DVRCamera::isOnline() const

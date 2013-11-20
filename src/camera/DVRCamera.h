@@ -64,6 +64,8 @@ public:
     void setMjpegStreamUrl(const QUrl &mjpegStreamUrl);
     QUrl mjpegStreamUrl() const;
 
+    void streamsInitialized();
+
     bool isOnline() const;
     QSharedPointer<LiveStream> liveStream();
 

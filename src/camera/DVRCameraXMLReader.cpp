@@ -79,5 +79,7 @@ bool DVRCameraXMLReader::readCamera(DVRCamera *camera, QXmlStreamReader &xmlStre
 
     camera->setMjpegStreamUrl(mjpegUrl);
 
+    camera->streamsInitialized();
+
     return true;
 }
