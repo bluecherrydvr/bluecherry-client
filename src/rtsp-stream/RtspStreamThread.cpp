@@ -51,9 +51,9 @@ void RtspStreamThread::start(const QUrl &url)
         m_worker.data()->setUrl(url);
 
         connect(m_thread.data(), SIGNAL(started()), m_worker.data(), SLOT(run()));
-        connect(m_thread.data(), SIGNAL(finished()), this, SLOT(threadFinished()));
-        connect(m_worker.data(), SIGNAL(fatalError(QString)), this, SIGNAL(fatalError(QString)));
-        connect(m_worker.data(), SIGNAL(finished()), m_thread.data(), SLOT(quit()));
+        connect(m_thread.data(), SIGNAL(finished()), m_thread.data(), SLOT(deleteLater()));
+        connect(m_worker.data(), SIGNAL(fatalError(QString)), this, SIGNAL(fatalError(QString)));        
+        connect(m_worker.data(), SIGNAL(destroyed()), m_thread.data(), SLOT(quit()));
 
         connect(m_worker.data(), SIGNAL(bytesDownloaded(uint)), bcApp->globalRate, SLOT(addSampleValue(uint)));
 
@@ -94,18 +94,6 @@ bool RtspStreamThread::hasWorker()
     QMutexLocker locker(&m_workerMutex);
 
     return !m_worker.isNull();
-}
-
-void RtspStreamThread::threadFinished()
-{
-    QMutexLocker locker(&m_workerMutex);
-
-    if (m_worker.data())
-        m_worker.data()->deleteLater();
-    if (m_thread.data())
-        m_thread.data()->deleteLater();
-
-    m_isRunning = false;
 }
 
 bool RtspStreamThread::isRunning() const

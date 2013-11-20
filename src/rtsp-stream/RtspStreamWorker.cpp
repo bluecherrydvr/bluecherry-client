@@ -95,7 +95,7 @@ void RtspStreamWorker::run()
     if (setup())
         processStreamLoop();
 
-    emit finished();
+    deleteLater();
 }
 
 void RtspStreamWorker::processStreamLoop()
