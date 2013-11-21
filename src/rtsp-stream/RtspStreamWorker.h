@@ -24,6 +24,7 @@
 #include <QUrl>
 
 struct AVDictionary;
+struct AVFrame;
 struct AVStream;
 
 class RtspStreamFrame;
@@ -84,7 +85,7 @@ private:
     bool processStream();
     struct AVPacket readPacket(bool *ok = 0);
     bool processPacket(struct AVPacket packet);
-    struct AVFrame * extractFrame(struct AVPacket &packet);
+    AVFrame * extractFrame(struct AVPacket &packet, bool *breakLoop);
     void processFrame(struct AVFrame *frame);
 
     QString errorMessageFromCode(int errorCode);
