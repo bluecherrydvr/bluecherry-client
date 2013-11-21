@@ -1,9 +1,12 @@
-bluecherry-client (1:2.1.6-2) lucid; urgency=low
+bluecherry-client (1:2.1.7-1) lucid; urgency=low
 
+  * Bug #162: Add option for MJPEG streaming
+  * Bug #194: RTSP connections have not been cleaned up
+  * Bug: Infinite loop of "no frame" errors
   * Bug: Crash reporter broken in 2.1.6 build
   * Other: Update libav to 9.10 release
 
- -- Piotr Galiszewski <pgaliszewski@corp.bluecherry.net>  Fri, 15 Nov 2013 22:17:50 +0200
+ -- Piotr Galiszewski <pgaliszewski@corp.bluecherry.net>  Thu, 21 Nov 2013 22:30:50 +0200
 
 
 bluecherry-client (1:2.1.6-1) lucid; urgency=low
