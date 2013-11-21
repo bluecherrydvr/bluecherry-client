@@ -175,6 +175,8 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     setControlsEnabled(false);
 
     m_lastspeed = 1.0;
+
+    retranslateUI();
 }
 
 EventVideoPlayer::~EventVideoPlayer()
