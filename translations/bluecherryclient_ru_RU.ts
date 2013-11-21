@@ -899,7 +899,7 @@ For help, contact support@bluecherrydvr.com.</source>
     </message>
     <message>
         <source>&amp;Help</source>
-        <translation>&quot;&amp;Помощь</translation>
+        <translation>&amp;Помощь</translation>
     </message>
     <message>
         <source>&amp;Documentation</source>
@@ -1125,6 +1125,18 @@ For help, contact support@bluecherrydvr.com.</source>
     <message>
         <source>&lt;b&gt;Login error:&lt;/b&gt; %1</source>
         <translation>&lt;b&gt;Ошибка подключения:&lt;/b&gt; %1</translation>
+    </message>
+    <message>
+        <source>Connection Type:</source>
+        <translation>Тип подключения:</translation>
+    </message>
+    <message>
+        <source>RTSP</source>
+        <translation>RTSP</translation>
+    </message>
+    <message>
+        <source>MJPEG</source>
+        <translation>MJPEG</translation>
     </message>
 </context>
 <context>

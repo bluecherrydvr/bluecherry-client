@@ -1126,6 +1126,18 @@ For mer hjelp, kontakt support@bluecherrydvr.com.</translation>
         <source>&lt;b&gt;Login error:&lt;/b&gt; %1</source>
         <translation>&lt;b&gt;Logg inn feil:&lt;/b&gt; %1</translation>
     </message>
+    <message>
+        <source>Connection Type:</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>RTSP</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <source>MJPEG</source>
+        <translation type="unfinished"/>
+    </message>
 </context>
 <context>
     <name>PtzPresetsModel</name>

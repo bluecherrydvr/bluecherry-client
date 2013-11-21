@@ -1126,6 +1126,18 @@ Para obtener ayuda escriba a support@bluecherrydvr.com.</translation>
         <source>&lt;b&gt;Login error:&lt;/b&gt; %1</source>
         <translation>&lt;b&gt;Error de inicio de sesión:&lt;/b&gt; %1</translation>
     </message>
+    <message>
+        <source>Connection Type:</source>
+        <translation>Tipo de conexión:</translation>
+    </message>
+    <message>
+        <source>RTSP</source>
+        <translation>RTSP</translation>
+    </message>
+    <message>
+        <source>MJPEG</source>
+        <translation>MJPEG</translation>
+    </message>
 </context>
 <context>
     <name>PtzPresetsModel</name>
