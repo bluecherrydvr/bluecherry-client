@@ -70,20 +70,33 @@ private slots:
 private:
     QThread *m_controlThread;
     QMutex m_mutex;
-    GstElement *m_pipeline, *m_videoLink, *m_sink;
+    GstElement *m_pipeline, *m_videoLink, *m_sink, *m_audioLink, *m_audioQueue, *m_videoQueue;
     VideoHttpBuffer *m_videoBuffer;
     VideoState m_state;
     QString m_errorMessage;
     double m_playbackSpeed;
+    bool m_hasAudio;
+
+    GstElement *m_audioDecoder, *m_audioResample, *m_audioSink;
 
     void setError(bool permanent, const QString &message);
     void setVideoBuffer(VideoHttpBuffer *videoHttpBuffer);
 
+    bool setupAudioPipeline();
+    bool setupVideoPipeline();
+
     GstBusSyncReply busHandler(GstBus *bus, GstMessage *msg);
-    void decodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast);
+    void decodeAudioPadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast);
+    void decodeVideoPadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast);
+    void demuxerPadReady(GstElement *element, GstPad *pad);
+    void demuxerNoMorePads(GstElement *demux);
 
     static GstBusSyncReply staticBusHandler(GstBus *bus, GstMessage *msg, gpointer data);
-    static void staticDecodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast, gpointer user_data);
+    static void staticVideoDecodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast, gpointer user_data);
+    static void staticAudioDecodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast, gpointer user_data);
+    static void staticDemuxerPadReady(GstElement *element, GstPad *pad, gpointer data);
+    static void staticDemuxerNoMorePads(GstElement *demux, gpointer user_data);
+
 };
 
 #endif // GST_VIDEO_PLAYER_BACKEND_H

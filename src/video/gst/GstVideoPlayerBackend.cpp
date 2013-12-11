@@ -31,8 +31,8 @@
 #include <glib.h>
 
 GstVideoPlayerBackend::GstVideoPlayerBackend(QObject *parent)
-    : VideoPlayerBackend(parent), m_pipeline(0), m_videoLink(0), m_sink(0), m_videoBuffer(0), m_state(Stopped),
-      m_playbackSpeed(1.0)
+    : VideoPlayerBackend(parent), m_pipeline(0), m_videoLink(0), m_sink(0), m_audioLink(0), m_audioQueue(0), m_videoQueue(0),
+      m_videoBuffer(0), m_state(Stopped),m_playbackSpeed(1.0), m_hasAudio(false)
 {
     if (!initGStreamer())
         setError(true, bcApp->gstWrapper()->errorMessage()); // not the clearest solution, will be replaced
@@ -77,10 +77,28 @@ GstBusSyncReply GstVideoPlayerBackend::staticBusHandler(GstBus *bus, GstMessage 
     return ((GstVideoPlayerBackend*)data)->busHandler(bus, msg);
 }
 
-void GstVideoPlayerBackend::staticDecodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast, gpointer user_data)
+void GstVideoPlayerBackend::staticVideoDecodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast, gpointer user_data)
 {
     Q_ASSERT(user_data);
-    static_cast<GstVideoPlayerBackend*>(user_data)->decodePadReady(bin, pad, islast);
+    static_cast<GstVideoPlayerBackend*>(user_data)->decodeVideoPadReady(bin, pad, islast);
+}
+
+void GstVideoPlayerBackend::staticAudioDecodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast, gpointer user_data)
+{
+    Q_ASSERT(user_data);
+    static_cast<GstVideoPlayerBackend*>(user_data)->decodeAudioPadReady(bin, pad, islast);
+}
+
+void GstVideoPlayerBackend::staticDemuxerPadReady(GstElement *element, GstPad *pad, gpointer user_data)
+{
+    Q_ASSERT(user_data);
+    static_cast<GstVideoPlayerBackend*>(user_data)->demuxerPadReady(element, pad);
+}
+
+void GstVideoPlayerBackend::staticDemuxerNoMorePads(GstElement* demux, gpointer user_data)
+{
+    Q_ASSERT(user_data);
+    static_cast<GstVideoPlayerBackend*>(user_data)->demuxerNoMorePads(demux);
 }
 
 void GstVideoPlayerBackend::setSink(GstElement *sink)
@@ -115,7 +133,7 @@ bool GstVideoPlayerBackend::start(const QUrl &url)
         setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("stream")));
         return false;
     }
-
+    Q_UNUSED(url)
     /* Buffered HTTP source */
     setVideoBuffer(new VideoHttpBuffer(url));
 
@@ -129,45 +147,19 @@ bool GstVideoPlayerBackend::start(const QUrl &url)
 
     m_videoBuffer->startBuffering();
 
-    /* Decoder */
-    GstElement *decoder = gst_element_factory_make("decodebin2", "decoder");
-    if (!decoder)
+    GstElement *demuxer = gst_element_factory_make("matroskademux","avi-demuxer");
+    g_signal_connect(demuxer, "pad-added", G_CALLBACK(staticDemuxerPadReady), this);
+    g_signal_connect(demuxer, "no-more-pads", G_CALLBACK(staticDemuxerNoMorePads), this);
+    gst_bin_add(GST_BIN(m_pipeline), demuxer);
+
+    if (!gst_element_link(source, demuxer))
     {
-        setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("decoder")));
+        setError(true, tr("Failed to create pipeline (%1)").arg(QLatin1String("demuxer")));
         return false;
     }
 
-    g_object_set(G_OBJECT(decoder),
-                 "use-buffering", TRUE,
-                 "max-size-time", 10 * GST_SECOND,
-                 NULL);
-
-    g_signal_connect(decoder, "new-decoded-pad", G_CALLBACK(staticDecodePadReady), this);
-
-    /* Colorspace conversion (no-op if unnecessary) */
-    GstElement *colorspace = gst_element_factory_make("ffmpegcolorspace", "colorspace");
-    if (!colorspace)
-    {
-        setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("colorspace")));
+    if (!setupVideoPipeline() || !setupAudioPipeline())
         return false;
-    }
-
-    gst_bin_add_many(GST_BIN(m_pipeline), decoder, colorspace, m_sink, NULL);
-    if (!gst_element_link(source, decoder))
-    {
-        setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("link decoder")));
-        return false;
-    }
-
-    if (!gst_element_link(colorspace, m_sink))
-    {
-        setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("link sink")));
-        return false;
-    }
-
-    /* This is the element that is linked to the decoder for video output; it will be linked when decodePadReady
-     * gives us the video pad. */
-    m_videoLink = colorspace;
 
     m_playbackSpeed = 1.0;
 
@@ -186,10 +178,148 @@ bool GstVideoPlayerBackend::start(const QUrl &url)
     return true;
 }
 
+bool GstVideoPlayerBackend::setupVideoPipeline()
+{
+    /* Decoder */
+    GstElement *videoDecoder = gst_element_factory_make("decodebin2", "videoDecoder");
+    if (!videoDecoder)
+    {
+        setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("videoDecoder")));
+        return false;
+    }
+
+    g_object_set(G_OBJECT(videoDecoder),
+                 "use-buffering", TRUE,
+                 "max-size-time", 10 * GST_SECOND,
+                 NULL);
+
+    g_signal_connect(videoDecoder, "new-decoded-pad", G_CALLBACK(staticVideoDecodePadReady), this);
+
+
+    GstElement *videoQueue = gst_element_factory_make ("queue", "videoQueue");
+    if (!videoQueue)
+    {
+        setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("videoQueue")));
+        return false;
+    }
+
+    /* Colorspace conversion (no-op if unnecessary) */
+    GstElement *colorspace = gst_element_factory_make("ffmpegcolorspace", "colorspace");
+    if (!colorspace)
+    {
+        setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("colorspace")));
+        return false;
+    }
+
+    gst_bin_add_many(GST_BIN(m_pipeline), videoQueue, videoDecoder, colorspace, m_sink, NULL);
+
+    if (!gst_element_link(videoQueue, videoDecoder))
+    {
+        setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("link decoder")));
+        return false;
+    }
+
+    if (!gst_element_link(colorspace, m_sink))
+    {
+        setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("link sink")));
+        return false;
+    }
+
+    /* This is the element that is linked to the decoder for video output; it will be linked when decodePadReady
+     * gives us the video pad. */
+    m_videoQueue = videoQueue;
+    m_videoLink = colorspace;
+
+    return true;
+}
+
+bool GstVideoPlayerBackend::setupAudioPipeline()
+{
+    GstElement *audioDecoder = gst_element_factory_make("decodebin2", "audiodecoder");
+    if (!audioDecoder)
+    {
+        setError(true, tr("Failed to create audio pipeline (%1)").arg(QLatin1String("audiodecoder")));
+        return false;
+    }
+
+    g_object_set(G_OBJECT(audioDecoder),
+                 "use-buffering", TRUE,
+                 "max-size-time", 10 * GST_SECOND,
+                 NULL);
+
+    g_signal_connect(audioDecoder, "new-decoded-pad", G_CALLBACK(staticAudioDecodePadReady), this);
+
+
+    GstElement *audioQueue = gst_element_factory_make ("queue", "audioQueue");
+    if (!audioQueue)
+    {
+        setError(true, tr("Failed to create audio pipeline (%1)").arg(QLatin1String("audioQueue")));
+        return false;
+    }
+
+    GstElement *audioConvert = gst_element_factory_make("audioconvert", "convert");
+    if (!audioConvert)
+    {
+        setError(true, tr("Failed to create audio pipeline (%1)").arg(QLatin1String("audioConvert")));
+        return false;
+    }
+
+    GstElement *audioResample = gst_element_factory_make ("audioresample", "audioResample");
+    if (!audioResample)
+    {
+        setError(true, tr("Failed to create audio pipeline (%1)").arg(QLatin1String("audioResample")));
+        return false;
+    }
+
+    GstElement *audioSink = gst_element_factory_make("autoaudiosink", "audioSink");
+    if (!audioSink)
+    {
+        setError(true, tr("Failed to create audio pipeline (%1)").arg(QLatin1String("audioSink")));
+        return false;
+    }
+
+    gst_bin_add_many(GST_BIN(m_pipeline), audioQueue, audioDecoder, audioConvert, audioResample, audioSink, NULL);
+
+    if (!gst_element_link(audioQueue, audioDecoder))
+    {
+        setError(true, tr("Failed to create audio pipeline (%1)").arg(QLatin1String("link decoder")));
+        return false;
+    }
+
+    if (!gst_element_link(audioConvert, audioResample))
+    {
+        setError(true, tr("Failed to create audio pipeline (%1)").arg(QLatin1String("link resample")));
+        return false;
+    }
+
+    if (!gst_element_link(audioResample, audioSink))
+    {
+        setError(true, tr("Failed to create audio pipeline (%1)").arg(QLatin1String("link sink")));
+        return false;
+    }
+
+    m_audioQueue = audioQueue;
+    m_audioLink = audioConvert;
+    m_audioResample = audioResample;
+    m_audioSink = audioSink;
+    m_audioDecoder = audioDecoder;
+
+    return true;
+}
+
 void GstVideoPlayerBackend::clear()
 {
     if (m_sink)
         g_object_unref(m_sink);
+
+    if (!m_hasAudio)
+    {
+        gst_element_set_state(m_audioDecoder, GST_STATE_NULL);
+        gst_element_set_state(m_audioQueue, GST_STATE_NULL);
+        gst_element_set_state(m_audioLink, GST_STATE_NULL);
+        gst_element_set_state(m_audioResample, GST_STATE_NULL);
+        gst_element_set_state(m_audioSink, GST_STATE_NULL);
+    }
 
     if (m_pipeline)
     {
@@ -209,7 +339,7 @@ void GstVideoPlayerBackend::clear()
         gst_object_unref(GST_OBJECT(m_pipeline));
     }
 
-    m_pipeline = m_videoLink = m_sink = 0;
+    m_pipeline = m_videoLink = m_sink = m_audioLink = 0;
 
     setVideoBuffer(0);
 
@@ -372,7 +502,7 @@ bool GstVideoPlayerBackend::setSpeed(double speed)
     return re ? true : false;
 }
 
-void GstVideoPlayerBackend::decodePadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast)
+void GstVideoPlayerBackend::decodeVideoPadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast)
 {
     Q_UNUSED(islast);
 
@@ -392,9 +522,58 @@ void GstVideoPlayerBackend::decodePadReady(GstDecodeBin *bin, GstPad *pad, gbool
         }
     }
 
-    /* TODO: Audio */
+    g_free(capsstr);
+}
 
-    //free(capsstr);
+void GstVideoPlayerBackend::decodeAudioPadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast)
+{
+    Q_UNUSED(islast);
+
+    /* TODO: Better cap detection */
+    GstCaps *caps = gst_pad_get_caps_reffed(pad);
+    Q_ASSERT(caps);
+    gchar *capsstr = gst_caps_to_string(caps);
+    gst_caps_unref(caps);
+
+    if (QByteArray(capsstr).contains("audio"))
+    {
+        qDebug("gstreamer: linking audio decoder to pipeline");
+        if (!gst_element_link(GST_ELEMENT(bin), m_audioLink))
+        {
+            setError(false, tr("Building audio pipeline failed"));
+            return;
+        }
+    }
+
+    g_free(capsstr);
+}
+
+void GstVideoPlayerBackend::demuxerPadReady(GstElement *element, GstPad *pad)
+{
+    Q_UNUSED(element)
+
+    gchar *padName = gst_pad_get_name(pad);
+
+    if (QByteArray(padName).contains("audio"))
+    {
+        m_hasAudio = true;
+
+        GstPad *audiodemuxsink = gst_element_get_static_pad(m_audioQueue, "sink");
+        gst_pad_link(pad, audiodemuxsink);
+    }
+    else if (QByteArray(padName).contains("video")) {
+        GstPad *videodemuxsink = gst_element_get_static_pad(m_videoQueue, "sink");
+        gst_pad_link(pad, videodemuxsink);
+    }
+    g_free(padName);
+}
+
+void GstVideoPlayerBackend::demuxerNoMorePads(GstElement *demux)
+{
+    Q_UNUSED(demux)
+
+    if (!m_hasAudio)
+        gst_bin_remove_many(GST_BIN(m_pipeline), m_audioQueue, m_audioDecoder, m_audioLink, m_audioResample, m_audioSink, NULL);
 }
 
 /* Caution: This function is executed on all sorts of strange threads, which should
