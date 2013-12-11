@@ -133,7 +133,7 @@ bool GstVideoPlayerBackend::start(const QUrl &url)
         setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("stream")));
         return false;
     }
-    Q_UNUSED(url)
+
     /* Buffered HTTP source */
     setVideoBuffer(new VideoHttpBuffer(url));
 
@@ -150,6 +150,7 @@ bool GstVideoPlayerBackend::start(const QUrl &url)
     GstElement *demuxer = gst_element_factory_make("matroskademux","avi-demuxer");
     g_signal_connect(demuxer, "pad-added", G_CALLBACK(staticDemuxerPadReady), this);
     g_signal_connect(demuxer, "no-more-pads", G_CALLBACK(staticDemuxerNoMorePads), this);
+
     gst_bin_add(GST_BIN(m_pipeline), demuxer);
 
     if (!gst_element_link(source, demuxer))
@@ -312,6 +313,9 @@ void GstVideoPlayerBackend::clear()
     if (m_sink)
         g_object_unref(m_sink);
 
+    /* stream doesn't support audio. Audio elemets have been unlinked from bus, but they stil are in PAUSED state.
+     * Set their state to null to avoid warning on disposing
+     */
     if (!m_hasAudio)
     {
         gst_element_set_state(m_audioDecoder, GST_STATE_NULL);
@@ -340,6 +344,7 @@ void GstVideoPlayerBackend::clear()
     }
 
     m_pipeline = m_videoLink = m_sink = m_audioLink = 0;
+    m_audioDecoder = m_audioQueue = m_audioResample = m_audioSink = 0;
 
     setVideoBuffer(0);
 
@@ -572,6 +577,8 @@ void GstVideoPlayerBackend::demuxerNoMorePads(GstElement *demux)
 {
     Q_UNUSED(demux)
 
+    /* there are no audio stream. Unlink audio elements from pipepline
+     * Without this pipeline hangs waiting for audio stream to show up  */
     if (!m_hasAudio)
         gst_bin_remove_many(GST_BIN(m_pipeline), m_audioQueue, m_audioDecoder, m_audioLink, m_audioResample, m_audioSink, NULL);
 }
