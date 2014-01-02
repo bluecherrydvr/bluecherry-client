@@ -127,7 +127,22 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     btnLayout->addWidget(m_playBtn);
     connect(m_playBtn, SIGNAL(clicked()), SLOT(playPause()));
 
-    btnLayout->addSpacing(26);
+    m_muteBtn = new QToolButton;
+    m_muteBtn->setCheckable(true);
+    m_muteBtn->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
+    btnLayout->addWidget(m_muteBtn);
+    connect(m_muteBtn, SIGNAL(clicked()), SLOT(mute()));
+
+    m_volumeSlider = new QSlider(Qt::Horizontal);
+    m_volumeSlider->setTickInterval(2);
+    m_volumeSlider->setTickPosition(QSlider::TicksBelow);
+    m_volumeSlider->setMinimum(0);
+    m_volumeSlider->setMaximum(10);
+    m_volumeSlider->setValue(10);
+    connect(m_volumeSlider, SIGNAL(sliderMoved(int)), SLOT(setVolume(int)));
+    btnLayout->addWidget(m_volumeSlider);
+
+    btnLayout->addSpacing(13);
 
     m_slowBtn = new QToolButton;
     m_slowBtn->setIcon(QIcon(QLatin1String(":/icons/control-double-180.png")));
@@ -224,6 +239,7 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     connect(m_videoBackend.data(), SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
     connect(m_videoBackend.data(), SIGNAL(endOfStream()), SLOT(durationChanged()));
     connect(m_videoBackend.data(), SIGNAL(playbackSpeedChanged(double)), SLOT(playbackSpeedChanged(double)));
+    connect(m_videoBackend.data(), SIGNAL(streamsInitialized(bool)), SLOT(streamsInitialized(bool)));
 
     m_videoWidget->initVideo(m_videoBackend.data());
 
@@ -275,16 +291,11 @@ void EventVideoPlayer::playPause()
         return;
 
     if (m_videoBackend.data()->state() == VideoPlayerBackend::Playing)
-    {
         m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "pause", Qt::QueuedConnection);
-    }
+    else if (m_videoBackend.data()->atEnd())
+        restart();
     else
-    {
-        if (m_videoBackend.data()->atEnd())
-            restart();
-        else
-            m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "play", Qt::QueuedConnection);
-    }
+        m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "play", Qt::QueuedConnection);
 }
 
 void EventVideoPlayer::restart()
@@ -430,6 +441,28 @@ void EventVideoPlayer::bufferingStopped()
         m_uiTimer.stop();
 }
 
+void EventVideoPlayer::mute()
+{
+    if (!m_videoBackend)
+        return;
+
+    m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "mute", Qt::QueuedConnection, Q_ARG(bool, m_muteBtn->isChecked()));
+
+    m_muteBtn->setIcon(m_muteBtn->isChecked() ? style()->standardIcon(QStyle::SP_MediaVolumeMuted) : style()->standardIcon(QStyle::SP_MediaVolume));
+}
+
+void EventVideoPlayer::setVolume(int volume)
+{
+    if (!m_videoBackend)
+        return;
+
+    m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "setVolume", Qt::QueuedConnection, Q_ARG(double, volume/10.0));
+    m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "mute", Qt::QueuedConnection, Q_ARG(bool, false));
+
+    m_muteBtn->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
+    m_muteBtn->setChecked(false);
+}
+
 void EventVideoPlayer::videoNonFatalError(const QString &message)
 {
     if (message.isEmpty())
@@ -437,6 +470,12 @@ void EventVideoPlayer::videoNonFatalError(const QString &message)
 
     m_statusText->setText(QLatin1String("<span style='color:red;font-weight:bold'>") + message +
                           QLatin1String("</span>"));
+}
+
+void EventVideoPlayer::streamsInitialized(bool hasAudioSupport)
+{
+    m_volumeSlider->setEnabled(hasAudioSupport);
+    m_muteBtn->setEnabled(hasAudioSupport);
 }
 
 void EventVideoPlayer::stateChanged(int state)

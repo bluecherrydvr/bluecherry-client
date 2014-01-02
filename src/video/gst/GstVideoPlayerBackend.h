@@ -63,6 +63,8 @@ public slots:
     virtual bool seek(qint64 position);
     virtual bool setSpeed(double speed);
     virtual void restart();
+    virtual void mute(bool mute);
+    virtual void setVolume(double volume);
 
 private slots:
     void streamError(const QString &message);
@@ -77,7 +79,7 @@ private:
     double m_playbackSpeed;
     bool m_hasAudio;
 
-    GstElement *m_audioDecoder, *m_audioResample, *m_audioSink;
+    GstElement *m_audioDecoder, *m_audioResample, *m_audioSink, *m_volumeController;
 
     void setError(bool permanent, const QString &message);
     void setVideoBuffer(VideoHttpBuffer *videoHttpBuffer);

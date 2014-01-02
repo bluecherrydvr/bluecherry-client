@@ -272,6 +272,13 @@ bool GstVideoPlayerBackend::setupAudioPipeline()
         return false;
     }
 
+    GstElement *volume = gst_element_factory_make ("volume", "volume");
+    if (!volume)
+    {
+        setError(true, tr("Failed to create audio pipeline (%1)").arg(QLatin1String("volume")));
+        return false;
+    }
+
     GstElement *audioSink = gst_element_factory_make("autoaudiosink", "audioSink");
     if (!audioSink)
     {
@@ -279,7 +286,7 @@ bool GstVideoPlayerBackend::setupAudioPipeline()
         return false;
     }
 
-    gst_bin_add_many(GST_BIN(m_pipeline), audioQueue, audioDecoder, audioConvert, audioResample, audioSink, NULL);
+    gst_bin_add_many(GST_BIN(m_pipeline), audioQueue, audioDecoder, audioConvert, audioResample, volume, audioSink, NULL);
 
     if (!gst_element_link(audioQueue, audioDecoder))
     {
@@ -293,7 +300,13 @@ bool GstVideoPlayerBackend::setupAudioPipeline()
         return false;
     }
 
-    if (!gst_element_link(audioResample, audioSink))
+    if (!gst_element_link(audioResample, volume))
+    {
+        setError(true, tr("Failed to create audio pipeline (%1)").arg(QLatin1String("link volume")));
+        return false;
+    }
+
+    if (!gst_element_link(volume, audioSink))
     {
         setError(true, tr("Failed to create audio pipeline (%1)").arg(QLatin1String("link sink")));
         return false;
@@ -304,6 +317,7 @@ bool GstVideoPlayerBackend::setupAudioPipeline()
     m_audioResample = audioResample;
     m_audioSink = audioSink;
     m_audioDecoder = audioDecoder;
+    m_volumeController = volume;
 
     return true;
 }
@@ -316,12 +330,13 @@ void GstVideoPlayerBackend::clear()
     /* stream doesn't support audio. Audio elemets have been unlinked from bus, but they stil are in PAUSED state.
      * Set their state to null to avoid warning on disposing
      */
-    if (!m_hasAudio)
+    if (!m_hasAudio && m_audioDecoder)
     {
         gst_element_set_state(m_audioDecoder, GST_STATE_NULL);
         gst_element_set_state(m_audioQueue, GST_STATE_NULL);
         gst_element_set_state(m_audioLink, GST_STATE_NULL);
         gst_element_set_state(m_audioResample, GST_STATE_NULL);
+        gst_element_set_state(m_volumeController, GST_STATE_NULL);
         gst_element_set_state(m_audioSink, GST_STATE_NULL);
     }
 
@@ -344,7 +359,9 @@ void GstVideoPlayerBackend::clear()
     }
 
     m_pipeline = m_videoLink = m_sink = m_audioLink = 0;
-    m_audioDecoder = m_audioQueue = m_audioResample = m_audioSink = 0;
+    m_audioDecoder = m_audioQueue = m_audioResample = m_volumeController = m_audioSink = 0;
+
+    m_hasAudio = false;
 
     setVideoBuffer(0);
 
@@ -401,6 +418,26 @@ void GstVideoPlayerBackend::restart()
     VideoState old = m_state;
     m_state = Stopped;
     emit stateChanged(m_state, old);
+}
+
+void GstVideoPlayerBackend::mute(bool mute)
+{
+    if (!m_pipeline || !m_hasAudio)
+        return;
+
+    g_object_set(G_OBJECT(m_volumeController),
+                         "mute", mute,
+                         NULL);
+}
+
+void GstVideoPlayerBackend::setVolume(double volume)
+{
+    if (!m_pipeline || !m_hasAudio)
+        return;
+
+    g_object_set(G_OBJECT(m_volumeController),
+                         "volume", volume,
+                         NULL);
 }
 
 qint64 GstVideoPlayerBackend::duration() const
@@ -580,7 +617,9 @@ void GstVideoPlayerBackend::demuxerNoMorePads(GstElement *demux)
     /* there are no audio stream. Unlink audio elements from pipepline
      * Without this pipeline hangs waiting for audio stream to show up  */
     if (!m_hasAudio)
-        gst_bin_remove_many(GST_BIN(m_pipeline), m_audioQueue, m_audioDecoder, m_audioLink, m_audioResample, m_audioSink, NULL);
+        gst_bin_remove_many(GST_BIN(m_pipeline), m_audioQueue, m_audioDecoder, m_audioLink, m_audioResample, m_volumeController, m_audioSink, NULL);
+
+    emit streamsInitialized(m_hasAudio);
 }
 
 /* Caution: This function is executed on all sorts of strange threads, which should
