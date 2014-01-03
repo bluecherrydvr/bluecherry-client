@@ -62,6 +62,7 @@ private slots:
     void playbackSpeedChanged(double playbackSpeed);
     void updatePosition();
     void videoNonFatalError(const QString &message);
+    void streamsInitialized(bool hasAudioSupport);
 
     void videoContextMenu(const QPoint &pos);
 
@@ -70,6 +71,9 @@ private slots:
     void updateBufferStatus();
     void bufferingStopped();
 
+    void mute();
+    void setVolume(int volume);
+
     void updateUI();
 
 private:
@@ -77,10 +81,11 @@ private:
     QWeakPointer<QThread> m_videoThread;
     QWeakPointer<VideoPlayerBackend> m_videoBackend;
     VideoWidget *m_videoWidget;
-    QToolButton *m_playBtn, *m_restartBtn, *m_fastBtn, *m_slowBtn;
+    QToolButton *m_playBtn, *m_restartBtn, *m_fastBtn, *m_slowBtn, *m_muteBtn;
     QPushButton *m_saveBtn;
     QSlider *m_seekSlider;
     QLabel *m_startTime, *m_endTime, *m_statusText, *m_rateText;
+    QSlider *m_volumeSlider;
     QTimer m_uiTimer;
     double m_lastspeed;
 

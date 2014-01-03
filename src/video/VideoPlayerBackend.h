@@ -68,6 +68,9 @@ public slots:
     virtual bool setSpeed(double speed) = 0;
     virtual void restart() = 0;
 
+    virtual void mute(bool mute) = 0;
+    virtual void setVolume(double volume) = 0;
+
 signals:
     void stateChanged(int newState, int oldState);
     void durationChanged(qint64 duration);
@@ -80,6 +83,8 @@ signals:
     void bufferingStarted();
     void bufferingStopped();
     void nonFatalError(const QString &message);
+
+    void streamsInitialized(bool hasAudioSupport);
 
 };
 

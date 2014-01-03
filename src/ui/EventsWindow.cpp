@@ -335,7 +335,9 @@ void EventsWindow::showServerEvent(const QModelIndex &index)
     showServerEvent(*data);
 
     m_modelEventsCursor->setCameraFilter(data->locationCamera());
+    m_modelEventsCursor->blockSignals(true);
     m_modelEventsCursor->setIndex(index.row());
+    m_modelEventsCursor->blockSignals(false);
 }
 
 void EventsWindow::showServerEvent(const EventData &eventData)
