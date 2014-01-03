@@ -127,9 +127,12 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     btnLayout->addWidget(m_playBtn);
     connect(m_playBtn, SIGNAL(clicked()), SLOT(playPause()));
 
+    QSettings settings;
     m_muteBtn = new QToolButton;
     m_muteBtn->setCheckable(true);
-    m_muteBtn->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
+    m_muteBtn->setChecked(settings.value(QLatin1String("eventPlayer/isMuted"), false).toBool());
+    m_muteBtn->setIcon(m_muteBtn->isChecked() ? style()->standardIcon(QStyle::SP_MediaVolumeMuted) : style()->standardIcon(QStyle::SP_MediaVolume));
+
     btnLayout->addWidget(m_muteBtn);
     connect(m_muteBtn, SIGNAL(clicked()), SLOT(mute()));
 
@@ -138,7 +141,7 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     m_volumeSlider->setTickPosition(QSlider::TicksBelow);
     m_volumeSlider->setMinimum(0);
     m_volumeSlider->setMaximum(10);
-    m_volumeSlider->setValue(10);
+    m_volumeSlider->setValue(settings.value(QLatin1String("eventPlayer/volume"), 10).toInt());
     connect(m_volumeSlider, SIGNAL(sliderMoved(int)), SLOT(setVolume(int)));
     btnLayout->addWidget(m_volumeSlider);
 
@@ -211,6 +214,11 @@ EventVideoPlayer::~EventVideoPlayer()
         m_videoThread.data()->quit();
         m_videoThread.data()->deleteLater();
     }
+
+    QSettings settings;
+    settings.setValue(QLatin1String("eventPlayer/isMuted"), m_muteBtn->isChecked());
+    settings.setValue(QLatin1String("eventPlayer/volume"), m_volumeSlider->value());
+
 }
 
 void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
@@ -474,6 +482,12 @@ void EventVideoPlayer::videoNonFatalError(const QString &message)
 
 void EventVideoPlayer::streamsInitialized(bool hasAudioSupport)
 {
+    if (hasAudioSupport)
+    {
+        m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "setVolume", Qt::QueuedConnection, Q_ARG(double, m_volumeSlider->value()/10.0));
+        m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "mute", Qt::QueuedConnection, Q_ARG(bool, m_muteBtn->isChecked()));
+    }
+
     m_volumeSlider->setEnabled(hasAudioSupport);
     m_muteBtn->setEnabled(hasAudioSupport);
 }
