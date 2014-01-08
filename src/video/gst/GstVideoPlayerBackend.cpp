@@ -32,7 +32,7 @@
 
 GstVideoPlayerBackend::GstVideoPlayerBackend(QObject *parent)
     : VideoPlayerBackend(parent), m_pipeline(0), m_videoLink(0), m_sink(0), m_audioLink(0), m_audioQueue(0), m_videoQueue(0),
-      m_videoBuffer(0), m_state(Stopped),m_playbackSpeed(1.0), m_hasAudio(false)
+      m_videoBuffer(0), m_state(Stopped),m_playbackSpeed(1.0), m_hasAudio(false), m_audioDecoder(0)
 {
     if (!initGStreamer())
         setError(true, bcApp->gstWrapper()->errorMessage()); // not the clearest solution, will be replaced
@@ -600,10 +600,14 @@ void GstVideoPlayerBackend::demuxerPadReady(GstElement *element, GstPad *pad)
     {
         m_hasAudio = true;
 
+        qDebug("gstreamer: demux audio pad linked");
+
         GstPad *audiodemuxsink = gst_element_get_static_pad(m_audioQueue, "sink");
         gst_pad_link(pad, audiodemuxsink);
     }
     else if (QByteArray(padName).contains("video")) {
+        qDebug("gstreamer: demux video pad linked");
+
         GstPad *videodemuxsink = gst_element_get_static_pad(m_videoQueue, "sink");
         gst_pad_link(pad, videodemuxsink);
     }
@@ -612,7 +616,9 @@ void GstVideoPlayerBackend::demuxerPadReady(GstElement *element, GstPad *pad)
 
 void GstVideoPlayerBackend::demuxerNoMorePads(GstElement *demux)
 {
-    Q_UNUSED(demux)
+    Q_UNUSED(demux);
+
+    qDebug("gstreamer: no more pads signal");
 
     /* there are no audio stream. Unlink audio elements from pipepline
      * Without this pipeline hangs waiting for audio stream to show up  */
