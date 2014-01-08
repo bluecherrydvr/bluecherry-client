@@ -53,6 +53,14 @@ Section
         File "${QT_PATH}\..\plugins\imageformats\qgif4.dll"
         SetOutPath "$INSTDIR"
 
+        # Translations
+        File "${BIN_PATH}\bluecherryclient_de_DE.qm"
+        File "${BIN_PATH}\bluecherryclient_en.qm"
+        File "${BIN_PATH}\bluecherryclient_es.qm"
+        File "${BIN_PATH}\bluecherryclient_no.qm"
+        File "${BIN_PATH}\bluecherryclient_ru_RU.qm"
+        File "${BIN_PATH}\bluecherryclient_sv_SE.qm"
+		
         # LibAV
         File "${LIBAV_PATH}\avcodec-54.dll"
         File "${LIBAV_PATH}\avformat-54.dll"
@@ -75,6 +83,7 @@ Section
         File "${GSTREAMER_PATH}\libgstapp-0.10-0.dll"
         File "${GSTREAMER_PATH}\libgstaudio-0.10-0.dll"
         File "${GSTREAMER_PATH}\libgstbase-0.10-0.dll"
+        File "${GSTREAMER_PATH}\libgstcontroller-0.10-0.dll"
         File "${GSTREAMER_PATH}\libgstinterfaces-0.10-0.dll"
         File "${GSTREAMER_PATH}\libgstpbutils-0.10-0.dll"
         File "${GSTREAMER_PATH}\libgstreamer-0.10-0.dll"
@@ -85,19 +94,24 @@ Section
         File "${GSTREAMER_PATH}\libiconv-2.dll"
         File "${GSTREAMER_PATH}\libintl-8.dll"
         File "${GSTREAMER_PATH}\liborc-0.4-0.dll"
+        File "${GSTREAMER_PATH}\liborc-test-0.4-0.dll"
         File "${GSTREAMER_PATH}\libwinpthread-1.dll"
         File "${GSTREAMER_PATH}\libxml2-2.dll"
         File "${GSTREAMER_PATH}\libz.dll"
 
         SetOutPath "$INSTDIR\plugins"
         File "${GSTREAMER_PATH}\..\plugins\libgstapp.dll"
+        File "${GSTREAMER_PATH}\..\plugins\libgstaudioconvert.dll"
+        File "${GSTREAMER_PATH}\..\plugins\libgstaudioresample.dll"
         File "${GSTREAMER_PATH}\..\plugins\libgstautodetect.dll"
         File "${GSTREAMER_PATH}\..\plugins\libgstcoreelements.dll"
         File "${GSTREAMER_PATH}\..\plugins\libgstdecodebin2.dll"
+        File "${GSTREAMER_PATH}\..\plugins\libgstdirectsoundsink.dll"
         File "${GSTREAMER_PATH}\..\plugins\libgstffmpegcolorspace.dll"
         File "${GSTREAMER_PATH}\..\plugins\libgstffmpeg-lgpl.dll"
         File "${GSTREAMER_PATH}\..\plugins\libgstmatroska.dll"
         File "${GSTREAMER_PATH}\..\plugins\libgsttypefindfunctions.dll"
+        File "${GSTREAMER_PATH}\..\plugins\libgstvolume.dll"
         SetOutPath "$INSTDIR"
 
         # OpenSSL
