@@ -53,5 +53,5 @@ if (WIN32)
 
     set (GSTREAMER_PLUGIN_PREFIX "lib")
     set (GSTREAMER_PLUGIN_SUFFIX ".dll")
-    set (GSTREAMER_PLUGINS "gsttypefindfunctions:gstapp:gstdecodebin2:gstmatroska:gstffmpegcolorspace:gstcoreelements:gstffmpeg-lgpl:gstautodetect")
+    set (GSTREAMER_PLUGINS "gsttypefindfunctions:gstapp:gstdecodebin2:gstmatroska:gstffmpegcolorspace:gstcoreelements:gstffmpeg-lgpl:gstautodetect:gstaudioconvert:gstaudioresample:gstvolume:gstdirectsoundsink")
 endif (WIN32)
