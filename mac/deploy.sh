@@ -40,6 +40,8 @@ cp ${LIBAV_PATH}/lib{avformat,avcodec,swscale,avutil}.dylib $1/Contents/Framewor
 echo "Replacing library paths..."
 $BINPATH/replacepath.py --old @loader_path/ --new @executable_path/../Frameworks/ --file $1/Contents/MacOS/$EXENAME
 $BINPATH/replacepath.py --old @loader_path/ --new @executable_path/../Frameworks/ --dir $1/Contents/PlugIns/gstreamer/
+$BINPATH/replacepath.py --old @executable_path/../Resources/lib/ --new @executable_path/../Frameworks/ --dir $1/Contents/PlugIns/gstreamer/
+$BINPATH/replacepath.py --old @executable_path/../Resources/lib/ --new @executable_path/../Frameworks/ --dir $1/Contents/Frameworks/
 $BINPATH/replacepath.py --old ${LIBAV_PATH}/ --new @executable_path/../Frameworks/ --file $1/Contents/MacOS/$EXENAME
 $BINPATH/replacepath.py --old ${LIBAV_PATH}/ --new @executable_path/../Frameworks/ --dir $1/Contents/Frameworks/
 

@@ -41,7 +41,7 @@ if (APPLE)
     set (GSTREAMER_PLUGIN_PATHS "./../PlugIns/gstreamer/:${GSTREAMER_PLUGIN_PATHS}")
     set (GSTREAMER_PLUGIN_PREFIX "lib")
     set (GSTREAMER_PLUGIN_SUFFIX ".so")
-    set (GSTREAMER_PLUGINS "gsttypefindfunctions:gstapp:gstdecodebin2:gstmatroska:gstffmpegcolorspace:gstcoreelements:gstffmpeg:gstosxaudio")
+    set (GSTREAMER_PLUGINS "gsttypefindfunctions:gstapp:gstdecodebin2:gstmatroska:gstffmpegcolorspace:gstcoreelements:gstffmpeg:gstosxaudio:gstautodetect:gstaudioconvert:gstaudioresample:gstvolume")
 endif (APPLE)
 
 if (WIN32)
