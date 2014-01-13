@@ -27,7 +27,7 @@ extern "C" {
 #define RENDER_TIMER_FPS 30
 
 RtspStreamFrameQueue::RtspStreamFrameQueue(quint16 sizeLimit) :
-        m_frameQueueLock(QMutex::Recursive), m_sizeLimit(sizeLimit), m_ptsBase(AV_NOPTS_VALUE)
+        m_frameQueueLock(QMutex::NonRecursive), m_sizeLimit(sizeLimit), m_ptsBase(AV_NOPTS_VALUE)
 {
 }
 
@@ -79,6 +79,7 @@ void RtspStreamFrameQueue::enqueue(RtspStreamFrame *frame)
 {
     QMutexLocker locker(&m_frameQueueLock);
     m_frameQueue.enqueue(frame);
+
     dropOldFrames();
 }
 
@@ -89,9 +90,9 @@ void RtspStreamFrameQueue::clear()
     m_frameQueue.clear();
 }
 
+// Calling this method should be proteced by m_frameQueueLock
 void RtspStreamFrameQueue::dropOldFrames()
 {
-    QMutexLocker locker(&m_frameQueueLock);
     while (m_frameQueue.size() >= 6)
     {
         RtspStreamFrame *frame = m_frameQueue.dequeue();
