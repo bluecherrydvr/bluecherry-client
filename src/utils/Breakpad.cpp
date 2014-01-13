@@ -47,8 +47,9 @@ bool breakpadDumpCallback(const wchar_t *dump_path, const wchar_t *minidump_id, 
         wcscat_s(cmdline, L".dmp\"");
     }
 
-    if (!CreateProcessW(executablePath, cmdline, 0, 0, FALSE, 0, 0, 0, &si, &pi))
+    if (!CreateProcessW(NULL, cmdline, 0, 0, FALSE, 0, 0, 0, &si, &pi)) {
         return false;
+    }
 
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
