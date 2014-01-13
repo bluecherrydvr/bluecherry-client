@@ -359,6 +359,9 @@ void RtspStreamWorker::startInterruptableOperation(int timeoutInSeconds)
 
 RtspStreamFrame * RtspStreamWorker::frameToDisplay()
 {
+    if (m_cancelFlag || !m_frameQueue)
+        return 0;
+
     return m_frameQueue.data()->dequeue();
 }
 
