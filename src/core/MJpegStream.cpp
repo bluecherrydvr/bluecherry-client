@@ -79,7 +79,7 @@ void MJpegStream::setError(const QString &message)
 
 void MJpegStream::start()
 {
-    if (state() >= Connecting)
+    if (state() >= Connecting && (state() != Paused))
         return;
 
     if (state() == StreamOffline)
@@ -103,22 +103,17 @@ void MJpegStream::start()
 
     setState(Connecting);
 
-    /* HACK: QNetworkAccessManager limits itself to 6 parallel connections to a single
-     * host and port, which is unacceptable for this. It includes the username field when
-     * caching these connections, so we can work around it by sending a fake username.
-     * Needs a proper fix, because this behavior could be a Qt bug. Issue #535 */
-    QUrl hackUrl = url();
-    hackUrl.setUserName(QString::number(qrand()));
+    QUrl currentUrl(url());
 
     /* Interval */
     if (m_interval > 1)
-        hackUrl.addEncodedQueryItem("interval", QByteArray::number(m_interval));
+        currentUrl.addEncodedQueryItem("interval", QByteArray::number(m_interval));
     else if (!m_interval)
-        hackUrl.addEncodedQueryItem("interval", "low");
+        currentUrl.addEncodedQueryItem("interval", "low");
 
-    hackUrl.addEncodedQueryItem("activity", "1");
+    currentUrl.addEncodedQueryItem("activity", "1");
 
-    m_httpReply = bcApp->nam->get(QNetworkRequest(hackUrl));
+    m_httpReply = bcApp->nam->get(QNetworkRequest(currentUrl));
     m_httpReply->ignoreSslErrors();
     connect(m_httpReply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(requestError()));
     connect(m_httpReply, SIGNAL(finished()), SLOT(requestError()));
@@ -142,7 +137,9 @@ void MJpegStream::stop()
 
     if (state() > NotConnected)
     {
-        setState(NotConnected);
+        if (state() != Paused)
+            setState(NotConnected);
+
         m_autoStart = false;
     }
 
