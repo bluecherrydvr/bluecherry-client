@@ -111,6 +111,8 @@ void LiveFeedItem::cameraDataUpdated()
     emit hasPtzChanged();
 
     m_streamItem->setStream(m_camera.data()->liveStream());
+
+    emit cameraChanged(m_camera.data());
 }
 
 void LiveFeedItem::openNewWindow()
