@@ -26,6 +26,7 @@
 #include "core/LiveViewManager.h"
 #include "core/LiveStream.h"
 
+class QNetworkAccessManager;
 class QNetworkReply;
 class ThreadTask;
 class ImageDecodeTask;
@@ -82,6 +83,8 @@ private:
     QTimer m_activityTimer;
     uint m_lastActivity;
     float m_receivedFps;
+
+    QNetworkAccessManager *m_nam;
 
     int m_httpBodyLength;
     State m_state;

@@ -30,7 +30,7 @@
 
 MJpegStream::MJpegStream(DVRCamera *camera, QObject *parent)
     : LiveStream(parent), m_camera(camera), m_httpReply(0), m_currentFrameNo(0), m_latestFrameNo(0), m_fpsRecvTs(0), m_fpsRecvNo(0),
-      m_decodeTask(0), m_lastActivity(0), m_receivedFps(0), m_httpBodyLength(0), m_state(NotConnected),
+      m_decodeTask(0), m_lastActivity(0), m_receivedFps(0), m_nam(0), m_httpBodyLength(0), m_state(NotConnected),
       m_parserState(ParserBoundary), m_autoStart(false), m_paused(false), m_interval(1)
 {
     Q_ASSERT(m_camera);
@@ -113,7 +113,9 @@ void MJpegStream::start()
 
     currentUrl.addEncodedQueryItem("activity", "1");
 
-    m_httpReply = bcApp->nam->get(QNetworkRequest(currentUrl));
+    m_nam = bcApp->createNam();
+
+    m_httpReply = m_nam->get(QNetworkRequest(currentUrl));
     m_httpReply->ignoreSslErrors();
     connect(m_httpReply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(requestError()));
     connect(m_httpReply, SIGNAL(finished()), SLOT(requestError()));
@@ -130,6 +132,12 @@ void MJpegStream::stop()
         m_httpReply->abort();
         m_httpReply->deleteLater();
         m_httpReply = 0;
+    }
+
+    if (m_nam)
+    {
+        m_nam->deleteLater();
+        m_nam = 0;
     }
 
     m_httpBuffer.clear();
