@@ -78,6 +78,7 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     : QWidget(parent), m_event(0), m_videoWidget(0)
 {
     connect(bcApp, SIGNAL(queryLivePaused()), SLOT(queryLivePaused()));
+    connect(bcApp, SIGNAL(settingsChanged()), SLOT(settingsChanged()));
     connect(&m_uiTimer, SIGNAL(timeout()), SLOT(updateUI()));
 
     m_uiTimer.setInterval(100);
@@ -224,7 +225,7 @@ EventVideoPlayer::~EventVideoPlayer()
 void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
 {
     if (m_videoBackend)
-            clearVideo();
+        clearVideo();
 
     if (url.isEmpty())
         return;
@@ -242,6 +243,9 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     m_videoBackend = bcApp->videoPlayerFactory()->createBackend();
 	m_videoBackend.data()->moveToThread(m_videoThread.data());
 	m_videoBackend.data()->setLastSpeed(m_lastspeed);
+
+	settingsChanged();
+
     connect(m_videoBackend.data(), SIGNAL(stateChanged(int,int)), SLOT(stateChanged(int)));
     connect(m_videoBackend.data(), SIGNAL(nonFatalError(QString)), SLOT(videoNonFatalError(QString)));
     connect(m_videoBackend.data(), SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
@@ -418,6 +422,15 @@ void EventVideoPlayer::updateUI()
 {
     updatePosition();
     updateBufferStatus();
+}
+
+void EventVideoPlayer::settingsChanged()
+{
+    if (!m_videoBackend)
+        return;
+
+    QSettings settings;
+    m_videoBackend.data()->setHardwareDecodingEnabled(settings.value(QLatin1String("ui/eventplayer/enableHardwareDecoding"), false).toBool());
 }
 
 void EventVideoPlayer::bufferingStarted()

@@ -57,6 +57,8 @@ public:
     virtual QString errorMessage() const = 0;
     virtual VideoHttpBuffer * videoBuffer() const = 0;
 
+    virtual void setHardwareDecodingEnabled(bool enable) = 0;
+
 public slots:
     virtual bool start(const QUrl &url) = 0;
     virtual void clear() = 0;

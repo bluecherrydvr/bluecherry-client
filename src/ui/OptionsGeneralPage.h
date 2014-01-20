@@ -38,7 +38,7 @@ private slots:
     void ssUpdateForOthers(bool checked);
 
 private:
-    QCheckBox *m_eventsPauseLive, *m_closeToTray, *m_liveHwAccel, *m_advancedOpengl, *m_deinterlace;
+    QCheckBox *m_eventsPauseLive, *m_closeToTray, *m_liveHwAccel, *m_advancedOpengl, *m_eventPlayerHardwareDecoding, *m_deinterlace;
     QCheckBox *m_ssFullscreen, *m_ssVideo, *m_ssNever;
 
 	QComboBox *m_languages;

@@ -75,6 +75,7 @@ private slots:
     void setVolume(int volume);
 
     void updateUI();
+    void settingsChanged();
 
 private:
     EventData *m_event;

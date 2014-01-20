@@ -68,6 +68,15 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     m_advancedOpengl->setToolTip(tr("Disable advanced OpenGL features if live video doesn't appear correctly"));
     layout->addWidget(m_advancedOpengl);
 
+#if defined(Q_OS_LINUX)
+    m_eventPlayerHardwareDecoding = new QCheckBox(tr("Use hardware decoding in event player (vaapi)"));
+    m_eventPlayerHardwareDecoding->setChecked(settings.value(QLatin1String("ui/eventplayer/enableHardwareDecoding"), false).toBool());
+    m_eventPlayerHardwareDecoding->setToolTip(tr("Disable hardware decoding if you do not see anything in the event player."));
+    layout->addWidget(m_eventPlayerHardwareDecoding);
+#else
+    m_eventPlayerHardwareDecoding = 0;
+#endif
+
     m_deinterlace = new QCheckBox(tr("Automatic deinterlacing"));
     m_deinterlace->setChecked(settings.value(QLatin1String("ui/liveview/autoDeinterlace"), false).toBool());
     layout->addWidget(m_deinterlace);
@@ -136,6 +145,8 @@ void OptionsGeneralPage::saveChanges()
     settings.setValue(QLatin1String("ui/liveview/disableHardwareAcceleration"), !m_liveHwAccel->isChecked());
     settings.setValue(QLatin1String("ui/liveview/disableAdvancedOpengl"), !m_advancedOpengl->isChecked());
     settings.setValue(QLatin1String("ui/liveview/autoDeinterlace"), m_deinterlace->isChecked());
+    if (m_eventPlayerHardwareDecoding)
+        settings.setValue(QLatin1String("ui/eventplayer/enableHardwareDecoding"), m_eventPlayerHardwareDecoding->isChecked());
 
     if (m_ssFullscreen && m_ssVideo && m_ssNever)
     {

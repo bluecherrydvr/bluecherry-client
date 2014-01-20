@@ -53,6 +53,8 @@ public:
     virtual QString errorMessage() const { return m_errorMessage; }
     virtual VideoHttpBuffer *videoBuffer() const { return m_videoBuffer; }
 
+    virtual void setHardwareDecodingEnabled(bool enable);
+
 public slots:
     virtual bool start(const QUrl &url);
     virtual void clear();
@@ -78,6 +80,7 @@ private:
     QString m_errorMessage;
     double m_playbackSpeed;
     bool m_hasAudio;
+    bool m_useHardwareDecoding;
 
     GstElement *m_audioDecoder, *m_audioResample, *m_audioSink, *m_volumeController;
 
@@ -86,6 +89,8 @@ private:
 
     bool setupAudioPipeline();
     bool setupVideoPipeline();
+
+    void enableFactory(const gchar *name, gboolean enable);
 
     GstBusSyncReply busHandler(GstBus *bus, GstMessage *msg);
     void decodeAudioPadReady(GstDecodeBin *bin, GstPad *pad, gboolean islast);

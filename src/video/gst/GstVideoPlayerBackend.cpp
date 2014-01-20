@@ -32,7 +32,7 @@
 
 GstVideoPlayerBackend::GstVideoPlayerBackend(QObject *parent)
     : VideoPlayerBackend(parent), m_pipeline(0), m_videoLink(0), m_sink(0), m_audioLink(0), m_audioQueue(0), m_videoQueue(0),
-      m_videoBuffer(0), m_state(Stopped),m_playbackSpeed(1.0), m_hasAudio(false), m_audioDecoder(0)
+      m_videoBuffer(0), m_state(Stopped),m_playbackSpeed(1.0), m_hasAudio(false), m_useHardwareDecoding(false), m_audioDecoder(0)
 {
     if (!initGStreamer())
         setError(true, bcApp->gstWrapper()->errorMessage()); // not the clearest solution, will be replaced
@@ -114,6 +114,24 @@ void GstVideoPlayerBackend::setSink(GstElement *sink)
     }
 }
 
+void GstVideoPlayerBackend::enableFactory(const gchar *name, gboolean enable)
+{
+    GstRegistry *registry = gst_registry_get_default();
+    if (!registry)
+        return;
+
+    GstElementFactory *factory = gst_element_factory_find(name);
+    if (!factory)
+        return;
+
+    if (enable)
+        gst_plugin_feature_set_rank(GST_PLUGIN_FEATURE(factory), GST_RANK_PRIMARY + 1);
+    else
+        gst_plugin_feature_set_rank(GST_PLUGIN_FEATURE(factory), GST_RANK_NONE);
+
+    gst_registry_add_feature(registry, GST_PLUGIN_FEATURE(factory));
+}
+
 bool GstVideoPlayerBackend::start(const QUrl &url)
 {
     Q_ASSERT(!m_pipeline);
@@ -133,6 +151,8 @@ bool GstVideoPlayerBackend::start(const QUrl &url)
         setError(true, tr("Failed to create video pipeline (%1)").arg(QLatin1String("stream")));
         return false;
     }
+
+    enableFactory("vaapidecode", m_useHardwareDecoding);
 
     /* Buffered HTTP source */
     setVideoBuffer(new VideoHttpBuffer(url));
@@ -487,6 +507,11 @@ bool GstVideoPlayerBackend::isSeekable() const
 
     gst_query_unref(query);
     return re;
+}
+
+void GstVideoPlayerBackend::setHardwareDecodingEnabled(bool enable)
+{
+    m_useHardwareDecoding = enable;
 }
 
 bool GstVideoPlayerBackend::seek(qint64 position)
