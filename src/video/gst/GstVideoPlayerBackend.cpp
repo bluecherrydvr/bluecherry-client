@@ -152,7 +152,9 @@ bool GstVideoPlayerBackend::start(const QUrl &url)
         return false;
     }
 
-    enableFactory("vaapidecode", m_useHardwareDecoding);
+    // TODO: uncomment when vaapi download starts works
+//    enableFactory("vaapidecode", m_useHardwareDecoding);
+    enableFactory("vaapidecode", false);
 
     /* Buffered HTTP source */
     setVideoBuffer(new VideoHttpBuffer(url));

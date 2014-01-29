@@ -68,7 +68,7 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     m_advancedOpengl->setToolTip(tr("Disable advanced OpenGL features if live video doesn't appear correctly"));
     layout->addWidget(m_advancedOpengl);
 
-#if defined(Q_OS_LINUX)
+#if 0// defined(Q_OS_LINUX)
     m_eventPlayerHardwareDecoding = new QCheckBox(tr("Use hardware decoding in event player (vaapi)"));
     m_eventPlayerHardwareDecoding->setChecked(settings.value(QLatin1String("ui/eventplayer/enableHardwareDecoding"), false).toBool());
     m_eventPlayerHardwareDecoding->setToolTip(tr("Disable hardware decoding if you do not see anything in the event player."));
