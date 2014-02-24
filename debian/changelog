@@ -4,11 +4,11 @@ bluecherry-client (1:2.1.8-1) lucid; urgency=low
   * Bug: MJPEG streams is not restarted after pausing
   * Bug: "offline," "connecting," and "error" overlays persist after connection to stream
   * Bug: Only 6 MJPEG streams are displayed in live view 
-  * Bug: Crash fixes
+  * Bug: Fix random crashes
   * Feature: Add audio support to event player
   * Other: Remove package conflict with gstreamar-vaapi
 
- -- Piotr Galiszewski <pgaliszewski@corp.bluecherry.net>  Thu, 13 Nov 2013 23:30:50 +0200
+ -- Piotr Galiszewski <pgaliszewski@corp.bluecherry.net>  Thu, 24 Feb 2014 19:30:50 +0200
 
 
 bluecherry-client (1:2.1.7-1) lucid; urgency=low
