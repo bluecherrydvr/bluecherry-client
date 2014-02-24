@@ -7,6 +7,7 @@ bluecherry-client (1:2.1.8-1) lucid; urgency=low
   * Bug: Fix random crashes
   * Feature: Add audio support to event player
   * Other: Remove package conflict with gstreamar-vaapi
+  * Other: Update libav to 9.11 release
 
  -- Piotr Galiszewski <pgaliszewski@corp.bluecherry.net>  Thu, 24 Feb 2014 19:30:50 +0200
 
