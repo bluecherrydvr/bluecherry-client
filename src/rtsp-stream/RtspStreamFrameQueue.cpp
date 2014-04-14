@@ -45,7 +45,7 @@ RtspStreamFrame * RtspStreamFrameQueue::dequeue()
     if (m_ptsBase == (int64_t)AV_NOPTS_VALUE)
     {
         m_ptsBase = m_frameQueue.head()->avFrame()->pts;
-        m_ptsTimer.restart();
+        m_ptsTimer.start();
     }
 
     qint64 now = m_ptsTimer.elapsed() * 1000;
@@ -59,7 +59,7 @@ RtspStreamFrame * RtspStreamFrameQueue::dequeue()
         if (abs(scaledFrameDisplayTime - now) >= AV_TIME_BASE/2)
         {
             m_ptsBase = frame->avFrame()->pts;
-            m_ptsTimer.restart();
+            m_ptsTimer.start();
             now = scaledFrameDisplayTime = 0;
         }
 
