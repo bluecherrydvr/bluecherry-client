@@ -45,9 +45,10 @@ void RtspStreamThread::start(const QUrl &url)
         m_thread = new QThread();
 
         RtspStreamWorker *worker = new RtspStreamWorker();
+        m_worker = worker;
+
         worker->moveToThread(m_thread.data());
 
-        m_worker = worker;
         m_worker.data()->setUrl(url);
 
         connect(m_thread.data(), SIGNAL(started()), m_worker.data(), SLOT(run()));
@@ -79,7 +80,7 @@ void RtspStreamThread::stop()
         m_thread.clear();
     }
 
-    Q_ASSERT(!m_thread);
+  //  Q_ASSERT(!m_thread);
 }
 
 void RtspStreamThread::setPaused(bool paused)
