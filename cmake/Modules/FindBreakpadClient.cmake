@@ -27,7 +27,7 @@
 find_path (BREAKPADCLIENT_INCLUDE_DIR_${CMAKE_BUILD_TYPE} client/linux/handler/exception_handler.h ${WIN32_BREAKPAD_SRC_DIR} ${MACOSX_BREAKPAD_SRC_DIR} ${LINUX_BREAKPAD_DIR}/src)
 
 if (UNIX AND NOT APPLE)
-    find_library (BREAKPADCLIENT_LIBRARY_${CMAKE_BUILD_TYPE} NAMES libbreakpad_client.a PATHS ${LINUX_BREAKPAD_DIR}/src/client/linux/.libs/)
+    find_library (BREAKPADCLIENT_LIBRARY_${CMAKE_BUILD_TYPE} NAMES libbreakpad_client.a PATHS ${LINUX_BREAKPAD_DIR}/src/client/linux/)
     set (BREAKPADCLIENT_LIBRARIES_${CMAKE_BUILD_TYPE}
         ${BREAKPADCLIENT_LIBRARY_${CMAKE_BUILD_TYPE}}
     )
