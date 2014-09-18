@@ -39,11 +39,12 @@ int rtspStreamInterruptCallback(void *opaque)
     return worker->shouldInterrupt();
 }
 
-RtspStreamWorker::RtspStreamWorker(QObject *parent)
+RtspStreamWorker::RtspStreamWorker(QSharedPointer<RtspStreamFrameQueue> &shared_queue, QObject *parent)
     : QObject(parent), m_ctx(0),
       m_cancelFlag(false), m_autoDeinterlacing(true),
       m_frameQueue(new RtspStreamFrameQueue(6))
 {
+    shared_queue = m_frameQueue;
 }
 
 RtspStreamWorker::~RtspStreamWorker()

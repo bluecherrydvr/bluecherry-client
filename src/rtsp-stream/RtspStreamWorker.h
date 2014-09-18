@@ -22,6 +22,7 @@
 #include <QDateTime>
 #include <QObject>
 #include <QUrl>
+#include <QSharedPointer>
 
 struct AVDictionary;
 struct AVFrame;
@@ -36,7 +37,7 @@ class RtspStreamWorker : public QObject
     Q_OBJECT
 
 public:
-    explicit RtspStreamWorker(QObject *parent = 0);
+    explicit RtspStreamWorker(QSharedPointer<RtspStreamFrameQueue> &shared_queue, QObject *parent = 0);
     virtual ~RtspStreamWorker();
 
     void setUrl(const QUrl &url);
@@ -67,7 +68,7 @@ private:
 
     ThreadPause m_threadPause;
     QScopedPointer<RtspStreamFrameFormatter> m_frameFormatter;
-    QScopedPointer<RtspStreamFrameQueue> m_frameQueue;
+    QSharedPointer<RtspStreamFrameQueue> m_frameQueue;
 
     bool setup();
     bool prepareStream(AVFormatContext **context, AVDictionary *options);

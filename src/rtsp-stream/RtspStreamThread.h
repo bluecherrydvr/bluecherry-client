@@ -21,9 +21,11 @@
 #include <QMutex>
 #include <QObject>
 #include <QWeakPointer>
+#include <QSharedPointer>
 
 class RtspStreamFrame;
 class RtspStreamWorker;
+class RtspStreamFrameQueue;
 class QThread;
 class QUrl;
 
@@ -52,6 +54,7 @@ signals:
 private:
     QWeakPointer<QThread> m_thread;
     QWeakPointer<RtspStreamWorker> m_worker;
+    QSharedPointer<RtspStreamFrameQueue> m_frameQueue;
     QMutex m_workerMutex;
     bool m_isRunning;
 

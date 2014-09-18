@@ -17,6 +17,7 @@
 
 #include "RtspStreamThread.h"
 #include "RtspStreamWorker.h"
+#include "RtspStreamFrameQueue.h"
 #include "core/BluecherryApp.h"
 #include "core/LoggableUrl.h"
 #include <QDebug>
@@ -44,7 +45,7 @@ void RtspStreamThread::start(const QUrl &url)
         Q_ASSERT(!m_thread);
         m_thread = new QThread();
 
-        RtspStreamWorker *worker = new RtspStreamWorker();
+        RtspStreamWorker *worker = new RtspStreamWorker(m_frameQueue);
         m_worker = worker;
 
         worker->moveToThread(m_thread.data());
@@ -77,6 +78,7 @@ void RtspStreamThread::stop()
         /* Worker will delete itself, which will then destroy the thread */
         m_worker.data()->stop();
         m_worker.clear();
+        m_frameQueue.clear();
         m_thread.clear();
     }
 
@@ -114,8 +116,8 @@ RtspStreamFrame * RtspStreamThread::frameToDisplay()
 {
     QMutexLocker locker(&m_workerMutex);
 
-    if (hasWorker())
-        return m_worker.data()->frameToDisplay();
+    if (m_frameQueue)
+        return m_frameQueue->dequeue();
     else
         return 0;
 }
