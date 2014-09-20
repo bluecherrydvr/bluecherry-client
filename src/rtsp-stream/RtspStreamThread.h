@@ -58,6 +58,8 @@ private:
     QMutex m_workerMutex;
     bool m_isRunning;
 
+private slots:
+    void clearWorker();
 };
 
 #endif // RTSP_STREAM_THREAD_H
