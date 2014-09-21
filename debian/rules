@@ -27,6 +27,7 @@ override_dh_auto_install:
 	cp -a /usr/lib/bluecherry/client/lib/libavcodec.so* debian/bluecherry-client/usr/lib/bluecherry/client/lib/
 	cp -a /usr/lib/bluecherry/client/lib/libavutil.so* debian/bluecherry-client/usr/lib/bluecherry/client/lib/
 	cp -a /usr/lib/bluecherry/client/lib/libswscale.so* debian/bluecherry-client/usr/lib/bluecherry/client/lib/
+	cp -a /usr/lib/bluecherry/client/lib/libswresample.so* debian/bluecherry-client/usr/lib/bluecherry/client/lib/
 
 override_dh_shlibdeps:
 	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:debian/bluecherry-client/usr/lib/bluecherry/client/lib:debian/bluecherry-client/usr/lib/bluecherry/qt4.8/lib dh_shlibdeps
