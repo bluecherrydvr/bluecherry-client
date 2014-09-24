@@ -8,12 +8,13 @@ To compile bluecherry-client on MasOSX install following applications:
 Using MacPorts install following packages:
 * git-core
 * cmake
+* wget
 
-Download  bluecherry-client-scripts package from git and install libav and Qt:
+Download  bluecherry-client-scripts package from git and install ffmpeg and Qt:
 
 - git clone git://github.com/vogel/bluecherry-client-scripts.git
 - cd bluecherry-client-scripts/dependencies
-- ./install-libav-macosx.sh
+- ./install-ffmpeg-macosx.sh
 - ./install-qt-macosx.sh
 
 This script will automatically download more required MacPorts packages.
@@ -29,3 +30,8 @@ Next configure and compile your source code:
 - cmake {path to bluecherry-client sources}
 - make
 - make deploy
+- cd ..
+- ./mac/package.sh build
+
+Bluecherry-client should be compiled by GCC. If Clang is used by default, put CXX=/usr/bin/g++ before calling cmake
+
