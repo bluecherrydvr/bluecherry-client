@@ -25,6 +25,7 @@ values appropriately.
 Next configure and compile your source code:
 
 - export QTPATH=$HOME/dev/user
+- export PATH="$HOME/dev/user/bin:${PATH}"
 - mkdir build
 - cd build
 - cmake {path to bluecherry-client sources}
@@ -33,5 +34,8 @@ Next configure and compile your source code:
 - cd ..
 - ./mac/package.sh build
 
-Bluecherry-client should be compiled by GCC. If Clang is used by default, put CXX=/usr/bin/g++ before calling cmake
+NOTES: Bluecherry-client should be compiled by GCC. If Clang is used by default, put CXX=/usr/bin/g++ before calling cmake.
+After "make deploy" run "otool -L bluecherry-client.app/Contents/MacOS/bluecherry-client" and make sure all non-system
+dependencies reference libraries inside bundle
+
 
