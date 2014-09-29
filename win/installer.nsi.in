@@ -61,17 +61,17 @@ Section
         File "${BIN_PATH}\bluecherryclient_ru_RU.qm"
         File "${BIN_PATH}\bluecherryclient_sv_SE.qm"
 		
-        # LibAV
-        File "${LIBAV_PATH}\avcodec-54.dll"
-        File "${LIBAV_PATH}\avformat-54.dll"
+        # ffmpeg
+        File "${LIBAV_PATH}\avcodec-55.dll"
+        File "${LIBAV_PATH}\avformat-55.dll"
         File "${LIBAV_PATH}\avutil-52.dll"
         File "${LIBAV_PATH}\swscale-2.dll"
-        File "${LIBAV_PATH}\libmp3lame-0.dll"
-        File "${LIBAV_PATH}\libvo-aacenc-0.dll"
-        File "${LIBAV_PATH}\libvorbis-0.dll"
-        File "${LIBAV_PATH}\libogg-0.dll"
-        File "${LIBAV_PATH}\libvorbisenc-2.dll"
-        File "${LIBAV_PATH}\libx264-125.dll"
+        #File "${LIBAV_PATH}\libmp3lame-0.dll"
+        #File "${LIBAV_PATH}\libvo-aacenc-0.dll"
+        #File "${LIBAV_PATH}\libvorbis-0.dll"
+        #File "${LIBAV_PATH}\libogg-0.dll"
+        #File "${LIBAV_PATH}\libvorbisenc-2.dll"
+        #File "${LIBAV_PATH}\libx264-125.dll"
 
         # GStreamer
         File "${GSTREAMER_PATH}\libbz2.dll"
