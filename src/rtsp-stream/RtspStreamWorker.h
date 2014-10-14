@@ -86,7 +86,7 @@ private:
     bool processStream();
     struct AVPacket readPacket(bool *ok = 0);
     bool processPacket(struct AVPacket packet);
-    AVFrame * extractFrame(struct AVPacket &packet, bool *breakLoop);
+    AVFrame * extractFrame(struct AVPacket &packet);
     void processFrame(struct AVFrame *frame);
 
     QString errorMessageFromCode(int errorCode);

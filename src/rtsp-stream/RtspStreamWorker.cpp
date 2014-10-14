@@ -147,32 +147,25 @@ bool RtspStreamWorker::processPacket(struct AVPacket packet)
 
     while (packet.size > 0)
     {
-        bool breakLoop;
-        AVFrame *frame = extractFrame(packet, &breakLoop);
+        AVFrame *frame = extractFrame(packet);
         if (frame)
         {
             processFrame(frame);
             av_free(frame);
         }
-
-        if (breakLoop)
-            return false;
     }
 
     return true;
 }
 
-AVFrame * RtspStreamWorker::extractFrame(AVPacket &packet, bool *breakLoop)
+AVFrame * RtspStreamWorker::extractFrame(AVPacket &packet)
 {
-    *breakLoop = false;
-
     AVFrame *frame = avcodec_alloc_frame();
     startInterruptableOperation(5);
 
     int pictureAvailable;
     int re = avcodec_decode_video2(m_ctx->streams[0]->codec, frame, &pictureAvailable, &packet);
     if (re == 0) {
-        *breakLoop = true;
         return 0;
     }
 
@@ -180,7 +173,6 @@ AVFrame * RtspStreamWorker::extractFrame(AVPacket &packet, bool *breakLoop)
     {
         emit fatalError(QString::fromLatin1("Decoding error: %1").arg(errorMessageFromCode(re)));
         av_free(frame);
-        *breakLoop = true;
         return 0;
     }
 
