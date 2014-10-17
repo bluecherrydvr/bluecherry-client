@@ -133,6 +133,7 @@ SetupServerPage::SetupServerPage(DVRServerRepository *serverRepository)
 
     row++;
     QLineEdit *passwordEdit = new QLineEdit;
+    passwordEdit->setEchoMode(QLineEdit::Password);
     layout->addWidget(new QLabel(tr("Password:")), row, 0);
     layout->addWidget(passwordEdit, row, 1);
     QCheckBox *passSaveChk = new QCheckBox(tr("Save password"));

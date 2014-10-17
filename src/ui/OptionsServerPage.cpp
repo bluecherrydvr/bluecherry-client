@@ -116,7 +116,7 @@ OptionsServerPage::OptionsServerPage(DVRServerRepository *serverRepository, QWid
     editsLayout->addWidget(label, 1, 2, Qt::AlignRight);
 
     m_passwordEdit = new QLineEdit;
-    m_passwordEdit->setEchoMode(QLineEdit::PasswordEchoOnEdit);
+    m_passwordEdit->setEchoMode(QLineEdit::Password);
     editsLayout->addWidget(m_passwordEdit, 1, 3);
 
     m_autoConnect = new QCheckBox(tr("Connect Automatically"));
