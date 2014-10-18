@@ -87,7 +87,7 @@ void RtspStream::init()
     m_renderTimer->setSingleShot(false);
 
     m_stateTimer = new AutoTimer;
-    m_stateTimer->setInterval(15000);//wtf 15 seconds?
+    m_stateTimer->setInterval(5000);
     m_stateTimer->setSingleShot(false);
 }
 
