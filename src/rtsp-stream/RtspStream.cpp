@@ -27,6 +27,7 @@
 #include <QTimer>
 #include <QDebug>
 #include <QSettings>
+#include <QDateTime>
 
 extern "C" {
 #   include "libavcodec/avcodec.h"
@@ -283,7 +284,7 @@ QSize RtspStream::streamSize() const
 
 void RtspStream::fatalError(const QString &message)
 {
-    qDebug() << "Fatal error:" << LoggableUrl(url()) << message;
+    qDebug() << QDateTime::currentDateTime().toString(tr("yyyy-MM-dd")) << " Fatal error:" << LoggableUrl(url()) << message;
 
     m_errorMessage = message;
     setState(Error);
