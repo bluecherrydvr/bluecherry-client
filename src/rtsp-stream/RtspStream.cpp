@@ -87,7 +87,7 @@ void RtspStream::init()
     m_renderTimer->setSingleShot(false);
 
     m_stateTimer = new AutoTimer;
-    m_stateTimer->setInterval(15000);
+    m_stateTimer->setInterval(15000);//wtf 15 seconds?
     m_stateTimer->setSingleShot(false);
 }
 
@@ -284,7 +284,7 @@ QSize RtspStream::streamSize() const
 
 void RtspStream::fatalError(const QString &message)
 {
-    qDebug() << QDateTime::currentDateTime().toString(tr("yyyy-MM-dd")) << " Fatal error:" << LoggableUrl(url()) << message;
+    qDebug() << QDateTime::currentDateTime().toString(tr("yyyy-MM-dd hh:mm:ss")) << " Fatal error:" << LoggableUrl(url()) << message;
 
     m_errorMessage = message;
     setState(Error);
