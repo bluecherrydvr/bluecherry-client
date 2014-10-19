@@ -33,6 +33,8 @@ extern "C" {
 
 #define ASSERT_WORKER_THREAD() Q_ASSERT(QThread::currentThread() == thread())
 
+static const int maxDecodeErrors = 3;
+
 int rtspStreamInterruptCallback(void *opaque)
 {
     RtspStreamWorker *worker = (RtspStreamWorker *)opaque;
@@ -40,7 +42,7 @@ int rtspStreamInterruptCallback(void *opaque)
 }
 
 RtspStreamWorker::RtspStreamWorker(QSharedPointer<RtspStreamFrameQueue> &shared_queue, QObject *parent)
-    : QObject(parent), m_ctx(0),
+    : QObject(parent), m_ctx(0), m_decodeErrorsCnt(0),
       m_cancelFlag(false), m_autoDeinterlacing(true),
       m_frameQueue(new RtspStreamFrameQueue(6))
 {
@@ -153,6 +155,11 @@ bool RtspStreamWorker::processPacket(struct AVPacket packet)
             processFrame(frame);
             av_free(frame);
         }
+
+        if (m_decodeErrorsCnt >= maxDecodeErrors)
+        {
+            return false;
+        }
     }
 
     return true;
@@ -171,11 +178,17 @@ AVFrame * RtspStreamWorker::extractFrame(AVPacket &packet)
 
     if (re < 0)
     {
-        emit fatalError(QString::fromLatin1("Decoding error: %1").arg(errorMessageFromCode(re)));
+        m_decodeErrorsCnt++;
+
+        if (m_decodeErrorsCnt >= maxDecodeErrors)
+        {
+            emit fatalError(QString::fromLatin1("Decoding error: %1").arg(errorMessageFromCode(re)));
+        }
         av_free(frame);
         return 0;
     }
 
+    m_decodeErrorsCnt = 0; //reset error counter if avcodec_decode_video2() call was successful
     packet.size -= re;
     packet.data += re;
 

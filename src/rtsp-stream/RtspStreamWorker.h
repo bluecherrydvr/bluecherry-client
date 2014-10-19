@@ -65,10 +65,12 @@ private:
     bool m_autoDeinterlacing;
     mutable bool m_lastCancel;
     mutable int m_lastSeconds;
+    int m_decodeErrorsCnt;
 
     ThreadPause m_threadPause;
     QScopedPointer<RtspStreamFrameFormatter> m_frameFormatter;
     QSharedPointer<RtspStreamFrameQueue> m_frameQueue;
+
 
     bool setup();
     bool prepareStream(AVFormatContext **context, AVDictionary *options);
