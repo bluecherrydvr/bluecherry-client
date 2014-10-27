@@ -6,16 +6,20 @@
 	<string>12A269</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
+	<key>CFBundleDisplayName</key>
+	<string>crash_report_sender</string>
 	<key>CFBundleExecutable</key>
-	<string>Breakpad</string>
+	<string>crash_report_sender</string>
+	<key>CFBundleIconFile</key>
+	<string>crash_report_sender</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.googlecode.google-breakpad</string>
+	<string>com.Breakpad.crash_report_sender</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Breakpad</string>
+	<string>crash_report_sender</string>
 	<key>CFBundlePackageType</key>
-	<string>FMWK</string>
+	<string>APPL</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
@@ -34,5 +38,11 @@
 	<string>0460</string>
 	<key>DTXcodeBuild</key>
 	<string>4H127</string>
+	<key>LSHasLocalizedDisplayName</key>
+	<true/>
+	<key>NSMainNibFile</key>
+	<string>MainMenu</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
 </dict>
 </plist>
