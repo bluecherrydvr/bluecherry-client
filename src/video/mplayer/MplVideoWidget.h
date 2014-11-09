@@ -32,6 +32,28 @@ public:
     virtual void clearVideo();
 
     virtual QImage currentFrame();
+
+    virtual QSize sizeHint() const;
+
+    void setViewport(QWidget *viewport);
+
+public slots:
+    void setFullScreen(bool on);
+    void toggleFullScreen() { setFullScreen(!isFullScreen()); }
+
+    void setOverlayMessage(const QString &message);
+    void clearOverlayMessage() { setOverlayMessage(QString()); }
+
+protected:
+    virtual void resizeEvent(QResizeEvent *ev);
+    virtual void mouseDoubleClickEvent(QMouseEvent *ev);
+    virtual void keyPressEvent(QKeyEvent *ev);
+    virtual bool eventFilter(QObject *, QEvent *);
+
+private:
+    QWidget *m_viewport;
+    QString m_overlayMsg;
+    int m_frameWidth, m_frameHeight;
 };
 
 #endif //MPL_VIDEOWIDGET_H

@@ -19,10 +19,12 @@
 #define MPL_VIDEO_PLAYER_BACKEND_H
 
 #include "video/VideoPlayerBackend.h"
+#include <QProcess>
+
 
 class QString;
 class VideoHttpBuffer;
-class QProcess;
+
 
 class MplVideoPlayerBackend : public VideoPlayerBackend
 {
@@ -46,6 +48,7 @@ public:
     virtual VideoHttpBuffer *videoBuffer() const { return m_videoBuffer; }
 
     virtual void setHardwareDecodingEnabled(bool enable);
+    void setWindowId(quint64 wid);
 
 public slots:
     virtual bool start(const QUrl &url);
@@ -70,6 +73,8 @@ private:
     double m_playbackSpeed;
 
     QProcess m_mplayer;
+    //Window id for mplayer process, argument for -wid option
+    QString m_wid;
 
     void setError(bool permanent, const QString &message);
     void setVideoBuffer(VideoHttpBuffer *videoHttpBuffer);

@@ -48,6 +48,8 @@ public:
 
     QUrl url() const { return m_url; }
 
+    QString bufferFilePath() const;
+
 public slots:
     void clearPlayback();
 

@@ -188,3 +188,8 @@ bool VideoHttpBuffer::seekData(qint64 offset)
     Q_ASSERT(media);
     return media->seek((unsigned)offset);
 }
+
+QString VideoHttpBuffer::bufferFilePath() const
+{
+    return media->bufferFilePath();
+}
