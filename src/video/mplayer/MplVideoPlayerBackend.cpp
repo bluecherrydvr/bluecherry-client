@@ -134,6 +134,15 @@ void MplVideoPlayerBackend::setError(bool permanent, const QString &message)
     emit stateChanged(m_state, old);
 }
 
+void MplVideoPlayerBackend::streamError(const QString &message)
+{
+    qDebug() << "MplVideoPlayerBackend: stopping stream due to error:" << message;
+
+    //close mplayer process?
+
+    setError(true, message);
+}
+
 bool MplVideoPlayerBackend::isSeekable() const
 {
     return true;
@@ -147,6 +156,8 @@ void MplVideoPlayerBackend::playIfReady()
     m_mplayer.write((QString("pausing loadfile ") + m_videoBuffer->bufferFilePath() + "\n").toAscii().constData());
 
     emit durationChanged(duration());
+
+    play();
 }
 
 void MplVideoPlayerBackend::play()
@@ -157,6 +168,10 @@ void MplVideoPlayerBackend::play()
     m_mplayer.write("pause\n");
 
     emit playbackSpeedChanged(m_playbackSpeed);
+
+    VideoState old = m_state;
+    m_state = Playing;
+    emit stateChanged(m_state, old);
 }
 
 void MplVideoPlayerBackend::pause()

@@ -48,12 +48,13 @@ protected:
     virtual void resizeEvent(QResizeEvent *ev);
     virtual void mouseDoubleClickEvent(QMouseEvent *ev);
     virtual void keyPressEvent(QKeyEvent *ev);
-    virtual bool eventFilter(QObject *, QEvent *);
+    //virtual bool eventFilter(QObject *, QEvent *);
 
 private:
     QWidget *m_viewport;
     QString m_overlayMsg;
     int m_frameWidth, m_frameHeight;
+    int m_normalFrameStyle;
 };
 
 #endif //MPL_VIDEOWIDGET_H

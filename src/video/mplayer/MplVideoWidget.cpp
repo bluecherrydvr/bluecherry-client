@@ -17,7 +17,12 @@
 
 #include "MplVideoWidget.h"
 #include "MplVideoPlayerBackend.h"
+#include "core/BluecherryApp.h"
 #include <QWidget>
+#include <QImage>
+#include <QApplication>
+#include <QSettings>
+#include <QMouseEvent>
 
 
 MplVideoWidget::~MplVideoWidget()
@@ -29,7 +34,8 @@ MplVideoWidget::MplVideoWidget(QWidget *parent)
     : VideoWidget(parent),
       m_viewport(0),
       m_frameWidth(-1),
-      m_frameHeight(-1)
+      m_frameHeight(-1),
+      m_normalFrameStyle(0)
 {
     setAutoFillBackground(false);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -70,7 +76,7 @@ void MplVideoWidget::setViewport(QWidget *w)
     m_viewport->setGeometry(contentsRect());
     m_viewport->setAutoFillBackground(false);
     m_viewport->setAttribute(Qt::WA_OpaquePaintEvent);
-    m_viewport->installEventFilter(this);
+    //m_viewport->installEventFilter(this);
     m_viewport->show();
 }
 
@@ -86,4 +92,60 @@ void MplVideoWidget::setOverlayMessage(const QString &message)
 
     m_overlayMsg = message;
     m_viewport->update();
+}
+
+void MplVideoWidget::setFullScreen(bool on)
+{
+    if (on)
+    {
+        setWindowFlags(windowFlags() | Qt::Window);
+        m_normalFrameStyle = frameStyle();
+        setFrameStyle(QFrame::NoFrame);
+        showFullScreen();
+    }
+    else
+    {
+        setWindowFlags(windowFlags() & ~Qt::Window);
+        setFrameStyle(m_normalFrameStyle);
+        showNormal();
+    }
+
+    QSettings settings;
+    if (settings.value(QLatin1String("ui/disableScreensaver/onFullscreen")).toBool())
+        bcApp->setScreensaverInhibited(on);
+}
+
+QImage MplVideoWidget::currentFrame()
+{
+    //implement me
+    return QImage();
+}
+
+void MplVideoWidget::resizeEvent(QResizeEvent *ev)
+{
+    QFrame::resizeEvent(ev);
+    m_viewport->setGeometry(contentsRect());
+}
+
+void MplVideoWidget::mouseDoubleClickEvent(QMouseEvent *ev)
+{
+    ev->accept();
+    toggleFullScreen();
+}
+
+void MplVideoWidget::keyPressEvent(QKeyEvent *ev)
+{
+    if (ev->modifiers() != 0)
+        return;
+
+    switch (ev->key())
+    {
+    case Qt::Key_Escape:
+        setFullScreen(false);
+        break;
+    default:
+        return;
+    }
+
+    ev->accept();
 }
