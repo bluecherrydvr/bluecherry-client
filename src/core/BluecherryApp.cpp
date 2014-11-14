@@ -27,6 +27,7 @@
 #include "video/gst/GstPluginLoader.h"
 #include "video/gst/GstWrapper.h"
 #include "video/gst/GstVideoPlayerFactory.h"
+#include "video/mplayer/MplVideoPlayerFactory.h"
 #include <QSettings>
 #include <QStringList>
 #include <QNetworkAccessManager>
@@ -119,7 +120,7 @@ BluecherryApp::~BluecherryApp()
 
 void BluecherryApp::registerVideoPlayerFactory()
 {
-    m_videoPlayerFactory.reset(new GstVideoPlayerFactory());
+    m_videoPlayerFactory.reset(new MplVideoPlayerFactory());
 }
 
 void BluecherryApp::unregisterVideoPlayerFactory()
