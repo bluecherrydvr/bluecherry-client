@@ -27,7 +27,7 @@
 #include <QtConcurrentRun>
 
 EventsLoader::EventsLoader(DVRServer *server, QObject *parent)
-    : QObject(parent), m_server(server), m_limit(-1)
+    : QObject(parent), m_server(server), m_limit(-1), m_lastId(-1)
 {
 }
 
@@ -38,6 +38,11 @@ EventsLoader::~EventsLoader()
 void EventsLoader::setLimit(int limit)
 {
     m_limit = limit;
+}
+
+void EventsLoader::setLastId(int lastId)
+{
+    m_lastId = lastId;
 }
 
 void EventsLoader::setStartTime(const QDateTime &startTime)
@@ -65,6 +70,8 @@ void EventsLoader::loadEvents()
         url.addQueryItem(QLatin1String("startDate"), QString::number(m_startTime.toTime_t()));
     if (!m_endTime.isNull())
         url.addQueryItem(QLatin1String("endDate"), QString::number(m_endTime.toTime_t()));
+    if (m_lastId > 0)
+        url.addQueryItem(QLatin1String("afterId"), QString::number(m_lastId));
 
     QNetworkReply *reply = m_server.data()->sendRequest(url);
     connect(reply, SIGNAL(finished()), SLOT(serverRequestFinished()));
