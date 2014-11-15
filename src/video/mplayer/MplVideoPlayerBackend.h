@@ -72,7 +72,7 @@ private:
     QString m_errorMessage;
     double m_playbackSpeed;
 
-    QProcess m_mplayer;
+    QProcess *m_mplayer;
     //Window id for mplayer process, argument for -wid option
     QString m_wid;
 

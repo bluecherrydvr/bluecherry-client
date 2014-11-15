@@ -21,6 +21,7 @@
 #include <QUrl>
 #include <QRegExp>
 #include <QByteArray>
+#include <QDebug>
 
 #include "MplVideoPlayerBackend.h"
 #include "video/VideoHttpBuffer.h"
@@ -34,9 +35,10 @@ MplVideoPlayerBackend::~MplVideoPlayerBackend()
 
 MplVideoPlayerBackend::MplVideoPlayerBackend(QObject *parent)
     : VideoPlayerBackend(parent),
-      m_videoBuffer(0), m_state(Stopped),m_playbackSpeed(1.0)
+      m_videoBuffer(0), m_state(Stopped),
+      m_playbackSpeed(1.0), m_mplayer(0)
 {
-
+    qDebug() << "MplVideoPlayerBackend() this =" << this << "\n";
 }
 
 void MplVideoPlayerBackend::setVideoBuffer(VideoHttpBuffer *videoHttpBuffer)
@@ -54,7 +56,7 @@ void MplVideoPlayerBackend::setVideoBuffer(VideoHttpBuffer *videoHttpBuffer)
     {
         connect(m_videoBuffer, SIGNAL(bufferingStarted()), this, SIGNAL(bufferingStarted()));
         connect(m_videoBuffer, SIGNAL(bufferingStopped()), this, SIGNAL(bufferingStopped()));
-        connect(m_videoBuffer, SIGNAL(bufferingReady()), SLOT(playIfReady()));
+        connect(m_videoBuffer, SIGNAL(bufferingFinished()), SLOT(playIfReady()));
         connect(m_videoBuffer, SIGNAL(streamError(QString)), SLOT(streamError(QString)));
     }
 }
@@ -66,6 +68,7 @@ void MplVideoPlayerBackend::setWindowId(quint64 wid)
 
 bool MplVideoPlayerBackend::start(const QUrl &url)
 {
+    qDebug() << "MplVideoPlayerBackend::start url =" << url << "\n";
     if (state() == PermanentError)
         return false;
 
@@ -75,18 +78,21 @@ bool MplVideoPlayerBackend::start(const QUrl &url)
         return false;
     }
 
+    //check for existing instance
+    m_mplayer = new QProcess();
+
     /* Buffered HTTP source */
     setVideoBuffer(new VideoHttpBuffer(url));
 
     m_videoBuffer->startBuffering();
 
-    m_mplayer.start("mplayer", QStringList() << "-slave" << "-idle" << "-wid" << m_wid << "-quiet");
+    m_mplayer->start("mplayer", QStringList() << "-slave" << "-idle" << "-wid" << m_wid << "-quiet");
 
-    if (!m_mplayer.waitForStarted())
+    if (!m_mplayer->waitForStarted())
     {
         QString errStr(tr("MPlayer process "));
 
-        switch(m_mplayer.error())
+        switch(m_mplayer->error())
         {
         case QProcess::FailedToStart:
             errStr.append(tr("failed to start"));
@@ -105,19 +111,22 @@ bool MplVideoPlayerBackend::start(const QUrl &url)
     }
 
     m_playbackSpeed = 1.0;
-
+    qDebug() << "MplVideoPlayerBackend::start mplayer process started\n";
     return true;
 }
 
 void MplVideoPlayerBackend::clear()
 {
-    if (QProcess::NotRunning != m_mplayer.state())
+    if (m_mplayer && QProcess::NotRunning != m_mplayer->state())
     {
-        m_mplayer.write("quit\n");
-        if (!m_mplayer.waitForFinished(1000))
+        m_mplayer->write("quit\n");
+        if (!m_mplayer->waitForFinished(1000))
         {
-            m_mplayer.kill();
+            m_mplayer->kill();
         }
+
+        m_mplayer->deleteLater();
+        m_mplayer = 0;
     }
 
     setVideoBuffer(0);
@@ -150,10 +159,10 @@ bool MplVideoPlayerBackend::isSeekable() const
 
 void MplVideoPlayerBackend::playIfReady()
 {
-    if (m_mplayer.state() != QProcess::Running)
+    if (m_mplayer->state() != QProcess::Running)
         return;
 
-    m_mplayer.write((QString("pausing loadfile ") + m_videoBuffer->bufferFilePath() + "\n").toAscii().constData());
+    m_mplayer->write((QString("pausing loadfile ") + m_videoBuffer->bufferFilePath() + "\n").toAscii().constData());
 
     emit durationChanged(duration());
 
@@ -162,10 +171,10 @@ void MplVideoPlayerBackend::playIfReady()
 
 void MplVideoPlayerBackend::play()
 {
-    if (m_mplayer.state() != QProcess::Running)
+    if (m_mplayer->state() != QProcess::Running)
         return;
 
-    m_mplayer.write("pause\n");
+    m_mplayer->write("pause\n");
 
     emit playbackSpeedChanged(m_playbackSpeed);
 
@@ -176,18 +185,18 @@ void MplVideoPlayerBackend::play()
 
 void MplVideoPlayerBackend::pause()
 {
-    if (m_mplayer.state() != QProcess::Running)
+    if (m_mplayer->state() != QProcess::Running)
         return;
 
-    m_mplayer.write("pause\n");
+    m_mplayer->write("pause\n");
 }
 
 void MplVideoPlayerBackend::restart()
 {
-    if (m_mplayer.state() != QProcess::Running)
+    if (m_mplayer->state() != QProcess::Running)
         return;
 
-    m_mplayer.write((QString("pausing loadfile ") + m_videoBuffer->bufferFilePath() + "\n").toAscii().constData());
+    m_mplayer->write((QString("pausing loadfile ") + m_videoBuffer->bufferFilePath() + "\n").toAscii().constData());
 
     VideoState old = m_state;
     m_state = Stopped;
@@ -196,18 +205,18 @@ void MplVideoPlayerBackend::restart()
 
 void MplVideoPlayerBackend::mute(bool mute)
 {
-    if (m_mplayer.state() != QProcess::Running)
+    if (m_mplayer->state() != QProcess::Running)
         return;
 
     if (mute)
-        m_mplayer.write("mute 0\n");
+        m_mplayer->write("mute 0\n");
     else
-        m_mplayer.write("mute 1\n");
+        m_mplayer->write("mute 1\n");
 }
 
 void MplVideoPlayerBackend::setVolume(double volume)
 {
-    if (m_mplayer.state() != QProcess::Running)
+    if (m_mplayer->state() != QProcess::Running)
         return;
 
     //mplayer volume range 0-100
@@ -215,21 +224,21 @@ void MplVideoPlayerBackend::setVolume(double volume)
 
     QString command = QString("set_property volume %1\n").arg(volume);
 
-    m_mplayer.write(command.toAscii().constData());
+    m_mplayer->write(command.toAscii().constData());
 }
 
 qint64 MplVideoPlayerBackend::duration() const
 {
-    if (m_mplayer.state() != QProcess::Running)
+    if (m_mplayer->state() != QProcess::Running)
         return -1;
 
-    const_cast<MplVideoPlayerBackend*>(this)->m_mplayer.write("pausing get_property length\n");
+    const_cast<MplVideoPlayerBackend*>(this)->m_mplayer->write("pausing get_property length\n");
 
     //result is in seconds, we return nanoseconds
 
     QRegExp rexp("ANS_length=([0-9\\.]+)");
 
-    QByteArray reply = const_cast<MplVideoPlayerBackend*>(this)->m_mplayer.readAllStandardOutput();
+    QByteArray reply = const_cast<MplVideoPlayerBackend*>(this)->m_mplayer->readAllStandardOutput();
 
     if (!QString::fromAscii(reply.constData()).contains(rexp))
     {
@@ -241,16 +250,16 @@ qint64 MplVideoPlayerBackend::duration() const
 
 qint64 MplVideoPlayerBackend::position() const
 {
-    if (m_mplayer.state() != QProcess::Running)
+    if (m_mplayer->state() != QProcess::Running)
         return -1;
 
-    const_cast<MplVideoPlayerBackend*>(this)->m_mplayer.write("pausing get_property time_pos\n");
+    const_cast<MplVideoPlayerBackend*>(this)->m_mplayer->write("pausing get_property time_pos\n");
 
     //result is in seconds, we return nanoseconds
 
     QRegExp rexp("ANS_time_pos=([0-9\\.]+)");
 
-    QByteArray reply = const_cast<MplVideoPlayerBackend*>(this)->m_mplayer.readAllStandardOutput();
+    QByteArray reply = const_cast<MplVideoPlayerBackend*>(this)->m_mplayer->readAllStandardOutput();
 
     if (!QString::fromAscii(reply.constData()).contains(rexp))
     {
@@ -267,7 +276,7 @@ void MplVideoPlayerBackend::setHardwareDecodingEnabled(bool enable)
 
 bool MplVideoPlayerBackend::seek(qint64 position)
 {
-    if (m_mplayer.state() != QProcess::Running)
+    if (m_mplayer->state() != QProcess::Running)
         return -1;
 
     if (state() != Playing && state() != Paused)
@@ -281,14 +290,14 @@ bool MplVideoPlayerBackend::seek(qint64 position)
     if (state() == Paused)
         command = QString("pausing ") + command;
 
-    m_mplayer.write(command.toAscii().constData());
+    m_mplayer->write(command.toAscii().constData());
 
     return true;
 }
 
 bool MplVideoPlayerBackend::setSpeed(double speed)
 {
-    if (m_mplayer.state() != QProcess::Running)
+    if (m_mplayer->state() != QProcess::Running)
         return -1;
 
     if (speed == m_playbackSpeed)
@@ -302,7 +311,7 @@ bool MplVideoPlayerBackend::setSpeed(double speed)
     if (state() == Paused)
         command = QString("pausing ") + command;
 
-    m_mplayer.write(command.toAscii().constData());
+    m_mplayer->write(command.toAscii().constData());
 
     m_playbackSpeed = speed;
     m_lastspeed = speed;
