@@ -436,6 +436,7 @@ void EventsWindow::setFilterDay(const QDateTime &day)
 {
     m_eventsUpdater->setDay(day.date());
     m_resultsView->setDay(day.date());
+    m_eventsUpdater->updateServers();
 }
 
 void EventsWindow::setFilterSources(const QMap<DVRServer *, QSet<int> > &sources)

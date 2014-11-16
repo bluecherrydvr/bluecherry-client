@@ -43,8 +43,8 @@ bool EventsUpdater::isUpdating() const
 
 void EventsUpdater::serverAdded(DVRServer *server)
 {
-    connect(server, SIGNAL(loginSuccessful(DVRServer*)), SLOT(updateServer(DVRServer*)));
-    updateServer(server);
+    //connect(server, SIGNAL(loginSuccessful(DVRServer*)), SLOT(updateServer(DVRServer*)));
+    //updateServer(server);
 }
 
 void EventsUpdater::setUpdateInterval(int miliseconds)
@@ -68,7 +68,7 @@ void EventsUpdater::setDay(const QDate &date)
     m_startTime = QDateTime(date, QTime(0, 0));
     m_endTime = QDateTime(date, QTime(23, 59, 59, 999));
 
-    updateServers();
+    //updateServers();
 }
 
 void EventsUpdater::updateServers()
