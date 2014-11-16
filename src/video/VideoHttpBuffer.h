@@ -22,8 +22,6 @@
 #include <QUrl>
 #include "MediaDownload.h"
 
-typedef struct _GstAppSrc GstAppSrc;
-typedef struct _GstElement GstElement;
 class QNetworkCookie;
 
 class VideoHttpBuffer : public QObject
@@ -34,9 +32,6 @@ public:
     explicit VideoHttpBuffer(const QUrl &url, QObject *parent = 0);
     ~VideoHttpBuffer();
 
-    /* Create and prepare a source element; the element will be added to the pipeline,
-     * but not linked. */
-    GstElement *setupSrcElement(GstElement *pipeline);
 
     bool isBuffering() const { return media && !media->isFinished(); }
 
@@ -72,14 +67,6 @@ private slots:
 private:
     QUrl m_url;
     MediaDownload *media;
-    GstAppSrc *m_element;
-    GstElement *m_pipeline;
-
-    static void needDataWrap(GstAppSrc *, unsigned, void*);
-    static int seekDataWrap(GstAppSrc *, quint64, void*);
-
-    void needData(int size);
-    bool seekData(qint64 offset);
 };
 
 inline int VideoHttpBuffer::bufferedPercent() const

@@ -138,11 +138,6 @@ set (bluecherry_client_main_SRCS
     src/video/mplayer/MplVideoPlayerFactory.cpp
     src/video/mplayer/MplVideoWidget.cpp
 
-    src/video/gst/GstPluginLoader.cpp
-    src/video/gst/GstSinkWidget.cpp
-    src/video/gst/GstVideoPlayerBackend.cpp
-    src/video/gst/GstVideoPlayerFactory.cpp
-    src/video/gst/GstWrapper.cpp
 )
 
 if (NOT APPLE)

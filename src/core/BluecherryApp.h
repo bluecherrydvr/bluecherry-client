@@ -67,8 +67,7 @@ public:
     MediaDownloadManager * mediaDownloadManager() const { return m_mediaDownloadManager; }
     EventDownloadManager * eventDownloadManager() const { return m_eventDownloadManager; }
     VideoPlayerFactory * videoPlayerFactory() const { return m_videoPlayerFactory.data(); }
-    GstWrapper * gstWrapper() const { return m_gstWrapper.data(); }
-    GstPluginLoader * gstPluginLoader() const { return m_gstPluginLoader.data(); }
+
     LanguageController * languageController() const { return m_languageController.data(); }
 
     /* Temporarily pause live feeds to free up bandwidth for other intensive transfers
@@ -112,8 +111,6 @@ private:
     EventDownloadManager *m_eventDownloadManager;
     UpdateChecker *m_updateChecker;
     QScopedPointer<VideoPlayerFactory> m_videoPlayerFactory;
-    QScopedPointer<GstWrapper> m_gstWrapper;
-    QScopedPointer<GstPluginLoader> m_gstPluginLoader;
 
     QSharedPointer<LanguageController> m_languageController;
 
@@ -129,12 +126,6 @@ private:
 
     void registerVideoPlayerFactory();
     void unregisterVideoPlayerFactory();
-
-    void registerGstPluginLoader();
-    void unregisterGstPluginLoader();
-
-    void registerGstWrapper();
-    void unregisterGstWrapper();
 
     void loadServers();
     bool shouldAddLocalServer() const;
