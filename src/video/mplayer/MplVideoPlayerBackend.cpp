@@ -189,6 +189,10 @@ void MplVideoPlayerBackend::pause()
         return;
 
     m_mplayer->write("pause\n");
+
+    VideoState old = m_state;
+    m_state = Paused;
+    emit stateChanged(m_state, old);
 }
 
 void MplVideoPlayerBackend::restart()
