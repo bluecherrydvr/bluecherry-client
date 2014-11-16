@@ -51,6 +51,7 @@
 #include <QMenu>
 #include <QAction>
 #include <QEvent>
+#include <QPushButton>
 
 EventsWindow::EventsWindow(DVRServerRepository *serverRepository, QWidget *parent)
 	: QWidget(parent, Qt::Window), m_serverRepository(serverRepository),
@@ -84,6 +85,7 @@ EventsWindow::EventsWindow(DVRServerRepository *serverRepository, QWidget *paren
             this, SLOT(setFilterSources(QMap<DVRServer*,QSet<int>>)));
 
     createDateFilter(filtersLayout);
+    createLoadButton(filtersLayout);
 
 #if 1 /* This is not useful currently. */
 	m_minimumLevelLabel = new QLabel;
@@ -150,6 +152,15 @@ void EventsWindow::changeEvent(QEvent *event)
 	QWidget::changeEvent(event);
 }
 
+void EventsWindow::createLoadButton(QBoxLayout *layout)
+{
+    m_loadEvents = new QPushButton;
+    m_loadEvents->setStyleSheet(QLatin1String("font-weight:bold;"));
+    layout->addWidget(m_loadEvents);
+
+    connect(m_loadEvents, SIGNAL(clicked()), this, SLOT(loadEvents()));
+}
+
 void EventsWindow::createDateFilter(QBoxLayout *layout)
 {
 	m_dateLabel = new QLabel;
@@ -163,6 +174,8 @@ void EventsWindow::createDateFilter(QBoxLayout *layout)
     dateEdit->setTime(QTime(23, 59, 59, 999));
     dateEdit->setFixedWidth(m_sourcesView->width());
     layout->addWidget(dateEdit);
+
+    setFilterDay(dateEdit->dateTime());
 
     connect(dateEdit, SIGNAL(dateTimeChanged(QDateTime)), this,
             SLOT(setFilterDay(QDateTime)));
@@ -287,6 +300,7 @@ void EventsWindow::retranslateUI()
 	m_levelFilter->setItemText(4, tr("Critical"));
 	m_levelFilter->blockSignals(false);
 
+    m_loadEvents->setText(tr("Load Events"));
 }
 
 void EventsWindow::closeEvent(QCloseEvent *event)
@@ -436,6 +450,10 @@ void EventsWindow::setFilterDay(const QDateTime &day)
 {
     m_eventsUpdater->setDay(day.date());
     m_resultsView->setDay(day.date());
+}
+
+void EventsWindow::loadEvents()
+{
     m_eventsUpdater->updateServers();
 }
 

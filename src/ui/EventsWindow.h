@@ -39,6 +39,7 @@ class QTabWidget;
 class EventViewWindow;
 class QSplitter;
 class ModelEventsCursor;
+class QPushButton;
 
 class EventsWindow : public QWidget
 {
@@ -66,6 +67,7 @@ private slots:
     void setFilterTypes(QBitArray types);
     void setFilterDay(const QDateTime &day);
     void setFilterSources(const QMap<DVRServer *, QSet<int> > &sources);
+    void loadEvents();
 
 private:
     DVRServerRepository *m_serverRepository;
@@ -76,6 +78,7 @@ private:
     EventTypesFilter *m_typeFilter;
     EventTagsView *m_tagsView;
     QLabel *m_resultTitle;
+    QPushButton *m_loadEvents;
 
     /* Results */
     enum ResultsViewTab
@@ -106,6 +109,7 @@ private:
 	QLabel *m_zoomLabel;
 
     void createDateFilter(QBoxLayout *layout);
+    void createLoadButton(QBoxLayout *layout);
     QWidget *createLevelFilter();
     QWidget *createTypeFilter();
     QWidget *createTags();
