@@ -75,8 +75,9 @@ void MplVideoWidget::setViewport(QWidget *w)
     m_viewport->setParent(this);
     m_viewport->setGeometry(contentsRect());
     m_viewport->setAutoFillBackground(false);
-    m_viewport->setAttribute(Qt::WA_OpaquePaintEvent);
+    //m_viewport->setAttribute(Qt::WA_OpaquePaintEvent);
     //m_viewport->installEventFilter(this);
+    m_viewport->setStyleSheet(QLatin1String("background-color:black;"));
     m_viewport->show();
 }
 
@@ -108,6 +109,7 @@ void MplVideoWidget::setFullScreen(bool on)
         setWindowFlags(windowFlags() & ~Qt::Window);
         setFrameStyle(m_normalFrameStyle);
         showNormal();
+        update();
     }
 
     QSettings settings;

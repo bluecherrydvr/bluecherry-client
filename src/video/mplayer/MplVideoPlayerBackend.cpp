@@ -86,7 +86,10 @@ bool MplVideoPlayerBackend::start(const QUrl &url)
 
     m_videoBuffer->startBuffering();
 
-    m_mplayer->start("mplayer", QStringList() << "-slave" << "-idle" << "-wid" << m_wid << "-quiet");
+    m_mplayer->start("mplayer", QStringList() << "-slave" << "-idle"
+                     << "-wid" << m_wid << "-quiet" << "-input"
+                     << "nodefault-bindings:conf=/dev/null" << "-noconfig" << "all"
+                     << "-nomouseinput");
 
     if (!m_mplayer->waitForStarted())
     {
