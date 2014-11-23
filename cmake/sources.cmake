@@ -137,7 +137,7 @@ set (bluecherry_client_main_SRCS
     src/video/mplayer/MplVideoPlayerBackend.cpp
     src/video/mplayer/MplVideoPlayerFactory.cpp
     src/video/mplayer/MplVideoWidget.cpp
-
+    src/video/mplayer/MplayerProcess.cpp
 )
 
 if (NOT APPLE)

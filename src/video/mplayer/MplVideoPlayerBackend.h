@@ -19,7 +19,7 @@
 #define MPL_VIDEO_PLAYER_BACKEND_H
 
 #include "video/VideoPlayerBackend.h"
-#include <QProcess>
+#include "MplayerProcess.h"
 
 
 class QString;
@@ -65,6 +65,7 @@ public slots:
 
 private slots:
     void streamError(const QString &message);
+    void setError(bool permanent, const QString message);
 
 private:
     VideoHttpBuffer *m_videoBuffer;
@@ -72,11 +73,10 @@ private:
     QString m_errorMessage;
     double m_playbackSpeed;
 
-    QProcess *m_mplayer;
+    MplayerProcess *m_mplayer;
     //Window id for mplayer process, argument for -wid option
     QString m_wid;
 
-    void setError(bool permanent, const QString &message);
     void setVideoBuffer(VideoHttpBuffer *videoHttpBuffer);
 
 };

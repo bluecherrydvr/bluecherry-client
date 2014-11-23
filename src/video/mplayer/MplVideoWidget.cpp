@@ -109,7 +109,7 @@ void MplVideoWidget::setFullScreen(bool on)
         setWindowFlags(windowFlags() & ~Qt::Window);
         setFrameStyle(m_normalFrameStyle);
         showNormal();
-        update();
+        //update();
     }
 
     QSettings settings;

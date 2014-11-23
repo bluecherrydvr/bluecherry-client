@@ -18,32 +18,58 @@
 #ifndef MPL_MPLAYER_PROCESS_H
 #define MPL_MPLAYER_PROCESS_H
 
+#include <QObject>
 #include <QProcess>
 
-class MplayerProcess
+class MplayerProcess : public QObject
 {
 Q_OBJECT
 
 public:
-    MplayerProcess(QString wid);
+    MplayerProcess(QString &wid, QObject *parent = 0);
     ~MplayerProcess();
 
 public slots:
+    bool start();
     void play();
     void pause();
     void quit();
+    //seek to pos second
     bool seek(double pos);
 
-    //returns duration in seconds
-    int duration();
-    void loadfile(QString file);
+    //normal speed - 1.0
+    void setSpeed(double speed);
+    //volume range 0..100
+    void setVolume(double vol);
+    //true - disable sound
+    void mute(bool yes);
 
-private:
-    QProcess m_process;
+    //returns duration in seconds
+    double duration();
+    double position();
+
+    void loadfile(QString file);
 
     void setProperty(QString prop, QString val);
     QString getProperty(QString prop);
+    void sendCommand(QString cmd);
 
+    bool isRunning();
+signals:
+    void mplayerError(bool permanent, const QString message);
+
+private slots:
+    void readAvailableStdout();
+    void readAvailableStderr();
+    void processError(QProcess::ProcessError error);
+
+private:
+    QProcess m_process;
+    QString m_wid;
+    bool m_expectData;
+    bool m_loaded;
+
+    void consumeStdOut();
 };
 
 #endif

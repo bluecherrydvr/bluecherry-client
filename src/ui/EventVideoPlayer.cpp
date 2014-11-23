@@ -81,7 +81,7 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     connect(bcApp, SIGNAL(settingsChanged()), SLOT(settingsChanged()));
     connect(&m_uiTimer, SIGNAL(timeout()), SLOT(updateUI()));
 
-    m_uiTimer.setInterval(100);
+    m_uiTimer.setInterval(500);
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -255,7 +255,7 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
 
     m_videoWidget->initVideo(m_videoBackend.data());
 
-    connect(m_videoBackend.data(), SIGNAL(bufferingStatus(int)), m_videoWidget, SLOT(setBufferStatus(int)));
+    //connect(m_videoBackend.data(), SIGNAL(bufferingStatus(int)), m_videoWidget, SLOT(setBufferStatus(int)));
     connect(m_videoBackend.data(), SIGNAL(bufferingStopped()), SLOT(bufferingStopped()), Qt::QueuedConnection);
     connect(m_videoBackend.data(), SIGNAL(bufferingStarted()), SLOT(bufferingStarted()));
 
@@ -546,6 +546,7 @@ void EventVideoPlayer::durationChanged(qint64 nsDuration)
         return;
 
     if (nsDuration == -1)
+        //return;
         nsDuration = m_videoBackend.data()->duration();
 
     /* Time is assumed to be nanoseconds; convert to milliseconds */
