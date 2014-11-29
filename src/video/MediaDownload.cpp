@@ -27,6 +27,7 @@
 #include <QApplication>
 #include <QTextDocument>
 #include <QDebug>
+#include <QMutexLocker>
 
 /* Minimum number of bytes delta between the current write position
  * and the forward seek position before we will launch a new ranged
@@ -380,7 +381,7 @@ void MediaDownload::taskFinished()
 }
 
 MediaDownloadTask::MediaDownloadTask(QObject *parent)
-    : QObject(parent), m_reply(0), m_writePos(0)
+    : QObject(parent), m_reply(0), m_writePos(0), m_lock(QMutex::Recursive)
 {
 }
 
@@ -410,11 +411,13 @@ void MediaDownloadTask::start(const QUrl &url, const QList<QNetworkCookie> &cook
 
     m_writePos = position;
 
+    m_lock.lock();
     m_reply = threadNAM.localData()->get(req);
     m_reply->ignoreSslErrors(); // XXX Do this properly!
     connect(m_reply, SIGNAL(metaDataChanged()), SLOT(metaDataReady()));
     connect(m_reply, SIGNAL(readyRead()), SLOT(read()));
     connect(m_reply, SIGNAL(finished()), SLOT(requestFinished()));
+    m_lock.unlock();
 }
 
 MediaDownloadTask::~MediaDownloadTask()
@@ -424,9 +427,12 @@ MediaDownloadTask::~MediaDownloadTask()
 
 void MediaDownloadTask::abortLater()
 {
-    /* Mostly threadsafe; caller must know that the instance will not be deleted at this time. */
+
+    m_lock.lock();
     if (m_reply)
         m_reply->disconnect(this);
+    m_lock.unlock();
+
     metaObject()->invokeMethod(this, "abort", Qt::QueuedConnection);
 }
 
@@ -435,14 +441,21 @@ void MediaDownloadTask::abort()
     if (!m_reply)
         return;
 
+    m_lock.lock();
     m_reply->disconnect(this);
     m_reply->abort();
     m_reply->deleteLater();
     m_reply = 0;
+    m_lock.unlock();
 }
 
 void MediaDownloadTask::metaDataReady()
 {
+    if (!m_reply)
+        return;
+
+    QMutexLocker locker(&m_lock);
+
     int status = m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     if (m_reply->error() != QNetworkReply::NoError || status < 200 || status > 299) {
         if (m_reply->error() != QNetworkReply::NoError)
@@ -462,6 +475,11 @@ void MediaDownloadTask::metaDataReady()
 
 void MediaDownloadTask::read()
 {
+    if (!m_reply)
+        return;
+
+    QMutexLocker locker(&m_lock);
+
     QByteArray data = m_reply->readAll();
     if (data.isEmpty())
         return;
@@ -474,6 +492,11 @@ void MediaDownloadTask::read()
 
 void MediaDownloadTask::requestFinished()
 {
+    if (!m_reply)
+        return;
+
+    QMutexLocker locker(&m_lock);
+
     if (m_reply->error() != QNetworkReply::NoError && m_reply->error() != QNetworkReply::UnknownNetworkError)
         emit error(m_reply->errorString());
     else

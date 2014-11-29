@@ -21,6 +21,7 @@
 #include <QObject>
 #include <QUrl>
 #include <QThreadStorage>
+#include <QMutex>
 
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -66,6 +67,7 @@ private:
     static QThreadStorage<QNetworkAccessManager*> threadNAM;
     QNetworkReply *m_reply;
     unsigned m_writePos;
+    QMutex m_lock;
 };
 
 #endif // MEDIADOWNLOAD_P_H
