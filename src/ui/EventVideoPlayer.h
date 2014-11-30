@@ -79,7 +79,7 @@ private slots:
 
 private:
     EventData *m_event;
-    QWeakPointer<QThread> m_videoThread;
+    //QWeakPointer<QThread> m_videoThread;
     QWeakPointer<VideoPlayerBackend> m_videoBackend;
     VideoWidget *m_videoWidget;
     QToolButton *m_playBtn, *m_restartBtn, *m_fastBtn, *m_slowBtn, *m_muteBtn;

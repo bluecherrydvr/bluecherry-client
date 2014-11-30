@@ -205,16 +205,16 @@ EventVideoPlayer::~EventVideoPlayer()
 
     if (m_videoBackend)
     {
-        connect(m_videoBackend.data(), SIGNAL(destroyed()), m_videoThread.data(), SLOT(quit()));
-        connect(m_videoThread.data(), SIGNAL(finished()), m_videoThread.data(), SLOT(deleteLater()));
+        //connect(m_videoBackend.data(), SIGNAL(destroyed()), m_videoThread.data(), SLOT(quit()));
+        //connect(m_videoThread.data(), SIGNAL(finished()), m_videoThread.data(), SLOT(deleteLater()));
 
         m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "deleteLater", Qt::QueuedConnection);
-    }
+    }/*
     else if (m_videoThread)
     {
         m_videoThread.data()->quit();
         m_videoThread.data()->deleteLater();
-    }
+    }*/
 
     QSettings settings;
     settings.setValue(QLatin1String("eventPlayer/isMuted"), m_muteBtn->isChecked());
@@ -232,16 +232,16 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
 
     m_event = event;
 
-    if (!m_videoThread)
-    {
+    //if (!m_videoThread)
+    //{
         /* Not parented to this instance, because it may live slightly beyond the window while
          * the pipeline is being destroyed. */
-        m_videoThread = new QThread;
-        m_videoThread.data()->start();
-    }
+        //m_videoThread = new QThread;
+        //m_videoThread.data()->start();
+    //}
 
     m_videoBackend = bcApp->videoPlayerFactory()->createBackend();
-	m_videoBackend.data()->moveToThread(m_videoThread.data());
+    //m_videoBackend.data()->moveToThread(m_videoThread.data());
 	m_videoBackend.data()->setLastSpeed(m_lastspeed);
 
 	settingsChanged();
