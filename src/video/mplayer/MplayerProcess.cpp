@@ -22,48 +22,67 @@
 #include <QRegExp>
 #include <QByteArray>
 #include <QDebug>
+#include <QThread>
+#include <QApplication>
 
 #include "MplayerProcess.h"
 
+#define MPL_PLAYMSGMAGIC "XPL32AFFC3DFEBB"
+
 MplayerProcess::MplayerProcess(QString &wid, QObject *parent)
     : QObject(parent),
-      m_wid(wid), m_expectData(false), m_loaded(false)
+      m_wid(wid), m_process(0),
+      m_duration(-1), m_position(-1),
+      m_isreadytoplay(false),
+      m_posreqsent(false), m_durreqsent(false)
+
 {
     qDebug() << this << "\n";
 
-    //connect(&m_process, SIGNAL(readyReadStandardOutput()), this, SLOT(readAvailableStdout()));
-    connect(&m_process, SIGNAL(readyReadStandardError()), this, SLOT(readAvailableStderr()));
-    connect(&m_process, SIGNAL(error()), this, SLOT(processError(QProcess::ProcessError)));
+    Q_ASSERT(QThread::currentThread() == qApp->thread());
+
+    m_process = new QProcess(this);
+    connect(m_process, SIGNAL(readyReadStandardOutput()), this, SLOT(readAvailableStdout()));
+    connect(m_process, SIGNAL(readyReadStandardError()), this, SLOT(readAvailableStderr()));
+    connect(m_process, SIGNAL(error(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));
 }
 
 MplayerProcess::~MplayerProcess()
 {
+    Q_ASSERT(QThread::currentThread() == qApp->thread());
+
     qDebug() << "~MplayerProcess()\n";
 
-    if (m_process.state() == QProcess::Running)
+    if (m_process->state() == QProcess::Running)
     {
         quit();
-        if (!m_process.waitForFinished(1000))
+        if (!m_process->waitForFinished(1000))
         {
-            m_process.kill();
+            m_process->kill();
         }
     }
+    delete m_process;
+    m_process = 0;
 }
 
-bool MplayerProcess::start()
+bool MplayerProcess::start(QString filename)
 {
-    qDebug() << this << "starting mplayer process...\n";
+    Q_ASSERT(QThread::currentThread() == qApp->thread());
 
-    m_process.start("mplayer", QStringList() << "-slave" << "-idle"
+    qDebug() << this << "starting mplayer process, opening file " << filename << " ...\n";
+
+    m_process->start("mplayer", QStringList() << "-slave" //<< "-idle"
                     << "-wid" << m_wid << "-quiet" << "-input"
                     << "nodefault-bindings:conf=/dev/null" << "-noconfig" << "all"
-                    << "-nomouseinput" << "-zoom" << "-nomsgcolor");
+                    << "-playing-msg" << MPL_PLAYMSGMAGIC"\n"
+                    << "-nomouseinput" << "-zoom" << "-nomsgcolor"
+                    << filename);
 
-    if (!m_process.waitForStarted())
+    if (!m_process->waitForStarted())
     {
         QString errStr(tr("MPlayer process "));
 
-        switch(m_process.error())
+        switch(m_process->error())
         {
         case QProcess::FailedToStart:
             errStr.append(tr("failed to start"));
@@ -83,47 +102,96 @@ bool MplayerProcess::start()
 
     qDebug() << this << "mplayer process started\n";
 
-
-    consumeStdOut();
-
     return true;
 }
 
-void MplayerProcess::consumeStdOut()
-{
-    int i = 0;
 
-    while(m_process.canReadLine() && i < 10)
+void MplayerProcess::checkEof(QByteArray &a)
+{
+    QRegExp rx_endoffile("^Exiting... \\(End of file\\)|^ID_EXIT=EOF");
+
+    if (QString::fromAscii(a.constData()).contains(rx_endoffile))
+        emit eof();
+}
+
+void MplayerProcess::checkPlayingMsgMagic(QByteArray &a)
+{
+    if (m_isreadytoplay)
+        return;
+
+    if (a.contains(MPL_PLAYMSGMAGIC))
     {
-        readAvailableStdout();
-        m_process.waitForReadyRead(++i * 100);
+        m_isreadytoplay = true;
+        emit readyToPlay();
+        duration();
+    }
+}
+
+void MplayerProcess::checkPositionAnswer(QByteArray &a)
+{
+    if (!m_posreqsent)
+        return;
+
+    QRegExp rexp(QString("ANS_time_pos=(\\S+)"));
+
+    if (QString::fromAscii(a.constData()).contains(rexp))
+    {
+        m_position = rexp.cap(1).toDouble();
+        m_posreqsent = false;
+    }
+}
+
+void MplayerProcess::checkDurationAnswer(QByteArray &a)
+{
+    if (!m_durreqsent)
+        return;
+
+    QRegExp rexp(QString("ANS_length=(\\S+)"));
+
+    if (QString::fromAscii(a.constData()).contains(rexp))
+    {
+        double old_duration = m_duration;
+        m_duration = rexp.cap(1).toDouble();
+
+        if (old_duration != m_duration)
+            emit durationChanged();
+
+        m_durreqsent = false;
     }
 }
 
 void MplayerProcess::readAvailableStderr()
 {
-    qDebug() << this << " stderr from mplayer:\n====\n"
-             << m_process.readAllStandardError().constData()
-             << "\n====\n";
+    m_process->setReadChannel(QProcess::StandardError);
+
+    while(m_process->canReadLine())
+        qDebug() << "MPLAYER STDERR:" << m_process->readLine();
 }
 
 void MplayerProcess::readAvailableStdout()
 {
-    if (m_expectData)
-        return;
+    m_process->setReadChannel(QProcess::StandardOutput);
 
-    qDebug() << this << " stdout from mplayer:\n====\n"
-             << m_process.readAllStandardOutput().constData()
-             << "\n====\n";
+    while(m_process->canReadLine())
+    {
+        QByteArray l = m_process->readLine();
+        checkEof(l);
+        checkPlayingMsgMagic(l);
+        checkDurationAnswer(l);
+        checkPositionAnswer(l);
 
+        qDebug() << "MPLAYER STDOUT:" << l << "\n";
+    }
 }
 
 void MplayerProcess::sendCommand(QString cmd)
 {
+    Q_ASSERT(QThread::currentThread() == qApp->thread());
+
     if (!isRunning())
         return;
 
-    m_process.write(QString("pausing_keep %1\n").arg(cmd).toAscii().constData());
+    m_process->write(QString("pausing_keep %1\n").arg(cmd).toAscii().constData());
 
     qDebug() << this << " sending command " << QString("pausing_keep %1\n").arg(cmd);
 }
@@ -135,71 +203,76 @@ void MplayerProcess::quit()
 
 void MplayerProcess::setProperty(QString prop, QString val)
 {
+    Q_ASSERT(QThread::currentThread() == qApp->thread());
+
     sendCommand(QString("set_property %1 %2").arg(prop).arg(val));
 }
-
+/*
 QString MplayerProcess::getProperty(QString prop)
 {
+    Q_ASSERT(QThread::currentThread() == qApp->thread());
+
+    QString ret;
+
     if (!isRunning())
-        return QString();
+        return ret;
 
-    m_expectData = true;
+    //m_expectData = true;
 
-    QByteArray rbuf;
     QRegExp rexp(QString("ANS_%1=(\\S+)").arg(prop));
+
+    m_process->disconnect(SIGNAL(readyReadStandardOutput()));
+    m_process->readAllStandardOutput();
 
     sendCommand(QString("get_property %1").arg(prop));
 
-    int i = 0;
-    do
+    m_process->waitForReadyRead(100);
+
+    while(m_process->canReadLine())
     {
-        qDebug() << "getProperty iteration #" << i << "\b";
-        rbuf = rbuf + m_process.readAllStandardOutput();
+          QByteArray line = m_process->readLine(1024);
 
-        qDebug() << "buffer content: " << rbuf.constData() << "\n";
+          if (line.contains("ANS_ERROR=PROPERTY_UNAVAILABLE"))
+                break;
 
-        if (QString::fromAscii(rbuf.constData()).contains(rexp))
-        {
-            m_expectData = false;
+          checkEof(line);
 
-            qDebug() << this << "returning property value " << rexp.cap(1) << "\n";
-            return rexp.cap(1);
-        }
-
-        i++;
-        m_process.waitForReadyRead(i * 10);
+          if (QString::fromAscii(line.constData()).contains(rexp))
+                {
+                    ret = rexp.cap(1);
+                    break;
+                }
     }
-    while(i < 12);
 
-    //emit mplayerError(false, QString(tr("Failed to read property value from mplayer process!")));
+    connect(m_process, SIGNAL(readyReadStandardOutput()), this, SLOT(readAvailableStdout()));
 
-    m_expectData = false;
-    return QString();
-}
+    return ret;
+}*/
 
 void MplayerProcess::play()
 {
-    if (!isRunning())
+    if (!(isRunning() && m_isreadytoplay))
         return;
 
-    m_process.write("pause\n");
+    qDebug() << "MplayerProcess::play()\n";
+
+    m_process->write("pause\n");
 }
 
 void MplayerProcess::pause()
 {
-    if (!isRunning())
+    if (!(isRunning() && m_isreadytoplay))
         return;
 
-    m_process.write("pause\n");
+    qDebug() << "MplayerProcess::pause()\n";
+
+    m_process->write("pause\n");
 }
 
 bool MplayerProcess::seek(double pos)
 {
-    if (!isRunning())
+    if (!(isRunning() && m_isreadytoplay))
         return false;
-
-    if (!m_loaded)
-            return false;
 
     sendCommand(QString("seek %1 2").arg(pos, 0, 'f', 2));
 
@@ -208,39 +281,35 @@ bool MplayerProcess::seek(double pos)
 
 double MplayerProcess::duration()
 {
-    if (!isRunning())
+    if (!(isRunning() && m_isreadytoplay))
         return -1;
 
-    if (!m_loaded)
-            return -1;
+    if (!m_durreqsent)
+    {
+        m_durreqsent = true;
+        sendCommand(QString("get_property length"));
+    }
 
-    QString ret = getProperty("length");
-
-    if (ret.isEmpty())
-        return -1;
-
-    return ret.toDouble();
+    return m_duration;
 }
 
 double MplayerProcess::position()
 {
-    if (!isRunning())
+    if (!(isRunning() && m_isreadytoplay))
         return -1;
 
-    if (!m_loaded)
-            return -1;
+    if (!m_posreqsent)
+    {
+        m_posreqsent = true;
+        sendCommand(QString("get_property time_pos"));
+    }
 
-    QString ret = getProperty("time_pos");
-
-    if (ret.isEmpty())
-        return -1;
-
-    return ret.toDouble();
+    return m_position;
 }
 
 void MplayerProcess::setSpeed(double speed)
 {
-    if (!isRunning())
+    if (!(isRunning() && m_isreadytoplay))
         return;
 
     setProperty("speed", QString::number(speed, 'f', 2));
@@ -248,7 +317,7 @@ void MplayerProcess::setSpeed(double speed)
 
 void MplayerProcess::setVolume(double vol)
 {
-    if (!isRunning())
+    if (!(isRunning() && m_isreadytoplay))
         return;
 
     setProperty("volume", QString::number(vol, 'f', 2));
@@ -256,7 +325,7 @@ void MplayerProcess::setVolume(double vol)
 
 void MplayerProcess::mute(bool yes)
 {
-    if (!isRunning())
+    if (!(isRunning() && m_isreadytoplay))
         return;
 
     if (yes)
@@ -265,23 +334,10 @@ void MplayerProcess::mute(bool yes)
         setProperty("mute", "1");
 }
 
-void MplayerProcess::loadfile(QString file)
-{
-    qDebug() << this << "loading file " << file << "\n";
-
-    if (!isRunning())
-        return;
-
-    m_process.write((QString("pausing loadfile ") + file + "\n").toAscii().constData());
-
-    consumeStdOut();
-
-    m_loaded = true;
-}
 
 bool MplayerProcess::isRunning()
 {
-    return m_process.state() == QProcess::Running;
+    return m_process->state() == QProcess::Running;
 }
 
 void MplayerProcess::processError(QProcess::ProcessError error)
@@ -298,7 +354,7 @@ void MplayerProcess::processError(QProcess::ProcessError error)
     break;
 
     default:
-        errStr.append(tr("- unable to start for unknown reason"));
+        return;
     }
 
     qDebug() << this << errStr;

@@ -129,6 +129,12 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     connect(m_playBtn, SIGNAL(clicked()), SLOT(playPause()));
 
     QSettings settings;
+
+    if (settings.value(QLatin1String("ui/disableScreensaver/onVideo")).toBool())
+    {
+        bcApp->setScreensaverInhibited(true);
+    }
+
     m_muteBtn = new QToolButton;
     m_muteBtn->setCheckable(true);
     m_muteBtn->setChecked(settings.value(QLatin1String("eventPlayer/isMuted"), false).toBool());
@@ -217,6 +223,10 @@ EventVideoPlayer::~EventVideoPlayer()
     }*/
 
     QSettings settings;
+    if (settings.value(QLatin1String("ui/disableScreensaver/onVideo")).toBool())
+    {
+        bcApp->setScreensaverInhibited(false);
+    }
     settings.setValue(QLatin1String("eventPlayer/isMuted"), m_muteBtn->isChecked());
     settings.setValue(QLatin1String("eventPlayer/volume"), m_volumeSlider->value());
 
@@ -530,12 +540,6 @@ void EventVideoPlayer::stateChanged(int state)
                               m_videoBackend.data()->errorMessage() + QLatin1String("</span>"));
     }
 
-    QSettings settings;
-    if (settings.value(QLatin1String("ui/disableScreensaver/onVideo")).toBool())
-    {
-        bcApp->setScreensaverInhibited(state == VideoPlayerBackend::Playing
-                                       || state == VideoPlayerBackend::Paused);
-    }
 }
 
 void EventVideoPlayer::durationChanged(qint64 nsDuration)
@@ -577,6 +581,10 @@ void EventVideoPlayer::updatePosition()
 
     qint64 nsPosition = m_videoBackend.data()->position();
     int position = int(nsPosition / 1000000);
+
+    if (m_videoBackend.data()->atEnd())
+        position = m_seekSlider->maximum();
+
     if (!m_seekSlider->isSliderDown())
     {
         m_seekSlider->blockSignals(true);

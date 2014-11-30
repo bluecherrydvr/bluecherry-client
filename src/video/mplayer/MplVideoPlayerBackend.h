@@ -66,6 +66,9 @@ public slots:
 private slots:
     void streamError(const QString &message);
     void setError(bool permanent, const QString message);
+    void handleEof();
+    void mplayerReady();
+    void durationIsKnown();
 
 private:
     VideoHttpBuffer *m_videoBuffer;
@@ -78,7 +81,6 @@ private:
     QString m_wid;
 
     void setVideoBuffer(VideoHttpBuffer *videoHttpBuffer);
-
 };
 
 #endif // MPL_VIDEO_PLAYER_BACKEND_H

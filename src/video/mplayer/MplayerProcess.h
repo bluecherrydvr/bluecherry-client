@@ -20,6 +20,7 @@
 
 #include <QObject>
 #include <QProcess>
+#include <QMutex>
 
 class MplayerProcess : public QObject
 {
@@ -30,7 +31,7 @@ public:
     ~MplayerProcess();
 
 public slots:
-    bool start();
+    bool start(QString filename);
     void play();
     void pause();
     void quit();
@@ -48,15 +49,18 @@ public slots:
     double duration();
     double position();
 
-    void loadfile(QString file);
-
     void setProperty(QString prop, QString val);
-    QString getProperty(QString prop);
+    //QString getProperty(QString prop);
     void sendCommand(QString cmd);
 
     bool isRunning();
+    bool isReadyToPlay() {return m_isreadytoplay;};
+
 signals:
     void mplayerError(bool permanent, const QString message);
+    void eof();
+    void readyToPlay();
+    void durationChanged();
 
 private slots:
     void readAvailableStdout();
@@ -64,12 +68,20 @@ private slots:
     void processError(QProcess::ProcessError error);
 
 private:
-    QProcess m_process;
+    QProcess *m_process;
     QString m_wid;
-    bool m_expectData;
-    bool m_loaded;
+    //bool m_expectData;
+    double m_duration;
+    double m_position;
 
-    void consumeStdOut();
+    bool m_isreadytoplay;
+    bool m_posreqsent;
+    bool m_durreqsent;
+
+    void checkEof(QByteArray &a);
+    void checkPositionAnswer(QByteArray &a);
+    void checkDurationAnswer(QByteArray &a);
+    void checkPlayingMsgMagic(QByteArray &a);
 };
 
 #endif
