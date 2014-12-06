@@ -5,10 +5,6 @@ if [ -z $1 ]; then
 	exit 1;
 fi;
 
-if [ ! -e gstreamer-bin ]; then
-	echo "This file must be run from the main application directory ('client')";
-	exit 1;
-fi;
 
 EXENAME=`basename "$1" | cut -d '.' -f 1`
 
@@ -22,12 +18,6 @@ echo "Copying Icon..."
 mkdir -p $1/Contents/Resources/
 cp res/bluecherry.icns $1/Contents/Resources/
 
-echo "Copying GStreamer libraries..."
-cp gstreamer-bin/mac/lib/* $1/Contents/Frameworks/
-
-echo "Copying GStreamer plugins..."
-mkdir -p $1/Contents/PlugIns/gstreamer
-cp gstreamer-bin/mac/plugins/* $1/Contents/PlugIns/gstreamer/
 
 echo "Copying Breakpad framework..."
 rm -r $1/Contents/Frameworks/Breakpad.framework
@@ -39,8 +29,6 @@ cp ${LIBAV_PATH}/lib{avformat,avcodec,swscale,avutil}.dylib $1/Contents/Framewor
 
 echo "Replacing library paths..."
 $BINPATH/replacepath.py --old @loader_path/ --new @executable_path/../Frameworks/ --file $1/Contents/MacOS/$EXENAME
-$BINPATH/replacepath.py --old @loader_path/ --new @executable_path/../Frameworks/ --dir $1/Contents/PlugIns/gstreamer/
-$BINPATH/replacepath.py --old @executable_path/../Resources/lib/ --new @executable_path/../Frameworks/ --dir $1/Contents/PlugIns/gstreamer/
 $BINPATH/replacepath.py --old @executable_path/../Resources/lib/ --new @executable_path/../Frameworks/ --dir $1/Contents/Frameworks/
 $BINPATH/replacepath.py --old ${LIBAV_PATH}/ --new @executable_path/../Frameworks/ --file $1/Contents/MacOS/$EXENAME
 $BINPATH/replacepath.py --old ${LIBAV_PATH}/ --new @executable_path/../Frameworks/ --dir $1/Contents/Frameworks/

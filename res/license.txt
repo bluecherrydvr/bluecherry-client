@@ -4,7 +4,6 @@ The following software is distributed under the terms of the GNU Lesser General 
 <ul>
     <li><a href='http://qt.nokia.com/'>Qt Toolkit</a></li>
     <li><a href='http://www.webkit.org/'>Webkit</a> (portions of)</li>
-    <li><a href='http://gstreamer.freedesktop.org/'>GStreamer</a></li>
     <li><a href='http://www.ffmpeg.org/'>FFmpeg</a></li>
     <li><a href='http://www.gtk.org/'>GLib</a></li>
     <li><a href='http://www.gnu.org/software/libiconv/'>libiconv</a></li>

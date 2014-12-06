@@ -66,7 +66,6 @@ include (cmake/moc_sources.cmake)
 include (cmake/resources.cmake)
 
 include (cmake/libav.cmake)
-#include (cmake/gstreamer.cmake)
 
 if (ENABLE_BREAKPAD)
     include (cmake/breakpad.cmake)

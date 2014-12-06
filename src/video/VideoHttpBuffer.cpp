@@ -68,7 +68,6 @@ void VideoHttpBuffer::sendStreamError(const QString &message)
 {
     emit streamError(message);
     emit bufferingStopped();
-    //gst_element_set_state(GST_ELEMENT(m_element), GST_STATE_NULL);
 }
 
 void VideoHttpBuffer::fileSizeChanged(unsigned fileSize)
@@ -76,13 +75,6 @@ void VideoHttpBuffer::fileSizeChanged(unsigned fileSize)
     if (!fileSize)
         qDebug() << "VideoHttpBuffer: fileSize is 0, may cause problems!";
 
-    //bool firstTime = gst_app_src_get_size(m_element) <= 0;
-
-    //if (m_element)
-        //gst_app_src_set_size(m_element, fileSize);
-
-    //if (firstTime && fileSize)
-        //emit bufferingReady(); FIXME - change conditions for emitting signal
 }
 
 

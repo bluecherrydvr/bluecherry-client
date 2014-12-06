@@ -9,7 +9,7 @@ github.com/bluecherrydvr/bluecherry-client.  Occasional support can be found on 
 ---------
 
 Requirements:
-  sudo apt-get install git-core cmake qt4-qmake libqt4-dev libgstreamer0.10-dev gstreamer0.10-plugins-good libgstreamer-plugins-base0.10-dev libavcodec-dev libavformat-dev libswscale-dev
+  sudo apt-get install git-core cmake qt4-qmake libqt4-dev mplayer libavcodec-dev libavformat-dev libswscale-dev
 
 Breakpad is not available in standard installation. To install it use:
   mkdir -p ~/dev/

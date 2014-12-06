@@ -14,5 +14,3 @@ Files: */breakpad-bin
 Copyright: 2006, Google Inc.
 Licence: BSD-3-clause
 
-Files: */gstreamer-bin
-License: GPL-2+
