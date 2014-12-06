@@ -30,11 +30,6 @@ public:
     MplayerProcess(QString &wid, QObject *parent = 0);
     ~MplayerProcess();
 
-public slots:
-    bool start(QString filename);
-    void play();
-    void pause();
-    void quit();
     //seek to pos second
     bool seek(double pos);
 
@@ -56,6 +51,14 @@ public slots:
     bool isRunning();
     bool isReadyToPlay() {return m_isreadytoplay;};
 
+    bool saveScreenshot(QString &file);
+
+public slots:
+    bool start(QString filename);
+    void play();
+    void pause();
+    void quit();
+
 signals:
     void mplayerError(bool permanent, const QString message);
     void eof();
@@ -66,6 +69,7 @@ private slots:
     void readAvailableStdout();
     void readAvailableStderr();
     void processError(QProcess::ProcessError error);
+    void moveScreenshot();
 
 private:
     QProcess *m_process;
@@ -78,10 +82,14 @@ private:
     bool m_posreqsent;
     bool m_durreqsent;
 
+    QString m_dstscreenshotfile;
+    QString m_srcscreenshotfile;
+
     void checkEof(QByteArray &a);
     void checkPositionAnswer(QByteArray &a);
     void checkDurationAnswer(QByteArray &a);
     void checkPlayingMsgMagic(QByteArray &a);
+    void checkScreenshot(QByteArray &a);
 };
 
 #endif

@@ -56,6 +56,7 @@ public:
     virtual bool isPermanentError() const = 0;
     virtual QString errorMessage() const = 0;
     virtual VideoHttpBuffer * videoBuffer() const = 0;
+    virtual bool saveScreenshot(QString &file) = 0;
 
     virtual void setHardwareDecodingEnabled(bool enable) = 0;
 

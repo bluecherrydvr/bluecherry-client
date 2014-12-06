@@ -33,8 +33,6 @@ public:
     virtual void initVideo(VideoPlayerBackend *videoPlayerBackend) = 0;
     virtual void clearVideo() = 0;
 
-    virtual QImage currentFrame() = 0;
-
 };
 
 #endif // VIDEO_WIDGET_H

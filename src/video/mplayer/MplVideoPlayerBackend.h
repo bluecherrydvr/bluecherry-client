@@ -47,6 +47,7 @@ public:
     virtual QString errorMessage() const { return m_errorMessage; }
     virtual VideoHttpBuffer *videoBuffer() const { return m_videoBuffer; }
 
+    virtual bool saveScreenshot(QString &file);
     virtual void setHardwareDecodingEnabled(bool enable);
     void setWindowId(quint64 wid);
 

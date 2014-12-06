@@ -600,10 +600,6 @@ void EventVideoPlayer::saveVideo()
 
 void EventVideoPlayer::saveSnapshot(const QString &ifile)
 {
-    QImage frame = m_videoWidget ? m_videoWidget->currentFrame() : QImage();
-    if (frame.isNull() || !m_videoBackend)
-        return;
-
     QString file = ifile;
 
     if (file.isEmpty())
@@ -611,7 +607,7 @@ void EventVideoPlayer::saveSnapshot(const QString &ifile)
         QString filename;
         if (m_event)
         {
-            filename = QString::fromLatin1("%1 - %2.jpg").arg(m_event->uiLocation(),
+            filename = QString::fromLatin1("%1 - %2.png").arg(m_event->uiLocation(),
                                                               m_event->localStartDate().addSecs(int(m_videoBackend.data()->position() / 1000000000))
                                                               .toString(QLatin1String("yyyy-MM-dd hh-mm-ss")));
         }
@@ -619,15 +615,15 @@ void EventVideoPlayer::saveSnapshot(const QString &ifile)
         file = getSaveFileNameExt(this, tr("Save Video Snapshot"),
                            QDesktopServices::storageLocation(QDesktopServices::PicturesLocation),
                            QLatin1String("ui/snapshotSaveLocation"),
-                           filename, tr("Image (*.jpg)"));
+                           filename, tr("Image (*.png)"));
 
         if (file.isEmpty())
             return;
-        if (!file.endsWith(QLatin1String(".jpg"), Qt::CaseInsensitive))
-            file.append(QLatin1String(".jpg"));
+        if (!file.endsWith(QLatin1String(".png"), Qt::CaseInsensitive))
+            file.append(QLatin1String(".png"));
     }
 
-    if (!frame.save(file, "jpeg"))
+    if (!m_videoBackend.data()->saveScreenshot(file))
     {
         QMessageBox::critical(this, tr("Snapshot Error"), tr("An error occurred while saving the video snapshot."),
                               QMessageBox::Ok);

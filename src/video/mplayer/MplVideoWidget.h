@@ -31,8 +31,6 @@ public:
     virtual void initVideo(VideoPlayerBackend *videoPlayerBackend);
     virtual void clearVideo();
 
-    virtual QImage currentFrame();
-
     virtual QSize sizeHint() const;
 
     void setViewport(QWidget *viewport);

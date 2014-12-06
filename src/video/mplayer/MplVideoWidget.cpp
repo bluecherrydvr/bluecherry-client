@@ -117,12 +117,6 @@ void MplVideoWidget::setFullScreen(bool on)
         bcApp->setScreensaverInhibited(on);
 }
 
-QImage MplVideoWidget::currentFrame()
-{
-    //implement me
-    return QImage();
-}
-
 void MplVideoWidget::resizeEvent(QResizeEvent *ev)
 {
     QFrame::resizeEvent(ev);

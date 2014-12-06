@@ -24,6 +24,9 @@
 #include <QDebug>
 #include <QThread>
 #include <QApplication>
+#include <QFile>
+#include <QDir>
+#include <QTimer>
 
 #include "MplayerProcess.h"
 
@@ -65,9 +68,30 @@ MplayerProcess::~MplayerProcess()
     m_process = 0;
 }
 
+bool MplayerProcess::saveScreenshot(QString &file)
+{
+    Q_ASSERT(QThread::currentThread() == qApp->thread());
+
+    if (!(isRunning() && m_isreadytoplay))
+        return false;
+
+    if (file.isEmpty())
+        return false;
+
+    qDebug() << "MplayerProcess::saveScreenshot() " << file << "\n";
+
+    m_dstscreenshotfile = file;
+
+    sendCommand("screenshot 0");
+
+    return true;
+}
+
 bool MplayerProcess::start(QString filename)
 {
     Q_ASSERT(QThread::currentThread() == qApp->thread());
+
+    m_process->setWorkingDirectory(QDir::tempPath());
 
     qDebug() << this << "starting mplayer process, opening file " << filename << " ...\n";
 
@@ -76,6 +100,7 @@ bool MplayerProcess::start(QString filename)
                     << "nodefault-bindings:conf=/dev/null" << "-noconfig" << "all"
                     << "-playing-msg" << MPL_PLAYMSGMAGIC"\n"
                     << "-nomouseinput" << "-zoom" << "-nomsgcolor"
+                    << "-vf" << "screenshot=bluecherryscrnshot"
                     << filename);
 
     if (!m_process->waitForStarted())
@@ -105,6 +130,38 @@ bool MplayerProcess::start(QString filename)
     return true;
 }
 
+void MplayerProcess::checkScreenshot(QByteArray &a)
+{
+    if (m_dstscreenshotfile.isEmpty())
+        return;
+
+    QRegExp rx_screenshot("^\\*\\*\\* screenshot '(.*)'");
+
+    if (QString::fromAscii(a.constData()).contains(rx_screenshot))
+    {
+        QString s = rx_screenshot.cap(1);
+
+        m_srcscreenshotfile = m_process->workingDirectory() + '/' + s;
+
+        moveScreenshot();
+    }
+}
+
+void MplayerProcess::moveScreenshot()
+{
+    if (!QFile::exists(m_srcscreenshotfile))
+    {
+        QTimer::singleShot(300, this, SLOT(moveScreenshot()));
+        return;
+    }
+
+    if (!QFile::copy(m_srcscreenshotfile, m_dstscreenshotfile))
+        qDebug() << "failed to copy screenshot file from " << m_srcscreenshotfile << " to " << m_dstscreenshotfile << "\n";
+
+    m_dstscreenshotfile.clear();
+    QFile::remove(m_srcscreenshotfile);
+    m_srcscreenshotfile.clear();
+}
 
 void MplayerProcess::checkEof(QByteArray &a)
 {
@@ -113,6 +170,8 @@ void MplayerProcess::checkEof(QByteArray &a)
     if (QString::fromAscii(a.constData()).contains(rx_endoffile))
         emit eof();
 }
+
+
 
 void MplayerProcess::checkPlayingMsgMagic(QByteArray &a)
 {
@@ -179,6 +238,7 @@ void MplayerProcess::readAvailableStdout()
         checkPlayingMsgMagic(l);
         checkDurationAnswer(l);
         checkPositionAnswer(l);
+        checkScreenshot(l);
 
         qDebug() << "MPLAYER STDOUT:" << l << "\n";
     }

@@ -128,6 +128,15 @@ void MplVideoPlayerBackend::streamError(const QString &message)
     setError(true, message);
 }
 
+bool MplVideoPlayerBackend::saveScreenshot(QString &file)
+{
+    if (!m_mplayer || !m_mplayer->isRunning() || !m_mplayer->isReadyToPlay())
+        return false;
+
+    return m_mplayer->saveScreenshot(file);
+}
+
+
 void MplVideoPlayerBackend::handleEof()
 {
     qDebug() << "EOF\n";
