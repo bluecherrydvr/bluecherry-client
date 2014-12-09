@@ -85,7 +85,7 @@ LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *p
     m_savedLayouts->setMinimumWidth(100);
     m_savedLayouts->setContextMenuPolicy(Qt::CustomContextMenu);
     m_savedLayouts->setCurrentIndex(-1);
-    m_savedLayouts->setMaxVisibleItems(10 + m_liveView->height()/m_savedLayouts->height()/2);
+    m_savedLayouts->setMaxVisibleItems(22);
 	m_toolBar->addWidget(m_savedLayouts);
 
     QWidget *spacer = new QWidget;
