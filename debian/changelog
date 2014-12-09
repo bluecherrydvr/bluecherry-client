@@ -1,3 +1,12 @@
+bluecherry-client (1:2.2.0-rc1-1) lucid; urgency=low
+
+  * New event player based on mplayer instead of gstreamer
+  * New button "Load Events" in event browser, disabled autoloading events
+  * Updated ffmpeg to version 2.5, Qt to 4.8.6, Breakpad to latest trunk revision
+  * Bugfixes: #218, #104, #217, #225
+
+ -- Anton Sviridenko <anton@corp.bluecherry.net>  Tue, 09 Dec 2014 08:32:10 +0400
+
 bluecherry-client (1:2.1.9-1) lucid; urgency=low
 
   * Bug #214: Fixed crash caused by race condition
