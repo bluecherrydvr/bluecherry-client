@@ -7,7 +7,7 @@ Standards-Version: 3.8.4
 
 Package: bluecherry-client
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libssl0.9.8
+Depends: ${shlibs:Depends}, ${misc:Depends}, libssl0.9.8, mplayer
 Description: Bluecherry DVR Client
  This package contains the client for the Bluecherry DVR system. It can
  also be used to connect to remote instances of the Bluecherry DVR server.
