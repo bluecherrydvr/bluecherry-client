@@ -1,3 +1,9 @@
+bluecherry-client (1:2.2.0-rc2-1) lucid; urgency=low
+
+  * Added missing mplayer dependency
+
+ --  Anton Sviridenko <anton@corp.bluecherry.net>  Thu, 11 Dec 2014 02:31:55 +0400
+
 bluecherry-client (1:2.2.0-rc1-1) lucid; urgency=low
 
   * New event player based on mplayer instead of gstreamer
