@@ -6,6 +6,7 @@
 !define LIBAV_PATH "@WIN32_LIBAV_DIR@\bin"
 !define LIBOPENSSL_PATH "C:\OpenSSL-Win32\bin"
 !define WINDOWS_DLL_PATH "C:\Windows\System32"
+!define MPLAYER_PATH "@CMAKE_SOURCE_DIR@\mplayer-bin\win"
 
 Name "Bluecherry Client"
 OutFile "SetupBluecherryClient.exe"
@@ -73,6 +74,8 @@ Section
         #File "${LIBAV_PATH}\libx264-125.dll"
 
         SetOutPath "$INSTDIR"
+		# mplayer
+		File "${MPLAYER_PATH}\mplayer.exe"
 
         # OpenSSL
         File "${LIBOPENSSL_PATH}\ssleay32.dll"
