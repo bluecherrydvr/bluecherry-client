@@ -40,7 +40,7 @@ MplayerProcess::MplayerProcess(QString &wid, QObject *parent)
       m_posreqsent(false), m_durreqsent(false)
 
 {
-    qDebug() << this << "\n";
+    //qDebug() << this << "\n";
 
     Q_ASSERT(QThread::currentThread() == qApp->thread());
 
@@ -54,7 +54,7 @@ MplayerProcess::~MplayerProcess()
 {
     Q_ASSERT(QThread::currentThread() == qApp->thread());
 
-    qDebug() << "~MplayerProcess()\n";
+    //qDebug() << "~MplayerProcess()\n";
 
     if (m_process->state() == QProcess::Running)
     {
@@ -78,7 +78,7 @@ bool MplayerProcess::saveScreenshot(QString &file)
     if (file.isEmpty())
         return false;
 
-    qDebug() << "MplayerProcess::saveScreenshot() " << file << "\n";
+    //qDebug() << "MplayerProcess::saveScreenshot() " << file << "\n";
 
     m_dstscreenshotfile = file;
 
@@ -93,7 +93,7 @@ bool MplayerProcess::start(QString filename)
 
     m_process->setWorkingDirectory(QDir::tempPath());
 
-    qDebug() << this << "starting mplayer process, opening file " << filename << " ...\n";
+    //qDebug() << this << "starting mplayer process, opening file " << filename << " ...\n";
 
     m_process->start("mplayer", QStringList() << "-slave" //<< "-idle"
                     << "-wid" << m_wid << "-quiet" << "-input"
@@ -101,6 +101,17 @@ bool MplayerProcess::start(QString filename)
                     << "-playing-msg" << MPL_PLAYMSGMAGIC"\n"
                     << "-nomouseinput" << "-zoom" << "-nomsgcolor"
                     << "-vf" << "screenshot=bluecherryscrnshot"
+#ifdef WIN32
+                    << "-nofs"
+                    << "-priority" << "abovenormal"
+                    << "-nodr"
+                    << "-double"
+                    << "-cache" << "512"
+                    << "-noslices"
+                    << "-osdlevel" << "0"
+                    << "-colorkey" << "0x020202"
+                    //<< "-nokeepaspect"
+#endif
                     << filename);
 
     if (!m_process->waitForStarted())
@@ -125,7 +136,7 @@ bool MplayerProcess::start(QString filename)
         return false;
     }
 
-    qDebug() << this << "mplayer process started\n";
+    //qDebug() << this << "mplayer process started\n";
 
     return true;
 }
@@ -156,7 +167,10 @@ void MplayerProcess::moveScreenshot()
     }
 
     if (!QFile::copy(m_srcscreenshotfile, m_dstscreenshotfile))
-        qDebug() << "failed to copy screenshot file from " << m_srcscreenshotfile << " to " << m_dstscreenshotfile << "\n";
+        emit mplayerError(false,
+                          tr("failed to copy screenshot file from %1 to %2").
+                          arg(m_srcscreenshotfile).arg(m_dstscreenshotfile));
+        //qDebug() << "failed to copy screenshot file from " << m_srcscreenshotfile << " to " << m_dstscreenshotfile << "\n";
 
     m_dstscreenshotfile.clear();
     QFile::remove(m_srcscreenshotfile);
@@ -223,8 +237,8 @@ void MplayerProcess::readAvailableStderr()
 {
     m_process->setReadChannel(QProcess::StandardError);
 
-    while(m_process->canReadLine())
-        qDebug() << "MPLAYER STDERR:" << m_process->readLine();
+    //while(m_process->canReadLine())
+        //qDebug() << "MPLAYER STDERR:" << m_process->readLine();
 }
 
 void MplayerProcess::readAvailableStdout()
@@ -240,7 +254,7 @@ void MplayerProcess::readAvailableStdout()
         checkPositionAnswer(l);
         checkScreenshot(l);
 
-        qDebug() << "MPLAYER STDOUT:" << l << "\n";
+        //qDebug() << "MPLAYER STDOUT:" << l << "\n";
     }
 }
 
@@ -253,7 +267,7 @@ void MplayerProcess::sendCommand(QString cmd)
 
     m_process->write(QString("pausing_keep %1\n").arg(cmd).toAscii().constData());
 
-    qDebug() << this << " sending command " << QString("pausing_keep %1\n").arg(cmd);
+    //qDebug() << this << " sending command " << QString("pausing_keep %1\n").arg(cmd);
 }
 
 void MplayerProcess::quit()
@@ -314,7 +328,7 @@ void MplayerProcess::play()
     if (!(isRunning() && m_isreadytoplay))
         return;
 
-    qDebug() << "MplayerProcess::play()\n";
+    //qDebug() << "MplayerProcess::play()\n";
 
     m_process->write("pause\n");
 }
@@ -324,7 +338,7 @@ void MplayerProcess::pause()
     if (!(isRunning() && m_isreadytoplay))
         return;
 
-    qDebug() << "MplayerProcess::pause()\n";
+    //qDebug() << "MplayerProcess::pause()\n";
 
     m_process->write("pause\n");
 }
@@ -417,7 +431,7 @@ void MplayerProcess::processError(QProcess::ProcessError error)
         return;
     }
 
-    qDebug() << this << errStr;
+    //qDebug() << this << errStr;
 
     emit mplayerError(true, errStr);
 }
