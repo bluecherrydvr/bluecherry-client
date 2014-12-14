@@ -7,9 +7,10 @@
 !define LIBOPENSSL_PATH "C:\OpenSSL-Win32\bin"
 !define WINDOWS_DLL_PATH "C:\Windows\System32"
 !define MPLAYER_PATH "@CMAKE_SOURCE_DIR@\mplayer-bin\win"
+!define VERSION "@VERSION@"
 
 Name "Bluecherry Client"
-OutFile "SetupBluecherryClient.exe"
+OutFile "SetupBluecherryClient_${VERSION}.exe"
 InstallDir "$PROGRAMFILES\Bluecherry Client"
 InstallDirRegKey HKLM "Software\Bluecherry Client" ""
 RequestExecutionLevel admin
@@ -18,7 +19,8 @@ SetCompressor /FINAL /SOLID lzma
 !define MUI_UNICON "${SRC_PATH}\res\bluecherry.ico"
 
 !insertmacro MUI_PAGE_WELCOME
-#!insertmacro MUI_PAGE_LICENSE "${NSISDIR}\Docs\Modern UI\License.txt"
+!insertmacro MUI_PAGE_LICENSE "${SRC_PATH}\COPYING"
+!insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !define MUI_FINISHPAGE_RUN $INSTDIR\BluecherryClient.exe
 !define MUI_FINISHPAGE_RUN_TEXT "Run Bluecherry Client"
@@ -35,6 +37,9 @@ Section
 
         # Main
         File /oname=BluecherryClient.exe "${BIN_PATH}\bluecherry-client.exe"
+
+        #License
+        File "${SRC_PATH}\COPYING"
 
         # Qt
         File "${QT_PATH}\QtCore4.dll"
