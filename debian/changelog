@@ -72,7 +72,7 @@ bluecherry-client (1:2.1.5-1) lucid; urgency=low
 
  -- Rafał Malinowski <rafal.malinowski@corp.bluecherry.net>  Thu, 29 Aug 2013 16:35:28 +0200
 
- bluecherry-client (1:2.1.4-1) lucid; urgency=low
+bluecherry-client (1:2.1.4-1) lucid; urgency=low
 
   * Bug #145: Server settings are not stored until program is closed
   * Bug #148: Do not show passwords in log
@@ -182,6 +182,8 @@ bluecherry-client (2.0.0-0beta7-1) lucid; urgency=low
   * Feature #901: Display actual FPS of live feeds
   * Feature #904: Improve appearance and convenience of the main UI window
   * Feature #945: Update to Qt 4.7.4 for all platforms
+
+ -- John Brooks <john.brooks@bluecherry.net>
 
 bluecherry-client (2.0.0-0beta6-1) lucid; urgency=low
 
