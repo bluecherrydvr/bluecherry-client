@@ -136,16 +136,18 @@ set (bluecherry_client_main_SRCS
 
     src/video/mplayer/MplVideoPlayerBackend.cpp
     src/video/mplayer/MplVideoPlayerFactory.cpp
-    src/video/mplayer/MplVideoWidget.cpp
+#    src/video/mplayer/MplVideoWidget.cpp
     src/video/mplayer/MplayerProcess.cpp
 )
 
 if (NOT APPLE)
     list (APPEND bluecherry_client_main_SRCS
+        src/video/mplayer/MplVideoWidget.cpp
         src/ui/StatusBandwidthWidget.cpp
     )
 else (NOT APPLE)
     list (APPEND bluecherry_client_main_SRCS
+        src/video/mplayer/MplVideoWidget_mac.mm
         src/ui/StatusBandwidthWidget_mac.mm
         src/utils/PlatformOSX.mm
     )
