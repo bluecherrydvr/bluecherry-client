@@ -37,7 +37,8 @@ MplayerProcess::MplayerProcess(QString &wid, QObject *parent)
       m_wid(wid), m_process(0),
       m_duration(-1), m_position(-1),
       m_isreadytoplay(false),
-      m_posreqsent(false), m_durreqsent(false)
+      m_posreqsent(false), m_durreqsent(false),
+      m_ispaused(false)
 
 {
     //qDebug() << this << "\n";
@@ -265,7 +266,7 @@ void MplayerProcess::sendCommand(QString cmd)
     if (!isRunning())
         return;
 
-    m_process->write(QString("pausing_keep %1\n").arg(cmd).toAscii().constData());
+    m_process->write(QString("%1 %2\n").arg(m_ispaused ? "pausing_keep" : "").arg(cmd).toAscii().constData());//
 
     //qDebug() << this << " sending command " << QString("pausing_keep %1\n").arg(cmd);
 }
@@ -331,6 +332,7 @@ void MplayerProcess::play()
     //qDebug() << "MplayerProcess::play()\n";
 
     m_process->write("pause\n");
+    m_ispaused = false;
 }
 
 void MplayerProcess::pause()
@@ -341,6 +343,7 @@ void MplayerProcess::pause()
     //qDebug() << "MplayerProcess::pause()\n";
 
     m_process->write("pause\n");
+    m_ispaused = true;
 }
 
 bool MplayerProcess::seek(double pos)

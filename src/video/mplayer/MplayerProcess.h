@@ -81,6 +81,7 @@ private:
     bool m_isreadytoplay;
     bool m_posreqsent;
     bool m_durreqsent;
+    bool m_ispaused;
 
     QString m_dstscreenshotfile;
     QString m_srcscreenshotfile;
