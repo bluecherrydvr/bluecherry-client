@@ -141,6 +141,7 @@ sharedBufferName:(NSString *)aName
 
         qDebug() << "[exiting thread loop]\n";
 
+        [serverConnection invalidate];
         [serverConnection release];
         //[self stop];
         [pool release];
