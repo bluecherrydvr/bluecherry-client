@@ -211,16 +211,14 @@ EventVideoPlayer::~EventVideoPlayer()
 
     if (m_videoBackend)
     {
-        //connect(m_videoBackend.data(), SIGNAL(destroyed()), m_videoThread.data(), SLOT(quit()));
-        //connect(m_videoThread.data(), SIGNAL(finished()), m_videoThread.data(), SLOT(deleteLater()));
-
+#ifdef Q_OS_MAC
+        qDebug() << "deleting videoBackend first, before VideoWidget\n";
+        delete m_videoBackend.data();
+        m_videoBackend.clear();
+#else
         m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "deleteLater", Qt::QueuedConnection);
-    }/*
-    else if (m_videoThread)
-    {
-        m_videoThread.data()->quit();
-        m_videoThread.data()->deleteLater();
-    }*/
+#endif
+    }
 
     QSettings settings;
     if (settings.value(QLatin1String("ui/disableScreensaver/onVideo")).toBool())
