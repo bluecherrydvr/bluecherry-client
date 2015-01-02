@@ -57,6 +57,7 @@ sharedBufferName:(NSString *)aName;
 @interface VideoRenderer ()
 - (void)connect;
 - (void)disconnect;
+- (void)clear;
 @end
 
 
@@ -92,10 +93,8 @@ sharedBufferName:(NSString *)aName
     return self;
 }
 
-- (void)dealloc
+- (void)clear
 {
-    qDebug() << "[VideoRenderer dealloc]\n";
-
     if ([m_thread isExecuting])
     {
         [self performSelector:@selector(disconnect)
@@ -107,6 +106,15 @@ sharedBufferName:(NSString *)aName
     while ([m_thread isExecuting])
     {
     }
+
+    m_widget = 0;
+}
+
+- (void)dealloc
+{
+    qDebug() << "[VideoRenderer dealloc]\n";
+
+    [self clear];
 
     [m_thread release];
 
@@ -332,8 +340,8 @@ MplVideoWidget::~MplVideoWidget()
     NSAutoreleasePool * pool = [NSAutoreleasePool new];
     stop();
 
+    [m_renderer->m_vr clear];
     [m_renderer->m_vr release];
-    //[m_renderer->pool release];
 
     delete m_renderer;
 
