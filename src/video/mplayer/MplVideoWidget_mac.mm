@@ -56,7 +56,7 @@ sharedBufferName:(NSString *)aName;
 
 @interface VideoRenderer ()
 - (void)connect;
-//- (void)disconnect;
+- (void)disconnect;
 @end
 
 
@@ -332,7 +332,7 @@ MplVideoWidget::~MplVideoWidget()
     NSAutoreleasePool * pool = [NSAutoreleasePool new];
     stop();
 
-    [m_renderer->m_vr dealloc];
+    [m_renderer->m_vr release];
     //[m_renderer->pool release];
 
     delete m_renderer;
