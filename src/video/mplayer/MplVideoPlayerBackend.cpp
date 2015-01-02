@@ -101,7 +101,11 @@ void MplVideoPlayerBackend::clear()
 {
     if (m_mplayer)
     {
+#ifdef Q_OS_MAC
+        delete m_mplayer;
+#else
         m_mplayer->deleteLater();
+#endif
         m_mplayer = 0;
     }
 
