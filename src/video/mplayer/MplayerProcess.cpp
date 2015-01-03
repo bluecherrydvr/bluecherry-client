@@ -98,7 +98,7 @@ bool MplayerProcess::start(QString filename)
 #ifndef Q_OS_MAC
     m_process->start("mplayer",
 #else
-    m_process->start(QCoreApplication::applicationDirPath() + QDir::separator + "mplayer",
+    m_process->start(QCoreApplication::applicationDirPath() + QDir::separator() + "mplayer",
 #endif
                     QStringList()
                     << "-slave"
