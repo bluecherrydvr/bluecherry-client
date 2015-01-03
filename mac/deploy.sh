@@ -23,6 +23,9 @@ echo "Copying Breakpad framework..."
 rm -r $1/Contents/Frameworks/Breakpad.framework
 cp -R breakpad-bin/mac/Breakpad.framework $1/Contents/Frameworks/
 
+echo "Copying mplayer..."
+cp mplayer-bin/mac/mplayer $1/Contents/MacOS/
+
 echo "Copying libav..."
 LIBAV_PATH=/Users/jbrooks/Development/libav/lib
 cp ${LIBAV_PATH}/lib{avformat,avcodec,swscale,avutil}.dylib $1/Contents/Frameworks
