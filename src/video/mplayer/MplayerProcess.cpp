@@ -27,7 +27,7 @@
 #include <QFile>
 #include <QDir>
 #include <QTimer>
-
+#include <QCoreApplication>
 #include "MplayerProcess.h"
 
 #define MPL_PLAYMSGMAGIC "XPL32AFFC3DFEBB"
@@ -95,8 +95,13 @@ bool MplayerProcess::start(QString filename)
     m_process->setWorkingDirectory(QDir::tempPath());
 
     //qDebug() << this << "starting mplayer process, opening file " << filename << " ...\n";
-
-    m_process->start("mplayer", QStringList() << "-slave"
+#ifndef Q_OS_MAC
+    m_process->start("mplayer",
+#else
+    m_process->start(QCoreApplication::applicationDirPath() + QDir::separator + "mplayer",
+#endif
+                    QStringList()
+                    << "-slave"
 #ifndef Q_OS_MAC
                     << "-wid" << m_wid
 #endif
