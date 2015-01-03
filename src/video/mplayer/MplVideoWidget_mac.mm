@@ -64,10 +64,8 @@ sharedBufferName:(NSString *)aName;
 struct VideoRendererWrapper
 {
     VideoRenderer *m_vr;
-    //NSAutoreleasePool *pool;
 };
 
-//#pragma mark -
 
 @implementation VideoRenderer
 
@@ -81,8 +79,6 @@ sharedBufferName:(NSString *)aName
 
     m_sharedBufferName = aName;
     m_widget = aWidget;
-
-    qDebug() << "[VideoRenderer initWithWidget] m_sharedBufferName=" << [m_sharedBufferName UTF8String] << "\n";
 
     m_thread = [[NSThread alloc] initWithTarget:self
                                     selector:@selector(connect)
@@ -112,69 +108,47 @@ sharedBufferName:(NSString *)aName
 
 - (void)dealloc
 {
-    qDebug() << "[VideoRenderer dealloc]\n";
+    //qDebug() << "[VideoRenderer dealloc]\n";
 
     [self clear];
 
     [m_thread release];
 
-    qDebug() << "[VideoRenderer dealloc] going to release m_sharedBufferName\n";
-
     [m_sharedBufferName release];
-
-    qDebug() << "[VideoRenderer dealloc] going to dealloc super\n";
 
     m_widget = 0;
 
     [super dealloc];
-
-    qDebug() << "[VideoRenderer dealloc] finished\n";
 }
 
 - (void)connect
 {
-    //@autoreleasepool
-    //{
-        //[NSConnection serviceConnectionWithName:m_sharedBufferName
-         //                            rootObject:self];
         NSAutoreleasePool * pool = [NSAutoreleasePool new];
-        //NSRunLoop* myRunLoop = [NSRunLoop currentRunLoop];
 
         NSConnection *serverConnection = [NSConnection new];
         [serverConnection setRootObject:self];
         [serverConnection registerName:m_sharedBufferName];
 
-        //[myRunLoop run];
         CFRunLoopRun();
-
-        qDebug() << "[exiting thread loop]\n";
 
         [serverConnection invalidate];
         [serverConnection release];
-        //[self stop];
         [pool release];
-   //}
 }
 
 - (void)disconnect
 {
-    qDebug() << "[VideoRenderer disconnect]\n";
-
     CFRunLoopStop(CFRunLoopGetCurrent());
     [self stop];
-
-    qDebug() << "[VideoRenderer disconnect] finished\n";
 }
 
-//#pragma mark -
-//#pragma mark MPlayerOSXVOProto
 
 - (int)startWithWidth:(bycopy int)width
            withHeight:(bycopy int)height
             withBytes:(bycopy int)bytes
            withAspect:(bycopy int)aspect
 {
-    qDebug() << "[VideoRenderer startWithWidth]\n";
+    //qDebug() << "[VideoRenderer startWithWidth]\n";
 
     if (m_widget)
         m_widget->initSharedMem([m_sharedBufferName UTF8String], width, height, bytes);
@@ -212,7 +186,7 @@ void MplVideoWidget::getFrame()
     if (!m_sharedBuffer || !m_frontBuffer || !m_backBuffer)
         return;
 
-    qDebug() << "MplVideoWidget::getFrame()\n";
+    //qDebug() << "MplVideoWidget::getFrame()\n";
 
     SwsContext * ctx = sws_getContext(m_frameWidth, m_frameHeight,
                                       m_pixelFormat, m_frameWidth, m_frameHeight,
@@ -247,9 +221,6 @@ void MplVideoWidget::stop()
 {
     QMutexLocker locker(&m_frameLock);
 
-    qDebug() << "MplVideoWidget::stop()\n";
-    qDebug() << "MplVideoWidget::stop() this = " << this << "\n";
-
     free(m_backBuffer);
     m_backBuffer = NULL;
 
@@ -263,17 +234,15 @@ void MplVideoWidget::stop()
     }
 
     m_srcBufferSize = 0;
-
-    qDebug() << "MplVideoWidget::stop() finished\n";
 }
 
 void MplVideoWidget::initSharedMem(const char *bufferName, int width, int height, int bpp)
 {
     QMutexLocker locker(&m_frameLock);
 
-    qDebug() << "initSharedMem()\n";
+    //qDebug() << "initSharedMem()\n";
 
-    qDebug() << "initSharedMem()\n bufferName=" << bufferName << "\n";
+    //qDebug() << "initSharedMem()\n bufferName=" << bufferName << "\n";
 
     int shbf = shm_open(bufferName, O_RDONLY, S_IRUSR);
 
@@ -289,7 +258,7 @@ void MplVideoWidget::initSharedMem(const char *bufferName, int width, int height
     m_frameHeight = height;
     m_bpp = bpp;
 
-    qDebug() << "MplVideoWidget::initSharedMem() width=" << width << " height=" << height << " bpp=" << bpp << "\n";
+    //qDebug() << "MplVideoWidget::initSharedMem() width=" << width << " height=" << height << " bpp=" << bpp << "\n";
 
     if (m_sharedBuffer)
     {
@@ -315,8 +284,6 @@ void MplVideoWidget::initSharedMem(const char *bufferName, int width, int height
         free(m_backBuffer);
     }
 
-    qDebug() << "initSharedMem() - allocating front and back buffers\n";
-
     m_frontBuffer = (unsigned char*) calloc(m_dstBufferSize, 1);
     m_backBuffer = (unsigned char*) calloc(m_dstBufferSize, 1);
 
@@ -335,8 +302,6 @@ void MplVideoWidget::initSharedMem(const char *bufferName, int width, int height
 
 MplVideoWidget::~MplVideoWidget()
 {
-    qDebug() << "MplVideoWidget::~MplVideoWidget()\n";
-    {
     NSAutoreleasePool * pool = [NSAutoreleasePool new];
     stop();
 
@@ -348,8 +313,6 @@ MplVideoWidget::~MplVideoWidget()
     m_renderer = 0;
 
     [pool release];
-    }
-    qDebug() << "MplVideoWidget::~MplVideoWidget() finished\n";
 }
 
 MplVideoWidget::MplVideoWidget(QWidget *parent)
@@ -378,12 +341,8 @@ MplVideoWidget::MplVideoWidget(QWidget *parent)
 
     QString connectionName = QString("bceventmplayer") + QString::number((quint64) m_viewport->winId());
 
-    qDebug() << "connectionName = " << connectionName << "\n";
-
     m_renderer = new VideoRendererWrapper;
 
-    qDebug() << "MplVideoWidget::MplVideoWidget() going to create VideoRenderer instance\n";
-    //m_renderer->pool = [NSAutoreleasePool new];
     NSAutoreleasePool * pool = [NSAutoreleasePool new];
 
     m_renderer->m_vr = [[VideoRenderer alloc] initWithWidget:this
@@ -437,8 +396,6 @@ bool MplVideoWidget::eventFilter(QObject *obj, QEvent *ev)
     r.adjust((r.width() - scaledSize.width()) / 2, (r.height() - scaledSize.height()) / 2, 0, 0);
     r.setSize(scaledSize);
     p.drawImage(r, frame);
-
-    qDebug() << "QEvent::Paint handled\n";
 
     m_frameLock.unlock();
     return true;
