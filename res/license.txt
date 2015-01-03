@@ -11,6 +11,11 @@ The following software is distributed under the terms of the GNU Lesser General 
 </ul>
 The Qt Toolkit contains code under other licenses and by specific authors. A complete list of copyrights is included with Qt's documentation, or available online <a href='http://doc.qt.nokia.com/latest/licenses.html'>here</a>.
 <br><hr><br>
+The MPlayer is distributed under the terms of the GNU General Public License version 2:
+<ul>
+    <li><a href='http://mplayerhq.hu/'>MPlayer</a></li>
+</ul>
+<br><hr><br>
 The following software is distributed under the terms of the two-clause BSD license, included below:
 <ul>
     <li><a href='http://www.webkit.org/'>Webkit</a> (portions of)</li>
