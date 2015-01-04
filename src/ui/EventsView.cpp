@@ -149,11 +149,8 @@ void EventsView::loadingStarted()
 
 void EventsView::loadingFinished()
 {
-    if (model()->rowCount())
-    {
-        delete loadingIndicator;
-        loadingIndicator = 0;
-    }
+    delete loadingIndicator;
+    loadingIndicator = 0;
 }
 
 bool EventsView::eventFilter(QObject *obj, QEvent *ev)
