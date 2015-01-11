@@ -637,11 +637,13 @@ void EventTimelineWidget::rowsAboutToBeRemoved(const QModelIndex &parent, int st
         if (locationData->events.isEmpty())
         {
             serverData->locationsMap.remove(locationData->locationId);
+            layoutRows.removeAll(locationData);
             delete locationData;
 
             if (serverData->locationsMap.isEmpty())
             {
                 serversMap.remove(serverData->server);
+                layoutRows.removeAll(serverData);
                 delete serverData;
             }
 
