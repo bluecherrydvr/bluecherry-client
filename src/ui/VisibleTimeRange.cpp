@@ -78,7 +78,7 @@ void VisibleTimeRange::computePrimaryTickSecs(int prefferedTickCount)
         int minTickSecs = qMax(visibleSeconds() / prefferedTickCount, 1);
         QList<int>::const_iterator tickIterator = qLowerBound(m_tickSizes, minTickSecs);
         if (tickIterator == m_tickSizes.constEnd())
-            m_primaryTickSecs = *m_tickSizes.end();
+            m_primaryTickSecs = m_tickSizes.last();
         else
             m_primaryTickSecs = *tickIterator;
     }
