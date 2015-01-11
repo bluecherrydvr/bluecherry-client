@@ -154,6 +154,7 @@ QStringList BluecherryApp::mplayerVideoOutputs()
     result << QString("gl_nosw");
     result << QString("sdl");
     result << QString("gl");
+    result << QString("vdpau");
 #endif
     return result;
 }
