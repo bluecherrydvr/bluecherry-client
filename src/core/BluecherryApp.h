@@ -84,6 +84,8 @@ public:
 
     static QStringList absolutePaths(const QStringList &paths);
 
+    static QStringList mplayerVideoOutputs();
+
 public slots:
     void pauseLive();
     void releaseLive();

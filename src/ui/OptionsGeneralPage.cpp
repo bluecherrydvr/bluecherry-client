@@ -43,6 +43,16 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
 
 	layout->addLayout(languagesLayout);
 
+    QFormLayout *mplayervoLayout = new QFormLayout();
+    m_mplayervo = new QComboBox();
+    fillMplayerVOComboBox();
+    m_mplayervo->setCurrentIndex(m_mplayervo->findText(
+                                     settings.value(QLatin1String("eventPlayer/mplayer_vo"), QLatin1String("default")).toString()));
+    mplayervoLayout->addRow(new QLabel(tr("MPlayer output driver:")), m_mplayervo);
+
+    layout->addLayout(mplayervoLayout);
+
+
     m_closeToTray = new QCheckBox(tr("Close to tray"));
     m_closeToTray->setChecked(settings.value(QLatin1String("ui/main/closeToTray"), false).toBool());
     m_closeToTray->setToolTip(tr("When the main window is closed, minimize to the system tray"));
@@ -133,6 +143,11 @@ void OptionsGeneralPage::fillLanguageComboBox()
 		m_languages->addItem(it.value(), it.key());
 }
 
+void OptionsGeneralPage::fillMplayerVOComboBox()
+{
+    m_mplayervo->addItems(bcApp->mplayerVideoOutputs());
+}
+
 void OptionsGeneralPage::saveChanges()
 {
     QSettings settings;
@@ -140,6 +155,7 @@ void OptionsGeneralPage::saveChanges()
     bcApp->releaseLive();
 	settings.setValue(QLatin1String("ui/main/language"), m_languages->itemData(m_languages->currentIndex()));
 	bcApp->languageController()->loadLanguage(m_languages->itemData(m_languages->currentIndex()).toString());
+    settings.setValue(QLatin1String("eventPlayer/mplayer_vo"), m_mplayervo->itemText(m_mplayervo->currentIndex()));
     settings.setValue(QLatin1String("ui/main/closeToTray"), m_closeToTray->isChecked());
     bcApp->mainWindow->updateTrayIcon();
     settings.setValue(QLatin1String("ui/liveview/disableHardwareAcceleration"), !m_liveHwAccel->isChecked());

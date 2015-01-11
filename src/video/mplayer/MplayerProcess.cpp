@@ -28,6 +28,7 @@
 #include <QDir>
 #include <QTimer>
 #include <QCoreApplication>
+#include <QSettings>
 #include "MplayerProcess.h"
 
 #define MPL_PLAYMSGMAGIC "XPL32AFFC3DFEBB"
@@ -96,6 +97,12 @@ bool MplayerProcess::start(QString filename)
 
     //qDebug() << this << "starting mplayer process, opening file " << filename << " ...\n";
 #ifndef Q_OS_MAC
+    QSettings settings;
+    QString vo = settings.value(QLatin1String("eventPlayer/mplayer_vo"), QLatin1String("default")).toString();
+
+    if (vo == QLatin1String("default"))
+        vo = QLatin1String(" ,");
+
     m_process->start("mplayer",
 #else
     m_process->start(QCoreApplication::applicationDirPath() + QDir::separator() + "mplayer",
@@ -123,6 +130,8 @@ bool MplayerProcess::start(QString filename)
 #endif
 #ifdef Q_OS_MAC
                     << "-vo" << "corevideo:shared_buffer:buffer_name=bceventmplayer" + m_wid
+#else
+                    << "-vo" << vo
 #endif
                     << filename);
 

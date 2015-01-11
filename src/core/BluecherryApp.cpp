@@ -134,6 +134,30 @@ QStringList BluecherryApp::absolutePaths(const QStringList& paths)
     return result;
 }
 
+QStringList BluecherryApp::mplayerVideoOutputs()
+{
+    QStringList result;
+
+    result << QString("default");
+
+#ifdef Q_OS_WIN
+    result << QString("directx");
+    result << QString("direct3d");
+    result << QString("gl_nosw");
+    result << QString("sdl");
+    result << QString("gl");
+#endif
+
+#ifdef Q_OS_LINUX
+    result << QString("xv");
+    result << QString("x11");
+    result << QString("gl_nosw");
+    result << QString("sdl");
+    result << QString("gl");
+#endif
+    return result;
+}
+
 void BluecherryApp::commitDataRequest(QSessionManager &sessionManager)
 {
     Q_UNUSED(sessionManager);

@@ -42,8 +42,10 @@ private:
     QCheckBox *m_ssFullscreen, *m_ssVideo, *m_ssNever;
 
 	QComboBox *m_languages;
+    QComboBox *m_mplayervo;
 
 	void fillLanguageComboBox();
+    void fillMplayerVOComboBox();
 };
 
 #endif // OPTIONSGENERALPAGE_H
