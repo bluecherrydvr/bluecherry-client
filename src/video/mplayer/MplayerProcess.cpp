@@ -451,9 +451,9 @@ void MplayerProcess::mute(bool yes)
         return;
 
     if (yes)
-        setProperty("mute", "0");
-    else
         setProperty("mute", "1");
+    else
+        setProperty("mute", "0");
 }
 
 
