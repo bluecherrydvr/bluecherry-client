@@ -48,7 +48,7 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     fillMplayerVOComboBox();
     m_mplayervo->setCurrentIndex(m_mplayervo->findText(
                                      settings.value(QLatin1String("eventPlayer/mplayer_vo"), QLatin1String("default")).toString()));
-    mplayervoLayout->addRow(new QLabel(tr("MPlayer output driver:")), m_mplayervo);
+    mplayervoLayout->addRow(new QLabel(tr("MPlayer video output driver:")), m_mplayervo);
 
     layout->addLayout(mplayervoLayout);
 

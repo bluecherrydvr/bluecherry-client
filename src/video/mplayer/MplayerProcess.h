@@ -91,6 +91,7 @@ private:
     void checkDurationAnswer(QByteArray &a);
     void checkPlayingMsgMagic(QByteArray &a);
     void checkScreenshot(QByteArray &a);
+    void checkVOError(QByteArray &a);
 };
 
 #endif

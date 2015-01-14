@@ -258,11 +258,33 @@ void MplayerProcess::checkDurationAnswer(QByteArray &a)
     }
 }
 
+void MplayerProcess::checkVOError(QByteArray &a)
+{
+    QRegExp rx_voerror(QString("^Error opening/initializing the selected video_out \\(\\-vo\\) device"));
+
+    if (QString::fromAscii(a.constData()).contains(rx_voerror))
+    {
+#ifndef Q_OS_MAC
+        QSettings settings;
+        QString vo = settings.value(QLatin1String("eventPlayer/mplayer_vo"), QLatin1String("default")).toString();
+
+        emit mplayerError(true,
+                          tr("Failed to initialize video output '%1'. Please choose another video output driver for MPlayer in the program options.").arg(vo));
+#else
+        emit mplayerError(true, rx_voerror.cap());
+#endif
+    }
+}
+
 void MplayerProcess::readAvailableStderr()
 {
     m_process->setReadChannel(QProcess::StandardError);
 
-    //while(m_process->canReadLine())
+    while(m_process->canReadLine())
+    {
+        QByteArray l = m_process->readLine();
+        checkVOError(l);
+    }
         //qDebug() << "MPLAYER STDERR:" << m_process->readLine();
 }
 
@@ -278,7 +300,6 @@ void MplayerProcess::readAvailableStdout()
         checkDurationAnswer(l);
         checkPositionAnswer(l);
         checkScreenshot(l);
-
         //qDebug() << "MPLAYER STDOUT:" << l << "\n";
     }
 }
