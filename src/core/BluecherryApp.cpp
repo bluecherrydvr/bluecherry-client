@@ -142,6 +142,7 @@ QStringList BluecherryApp::mplayerVideoOutputs()
 
 #ifdef Q_OS_WIN
     result << QString("directx");
+    result << QString("directx:noaccel");
     result << QString("direct3d");
     result << QString("gl_nosw");
     result << QString("sdl");
