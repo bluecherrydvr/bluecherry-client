@@ -101,7 +101,11 @@ bool MplayerProcess::start(QString filename)
     QString vo = settings.value(QLatin1String("eventPlayer/mplayer_vo"), QLatin1String("default")).toString();
 
     if (vo == QLatin1String("default"))
+#ifdef Q_OS_WIN
+        vo = QLatin1String("direct3d,directx:noaccel,");
+#else
         vo = QLatin1String(" ,");
+#endif
 
     m_process->start("mplayer",
 #else
