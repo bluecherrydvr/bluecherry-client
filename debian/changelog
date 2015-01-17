@@ -1,3 +1,15 @@
+bluecherry-client (1:2.2.1-1) lucid; urgency=low
+
+  * Video output selection for MPlayer (Linux and Windows)
+  * Fixed inverted functioning of mute button in event player
+  * Bug #214: Fixed crash
+  * Bug #222: Fixed crash on  "Timeline" tab of event browser
+  * Bug #227: Fixed crash on removing items in "Timeline" tab
+  * Bug #224: Fixed infinite running of loading indicator when 0 events are
+    received
+
+ -- Anton Sviridenko <anton@corp.bluecherry.net>  Sat, 17 Jan 2015 23:19:16 +0400
+
 bluecherry-client (1:2.2.0-1) lucid; urgency=low
 
   * New event player based on mplayer instead of gstreamer
