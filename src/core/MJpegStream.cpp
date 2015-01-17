@@ -34,7 +34,7 @@ MJpegStream::MJpegStream(DVRCamera *camera, QObject *parent)
       m_parserState(ParserBoundary), m_autoStart(false), m_paused(false), m_interval(1)
 {
     Q_ASSERT(m_camera);
-    connect(m_camera.data(), SIGNAL(destroyed(QObject*)), this, SLOT(deleteLater()));
+    //connect(m_camera.data(), SIGNAL(destroyed(QObject*)), this, SLOT(deleteLater()));
 
     bcApp->liveView->addStream(this);
     connect(&m_activityTimer, SIGNAL(timeout()), SLOT(checkActivity()));

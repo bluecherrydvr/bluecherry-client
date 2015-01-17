@@ -98,7 +98,7 @@ RtspStream::RtspStream(DVRCamera *camera, QObject *parent)
       m_fps(0)
 {
     Q_ASSERT(m_camera);
-    connect(m_camera.data(), SIGNAL(destroyed(QObject*)), this, SLOT(deleteLater()));
+    //connect(m_camera.data(), SIGNAL(destroyed(QObject*)), this, SLOT(deleteLater()));
 
     bcApp->liveView->addStream(this);
     connect(bcApp, SIGNAL(settingsChanged()), SLOT(updateSettings()));
