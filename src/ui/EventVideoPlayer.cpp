@@ -170,6 +170,14 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     btnLayout->addWidget(m_fastBtn);
     connect(m_fastBtn, SIGNAL(clicked()), SLOT(faster()));
 
+    m_zoomInBtn = new QPushButton;
+    btnLayout->addWidget(m_zoomInBtn);
+    connect(m_zoomInBtn, SIGNAL(clicked()), SLOT(zoomIn()));
+
+    m_zoomOutBtn = new QPushButton;
+    btnLayout->addWidget(m_zoomOutBtn);
+    connect(m_zoomOutBtn, SIGNAL(clicked()), SLOT(zoomOut()));
+
     btnLayout->addStretch();
 
     m_statusText = new QLabel;
@@ -423,6 +431,8 @@ bool EventVideoPlayer::uiRefreshNeeded() const
 void EventVideoPlayer::retranslateUI()
 {
 	m_saveBtn->setText(tr("Save"));
+    m_zoomInBtn->setText(tr("Zoom In"));
+    m_zoomOutBtn->setText(tr("Zoom Out"));
 	updateBufferStatus();
 }
 
@@ -596,6 +606,16 @@ void EventVideoPlayer::saveVideo()
     bcApp->eventDownloadManager()->startEventDownload(*m_event);
 }
 
+void EventVideoPlayer::zoomIn()
+{
+
+}
+
+void EventVideoPlayer::zoomOut()
+{
+
+}
+
 void EventVideoPlayer::saveSnapshot(const QString &ifile)
 {
     QString file = ifile;
@@ -669,4 +689,6 @@ void EventVideoPlayer::setControlsEnabled(bool enabled)
     m_playBtn->setEnabled(enabled);
     m_restartBtn->setEnabled(enabled);
     m_saveBtn->setEnabled(enabled);
+    m_zoomInBtn->setEnabled(enabled);
+    m_zoomOutBtn->setEnabled(enabled);
 }

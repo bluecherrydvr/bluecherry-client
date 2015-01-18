@@ -45,6 +45,8 @@ public slots:
     void setVideo(const QUrl &url, EventData *event = 0);
     void clearVideo();
     void saveVideo();
+    void zoomIn();
+    void zoomOut();
     void saveSnapshot(const QString &file = QString());
 
     void playPause();
@@ -84,6 +86,8 @@ private:
     VideoWidget *m_videoWidget;
     QToolButton *m_playBtn, *m_restartBtn, *m_fastBtn, *m_slowBtn, *m_muteBtn;
     QPushButton *m_saveBtn;
+    QPushButton *m_zoomInBtn;
+    QPushButton *m_zoomOutBtn;
     QSlider *m_seekSlider;
     QLabel *m_startTime, *m_endTime, *m_statusText, *m_rateText;
     QSlider *m_volumeSlider;
