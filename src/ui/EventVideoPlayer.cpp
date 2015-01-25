@@ -75,7 +75,8 @@ protected:
 };
 
 EventVideoPlayer::EventVideoPlayer(QWidget *parent)
-    : QWidget(parent), m_event(0), m_videoWidget(0)
+    : QWidget(parent), m_event(0),
+      m_videoWidget(0), m_zoomFactor(1.0)
 {
     connect(bcApp, SIGNAL(queryLivePaused()), SLOT(queryLivePaused()));
     connect(bcApp, SIGNAL(settingsChanged()), SLOT(settingsChanged()));
@@ -605,15 +606,44 @@ void EventVideoPlayer::saveVideo()
 {
     bcApp->eventDownloadManager()->startEventDownload(*m_event);
 }
+/*
+void EventVideoPlayer::setZoom(double z)
+{
+    m_zoomFactor = z;
+
+    if (m_videoWidget)
+    {
+        int x, y, w, h;
+
+        x = m_videoWidget->x();
+        y = m_videoWidget->y();
+        w = m_videoWidget->width();
+        h = m_videoWidget->height();
+
+        if (m_zoomFactor != 1.0)
+        {
+            w = w * m_zoomFactor;
+            h = h * m_zoomFactor;
+
+            x = (this->width() - w) / 2;
+            y = (this->height() -h) / 2;
+        }
+
+        m_videoWidget->move(x, y);
+        m_videoWidget->resize(w, h);
+    }
+}*/
 
 void EventVideoPlayer::zoomIn()
 {
-
+    if (m_videoWidget)
+        m_videoWidget->zoomIn();
 }
 
 void EventVideoPlayer::zoomOut()
 {
-
+    if (m_videoWidget)
+        m_videoWidget->zoomOut();
 }
 
 void EventVideoPlayer::saveSnapshot(const QString &ifile)

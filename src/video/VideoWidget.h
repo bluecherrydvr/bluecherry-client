@@ -32,6 +32,8 @@ public:
 
     virtual void initVideo(VideoPlayerBackend *videoPlayerBackend) = 0;
     virtual void clearVideo() = 0;
+    virtual void zoomIn() = 0;
+    virtual void zoomOut() = 0;
 
 };
 

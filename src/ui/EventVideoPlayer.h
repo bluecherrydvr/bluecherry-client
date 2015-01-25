@@ -93,10 +93,12 @@ private:
     QSlider *m_volumeSlider;
     QTimer m_uiTimer;
     double m_lastspeed;
+    double m_zoomFactor;
 
     void setControlsEnabled(bool enabled);
     bool uiRefreshNeeded() const;
 	void retranslateUI();
+    //void setZoom(double z);
 };
 
 #endif // EVENTVIDEOPLAYER_H

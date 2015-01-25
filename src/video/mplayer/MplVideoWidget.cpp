@@ -23,7 +23,9 @@
 #include <QApplication>
 #include <QSettings>
 #include <QMouseEvent>
+#include <QDebug>
 
+#define ZOOM_STEP 0.05
 
 MplVideoWidget::~MplVideoWidget()
 {
@@ -35,7 +37,8 @@ MplVideoWidget::MplVideoWidget(QWidget *parent)
       m_viewport(0),
       m_frameWidth(-1),
       m_frameHeight(-1),
-      m_normalFrameStyle(0)
+      m_normalFrameStyle(0),
+      m_zoomFactor(1.0)
 {
     setAutoFillBackground(false);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -121,12 +124,61 @@ void MplVideoWidget::resizeEvent(QResizeEvent *ev)
 {
     QFrame::resizeEvent(ev);
     m_viewport->setGeometry(contentsRect());
+
+    int x, y, w, h;
+
+    x = 0;
+    y = 0;
+    w = this->width();
+    h = this->height();
+
+    m_viewport->move(x, y);
+    m_viewport->resize(w, h);
+
+    setZoom(m_zoomFactor);
 }
 
 void MplVideoWidget::mouseDoubleClickEvent(QMouseEvent *ev)
 {
     ev->accept();
     toggleFullScreen();
+}
+
+void MplVideoWidget::zoomIn()
+{
+    setZoom(m_zoomFactor + ZOOM_STEP);
+}
+
+void MplVideoWidget::zoomOut()
+{
+    setZoom(m_zoomFactor - ZOOM_STEP);
+}
+
+void MplVideoWidget::setZoom(double z)
+{
+    m_zoomFactor = z;
+
+    if (m_viewport)
+    {
+        int x, y, w, h;
+
+        x = m_viewport->x();
+        y = m_viewport->y();
+        w = m_viewport->width();
+        h = m_viewport->height();
+
+        if (m_zoomFactor != 1.0)
+        {
+            w = w * m_zoomFactor;
+            h = h * m_zoomFactor;
+
+            x = (this->width() - w) / 2;
+            y = (this->height() -h) / 2;
+        }
+
+        m_viewport->move(x, y);
+        m_viewport->resize(w, h);
+    }
 }
 
 void MplVideoWidget::keyPressEvent(QKeyEvent *ev)
@@ -138,6 +190,12 @@ void MplVideoWidget::keyPressEvent(QKeyEvent *ev)
     {
     case Qt::Key_Escape:
         setFullScreen(false);
+        break;
+    case Qt::Key_W:
+        zoomOut();
+        break;
+    case Qt::Key_E:
+        zoomIn();
         break;
     default:
         return;

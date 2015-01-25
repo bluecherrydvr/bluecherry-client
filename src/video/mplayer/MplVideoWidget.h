@@ -50,6 +50,9 @@ public:
 
     virtual QSize sizeHint() const;
 
+    virtual void zoomIn();
+    virtual void zoomOut();
+
     void setViewport(QWidget *viewport);
 
 public slots:
@@ -72,6 +75,10 @@ private:
     QString m_overlayMsg;
     int m_frameWidth, m_frameHeight;
     int m_normalFrameStyle;
+    double m_zoomFactor;
+
+    void setZoom(double z);
+
 #ifdef Q_OS_MAC
     QString m_sharedBufferName;
     QMutex m_frameLock;
