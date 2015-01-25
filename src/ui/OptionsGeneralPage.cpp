@@ -91,6 +91,10 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     m_deinterlace->setChecked(settings.value(QLatin1String("ui/liveview/autoDeinterlace"), false).toBool());
     layout->addWidget(m_deinterlace);
 
+    m_updateNotifications = new QCheckBox(tr("Disable notifications about available Bluecherry client updates"));
+    m_updateNotifications->setChecked(settings.value(QLatin1String("ui/disableUpdateNotifications"), false).toBool());
+    layout->addWidget(m_updateNotifications);
+
 #if defined(Q_OS_WIN) || defined(Q_OS_MAC) || defined(Q_OS_LINUX)
     m_ssFullscreen = new QCheckBox(tr("Viewing live or recorded video in fullscreen"));
     m_ssVideo = new QCheckBox(tr("Playing recorded video"));
@@ -161,6 +165,7 @@ void OptionsGeneralPage::saveChanges()
     settings.setValue(QLatin1String("ui/liveview/disableHardwareAcceleration"), !m_liveHwAccel->isChecked());
     settings.setValue(QLatin1String("ui/liveview/disableAdvancedOpengl"), !m_advancedOpengl->isChecked());
     settings.setValue(QLatin1String("ui/liveview/autoDeinterlace"), m_deinterlace->isChecked());
+    settings.setValue(QLatin1String("ui/disableUpdateNotifications"), m_updateNotifications->isChecked());
     if (m_eventPlayerHardwareDecoding)
         settings.setValue(QLatin1String("ui/eventplayer/enableHardwareDecoding"), m_eventPlayerHardwareDecoding->isChecked());
 

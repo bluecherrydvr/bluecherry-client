@@ -92,7 +92,12 @@ BluecherryApp::BluecherryApp()
 
     m_updateChecker = new UpdateChecker(nam, this);
     connect(m_updateChecker, SIGNAL(newVersionAvailable(Version)), this, SLOT(newVersionAvailable(Version)));
-    m_updateChecker->start(60 * 60 * 24 * 1000);
+    QSettings settings;
+
+    if (!settings.value(QLatin1String("ui/disableUpdateNotifications"), false).toBool())
+    {
+        startUpdateChecker();
+    }
 
     m_mediaDownloadManager = new MediaDownloadManager(this);
     m_mediaDownloadManager->setCookieJar(nam->cookieJar());
@@ -109,6 +114,16 @@ BluecherryApp::BluecherryApp()
 BluecherryApp::~BluecherryApp()
 {
     unregisterVideoPlayerFactory();
+}
+
+void BluecherryApp::startUpdateChecker()
+{
+    m_updateChecker->start(60 * 60 * 24 * 1000);
+}
+
+void BluecherryApp::stopUpdateChecker()
+{
+    m_updateChecker->stop();
 }
 
 void BluecherryApp::registerVideoPlayerFactory()
@@ -178,13 +193,25 @@ void BluecherryApp::newVersionAvailable(const Version &newVersion)
     messageBox.setWindowTitle(tr("Bluecherry"));
     messageBox.setText(tr("A new Bluecherry client update is available"));
     messageBox.setInformativeText(tr("Would you like to download version %2 now?").arg(newVersion.toString()));
-    messageBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    messageBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel | QMessageBox::Discard);
     messageBox.button(QMessageBox::Ok)->setText(tr("Download"));
     messageBox.button(QMessageBox::Cancel)->setText(tr("Remind Me Later"));
+    messageBox.button(QMessageBox::Discard)->setText(tr("Do Not Show Again"));
 
-    if (messageBox.exec() == QMessageBox::Ok) {
+    int result = messageBox.exec();
+    if (result == QMessageBox::Ok)
+    {
         qDebug() << Q_FUNC_INFO << "Upgrading";
         QDesktopServices::openUrl(QString::fromLatin1("http://www.bluecherrydvr.com/downloads/?v=%1").arg(QApplication::applicationVersion()));
+    }
+
+    if (result == QMessageBox::Discard)
+    {
+        stopUpdateChecker();
+
+        QSettings settings;
+
+        settings.setValue(QLatin1String("ui/disableUpdateNotifications"), true);
     }
 }
 
@@ -201,6 +228,9 @@ void BluecherryApp::sendSettingsChanged()
     /* If always is disabled while another condition would keep the screensaver off right now,
      * this will incorrectly turn off inhibition. Detecting this case is complicated. */
     setScreensaverInhibited(settings.value(QLatin1String("ui/disableScreensaver/always"), true).toBool());
+
+    if (settings.value(QLatin1String("ui/disableUpdateNotifications"), false).toBool())
+        stopUpdateChecker();
 }
 
 void BluecherryApp::setLanguageController(const QSharedPointer<LanguageController> &controller)

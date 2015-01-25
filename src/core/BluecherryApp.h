@@ -91,6 +91,8 @@ public slots:
     void releaseLive();
     void setScreensaverInhibited(bool inhibit);
     void commitDataRequest(QSessionManager &sessionManager);
+    void startUpdateChecker();
+    void stopUpdateChecker();
 
 signals:
     void sslConfirmRequired(DVRServer *server, const QList<QSslError> &errors, const QSslConfiguration &config);
