@@ -288,8 +288,9 @@ void MplayerProcess::readAvailableStderr()
     {
         QByteArray l = m_process->readLine();
         checkVOError(l);
+
+        qDebug() << "MPLAYER STDERR:" << l;
     }
-        //qDebug() << "MPLAYER STDERR:" << m_process->readLine();
 }
 
 void MplayerProcess::readAvailableStdout()
