@@ -38,7 +38,9 @@ MplVideoWidget::MplVideoWidget(QWidget *parent)
       m_frameWidth(-1),
       m_frameHeight(-1),
       m_normalFrameStyle(0),
-      m_zoomFactor(1.0)
+      m_zoomFactor(1.0),
+      m_originalWidth(0),
+      m_originalHeight(0)
 {
     setAutoFillBackground(false);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -129,8 +131,8 @@ void MplVideoWidget::resizeEvent(QResizeEvent *ev)
 
     x = 0;
     y = 0;
-    w = this->width();
-    h = this->height();
+    m_originalWidth = w = this->width();
+    m_originalHeight = h = this->height();
 
     m_viewport->move(x, y);
     m_viewport->resize(w, h);
@@ -164,8 +166,8 @@ void MplVideoWidget::setZoom(double z)
 
         x = m_viewport->x();
         y = m_viewport->y();
-        w = m_viewport->width();
-        h = m_viewport->height();
+        w = m_originalWidth;//m_viewport->width();
+        h = m_originalHeight;//m_viewport->height();
 
         if (m_zoomFactor != 1.0)
         {
@@ -179,6 +181,8 @@ void MplVideoWidget::setZoom(double z)
         m_viewport->move(x, y);
         m_viewport->resize(w, h);
     }
+
+    qDebug() << "m_zoomFactor = " << m_zoomFactor << "\n";
 }
 
 void MplVideoWidget::keyPressEvent(QKeyEvent *ev)

@@ -76,6 +76,8 @@ private:
     int m_frameWidth, m_frameHeight;
     int m_normalFrameStyle;
     double m_zoomFactor;
+    int m_originalWidth;
+    int m_originalHeight;
 
     void setZoom(double z);
 
