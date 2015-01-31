@@ -185,6 +185,11 @@ void MplVideoWidget::setZoom(double z)
     qDebug() << "m_zoomFactor = " << m_zoomFactor << "\n";
 }
 
+void MplVideoWidget::moveFrame(int dx, int dy)
+{
+    m_viewport->move(m_viewport->x() + dx, m_viewport->y() + dy);
+}
+
 void MplVideoWidget::keyPressEvent(QKeyEvent *ev)
 {
     if (ev->modifiers() != 0)
@@ -194,24 +199,6 @@ void MplVideoWidget::keyPressEvent(QKeyEvent *ev)
     {
     case Qt::Key_Escape:
         setFullScreen(false);
-        break;
-    case Qt::Key_W:
-        zoomOut();
-        break;
-    case Qt::Key_E:
-        zoomIn();
-        break;
-    case Qt::Key_Up:
-        m_viewport->move(m_viewport->x(), m_viewport->y() - 10);
-        break;
-    case Qt::Key_Down:
-        m_viewport->move(m_viewport->x(), m_viewport->y() + 10);
-        break;
-    case Qt::Key_Left:
-        m_viewport->move(m_viewport->x() - 10, m_viewport->y());
-        break;
-    case Qt::Key_Right:
-        m_viewport->move(m_viewport->x() + 10, m_viewport->y());
         break;
     default:
         return;

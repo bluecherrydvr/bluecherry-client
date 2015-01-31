@@ -47,6 +47,10 @@ public slots:
     void saveVideo();
     void zoomIn();
     void zoomOut();
+    void moveLeft();
+    void moveRight();
+    void moveUp();
+    void moveDown();
     void saveSnapshot(const QString &file = QString());
 
     void playPause();

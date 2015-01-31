@@ -52,6 +52,7 @@ public:
 
     virtual void zoomIn();
     virtual void zoomOut();
+    virtual void moveFrame(int dx, int dy);
 
     void setViewport(QWidget *viewport);
 
