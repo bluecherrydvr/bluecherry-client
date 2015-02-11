@@ -171,13 +171,19 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     btnLayout->addWidget(m_fastBtn);
     connect(m_fastBtn, SIGNAL(clicked()), SLOT(faster()));
 
-    m_zoomInBtn = new QPushButton;
-    btnLayout->addWidget(m_zoomInBtn);
-    connect(m_zoomInBtn, SIGNAL(clicked()), SLOT(zoomIn()));
-
     m_zoomOutBtn = new QPushButton;
     btnLayout->addWidget(m_zoomOutBtn);
     connect(m_zoomOutBtn, SIGNAL(clicked()), SLOT(zoomOut()));
+
+    m_zoomText = new QLabel(tr("zoom 1x"));
+    m_zoomText->setStyleSheet(QLatin1String("color: #777777"));
+    m_zoomText->setFixedWidth(QFontMetrics(m_rateText->font()).width(QLatin1String("zoom 12.99x")));
+    m_zoomText->setAlignment(Qt::AlignCenter);
+    btnLayout->addWidget(m_zoomText);
+
+    m_zoomInBtn = new QPushButton;
+    btnLayout->addWidget(m_zoomInBtn);
+    connect(m_zoomInBtn, SIGNAL(clicked()), SLOT(zoomIn()));
 
     btnLayout->addStretch();
 
@@ -450,8 +456,8 @@ bool EventVideoPlayer::uiRefreshNeeded() const
 void EventVideoPlayer::retranslateUI()
 {
 	m_saveBtn->setText(tr("Save"));
-    m_zoomInBtn->setText(tr("Zoom In"));
-    m_zoomOutBtn->setText(tr("Zoom Out"));
+    m_zoomInBtn->setText(tr("+"));
+    m_zoomOutBtn->setText(tr("-"));
 	updateBufferStatus();
 }
 
@@ -655,13 +661,19 @@ void EventVideoPlayer::setZoom(double z)
 void EventVideoPlayer::zoomIn()
 {
     if (m_videoWidget)
+    {
         m_videoWidget->zoomIn();
+        m_zoomText->setText(QString::fromLatin1("zoom %L1x").arg(m_videoWidget->zoom(), 0, 'f', 2));
+    }
 }
 
 void EventVideoPlayer::zoomOut()
 {
     if (m_videoWidget)
+    {
         m_videoWidget->zoomOut();
+        m_zoomText->setText(QString::fromLatin1("zoom %L1x").arg(m_videoWidget->zoom(), 0, 'f', 2));
+    }
 }
 
 void EventVideoPlayer::moveLeft()
