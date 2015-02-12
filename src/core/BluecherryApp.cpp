@@ -54,7 +54,7 @@ BluecherryApp *bcApp = 0;
 
 BluecherryApp::BluecherryApp()
     : nam(new QNetworkAccessManager(this)), liveView(new LiveViewManager(this)),
-      globalRate(new TransferRateCalculator(this)),
+      globalRate(new TransferRateCalculator(this)), m_updateChecker(0),
       m_livePaused(false), m_inPauseQuery(false),
       m_screensaverInhibited(false), m_screensaveValue(0)
 {
@@ -118,12 +118,14 @@ BluecherryApp::~BluecherryApp()
 
 void BluecherryApp::startUpdateChecker()
 {
-    m_updateChecker->start(60 * 60 * 24 * 1000);
+    if (m_updateChecker)
+        m_updateChecker->start(60 * 60 * 24 * 1000);
 }
 
 void BluecherryApp::stopUpdateChecker()
 {
-    m_updateChecker->stop();
+    if (m_updateChecker)
+        m_updateChecker->stop();
 }
 
 void BluecherryApp::registerVideoPlayerFactory()
