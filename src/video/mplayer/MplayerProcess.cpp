@@ -463,6 +463,9 @@ void MplayerProcess::mute(bool yes)
 
 bool MplayerProcess::isRunning()
 {
+    if (!m_process)
+        return false;
+
     return m_process->state() == QProcess::Running;
 }
 

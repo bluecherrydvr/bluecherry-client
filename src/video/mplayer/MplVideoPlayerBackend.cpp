@@ -173,7 +173,7 @@ bool MplVideoPlayerBackend::isSeekable() const
 
 void MplVideoPlayerBackend::playIfReady()
 {
-    if (!m_mplayer->start(m_videoBuffer->bufferFilePath()))
+    if (!m_mplayer || !m_mplayer->start(m_videoBuffer->bufferFilePath()))
         return;
 }
 
@@ -225,7 +225,7 @@ void MplVideoPlayerBackend::restart()
 
 void MplVideoPlayerBackend::mute(bool mute)
 {
-    if (!m_mplayer->isRunning())
+    if (!m_mplayer || !m_mplayer->isRunning())
         return;
 
     m_mplayer->mute(mute);
@@ -233,7 +233,7 @@ void MplVideoPlayerBackend::mute(bool mute)
 
 void MplVideoPlayerBackend::setVolume(double volume)
 {
-    if (!m_mplayer->isRunning())
+    if (!m_mplayer || !m_mplayer->isRunning())
         return;
 
     volume*=100.0;
@@ -243,7 +243,7 @@ void MplVideoPlayerBackend::setVolume(double volume)
 
 qint64 MplVideoPlayerBackend::duration() const
 {
-    if (!m_mplayer->isRunning())
+    if (!m_mplayer || !m_mplayer->isRunning())
         return -1;
 
     double secs = m_mplayer->duration();
@@ -252,7 +252,7 @@ qint64 MplVideoPlayerBackend::duration() const
 
 qint64 MplVideoPlayerBackend::position() const
 {
-    if (!m_mplayer->isRunning())
+    if (!m_mplayer || !m_mplayer->isRunning())
         return -1;
 
     double secs = m_mplayer->position();
@@ -267,7 +267,7 @@ void MplVideoPlayerBackend::setHardwareDecodingEnabled(bool enable)
 
 bool MplVideoPlayerBackend::seek(qint64 position)
 {
-    if (!m_mplayer->isRunning())
+    if (!m_mplayer || !m_mplayer->isRunning())
         return false;
 
     return m_mplayer->seek((double)position/1000000000.0);
@@ -275,7 +275,7 @@ bool MplVideoPlayerBackend::seek(qint64 position)
 
 bool MplVideoPlayerBackend::setSpeed(double speed)
 {
-    if (!m_mplayer->isRunning())
+    if (!m_mplayer || !m_mplayer->isRunning())
         return false;
 
     if (speed == m_playbackSpeed)
