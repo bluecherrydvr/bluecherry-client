@@ -20,6 +20,8 @@
 
 #include "video/VideoWidget.h"
 
+#define ZOOM_STEP 0.05
+
 #ifdef Q_OS_MAC
 #include <QMutex>
 #include <QImage>

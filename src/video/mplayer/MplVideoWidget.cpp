@@ -23,9 +23,7 @@
 #include <QApplication>
 #include <QSettings>
 #include <QMouseEvent>
-#include <QDebug>
 
-#define ZOOM_STEP 0.05
 
 MplVideoWidget::~MplVideoWidget()
 {
@@ -182,7 +180,6 @@ void MplVideoWidget::setZoom(double z)
         m_viewport->resize(w, h);
     }
 
-    //qDebug() << "m_zoomFactor = " << m_zoomFactor << "\n";
 }
 
 void MplVideoWidget::moveFrame(int dx, int dy)
