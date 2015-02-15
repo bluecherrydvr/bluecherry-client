@@ -36,8 +36,8 @@ public:
 
 
 
-    virtual qint64 duration() const;
-    virtual qint64 position() const;
+    virtual int duration() const;
+    virtual int position() const;
     virtual double playbackSpeed() const { return m_playbackSpeed; }
     virtual bool isSeekable() const;
     virtual bool atEnd() const { return m_state == Done; }
@@ -58,7 +58,7 @@ public slots:
     virtual void play();
     virtual void playIfReady();
     virtual void pause();
-    virtual bool seek(qint64 position);
+    virtual bool seek(int position);
     virtual bool setSpeed(double speed);
     virtual void restart();
     virtual void mute(bool mute);

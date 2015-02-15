@@ -289,7 +289,7 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
 
     connect(m_videoBackend.data(), SIGNAL(stateChanged(int,int)), SLOT(stateChanged(int)));
     connect(m_videoBackend.data(), SIGNAL(nonFatalError(QString)), SLOT(videoNonFatalError(QString)));
-    connect(m_videoBackend.data(), SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
+    connect(m_videoBackend.data(), SIGNAL(durationChanged(int)), SLOT(durationChanged(int)));
     connect(m_videoBackend.data(), SIGNAL(endOfStream()), SLOT(durationChanged()));
     connect(m_videoBackend.data(), SIGNAL(playbackSpeedChanged(double)), SLOT(playbackSpeedChanged(double)));
     connect(m_videoBackend.data(), SIGNAL(streamsInitialized(bool)), SLOT(streamsInitialized(bool)));
@@ -366,7 +366,7 @@ void EventVideoPlayer::seek(int position)
         return;
 
     bool ok = m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "seek", Qt::QueuedConnection,
-                                                  Q_ARG(qint64, qint64(position) * 1000000));
+                                                  Q_ARG(int, position));
     Q_ASSERT(ok);
     Q_UNUSED(ok);
 }
@@ -575,22 +575,19 @@ void EventVideoPlayer::stateChanged(int state)
 
 }
 
-void EventVideoPlayer::durationChanged(qint64 nsDuration)
+void EventVideoPlayer::durationChanged(int msDuration)
 {
     Q_ASSERT(QThread::currentThread() == qApp->thread());
 
     if (!m_videoBackend)
         return;
 
-    if (nsDuration == -1)
+    if (msDuration == -1)
         //return;
-        nsDuration = m_videoBackend.data()->duration();
+        msDuration = m_videoBackend.data()->duration();
 
-    /* Time is assumed to be nanoseconds; convert to milliseconds */
-    int duration = int(nsDuration / 1000000);
-    /* BUG: Shouldn't mindlessly chop to int */
     m_seekSlider->blockSignals(true);
-    m_seekSlider->setMaximum(duration);
+    m_seekSlider->setMaximum(msDuration);
     m_seekSlider->blockSignals(false);
     updatePosition();
 }
@@ -604,24 +601,23 @@ void EventVideoPlayer::updatePosition()
 
     if (!m_seekSlider->maximum())
     {
-        qint64 nsDuration = m_videoBackend.data()->duration();
-        if (nsDuration && int(nsDuration / 1000000))
+        int msDuration = m_videoBackend.data()->duration();
+        if (msDuration)
         {
-            durationChanged(nsDuration);
+            durationChanged(msDuration);
             return;
         }
     }
 
-    qint64 nsPosition = m_videoBackend.data()->position();
-    int position = int(nsPosition / 1000000);
+    int msPosition = m_videoBackend.data()->position();
 
     if (m_videoBackend.data()->atEnd())
-        position = m_seekSlider->maximum();
+        msPosition = m_seekSlider->maximum();
 
     if (!m_seekSlider->isSliderDown())
     {
         m_seekSlider->blockSignals(true);
-        m_seekSlider->setValue(position);
+        m_seekSlider->setValue(msPosition);
         m_seekSlider->blockSignals(false);
     }
 }

@@ -64,7 +64,7 @@ protected:
 
 private slots:
     void stateChanged(int state);
-    void durationChanged(qint64 duration = -1);
+    void durationChanged(int msDuration = -1);
     void playbackSpeedChanged(double playbackSpeed);
     void updatePosition();
     void videoNonFatalError(const QString &message);

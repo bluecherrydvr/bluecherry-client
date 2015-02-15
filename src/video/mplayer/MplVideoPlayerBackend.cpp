@@ -241,23 +241,23 @@ void MplVideoPlayerBackend::setVolume(double volume)
     m_mplayer->setVolume(volume);
 }
 
-qint64 MplVideoPlayerBackend::duration() const
+int MplVideoPlayerBackend::duration() const
 {
     if (!m_mplayer || !m_mplayer->isRunning())
         return -1;
 
     double secs = m_mplayer->duration();
-    return secs < 0 ? -1 : secs  * 1000000000.0;
+    return secs < 0 ? -1 : secs  * 1000.0;
 }
 
-qint64 MplVideoPlayerBackend::position() const
+int MplVideoPlayerBackend::position() const
 {
     if (!m_mplayer || !m_mplayer->isRunning())
         return -1;
 
     double secs = m_mplayer->position();
 
-    return secs > 0 ? secs * 1000000000.0 : -1;
+    return secs > 0 ? secs * 1000.0 : -1;
 }
 
 void MplVideoPlayerBackend::setHardwareDecodingEnabled(bool enable)
@@ -265,12 +265,12 @@ void MplVideoPlayerBackend::setHardwareDecodingEnabled(bool enable)
     //implement later
 }
 
-bool MplVideoPlayerBackend::seek(qint64 position)
+bool MplVideoPlayerBackend::seek(int position)
 {
     if (!m_mplayer || !m_mplayer->isRunning())
         return false;
 
-    return m_mplayer->seek((double)position/1000000000.0);
+    return m_mplayer->seek((double)position/1000.0);
 }
 
 bool MplVideoPlayerBackend::setSpeed(double speed)

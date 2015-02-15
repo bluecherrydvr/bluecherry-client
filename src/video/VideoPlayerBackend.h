@@ -46,8 +46,8 @@ public:
     explicit VideoPlayerBackend(QObject *parent = 0);
     virtual ~VideoPlayerBackend();
 
-    virtual qint64 duration() const = 0;
-    virtual qint64 position() const = 0;
+    virtual int duration() const = 0;
+    virtual int position() const = 0;
     virtual double playbackSpeed() const = 0;
     virtual bool isSeekable() const = 0;
     virtual bool atEnd() const = 0;
@@ -67,7 +67,7 @@ public slots:
     virtual void play() = 0;
     virtual void playIfReady() = 0;
     virtual void pause() = 0;
-    virtual bool seek(qint64 position) = 0;
+    virtual bool seek(int position) = 0;
     virtual bool setSpeed(double speed) = 0;
     virtual void restart() = 0;
 
@@ -76,7 +76,7 @@ public slots:
 
 signals:
     void stateChanged(int newState, int oldState);
-    void durationChanged(qint64 duration);
+    void durationChanged(int duration);
     void playbackSpeedChanged(double playbackSpeed);
     void endOfStream();
     /* This reports the status of buffering enough for playback, not the buffering of the entire file.
