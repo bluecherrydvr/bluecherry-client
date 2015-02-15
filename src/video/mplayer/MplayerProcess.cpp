@@ -39,7 +39,8 @@ MplayerProcess::MplayerProcess(QString &wid, QObject *parent)
       m_duration(-1), m_position(-1),
       m_isreadytoplay(false),
       m_posreqsent(false), m_durreqsent(false),
-      m_ispaused(false)
+      m_ispaused(false),
+      m_speed(1.0)
 
 {
     //qDebug() << this << "\n";
@@ -226,6 +227,7 @@ void MplayerProcess::checkPlayingMsgMagic(QByteArray &a)
         m_isreadytoplay = true;
         emit readyToPlay();
         duration();
+        setSpeed(m_speed);
     }
 }
 
@@ -383,6 +385,9 @@ void MplayerProcess::play()
 
     m_process->write("pause\n");
     m_ispaused = false;
+
+    if (m_speed != 1.0)
+        setProperty("speed", QString::number(m_speed, 'f', 2));
 }
 
 void MplayerProcess::pause()
@@ -436,6 +441,8 @@ double MplayerProcess::position()
 
 void MplayerProcess::setSpeed(double speed)
 {
+    m_speed = speed;
+
     if (!(isRunning() && m_isreadytoplay))
         return;
 

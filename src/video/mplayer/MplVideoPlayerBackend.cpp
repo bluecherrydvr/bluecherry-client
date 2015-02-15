@@ -159,6 +159,8 @@ void MplVideoPlayerBackend::mplayerReady()
     VideoState old = m_state;
     m_state = Playing;
     emit stateChanged(m_state, old);
+
+    m_mplayer->setSpeed(m_playbackSpeed);
 }
 
 void MplVideoPlayerBackend::durationIsKnown()

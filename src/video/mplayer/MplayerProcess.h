@@ -83,6 +83,8 @@ private:
     bool m_durreqsent;
     bool m_ispaused;
 
+    double m_speed;
+
     QString m_dstscreenshotfile;
     QString m_srcscreenshotfile;
 
