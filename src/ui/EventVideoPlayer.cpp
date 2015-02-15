@@ -82,7 +82,7 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     connect(bcApp, SIGNAL(settingsChanged()), SLOT(settingsChanged()));
     connect(&m_uiTimer, SIGNAL(timeout()), SLOT(updateUI()));
 
-    m_uiTimer.setInterval(500);
+    m_uiTimer.setInterval(333);
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
