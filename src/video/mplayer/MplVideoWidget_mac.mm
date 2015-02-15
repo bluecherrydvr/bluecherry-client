@@ -394,6 +394,7 @@ bool MplVideoWidget::eventFilter(QObject *obj, QEvent *ev)
 
     QRect r = rect();
     p.eraseRect(r);
+    r = m_viewport->rect();
     QSize scaledSize = frame.size();
     scaledSize.scale(r.size(), Qt::KeepAspectRatio);
     r.adjust((r.width() - scaledSize.width()) / 2, (r.height() - scaledSize.height()) / 2, 0, 0);
