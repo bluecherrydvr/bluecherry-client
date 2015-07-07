@@ -519,7 +519,7 @@ void MainWindow::openAbout()
 
 void MainWindow::openDocumentation()
 {
-    QUrl url(QLatin1String("http://help.bluecherrydvr.com/s/manuals/m/version2"));
+    QUrl url(QLatin1String("http://docs.bluecherrydvr.com/collection/13-version-2-user-manual"));
     bool ok = QDesktopServices::openUrl(url);
     if (!ok)
         QMessageBox::critical(this, tr("Error"), tr("An error occurred while opening %1").arg(url.toString()));
