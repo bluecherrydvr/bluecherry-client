@@ -46,6 +46,7 @@ public:
     void setMinimumLevel(EventLevel minimumLevel);
     void setTypes(QBitArray types);
     void setDay(const QDate &day);
+    void setTimeRange(const QDateTime &from, const QDateTime &to);
     void setSources(const QMap<DVRServer*, QSet<int> > &sources);
 
 private:
@@ -53,7 +54,9 @@ private:
     IncompletePlace m_incompletePlace;
     EventLevel m_minimumLevel;
     QBitArray m_types;
-    QDate m_day;
+    //QDate m_day;
+    QDateTime m_dtStart;
+    QDateTime m_dtEnd;
     QMap<DVRServer*, QSet<int> > m_sources;
 
     bool filterAcceptsRow(EventData *eventData) const;

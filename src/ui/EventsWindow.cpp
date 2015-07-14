@@ -37,7 +37,7 @@
 #include "event/MediaEventFilter.h"
 #include <QBoxLayout>
 #include <QGridLayout>
-#include <QDateEdit>
+#include <QDateTimeEdit>
 #include <QComboBox>
 #include <QLabel>
 #include <QCheckBox>
@@ -84,7 +84,7 @@ EventsWindow::EventsWindow(DVRServerRepository *serverRepository, QWidget *paren
     connect(sourcesModel, SIGNAL(checkedSourcesChanged(QMap<DVRServer*,QSet<int>>)),
             this, SLOT(setFilterSources(QMap<DVRServer*,QSet<int>>)));
 
-    createDateFilter(filtersLayout);
+    createDateTimeFilter(filtersLayout);
     createLoadButton(filtersLayout);
 
 #if 1 /* This is not useful currently. */
@@ -161,24 +161,44 @@ void EventsWindow::createLoadButton(QBoxLayout *layout)
     connect(m_loadEvents, SIGNAL(clicked()), this, SLOT(loadEvents()));
 }
 
-void EventsWindow::createDateFilter(QBoxLayout *layout)
+void EventsWindow::createDateTimeFilter(QBoxLayout *layout)
 {
-	m_dateLabel = new QLabel;
-	m_dateLabel->setStyleSheet(QLatin1String("font-weight:bold;"));
-	layout->addWidget(m_dateLabel);
+    m_fromDateTimeLabel = new QLabel;
+    m_toDateTimeLabel = new QLabel;
+    m_fromDateTimeLabel->setStyleSheet(QLatin1String("font-weight:bold;"));
+    m_toDateTimeLabel->setStyleSheet(QLatin1String("font-weight:bold;"));
 
-    QDateEdit *dateEdit = new QDateEdit(QDate::currentDate());
-    dateEdit->setCalendarPopup(true);
-    dateEdit->setMaximumDate(QDate::currentDate());
-    dateEdit->setDisplayFormat(QLatin1String("ddd, MMM dd, yyyy"));
-    dateEdit->setTime(QTime(23, 59, 59, 999));
-    dateEdit->setFixedWidth(m_sourcesView->width());
-    layout->addWidget(dateEdit);
+    layout->addWidget(m_fromDateTimeLabel);
 
-    setFilterDay(dateEdit->dateTime());
 
-    connect(dateEdit, SIGNAL(dateTimeChanged(QDateTime)), this,
-            SLOT(setFilterDay(QDateTime)));
+    QDateTimeEdit *fromDateEdit = new QDateTimeEdit(QDateTime::currentDateTime().addSecs(-60*60*5));
+    fromDateEdit->setCalendarPopup(true);
+    fromDateEdit->setMaximumDate(QDate::currentDate());
+    fromDateEdit->setDisplayFormat(QLatin1String("ddd, MMM dd, yyyy hh:mm"));
+    //fromDateEdit->setTime(QTime(23, 59, 59, 999));
+    fromDateEdit->setFixedWidth(m_sourcesView->width());
+    layout->addWidget(fromDateEdit);
+    m_fromDateTime = fromDateEdit;
+
+    layout->addWidget(m_toDateTimeLabel);
+
+    QDateTimeEdit *toDateEdit = new QDateTimeEdit(QDateTime::currentDateTime());
+    toDateEdit->setCalendarPopup(true);
+    toDateEdit->setMaximumDate(QDate::currentDate());
+    toDateEdit->setDisplayFormat(QLatin1String("ddd, MMM dd, yyyy hh:mm"));
+    //toDateEdit->setTime(QTime(23, 59, 59, 999));
+    toDateEdit->setFixedWidth(m_sourcesView->width());
+    layout->addWidget(toDateEdit);
+    m_toDateTime = toDateEdit;
+
+    //setFilterDay(dateEdit->dateTime());
+    setFilterDateTimeRange();
+
+    connect(fromDateEdit, SIGNAL(dateTimeChanged(QDateTime)), this,
+            SLOT(setFilterDateTimeRange()));
+    connect(toDateEdit, SIGNAL(dateTimeChanged(QDateTime)), this,
+            SLOT(setFilterDateTimeRange()));
+
 }
 
 QWidget *EventsWindow::createLevelFilter()
@@ -290,7 +310,8 @@ void EventsWindow::retranslateUI()
 	m_zoomLabel->setText(tr("Zoom:"));
 	if (m_tagInput)
 		m_tagInput->lineEdit()->setPlaceholderText(tr("Type or select a tag to filter"));
-	m_dateLabel->setText(tr("Date"));
+    m_fromDateTimeLabel->setText(tr("From:"));
+    m_toDateTimeLabel->setText(tr("To:"));
 
 	m_levelFilter->blockSignals(true);
 	m_levelFilter->setItemText(0, tr("Any"));
@@ -446,10 +467,15 @@ void EventsWindow::setFilterTypes(QBitArray types)
     m_resultsView->setTypes(types);
 }
 
-void EventsWindow::setFilterDay(const QDateTime &day)
+void EventsWindow::setFilterDateTimeRange()
 {
-    m_eventsUpdater->setDay(day.date());
-    m_resultsView->setDay(day.date());
+    QDateTime from, to;
+
+    from = m_fromDateTime->dateTime();
+    to = m_toDateTime->dateTime();
+
+    m_eventsUpdater->setTimeRange(from, to);
+    m_resultsView->setTimeRange(from, to);
 }
 
 void EventsWindow::loadEvents()

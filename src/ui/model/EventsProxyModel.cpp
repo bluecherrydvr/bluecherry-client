@@ -50,8 +50,12 @@ bool EventsProxyModel::filterAcceptsRow(EventData *eventData) const
     if (!m_types.isNull() && (int)eventData->type() >= 0 && !m_types.testBit((int)eventData->type()))
         return false;
 
-    if (!m_day.isNull() && eventData->localStartDate().date() != m_day)
+    //if (!m_day.isNull() && eventData->localStartDate().date() != m_day)
+    //  return false;
+    if (!m_dtStart.isNull() && !m_dtEnd.isNull() && (eventData->localStartDate() < m_dtStart || eventData->localStartDate() > m_dtEnd))
         return false;
+
+
 
     if (m_sources.isEmpty())
         return true;
@@ -156,10 +160,27 @@ void EventsProxyModel::setTypes(QBitArray types)
 
 void EventsProxyModel::setDay(const QDate &day)
 {
-    if (m_day == day)
+    /*if (m_day == day)
         return;
 
-    m_day = day;
+    m_day = day;*/
+    if (m_dtStart.date() == day && m_dtEnd.date() == day)
+        return;
+
+    m_dtStart.setDate(day);
+    m_dtEnd.setDate(day);
+    m_dtEnd.setTime(QTime(23, 59, 59, 999));
+
+    invalidateFilter();
+}
+
+void EventsProxyModel::setTimeRange(const QDateTime &from, const QDateTime &to)
+{
+    if (m_dtStart == from && m_dtEnd == to)
+        return;
+
+    m_dtStart = from;
+    m_dtEnd = to;
     invalidateFilter();
 }
 

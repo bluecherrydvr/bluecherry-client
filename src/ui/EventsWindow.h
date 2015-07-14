@@ -35,6 +35,7 @@ class QComboBox;
 class QSlider;
 class QModelIndex;
 class QDateTime;
+class QDateTimeEdit;
 class QTabWidget;
 class EventViewWindow;
 class QSplitter;
@@ -65,7 +66,7 @@ private slots:
     void showServerEvent(const EventData &eventData);
 
     void setFilterTypes(QBitArray types);
-    void setFilterDay(const QDateTime &day);
+    void setFilterDateTimeRange();
     void setFilterSources(const QMap<DVRServer *, QSet<int> > &sources);
     void loadEvents();
 
@@ -104,11 +105,14 @@ private:
 	QLabel *m_minimumLevelLabel;
 	QLabel *m_typeLabel;
 	QLabel *m_tagsLabel;
-	QLabel *m_dateLabel;
+    QLabel *m_fromDateTimeLabel;
+    QDateTimeEdit *m_fromDateTime;
+    QLabel *m_toDateTimeLabel;
+    QDateTimeEdit *m_toDateTime;
 	QComboBox *m_tagInput;
 	QLabel *m_zoomLabel;
 
-    void createDateFilter(QBoxLayout *layout);
+    void createDateTimeFilter(QBoxLayout *layout);
     void createLoadButton(QBoxLayout *layout);
     QWidget *createLevelFilter();
     QWidget *createTypeFilter();

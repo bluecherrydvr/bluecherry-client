@@ -71,6 +71,12 @@ void EventsUpdater::setDay(const QDate &date)
     //updateServers();
 }
 
+void EventsUpdater::setTimeRange(const QDateTime &from, const QDateTime &to)
+{
+    m_startTime = from;
+    m_endTime = to;
+}
+
 void EventsUpdater::updateServers()
 {
     foreach (DVRServer *s, m_serverRepository->servers())

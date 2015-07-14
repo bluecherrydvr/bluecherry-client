@@ -46,6 +46,7 @@ public slots:
     void setMinimumLevel(EventLevel minimumLevel);
     void setTypes(QBitArray types);
     void setDay(const QDate &day);
+    void setTimeRange(const QDateTime &from, const QDateTime &to);
     void setSources(const QMap<DVRServer*, QSet<int> > &sources);
 
     void sortEvents(int logicalIndex, Qt::SortOrder sortOrder);

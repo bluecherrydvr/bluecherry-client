@@ -102,6 +102,11 @@ void EventsView::setDay(const QDate &day)
     m_eventsProxyModel->setDay(day);
 }
 
+void EventsView::setTimeRange(const QDateTime &from, const QDateTime &to)
+{
+    m_eventsProxyModel->setTimeRange(from, to);
+}
+
 void EventsView::setSources(const QMap<DVRServer*, QSet<int> > &sources)
 {
     m_eventsProxyModel->setSources(sources);

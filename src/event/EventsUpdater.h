@@ -41,6 +41,7 @@ public slots:
     void setUpdateInterval(int miliseconds);
     void setLimit(int limit);
     void setDay(const QDate &date);
+    void setTimeRange(const QDateTime &from, const QDateTime &to);
 
     void updateServer(DVRServer *server);
     void updateServers();
