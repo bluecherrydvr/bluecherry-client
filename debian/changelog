@@ -1,3 +1,16 @@
+bluecherry-client (1:2.2.2-1) lucid; urgency=low
+
+  * Bug #236: Fixed documentation URL in Help -> Documentation menu item
+  * Bug #231: Fixed broken MJPEG liveview
+  * Fixed bug - changed playback speed was ignored after restarting playback
+    in event player
+  * Zoom in event player
+  * Fixed crash on closing event player
+  * Added option for disabling notifications about new Bluecherry client
+    versions
+
+ -- Anton Sviridenko <anton@corp.bluecherry.net>  Sat, 27 Jul 2015 04:42:16 +0400
+
 bluecherry-client (1:2.2.1-1) lucid; urgency=low
 
   * Video output selection for MPlayer (Linux and Windows)
