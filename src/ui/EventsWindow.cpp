@@ -52,6 +52,7 @@
 #include <QAction>
 #include <QEvent>
 #include <QPushButton>
+#include <QDebug>
 
 EventsWindow::EventsWindow(DVRServerRepository *serverRepository, QWidget *parent)
 	: QWidget(parent, Qt::Window), m_serverRepository(serverRepository),
@@ -85,7 +86,8 @@ EventsWindow::EventsWindow(DVRServerRepository *serverRepository, QWidget *paren
             this, SLOT(setFilterSources(QMap<DVRServer*,QSet<int>>)));
 
     createDateTimeFilter(filtersLayout);
-    createLoadButton(filtersLayout);
+    //createLoadButton(filtersLayout);
+    createRangeSelector(filtersLayout);
 
 #if 1 /* This is not useful currently. */
 	m_minimumLevelLabel = new QLabel;
@@ -151,7 +153,7 @@ void EventsWindow::changeEvent(QEvent *event)
 
 	QWidget::changeEvent(event);
 }
-
+/*
 void EventsWindow::createLoadButton(QBoxLayout *layout)
 {
     m_loadEvents = new QPushButton;
@@ -159,6 +161,22 @@ void EventsWindow::createLoadButton(QBoxLayout *layout)
     layout->addWidget(m_loadEvents);
 
     connect(m_loadEvents, SIGNAL(clicked()), this, SLOT(loadEvents()));
+}*/
+
+void EventsWindow::createRangeSelector(QBoxLayout *layout)
+{
+    m_rangeSelector = new QComboBox;
+    m_rangeSelector->setStyleSheet(QLatin1String("font-weight:bold;"));
+    m_rangeSelector->addItem(tr("Last  1 hour "), EventsWindow::Last1Hour);
+    m_rangeSelector->addItem(tr("Last  6 hours"), EventsWindow::Last6Hours);
+    m_rangeSelector->addItem(tr("Last 24 hours"), EventsWindow::Last24Hours);
+    m_rangeSelector->addItem(tr("Select time range"), EventsWindow::SelectTimeRange);
+
+    layout->addWidget(m_rangeSelector);
+
+    rangeSelectorChanged();
+
+    connect(m_rangeSelector, SIGNAL(activated (int)), this, SLOT(rangeSelectorChanged()));
 }
 
 void EventsWindow::createDateTimeFilter(QBoxLayout *layout)
@@ -192,7 +210,7 @@ void EventsWindow::createDateTimeFilter(QBoxLayout *layout)
     m_toDateTime = toDateEdit;
 
     //setFilterDay(dateEdit->dateTime());
-    setFilterDateTimeRange();
+    //setFilterDateTimeRange();
 
     connect(fromDateEdit, SIGNAL(dateTimeChanged(QDateTime)), this,
             SLOT(setFilterDateTimeRange()));
@@ -321,7 +339,14 @@ void EventsWindow::retranslateUI()
 	m_levelFilter->setItemText(4, tr("Critical"));
 	m_levelFilter->blockSignals(false);
 
-    m_loadEvents->setText(tr("Load Events"));
+    m_rangeSelector->blockSignals(true);
+    m_rangeSelector->setItemText(0, tr("Last  1 hour "));
+    m_rangeSelector->setItemText(1, tr("Last  6 hours"));
+    m_rangeSelector->setItemText(2, tr("Last 24 hours"));
+    m_rangeSelector->setItemText(3, tr("Select time range"));
+    m_rangeSelector->blockSignals(false);
+
+    //m_loadEvents->setText(tr("Load Events"));
 }
 
 void EventsWindow::closeEvent(QCloseEvent *event)
@@ -331,6 +356,62 @@ void EventsWindow::closeEvent(QCloseEvent *event)
     settings.setValue(QLatin1String("ui/events/videoSplitter"), m_videoSplitter->saveState());
     settings.setValue(QLatin1String("ui/events/viewHeader"), m_resultsView->header()->saveState());
     QWidget::closeEvent(event);
+}
+
+void EventsWindow::rangeSelectorChanged()
+{
+    enum EventsTimeRange range = (EventsTimeRange)m_rangeSelector->itemData(m_rangeSelector->currentIndex()).toInt();
+    int hours = -1;
+    QDateTime from, to;
+
+    m_fromDateTime->blockSignals(true);
+    m_toDateTime->blockSignals(true);
+
+    switch (range)
+    {
+        case Last1Hour:
+        hours = 1;
+        break;
+
+        case Last6Hours:
+        hours = 6;
+        break;
+
+        case Last24Hours:
+        hours = 24;
+        break;
+
+        case SelectTimeRange:
+        m_fromDateTime->setEnabled(true);
+        m_toDateTime->setEnabled(true);
+    }
+
+    if (hours > 0)
+    {
+        from = QDateTime::currentDateTime().addSecs(-60*60*hours);
+        to = QDateTime::currentDateTime();
+
+        m_fromDateTime->setEnabled(false);
+        m_toDateTime->setEnabled(false);
+
+        m_fromDateTime->setDateTime(from);
+        m_toDateTime->setDateTime(to);
+    }
+    else
+    {
+        from = m_fromDateTime->dateTime();
+        to = m_toDateTime->dateTime();
+    }
+
+    m_eventsUpdater->setTimeRange(from, to);
+    m_resultsView->setTimeRange(from, to);
+
+    //qDebug() << "EventsWindow::rangeSelectorChanged " << hours << "\n";
+
+    loadEvents();
+
+    m_fromDateTime->blockSignals(false);
+    m_toDateTime->blockSignals(false);
 }
 
 void EventsWindow::levelFilterChanged()
@@ -476,6 +557,10 @@ void EventsWindow::setFilterDateTimeRange()
 
     m_eventsUpdater->setTimeRange(from, to);
     m_resultsView->setTimeRange(from, to);
+
+    //qDebug() << "EventsWindow::setFilterDateTimeRange()" << from << to <<"\n";
+
+    loadEvents();
 }
 
 void EventsWindow::loadEvents()

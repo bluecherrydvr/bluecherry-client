@@ -46,6 +46,14 @@ class EventsWindow : public QWidget
 {
     Q_OBJECT
 
+    enum EventsTimeRange
+    {
+        Last1Hour,
+        Last6Hours,
+        Last24Hours,
+        SelectTimeRange
+    };
+
 public:
     explicit EventsWindow(DVRServerRepository *serverRepository, QWidget *parent = 0);
     virtual ~EventsWindow();
@@ -57,6 +65,7 @@ protected:
 private slots:
     void levelFilterChanged();
     void cursorIndexUpdated();
+    void rangeSelectorChanged();
 
     void timelineZoomChanged(int value);
     void timelineSliderChanged(int value);
@@ -79,7 +88,8 @@ private:
     EventTypesFilter *m_typeFilter;
     EventTagsView *m_tagsView;
     QLabel *m_resultTitle;
-    QPushButton *m_loadEvents;
+    //QPushButton *m_loadEvents;
+    QComboBox *m_rangeSelector;
 
     /* Results */
     enum ResultsViewTab
@@ -113,7 +123,9 @@ private:
 	QLabel *m_zoomLabel;
 
     void createDateTimeFilter(QBoxLayout *layout);
-    void createLoadButton(QBoxLayout *layout);
+    //void createLoadButton(QBoxLayout *layout);
+    void createRangeSelector(QBoxLayout *layout);
+
     QWidget *createLevelFilter();
     QWidget *createTypeFilter();
     QWidget *createTags();
