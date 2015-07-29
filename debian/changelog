@@ -1,5 +1,6 @@
 bluecherry-client (1:2.2.2-1) lucid; urgency=low
 
+  * More precise events range selection in event browser
   * Bug #236: Fixed documentation URL in Help -> Documentation menu item
   * Bug #231: Fixed broken MJPEG liveview
   * Fixed bug - changed playback speed was ignored after restarting playback
