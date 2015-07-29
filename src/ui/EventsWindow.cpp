@@ -172,6 +172,9 @@ void EventsWindow::createRangeSelector(QBoxLayout *layout)
     m_rangeSelector->addItem(tr("Last 24 hours"), EventsWindow::Last24Hours);
     m_rangeSelector->addItem(tr("Select time range"), EventsWindow::SelectTimeRange);
 
+    QSettings settings;
+    m_rangeSelector->setCurrentIndex(settings.value(QLatin1String("ui/events/selectedRange"), 0).toInt());
+
     layout->addWidget(m_rangeSelector);
 
     rangeSelectorChanged();
@@ -188,8 +191,8 @@ void EventsWindow::createDateTimeFilter(QBoxLayout *layout)
 
     layout->addWidget(m_fromDateTimeLabel);
 
-
-    QDateTimeEdit *fromDateEdit = new QDateTimeEdit(QDateTime::currentDateTime().addSecs(-60*60*5));
+    QSettings settings;
+    QDateTimeEdit *fromDateEdit = new QDateTimeEdit(settings.value(QLatin1String("ui/events/fromDateTime"), QDateTime::currentDateTime().addSecs(-60*60*1)).toDateTime());
     fromDateEdit->setCalendarPopup(true);
     fromDateEdit->setMaximumDate(QDate::currentDate());
     fromDateEdit->setDisplayFormat(QLatin1String("ddd, MMM dd, yyyy hh:mm"));
@@ -200,7 +203,7 @@ void EventsWindow::createDateTimeFilter(QBoxLayout *layout)
 
     layout->addWidget(m_toDateTimeLabel);
 
-    QDateTimeEdit *toDateEdit = new QDateTimeEdit(QDateTime::currentDateTime());
+    QDateTimeEdit *toDateEdit = new QDateTimeEdit(settings.value(QLatin1String("ui/events/toDateTime"), QDateTime::currentDateTime()).toDateTime());
     toDateEdit->setCalendarPopup(true);
     toDateEdit->setMaximumDate(QDate::currentDate());
     toDateEdit->setDisplayFormat(QLatin1String("ddd, MMM dd, yyyy hh:mm"));
@@ -355,6 +358,9 @@ void EventsWindow::closeEvent(QCloseEvent *event)
     settings.setValue(QLatin1String("ui/events/geometry"), saveGeometry());
     settings.setValue(QLatin1String("ui/events/videoSplitter"), m_videoSplitter->saveState());
     settings.setValue(QLatin1String("ui/events/viewHeader"), m_resultsView->header()->saveState());
+    settings.setValue(QLatin1String("ui/events/selectedRange"), m_rangeSelector->currentIndex());
+    settings.setValue(QLatin1String("ui/events/fromDateTime"), m_fromDateTime->dateTime());
+    settings.setValue(QLatin1String("ui/events/toDateTime"), m_toDateTime->dateTime());
     QWidget::closeEvent(event);
 }
 
