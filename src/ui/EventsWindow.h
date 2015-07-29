@@ -50,6 +50,7 @@ class EventsWindow : public QWidget
     {
         Last1Hour,
         Last6Hours,
+        Last12Hours,
         Last24Hours,
         SelectTimeRange
     };

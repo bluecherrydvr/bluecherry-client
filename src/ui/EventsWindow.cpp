@@ -169,6 +169,7 @@ void EventsWindow::createRangeSelector(QBoxLayout *layout)
     m_rangeSelector->setStyleSheet(QLatin1String("font-weight:bold;"));
     m_rangeSelector->addItem(tr("Last  1 hour "), EventsWindow::Last1Hour);
     m_rangeSelector->addItem(tr("Last  6 hours"), EventsWindow::Last6Hours);
+    m_rangeSelector->addItem(tr("Last 12 hours"), EventsWindow::Last12Hours);
     m_rangeSelector->addItem(tr("Last 24 hours"), EventsWindow::Last24Hours);
     m_rangeSelector->addItem(tr("Select time range"), EventsWindow::SelectTimeRange);
 
@@ -345,8 +346,9 @@ void EventsWindow::retranslateUI()
     m_rangeSelector->blockSignals(true);
     m_rangeSelector->setItemText(0, tr("Last  1 hour "));
     m_rangeSelector->setItemText(1, tr("Last  6 hours"));
-    m_rangeSelector->setItemText(2, tr("Last 24 hours"));
-    m_rangeSelector->setItemText(3, tr("Select time range"));
+    m_rangeSelector->setItemText(2, tr("Last 12 hours"));
+    m_rangeSelector->setItemText(3, tr("Last 24 hours"));
+    m_rangeSelector->setItemText(4, tr("Select time range"));
     m_rangeSelector->blockSignals(false);
 
     //m_loadEvents->setText(tr("Load Events"));
@@ -381,6 +383,10 @@ void EventsWindow::rangeSelectorChanged()
 
         case Last6Hours:
         hours = 6;
+        break;
+
+        case Last12Hours:
+        hours = 12;
         break;
 
         case Last24Hours:
