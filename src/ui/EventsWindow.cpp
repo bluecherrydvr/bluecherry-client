@@ -167,7 +167,7 @@ void EventsWindow::createRangeSelector(QBoxLayout *layout)
 {
     m_rangeSelector = new QComboBox;
     m_rangeSelector->setStyleSheet(QLatin1String("font-weight:bold;"));
-    m_rangeSelector->addItem(tr("Last  1 hour "), EventsWindow::Last1Hour);
+    m_rangeSelector->addItem(tr("Last    hour "), EventsWindow::Last1Hour);
     m_rangeSelector->addItem(tr("Last  6 hours"), EventsWindow::Last6Hours);
     m_rangeSelector->addItem(tr("Last 12 hours"), EventsWindow::Last12Hours);
     m_rangeSelector->addItem(tr("Last 24 hours"), EventsWindow::Last24Hours);
@@ -344,7 +344,7 @@ void EventsWindow::retranslateUI()
 	m_levelFilter->blockSignals(false);
 
     m_rangeSelector->blockSignals(true);
-    m_rangeSelector->setItemText(0, tr("Last  1 hour "));
+    m_rangeSelector->setItemText(0, tr("Last    hour "));
     m_rangeSelector->setItemText(1, tr("Last  6 hours"));
     m_rangeSelector->setItemText(2, tr("Last 12 hours"));
     m_rangeSelector->setItemText(3, tr("Last 24 hours"));
