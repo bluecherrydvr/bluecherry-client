@@ -85,9 +85,11 @@ EventsWindow::EventsWindow(DVRServerRepository *serverRepository, QWidget *paren
     connect(sourcesModel, SIGNAL(checkedSourcesChanged(QMap<DVRServer*,QSet<int>>)),
             this, SLOT(setFilterSources(QMap<DVRServer*,QSet<int>>)));
 
-    createDateTimeFilter(filtersLayout);
+
     //createLoadButton(filtersLayout);
     createRangeSelector(filtersLayout);
+    createDateTimeFilter(filtersLayout);
+    rangeSelectorChanged();
 
 #if 1 /* This is not useful currently. */
 	m_minimumLevelLabel = new QLabel;
@@ -177,8 +179,6 @@ void EventsWindow::createRangeSelector(QBoxLayout *layout)
     m_rangeSelector->setCurrentIndex(settings.value(QLatin1String("ui/events/selectedRange"), 0).toInt());
 
     layout->addWidget(m_rangeSelector);
-
-    rangeSelectorChanged();
 
     connect(m_rangeSelector, SIGNAL(activated (int)), this, SLOT(rangeSelectorChanged()));
 }
