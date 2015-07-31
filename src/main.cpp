@@ -29,6 +29,7 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QtPlugin>
+#include <QSettings>
 
 #ifdef Q_OS_WIN
 #include <utils/explorerstyle.h>
@@ -92,7 +93,7 @@ int main(int argc, char *argv[])
     initBreakpad();
 #endif
 
-    if (!QGLFormat::hasOpenGL())
+    if (!settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration")).toBool() && !QGLFormat::hasOpenGL())
     {
 		QMessageBox::critical(0, a.translate("@default", "Error"), a.translate("@default", "This application is designed to utilize OpenGL "
                                                     "acceleration, which is not supported by your system. "
