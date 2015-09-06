@@ -487,6 +487,9 @@ void MainWindow::retranslateUI()
 
 void MainWindow::showOptionsDialog()
 {
+    if (OptionsDialog::isDialogCreated())
+        return;
+
     OptionsDialog *dlg = new OptionsDialog(m_serverRepository, this);
     dlg->setAttribute(Qt::WA_DeleteOnClose);
     dlg->show();
@@ -556,6 +559,9 @@ void MainWindow::addServer()
 
 void MainWindow::openServerSettings()
 {
+    if (OptionsDialog::isDialogCreated())
+        return;
+
     DVRServer *server = 0;
     if (sender())
         server = qobject_cast<DVRServer*>(sender()->property("associatedServer").value<QObject*>());

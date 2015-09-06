@@ -36,9 +36,12 @@ public:
     };
 
     explicit OptionsDialog(DVRServerRepository *serverRepository, QWidget *parent = 0);
+    ~OptionsDialog();
 
     void showPage(OptionsPage page);
     QWidget *pageWidget(OptionsPage page) const;
+
+    static bool isDialogCreated() {return m_dialogCreated;};
 
 protected:
     virtual void closeEvent(QCloseEvent *event);
@@ -46,6 +49,8 @@ protected:
 private:
     QTabWidget *m_tabWidget;
     QDialogButtonBox *m_buttons;
+
+    static bool m_dialogCreated;
 };
 
 class OptionsDialogPage : public QWidget

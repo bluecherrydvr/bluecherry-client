@@ -209,7 +209,7 @@ void DVRServersView::mouseDoubleClickEvent(QMouseEvent *event)
 
     if (server && !(index.flags() & Qt::ItemIsEnabled))
     {
-        if (server->isLoginPending())
+        if (server->isLoginPending() && !OptionsDialog::isDialogCreated())
         {
             OptionsDialog *dlg = new OptionsDialog(m_serverRepository, this);
             dlg->showPage(OptionsDialog::ServerPage);

@@ -25,10 +25,19 @@
 #include <QMessageBox>
 #include <QCloseEvent>
 
+bool OptionsDialog::m_dialogCreated = false;
+
+OptionsDialog::~OptionsDialog()
+{
+    m_dialogCreated = false;
+}
+
 OptionsDialog::OptionsDialog(DVRServerRepository *serverRepository, QWidget *parent)
     : QDialog(parent)
 {
-    setModal(true);
+    //setModal(true);
+    m_dialogCreated = true; // OptionsDialog is modeless now, preventing creation of multiple dialogs simultaneously
+
     setWindowTitle(tr("Bluecherry - Options"));
 
     QBoxLayout *layout = new QVBoxLayout(this);
