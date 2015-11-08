@@ -144,7 +144,7 @@ void ServerRequestManager::loginReplyReady()
     }
 
     QByteArray data = reply->readAll();
-    if (!data.startsWith("OK"))
+    if (!data.startsWith("OK") && !data.startsWith("{\"status\":\"1\""))
     {
         setStatus(DVRServer::LoginError, data.isEmpty() ? tr("Unknown error") : QString::fromUtf8(data));
         return;
