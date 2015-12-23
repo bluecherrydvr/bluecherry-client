@@ -42,7 +42,7 @@ public:
     ~EventVideoPlayer();
 
 public slots:
-    void setVideo(const QUrl &url, EventData *event = 0);
+    void setVideo(const QUrl &url, EventData *event);
     void clearVideo();
     void saveVideo();
     void zoomIn();
