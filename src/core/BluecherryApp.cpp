@@ -40,6 +40,7 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QAbstractButton>
+#include <QDirIterator>
 #include <QDebug>
 
 #ifdef Q_OS_LINUX
@@ -83,6 +84,7 @@ BluecherryApp::BluecherryApp()
 #endif
     QSslConfiguration::setDefaultConfiguration(sslConfig);
 
+    clearTempFiles();
     loadServers();
     if (shouldAddLocalServer())
         addLocalServer();
@@ -114,6 +116,19 @@ BluecherryApp::BluecherryApp()
 BluecherryApp::~BluecherryApp()
 {
     unregisterVideoPlayerFactory();
+}
+
+void BluecherryApp::clearTempFiles()
+{
+    QStringList nf("bc_vbuf_*.mkv");
+    QDirIterator it(QDir::tempPath(), nf, QDir::Files);
+
+    while(it.hasNext())
+    {
+        //qDebug() << it.next();
+        QFile::remove(it.next());
+    }
+
 }
 
 void BluecherryApp::startUpdateChecker()

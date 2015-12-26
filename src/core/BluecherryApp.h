@@ -135,6 +135,7 @@ private:
     bool shouldAddLocalServer() const;
     void addLocalServer();
     void autoConnectServers();
+    void clearTempFiles();
 };
 
 extern BluecherryApp *bcApp;
