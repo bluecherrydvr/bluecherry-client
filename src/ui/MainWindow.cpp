@@ -136,6 +136,7 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
 #endif
 
     QSettings settings;
+    bcApp->liveView->setBandwidthMode(settings.value(QLatin1String("ui/liveview/bandwidthMode")).toInt());
     restoreGeometry(settings.value(QLatin1String("ui/main/geometry")).toByteArray());
     if (!m_centerSplit->restoreState(settings.value(QLatin1String("ui/main/centerSplit")).toByteArray()))
     {
@@ -220,6 +221,7 @@ void MainWindow::saveSettings()
     settings.setValue(QLatin1String("ui/main/centerSplit"), m_centerSplit->saveState());
     settings.setValue(QLatin1String("ui/main/leftSplit"), m_leftSplit->saveState());
     settings.setValue(QLatin1String("ui/main/eventsView"), m_eventsView->header()->saveState());
+    settings.setValue(QLatin1String("ui/liveview/bandwidthMode"), bcApp->liveView->bandwidthMode());
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
