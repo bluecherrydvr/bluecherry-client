@@ -61,7 +61,7 @@ QModelIndex EventsModel::index(int row, int column, const QModelIndex &parent) c
     if (parent.isValid() || row < 0 || column < 0 || row >= m_items.size() || column >= columnCount())
         return QModelIndex();
 
-    return createIndex(row, column, m_items[row]);
+    return createIndex(row, column, m_items[row].data());
 }
 
 QModelIndex EventsModel::parent(const QModelIndex &child) const
@@ -173,7 +173,7 @@ void EventsModel::computeBoundaries()
     }
 }
 
-void EventsModel::setServerEvents(DVRServer *server, const QList<EventData *> &events)
+void EventsModel::setServerEvents(DVRServer *server, const QList<QSharedPointer<EventData> > &events)
 {
     clearServerEvents(server);
     computeBoundaries();
@@ -201,8 +201,8 @@ void EventsModel::clearServerEvents(DVRServer *server)
     if (removedRowEnd >= removedRowBegin)
     {
         beginRemoveRows(QModelIndex(), removedRowBegin, removedRowEnd);
-        QList<EventData *> removedEvents = m_items.mid(removedRowBegin, removedRowEnd - removedRowBegin + 1);
-        qDeleteAll(removedEvents);
+        //QList<QSharedPointer<EventData> > removedEvents = m_items.mid(removedRowBegin, removedRowEnd - removedRowBegin + 1);
+        //qDeleteAll(removedEvents.begin(), removedEvents.end());
         m_items = m_items.mid(0, removedRowBegin) + m_items.mid(removedRowEnd + 1);
         endRemoveRows();
     }

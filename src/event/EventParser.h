@@ -27,7 +27,7 @@ class QXmlStreamReader;
 class EventParser
 {
 public:
-    static QList<EventData *> parseEvents(DVRServer *server, const QByteArray &input);
+    static QList<QSharedPointer<EventData> > parseEvents(DVRServer *server, const QByteArray &input);
 
 private:
     static EventData * parseEntry(DVRServer *server, QXmlStreamReader &reader);

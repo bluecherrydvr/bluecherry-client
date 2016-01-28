@@ -19,6 +19,7 @@
 #define EVENTSMODEL_H
 
 #include <QAbstractItemModel>
+#include <QSharedPointer>
 
 class DVRServer;
 class DVRServerRepository;
@@ -56,7 +57,7 @@ public:
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
 public slots:
-    void setServerEvents(DVRServer *server, const QList<EventData *> &events);
+    void setServerEvents(DVRServer *server, const QList<QSharedPointer<EventData> > &events);
     void clearServerEvents(DVRServer *server);
 
 private slots:
@@ -65,7 +66,7 @@ private slots:
 private:
     DVRServerRepository *m_serverRepository;
 
-    QList<EventData *> m_items;
+    QList<QSharedPointer<EventData> > m_items;
     QMap<DVRServer *, QPair<int, int> > m_serverEventsBoundaries;
     QMap<DVRServer *, int> m_serverEventsCount;
 

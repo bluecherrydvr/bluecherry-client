@@ -436,8 +436,8 @@ QWidget *MainWindow::createRecentEvents()
     m_eventsModel = new EventsModel(m_serverRepository, m_eventsView);
 
     EventsUpdater *updater = new EventsUpdater(m_serverRepository, m_eventsModel);
-    connect(updater, SIGNAL(serverEventsAvailable(DVRServer*,QList<EventData*>)),
-            m_eventsModel, SLOT(setServerEvents(DVRServer*,QList<EventData*>)));
+    connect(updater, SIGNAL(serverEventsAvailable(DVRServer*,QList<QSharedPointer<EventData>>)),
+            m_eventsModel, SLOT(setServerEvents(DVRServer*,QList<QSharedPointer<EventData>>)));
 
     m_eventsView->setModel(m_eventsModel, updater->isUpdating());
 

@@ -21,13 +21,14 @@
 #include <QDebug>
 #include <QLatin1String>
 #include <QXmlStreamReader>
+#include <QSharedPointer>
 
 /* May be threaded; avoid dereferencing the server and so forth */
 
-QList<EventData *> EventParser::parseEvents(DVRServer *server, const QByteArray &input)
+QList<QSharedPointer<EventData> > EventParser::parseEvents(DVRServer *server, const QByteArray &input)
 {
     QXmlStreamReader reader(input);
-    QList<EventData*> re;
+    QList<QSharedPointer<EventData> > re;
 
     if (!reader.hasError() && reader.readNextStartElement())
     {
@@ -44,7 +45,7 @@ QList<EventData *> EventParser::parseEvents(DVRServer *server, const QByteArray 
                 {
                     EventData *ev = parseEntry(server, reader);
                     if (ev)
-                        re.append(ev);
+                        re.append(QSharedPointer<EventData>(ev));
                 }
             }
         }

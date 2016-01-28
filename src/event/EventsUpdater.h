@@ -50,11 +50,11 @@ signals:
     void loadingStarted();
     void loadingFinished();
 
-    void serverEventsAvailable(DVRServer *server, const QList<EventData *> &events);
+    void serverEventsAvailable(DVRServer *server, const QList<QSharedPointer<EventData> > &events);
 
 private slots:
     void serverAdded(DVRServer *server);
-    void eventsLoaded(DVRServer *server, bool ok, const QList<EventData *> &events);
+    void eventsLoaded(DVRServer *server, bool ok, const QList<QSharedPointer<EventData> > &events);
 
 private:
     DVRServerRepository *m_serverRepository;

@@ -273,8 +273,8 @@ QWidget * EventsWindow::createResultsView()
     EventsModel *eventsModel = new EventsModel(m_serverRepository, this);
     m_resultsView->setModel(eventsModel, m_eventsUpdater->isUpdating());
 
-    connect(m_eventsUpdater, SIGNAL(serverEventsAvailable(DVRServer*,QList<EventData*>)),
-            eventsModel, SLOT(setServerEvents(DVRServer*,QList<EventData*>)));
+    connect(m_eventsUpdater, SIGNAL(serverEventsAvailable(DVRServer*,QList<QSharedPointer<EventData> >)),
+            eventsModel, SLOT(setServerEvents(DVRServer*,QList<QSharedPointer<EventData> >)));
 
     m_resultsView->setFrameStyle(QFrame::NoFrame);
     m_resultsView->setContextMenuPolicy(Qt::CustomContextMenu);

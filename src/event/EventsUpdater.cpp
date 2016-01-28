@@ -93,8 +93,8 @@ void EventsUpdater::updateServer(DVRServer *server)
         emit loadingStarted();
 
     EventsLoader *eventsLoader = new EventsLoader(server);
-    connect(eventsLoader, SIGNAL(eventsLoaded(DVRServer*,bool,QList<EventData*>)),
-            this, SLOT(eventsLoaded(DVRServer*,bool,QList<EventData*>)));
+    connect(eventsLoader, SIGNAL(eventsLoaded(DVRServer*,bool,QList<QSharedPointer<EventData> >)),
+            this, SLOT(eventsLoaded(DVRServer*,bool,QList<QSharedPointer<EventData> >)));
 
     eventsLoader->setLimit(m_limit);
     eventsLoader->setStartTime(m_startTime);
@@ -102,7 +102,8 @@ void EventsUpdater::updateServer(DVRServer *server)
     eventsLoader->loadEvents();
 }
 
-void EventsUpdater::eventsLoaded(DVRServer *server, bool ok, const QList<EventData *> &events)
+void EventsUpdater::eventsLoaded(DVRServer *server, bool ok
+                                 ,const QList<QSharedPointer<EventData> > &events)
 {
     if (!server)
         return;

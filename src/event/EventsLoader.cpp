@@ -59,7 +59,7 @@ void EventsLoader::loadEvents()
 {
     if (!m_server || !m_server.data()->isOnline())
     {
-        emit eventsLoaded(m_server.data(), false, QList<EventData*>());
+        emit eventsLoaded(m_server.data(), false, QList<QSharedPointer<EventData> >());
         deleteLater();
         return;
     }
@@ -94,7 +94,7 @@ void EventsLoader::serverRequestFinished()
     {
         qWarning() << "Event request error:" << reply->errorString();
         /* TODO: Handle errors properly */
-        emit eventsLoaded(m_server.data(), false, QList<EventData*>());
+        emit eventsLoaded(m_server.data(), false, QList<QSharedPointer<EventData> >());
         deleteLater();
         return;
     }
@@ -103,7 +103,7 @@ void EventsLoader::serverRequestFinished()
     if (statusCode < 200 || statusCode >= 300)
     {
         qWarning() << "Event request error: HTTP code" << statusCode;
-        emit eventsLoaded(m_server.data(), false, QList<EventData*>());
+        emit eventsLoaded(m_server.data(), false, QList<QSharedPointer<EventData> >());
         deleteLater();
         return;
     }
@@ -111,9 +111,11 @@ void EventsLoader::serverRequestFinished()
     QByteArray data = reply->readAll();
     // qDebug() << "EventsLoader: Received reply from server: " << data;
 
-    QFuture<QList<EventData*> > future = QtConcurrent::run(&EventParser::parseEvents, m_server.data(), data);
+    QFuture<QList<QSharedPointer<EventData> > > future
+            = QtConcurrent::run(&EventParser::parseEvents, m_server.data(), data);
 
-    QFutureWatcher<QList<EventData*> > *qfw = new QFutureWatcher<QList<EventData*> >(this);
+    QFutureWatcher<QList<QSharedPointer<EventData> > > *qfw
+            = new QFutureWatcher<QList<QSharedPointer<EventData> > >(this);
     connect(qfw, SIGNAL(finished()), SLOT(eventParseFinished()));
     qfw->setFuture(future);
 }
@@ -121,17 +123,18 @@ void EventsLoader::serverRequestFinished()
 void EventsLoader::eventParseFinished()
 {
     Q_ASSERT(sender() && sender()->inherits("QFutureWatcherBase"));
-    QFutureWatcher<QList<EventData*> > *qfw = static_cast<QFutureWatcher<QList<EventData*> >*>(sender());
+    QFutureWatcher<QList<QSharedPointer<EventData> > > *qfw
+            = static_cast<QFutureWatcher<QList<QSharedPointer<EventData> > >*>(sender());
     qfw->deleteLater();
 
     if (!m_server)
     {
-        emit eventsLoaded(m_server.data(), false, QList<EventData*>());
+        emit eventsLoaded(m_server.data(), false, QList<QSharedPointer<EventData> >());
         deleteLater();
         return; // ignore data from removed servers
     }
 
-    QList<EventData*> events = qfw->result();
+    QList<QSharedPointer<EventData> > events = qfw->result();
     qDebug() << "EventsLoader: Parsed event data into" << events.size() << "events";
 
     emit eventsLoaded(m_server.data(), true, events);
