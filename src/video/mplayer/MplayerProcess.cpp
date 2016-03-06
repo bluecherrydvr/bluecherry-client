@@ -38,7 +38,7 @@ MplayerProcess::MplayerProcess(QString &wid, QObject *parent)
       m_wid(wid), m_process(0),
       m_duration(-1), m_position(-1),
       m_isreadytoplay(false),
-      m_posreqsent(false), m_durreqsent(false),
+      m_durreqsent(false),
       m_ispaused(false),
       m_speed(1.0)
 
@@ -233,15 +233,11 @@ void MplayerProcess::checkPlayingMsgMagic(QByteArray &a)
 
 void MplayerProcess::checkPositionAnswer(QByteArray &a)
 {
-    if (!m_posreqsent)
-        return;
-
     QRegExp rexp(QString("ANS_time_pos=(\\S+)"));
 
     if (QString::fromAscii(a.constData()).contains(rexp))
     {
         m_position = rexp.cap(1).toDouble();
-        m_posreqsent = false;
     }
 }
 
@@ -430,11 +426,7 @@ double MplayerProcess::position()
     if (!(isRunning() && m_isreadytoplay))
         return -1;
 
-    if (!m_posreqsent)
-    {
-        m_posreqsent = true;
-        sendCommand(QString("get_property time_pos"));
-    }
+    sendCommand(QString("get_property time_pos"));
 
     return m_position;
 }

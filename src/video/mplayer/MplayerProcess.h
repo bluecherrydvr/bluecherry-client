@@ -79,7 +79,6 @@ private:
     double m_position;
 
     bool m_isreadytoplay;
-    bool m_posreqsent;
     bool m_durreqsent;
     bool m_ispaused;
 
