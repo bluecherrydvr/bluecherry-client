@@ -15,7 +15,14 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-file (GLOB_RECURSE TRANSLATION_SOURCES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.ts")
+set(TRANSLATION_SOURCES translations/bluecherryclient_en.ts
+	translations/bluecherryclient_de_DE.ts
+	translations/bluecherryclient_es.ts
+	translations/bluecherryclient_no.ts
+	translations/bluecherryclient_pl.ts
+	translations/bluecherryclient_ru.ts
+	translations/bluecherryclient_sv_SE.ts
+)
 
 qt4_add_translation (TRANSLATION_FILES ${TRANSLATION_SOURCES})
 
