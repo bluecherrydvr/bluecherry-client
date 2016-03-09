@@ -63,7 +63,8 @@ Section
         File "${BIN_PATH}\bluecherryclient_en.qm"
         File "${BIN_PATH}\bluecherryclient_es.qm"
         File "${BIN_PATH}\bluecherryclient_no.qm"
-        File "${BIN_PATH}\bluecherryclient_ru_RU.qm"
+        File "${BIN_PATH}\bluecherryclient_pl.qm"
+        File "${BIN_PATH}\bluecherryclient_ru.qm"
         File "${BIN_PATH}\bluecherryclient_sv_SE.qm"
 		
         # ffmpeg
