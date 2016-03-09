@@ -85,6 +85,8 @@ bool MplVideoPlayerBackend::start(const QUrl &url)
     connect(m_mplayer, SIGNAL(eof()), this, SLOT(handleEof()));
     connect(m_mplayer, SIGNAL(readyToPlay()), this, SLOT(mplayerReady()));
     connect(m_mplayer, SIGNAL(durationChanged()), this, SLOT(durationIsKnown()));
+    connect(m_mplayer, SIGNAL(respondPosition(double))
+            ,this, SIGNAL(respondPosition(double)));
 
 
     /* Buffered HTTP source */
@@ -260,6 +262,16 @@ int MplVideoPlayerBackend::position() const
     double secs = m_mplayer->position();
 
     return secs > 0 ? secs * 1000.0 : -1;
+}
+
+void MplVideoPlayerBackend::queryPosition() const
+{
+    if (!m_mplayer || !m_mplayer->isRunning())
+    {
+        return;
+    }
+
+    m_mplayer->queryPosition();
 }
 
 void MplVideoPlayerBackend::setHardwareDecodingEnabled(bool enable)

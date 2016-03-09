@@ -43,6 +43,7 @@ public:
     //returns duration in seconds
     double duration();
     double position();
+    void queryPosition();
 
     void setProperty(QString prop, QString val);
     //QString getProperty(QString prop);
@@ -64,6 +65,7 @@ signals:
     void eof();
     void readyToPlay();
     void durationChanged();
+    void respondPosition(double position);
 
 private slots:
     void readAvailableStdout();

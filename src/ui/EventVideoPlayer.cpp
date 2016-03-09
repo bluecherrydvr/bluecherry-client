@@ -293,6 +293,8 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     connect(m_videoBackend.data(), SIGNAL(endOfStream()), SLOT(durationChanged()));
     connect(m_videoBackend.data(), SIGNAL(playbackSpeedChanged(double)), SLOT(playbackSpeedChanged(double)));
     connect(m_videoBackend.data(), SIGNAL(streamsInitialized(bool)), SLOT(streamsInitialized(bool)));
+    connect(m_videoBackend.data(), SIGNAL(respondPosition(double))
+            ,this, SLOT(updateSliderPosition(double)));
 
     m_videoWidget->initVideo(m_videoBackend.data());
 
@@ -609,10 +611,29 @@ void EventVideoPlayer::updatePosition()
         }
     }
 
-    int msPosition = m_videoBackend.data()->position();
+    m_videoBackend.data()->queryPosition();
+}
+
+void EventVideoPlayer::updateSliderPosition(double position)
+{
+    Q_ASSERT(QThread::currentThread() == qApp->thread());
+
+    if (!m_videoBackend)
+    {
+        return;
+    }
+
+    if ( m_seekSlider->maximum() == 0)
+    {
+        return;
+    }
+
+    int msPosition = static_cast<int>(position > 0 ? position * 1000.0 : -1);
 
     if (m_videoBackend.data()->atEnd())
+    {
         msPosition = m_seekSlider->maximum();
+    }
 
     if (!m_seekSlider->isSliderDown())
     {
