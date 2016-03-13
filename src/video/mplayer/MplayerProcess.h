@@ -65,7 +65,7 @@ signals:
     void eof();
     void readyToPlay();
     void durationChanged();
-    void respondPosition(double position);
+    void currentPosition(double position);
 
 private slots:
     void readAvailableStdout();

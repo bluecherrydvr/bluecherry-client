@@ -293,7 +293,7 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     connect(m_videoBackend.data(), SIGNAL(endOfStream()), SLOT(durationChanged()));
     connect(m_videoBackend.data(), SIGNAL(playbackSpeedChanged(double)), SLOT(playbackSpeedChanged(double)));
     connect(m_videoBackend.data(), SIGNAL(streamsInitialized(bool)), SLOT(streamsInitialized(bool)));
-    connect(m_videoBackend.data(), SIGNAL(respondPosition(double))
+    connect(m_videoBackend.data(), SIGNAL(currentPosition(double))
             ,this, SLOT(updateSliderPosition(double)));
 
     m_videoWidget->initVideo(m_videoBackend.data());

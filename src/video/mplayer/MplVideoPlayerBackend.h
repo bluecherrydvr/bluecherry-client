@@ -73,7 +73,7 @@ private slots:
     void durationIsKnown();
 
 signals:
-    void respondPosition(double position);
+    void currentPosition(double position);
 
 
 private:
@@ -87,6 +87,7 @@ private:
     QString m_wid;
 
     void setVideoBuffer(VideoHttpBuffer *videoHttpBuffer);
+    void createMplayerProcess();
 };
 
 #endif // MPL_VIDEO_PLAYER_BACKEND_H

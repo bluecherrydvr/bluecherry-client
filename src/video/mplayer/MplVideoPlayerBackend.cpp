@@ -65,6 +65,17 @@ void MplVideoPlayerBackend::setWindowId(quint64 wid)
     m_wid = QString::number(wid);
 }
 
+void MplVideoPlayerBackend::createMplayerProcess()
+{
+    m_mplayer = new MplayerProcess(m_wid, this);
+    connect(m_mplayer, SIGNAL(mplayerError(bool,QString)), this, SLOT(setError(bool,QString)));
+    connect(m_mplayer, SIGNAL(eof()), this, SLOT(handleEof()));
+    connect(m_mplayer, SIGNAL(readyToPlay()), this, SLOT(mplayerReady()));
+    connect(m_mplayer, SIGNAL(durationChanged()), this, SLOT(durationIsKnown()));
+    connect(m_mplayer, SIGNAL(currentPosition(double))
+            ,this, SIGNAL(currentPosition(double)));
+}
+
 bool MplVideoPlayerBackend::start(const QUrl &url)
 {
     qDebug() << "MplVideoPlayerBackend::start url =" << url << "\n";
@@ -80,13 +91,7 @@ bool MplVideoPlayerBackend::start(const QUrl &url)
     if (m_mplayer)
         m_mplayer->deleteLater();
 
-    m_mplayer = new MplayerProcess(m_wid, this);
-    connect(m_mplayer, SIGNAL(mplayerError(bool,QString)), this, SLOT(setError(bool,QString)));
-    connect(m_mplayer, SIGNAL(eof()), this, SLOT(handleEof()));
-    connect(m_mplayer, SIGNAL(readyToPlay()), this, SLOT(mplayerReady()));
-    connect(m_mplayer, SIGNAL(durationChanged()), this, SLOT(durationIsKnown()));
-    connect(m_mplayer, SIGNAL(respondPosition(double))
-            ,this, SIGNAL(respondPosition(double)));
+    createMplayerProcess();
 
 
     /* Buffered HTTP source */
@@ -214,11 +219,7 @@ void MplVideoPlayerBackend::restart()
 
     m_mplayer->deleteLater();
 
-    m_mplayer = new MplayerProcess(m_wid, this);
-    connect(m_mplayer, SIGNAL(mplayerError(bool,QString)), this, SLOT(setError(bool,QString)));
-    connect(m_mplayer, SIGNAL(eof()), this, SLOT(handleEof()));
-    connect(m_mplayer,SIGNAL(readyToPlay()), this, SLOT(mplayerReady()));
-    connect(m_mplayer, SIGNAL(durationChanged()), this, SLOT(durationIsKnown()));
+    createMplayerProcess();
 
     m_mplayer->start(m_videoBuffer->bufferFilePath());
 

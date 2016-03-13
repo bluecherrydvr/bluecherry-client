@@ -238,7 +238,7 @@ void MplayerProcess::checkPositionAnswer(QByteArray &a)
     if (QString::fromAscii(a.constData()).contains(rexp))
     {
         m_position = rexp.cap(1).toDouble();
-        emit respondPosition(m_position);
+        emit currentPosition(m_position);
     }
 }
 
