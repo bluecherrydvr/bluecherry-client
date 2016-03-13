@@ -2,8 +2,8 @@ REQUIREMENTS
 
 To compile bluecherry-client on Windows install following applications and libraries:
 
-* Qt libraries 4.8.4 for Windows (VS 2010)
-  http://releases.qt-project.org/qt4/source/qt-win-opensource-4.8.4-vs2010.exe
+* Qt libraries 4.8.6 for Windows (VS 2010)
+  http://download.qt.io/archive/qt/4.8/4.8.6/qt-opensource-windows-x86-vs2010-4.8.6.exe
 
 * Qt Creator 2.6.2 for Windows
   http://releases.qt-project.org/qtcreator/2.6.2/qt-creator-windows-opensource-2.6.2.exe
@@ -17,39 +17,41 @@ To compile bluecherry-client on Windows install following applications and libra
 * Microsoft Visual Studio 2010 Service Pack 1
   http://www.microsoft.com/en-us/download/details.aspx?id=23691
 
-* libav for Windows
-  http://win32.libav.org/releases/libav-9.7-win32.7z
-  unpack under C:\bluecherry\deps\libav
+* FFMpeg 
+  http://ffmpeg.zeranoe.com/builds/
+  suitable latest version
 
 * msinttypes
   http://msinttypes.googlecode.com/files/msinttypes-r26.zip
   unpack only inttypes.h under C:\bluecherry\deps\msinttypes
 
-* OpenSSL for Windows
-  http://slproweb.com/download/Win32OpenSSL_Light-1_0_1e.exe
-  install libraries to OpenSLL dir
+* OpenSSL 
+  download latest OpenSSL version (1.0.2g at this moment) from
+  https://openssl.org
+  unpack sources and build according to instructions in file INSTALL.W32
+  "perl Configure VC-WIN32 --prefix=prefix"
 
 CONFIGURING Qt Creator
 
 Run Qt Creator and configure Qt Kit:
 - open Options window (Tools -> Options...)
 - select Qt Versions tab (Build & Run -> Qt Versions)
-- add Qt 4.8.4 to system (Add -> C:\Qt\4.8.4\bin\qmake.exe)
+- add Qt 4.8.6 to system (Add -> C:\Qt\4.8.6\bin\qmake.exe)
 - click Apply
 - select Kits tab (Build & Run -> Kits)
 - click Add and fill out form:
-  * Name: Qt 4.8.4
+  * Name: Qt 4.8.6
   * Device type: Desktop
   * Device: Run locally (default for Desktop)
   * Compiler: Microsoft Visual C++ Compiler 10.0 (x86)
-  * Qt version:  Qt 4.8.4
+  * Qt version:  Qt 4.8.6
 - click OK
 
 CONFIGURING bluecherry-client
 
 Import bluecherry-client to Qt Creator:
 - copy windows-user.cmake to user.cmake file
-- adjusts paths in user.cmake file, only WIN32_MSINTTYPES_DIR and WIN32_LIBAV_DIR should be adjusted
+- adjust paths in user.cmake file: WIN32_MSINTTYPES_DIR, WIN32_LIBAV_DIR, WIN32_BREAKPAD_SRC_DIR, WIN32_OPENSSL_DIR, etc
 - open CMakeLists.txt file (File -> Open File or Project...)
 - click Next
 - select C:\Program Files (x86)\CMake 2.8\bin\cmake.exe
