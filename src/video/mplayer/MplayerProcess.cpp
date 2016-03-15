@@ -108,7 +108,12 @@ bool MplayerProcess::start(QString filename)
         vo = QLatin1String(" ,");
 #endif
 
+#ifdef Q_OS_LINUX
+    m_process->start("bc-mplayer",
+#else
     m_process->start("mplayer",
+#endif
+
 #else
     m_process->start(QCoreApplication::applicationDirPath() + QDir::separator() + "mplayer",
 #endif

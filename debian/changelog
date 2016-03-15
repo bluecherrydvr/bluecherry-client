@@ -6,7 +6,7 @@ bluecherry-client (1:2.2.3-1) precise; urgency=low
   * Live view bandwidth settings are preserved between restarts
   * Fixed issues #257, #256, #253, #252, #250, #247, #238
 
- -- Anton Sviridenko <anton@corp.bluecherry.net> Tue, 16 Mar 2016 01:40:16 +0400
+ -- Anton Sviridenko <anton@corp.bluecherry.net>  Tue, 16 Mar 2016 01:40:16 +0400
 
 bluecherry-client (1:2.2.2-1) lucid; urgency=low
 

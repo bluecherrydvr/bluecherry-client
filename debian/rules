@@ -6,28 +6,5 @@
 override_dh_strip:
 	dh_strip --dbg-package=bluecherry-client-dbg
 
-override_dh_auto_install:
-	dh_auto_install
-	mkdir -p debian/bluecherry-client/usr/lib/bluecherry/qt4.8/lib
-	cp -a /usr/lib/bluecherry/qt4.8/lib/libQtCore*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.8/lib/
-	cp -a /usr/lib/bluecherry/qt4.8/lib/libQtGui*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.8/lib/
-	cp -a /usr/lib/bluecherry/qt4.8/lib/libQtDeclarative*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.8/lib/
-	cp -a /usr/lib/bluecherry/qt4.8/lib/libQtNetwork*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.8/lib/
-	cp -a /usr/lib/bluecherry/qt4.8/lib/libQtOpenGL*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.8/lib/
-	cp -a /usr/lib/bluecherry/qt4.8/lib/libQtScript*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.8/lib/
-	cp -a /usr/lib/bluecherry/qt4.8/lib/libQtWebKit*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.8/lib/
-	cp -a /usr/lib/bluecherry/qt4.8/lib/libQtDBus*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.8/lib/
-	cp -a /usr/lib/bluecherry/qt4.8/lib/libQtSql*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.8/lib/
-	cp -a /usr/lib/bluecherry/qt4.8/lib/libQtXml*.so* debian/bluecherry-client/usr/lib/bluecherry/qt4.8/lib/
-	mkdir -p debian/bluecherry-client/usr/lib/bluecherry/qt4.8/plugins/imageformats
-	cp -a /usr/lib/bluecherry/qt4.8/plugins/imageformats/libqjpeg.so debian/bluecherry-client/usr/lib/bluecherry/qt4.8/plugins/imageformats
-	cp -a /usr/lib/bluecherry/qt4.8/plugins/imageformats/libqgif.so debian/bluecherry-client/usr/lib/bluecherry/qt4.8/plugins/imageformats
-	mkdir -p debian/bluecherry-client/usr/lib/bluecherry/client/lib
-	cp -a /usr/lib/bluecherry/client/lib/libavformat.so* debian/bluecherry-client/usr/lib/bluecherry/client/lib/
-	cp -a /usr/lib/bluecherry/client/lib/libavcodec.so* debian/bluecherry-client/usr/lib/bluecherry/client/lib/
-	cp -a /usr/lib/bluecherry/client/lib/libavutil.so* debian/bluecherry-client/usr/lib/bluecherry/client/lib/
-	cp -a /usr/lib/bluecherry/client/lib/libswscale.so* debian/bluecherry-client/usr/lib/bluecherry/client/lib/
-	cp -a /usr/lib/bluecherry/client/lib/libswresample.so* debian/bluecherry-client/usr/lib/bluecherry/client/lib/
-
 override_dh_shlibdeps:
-	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:debian/bluecherry-client/usr/lib/bluecherry/client/lib:debian/bluecherry-client/usr/lib/bluecherry/qt4.8/lib dh_shlibdeps
+	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:debian/bluecherry-client/usr/lib/bluecherry/client dh_shlibdeps
