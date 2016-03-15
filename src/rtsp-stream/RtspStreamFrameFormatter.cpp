@@ -26,7 +26,7 @@ extern "C" {
 }
 
 RtspStreamFrameFormatter::RtspStreamFrameFormatter(AVStream *stream) :
-        m_stream(stream), m_sws_context(0), m_pixelFormat(PIX_FMT_BGRA),
+        m_stream(stream), m_sws_context(0), m_pixelFormat(AV_PIX_FMT_BGRA),
         m_autoDeinterlacing(true), m_shouldTryDeinterlaceStream(shouldTryDeinterlaceStream())
 {
 }
@@ -46,7 +46,7 @@ bool RtspStreamFrameFormatter::shouldTryDeinterlaceStream()
     /* Assume that H.264 D1-resolution video is interlaced, to work around a solo(?) bug
      * that results in interlaced_frame not being set for videos from solo6110. */
 
-    if (m_stream->codec->codec_id != CODEC_ID_H264)
+    if (m_stream->codec->codec_id != AV_CODEC_ID_H264)
         return false;
 
     if (m_stream->codec->width == 704 && m_stream->codec->height == 480)
@@ -79,8 +79,9 @@ bool RtspStreamFrameFormatter::shouldTryDeinterlaceFrame(AVFrame *avFrame)
 
 void RtspStreamFrameFormatter::deinterlaceFrame(AVFrame* avFrame)
 {
-    int ret = avpicture_deinterlace((AVPicture*)avFrame, (AVPicture*)avFrame,
-                                    m_stream->codec->pix_fmt, m_stream->codec->width, m_stream->codec->height);
+    //int ret = avpicture_deinterlace((AVPicture*)avFrame, (AVPicture*)avFrame,
+    //                                m_stream->codec->pix_fmt, m_stream->codec->width, m_stream->codec->height);
+    int ret = -1;
     if (ret < 0)
         qDebug("deinterlacing failed");
 }
@@ -92,7 +93,7 @@ AVFrame * RtspStreamFrameFormatter::scaleFrame(AVFrame* avFrame)
     int bufSize  = avpicture_get_size(m_pixelFormat, m_stream->codec->width, m_stream->codec->height);
     uint8_t *buf = (uint8_t*) av_malloc(bufSize);
 
-    AVFrame *result = avcodec_alloc_frame();
+    AVFrame *result = av_frame_alloc();
     avpicture_fill((AVPicture*)result, buf, m_pixelFormat, m_stream->codec->width, m_stream->codec->height);
     sws_scale(m_sws_context, (const uint8_t**)avFrame->data, avFrame->linesize, 0, m_stream->codec->height,
               result->data, result->linesize);

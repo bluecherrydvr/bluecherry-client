@@ -40,7 +40,7 @@ public:
 private:
     AVStream *m_stream;
     SwsContext *m_sws_context;
-    PixelFormat m_pixelFormat;
+    AVPixelFormat m_pixelFormat;
     bool m_autoDeinterlacing;
     bool m_shouldTryDeinterlaceStream;
 

@@ -1,4 +1,4 @@
-MPlayer/MEncoder Win32 binary Builds by Redxii <redxii@users.sourceforge.net> for SMPlayer
+MPlayer/MEncoder Win32/Win64 binary Builds by Redxii <redxii@users.sourceforge.net> for SMPlayer
 Report bugs to http://smplayer.sf.net or http://mplayerwin.sf.net
 
 The included subfont.ttf is DejaVu Serif,
@@ -18,8 +18,11 @@ most things are valid for Windows as well.
 The files in this package:
 mplayer.exe       - the main executable
 mencoder.exe      - a full-featured video encoder
-mplayer.man.html  - usage and command line options
-README.txt        - this document
+vfw2menc.exe      - a tool used to configure Vfw codecs, please look at
+                    docs/menc-feat-video-for-windows.html
+MPlayer.html      - usage and command line options
+MPlayer.man.html  - usage and command line options
+Readme.txt        - this document
 fonts/            - FontConfig configuration
 licenses/         - license information for 3rd-party libraries used
                     by mplayer
@@ -28,8 +31,10 @@ codecs/           - binary codecs (Real, QuickTime etc.) directory;
                     http://www.mplayerhq.hu/design7/dload.html
                     Note: Not supported on 64-bit MPlayer!
 
-mplayer/config      - configuration file with adjustable options
-mplayer/input.conf  - keybinding configuration file
+mplayer/codecs.conf.in     - codec configuration built into MPlayer/MEncoder, rename to 'codecs.conf'
+                             if you wish to modify it 
+mplayer/config             - configuration file with adjustable options (see config.sample)
+mplayer/input.conf         - keybinding configuration file
 
 A list of Windows frontends for MPlayer can be found at
 http://www.mplayerhq.hu/design7/projects.html

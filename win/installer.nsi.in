@@ -69,11 +69,11 @@ Section
         File "${BIN_PATH}\bluecherryclient_sv_SE.qm"
 		
         # ffmpeg
-        File "${LIBAV_PATH}\avcodec-56.dll"
-        File "${LIBAV_PATH}\avformat-56.dll"
-        File "${LIBAV_PATH}\avutil-54.dll"
-        File "${LIBAV_PATH}\swscale-3.dll"
-        File "${LIBAV_PATH}\swresample-1.dll"
+        File "${LIBAV_PATH}\avcodec-57.dll"
+        File "${LIBAV_PATH}\avformat-57.dll"
+        File "${LIBAV_PATH}\avutil-55.dll"
+        File "${LIBAV_PATH}\swscale-4.dll"
+        File "${LIBAV_PATH}\swresample-2.dll"
 
         SetOutPath "$INSTDIR"
 		# mplayer

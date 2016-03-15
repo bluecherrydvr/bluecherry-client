@@ -120,7 +120,7 @@ bool RtspStreamWorker::processStream()
         return false;
 
     bool result = processPacket(packet);
-    av_free_packet(&packet);
+    av_packet_unref(&packet);
     return result;
 }
 
@@ -136,7 +136,7 @@ AVPacket RtspStreamWorker::readPacket(bool *ok)
         return packet;
 
     emit fatalError(QString::fromLatin1("Reading error: %1").arg(errorMessageFromCode(re)));
-    av_free_packet(&packet);
+    av_packet_unref(&packet);
 
     if (ok)
         *ok = false;
@@ -167,7 +167,7 @@ bool RtspStreamWorker::processPacket(struct AVPacket packet)
 
 AVFrame * RtspStreamWorker::extractFrame(AVPacket &packet)
 {
-    AVFrame *frame = avcodec_alloc_frame();
+    AVFrame *frame = av_frame_alloc();
     startInterruptableOperation(5);
 
     int pictureAvailable;
