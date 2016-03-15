@@ -1,0 +1,111 @@
+#
+# MPlayer configuration file
+#
+# Configuration files are read system-wide from /usr/local/etc/mplayer.conf
+# and per-user from ~/.mplayer/config, where per-user settings override
+# system-wide settings, all of which are overrriden by the command line.
+#
+# The configuration file settings are the same as the command line
+# options without the preceding '-'.
+#
+# See the CONFIGURATION FILES section in the man page
+# for a detailed description of the syntax.
+#
+# Profiles should be placed at the bottom of the configuration file to ensure
+# that settings wanted as defaults are not restricted to specific profiles.
+
+## Windows MPlayer Configuration
+## Rev 2015-0928
+
+## Color console
+msgcolor=yes
+
+##################
+# video settings #
+##################
+
+## Specify default video driver (see -vo help for a list).
+## Recommend DirectX for Windows 2000/XP, Direct3D for Vista and later
+#vo=caca
+#vo=directx
+#vo=direct3d
+#vo=gl
+#vo=gl_tiled
+#vo=sdl
+
+## Use SDL video with the aalib subdriver by default.
+#vo = sdl:aalib
+
+## Start in fullscreen mode by default.
+#fs=yes
+
+## Change to a different videomode when going fullscreen.
+#vm=yes
+
+## Override the autodetected color depth, may need 'vm=yes' as well.
+#bpp=0
+
+## Enable software scaling (powerful CPU needed) for video output
+## drivers that do not support hardware scaling.
+#zoom=yes
+
+## standard monitor size, with square pixels
+#monitoraspect=4:3
+
+## Use this for a widescreen monitor, non-square pixels.
+#monitoraspect=16:9
+
+## Keep the player window on top of all other windows.
+#ontop=yes
+
+## Use double-buffering
+#double=yes
+
+## Use direct rendering
+#dr=yes
+
+## Disable  drawing  video by 16-pixel height slices/bands, instead
+## draws the whole frame in a single run.  May be faster or slower,
+## depending on video card and available cache.  It has effect only
+## with libmpeg2 and libavcodec codecs.
+#noslices=yes
+
+##################
+# audio settings #
+##################
+
+## Specify default audio driver (see -ao help for a list).
+#ao=dsound
+#ao=win32
+
+## Use SDL audio driver with the esd subdriver by default.
+#ao=sdl:esd
+
+##################
+# other settings #
+##################
+
+## Drop frames to preserve audio/video sync.
+#framedrop=yes
+#hardframedrop=no
+
+## Use 32MB input cache by default.
+#cache=32768
+
+## Prefill 20% of the cache before starting playback.
+#cache-min=20.0
+
+## Prefill 50% of the cache before restarting playback after the cache emptied.
+#cache-seek-min=50
+
+## Drive letter of your DVD
+#dvd-device=d:
+
+## DVD: Display English subtitles if available.
+#slang=en
+
+## DVD: Play English audio tracks if available.
+#alang=en
+
+## Multithread decoding on supported codecs
+#lavdopts=threads=4
