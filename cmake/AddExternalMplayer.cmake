@@ -16,7 +16,6 @@ ExternalProject_Add(mplayer
 	--disable-tv 
 	--disable-mp3lame 
 	--extra-cflags=-I${CMAKE_BINARY_DIR}/ffmpeg/install/usr/include 
-	"--extra-ldflags=-L${CMAKE_BINARY_DIR}/ffmpeg/install/usr/lib/bluecherry/client -Wl,-rpath=/usr/lib/bluecherry/client -Wl,-rpath-link=${CMAKE_BINARY_DIR}/ffmpeg/install/usr/lib/bluecherry/client"
        	--enable-runtime-cpudetection
        	--enable-debug
 

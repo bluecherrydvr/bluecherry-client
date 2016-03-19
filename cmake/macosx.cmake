@@ -37,7 +37,7 @@ set (MACOSX_BUNDLE_LONG_VERSION_STRING ${VERSION})
 set (MACOSX_BUNDLE_BUNDLE_NAME "Bluecherry Client")
 set (MACOSX_BUNDLE_SHORT_VERSION_STRING ${VERSION})
 set (MACOSX_BUNDLE_BUNDLE_VERSION ${VERSION})
-set (MACOSX_BUNDLE_COPYRIGHT "Copyright 2010-2013 Bluecherry")
+set (MACOSX_BUNDLE_COPYRIGHT "Copyright 2010-2016 Bluecherry")
 
 add_custom_command (
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/bluecherry-client.app/Contents/Resources/qt.conf

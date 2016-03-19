@@ -14,11 +14,11 @@ ExternalProject_Add(ffmpeg
         --disable-stripping 
         --disable-doc
         --disable-everything
+	--disable-programs
 	--disable-static
         --enable-shared
                 
 	--enable-opengl
-        --enable-libxcb 
         --enable-xlib 
         --disable-sdl 
                 
@@ -71,7 +71,11 @@ set( LIBAVFORMAT_INCLUDE_DIRS "${CMAKE_BINARY_DIR}/ffmpeg/install/usr/include" )
 set( LIBAVUTIL_INCLUDE_DIRS   "${CMAKE_BINARY_DIR}/ffmpeg/install/usr/include" )
 set( LIBSWSCALE_INCLUDE_DIRS  "${CMAKE_BINARY_DIR}/ffmpeg/install/usr/include" )
 
-set( LIBAVCODEC_LIBRARIES  "${CMAKE_BINARY_DIR}/ffmpeg/install/usr/lib/bluecherry/client/libavcodec.so" )
-set( LIBAVFORMAT_LIBRARIES "${CMAKE_BINARY_DIR}/ffmpeg/install/usr/lib/bluecherry/client/libavformat.so" )
-set( LIBAVUTIL_LIBRARIES   "${CMAKE_BINARY_DIR}/ffmpeg/install/usr/lib/bluecherry/client/libavutil.so" )
-set( LIBSWSCALE_LIBRARIES  "${CMAKE_BINARY_DIR}/ffmpeg/install/usr/lib/bluecherry/client/libswscale.so" )
+set( LIBAVCODEC_LIBRARIES  
+	"${CMAKE_BINARY_DIR}/ffmpeg/install/usr/lib/bluecherry/client/libavcodec${CMAKE_SHARED_LIBRARY_SUFFIX}" )
+set( LIBAVFORMAT_LIBRARIES 
+	"${CMAKE_BINARY_DIR}/ffmpeg/install/usr/lib/bluecherry/client/libavformat${CMAKE_SHARED_LIBRARY_SUFFIX}" )
+set( LIBAVUTIL_LIBRARIES   
+	"${CMAKE_BINARY_DIR}/ffmpeg/install/usr/lib/bluecherry/client/libavutil${CMAKE_SHARED_LIBRARY_SUFFIX}" )
+set( LIBSWSCALE_LIBRARIES  
+	"${CMAKE_BINARY_DIR}/ffmpeg/install/usr/lib/bluecherry/client/libswscale${CMAKE_SHARED_LIBRARY_SUFFIX}" )

@@ -19,7 +19,7 @@
 #find_package (LibAVFormat 53.21.1 REQUIRED)
 #find_package (LibAVUtil 51.22.1 REQUIRED)
 #find_package (LibSWScale 2.1.0 REQUIRED)
-if (UNIX AND NOT APPLE)
+if ( UNIX )
     include(cmake/CpuCoresCount.cmake)
     include(ExternalProject)
     include(cmake/AddExternalFFmpeg.cmake)
