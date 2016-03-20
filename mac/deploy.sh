@@ -16,23 +16,23 @@ fi
 
 echo "Copying Icon..."
 mkdir -p $1/Contents/Resources/
-cp res/bluecherry.icns $1/Contents/Resources/
+cp $BINPATH/../res/bluecherry.icns $1/Contents/Resources/
 
 
-echo "Copying Breakpad framework..."
-rm -r $1/Contents/Frameworks/Breakpad.framework
-cp -R breakpad-bin/mac/Breakpad.framework $1/Contents/Frameworks/
+#echo "Copying Breakpad framework..."
+#rm -r $1/Contents/Frameworks/Breakpad.framework
+#cp -R breakpad-bin/mac/Breakpad.framework $1/Contents/Frameworks/
 
 echo "Copying mplayer..."
-cp mplayer-bin/mac/mplayer $1/Contents/MacOS/
+cp ffmpeg/install/usr/bin/mplayer $1/Contents/MacOS/
 
 echo "Copying libav..."
-LIBAV_PATH=/Users/jbrooks/Development/libav/lib
-cp ${LIBAV_PATH}/lib{avformat,avcodec,swscale,avutil}.dylib $1/Contents/Frameworks
+LIBAV_PATH=/usr/lib/bluecherry/client
+cp -a ffmpeg/install${LIBAV_PATH}/lib{avformat,avcodec,swscale,avutil}.dylib $1/Contents/Frameworks
 
 echo "Replacing library paths..."
-$BINPATH/replacepath.py --old @loader_path/ --new @executable_path/../Frameworks/ --file $1/Contents/MacOS/$EXENAME
-$BINPATH/replacepath.py --old @executable_path/../Resources/lib/ --new @executable_path/../Frameworks/ --dir $1/Contents/Frameworks/
+$BINPATH/replacepath.py --old $HOME/dev/usr/lib/ --new @executable_path/../Frameworks/ --file $1/Contents/MacOS/$EXENAME
+#$BINPATH/replacepath.py --old @executable_path/../Resources/lib/ --new @executable_path/../Frameworks/ --dir $1/Contents/Frameworks/
 $BINPATH/replacepath.py --old ${LIBAV_PATH}/ --new @executable_path/../Frameworks/ --file $1/Contents/MacOS/$EXENAME
 $BINPATH/replacepath.py --old ${LIBAV_PATH}/ --new @executable_path/../Frameworks/ --dir $1/Contents/Frameworks/
 
