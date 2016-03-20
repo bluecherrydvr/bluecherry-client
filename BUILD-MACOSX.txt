@@ -22,16 +22,18 @@ Next step is to configure cmake - copy macosx.cmake file to user.cmake and adjus
 values appropriately.
 
 Next configure and compile your source code:
+```
+# export QTPATH=$HOME/dev/user
+export PATH="$HOME/dev/usr/bin:${PATH}"
 
-- export QTPATH=$HOME/dev/user
-- export PATH="$HOME/dev/user/bin:${PATH}"
-- mkdir build
-- cd build
-- cmake {path to bluecherry-client sources}
-- make
-- make deploy
-- cd ..
-- ./mac/package.sh build
+mkdir build
+cd build
+PATH="$HOME/dev/usr/bin:${PATH}" CXX=/usr/bin/g++ cmake -DBUILD_TESTING=off -DENABLE_BREAKPAD=off {path to bluecherry-client sources}
+make mplayer
+CXXFLAGS="-arch i386" CFLAGS="-arch i386" LDFLAGS="-arch i386" CXX=/usr/bin/g++ make ffmpeg bluecherry-client
+make deploy
+cd {path to bluecherry-client SOURCES}
+./mac/package.sh {path to BUILD_DIR}
 
 NOTES: Bluecherry-client should be compiled by GCC. If Clang is used by default, put CXX=/usr/bin/g++ before calling cmake.
 After "make deploy" run "otool -L bluecherry-client.app/Contents/MacOS/bluecherry-client" and make sure all non-system
