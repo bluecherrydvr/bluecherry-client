@@ -11,12 +11,11 @@ Using MacPorts install following packages:
 * wget
 
 Download  bluecherry-client-scripts package from git and install ffmpeg and Qt:
-
-- git clone git://github.com/vogel/bluecherry-client-scripts.git
-- cd bluecherry-client-scripts/dependencies
-- ./install-ffmpeg-macosx.sh
-- ./install-qt-macosx.sh
-
+```
+git clone git://github.com/bluecherrydvr/bluecherry-client-scripts
+cd bluecherry-client-scripts/dependencies
+./install-qt-macosx.sh
+```
 This script will automatically download more required MacPorts packages.
 
 Next step is to configure cmake - copy macosx.cmake file to user.cmake and adjust
