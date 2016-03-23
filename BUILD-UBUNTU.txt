@@ -9,7 +9,7 @@ github.com/bluecherrydvr/bluecherry-client.  Occasional support can be found on 
 ---------
 
 Requirements:
-  sudo apt-get install git-core cmake qt4-qmake libqt4-dev mplayer libavcodec-dev libavformat-dev libswscale-dev
+  sudo apt-get install git dpkg-dev debhelper cmake qt4-qmake libqt4-dev yasm zlib1g-dev
 
 Breakpad is not available in standard installation. To install it use:
   mkdir -p ~/dev/
@@ -27,6 +27,5 @@ Next configure and build application:
   mkdir build
   cd build
   cmake -DCMAKE_INSTALL_PREFIX=/usr ../
-  make all
-  make test
+  make ffmpeg mplayer bluecherry-client
   sudo make install
