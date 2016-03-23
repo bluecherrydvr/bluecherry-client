@@ -28,7 +28,7 @@ endif (${CMAKE_MAJOR_VERSION} EQUAL 2 AND ${CMAKE_MINOR_VERSION} EQUAL 8 AND ${C
 
 option (DEVBUILD "Turn on some compiler flags helpful during development process" OFF)
 option (ENABLE_BREAKPAD "Enable Breakpad integration" ON)
-option (BUILD_TESTING "Build the test suite" ON)
+option (BUILD_TESTING "Build the test suite" OFF )
 
 if (NOT DEFINED CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
         if (DEVBUILD)

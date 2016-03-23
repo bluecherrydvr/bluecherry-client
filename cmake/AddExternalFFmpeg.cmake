@@ -9,7 +9,7 @@ ExternalProject_Add(ffmpeg
         --prefix=/usr
 	--libdir=/usr/lib/bluecherry/client
         --enable-pic 
-	--enable-lto
+	#--enable-lto
 	--enable-rpath
         --disable-stripping 
         --disable-doc
