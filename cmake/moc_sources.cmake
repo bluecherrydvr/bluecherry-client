@@ -35,6 +35,7 @@ set (bluecherry_client_MOC_SRCS
     src/event/EventsUpdater.h
     src/event/EventVideoDownload.h
     src/event/ModelEventsCursor.h
+    src/event/ThumbnailManager.h
 
     src/rtsp-stream/RtspStream.h
     src/rtsp-stream/RtspStreamThread.h

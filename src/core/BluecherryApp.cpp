@@ -20,6 +20,7 @@
 #include "core/UpdateChecker.h"
 #include "ui/MainWindow.h"
 #include "event/EventDownloadManager.h"
+#include "event/ThumbnailManager.h"
 #include "network/MediaDownloadManager.h"
 #include "server/DVRServer.h"
 #include "server/DVRServerConfiguration.h"
@@ -100,6 +101,8 @@ BluecherryApp::BluecherryApp()
     {
         startUpdateChecker();
     }
+
+    m_thumbnailManager = new ThumbnailManager(this);
 
     m_mediaDownloadManager = new MediaDownloadManager(this);
     m_mediaDownloadManager->setCookieJar(nam->cookieJar());

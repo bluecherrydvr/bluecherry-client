@@ -49,6 +49,7 @@ public:
     unsigned downloadedSize() const { return m_downloadedSize; }
     unsigned readPosition() const { return m_readPos; }
     bool isFinished() const { return m_isFinished; }
+    bool hasError() const { return m_hasError; }
 
     QString bufferFilePath() const;
 

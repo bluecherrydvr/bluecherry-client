@@ -18,7 +18,9 @@
 #include "EventsModel.h"
 #include "core/EventData.h"
 #include "core/ServerRequestManager.h"
+#include "core/BluecherryApp.h"
 #include "server/DVRServerRepository.h"
+#include "event/ThumbnailManager.h"
 #include <QDebug>
 #include <QIcon>
 #include <QTextDocument>
@@ -85,8 +87,28 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
     }
     else if (role == Qt::ToolTipRole)
     {
-        return tr("%1 (%2)<br>%3 on %4<br>%5").arg(data->uiType(), data->uiLevel(), Qt::escape(data->uiLocation()),
-                                                   Qt::escape(data->uiServer()), data->localStartDate().toString());
+        QString imgPath;
+        QString imgString;
+        ThumbnailManager::Status imgStatus;
+
+        imgStatus = bcApp->thumbnailManager()->getThumbnail(data, imgPath);
+
+        switch(imgStatus)
+        {
+        case ThumbnailManager::Available:
+            imgString = QString::fromLatin1("<img width=320 src=\"%1\">").arg(imgPath);//calculate size based on screen resolution
+            break;
+
+        case ThumbnailManager::Loading:
+            imgString = tr("Loading thumbnail...");
+            break;
+
+        case ThumbnailManager::NotFound:
+            imgString = tr("Thumbnail is not available");
+        }
+
+        return tr("%1 (%2)<br>%3 on %4<br>%5<br>%6").arg(data->uiType(), data->uiLevel(), Qt::escape(data->uiLocation()),
+                                                   Qt::escape(data->uiServer()), data->localStartDate().toString(), imgString);
     }
     else if (role == Qt::ForegroundRole)
     {

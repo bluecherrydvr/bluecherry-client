@@ -52,6 +52,7 @@ set (bluecherry_client_main_SRCS
     src/event/EventVideoDownload.cpp
     src/event/MediaEventFilter.cpp
     src/event/ModelEventsCursor.cpp
+    src/event/ThumbnailManager.cpp
 
     src/rtsp-stream/RtspStream.cpp
     src/rtsp-stream/RtspStreamFrame.cpp

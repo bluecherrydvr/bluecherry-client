@@ -37,6 +37,7 @@ class QTimer;
 class LiveViewManager;
 class EventDownloadManager;
 class MediaDownloadManager;
+class ThumbnailManager;
 class UpdateChecker;
 class GstPluginLoader;
 class GstWrapper;
@@ -66,6 +67,7 @@ public:
     DVRServerRepository * serverRepository() const { return m_serverRepository; }
     MediaDownloadManager * mediaDownloadManager() const { return m_mediaDownloadManager; }
     EventDownloadManager * eventDownloadManager() const { return m_eventDownloadManager; }
+    ThumbnailManager * thumbnailManager() const { return m_thumbnailManager; }
     VideoPlayerFactory * videoPlayerFactory() const { return m_videoPlayerFactory.data(); }
 
     LanguageController * languageController() const { return m_languageController.data(); }
@@ -113,6 +115,7 @@ private:
     DVRServerRepository *m_serverRepository;
     MediaDownloadManager *m_mediaDownloadManager;
     EventDownloadManager *m_eventDownloadManager;
+    ThumbnailManager *m_thumbnailManager;
     UpdateChecker *m_updateChecker;
     QScopedPointer<VideoPlayerFactory> m_videoPlayerFactory;
 
