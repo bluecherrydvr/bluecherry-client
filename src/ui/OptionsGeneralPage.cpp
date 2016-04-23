@@ -95,6 +95,10 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     m_updateNotifications->setChecked(settings.value(QLatin1String("ui/disableUpdateNotifications"), false).toBool());
     layout->addWidget(m_updateNotifications);
 
+    m_thumbnails = new QCheckBox(tr("Show thumbnails for recordings"));
+    m_thumbnails->setChecked(settings.value(QLatin1String("ui/enableThumbnails"), true).toBool());
+    layout->addWidget(m_thumbnails);
+
 #if defined(Q_OS_WIN) || defined(Q_OS_MAC) || defined(Q_OS_LINUX)
     m_ssFullscreen = new QCheckBox(tr("Viewing live or recorded video in fullscreen"));
     m_ssVideo = new QCheckBox(tr("Playing recorded video"));
@@ -166,6 +170,7 @@ void OptionsGeneralPage::saveChanges()
     settings.setValue(QLatin1String("ui/liveview/disableAdvancedOpengl"), !m_advancedOpengl->isChecked());
     settings.setValue(QLatin1String("ui/liveview/autoDeinterlace"), m_deinterlace->isChecked());
     settings.setValue(QLatin1String("ui/disableUpdateNotifications"), m_updateNotifications->isChecked());
+    settings.setValue(QLatin1String("ui/enableThumbnails"), m_thumbnails->isChecked());
     if (m_eventPlayerHardwareDecoding)
         settings.setValue(QLatin1String("ui/eventplayer/enableHardwareDecoding"), m_eventPlayerHardwareDecoding->isChecked());
 

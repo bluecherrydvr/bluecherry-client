@@ -24,6 +24,7 @@
 #include <QDebug>
 #include <QIcon>
 #include <QTextDocument>
+#include <QSettings>
 
 EventsModel::EventsModel(DVRServerRepository *serverRepository, QObject *parent)
     : QAbstractItemModel(parent), m_serverRepository(serverRepository)
@@ -90,21 +91,29 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
         QString imgPath;
         QString imgString;
         ThumbnailManager::Status imgStatus;
+        QSettings settings;
 
-        imgStatus = bcApp->thumbnailManager()->getThumbnail(data, imgPath);
-
-        switch(imgStatus)
+        if (settings.value(QLatin1String("ui/enableThumbnails"), true).toBool())
         {
-        case ThumbnailManager::Available:
-            imgString = QString::fromLatin1("<img width=320 src=\"%1\">").arg(imgPath);//calculate size based on screen resolution
-            break;
+            imgStatus = bcApp->thumbnailManager()->getThumbnail(data, imgPath);
 
-        case ThumbnailManager::Loading:
-            imgString = tr("Loading thumbnail...");
-            break;
+            switch(imgStatus)
+            {
+            case ThumbnailManager::Available:
+                imgString = QString::fromLatin1("<img width=320 src=\"%1\">").arg(imgPath);//calculate size based on screen resolution
+                break;
 
-        case ThumbnailManager::NotFound:
-            imgString = tr("Thumbnail is not available");
+            case ThumbnailManager::Loading:
+                imgString = tr("Loading thumbnail...");
+                break;
+
+            case ThumbnailManager::NotFound:
+                imgString = tr("Thumbnail is not available");
+                break;
+
+            case ThumbnailManager::Unknown:
+                break;
+            }
         }
 
         return tr("%1 (%2)<br>%3 on %4<br>%5<br>%6").arg(data->uiType(), data->uiLevel(), Qt::escape(data->uiLocation()),
