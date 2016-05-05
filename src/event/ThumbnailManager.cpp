@@ -52,8 +52,8 @@ ThumbnailManager::~ThumbnailManager()
     {
         if (i.value()->status == Available)
         {
-            qDebug() << "removing thumbnail file " << QDir::tempPath() + '/' + i.key();
-            QFile::remove(QDir::tempPath() + '/' + i.key());
+            qDebug() << "removing thumbnail file " << thumbnailFilePath(i.key());
+            QFile::remove(thumbnailFilePath(i.key()));
         }
 
         bcApp->mediaDownloadManager()->releaseMediaDownload(i.value()->md->url());
@@ -62,6 +62,11 @@ ThumbnailManager::~ThumbnailManager()
 
         ++i;
     }
+}
+
+QString ThumbnailManager::thumbnailFilePath(const QString &keyStr)
+{
+    return QDir::tempPath() + '/' + QLatin1String("bc_tmb_") + keyStr;
 }
 
 ThumbnailManager::Status ThumbnailManager::getThumbnail(const EventData *event, QString &imgPath)
@@ -87,7 +92,7 @@ ThumbnailManager::Status ThumbnailManager::getThumbnail(const EventData *event, 
             if (td->md->isFinished())
             {
                 //copy file, resize
-                QFile::copy(td->md->bufferFilePath(), QDir::tempPath() + '/' + keyStr);
+                QFile::copy(td->md->bufferFilePath(), thumbnailFilePath(keyStr));
                 td->status = Available;
 
                 qDebug() << "thumbnail " << keyStr << " is available";
@@ -133,7 +138,7 @@ ThumbnailManager::Status ThumbnailManager::getThumbnail(const EventData *event, 
     }
 
     if (result == Available)
-        imgPath = QDir::tempPath() + '/' + keyStr;
+        imgPath = thumbnailFilePath(keyStr);
 
     return result;
 }

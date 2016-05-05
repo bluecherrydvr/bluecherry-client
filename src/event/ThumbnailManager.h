@@ -53,6 +53,7 @@ public:
 private:
 
     QMap<QString,ThumbnailData*> m_thumbnails;
+    QString thumbnailFilePath(const QString &keyStr);
 };
 
 #endif
