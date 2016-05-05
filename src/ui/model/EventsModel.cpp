@@ -25,6 +25,8 @@
 #include <QIcon>
 #include <QTextDocument>
 #include <QSettings>
+#include <QApplication>
+#include <QDesktopWidget>
 
 EventsModel::EventsModel(DVRServerRepository *serverRepository, QObject *parent)
     : QAbstractItemModel(parent), m_serverRepository(serverRepository)
@@ -92,6 +94,7 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
         QString imgString;
         ThumbnailManager::Status imgStatus;
         QSettings settings;
+        int tmbWidth;
 
         if (settings.value(QLatin1String("ui/enableThumbnails"), true).toBool())
         {
@@ -100,7 +103,10 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
             switch(imgStatus)
             {
             case ThumbnailManager::Available:
-                imgString = QString::fromLatin1("<img width=320 src=\"%1\">").arg(imgPath);//calculate size based on screen resolution
+
+                tmbWidth = QApplication::desktop()->screenGeometry().width() / 4;
+
+                imgString = QString::fromLatin1("<img width=\"%2\" src=\"%1\">").arg(imgPath).arg(tmbWidth);//calculate size based on screen resolution
                 break;
 
             case ThumbnailManager::Loading:
