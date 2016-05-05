@@ -45,20 +45,20 @@ ThumbnailManager::ThumbnailManager(QObject *parent)
 ThumbnailManager::~ThumbnailManager()
 {
     //clear cache
-    qDebug() << "~ThumbnailManager()";
+    //qDebug() << "~ThumbnailManager()";
 
     QMap<QString, ThumbnailData*>::const_iterator i = m_thumbnails.constBegin();
     while (i != m_thumbnails.constEnd())
     {
         if (i.value()->status == Available)
         {
-            qDebug() << "removing thumbnail file " << thumbnailFilePath(i.key());
+            //qDebug() << "removing thumbnail file " << thumbnailFilePath(i.key());
             QFile::remove(thumbnailFilePath(i.key()));
         }
 
         bcApp->mediaDownloadManager()->releaseMediaDownload(i.value()->md->url());
 
-        delete i.value();//??
+        delete i.value();
 
         ++i;
     }
@@ -79,7 +79,7 @@ ThumbnailManager::Status ThumbnailManager::getThumbnail(const EventData *event, 
                               .arg(event->uiLocation())
                               .arg(event->mediaId()));
 
-    qDebug() << "searching for thumbnail " << keyStr;
+    //qDebug() << "searching for thumbnail " << keyStr;
 
     if (m_thumbnails.contains(keyStr))
     {
@@ -95,12 +95,12 @@ ThumbnailManager::Status ThumbnailManager::getThumbnail(const EventData *event, 
                 QFile::copy(td->md->bufferFilePath(), thumbnailFilePath(keyStr));
                 td->status = Available;
 
-                qDebug() << "thumbnail " << keyStr << " is available";
+                //qDebug() << "thumbnail " << keyStr << " is available";
             }
 
             if (td->md->hasError())
             {
-                qDebug() << "failed to download thumbnail" << keyStr;
+                //qDebug() << "failed to download thumbnail" << keyStr;
                 td->status = NotFound;
             }
 
@@ -124,7 +124,7 @@ ThumbnailManager::Status ThumbnailManager::getThumbnail(const EventData *event, 
         url.addQueryItem(QLatin1String("id"), QString::number(event->mediaId()));
         url.addQueryItem(QLatin1String("mode"), QLatin1String("screenshot"));
 
-        qDebug() << "requesting thumbnail using URL " << url.toString();
+        //qDebug() << "requesting thumbnail using URL " << url.toString();
 
         td->status = Loading;
         td->md = bcApp->mediaDownloadManager()->acquireMediaDownload(url);
