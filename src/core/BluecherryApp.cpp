@@ -124,6 +124,7 @@ BluecherryApp::~BluecherryApp()
 void BluecherryApp::clearTempFiles()
 {
     QStringList nf("bc_vbuf_*.mkv");
+    nf << "bc_tmb_*";
     QDirIterator it(QDir::tempPath(), nf, QDir::Files);
 
     while(it.hasNext())
