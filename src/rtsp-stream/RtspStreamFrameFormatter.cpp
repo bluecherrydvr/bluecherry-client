@@ -19,10 +19,12 @@
 #include "RtspStreamFrame.h"
 #include <QDebug>
 
-extern "C" {
-#   include "libavcodec/avcodec.h"
-#   include "libavformat/avformat.h"
-#   include "libswscale/swscale.h"
+extern "C"
+{
+#include "libavcodec/avcodec.h"
+#include "libavformat/avformat.h"
+#include "libswscale/swscale.h"
+#include "libavutil/imgutils.h"
 }
 
 RtspStreamFrameFormatter::RtspStreamFrameFormatter(AVStream *stream) :
@@ -90,11 +92,12 @@ AVFrame * RtspStreamFrameFormatter::scaleFrame(AVFrame* avFrame)
 {
     updateSWSContext();
 
-    int bufSize  = avpicture_get_size(m_pixelFormat, m_stream->codec->width, m_stream->codec->height);
+    int bufSize  = av_image_get_buffer_size(m_pixelFormat, m_stream->codec->width, m_stream->codec->height, 1);
     uint8_t *buf = (uint8_t*) av_malloc(bufSize);
 
     AVFrame *result = av_frame_alloc();
-    avpicture_fill((AVPicture*)result, buf, m_pixelFormat, m_stream->codec->width, m_stream->codec->height);
+
+    av_image_fill_arrays(result->data, result->linesize, buf, m_pixelFormat, m_stream->codec->width, m_stream->codec->height, 1);
     sws_scale(m_sws_context, (const uint8_t**)avFrame->data, avFrame->linesize, 0, m_stream->codec->height,
               result->data, result->linesize);
 
