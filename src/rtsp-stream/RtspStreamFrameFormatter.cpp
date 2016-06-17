@@ -107,9 +107,32 @@ AVFrame * RtspStreamFrameFormatter::scaleFrame(AVFrame* avFrame)
 
 void RtspStreamFrameFormatter::updateSWSContext()
 {
+    AVPixelFormat pixFormat;
+
+    //convert deprecated pixel format in incoming stream
+    //in order to suppress swscaler warning
+    switch (m_stream->codec->pix_fmt)
+    {
+    case AV_PIX_FMT_YUVJ420P :
+        pixFormat = AV_PIX_FMT_YUV420P;
+        break;
+    case AV_PIX_FMT_YUVJ422P  :
+        pixFormat = AV_PIX_FMT_YUV422P;
+        break;
+    case AV_PIX_FMT_YUVJ444P   :
+        pixFormat = AV_PIX_FMT_YUV444P;
+        break;
+    case AV_PIX_FMT_YUVJ440P :
+        pixFormat = AV_PIX_FMT_YUV440P;
+    default:
+        pixFormat = m_stream->codec->pix_fmt;
+        break;
+    }
+
+
     m_sws_context = sws_getCachedContext(m_sws_context,
                                          m_stream->codec->width, m_stream->codec->height,
-                                         m_stream->codec->pix_fmt,
+                                         pixFormat,
                                          m_stream->codec->width, m_stream->codec->height,
                                          m_pixelFormat,
                                          SWS_BICUBIC, NULL, NULL, NULL);
