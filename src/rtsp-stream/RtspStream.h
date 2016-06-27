@@ -53,6 +53,8 @@ public:
 
     bool isPaused() const { return state() == Paused; }
     bool isConnected() const { return state() > Connecting; }
+    bool hasAudio() const { return false; }
+    bool isAudioEnabled() const { return false; }
 
 public slots:
     void start();
@@ -62,6 +64,7 @@ public slots:
     void togglePaused() { setPaused(!isPaused()); }
     void setOnline(bool online);
     void setBandwidthMode(int bandwidthMode);
+    void enableAudio(bool) { ; }
 
 private slots:
     void updateFrame();

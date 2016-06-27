@@ -62,6 +62,9 @@ public:
     virtual bool isPaused() const = 0;
     virtual bool isConnected() const  = 0;
 
+    virtual bool hasAudio() const = 0;
+    virtual bool isAudioEnabled() const  = 0;
+
 public slots:
     virtual void start() = 0;
     virtual void stop() = 0;
@@ -70,6 +73,7 @@ public slots:
     virtual void togglePaused() { setPaused(!isPaused()); }
     virtual void setOnline(bool online) = 0;
     virtual void setBandwidthMode(int bandwidthMode) = 0;
+    virtual void enableAudio(bool enable) = 0;
 
 signals:
     void stateChanged(int newState);
