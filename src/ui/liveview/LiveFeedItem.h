@@ -110,6 +110,9 @@ public slots:
 
     void showFpsMenu(QDeclarativeItem *sourceItem = 0);
 
+    void enableAudio();
+    void disableAudio();
+
 signals:
     void cameraChanged(DVRCamera *camera);
     void cameraNameChanged(const QString &cameraName);

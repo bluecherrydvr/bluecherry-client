@@ -127,6 +127,18 @@ void LiveFeedItem::openFullScreen()
         LiveViewWindow::openWindow(m_serverRepository, bcApp->mainWindow, true, m_camera.data())->showFullScreen();
 }
 
+void LiveFeedItem::enableAudio()
+{
+    Q_ASSERT(stream());
+    stream()->enableAudio(true);
+}
+
+void LiveFeedItem::disableAudio()
+{
+    Q_ASSERT(stream());
+    stream()->enableAudio(false);
+}
+
 void LiveFeedItem::close()
 {
     bool closeFeedItem = parentItem()->metaObject()->invokeMethod(parentItem(), "removeItem", Q_ARG(QDeclarativeItem*, this));
@@ -225,6 +237,15 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     menu.addAction(tr("Open in window"), this, SLOT(openNewWindow()));
     menu.addAction(tr("Open as fullscreen"), this, SLOT(openFullScreen()));
     menu.addSeparator();
+
+    if (stream() && stream()->hasAudio())
+    {
+        if (stream()->isAudioEnabled())
+            menu.addAction(tr("Disable audio"), this, SLOT(disableAudio()));
+        else
+            menu.addAction(tr("Enable audio"), this, SLOT(enableAudio()));
+        menu.addSeparator();
+    }
 
     QAction *actClose = menu.addAction(tr("Close camera"), this, SLOT(close()));
     actClose->setEnabled(!m_camera.isNull());
