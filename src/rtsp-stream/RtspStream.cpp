@@ -111,6 +111,13 @@ RtspStream::~RtspStream()
     bcApp->liveView->removeStream(this);
 }
 
+void RtspStream::enableAudio(bool enable)
+{
+    //turn audio off on all other streams
+    if (enable)
+        bcApp->liveView->switchAudio(this);
+}
+
 void RtspStream::setState(State newState)
 {
     if (m_state == newState)

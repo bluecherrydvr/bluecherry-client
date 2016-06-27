@@ -61,6 +61,7 @@ private:
 
     void addStream(LiveStream *stream);
     void removeStream(LiveStream *stream);
+    void switchAudio(LiveStream *stream);
 };
 
 #endif // LIVEVIEWMANAGER_H

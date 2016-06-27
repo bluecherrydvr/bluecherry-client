@@ -48,6 +48,13 @@ MJpegStream::~MJpegStream()
         m_httpReply->deleteLater();
 }
 
+void MJpegStream::enableAudio(bool enable)
+{
+    //turn audio off on all other streams
+    if (enable)
+        bcApp->liveView->switchAudio(this);
+}
+
 void MJpegStream::setState(State newState)
 {
     if (m_state == newState)

@@ -24,6 +24,16 @@ LiveViewManager::LiveViewManager(QObject *parent)
 {
 }
 
+void LiveViewManager::switchAudio(LiveStream *stream)
+{
+    //disable audio on all streams except passed as argument
+    QList<LiveStream*>::const_iterator i;
+
+    for (i = m_streams.constBegin(); i != m_streams.constEnd(); ++i)
+        if (*i != stream)
+            (*i)->enableAudio(false);
+}
+
 void LiveViewManager::addStream(LiveStream *stream)
 {
     m_streams.append(stream);

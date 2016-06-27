@@ -66,7 +66,7 @@ public slots:
     void togglePaused() { setPaused(!isPaused()); }
     void setOnline(bool online);
     void setBandwidthMode(int bandwidthMode);
-    void enableAudio(bool) { ; }
+    void enableAudio(bool);
 
 private slots:
     void readable();
