@@ -16,6 +16,7 @@
 #
 
 set (bluecherry_client_MOC_SRCS
+    src/audio/AudioPlayer.h
     src/camera/DVRCamera.h
     src/camera/DVRCameraData.h
 

@@ -18,6 +18,7 @@
 include_directories (src)
 
 set (bluecherry_client_main_SRCS
+    src/audio/AudioPlayer.cpp
     src/camera/DVRCamera.cpp
     src/camera/DVRCameraData.cpp
     src/camera/DVRCameraSettingsReader.cpp

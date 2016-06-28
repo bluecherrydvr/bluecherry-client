@@ -42,6 +42,7 @@ class UpdateChecker;
 class GstPluginLoader;
 class GstWrapper;
 class VideoPlayerFactory;
+class AudioPlayer;
 
 class BluecherryApp : public QObject
 {
@@ -52,6 +53,7 @@ public:
     MainWindow *mainWindow;
     QIcon appIcon;
     LiveViewManager * const liveView;
+    AudioPlayer * const audioPlayer;
     TransferRateCalculator * const globalRate;
 
     explicit BluecherryApp();

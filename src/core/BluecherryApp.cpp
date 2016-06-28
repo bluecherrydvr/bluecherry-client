@@ -17,6 +17,7 @@
 
 #include "BluecherryApp.h"
 #include "LiveViewManager.h"
+#include "audio/AudioPlayer.h"
 #include "core/UpdateChecker.h"
 #include "ui/MainWindow.h"
 #include "event/EventDownloadManager.h"
@@ -56,6 +57,7 @@ BluecherryApp *bcApp = 0;
 
 BluecherryApp::BluecherryApp()
     : nam(new QNetworkAccessManager(this)), liveView(new LiveViewManager(this)),
+      audioPlayer(new AudioPlayer(this)),
       globalRate(new TransferRateCalculator(this)), m_updateChecker(0),
       m_livePaused(false), m_inPauseQuery(false),
       m_screensaverInhibited(false), m_screensaveValue(0)
