@@ -20,6 +20,11 @@
 
 #include <QObject>
 
+extern "C"
+{
+#include <libavutil/samplefmt.h>
+}
+
 class AudioPlayer : public QObject
 {
     Q_OBJECT
@@ -31,8 +36,18 @@ public:
 public slots:
     void play();
     void stop();
-    void setSampleFormat();
+    void setAudioFormat(enum AVSampleFormat fmt, int channelsNum, int sampleRate);
     void feedSamples(void *data, int samplesNum, int bytesNum);
+
+private:
+
+    bool m_isDeviceOpened;
+    bool m_isPlaying;
+    int m_deviceID;
+
+    static void SDL_AudioCallback(void*  userdata, quint8* stream, int len);
+
+
 
 };
 

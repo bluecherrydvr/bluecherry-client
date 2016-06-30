@@ -21,9 +21,16 @@
 
 #include <SDL2/SDL.h>
 
+extern "C"
+{
+#include <libavutil/samplefmt.h>
+}
+
 
 AudioPlayer::AudioPlayer(QObject *parent)
-    : QObject(parent)
+    : QObject(parent),
+      m_isDeviceOpened(false), m_isPlaying(false),
+      m_deviceID(0)
 {
     if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_TIMER))
     {
@@ -31,30 +38,104 @@ AudioPlayer::AudioPlayer(QObject *parent)
     }
 
     qDebug() << SDL_GetNumAudioDevices(0)  << " audio devices detected by SDL audio subsystem";
+
+    setAudioFormat(AV_SAMPLE_FMT_S16, 2, 44100);
 }
 
 AudioPlayer::~AudioPlayer()
 {
+    stop();
     SDL_Quit();
 }
 
-void AudioPlayer::play()
+void AudioPlayer::SDL_AudioCallback(void*  userdata, quint8 *stream, int len)
 {
 
+}
+
+
+void AudioPlayer::play()
+{
+    Q_ASSERT(m_isDeviceOpened);
+
+    SDL_PauseAudioDevice(m_deviceID, 0);
+    m_isPlaying = true;
 }
 
 void AudioPlayer::stop()
 {
-
+    if (m_isDeviceOpened)
+    {
+        SDL_CloseAudioDevice(m_deviceID);
+        m_isDeviceOpened = false;
+        m_isPlaying = false;
+    }
 }
 
-void AudioPlayer::setSampleFormat()
+void AudioPlayer::setAudioFormat(enum AVSampleFormat fmt, int channelsNum, int sampleRate)
 {
+    qDebug() << "AudioPlayer: setting sample format to " << av_get_sample_fmt_name(fmt)
+             << " channels: " << channelsNum << "sample rate: " << sampleRate;
+
+    AudioPlayer::stop();
+
+    SDL_AudioSpec spec;
+    SDL_AudioFormat sdlFmt;
+
+    SDL_memset(&spec, 0, sizeof(spec));
+
+    spec.freq = sampleRate;
+    spec.channels = channelsNum;
+    spec.samples = 8192;
+    spec.callback = NULL;
+
+    switch(fmt)
+    {
+    case AV_SAMPLE_FMT_U8:
+        sdlFmt = AUDIO_U8;
+        break;
+
+    case AV_SAMPLE_FMT_S16:
+        sdlFmt = AUDIO_S16SYS;
+        break;
+
+    case AV_SAMPLE_FMT_S32:
+        sdlFmt = AUDIO_S32SYS;
+        break;
+
+    case AV_SAMPLE_FMT_FLT:
+        sdlFmt = AUDIO_F32SYS;
+        break;
+
+    default:
+        qDebug() << "AudioPlayer: sample format is not supported by SDL";
+        return;
+    }
+
+    spec.format = sdlFmt;
+
+    m_deviceID = SDL_OpenAudioDevice(NULL, 0, &spec, NULL, 0);
+
+    if (m_deviceID == 0)
+    {
+        qDebug() << "AudioPlayer: failed to open audio device - " << SDL_GetError();
+        return;
+    }
+
+    m_isDeviceOpened = true;
 
 }
 
 void AudioPlayer::feedSamples(void *data, int samplesNum, int bytesNum)
 {
+    Q_ASSERT(m_isDeviceOpened);
+
+    int ret = SDL_QueueAudio(m_deviceID, data, bytesNum);
+
+    if (ret < 0)
+    {
+        qDebug() << "AudioPlayer: SDL_QueueAudio() failed - " << SDL_GetError();
+    }
 
 }
 
