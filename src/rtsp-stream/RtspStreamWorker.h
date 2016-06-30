@@ -56,6 +56,7 @@ signals:
     void fatalError(const QString &message);
     void finished();
     void bytesDownloaded(unsigned int bytes);
+    void foundAudioStream();
 
 private:
     struct AVFormatContext *m_ctx;
@@ -66,6 +67,8 @@ private:
     mutable bool m_lastCancel;
     mutable int m_lastSeconds;
     int m_decodeErrorsCnt;
+    int m_videoStreamIndex;
+    int m_audioStreamIndex;
 
     ThreadPause m_threadPause;
     QScopedPointer<RtspStreamFrameFormatter> m_frameFormatter;
@@ -88,7 +91,7 @@ private:
     bool processStream();
     struct AVPacket readPacket(bool *ok = 0);
     bool processPacket(struct AVPacket packet);
-    AVFrame * extractFrame(struct AVPacket &packet);
+    AVFrame * extractVideoFrame(struct AVPacket &packet);
     void processFrame(struct AVFrame *frame);
 
     QString errorMessageFromCode(int errorCode);

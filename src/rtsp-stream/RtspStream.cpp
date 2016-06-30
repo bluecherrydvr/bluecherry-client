@@ -22,6 +22,7 @@
 #include "core/BluecherryApp.h"
 #include "core/LiveViewManager.h"
 #include "core/LoggableUrl.h"
+#include "audio/AudioPlayer.h"
 #include <QMutex>
 #include <QMetaObject>
 #include <QTimer>
@@ -95,7 +96,7 @@ RtspStream::RtspStream(DVRCamera *camera, QObject *parent)
     : LiveStream(parent), m_camera(camera), m_thread(0), m_currentFrameMutex(QMutex::Recursive),
       m_frame(0), m_state(NotConnected),
       m_autoStart(false), m_bandwidthMode(LiveViewManager::FullBandwidth), m_fpsUpdateCnt(0), m_fpsUpdateHits(0),
-      m_fps(0)
+      m_fps(0), m_hasAudio(false), m_isAudioEnabled(false)
 {
     Q_ASSERT(m_camera);
     //connect(m_camera.data(), SIGNAL(destroyed(QObject*)), this, SLOT(deleteLater()));
@@ -111,11 +112,24 @@ RtspStream::~RtspStream()
     bcApp->liveView->removeStream(this);
 }
 
+void RtspStream::foundAudioStream()
+{
+    m_hasAudio = true;
+
+    qDebug() << "RTSP stream " << url() << " has audio stream";
+}
+
 void RtspStream::enableAudio(bool enable)
 {
     //turn audio off on all other streams
     if (enable)
         bcApp->liveView->switchAudio(this);
+
+    m_isAudioEnabled = enable;
+
+    bcApp->audioPlayer->stop();
+
+
 }
 
 void RtspStream::setState(State newState)
@@ -186,6 +200,7 @@ void RtspStream::start()
 
     m_thread.reset(new RtspStreamThread());
     connect(m_thread.data(), SIGNAL(fatalError(QString)), this, SLOT(fatalError(QString)));
+    connect(m_thread.data(), SIGNAL(foundAudioStream()), this, SLOT(foundAudioStream()));
     m_thread->start(url());
 
     updateSettings();

@@ -43,6 +43,7 @@ int rtspStreamInterruptCallback(void *opaque)
 
 RtspStreamWorker::RtspStreamWorker(QSharedPointer<RtspStreamFrameQueue> &shared_queue, QObject *parent)
     : QObject(parent), m_ctx(0), m_decodeErrorsCnt(0),
+      m_videoStreamIndex(-1), m_audioStreamIndex(-1),
       m_cancelFlag(false), m_autoDeinterlacing(true),
       m_frameQueue(new RtspStreamFrameQueue(6))
 {
@@ -149,7 +150,10 @@ bool RtspStreamWorker::processPacket(struct AVPacket packet)
 
     while (packet.size > 0)
     {
-        AVFrame *frame = extractFrame(packet);
+        if (packet.stream_index != m_videoStreamIndex)
+            return true;
+
+        AVFrame *frame = extractVideoFrame(packet);
         if (frame)
         {
             processFrame(frame);
@@ -165,13 +169,13 @@ bool RtspStreamWorker::processPacket(struct AVPacket packet)
     return true;
 }
 
-AVFrame * RtspStreamWorker::extractFrame(AVPacket &packet)
+AVFrame * RtspStreamWorker::extractVideoFrame(AVPacket &packet)
 {
     AVFrame *frame = av_frame_alloc();
     startInterruptableOperation(5);
 
     int pictureAvailable;
-    int re = avcodec_decode_video2(m_ctx->streams[0]->codec, frame, &pictureAvailable, &packet);
+    int re = avcodec_decode_video2(m_ctx->streams[m_videoStreamIndex]->codec, frame, &pictureAvailable, &packet);
     if (re == 0) {
         return 0;
     }
@@ -229,7 +233,7 @@ bool RtspStreamWorker::setup()
 
     if (prepared)
     {
-        m_frameFormatter.reset(new RtspStreamFrameFormatter(m_ctx->streams[0]));
+        m_frameFormatter.reset(new RtspStreamFrameFormatter(m_ctx->streams[m_videoStreamIndex]));
         m_frameFormatter->setAutoDeinterlacing(m_autoDeinterlacing);
     }
     else if (m_ctx)
@@ -258,7 +262,7 @@ AVDictionary * RtspStreamWorker::createOptions() const
     AVDictionary *options = 0;
 
     av_dict_set(&options, "threads", "1", 0);
-    av_dict_set(&options, "allowed_media_types", "-audio-data", 0);
+    //av_dict_set(&options, "allowed_media_types", "-audio-data", 0);
     av_dict_set(&options, "max_delay", QByteArray::number(qint64(0.3*AV_TIME_BASE)).constData(), 0);
     /* Because the server always starts streams on a keyframe, we don't need any time here.
      * If the first frame is not a keyframe, this could result in failures or corruption. */
@@ -329,6 +333,8 @@ void RtspStreamWorker::openCodecs(AVFormatContext *context, AVDictionary *option
 {
     for (unsigned int i = 0; i < context->nb_streams; i++)
     {
+        qDebug() << "processing stream id " << i;
+
         AVStream *stream = context->streams[i];
         bool codecOpened = openCodec(stream, options);
         if (!codecOpened)
@@ -338,16 +344,31 @@ void RtspStreamWorker::openCodecs(AVFormatContext *context, AVDictionary *option
             continue;
         }
 
+        if (stream->codec->codec_type==AVMEDIA_TYPE_VIDEO)
+            m_videoStreamIndex = i;
+
+        if (stream->codec->codec_type==AVMEDIA_TYPE_AUDIO)
+            m_audioStreamIndex = i;
+
         char info[512];
         avcodec_string(info, sizeof(info), stream->codec, 0);
         qDebug() << "RtspStream: stream #" << i << ":" << info;
     }
+
+    if (m_audioStreamIndex > -1)
+        emit foundAudioStream();
+
+    qDebug() << "video stream index: " << m_videoStreamIndex;
+    qDebug() << "audio steam index: " << m_audioStreamIndex;
 }
 
 bool RtspStreamWorker::openCodec(AVStream *stream, AVDictionary *options)
 {
     startInterruptableOperation(5);
     AVCodec *codec = avcodec_find_decoder(stream->codec->codec_id);
+
+    if (codec == NULL)
+        return false;
 
     AVDictionary *optionsCopy = 0;
     av_dict_copy(&optionsCopy, options, 0);

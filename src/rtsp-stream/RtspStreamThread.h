@@ -50,6 +50,7 @@ public:
 signals:
     void fatalError(const QString &error);
     void finished();
+    void foundAudioStream();
 
 private:
     QWeakPointer<QThread> m_thread;

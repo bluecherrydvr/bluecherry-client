@@ -53,8 +53,8 @@ public:
 
     bool isPaused() const { return state() == Paused; }
     bool isConnected() const { return state() > Connecting; }
-    bool hasAudio() const { return false; }
-    bool isAudioEnabled() const { return false; }
+    bool hasAudio() const { return m_hasAudio; }
+    bool isAudioEnabled() const { return m_isAudioEnabled; }
 
 public slots:
     void start();
@@ -71,6 +71,7 @@ private slots:
     void fatalError(const QString &message);
     void updateSettings();
     void checkState();
+    void foundAudioStream();
 
 private:
     static QTimer *m_renderTimer, *m_stateTimer;
@@ -88,6 +89,8 @@ private:
     int m_fpsUpdateCnt;
     int m_fpsUpdateHits;
     float m_fps;
+    bool m_hasAudio;
+    bool m_isAudioEnabled;
 
     QElapsedTimer m_frameInterval;
 
