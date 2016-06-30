@@ -17,15 +17,25 @@
 
 #include "AudioPlayer.h"
 
+#include <QDebug>
+
+#include <SDL2/SDL.h>
+
+
 AudioPlayer::AudioPlayer(QObject *parent)
     : QObject(parent)
 {
+    if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_TIMER))
+    {
+        qDebug() << "SDL initialization failed: " << SDL_GetError();
+    }
 
+    qDebug() << SDL_GetNumAudioDevices(0)  << " audio devices detected by SDL audio subsystem";
 }
 
 AudioPlayer::~AudioPlayer()
 {
-
+    SDL_Quit();
 }
 
 void AudioPlayer::play()
