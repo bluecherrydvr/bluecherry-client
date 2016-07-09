@@ -112,15 +112,10 @@ RtspStream::~RtspStream()
     bcApp->liveView->removeStream(this);
 }
 
-void RtspStream::foundAudioStream()
+void RtspStream::setAudioFormat(enum AVSampleFormat fmt, int channelsNum, int sampleRate)
 {
     m_hasAudio = true;
 
-    qDebug() << "RTSP stream " << url() << " has audio stream";
-}
-
-void RtspStream::setAudioFormat(enum AVSampleFormat fmt, int channelsNum, int sampleRate)
-{
     qDebug() << "RtspStream::setAudioFormat channels " << channelsNum << " sample rate " << sampleRate;
     m_audioSampleFmt = fmt;
     m_audioChannels = channelsNum;
@@ -224,7 +219,6 @@ void RtspStream::start()
 
     m_thread.reset(new RtspStreamThread());
     connect(m_thread.data(), SIGNAL(fatalError(QString)), this, SLOT(fatalError(QString)));
-    connect(m_thread.data(), SIGNAL(foundAudioStream()), this, SLOT(foundAudioStream()));
     connect(m_thread.data(), SIGNAL(audioFormat(enum AVSampleFormat, int, int)), this, SLOT(setAudioFormat(AVSampleFormat,int,int)), Qt::DirectConnection);
     m_thread->start(url());
 

@@ -73,7 +73,6 @@ private slots:
     void fatalError(const QString &message);
     void updateSettings();
     void checkState();
-    void foundAudioStream();
 
 private:
     static QTimer *m_renderTimer, *m_stateTimer;

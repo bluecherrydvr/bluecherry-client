@@ -414,8 +414,6 @@ void RtspStreamWorker::openCodecs(AVFormatContext *context, AVDictionary *option
                  << "/"
                  << context->streams[m_audioStreamIndex]->codec->time_base.den;
 
-        emit foundAudioStream();
-
         emit audioFormat(context->streams[m_audioStreamIndex]->codec->sample_fmt,
                          context->streams[m_audioStreamIndex]->codec->channels,
                          context->streams[m_audioStreamIndex]->codec->sample_rate);

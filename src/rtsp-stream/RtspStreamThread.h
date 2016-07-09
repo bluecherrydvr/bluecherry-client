@@ -52,7 +52,6 @@ public:
 signals:
     void fatalError(const QString &error);
     void finished();
-    void foundAudioStream();
     void audioFormat(enum AVSampleFormat fmt, int channelsNum, int sampleRate);
     void audioSamplesAvailable(void *data, int samplesNum, int bytesNum);
 

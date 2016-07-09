@@ -64,7 +64,6 @@ void RtspStreamThread::start(const QUrl &url)
         connect(m_worker.data(), SIGNAL(fatalError(QString)), this, SIGNAL(fatalError(QString)));        
         connect(m_worker.data(), SIGNAL(destroyed()), this, SLOT(clearWorker()), Qt::DirectConnection);
         connect(m_worker.data(), SIGNAL(destroyed()), m_thread.data(), SLOT(quit()));
-        connect(m_worker.data(), SIGNAL(foundAudioStream()), this, SIGNAL(foundAudioStream()));
         connect(m_worker.data(), SIGNAL(audioFormat(enum AVSampleFormat, int, int)), this, SIGNAL(audioFormat(enum AVSampleFormat,int,int)), Qt::DirectConnection);
         connect(m_worker.data(), SIGNAL(audioSamplesAvailable(void *, int, int)), this, SIGNAL(audioSamplesAvailable(void*,int,int)), Qt::DirectConnection);
 
