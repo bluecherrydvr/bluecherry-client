@@ -53,7 +53,7 @@ RtspStreamFrame * RtspStreamFrameQueue::dequeue()
     // TODO: needs checking
     // something is wrong with this code as after few minutes all frames are considered outdated - some calculation is off here
     RtspStreamFrame *frame = m_frameQueue.dequeue();
-    while (!m_frameQueue.isEmpty() && frame)
+    /*while (!m_frameQueue.isEmpty() && frame)
     {
         qint64 scaledFrameDisplayTime = av_rescale_rnd(frame->avFrame()->pts - m_ptsBase, AV_TIME_BASE, 90000, AV_ROUND_NEAR_INF);
         if (abs(scaledFrameDisplayTime - now) >= AV_TIME_BASE/2)
@@ -70,7 +70,7 @@ RtspStreamFrame * RtspStreamFrameQueue::dequeue()
         }
         else
             break;
-    }
+    }*/
 
     return frame;
 }
