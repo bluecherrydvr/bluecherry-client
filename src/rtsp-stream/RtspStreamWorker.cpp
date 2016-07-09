@@ -59,7 +59,6 @@ RtspStreamWorker::~RtspStreamWorker()
     for (unsigned int i = 0; i < m_ctx->nb_streams; ++i)
     {
         avcodec_close(m_ctx->streams[i]->codec);
-        av_freep(m_ctx->streams[i]);
     }
 
     startInterruptableOperation(5);
