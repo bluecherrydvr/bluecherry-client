@@ -48,11 +48,12 @@ AudioPlayer::~AudioPlayer()
     SDL_Quit();
 }
 
+/*
 void AudioPlayer::SDL_AudioCallback(void*  userdata, quint8 *stream, int len)
 {
 
 }
-
+*/
 
 void AudioPlayer::play()
 {
@@ -60,6 +61,8 @@ void AudioPlayer::play()
 
     SDL_PauseAudioDevice(m_deviceID, 0);
     m_isPlaying = true;
+
+    m_sampleClock.start();
 }
 
 void AudioPlayer::stop()
@@ -107,8 +110,17 @@ void AudioPlayer::setAudioFormat(enum AVSampleFormat fmt, int channelsNum, int s
         sdlFmt = AUDIO_F32SYS;
         break;
 
+    case AV_SAMPLE_FMT_FLTP:
+        /*
+        Planar formats are not supported by SDL (2.0.4 and older),
+        so we use only single plane and play one channel as a workaround
+        */
+        sdlFmt = AUDIO_F32SYS;
+        spec.channels = 1;
+        break;
+
     default:
-        qDebug() << "AudioPlayer: sample format is not supported by SDL";
+        qDebug() << "AudioPlayer: sample format " << av_get_sample_fmt_name(fmt) << " is not supported by SDL";
         return;
     }
 
@@ -129,6 +141,9 @@ void AudioPlayer::setAudioFormat(enum AVSampleFormat fmt, int channelsNum, int s
 void AudioPlayer::feedSamples(void *data, int samplesNum, int bytesNum)
 {
     Q_ASSERT(m_isDeviceOpened);
+
+    //qDebug() << "AudioPlayer: got " << samplesNum << " samples, " << bytesNum << " bytes, time elapsed: " << m_sampleClock.elapsed() << "ms";
+
 
     int ret = SDL_QueueAudio(m_deviceID, data, bytesNum);
 

@@ -44,6 +44,7 @@ int rtspStreamInterruptCallback(void *opaque)
 RtspStreamWorker::RtspStreamWorker(QSharedPointer<RtspStreamFrameQueue> &shared_queue, QObject *parent)
     : QObject(parent), m_ctx(0), m_decodeErrorsCnt(0),
       m_videoStreamIndex(-1), m_audioStreamIndex(-1),
+      m_audioEnabled(false),
       m_cancelFlag(false), m_autoDeinterlacing(true),
       m_frameQueue(new RtspStreamFrameQueue(6))
 {
@@ -150,23 +151,75 @@ bool RtspStreamWorker::processPacket(struct AVPacket packet)
 
     while (packet.size > 0)
     {
-        if (packet.stream_index != m_videoStreamIndex)
-            return true;
-
-        AVFrame *frame = extractVideoFrame(packet);
-        if (frame)
+        if (packet.stream_index == m_audioStreamIndex)
         {
-            processFrame(frame);
-            av_free(frame);
+            if (!m_audioEnabled)
+                return true;
+
+            AVFrame *frame = extractAudioFrame(packet);
+
+            if (frame)
+            {
+                //feed samples to audio player
+
+                int bytesNum = 0;
+
+                //bytesNum is set to linesize because only first plane is played in case of planar sample format
+                av_samples_get_buffer_size(&bytesNum, frame->channels, frame->nb_samples, (enum AVSampleFormat)frame->format, 0);
+
+                emit audioSamplesAvailable(frame->data[0], frame->nb_samples, bytesNum);
+
+                av_free(frame);
+            }
         }
 
-        if (m_decodeErrorsCnt >= maxDecodeErrors)
+        if (packet.stream_index == m_videoStreamIndex)
         {
-            return false;
+            AVFrame *frame = extractVideoFrame(packet);
+            if (frame)
+            {
+                processVideoFrame(frame);
+                av_free(frame);
+            }
+
+            if (m_decodeErrorsCnt >= maxDecodeErrors)
+            {
+                return false;
+            }
         }
     }
 
     return true;
+}
+
+AVFrame * RtspStreamWorker::extractAudioFrame(AVPacket &packet)
+{
+    AVFrame *frame = av_frame_alloc();
+    startInterruptableOperation(5);
+
+    int frameAvailable;
+
+    int ret = avcodec_decode_audio4(m_ctx->streams[m_audioStreamIndex]->codec, frame, &frameAvailable, &packet);
+
+    if (ret == 0)
+        return 0;
+
+    if (ret < 0)
+    {
+        av_free(frame);
+        return 0;
+    }
+
+    packet.size -= ret;
+    packet.data += ret;
+
+    if (!frameAvailable)
+    {
+        av_free(frame);
+        return 0;
+    }
+
+    return frame;
 }
 
 AVFrame * RtspStreamWorker::extractVideoFrame(AVPacket &packet)
@@ -205,7 +258,7 @@ AVFrame * RtspStreamWorker::extractVideoFrame(AVPacket &packet)
     return frame;
 }
 
-void RtspStreamWorker::processFrame(struct AVFrame *rawFrame)
+void RtspStreamWorker::processVideoFrame(struct AVFrame *rawFrame)
 {
     Q_ASSERT(m_frameFormatter);
     startInterruptableOperation(5);
@@ -356,7 +409,17 @@ void RtspStreamWorker::openCodecs(AVFormatContext *context, AVDictionary *option
     }
 
     if (m_audioStreamIndex > -1)
+    {
+        qDebug() << "audio stream time base " << context->streams[m_audioStreamIndex]->codec->time_base.num
+                 << "/"
+                 << context->streams[m_audioStreamIndex]->codec->time_base.den;
+
         emit foundAudioStream();
+
+        emit audioFormat(context->streams[m_audioStreamIndex]->codec->sample_fmt,
+                         context->streams[m_audioStreamIndex]->codec->channels,
+                         context->streams[m_audioStreamIndex]->codec->sample_rate);
+    }
 
     qDebug() << "video stream index: " << m_videoStreamIndex;
     qDebug() << "audio steam index: " << m_audioStreamIndex;

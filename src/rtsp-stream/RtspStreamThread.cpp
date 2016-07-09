@@ -65,6 +65,8 @@ void RtspStreamThread::start(const QUrl &url)
         connect(m_worker.data(), SIGNAL(destroyed()), this, SLOT(clearWorker()), Qt::DirectConnection);
         connect(m_worker.data(), SIGNAL(destroyed()), m_thread.data(), SLOT(quit()));
         connect(m_worker.data(), SIGNAL(foundAudioStream()), this, SIGNAL(foundAudioStream()));
+        connect(m_worker.data(), SIGNAL(audioFormat(enum AVSampleFormat, int, int)), this, SIGNAL(audioFormat(enum AVSampleFormat,int,int)), Qt::DirectConnection);
+        connect(m_worker.data(), SIGNAL(audioSamplesAvailable(void *, int, int)), this, SIGNAL(audioSamplesAvailable(void*,int,int)), Qt::DirectConnection);
 
         connect(m_worker.data(), SIGNAL(bytesDownloaded(uint)), bcApp->globalRate, SLOT(addSampleValue(uint)));
 
@@ -74,6 +76,16 @@ void RtspStreamThread::start(const QUrl &url)
         m_worker.data()->metaObject()->invokeMethod(m_worker.data(), "run");
 
     m_isRunning = true;
+}
+
+void RtspStreamThread::enableAudio(bool enabled)
+{
+    QMutexLocker locker(&m_workerMutex);
+
+    if (m_worker)
+    {
+        m_worker.data()->enableAudio(enabled);
+    }
 }
 
 void RtspStreamThread::stop()

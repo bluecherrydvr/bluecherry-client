@@ -23,6 +23,7 @@
 #include <QObject>
 #include <QUrl>
 #include <QSharedPointer>
+#include "audio/AudioPlayer.h"
 
 struct AVDictionary;
 struct AVFrame;
@@ -49,6 +50,8 @@ public:
     bool shouldInterrupt() const;
     RtspStreamFrame * frameToDisplay();
 
+    void enableAudio(bool enabled) { m_audioEnabled = enabled; }
+
 public slots:
     void run();
 
@@ -57,6 +60,8 @@ signals:
     void finished();
     void bytesDownloaded(unsigned int bytes);
     void foundAudioStream();
+    void audioFormat(enum AVSampleFormat fmt, int channelsNum, int sampleRate);
+    void audioSamplesAvailable(void *data, int samplesNum, int bytesNum);
 
 private:
     struct AVFormatContext *m_ctx;
@@ -69,6 +74,7 @@ private:
     int m_decodeErrorsCnt;
     int m_videoStreamIndex;
     int m_audioStreamIndex;
+    bool m_audioEnabled;
 
     ThreadPause m_threadPause;
     QScopedPointer<RtspStreamFrameFormatter> m_frameFormatter;
@@ -92,7 +98,8 @@ private:
     struct AVPacket readPacket(bool *ok = 0);
     bool processPacket(struct AVPacket packet);
     AVFrame * extractVideoFrame(struct AVPacket &packet);
-    void processFrame(struct AVFrame *frame);
+    AVFrame * extractAudioFrame(struct AVPacket &packet);
+    void processVideoFrame(struct AVFrame *frame);
 
     QString errorMessageFromCode(int errorCode);
     void startInterruptableOperation(int timeoutInSeconds);

@@ -22,6 +22,7 @@
 #include <QObject>
 #include <QWeakPointer>
 #include <QSharedPointer>
+#include "audio/AudioPlayer.h"
 
 class RtspStreamFrame;
 class RtspStreamWorker;
@@ -43,6 +44,7 @@ public:
 
     bool isRunning() const;
     bool hasWorker();
+    void enableAudio(bool enabled);
 
     void setAutoDeinterlacing(bool autoDeinterlacing);
     RtspStreamFrame * frameToDisplay();
@@ -51,6 +53,8 @@ signals:
     void fatalError(const QString &error);
     void finished();
     void foundAudioStream();
+    void audioFormat(enum AVSampleFormat fmt, int channelsNum, int sampleRate);
+    void audioSamplesAvailable(void *data, int samplesNum, int bytesNum);
 
 private:
     QWeakPointer<QThread> m_thread;

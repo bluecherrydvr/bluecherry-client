@@ -119,6 +119,14 @@ void RtspStream::foundAudioStream()
     qDebug() << "RTSP stream " << url() << " has audio stream";
 }
 
+void RtspStream::setAudioFormat(enum AVSampleFormat fmt, int channelsNum, int sampleRate)
+{
+    qDebug() << "RtspStream::setAudioFormat channels " << channelsNum << " sample rate " << sampleRate;
+    m_audioSampleFmt = fmt;
+    m_audioChannels = channelsNum;
+    m_audioSampleRate = sampleRate;
+}
+
 void RtspStream::enableAudio(bool enable)
 {
     //turn audio off on all other streams
@@ -128,6 +136,22 @@ void RtspStream::enableAudio(bool enable)
     m_isAudioEnabled = enable;
 
     bcApp->audioPlayer->stop();
+
+    if (!m_thread || !m_thread->hasWorker())
+        return;
+
+    if (enable)
+    {
+        bcApp->audioPlayer->setAudioFormat(m_audioSampleFmt, m_audioChannels, m_audioSampleRate);
+        connect(m_thread.data(), SIGNAL(audioSamplesAvailable(void *, int, int)), bcApp->audioPlayer, SLOT(feedSamples(void *, int, int)), Qt::DirectConnection);
+        bcApp->audioPlayer->play();
+    }
+    else
+    {
+        disconnect(m_thread.data(), SIGNAL(audioSamplesAvailable(void *, int, int)), 0, 0);
+    }
+
+    m_thread->enableAudio(enable);
 
 
 }
@@ -201,6 +225,7 @@ void RtspStream::start()
     m_thread.reset(new RtspStreamThread());
     connect(m_thread.data(), SIGNAL(fatalError(QString)), this, SLOT(fatalError(QString)));
     connect(m_thread.data(), SIGNAL(foundAudioStream()), this, SLOT(foundAudioStream()));
+    connect(m_thread.data(), SIGNAL(audioFormat(enum AVSampleFormat, int, int)), this, SLOT(setAudioFormat(AVSampleFormat,int,int)), Qt::DirectConnection);
     m_thread->start(url());
 
     updateSettings();

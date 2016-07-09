@@ -19,6 +19,7 @@
 #define AUDIOPLAYER_H
 
 #include <QObject>
+#include <QElapsedTimer>
 
 extern "C"
 {
@@ -45,7 +46,9 @@ private:
     bool m_isPlaying;
     int m_deviceID;
 
-    static void SDL_AudioCallback(void*  userdata, quint8* stream, int len);
+    QElapsedTimer m_sampleClock;
+
+    //static void SDL_AudioCallback(void*  userdata, quint8* stream, int len);
 
 
 

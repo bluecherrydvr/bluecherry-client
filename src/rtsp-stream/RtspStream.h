@@ -26,6 +26,7 @@
 #include "camera/DVRCamera.h"
 #include "core/LiveStream.h"
 #include "core/LiveViewManager.h"
+#include "audio/AudioPlayer.h"
 
 class RtspStreamThread;
 
@@ -65,6 +66,7 @@ public slots:
     void setOnline(bool online);
     void setBandwidthMode(int bandwidthMode);
     void enableAudio(bool);
+    void setAudioFormat(enum AVSampleFormat, int, int);
 
 private slots:
     void updateFrame();
@@ -93,6 +95,10 @@ private:
     bool m_isAudioEnabled;
 
     QElapsedTimer m_frameInterval;
+
+    enum AVSampleFormat m_audioSampleFmt;
+    int m_audioChannels;
+    int m_audioSampleRate;
 
     void setState(State newState);
 
