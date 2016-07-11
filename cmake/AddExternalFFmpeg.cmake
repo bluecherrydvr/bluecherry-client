@@ -48,7 +48,15 @@ ExternalProject_Add(ffmpeg
         --enable-decoder=mpeg4
         --enable-decoder=mjpeg
 	--enable-decoder=rawvideo
-                
+
+        --enable-decoder=aac
+	--enable-decoder=amrnb
+	--enable-decoder=amrwb
+	--enable-decoder=pcm_alaw
+	--enable-decoder=pcm_mulaw
+	--enable-decoder=gsm
+	--enable-decoder=adpcm_g726
+
 	--enable-parser=h264
         --enable-parser=mpeg4video
         --enable-parser=mjpeg
