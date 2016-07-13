@@ -136,6 +136,35 @@ LiveFeedBase {
                 visible: feedItem.hasPtz && parent.visible && !stream.paused
             }
 
+            Image {
+                id: audioStreamIcon
+                source: "qrc:/icons/audio-stream-available.png" /*stream !== null && stream.audioPlaying ? "qrc:/icons/audio-stream-on.png" : "qrc:/icons/audio-stream-available.png"*/
+                height: parent.height
+                fillMode: Image.PreserveAspectFit
+                visible: parent.visible && stream.audio /*stream !== null && stream.audio*/
+
+                states: [
+                    /*State {
+                        name: "hasAudio"
+                        when: stream && stream.audio
+
+                        PropertyChanges {
+                            target: audioStreamIcon
+                            source: "qrc:/icons/audio-stream-available.png"
+                        }
+                    },*/
+                    State {
+                        name: "AudioIsPlaying"
+                        when: stream && stream.audioPlaying
+
+                        PropertyChanges {
+                            target: audioStreamIcon
+                            source: "qrc:/icons/audio-stream-on.png"
+                        }
+                    }
+                ]
+            }
+
             Text {
                 id: fpsText
                 color: "#bebebe"
@@ -195,6 +224,8 @@ LiveFeedBase {
                     visible: fpsMouseArea.containsMouse
                 }
             }
+
+
         }
     }
 

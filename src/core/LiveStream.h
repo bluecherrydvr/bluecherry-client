@@ -34,6 +34,8 @@ class LiveStream : public QObject
     Q_PROPERTY(QSize streamSize READ streamSize NOTIFY streamSizeChanged)
     Q_PROPERTY(State state READ state NOTIFY stateChanged)
     Q_PROPERTY(QString errdesc READ errorMessage CONSTANT)
+    Q_PROPERTY(bool audio READ hasAudio NOTIFY audioChanged)
+    Q_PROPERTY(bool audioPlaying READ isAudioEnabled NOTIFY audioChanged)
 
 public:
     enum State
@@ -84,6 +86,7 @@ signals:
     void streamStopped();
     void streamSizeChanged(const QSize &size);
     void updated();
+    void audioChanged();
 
     
 };

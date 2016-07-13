@@ -120,6 +120,8 @@ void RtspStream::setAudioFormat(enum AVSampleFormat fmt, int channelsNum, int sa
     m_audioSampleFmt = fmt;
     m_audioChannels = channelsNum;
     m_audioSampleRate = sampleRate;
+
+    emit audioChanged();
 }
 
 void RtspStream::enableAudio(bool enable)
@@ -129,6 +131,8 @@ void RtspStream::enableAudio(bool enable)
         bcApp->liveView->switchAudio(this);
 
     m_isAudioEnabled = enable;
+
+    emit audioChanged();
 
     bcApp->audioPlayer->stop();
 
