@@ -31,6 +31,9 @@ To compile bluecherry-client on Windows install following applications and libra
   unpack sources and build according to instructions in file INSTALL.W32
   "perl Configure VC-WIN32 --prefix=prefix"
 
+* SDL 2.0.4
+  dowload headers and library files from http://www.libsdl.org/release/SDL2-devel-2.0.4-VC.zip
+
 CONFIGURING Qt Creator
 
 Run Qt Creator and configure Qt Kit:
