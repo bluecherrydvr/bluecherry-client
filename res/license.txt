@@ -1,8 +1,8 @@
-<center>Copyright &copy; 2011, Bluecherry LLC. All rights reserved.</center>
+<center>Copyright &copy; 2016, Bluecherry LLC. All rights reserved.</center>
 <br><hr><br>
 The following software is distributed under the terms of the GNU Lesser General Public License, either version 2.0, 2.1, or 2.1 or later, as indicated with their distribution:
 <ul>
-    <li><a href='http://qt.nokia.com/'>Qt Toolkit</a></li>
+    <li><a href='http://qt.io/'>Qt Toolkit</a></li>
     <li><a href='http://www.webkit.org/'>Webkit</a> (portions of)</li>
     <li><a href='http://www.ffmpeg.org/'>FFmpeg</a></li>
     <li><a href='http://www.gtk.org/'>GLib</a></li>
@@ -10,6 +10,11 @@ The following software is distributed under the terms of the GNU Lesser General 
     <li><a href='http://www.bzip.org/'>bzip2</a></li>
 </ul>
 The Qt Toolkit contains code under other licenses and by specific authors. A complete list of copyrights is included with Qt's documentation, or available online <a href='http://doc.qt.nokia.com/latest/licenses.html'>here</a>.
+<br><hr><br>
+SDL 2.0 is distributed under the <a href="http://www.gzip.org/zlib/zlib_license.html">zlib license</a>. This license allows you to use SDL freely in any software. 
+<ul>
+    <li><a href='http://www.libsdl.org/'>Simple DirectMedia Layer</a></li>
+</ul>
 <br><hr><br>
 The MPlayer is distributed under the terms of the GNU General Public License version 2:
 <ul>
