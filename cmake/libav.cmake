@@ -15,10 +15,14 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-#find_package (LibAVCodec 53.35.0 REQUIRED)
-#find_package (LibAVFormat 53.21.1 REQUIRED)
-#find_package (LibAVUtil 51.22.1 REQUIRED)
-#find_package (LibSWScale 2.1.0 REQUIRED)
+
+if ( WIN32 )
+find_package (LibAVCodec 53.35.0 REQUIRED)
+find_package (LibAVFormat 53.21.1 REQUIRED)
+find_package (LibAVUtil 51.22.1 REQUIRED)
+find_package (LibSWScale 2.1.0 REQUIRED)
+endif()
+
 if ( UNIX )
     include(cmake/CpuCoresCount.cmake)
     include(ExternalProject)
@@ -31,10 +35,12 @@ include_directories (${LIBAVFORMAT_INCLUDE_DIRS})
 include_directories (${LIBAVUTIL_INCLUDE_DIRS})
 include_directories (${LIBSWSCALE_INCLUDE_DIRS})
 
-#link_directories (${LIBAVCODEC_LIBRARY_DIRS})
-#link_directories (${LIBAVFORMAT_LIBRARY_DIRS})
-#link_directories (${LIBAVUTIL_LIBRARY_DIRS})
-#link_directories (${LIBSWSCALE_LIBRARY_DIRS})
+if ( WIN32 )
+link_directories (${LIBAVCODEC_LIBRARY_DIRS})
+link_directories (${LIBAVFORMAT_LIBRARY_DIRS})
+link_directories (${LIBAVUTIL_LIBRARY_DIRS})
+link_directories (${LIBSWSCALE_LIBRARY_DIRS})
+endif()
 
 # __STDC_CONSTANT_MACROS is necessary for libav on Linux
 add_definitions (-D__STDC_CONSTANT_MACROS)
