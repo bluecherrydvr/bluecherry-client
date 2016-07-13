@@ -6,6 +6,7 @@
 !define LIBAV_PATH "@WIN32_LIBAV_DIR@\bin"
 #!define LIBOPENSSL_PATH "C:\OpenSSL-Win32\bin"
 !define LIBOPENSSL_PATH "@WIN32_OPENSSL_DIR@\bin"
+!define LIBSDL2_PATH "@WIN32_LIBSDL2_DIR@\bin"
 !define WINDOWS_DLL_PATH "C:\Windows\System32"
 !define MPLAYER_PATH "@CMAKE_SOURCE_DIR@\mplayer-bin\win"
 !define VERSION "@VERSION@"
@@ -82,6 +83,8 @@ Section
         # OpenSSL
         File "${LIBOPENSSL_PATH}\ssleay32.dll"
         File "${LIBOPENSSL_PATH}\libeay32.dll"
+        # SDL2
+        File "${LIBSDL2_PATH}\SDL2.dll"
 
         # MSVC 2010 CRT
         File "${WINDOWS_DLL_PATH}\msvcp100.dll"
