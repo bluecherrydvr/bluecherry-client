@@ -121,6 +121,9 @@ void RtspStream::setAudioFormat(enum AVSampleFormat fmt, int channelsNum, int sa
     m_audioChannels = channelsNum;
     m_audioSampleRate = sampleRate;
 
+    if (m_isAudioEnabled)
+        enableAudio(m_isAudioEnabled);
+
     emit audioChanged();
 }
 
@@ -330,6 +333,9 @@ QSize RtspStream::streamSize() const
 void RtspStream::fatalError(const QString &message)
 {
     qDebug() << QDateTime::currentDateTime().toString(tr("yyyy-MM-dd hh:mm:ss")) << " Fatal error:" << LoggableUrl(url()) << message;
+
+    if (m_isAudioEnabled)
+        bcApp->audioPlayer->stop();
 
     m_errorMessage = message;
     setState(Error);
