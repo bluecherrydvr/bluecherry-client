@@ -30,6 +30,7 @@
 #include <QCoreApplication>
 #include <QSettings>
 #include "MplayerProcess.h"
+#include "bluecherry-config.h"
 
 #define MPL_PLAYMSGMAGIC "XPL32AFFC3DFEBB"
 
@@ -108,7 +109,8 @@ bool MplayerProcess::start(QString filename)
         vo = QLatin1String(" ,");
 #endif
 
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) && !defined(BC_NO_BUNDLED_MPLAYER)
+#error "bundled mplayer!"
     m_process->start("bc-mplayer",
 #else
     m_process->start("mplayer",

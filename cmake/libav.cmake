@@ -27,7 +27,11 @@ if ( UNIX )
     include(cmake/CpuCoresCount.cmake)
     include(ExternalProject)
     include(cmake/AddExternalFFmpeg.cmake)
-    include(cmake/AddExternalMplayer.cmake)
+
+    if (NOT BC_NO_BUNDLED_MPLAYER)
+	include(cmake/AddExternalMplayer.cmake)
+    endif()
+
 endif()
 
 include_directories (${LIBAVCODEC_INCLUDE_DIRS})

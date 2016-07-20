@@ -1,3 +1,4 @@
 #cmakedefine USE_BREAKPAD
+#cmakedefine BC_NO_BUNDLED_MPLAYER
 #define VERSION "@VERSION@"
 #define TEST_DATA_DIR "@CMAKE_SOURCE_DIR@/tests/data"
