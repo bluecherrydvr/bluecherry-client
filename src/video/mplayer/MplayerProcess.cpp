@@ -110,7 +110,6 @@ bool MplayerProcess::start(QString filename)
 #endif
 
 #if defined(Q_OS_LINUX) && !defined(BC_NO_BUNDLED_MPLAYER)
-#error "bundled mplayer!"
     m_process->start("bc-mplayer",
 #else
     m_process->start("mplayer",
