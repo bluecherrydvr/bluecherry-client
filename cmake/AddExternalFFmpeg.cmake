@@ -1,7 +1,6 @@
 ExternalProject_Add(ffmpeg
     PREFIX ffmpeg
     URL "https://github.com/FFmpeg/FFmpeg/releases/download/n3.0/ffmpeg-3.0.tar.gz"
-    URL_HASH MD5=123af0b03e4b3819eaf3c1e4ae123d46
 
     CONFIGURE_COMMAND ./configure
 	--cc=${CMAKE_C_COMPILER} 
