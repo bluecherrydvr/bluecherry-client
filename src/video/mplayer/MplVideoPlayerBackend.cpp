@@ -21,10 +21,13 @@
 #include <QUrl>
 #include <QRegExp>
 #include <QByteArray>
+#include <QTimer>
 #include <QDebug>
 
 #include "MplVideoPlayerBackend.h"
 #include "video/VideoHttpBuffer.h"
+
+#define DOWNLOADED_THRESHOLD 10
 
 MplVideoPlayerBackend::~MplVideoPlayerBackend()
 {
@@ -35,7 +38,8 @@ MplVideoPlayerBackend::MplVideoPlayerBackend(QObject *parent)
     : VideoPlayerBackend(parent),
       m_videoBuffer(0), m_state(Stopped),
       m_playbackSpeed(1.0), m_mplayer(0),
-      m_wid(QString()), m_errorMessage(QString())
+      m_wid(QString()), m_errorMessage(QString()),
+      m_playDuringDownload(false), m_pausedBySlowDownload(false)
 {
     qDebug() << "MplVideoPlayerBackend() this =" << this << "\n";
 }
@@ -58,6 +62,62 @@ void MplVideoPlayerBackend::setVideoBuffer(VideoHttpBuffer *videoHttpBuffer)
         connect(m_videoBuffer, SIGNAL(bufferingFinished()), SLOT(playIfReady()));
         connect(m_videoBuffer, SIGNAL(streamError(QString)), SLOT(streamError(QString)));
     }
+}
+
+void MplVideoPlayerBackend::checkDownloadAndPlayProgress(double position)
+{
+    if (!m_playDuringDownload)
+        return;
+
+    if (m_videoBuffer->isBufferingFinished())
+    {
+        m_playDuringDownload = false;
+        m_pausedBySlowDownload = false;
+        disconnect(m_mplayer, SIGNAL(currentPosition(double)), this, SLOT(checkDownloadAndPlayProgress(double)));
+
+        return;
+    }
+
+    if (m_playDuringDownload && m_state == Playing)
+    {
+        if (m_videoBuffer->bufferedPercent() - qRound((position / m_mplayer->duration()) * 100) < DOWNLOADED_THRESHOLD)
+        {
+            pause();
+            m_pausedBySlowDownload = true;
+            qDebug() << "paused because download progress is slower than playback progress";
+        }
+    }
+
+    if (m_pausedBySlowDownload && m_state == Paused)
+    {
+        if (m_videoBuffer->bufferedPercent() - qRound((position / m_mplayer->duration()) * 100) > DOWNLOADED_THRESHOLD)
+        {
+            m_pausedBySlowDownload = false;
+            play();
+            qDebug() << "continued playback after downloading portion of file";
+        }
+    }
+}
+
+void MplVideoPlayerBackend::playDuringDownloadTimerShot()
+{
+    if (m_videoBuffer->isBufferingFinished())
+    {
+        m_playDuringDownload = false;
+        m_pausedBySlowDownload = false;
+        return;
+    }
+
+    if (m_videoBuffer->bufferedPercent() > DOWNLOADED_THRESHOLD)
+    {
+        m_playDuringDownload = true;
+
+        qDebug() << "started playback while download is in progress";
+        connect(m_mplayer, SIGNAL(currentPosition(double)), this, SLOT(checkDownloadAndPlayProgress(double)));
+        playIfReady();
+    }
+    else
+        QTimer::singleShot(1000, this, SLOT(playDuringDownloadTimerShot()));
 }
 
 void MplVideoPlayerBackend::setWindowId(quint64 wid)
@@ -98,6 +158,8 @@ bool MplVideoPlayerBackend::start(const QUrl &url)
     setVideoBuffer(new VideoHttpBuffer(url));
 
     m_videoBuffer->startBuffering();
+
+    QTimer::singleShot(1000, this, SLOT(playDuringDownloadTimerShot()));
 
     m_playbackSpeed = 1.0;
     qDebug() << "MplVideoPlayerBackend::start mplayer process started\n";
@@ -182,13 +244,22 @@ bool MplVideoPlayerBackend::isSeekable() const
 
 void MplVideoPlayerBackend::playIfReady()
 {
-    if (!m_mplayer || !m_mplayer->start(m_videoBuffer->bufferFilePath()))
+    if (m_pausedBySlowDownload)
+    {
+        play();
+        return;
+    }
+
+    if (!m_mplayer || m_mplayer->isRunning() || !m_mplayer->start(m_videoBuffer->bufferFilePath()))
         return;
 }
 
 void MplVideoPlayerBackend::play()
 {
     if (!m_mplayer || !m_mplayer->isRunning() || !m_mplayer->isReadyToPlay())
+        return;
+
+    if (m_pausedBySlowDownload)
         return;
 
     m_mplayer->play();
@@ -205,6 +276,7 @@ void MplVideoPlayerBackend::pause()
     if (!m_mplayer || !m_mplayer->isRunning() || !m_mplayer->isReadyToPlay())
         return;
 
+    m_pausedBySlowDownload = false;
     m_mplayer->pause();
 
     VideoState old = m_state;
@@ -283,6 +355,9 @@ void MplVideoPlayerBackend::setHardwareDecodingEnabled(bool enable)
 bool MplVideoPlayerBackend::seek(int position)
 {
     if (!m_mplayer || !m_mplayer->isRunning())
+        return false;
+
+    if (m_playDuringDownload && (position/duration()*100) > m_videoBuffer->bufferedPercent())
         return false;
 
     return m_mplayer->seek((double)position/1000.0);

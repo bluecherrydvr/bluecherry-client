@@ -71,6 +71,8 @@ private slots:
     void handleEof();
     void mplayerReady();
     void durationIsKnown();
+    void playDuringDownloadTimerShot();
+    void checkDownloadAndPlayProgress(double position);
 
 signals:
     void currentPosition(double position);
@@ -85,6 +87,8 @@ private:
     MplayerProcess *m_mplayer;
     //Window id for mplayer process, argument for -wid option
     QString m_wid;
+    bool m_playDuringDownload;
+    bool m_pausedBySlowDownload;
 
     void setVideoBuffer(VideoHttpBuffer *videoHttpBuffer);
     void createMplayerProcess();
