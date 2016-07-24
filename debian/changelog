@@ -1,3 +1,9 @@
+bluecherry-client (1:2.2.4-1) precise; urgency=low
+
+  * Show thumbnails for recordings
+  * Audio support in liveview
+  * Playback while recording is downloaded
+
 bluecherry-client (1:2.2.3-1) precise; urgency=low
 
   * Polish translation
