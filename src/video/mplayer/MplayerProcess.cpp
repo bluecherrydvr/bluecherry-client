@@ -387,6 +387,7 @@ void MplayerProcess::play()
     //qDebug() << "MplayerProcess::play()\n";
 
     m_process->write("pause\n");
+    m_process->waitForBytesWritten(100);
     m_ispaused = false;
 
     if (m_speed != 1.0)
@@ -401,6 +402,7 @@ void MplayerProcess::pause()
     //qDebug() << "MplayerProcess::pause()\n";
 
     m_process->write("pause\n");
+    m_process->waitForBytesWritten(100);
     m_ispaused = true;
 }
 
@@ -419,7 +421,7 @@ double MplayerProcess::duration()
     if (!(isRunning() && m_isreadytoplay))
         return -1;
 
-    if (!m_durreqsent)
+    if (!m_durreqsent && !(m_ispaused && m_duration > -1))
     {
         m_durreqsent = true;
         sendCommand(QString("get_property length"));
@@ -433,7 +435,8 @@ double MplayerProcess::position()
     if (!(isRunning() && m_isreadytoplay))
         return -1;
 
-    sendCommand(QString("get_property time_pos"));
+    if (!(m_ispaused && m_position > -1))
+        sendCommand(QString("get_property time_pos"));
 
     return m_position;
 }
@@ -442,6 +445,12 @@ void MplayerProcess::queryPosition()
 {
     if (!(isRunning() && m_isreadytoplay))
     {
+        return;
+    }
+
+    if (m_ispaused && m_position > -1)
+    {
+        emit currentPosition(m_position);
         return;
     }
 
