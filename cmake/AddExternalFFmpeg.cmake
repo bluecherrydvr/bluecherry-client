@@ -1,3 +1,8 @@
+set (EXTRA_FLAGS "")
+if (APPLE)
+	set (EXTRA_FLAGS "--extra-cflags=-m32 --extra-ldflags=-m32")
+endif()
+
 ExternalProject_Add(ffmpeg
     PREFIX ffmpeg
     URL "https://github.com/FFmpeg/FFmpeg/releases/download/n3.0/ffmpeg-3.0.tar.gz"
@@ -16,6 +21,8 @@ ExternalProject_Add(ffmpeg
 	--disable-programs
 	--disable-static
         --enable-shared
+
+	${EXTRA_FLAGS}
                 
 	--enable-opengl
         --enable-xlib 
