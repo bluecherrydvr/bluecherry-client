@@ -1,6 +1,6 @@
 set (EXTRA_FLAGS "")
 if (APPLE)
-	set (EXTRA_FLAGS "--extra-cflags=-m32 --extra-ldflags=-m32")
+	set (EXTRA_FLAGS "-m32")
 endif()
 
 ExternalProject_Add(ffmpeg
@@ -22,7 +22,8 @@ ExternalProject_Add(ffmpeg
 	--disable-static
         --enable-shared
 
-	${EXTRA_FLAGS}
+	--extra-cflags=${EXTRA_FLAGS}
+	--extra-ldflags=${EXTRA_FLAGS}
                 
 	--enable-opengl
         --enable-xlib 
