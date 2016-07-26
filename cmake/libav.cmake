@@ -16,7 +16,7 @@
 #
 
 
-if ( WIN32 )
+if ( WIN32 OR BC_NO_BUNDLED_FFMPEG )
 find_package (LibAVCodec 53.35.0 REQUIRED)
 find_package (LibAVFormat 53.21.1 REQUIRED)
 find_package (LibAVUtil 51.22.1 REQUIRED)
