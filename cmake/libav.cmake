@@ -26,9 +26,12 @@ endif()
 if ( UNIX )
     include(cmake/CpuCoresCount.cmake)
     include(ExternalProject)
-    include(cmake/AddExternalFFmpeg.cmake)
 
-    if (NOT BC_NO_BUNDLED_MPLAYER)
+    if (NOT BC_NO_BUNDLED_FFMPEG)
+	include(cmake/AddExternalFFmpeg.cmake)
+    endif()
+
+    if (NOT BC_NO_BUNDLED_MPLAYER AND NOT APPLE)
 	include(cmake/AddExternalMplayer.cmake)
     endif()
 

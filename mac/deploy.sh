@@ -23,7 +23,7 @@ cp res/bluecherry.icns $1/Contents/Resources/
 #cp -R breakpad-bin/mac/Breakpad.framework $1/Contents/Frameworks/
 
 echo "Copying mplayer..."
-cp -a $BUILD_DIR/ffmpeg/install/usr/bin/mplayer $1/Contents/MacOS/
+cp mplayer-bin/mac/mplayer $1/Contents/MacOS/
 
 echo "Copying libav..."
 LIBAV_PATH=/usr/lib/bluecherry/client
