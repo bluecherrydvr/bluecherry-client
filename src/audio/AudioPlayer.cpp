@@ -19,6 +19,15 @@
 
 #include <QDebug>
 
+#if defined(__APPLE__)
+
+#if defined(MAC_OS_X_VERSION_MIN_REQUIRED)
+#undef MAC_OS_X_VERSION_MIN_REQUIRED
+#endif
+
+#define MAC_OS_X_VERSION_MIN_REQUIRED 1050
+
+#endif
 #include <SDL2/SDL.h>
 
 extern "C"
