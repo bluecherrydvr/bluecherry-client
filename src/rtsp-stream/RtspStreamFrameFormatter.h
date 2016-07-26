@@ -43,6 +43,8 @@ private:
     AVPixelFormat m_pixelFormat;
     bool m_autoDeinterlacing;
     bool m_shouldTryDeinterlaceStream;
+    int m_width;
+    int m_height;
 
     bool shouldTryDeinterlaceStream();
     bool shouldTryDeinterlaceFrame(AVFrame *avFrame);

@@ -29,7 +29,8 @@ extern "C"
 
 RtspStreamFrameFormatter::RtspStreamFrameFormatter(AVStream *stream) :
         m_stream(stream), m_sws_context(0), m_pixelFormat(AV_PIX_FMT_BGRA),
-        m_autoDeinterlacing(true), m_shouldTryDeinterlaceStream(shouldTryDeinterlaceStream())
+        m_autoDeinterlacing(true), m_shouldTryDeinterlaceStream(shouldTryDeinterlaceStream()),
+        m_width(0), m_height(0)
 {
 }
 
@@ -92,17 +93,20 @@ AVFrame * RtspStreamFrameFormatter::scaleFrame(AVFrame* avFrame)
 {
     updateSWSContext();
 
-    int bufSize  = av_image_get_buffer_size(m_pixelFormat, m_stream->codec->width, m_stream->codec->height, 1);
+    if (!m_sws_context)
+        return NULL;
+
+    int bufSize  = av_image_get_buffer_size(m_pixelFormat, m_width, m_height, 1);
     uint8_t *buf = (uint8_t*) av_malloc(bufSize);
 
     AVFrame *result = av_frame_alloc();
 
-    av_image_fill_arrays(result->data, result->linesize, buf, m_pixelFormat, m_stream->codec->width, m_stream->codec->height, 1);
-    sws_scale(m_sws_context, (const uint8_t**)avFrame->data, avFrame->linesize, 0, m_stream->codec->height,
+    av_image_fill_arrays(result->data, result->linesize, buf, m_pixelFormat, m_width, m_height, 1);
+    sws_scale(m_sws_context, (const uint8_t**)avFrame->data, avFrame->linesize, 0, m_height,
               result->data, result->linesize);
 
-    result->width = m_stream->codec->width;
-    result->height = m_stream->codec->height;
+    result->width = m_width;
+    result->height = m_height;
     result->pts = avFrame->pkt_pts;
 
     return result;
@@ -132,11 +136,21 @@ void RtspStreamFrameFormatter::updateSWSContext()
         break;
     }
 
+    if (m_stream->codec->width && m_stream->codec->height)
+    {
+        m_width = m_stream->codec->width;
+        m_height = m_stream->codec->height;
+    }
+    else //sometimes AVCodecContext->width can be zero, use coded_width & height instead
+    {
+        m_width = m_stream->codec->coded_width;
+        m_height = m_stream->codec->coded_height;
+    }
 
     m_sws_context = sws_getCachedContext(m_sws_context,
-                                         m_stream->codec->width, m_stream->codec->height,
+                                         m_width, m_height,
                                          pixFormat,
-                                         m_stream->codec->width, m_stream->codec->height,
+                                         m_width, m_height,
                                          m_pixelFormat,
                                          SWS_BICUBIC, NULL, NULL, NULL);
 }

@@ -77,6 +77,9 @@ RtspStreamFrame * RtspStreamFrameQueue::dequeue()
 
 void RtspStreamFrameQueue::enqueue(RtspStreamFrame *frame)
 {
+    if (!frame)
+        return;
+
     QMutexLocker locker(&m_frameQueueLock);
     m_frameQueue.enqueue(frame);
 
