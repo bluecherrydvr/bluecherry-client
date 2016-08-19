@@ -64,6 +64,8 @@ signals:
 
 private:
     struct AVFormatContext *m_ctx;
+    struct AVCodecContext *m_videoCodecCtx;
+    struct AVCodecContext *m_audioCodecCtx;
     QDateTime m_timeout;
     QUrl m_url;
     bool m_cancelFlag;
@@ -88,7 +90,7 @@ private:
     AVDictionary ** createStreamsOptions(AVFormatContext *context, AVDictionary *options) const;
     void destroyStreamOptions(AVFormatContext *context, AVDictionary **streamOptions);
     void openCodecs(AVFormatContext *context, AVDictionary *options);
-    bool openCodec(AVStream *stream, AVDictionary *options);
+    bool openCodec(AVStream *stream, AVCodecContext *avctx, AVDictionary *options);
 
     void pause();
 

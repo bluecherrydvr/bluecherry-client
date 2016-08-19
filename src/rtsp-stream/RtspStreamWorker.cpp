@@ -42,7 +42,9 @@ int rtspStreamInterruptCallback(void *opaque)
 }
 
 RtspStreamWorker::RtspStreamWorker(QSharedPointer<RtspStreamFrameQueue> &shared_queue, QObject *parent)
-    : QObject(parent), m_ctx(0), m_decodeErrorsCnt(0),
+    : QObject(parent), m_ctx(0),
+      m_videoCodecCtx(0), m_audioCodecCtx(0),
+      m_decodeErrorsCnt(0),
       m_videoStreamIndex(-1), m_audioStreamIndex(-1),
       m_audioEnabled(false),
       m_cancelFlag(false), m_autoDeinterlacing(true),
@@ -56,10 +58,11 @@ RtspStreamWorker::~RtspStreamWorker()
     if (!m_ctx)
         return;
 
-    for (unsigned int i = 0; i < m_ctx->nb_streams; ++i)
-    {
-        avcodec_close(m_ctx->streams[i]->codec);
-    }
+    avcodec_close(m_videoCodecCtx);
+    avcodec_close(m_audioCodecCtx);
+
+    avcodec_free_context(&m_videoCodecCtx);
+    avcodec_free_context(&m_audioCodecCtx);
 
     startInterruptableOperation(5);
     avformat_close_input(&m_ctx);
@@ -198,7 +201,7 @@ AVFrame * RtspStreamWorker::extractAudioFrame(AVPacket &packet)
 
     int frameAvailable;
 
-    int ret = avcodec_decode_audio4(m_ctx->streams[m_audioStreamIndex]->codec, frame, &frameAvailable, &packet);
+    int ret = avcodec_decode_audio4(m_audioCodecCtx, frame, &frameAvailable, &packet);
 
     if (ret == 0)
         return 0;
@@ -227,7 +230,7 @@ AVFrame * RtspStreamWorker::extractVideoFrame(AVPacket &packet)
     startInterruptableOperation(5);
 
     int pictureAvailable;
-    int re = avcodec_decode_video2(m_ctx->streams[m_videoStreamIndex]->codec, frame, &pictureAvailable, &packet);
+    int re = avcodec_decode_video2(m_videoCodecCtx, frame, &pictureAvailable, &packet);
     if (re == 0) {
         return 0;
     }
@@ -387,45 +390,63 @@ void RtspStreamWorker::openCodecs(AVFormatContext *context, AVDictionary *option
     {
         qDebug() << "processing stream id " << i;
 
-        AVStream *stream = context->streams[i];
-        bool codecOpened = openCodec(stream, options);
-        if (!codecOpened)
+        AVCodecContext *avctx = avcodec_alloc_context3(NULL);
+
+        if (!avctx)
         {
-            qDebug() << "RtspStream: cannot find decoder for stream" << i << "codec" <<
-                        stream->codec->codec_id;
+            qDebug() << "RtspStreamWorker: failed to allocate memory for AVCodecContext";
             continue;
         }
 
-        if (stream->codec->codec_type==AVMEDIA_TYPE_VIDEO)
-            m_videoStreamIndex = i;
+        AVStream *stream = context->streams[i];
+        bool codecOpened = openCodec(stream, avctx, options);
+        if (!codecOpened)
+        {
+            qDebug() << "RtspStream: cannot find decoder for stream" << i << "codec" <<
+                        stream->codecpar->codec_id;
+            avcodec_free_context(&avctx);
+            continue;
+        }
 
-        if (stream->codec->codec_type==AVMEDIA_TYPE_AUDIO)
+        if (stream->codecpar->codec_type==AVMEDIA_TYPE_VIDEO)
+        {
+            m_videoStreamIndex = i;
+            m_videoCodecCtx = avctx;
+        }
+
+        if (stream->codecpar->codec_type==AVMEDIA_TYPE_AUDIO)
+        {
             m_audioStreamIndex = i;
+            m_audioCodecCtx = avctx;
+        }
 
         char info[512];
-        avcodec_string(info, sizeof(info), stream->codec, 0);
+        avcodec_string(info, sizeof(info), avctx, 0);
         qDebug() << "RtspStream: stream #" << i << ":" << info;
     }
 
     if (m_audioStreamIndex > -1)
     {
-        qDebug() << "audio stream time base " << context->streams[m_audioStreamIndex]->codec->time_base.num
+        qDebug() << "audio stream time base " << m_audioCodecCtx->time_base.num
                  << "/"
-                 << context->streams[m_audioStreamIndex]->codec->time_base.den;
+                 << m_audioCodecCtx->time_base.den;
 
-        emit audioFormat(context->streams[m_audioStreamIndex]->codec->sample_fmt,
-                         context->streams[m_audioStreamIndex]->codec->channels,
-                         context->streams[m_audioStreamIndex]->codec->sample_rate);
+        emit audioFormat(m_audioCodecCtx->sample_fmt,
+                         m_audioCodecCtx->channels,
+                         m_audioCodecCtx->sample_rate);
     }
 
     qDebug() << "video stream index: " << m_videoStreamIndex;
     qDebug() << "audio steam index: " << m_audioStreamIndex;
 }
 
-bool RtspStreamWorker::openCodec(AVStream *stream, AVDictionary *options)
+bool RtspStreamWorker::openCodec(AVStream *stream, AVCodecContext *avctx, AVDictionary *options)
 {
+    if (avcodec_parameters_to_context(avctx, stream->codecpar) < 0)
+        return false;
+
     startInterruptableOperation(5);
-    AVCodec *codec = avcodec_find_decoder(stream->codec->codec_id);
+    AVCodec *codec = avcodec_find_decoder(stream->codecpar->codec_id);
 
     if (codec == NULL)
         return false;
@@ -433,7 +454,7 @@ bool RtspStreamWorker::openCodec(AVStream *stream, AVDictionary *options)
     AVDictionary *optionsCopy = 0;
     av_dict_copy(&optionsCopy, options, 0);
     startInterruptableOperation(5);
-    int errorCode = avcodec_open2(stream->codec, codec, &optionsCopy);
+    int errorCode = avcodec_open2(avctx, codec, &optionsCopy);
     av_dict_free(&optionsCopy);
 
     return 0 == errorCode;
