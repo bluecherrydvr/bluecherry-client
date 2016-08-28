@@ -188,6 +188,9 @@ bool RtspStreamWorker::processPacket(struct AVPacket packet)
             {
                 return false;
             }
+
+            //always expect single frame in video packets
+            break;
         }
     }
 
@@ -248,8 +251,6 @@ AVFrame * RtspStreamWorker::extractVideoFrame(AVPacket &packet)
     }
 
     m_decodeErrorsCnt = 0; //reset error counter if avcodec_decode_video2() call was successful
-    packet.size -= re;
-    packet.data += re;
 
     if (!pictureAvailable)
     {
