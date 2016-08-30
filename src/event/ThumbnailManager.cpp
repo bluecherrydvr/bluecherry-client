@@ -56,8 +56,6 @@ ThumbnailManager::~ThumbnailManager()
             QFile::remove(thumbnailFilePath(i.key()));
         }
 
-        bcApp->mediaDownloadManager()->releaseMediaDownload(i.value()->md->url());
-
         delete i.value();
 
         ++i;
@@ -91,17 +89,23 @@ ThumbnailManager::Status ThumbnailManager::getThumbnail(const EventData *event, 
 
             if (td->md->isFinished())
             {
+                if (td->md->fileSize() < 50) //handle case when error string is returned instead of picture by server version <=2.7.4
+                {
+                    td->status = NotFound;
+                    bcApp->mediaDownloadManager()->releaseMediaDownload(td->md->url());
+                    break;
+                }
                 //copy file, resize
                 QFile::copy(td->md->bufferFilePath(), thumbnailFilePath(keyStr));
                 td->status = Available;
-
-                //qDebug() << "thumbnail " << keyStr << " is available";
+                bcApp->mediaDownloadManager()->releaseMediaDownload(td->md->url());
             }
 
             if (td->md->hasError())
             {
                 //qDebug() << "failed to download thumbnail" << keyStr;
                 td->status = NotFound;
+                bcApp->mediaDownloadManager()->releaseMediaDownload(td->md->url());
             }
 
             break;
