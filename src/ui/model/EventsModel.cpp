@@ -96,7 +96,8 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
         QSettings settings;
         int tmbWidth;
 
-        if (settings.value(QLatin1String("ui/enableThumbnails"), true).toBool())
+        if (settings.value(QLatin1String("ui/enableThumbnails"), true).toBool()
+                && (data->type() == EventType::CameraContinuous || data->type() == EventType::CameraMotion))
         {
             imgStatus = bcApp->thumbnailManager()->getThumbnail(data, imgPath);
 
