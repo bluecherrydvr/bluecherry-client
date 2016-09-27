@@ -63,10 +63,6 @@ MplayerProcess::~MplayerProcess()
     if (m_process->state() == QProcess::Running)
     {
         quit();
-        if (!m_process->waitForFinished(1000))
-        {
-            m_process->kill();
-        }
     }
     delete m_process;
     m_process = 0;
