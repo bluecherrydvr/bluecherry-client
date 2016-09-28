@@ -5,7 +5,8 @@ endif()
 
 ExternalProject_Add(ffmpeg
     PREFIX ffmpeg
-    URL "https://github.com/FFmpeg/FFmpeg/releases/download/n3.0/ffmpeg-3.0.tar.gz"
+    GIT_REPOSITORY "https://github.com/FFmpeg/FFmpeg.git"
+    GIT_TAG "2a3720bc22d92d236ce62112edf80103e33ece1b"
 
     CONFIGURE_COMMAND ./configure
 	--cc=${CMAKE_C_COMPILER} 
