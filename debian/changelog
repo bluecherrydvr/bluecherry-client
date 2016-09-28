@@ -1,3 +1,12 @@
+bluecherry-client (1:2.2.5-1) precise; urgency=low
+
+  * Fixed crash #244 on closing event player
+  * Fixed MJPEG livestream decoding issue #211
+  * Thumbnails are displayed only for Motion and Continuous events
+  * Fixed displaying broken image when thumbnail file is missing on server
+
+ -- Anton Sviridenko <anton@corp.bluecherry.net>  Wed, 28 Sep 2016 22:08:16 +0400
+
 bluecherry-client (1:2.2.4-1) precise; urgency=low
 
   * Show thumbnails for recordings
