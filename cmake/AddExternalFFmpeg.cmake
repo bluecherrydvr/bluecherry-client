@@ -1,7 +1,3 @@
-set (EXTRA_FLAGS "")
-if (APPLE)
-	set (EXTRA_FLAGS "-m32")
-endif()
 
 ExternalProject_Add(ffmpeg
     PREFIX ffmpeg
@@ -22,9 +18,6 @@ ExternalProject_Add(ffmpeg
 	--disable-programs
 	--disable-static
         --enable-shared
-
-	--extra-cflags=${EXTRA_FLAGS}
-	--extra-ldflags=${EXTRA_FLAGS}
                 
 	--enable-opengl
         --enable-xlib 
