@@ -16,6 +16,7 @@
 #
 
 configure_file (win/installer.nsi.in win/installer.nsi @ONLY)
+configure_file (win/installer64_mingw.nsi.in win/installer.nsi @ONLY)
 
 include_directories (${WIN32_MSINTTYPES_DIR})
 

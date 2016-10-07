@@ -7,7 +7,6 @@ tests-build-*
 *.user
 *.obj
 *.dll
-*.exe
 *.res
 *.ilk
 *.pdb
