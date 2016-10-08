@@ -3,6 +3,9 @@
 # CONVERT_CYGWIN_PATH( PATH )
 #  This uses the command cygpath (provided by cygwin) to convert
 #  unix-style paths into paths useable by cmake on windows
+#
+# https://github.com/johnfettig/cmake-modules/blob/master/LICENSE
+#
 
 macro (CONVERT_CYGWIN_PATH _path)
   if (WIN32)
