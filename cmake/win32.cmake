@@ -18,7 +18,7 @@
 configure_file (win/installer.nsi.in win/installer.nsi @ONLY)
 
 if (MINGW)
-	include(CorrectWindowsPaths.cmake)
+	include(cmake/CorrectWindowsPaths.cmake)
 	set(WIN32_CMAKE_SOURCE_DIR ${CMAKE_SOURCE_DIR})
 	set(WIN32_CMAKE_BINARY_DIR ${CMAKE_BINARY_DIR})
 	convert_cygwin_path(WIN32_CMAKE_SOURCE_DIR)
