@@ -9,7 +9,7 @@
 !define MINGW_SYSROOT_PATH "@MINGW_SYSROOT_PATH@"
 !define QT_PATH "@MINGW_SYSROOT_PATH@\bin"
 !define QT_PLUGIN_PATH "@MINGW_SYSROOT_PATH@\lib\qt4\plugins"
-!define MPLAYER_PATH "@CMAKE_SOURCE_DIR@\mplayer-bin\win\amd64"
+!define MPLAYER_PATH "@WIN32_CMAKE_SOURCE_DIR@\mplayer-bin\win\amd64"
 !define VERSION "@VERSION@"
 
 Name "Bluecherry Client"
