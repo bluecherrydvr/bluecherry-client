@@ -16,8 +16,15 @@
 #
 
 configure_file (win/installer.nsi.in win/installer.nsi @ONLY)
-configure_file (win/installer64_mingw.nsi.in win/installer.nsi @ONLY)
 
+if (MINGW)
+	include(CorrectWindowsPaths.cmake)
+	set(WIN32_CMAKE_SOURCE_DIR ${CMAKE_SOURCE_DIR})
+	set(WIN32_CMAKE_BINARY_DIR ${CMAKE_BINARY_DIR})
+	convert_cygwin_path(WIN32_CMAKE_SOURCE_DIR)
+	convert_cygwin_path(WIN32_CMAKE_BINARY_DIR)
+	configure_file (win/installer64_mingw.nsi.in win/installer64_mingw.nsi @ONLY)
+endif()
 include_directories (${WIN32_MSINTTYPES_DIR})
 
 list (APPEND bluecherry_client_SRCS

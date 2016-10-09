@@ -1,13 +1,14 @@
 !include MUI2.nsh
 
-!define SRC_PATH "@CMAKE_SOURCE_DIR@"
-!define BIN_PATH "@CMAKE_BINARY_DIR@"
+!define SRC_PATH "@WIN32_CMAKE_SOURCE_DIR@"
+!define BIN_PATH "@WIN32_CMAKE_BINARY_DIR@"
 !define LIBAV_PATH "@WIN32_LIBAV_DIR@\bin"
 !define LIBOPENSSL_PATH "@WIN32_OPENSSL_DIR@\bin"
 !define LIBSDL2_PATH "@WIN32_LIBSDL2_DIR@\bin"
 !define WINDOWS_DLL_PATH "C:\Windows\System32"
 !define MINGW_SYSROOT_PATH "@MINGW_SYSROOT_PATH@"
 !define QT_PATH "@MINGW_SYSROOT_PATH@\bin"
+!define QT_PLUGIN_PATH "@MINGW_SYSROOT_PATH@\lib\qt4\plugins"
 !define MPLAYER_PATH "@CMAKE_SOURCE_DIR@\mplayer-bin\win\amd64"
 !define VERSION "@VERSION@"
 
@@ -56,8 +57,8 @@ Section
         File "${QT_PATH}\QtXml4.dll" # QtDeclarative
 
         SetOutPath "$INSTDIR\imageformats"
-        File "${QT_PATH}\..\plugins\imageformats\qjpeg4.dll"
-        File "${QT_PATH}\..\plugins\imageformats\qgif4.dll"
+        File "${QT_PLUGIN_PATH}\imageformats\qjpeg4.dll"
+        File "${QT_PLUGIN_PATH}\imageformats\qgif4.dll"
         SetOutPath "$INSTDIR"
 
         # Translations
