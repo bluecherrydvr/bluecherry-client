@@ -14,7 +14,7 @@
 
 Name "Bluecherry Client"
 OutFile "SetupBluecherryClient_amd64_${VERSION}.exe"
-InstallDir "$PROGRAMFILES\Bluecherry Client"
+InstallDir "$PROGRAMFILES64\Bluecherry Client"
 InstallDirRegKey HKLM "Software\Bluecherry Client" ""
 RequestExecutionLevel admin
 SetCompressor /FINAL /SOLID lzma
