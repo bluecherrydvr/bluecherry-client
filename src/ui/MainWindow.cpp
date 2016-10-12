@@ -458,7 +458,7 @@ QWidget *MainWindow::createRecentEvents()
 
 void MainWindow::retranslateUI()
 {
-	setWindowTitle(tr("Bluecherry"));
+	setWindowTitle(tr("Bluecherry %1").arg(QApplication::applicationVersion()));
 
 	m_mainToolbar->setWindowTitle(tr("Main"));
 	m_expandAllServersAction->setText(tr("Expand All Servers"));
