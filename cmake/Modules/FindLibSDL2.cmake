@@ -24,12 +24,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-if (NOT WIN32)
+if (NOT WIN32 AND NOT LIBSDL2_INCLUDE_DIRS)
     find_package (PkgConfig)
     if (PKG_CONFIG_FOUND)
         pkg_check_modules (LIBSDL2 QUIET sdl2)
     endif (PKG_CONFIG_FOUND)
-endif (NOT WIN32)
+endif ()
 
 find_path (LIBSDL2_INCLUDE_DIR SDL2/SDL.h ${LIBSDL2_INCLUDE_DIRS} ${WIN32_LIBSDL2_DIR}/include)
 list (APPEND LIBSDL2_INCLUDE_DIRS ${LIBSDL2_INCLUDE_DIR})

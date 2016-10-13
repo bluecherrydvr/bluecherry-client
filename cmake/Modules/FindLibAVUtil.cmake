@@ -24,12 +24,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-if (NOT WIN32)
+if (NOT WIN32 AND NOT LIBAVUTIL_INCLUDE_DIRS)
     find_package (PkgConfig)
     if (PKG_CONFIG_FOUND)
         pkg_check_modules (LIBAVUTIL QUIET libavutil)
     endif (PKG_CONFIG_FOUND)
-endif (NOT WIN32)
+endif ()
 
 find_path (LIBAVUTIL_INCLUDE_DIR libavutil/avutil.h ${LIBAVUTIL_INCLUDE_DIRS} ${WIN32_LIBAV_DIR}/include)
 list (APPEND LIBAVUTIL_INCLUDE_DIRS ${LIBAVUTIL_INCLUDE_DIR})

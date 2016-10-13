@@ -24,12 +24,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-if (NOT WIN32)
+if (NOT WIN32 AND NOT LIBAVFORMAT_INCLUDE_DIRS)
     find_package (PkgConfig)
     if (PKG_CONFIG_FOUND)
         pkg_check_modules (LIBAVFORMAT QUIET libavformat)
     endif (PKG_CONFIG_FOUND)
-endif (NOT WIN32)
+endif ()
 
 find_path (LIBAVFORMAT_INCLUDE_DIR libavformat/avformat.h ${LIBAVFORMAT_INCLUDE_DIRS} ${WIN32_LIBAV_DIR}/include)
 list (APPEND LIBAVFORMAT_INCLUDE_DIRS ${LIBAVFORMAT_INCLUDE_DIR})

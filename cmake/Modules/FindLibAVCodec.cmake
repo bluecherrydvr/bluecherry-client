@@ -24,12 +24,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-if (NOT WIN32)
+if (NOT WIN32 AND NOT LIBAVCODEC_INCLUDE_DIRS)
     find_package (PkgConfig)
     if (PKG_CONFIG_FOUND)
         pkg_check_modules (LIBAVCODEC QUIET libavcodec)
     endif (PKG_CONFIG_FOUND)
-endif (NOT WIN32)
+endif ()
 
 find_path (LIBAVCODEC_INCLUDE_DIR libavcodec/avcodec.h PATHS ${LIBAVCODEC_INCLUDE_DIRS} ${WIN32_LIBAV_DIR}/include)
 list (APPEND LIBAVCODEC_INCLUDE_DIRS ${LIBAVCODEC_INCLUDE_DIR})
