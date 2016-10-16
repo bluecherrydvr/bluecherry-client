@@ -21,6 +21,7 @@
 #include "ui/model/SavedLayoutsModel.h"
 #include "ui/MainWindow.h"
 #include "core/BluecherryApp.h"
+#include "server/DVRServer.h"
 #include <QBoxLayout>
 #include <QToolBar>
 #include <QComboBox>
@@ -37,6 +38,7 @@
 #include <QTextDocument>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QCloseEvent>
 
 #ifdef Q_OS_MAC
 #include <QMacStyle>
@@ -53,7 +55,14 @@ LiveViewWindow *LiveViewWindow::openWindow(DVRServerRepository *serverRepository
     window->setAttribute(Qt::WA_DeleteOnClose);
 
     if (camera)
+    {
         window->showSingleCamera(camera);
+        window->setObjectName(QString::number(camera->data().id()));
+
+        QSettings settings;
+        settings.beginGroup("multiWindow");
+        settings.setValue(QString::number(camera->data().id()), camera->data().displayName());
+    }
 
     return window;
 }
@@ -263,6 +272,24 @@ void LiveViewWindow::savedLayoutChanged(int index)
     m_isLayoutChanging = false;
 }
 
+void LiveViewWindow::restoreWindows(DVRServer *server)
+{
+    QSettings settings;
+    settings.beginGroup("multiWindow");
+    QStringList keyList = settings.allKeys();
+
+    foreach (DVRCamera *camera, server->cameras())
+    {
+        foreach(QString key, keyList)
+        {
+            if (settings.value(key) == camera->data().displayName())
+            {
+                openWindow(m_serverRepository, bcApp->mainWindow, false, camera)->show();
+            }
+        }
+    }
+}
+
 bool LiveViewWindow::createNewLayout(QString name)
 {
     if (name.isEmpty())
@@ -435,4 +462,13 @@ void LiveViewWindow::changeEvent(QEvent *event)
 		retranslateUI();
 
 	QWidget::changeEvent(event);
+}
+
+void LiveViewWindow::closeEvent(QCloseEvent *event)
+{
+    QSettings settings;
+    settings.beginGroup("multiWindow");
+    settings.remove(objectName());
+
+    QWidget::closeEvent(event);
 }

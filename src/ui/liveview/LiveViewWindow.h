@@ -60,11 +60,14 @@ public slots:
     void toggleFullScreen() { setFullScreen(!isFullScreen()); }
     void exitFullScreen() { setFullScreen(false); }
 
+    void restoreWindows(DVRServer *server);
+
 signals:
     void layoutChanged(const QString &layout);
 
 protected:
 	virtual void changeEvent(QEvent *event);
+    virtual void closeEvent(QCloseEvent *event);
 
 private slots:
     void savedLayoutChanged(int index);

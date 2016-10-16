@@ -753,6 +753,9 @@ void MainWindow::serverDevicesLoaded()
             ServerConfigWindow::instance()->raise();
         }
     }
+
+    if (server)
+        liveView()->restoreWindows(server);
 }
 
 
