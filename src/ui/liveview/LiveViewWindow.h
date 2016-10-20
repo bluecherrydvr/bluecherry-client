@@ -47,6 +47,8 @@ public:
 
     bool isFullScreen() const { return QWidget::isFullScreen() || m_fsSetWindow; }
 
+    void restoreSession();
+
 public slots:
     void showSingleCamera(DVRCamera *camera);
     bool setLayout(const QString &layout);
@@ -64,7 +66,10 @@ signals:
     void layoutChanged(const QString &layout);
 
 protected:
-	virtual void changeEvent(QEvent *event);
+    virtual void changeEvent(QEvent *event);
+    virtual void closeEvent(QCloseEvent *event);
+    virtual void resizeEvent(QResizeEvent *event);
+    virtual void moveEvent(QMoveEvent *event);
 
 private slots:
     void savedLayoutChanged(int index);
@@ -75,17 +80,20 @@ private slots:
 private:
     LiveViewArea *m_liveView;
     DVRServerRepository *m_serverRepository;
-	QToolBar *m_toolBar;
+    QToolBar *m_toolBar;
     QComboBox * const m_savedLayouts;
-	QAction *aNewLayout, *aRenameLayout, *aDelLayout;
+    QAction *aNewLayout, *aRenameLayout, *aDelLayout;
     QAction *m_addRowAction, *m_removeRowAction;
     QAction *m_addColumnAction, *m_removeColumnAction;
-	QAction *m_singleAction, *m_fullscreenAction, *m_closeAction;
+    QAction *m_singleAction, *m_fullscreenAction, *m_closeAction;
     QWeakPointer<LiveViewWindow> m_fsSetWindow;
-	int m_lastLayoutIndex;
+    int m_lastLayoutIndex;
     bool m_autoSized, m_isLayoutChanging, m_wasOpenedFs;
+    static bool m_isSessionRestoring;
 
-	void retranslateUI();
+    void retranslateUI();
+    void geometryChanged();
+    void saveWindowLayoutName(QString name);
 };
 
 #endif // LIVEVIEWWINDOW_H

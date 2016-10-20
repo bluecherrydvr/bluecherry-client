@@ -21,6 +21,7 @@
 #include "ui/model/SavedLayoutsModel.h"
 #include "ui/MainWindow.h"
 #include "core/BluecherryApp.h"
+#include "server/DVRServer.h"
 #include <QBoxLayout>
 #include <QToolBar>
 #include <QComboBox>
@@ -37,10 +38,13 @@
 #include <QTextDocument>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QCloseEvent>
 
 #ifdef Q_OS_MAC
 #include <QMacStyle>
 #endif
+
+bool LiveViewWindow::m_isSessionRestoring = false;
 
 LiveViewWindow *LiveViewWindow::openWindow(DVRServerRepository *serverRepository, QWidget *parent, bool fullscreen, DVRCamera *camera)
 {
@@ -55,6 +59,26 @@ LiveViewWindow *LiveViewWindow::openWindow(DVRServerRepository *serverRepository
     if (camera)
         window->showSingleCamera(camera);
 
+    QSettings settings;
+    if (settings.value(QLatin1String("ui/saveSession"), false).toBool() == false)
+        return window;
+
+    settings.beginGroup("session");
+
+    /* Let suppose at the same time max openned live view windows can be 128 */
+
+    for (int i = 1; i <= 128 && !m_isSessionRestoring; i++)
+    {
+        if (settings.childKeys().indexOf(QString::fromLatin1("Window-%1").arg(i)) == -1)
+        {
+            QString key = QString::fromLatin1("Window-%1").arg(i);
+            settings.setValue(key, key);
+            settings.setValue(QString::fromLatin1("geometry/%1").arg(key), bcApp->mainWindow->saveGeometry());
+            window->setObjectName(key);
+            break;
+        }
+    }
+
     return window;
 }
 
@@ -67,9 +91,9 @@ LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *p
     layout->setMargin(0);
     layout->setSpacing(0);
 
-	m_toolBar = new QToolBar(tr("Live View"));
-	m_toolBar->setIconSize(QSize(16, 16));
-	m_toolBar->setMovable(false);
+    m_toolBar = new QToolBar(tr("Live View"));
+    m_toolBar->setIconSize(QSize(16, 16));
+    m_toolBar->setMovable(false);
 
 #ifndef Q_OS_MAC
     //toolBar->setStyleSheet(QLatin1String("QToolBar { border: none; }"));
@@ -261,6 +285,8 @@ void LiveViewWindow::savedLayoutChanged(int index)
     aDelLayout->setEnabled(index >= 0);
 
     m_isLayoutChanging = false;
+
+    saveWindowLayoutName(currentLayout());
 }
 
 bool LiveViewWindow::createNewLayout(QString name)
@@ -277,6 +303,9 @@ bool LiveViewWindow::createNewLayout(QString name)
 
     m_isLayoutChanging = false;
     m_savedLayouts->setCurrentIndex(index);
+
+    saveWindowLayoutName(name);
+
     return true;
 }
 
@@ -294,6 +323,8 @@ void LiveViewWindow::renameLayout(QString name)
     }
 
     m_savedLayouts->setItemText(m_savedLayouts->currentIndex(), name);
+
+    saveWindowLayoutName(name);
 }
 
 void LiveViewWindow::deleteCurrentLayout(bool confirm)
@@ -406,7 +437,7 @@ void LiveViewWindow::updateLayoutActionStates()
     m_addRowAction->setEnabled(liveLayout->rows() < LiveViewLayout::maxRows());
     m_removeRowAction->setEnabled(liveLayout->rows() > 1);
     m_addColumnAction->setEnabled(liveLayout->columns() < LiveViewLayout::maxColumns());
-	m_removeColumnAction->setEnabled(liveLayout->columns() > 1);
+    m_removeColumnAction->setEnabled(liveLayout->columns() > 1);
 }
 
 void LiveViewWindow::retranslateUI()
@@ -426,13 +457,90 @@ void LiveViewWindow::retranslateUI()
 	if (m_wasOpenedFs)
 		m_closeAction->setText(tr("Exit"));
 
+}
 
+void LiveViewWindow::saveWindowLayoutName(QString name)
+{
+    QSettings settings;
+
+    if (settings.value(QLatin1String("ui/saveSession"), false).toBool())
+    {
+        settings.beginGroup("session");
+        QString key = objectName();
+
+        if (settings.childKeys().indexOf(key) != -1)
+            settings.setValue(key, name);
+    }
+}
+
+void LiveViewWindow::restoreSession()
+{
+    QSettings settings;
+    settings.beginGroup("session");
+    QStringList keyList = settings.childKeys();
+
+    m_isSessionRestoring = true;
+
+    foreach(QString key, keyList)
+    {
+        LiveViewWindow *window;
+        window = openWindow(m_serverRepository, bcApp->mainWindow, false, NULL);
+        window->setObjectName(key);
+        window->setLayout(settings.value(key).toString());
+        window->restoreGeometry(settings.value(QString::fromLatin1("geometry/%1").arg(key)).toByteArray());
+        window->show();
+    }
+
+    m_isSessionRestoring = false;
+}
+
+void LiveViewWindow::geometryChanged()
+{
+    QSettings settings;
+
+    if (settings.value(QLatin1String("ui/saveSession"), false).toBool() == false)
+        return;
+
+    settings.beginGroup("session/geometry");
+    QStringList keyList = settings.allKeys();
+
+    foreach(QString key, keyList)
+    {
+        if (key == objectName())
+            settings.setValue(key, saveGeometry());
+    }
 }
 
 void LiveViewWindow::changeEvent(QEvent *event)
 {
-	if (event && event->type() == QEvent::LanguageChange)
-		retranslateUI();
+    if (event && event->type() == QEvent::LanguageChange)
+        retranslateUI();
 
-	QWidget::changeEvent(event);
+    QWidget::changeEvent(event);
 }
+
+void LiveViewWindow::closeEvent(QCloseEvent *event)
+{
+    QSettings settings;
+    settings.beginGroup("session");
+    settings.remove(objectName());
+    settings.remove(QString::fromLatin1("geometry/%1").arg(objectName()));
+
+    QWidget::closeEvent(event);
+}
+
+void LiveViewWindow::resizeEvent(QResizeEvent *event)
+{
+    QWidget::resizeEvent(event);
+
+    geometryChanged();
+}
+
+
+void LiveViewWindow::moveEvent(QMoveEvent *event)
+{
+    QWidget::moveEvent(event);
+
+    geometryChanged();
+}
+

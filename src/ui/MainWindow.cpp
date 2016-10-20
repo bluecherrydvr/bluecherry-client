@@ -173,10 +173,13 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
 
     m_sourcesList->setFocus(Qt::OtherFocusReason);
 
-	connect(m_expandAllServersAction, SIGNAL(triggered()), m_sourcesList, SLOT(expandAll()));
-	connect(m_collapseAllServersAction, SIGNAL(triggered()), m_sourcesList, SLOT(collapseAll()));
+    connect(m_expandAllServersAction, SIGNAL(triggered()), m_sourcesList, SLOT(expandAll()));
+    connect(m_collapseAllServersAction, SIGNAL(triggered()), m_sourcesList, SLOT(collapseAll()));
 
-	retranslateUI();
+    if (settings.value(QLatin1String("ui/saveSession"), false).toBool())
+        m_liveView->restoreSession();
+
+    retranslateUI();
 }
 
 MainWindow::~MainWindow()
