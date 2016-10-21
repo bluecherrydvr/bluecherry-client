@@ -99,7 +99,7 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     m_thumbnails->setChecked(settings.value(QLatin1String("ui/enableThumbnails"), true).toBool());
     layout->addWidget(m_thumbnails);
 
-    m_session = new QCheckBox(tr("Restore previous session"));
+    m_session = new QCheckBox(tr("Restore previous session on startup"));
     m_session->setChecked(settings.value(QLatin1String("ui/saveSession"), false).toBool());
     layout->addWidget(m_session);
 
