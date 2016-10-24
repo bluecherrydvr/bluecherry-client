@@ -40,7 +40,8 @@ private slots:
 private:
     QCheckBox *m_eventsPauseLive, *m_closeToTray, *m_liveHwAccel,
                     *m_advancedOpengl, *m_eventPlayerHardwareDecoding,
-                    *m_deinterlace, *m_updateNotifications, *m_thumbnails, *m_session,
+                    *m_deinterlace, *m_updateNotifications, *m_thumbnails,
+                    *m_session, *m_startup,
                     *m_ssFullscreen, *m_ssVideo, *m_ssNever;
 
 	QComboBox *m_languages;

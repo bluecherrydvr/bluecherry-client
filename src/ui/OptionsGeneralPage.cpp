@@ -103,6 +103,14 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     m_session->setChecked(settings.value(QLatin1String("ui/saveSession"), false).toBool());
     layout->addWidget(m_session);
 
+#if defined(Q_OS_LINUX)
+    m_startup = new QCheckBox(tr("Run on startup"));
+    m_startup->setChecked(settings.value(QLatin1String("ui/startup"), false).toBool());
+    layout->addWidget(m_startup);
+
+    connect(m_startup, SIGNAL(toggled(bool)), bcApp, SLOT(updateStartup(bool)));
+#endif
+
 #if defined(Q_OS_WIN) || defined(Q_OS_MAC) || defined(Q_OS_LINUX)
     m_ssFullscreen = new QCheckBox(tr("Viewing live or recorded video in fullscreen"));
     m_ssVideo = new QCheckBox(tr("Playing recorded video"));
@@ -176,6 +184,7 @@ void OptionsGeneralPage::saveChanges()
     settings.setValue(QLatin1String("ui/disableUpdateNotifications"), m_updateNotifications->isChecked());
     settings.setValue(QLatin1String("ui/enableThumbnails"), m_thumbnails->isChecked());
     settings.setValue(QLatin1String("ui/saveSession"), m_session->isChecked());
+    settings.setValue(QLatin1String("ui/startup"), m_startup->isChecked());
     if (m_eventPlayerHardwareDecoding)
         settings.setValue(QLatin1String("ui/eventplayer/enableHardwareDecoding"), m_eventPlayerHardwareDecoding->isChecked());
 

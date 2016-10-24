@@ -130,9 +130,9 @@ private:
 
     QWidget *createRecentEvents();
 
-	void updateLiveMenu();
+    void updateLiveMenu();
 
-	void retranslateUI();
+    void retranslateUI();
 };
 
 #endif // MAINWINDOW_H
