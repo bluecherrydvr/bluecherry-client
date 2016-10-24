@@ -457,3 +457,43 @@ void BluecherryApp::resetSystemActivity()
     ::resetSystemActivity();
 #endif
 }
+
+void BluecherryApp::updateStartup(bool on)
+{
+#if defined(Q_OS_LINUX)
+
+    QString path;
+    QDir dir;
+
+    path = QDir::homePath() + QDir::separator() + QString(".config/autostart");
+    dir.setPath(path);
+
+    if (!dir.exists(path) || !dir.mkpath(path))
+        goto updateStartupFailed;
+
+    path.append(QDir::separator()).append("bluecherry-client.desktop");
+
+    if (on)
+    {
+        if (!QFile::copy(QString("/usr/share/applications/bluecherry-client.desktop"), path))
+            goto updateStartupFailed;
+    }
+    else
+    {
+        if (QFile::exists(path) && !QFile::remove(path))
+            goto updateStartupFailed;
+    }
+
+    return;
+
+updateStartupFailed:
+
+    qDebug() << "Failed to update startup file!\n";
+
+#elif defined(Q_OS_WIN)
+
+#elif defined(Q_OS_MAC)
+
+#endif
+}
+
