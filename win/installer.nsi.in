@@ -12,7 +12,7 @@
 !define VERSION "@VERSION@"
 
 Name "Bluecherry Client"
-OutFile "SetupBluecherryClient_${VERSION}.exe"
+OutFile "SetupBluecherryClient_${VERSION}_i386.exe"
 InstallDir "$PROGRAMFILES\Bluecherry Client"
 InstallDirRegKey HKLM "Software\Bluecherry Client" ""
 RequestExecutionLevel admin
