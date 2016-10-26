@@ -130,6 +130,7 @@ private slots:
     void cameraDataUpdated();
     void setBandwidthModeFromAction();
     void serverRemoved(DVRServer *server);
+    void updateAudioState(int state = 2);
 
 private:
     LiveStreamItem *m_streamItem;
