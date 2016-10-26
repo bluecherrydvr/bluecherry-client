@@ -134,14 +134,14 @@ void LiveFeedItem::openFullScreen()
 void LiveFeedItem::enableAudio()
 {
     Q_ASSERT(stream());
-    updateAudioState(1);
+    updateAudioState(LiveFeedItem::Save);
     stream()->enableAudio(true);
 }
 
 void LiveFeedItem::disableAudio()
 {
     Q_ASSERT(stream());
-    updateAudioState(0);
+    updateAudioState(LiveFeedItem::Disable);
     stream()->enableAudio(false);
 }
 
@@ -152,31 +152,37 @@ void LiveFeedItem::close()
     Q_UNUSED(closeFeedItem);
 }
 
-void LiveFeedItem::updateAudioState(int state)
+void LiveFeedItem::updateAudioState(LiveFeedItem::AudioState state)
 {
     QSettings settings;
+    int serverId, cameraId;
 
-    if (state == 0)
+    switch (state)
+    {
+    case LiveFeedItem::Disable:
         settings.remove(QLatin1String("ui/audioState"));
-    else if (state == 1)
-    {
-        int serverId = m_camera.data()->data().server()->configuration().id();
-        int cameraId = m_camera.data()->data().id();
+        break;
+
+    case LiveFeedItem::Save:
+        serverId = m_camera.data()->data().server()->configuration().id();
+        cameraId = m_camera.data()->data().id();
         settings.setValue(QString::fromLatin1("ui/audioState/%1").arg(serverId), QString::number(cameraId));
-    }
-    else if (state == 2)
-    {
-        int serverId = m_camera.data()->data().server()->configuration().id();
-        int cameraId = settings.value(QString::fromLatin1("ui/audioState/%1").arg(serverId), -1).toInt();
+        break;
+
+    case LiveFeedItem::Load:
+        serverId = m_camera.data()->data().server()->configuration().id();
+        cameraId = settings.value(QString::fromLatin1("ui/audioState/%1").arg(serverId), -1).toInt();
 
         if (cameraId != -1 && cameraId == m_camera.data()->data().id() &&
                 stream() && stream()->hasAudio() && !stream()->isAudioEnabled())
         {
             stream()->enableAudio(true);
         }
-    }
-    else
+        break;
+
+    default:
         qDebug() << "LiveFeedItem: Used wrong audio state!\n";
+    }
 }
 
 void LiveFeedItem::saveSnapshot(const QString &ifile)

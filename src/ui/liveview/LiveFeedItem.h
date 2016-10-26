@@ -68,6 +68,12 @@ public:
         MotionActive
     };
 
+    enum AudioState {
+        Disable = 0,
+        Save = 1,
+        Load = 2
+    };
+
     explicit LiveFeedItem(QDeclarativeItem *parent = 0);
 
     LiveStreamItem *streamItem() const { return m_streamItem; }
@@ -130,7 +136,7 @@ private slots:
     void cameraDataUpdated();
     void setBandwidthModeFromAction();
     void serverRemoved(DVRServer *server);
-    void updateAudioState(int state = 2);
+    void updateAudioState(enum AudioState state = Load);
 
 private:
     LiveStreamItem *m_streamItem;
