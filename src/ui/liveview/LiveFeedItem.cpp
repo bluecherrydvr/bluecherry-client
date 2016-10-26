@@ -29,6 +29,7 @@
 #include "server/DVRServer.h"
 #include "server/DVRServerRepository.h"
 #include <QMessageBox>
+#include <QSettings>
 #include <QDesktopServices>
 #include <QGraphicsSceneContextMenuEvent>
 #include <QMenu>
@@ -87,6 +88,9 @@ void LiveFeedItem::setCamera(DVRCamera *camera)
     cameraDataUpdated();
     emit cameraChanged(camera);
     emit recordingStateChanged();
+
+    if (camera && stream())
+        connect(stream(), SIGNAL(audioChanged()), SLOT(updateAudioState()));
 }
 
 DVRServerRepository * LiveFeedItem::serverRepository() const
@@ -130,12 +134,14 @@ void LiveFeedItem::openFullScreen()
 void LiveFeedItem::enableAudio()
 {
     Q_ASSERT(stream());
+    updateAudioState(1);
     stream()->enableAudio(true);
 }
 
 void LiveFeedItem::disableAudio()
 {
     Q_ASSERT(stream());
+    updateAudioState(0);
     stream()->enableAudio(false);
 }
 
@@ -144,6 +150,33 @@ void LiveFeedItem::close()
     bool closeFeedItem = parentItem()->metaObject()->invokeMethod(parentItem(), "removeItem", Q_ARG(QDeclarativeItem*, this));
     Q_ASSERT(closeFeedItem);
     Q_UNUSED(closeFeedItem);
+}
+
+void LiveFeedItem::updateAudioState(int state)
+{
+    QSettings settings;
+
+    if (state == 0)
+        settings.remove(QLatin1String("ui/audioState"));
+    else if (state == 1)
+    {
+        int serverId = m_camera.data()->data().server()->configuration().id();
+        int cameraId = m_camera.data()->data().id();
+        settings.setValue(QString::fromLatin1("ui/audioState/%1").arg(serverId), QString::number(cameraId));
+    }
+    else if (state == 2)
+    {
+        int serverId = m_camera.data()->data().server()->configuration().id();
+        int cameraId = settings.value(QString::fromLatin1("ui/audioState/%1").arg(serverId), -1).toInt();
+
+        if (cameraId != -1 && cameraId == m_camera.data()->data().id() &&
+                stream() && stream()->hasAudio() && !stream()->isAudioEnabled())
+        {
+            stream()->enableAudio(true);
+        }
+    }
+    else
+        qDebug() << "LiveFeedItem: Used wrong audio state!\n";
 }
 
 void LiveFeedItem::saveSnapshot(const QString &ifile)
