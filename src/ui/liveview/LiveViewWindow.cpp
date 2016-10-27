@@ -476,8 +476,10 @@ void LiveViewWindow::saveWindowLayoutName(QString name)
 void LiveViewWindow::restoreSession()
 {
     QSettings settings;
+    QString topWidget = settings.value(QLatin1String("ui/topWindow"), QString()).toString();
     settings.beginGroup("session");
     QStringList keyList = settings.childKeys();
+    LiveViewWindow *top = NULL;
 
     m_isSessionRestoring = true;
 
@@ -489,9 +491,17 @@ void LiveViewWindow::restoreSession()
         window->setLayout(settings.value(key).toString());
         window->restoreGeometry(settings.value(QString::fromLatin1("geometry/%1").arg(key)).toByteArray());
         window->show();
+
+        if (!topWidget.isEmpty() && topWidget == key)
+            top = window;
     }
 
     m_isSessionRestoring = false;
+
+    if (top != NULL)
+        QTimer::singleShot(50, top, SLOT(raise()));
+    else
+        QTimer::singleShot(50, bcApp->mainWindow, SLOT(raise()));
 }
 
 void LiveViewWindow::geometryChanged()
@@ -515,6 +525,8 @@ void LiveViewWindow::changeEvent(QEvent *event)
 {
     if (event && event->type() == QEvent::LanguageChange)
         retranslateUI();
+    else if (event && event->type() == QEvent::ActivationChange)
+        bcApp->mainWindow->saveTopWindow(this);
 
     QWidget::changeEvent(event);
 }
