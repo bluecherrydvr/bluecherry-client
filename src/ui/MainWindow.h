@@ -67,6 +67,8 @@ public slots:
     void showFront();
     void showDownloadsWindow();
 
+    void saveTopWindow(QWidget *w);
+
 private slots:
     void updateServersMenu();
     void sslConfirmRequired(DVRServer *server, const QList<QSslError> &errors, const QSslConfiguration &config);

@@ -71,6 +71,7 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
 	resize(1100, 750);
     createMenu();
     updateTrayIcon();
+    setObjectName("MainWindow");
 
     statusBar()->addPermanentWidget(new StatusBandwidthWidget(statusBar()));
     statusBar()->addWidget(new StatusBarServerAlert(m_serverRepository, statusBar()));
@@ -176,10 +177,10 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
     connect(m_expandAllServersAction, SIGNAL(triggered()), m_sourcesList, SLOT(expandAll()));
     connect(m_collapseAllServersAction, SIGNAL(triggered()), m_sourcesList, SLOT(collapseAll()));
 
+    retranslateUI();
+
     if (settings.value(QLatin1String("ui/saveSession"), false).toBool())
         m_liveView->restoreSession();
-
-    retranslateUI();
 }
 
 MainWindow::~MainWindow()
@@ -763,6 +764,15 @@ void MainWindow::changeEvent(QEvent *event)
 {
 	if (event && event->type() == QEvent::LanguageChange)
 		retranslateUI();
+    else if (event && event->type() == QEvent::ActivationChange)
+        saveTopWindow(this);
 
 	QWidget::changeEvent(event);
 }
+
+void MainWindow::saveTopWindow(QWidget *w)
+{
+    QSettings settings;
+    settings.setValue(QLatin1String("ui/topWindow"), w->objectName());
+}
+
