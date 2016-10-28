@@ -166,20 +166,37 @@ void LiveFeedItem::updateAudioState(LiveFeedItem::AudioState state)
     case LiveFeedItem::Save:
         serverId = m_camera.data()->data().server()->configuration().id();
         cameraId = m_camera.data()->data().id();
-        settings.setValue(QString::fromLatin1("ui/audioState/%1").arg(serverId), QString::number(cameraId));
+        settings.setValue(QString::fromLatin1("ui/audioState"), QString("%1/%2").arg(serverId).arg(cameraId));
         break;
 
     case LiveFeedItem::Load:
-        serverId = m_camera.data()->data().server()->configuration().id();
-        cameraId = settings.value(QString::fromLatin1("ui/audioState/%1").arg(serverId), -1).toInt();
+    {
+        QStringList list = settings.value(QString::fromLatin1("ui/audioState")).toString().split("/");
 
-        if (cameraId != -1 && cameraId == m_camera.data()->data().id() &&
-                stream() && stream()->hasAudio() && !stream()->isAudioEnabled())
+        if (list.size() != 2)
+            goto removeID;
+
+        bool ok;
+        serverId = list[0].toInt(&ok);
+        if (!ok)
+            goto removeID;
+        cameraId = list[1].toInt(&ok);
+        if (!ok)
+            goto removeID;
+
+        if (serverId == m_camera.data()->data().server()->configuration().id() &&
+                cameraId == m_camera.data()->data().id() &&
+                     stream() && stream()->hasAudio() && !stream()->isAudioEnabled())
         {
             stream()->enableAudio(true);
         }
         break;
 
+        removeID:
+        qDebug() << "LiveFeedItem: removing wrong settings value\n";
+        settings.remove(QLatin1String("ui/audioState"));
+        break;
+    }
     default:
         qDebug() << "LiveFeedItem: Used wrong audio state!\n";
     }
