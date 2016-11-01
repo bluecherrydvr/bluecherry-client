@@ -525,8 +525,6 @@ void LiveViewWindow::changeEvent(QEvent *event)
 {
     if (event && event->type() == QEvent::LanguageChange)
         retranslateUI();
-    else if (event && event->type() == QEvent::ActivationChange)
-        bcApp->mainWindow->saveTopWindow(this);
 
     QWidget::changeEvent(event);
 }
@@ -554,5 +552,13 @@ void LiveViewWindow::moveEvent(QMoveEvent *event)
     QWidget::moveEvent(event);
 
     geometryChanged();
+}
+
+bool LiveViewWindow::event(QEvent *event)
+{
+    if (event && event->type() == QEvent::WindowActivate)
+        bcApp->mainWindow->saveTopWindow(this);
+
+    return QWidget::event(event);
 }
 

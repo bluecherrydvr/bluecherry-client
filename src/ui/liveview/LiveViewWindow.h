@@ -70,6 +70,7 @@ protected:
     virtual void closeEvent(QCloseEvent *event);
     virtual void resizeEvent(QResizeEvent *event);
     virtual void moveEvent(QMoveEvent *event);
+    virtual bool event(QEvent *event);
 
 private slots:
     void savedLayoutChanged(int index);
