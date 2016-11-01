@@ -498,7 +498,7 @@ updateStartupFailed:
     if (on)
     {
         QDir dir;
-        QString path = dir.absolutePath() + QDir::separator() + QString("bluecherry-client.exe");
+        QString path = dir.absolutePath() + QDir::separator() + QString("BluecherryClient.exe");
         path = QDir::toNativeSeparators(path);
 
         settings.setValue("bluecherry-client", path);
