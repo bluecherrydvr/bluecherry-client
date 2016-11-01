@@ -492,6 +492,20 @@ updateStartupFailed:
 
 #elif defined(Q_OS_WIN)
 
+    QString autorun = QString("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run");
+    QSettings settings(autorun, QSettings::NativeFormat);
+
+    if (on)
+    {
+        QDir dir;
+        QString path = dir.absolutePath() + QDir::separator() + QString("bluecherry-client.exe");
+        path = QDir::toNativeSeparators(path);
+
+        settings.setValue("bluecherry-client", path);
+    }
+    else
+        settings.remove("bluecherry-client");
+
 #elif defined(Q_OS_MAC)
 
 #endif
