@@ -764,10 +764,16 @@ void MainWindow::changeEvent(QEvent *event)
 {
 	if (event && event->type() == QEvent::LanguageChange)
 		retranslateUI();
-    else if (event && event->type() == QEvent::ActivationChange)
-        saveTopWindow(this);
 
 	QWidget::changeEvent(event);
+}
+
+bool MainWindow::event(QEvent *event)
+{
+    if (event && event->type() == QEvent::WindowActivate)
+        saveTopWindow(this);
+
+    return QWidget::event(event);
 }
 
 void MainWindow::saveTopWindow(QWidget *w)

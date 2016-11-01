@@ -90,6 +90,7 @@ protected:
     virtual void showEvent(QShowEvent *event);
     virtual void hideEvent(QHideEvent *event);
     virtual void closeEvent(QCloseEvent *event);
+    virtual bool event(QEvent *event);
 
 private:
     DVRServerRepository *m_serverRepository;
