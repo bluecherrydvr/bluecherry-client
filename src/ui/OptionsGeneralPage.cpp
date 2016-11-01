@@ -103,7 +103,7 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     m_session->setChecked(settings.value(QLatin1String("ui/saveSession"), false).toBool());
     layout->addWidget(m_session);
 
-#if defined(Q_OS_LINUX)
+#if defined(Q_OS_LINUX) || defined(Q_OS_WIN)
     m_startup = new QCheckBox(tr("Run on startup"));
     m_startup->setChecked(settings.value(QLatin1String("ui/startup"), false).toBool());
     layout->addWidget(m_startup);
