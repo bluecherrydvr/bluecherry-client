@@ -20,13 +20,13 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <QSettings>
-#include <QGLContext>
+//#include <QGLContext>
 
 #ifndef Q_UNLIKELY
 #define Q_UNLIKELY(x) x
 #define Q_LIKELY(x) x
 #endif
-
+/*
 #if defined(Q_OS_WIN) && !defined(GL_CLAMP_TO_EDGE)
 #define GL_CLAMP_TO_EDGE 0x812F
 #endif
@@ -34,19 +34,20 @@
 #if defined(Q_OS_WIN) && !defined(GL_BGRA)
 #define GL_BGRA GL_BGRA_EXT
 #endif
+*/
 
 LiveStreamItem::LiveStreamItem(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent), m_useAdvancedGL(true), m_texId(0), m_texLastContext(0), m_texInvalidate(false),
-      m_texDataPtr(0)
+    : QDeclarativeItem(parent)/*, m_useAdvancedGL(true), m_texId(0), m_texLastContext(0), m_texInvalidate(false),
+      m_texDataPtr(0)*/
 {
     this->setFlag(QGraphicsItem::ItemHasNoContents, false);
-    updateSettings();
-    connect(bcApp, SIGNAL(settingsChanged()), SLOT(updateSettings()));
+    //updateSettings();
+    //connect(bcApp, SIGNAL(settingsChanged()), SLOT(updateSettings()));
 }
 
 LiveStreamItem::~LiveStreamItem()
 {
-    clearTexture();
+    //clearTexture();
 }
 
 /* This is odd and hackish logic to manage deletion of textures. The problem here is
@@ -64,7 +65,7 @@ LiveStreamItem::~LiveStreamItem()
  *
  * Bug #1118 revealed the problem, which was caused by deleting textures in the wrong context.
  */
-void LiveStreamItem::clearTexture()
+/* void LiveStreamItem::clearTexture()
 {
     if (m_texId)
     {
@@ -87,7 +88,7 @@ void LiveStreamItem::clearTexture()
         m_texLastContext = 0;
         m_texInvalidate = false;
     }
-}
+}*/
 
 void LiveStreamItem::setStream(QSharedPointer<LiveStream> stream)
 {
@@ -113,12 +114,12 @@ void LiveStreamItem::setStream(QSharedPointer<LiveStream> stream)
 void LiveStreamItem::clear()
 {
     setStream(QSharedPointer<LiveStream>());
-    clearTexture();
+    //clearTexture();
 }
 
 void LiveStreamItem::updateFrameSize()
 {
-    clearTexture();
+    //clearTexture();
     emit frameSizeChanged(frameSize());
 }
 
@@ -138,7 +139,7 @@ void LiveStreamItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWi
 
     /* For advanced GL textures that were invalidated (deleted when the relevant context
      * was not current), attempt to delete them here if appropriate. */
-    const bool glContextChanged = QGLContext::currentContext() != m_texLastContext;
+    /*const bool glContextChanged = QGLContext::currentContext() != m_texLastContext;
     if (m_texId && (glContextChanged || m_texInvalidate))
         clearTexture();
 
@@ -205,11 +206,11 @@ void LiveStreamItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWi
 
         p->endNativePainting();
     }
-    else
+    else */
     {
-        m_texId = 0;
-        m_texInvalidate = 0;
-        m_texLastContext = 0;
+        //m_texId = 0;
+        //m_texInvalidate = 0;
+        //m_texLastContext = 0;
 
         p->save();
         //p->setRenderHint(QPainter::SmoothPixmapTransform);
@@ -218,11 +219,11 @@ void LiveStreamItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWi
         p->restore();
     }
 }
-
+/*
 void LiveStreamItem::updateSettings()
 {
     QSettings settings;
     m_useAdvancedGL = !settings.value(QLatin1String("ui/liveview/disableAdvancedOpengl"), false).toBool();
     if (!m_useAdvancedGL && m_texId)
         clearTexture();
-}
+}*/

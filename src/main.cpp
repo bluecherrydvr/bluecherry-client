@@ -93,14 +93,14 @@ int main(int argc, char *argv[])
     initBreakpad();
 #endif
 
-    if (!settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration")).toBool() && !QGLFormat::hasOpenGL())
-    {
-		QMessageBox::critical(0, a.translate("@default", "Error"), a.translate("@default", "This application is designed to utilize OpenGL "
-                                                    "acceleration, which is not supported by your system. "
-                                                    "The application may not function correctly.\n\n"
-                                                    "For help, contact support@bluecherrydvr.com."),
-                              QMessageBox::Ok);
-    }
+//    if (!settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration")).toBool() && !QGLFormat::hasOpenGL())
+//    {
+//		QMessageBox::critical(0, a.translate("@default", "Error"), a.translate("@default", "This application is designed to utilize OpenGL "
+//                                                    "acceleration, which is not supported by your system. "
+//                                                    "The application may not function correctly.\n\n"
+//                                                    "For help, contact support@bluecherrydvr.com."),
+//                              QMessageBox::Ok);
+//    }
 
     bcApp = new BluecherryApp;
 	bcApp->setLanguageController(languageController);

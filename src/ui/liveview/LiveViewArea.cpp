@@ -35,7 +35,7 @@
 LiveViewArea::LiveViewArea(DVRServerRepository *serverRepository, QWidget *parent)
     : QDeclarativeView(parent)
 {
-    connect(bcApp, SIGNAL(settingsChanged()), SLOT(settingsChanged()));
+    //connect(bcApp, SIGNAL(settingsChanged()), SLOT(settingsChanged()));
 
     qmlRegisterType<LiveViewLayout>("Bluecherry", 1, 0, "LiveViewLayout");
     qmlRegisterType<LiveStreamItem>("Bluecherry", 1, 0, "LiveStreamDisplay");
@@ -45,11 +45,11 @@ LiveViewArea::LiveViewArea(DVRServerRepository *serverRepository, QWidget *paren
 
     rootContext()->setContextProperty(QLatin1String("mainServerRepository"), QVariant::fromValue(serverRepository));
 
-    QSettings settings;
-    if (!settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration"), true).toBool())
-        setViewport(new QGLWidget);
-    else
-        qDebug("Hardware-accelerated live view is DISABLED");
+    //QSettings settings;
+    //if (!settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration"), true).toBool())
+    //    setViewport(new QGLWidget);
+    //else
+    //   qDebug("Hardware-accelerated live view is DISABLED");
 
     engine()->addImageProvider(QLatin1String("liveviewgradients"), new LiveViewGradients);
 
@@ -66,59 +66,60 @@ LiveViewArea::~LiveViewArea()
      * to allow items a chance to clean up GL resources properly, though this is
      * non-critical because the context destruction would implicitly free them.
      * See LiveStreamItem. */
-    QGLWidget *gl = qobject_cast<QGLWidget*>(viewport());
-    if (gl)
-        gl->makeCurrent();
-    scene()->clear();
+    //QGLWidget *gl = qobject_cast<QGLWidget*>(viewport());
+    //if (gl)
+    //    gl->makeCurrent();
+    //scene()->clear();
 }
-
+/*
 bool LiveViewArea::isHardwareAccelerated() const
 {
     return viewport()->inherits("QGLWidget");
-}
+}*/
 
 void LiveViewArea::showEvent(QShowEvent *event)
 {
-    if (!event->spontaneous() && isHardwareAccelerated())
-    {
-        /* Hack around a bug that causes the surface to never paint anything on some systems
-         * running OpenGL 1.x (specifically witnessed on 1.4), by creating a new viewport shortly
-         * after the actual window has been shown. */
-        static_cast<QGLWidget*>(viewport())->makeCurrent();
-        Q_ASSERT(QGLContext::currentContext());
-        if (QGLFormat::openGLVersionFlags() < QGLFormat::OpenGL_Version_2_0)
-        {
-            qDebug("Using OpenGL 1.x late viewport hack");
-            QTimer::singleShot(0, this, SLOT(setViewportHack()));
-        }
-    }
+//    if (!event->spontaneous() && isHardwareAccelerated())
+//    {
+//        /* Hack around a bug that causes the surface to never paint anything on some systems
+//         * running OpenGL 1.x (specifically witnessed on 1.4), by creating a new viewport shortly
+//         * after the actual window has been shown. */
+//        static_cast<QGLWidget*>(viewport())->makeCurrent();
+//        Q_ASSERT(QGLContext::currentContext());
+//        if (QGLFormat::openGLVersionFlags() < QGLFormat::OpenGL_Version_2_0)
+//        {
+//            qDebug("Using OpenGL 1.x late viewport hack");
+//            QTimer::singleShot(0, this, SLOT(setViewportHack()));
+//        }
+//    }
 
     QDeclarativeView::showEvent(event);
 }
 
 void LiveViewArea::hideEvent(QHideEvent *event)
 {
-    if (!event->spontaneous() && isHardwareAccelerated())
-    {
-        static_cast<QGLWidget*>(viewport())->makeCurrent();
-        Q_ASSERT(QGLContext::currentContext());
-        if (QGLFormat::openGLVersionFlags() < QGLFormat::OpenGL_Version_2_0)
-        {
-            /* Run the viewport hack on any other LiveViewAreas that exist */
-            QWidgetList widgets = qApp->allWidgets();
-            foreach (QWidget *w, widgets)
-            {
-                if (qobject_cast<LiveViewArea*>(w) && w != this)
-                    QTimer::singleShot(0, w, SLOT(setViewportHack()));
-            }
-        }
-    }
+//    if (!event->spontaneous() && isHardwareAccelerated())
+//    {
+//        static_cast<QGLWidget*>(viewport())->makeCurrent();
+//        Q_ASSERT(QGLContext::currentContext());
+//        if (QGLFormat::openGLVersionFlags() < QGLFormat::OpenGL_Version_2_0)
+//        {
+//            /* Run the viewport hack on any other LiveViewAreas that exist */
+//            QWidgetList widgets = qApp->allWidgets();
+//            foreach (QWidget *w, widgets)
+//            {
+//                if (qobject_cast<LiveViewArea*>(w) && w != this)
+//                    QTimer::singleShot(0, w, SLOT(setViewportHack()));
+//            }
+//        }
+//    }
 }
 
+/*
 void LiveViewArea::setViewportHack()
 {
     setViewport(new QGLWidget);
-}
+}*/
 
 void LiveViewArea::addCamera(DVRCamera *camera)
 {
@@ -138,17 +139,18 @@ QSize LiveViewArea::sizeHint() const
 
     return m_sizeHint;
 }
-
+/*
 void LiveViewArea::settingsChanged()
 {
     QSettings settings;
     bool hwaccel = !settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration"), true).toBool();
     if (hwaccel != isHardwareAccelerated())
     {
-        qDebug("%s hardware acceleration for live view", hwaccel ? "Enabled" : "Disabled");
+        //qDebug("%s hardware acceleration for live view", hwaccel ? "Enabled" : "Disabled");
         if (hwaccel)
             setViewport(new QGLWidget);
         else
             setViewport(new QWidget);
     }
 }
+*/

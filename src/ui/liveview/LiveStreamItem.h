@@ -22,7 +22,7 @@
 #include <QSharedPointer>
 #include "core/LiveStream.h"
 
-class QGLContext;
+//class QGLContext;
 
 class LiveStreamItem : public QDeclarativeItem
 {
@@ -54,17 +54,17 @@ private slots:
     }
 
     void updateFrameSize();
-    void updateSettings();
+    //void updateSettings();
 
 private:
     QSharedPointer<LiveStream> m_stream;
-    bool m_useAdvancedGL;
+    /*bool m_useAdvancedGL;
     unsigned m_texId;
     const QGLContext *m_texLastContext;
     bool m_texInvalidate;
     const uchar *m_texDataPtr;
 
-    void clearTexture();
+    void clearTexture();*/
 };
 
 #endif // LIVESTREAMITEM_H

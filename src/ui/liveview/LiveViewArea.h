@@ -36,20 +36,20 @@ public:
 
     QSize sizeHint() const;
 
-    bool isHardwareAccelerated() const;
+    //bool isHardwareAccelerated() const;
 
 public slots:
     void addCamera(DVRCamera *camera);
     void updateGeometry() { m_sizeHint = QSize(); QDeclarativeView::updateGeometry(); }
 
-    void settingsChanged();
+    //void settingsChanged();
 
 protected:
     virtual void showEvent(QShowEvent *event);
     virtual void hideEvent(QHideEvent *event);
 
 private slots:
-    void setViewportHack();
+    //void setViewportHack();
 
 private:
     LiveViewLayout *m_layout;

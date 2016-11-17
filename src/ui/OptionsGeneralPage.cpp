@@ -70,17 +70,17 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     m_eventsPauseLive->setVisible(false); // Currently not functional
     layout->addWidget(m_eventsPauseLive);
 
-    m_liveHwAccel = new QCheckBox(tr("Use hardware acceleration (OpenGL)"));
+    /*m_liveHwAccel = new QCheckBox(tr("Use hardware acceleration (OpenGL)"));
     m_liveHwAccel->setChecked(!settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration"), true).toBool());
     m_liveHwAccel->setToolTip(tr("Disable hardware acceleration only if you do not see anything in the live view area."));
-    layout->addWidget(m_liveHwAccel);
+    layout->addWidget(m_liveHwAccel);*/
 
-    m_advancedOpengl = new QCheckBox(tr("Use advanced OpenGL features"));
+    /*m_advancedOpengl = new QCheckBox(tr("Use advanced OpenGL features"));
     m_advancedOpengl->setEnabled(m_liveHwAccel->isChecked());
     connect(m_liveHwAccel, SIGNAL(toggled(bool)), m_advancedOpengl, SLOT(setEnabled(bool)));
     m_advancedOpengl->setChecked(!settings.value(QLatin1String("ui/liveview/disableAdvancedOpengl"), false).toBool());
     m_advancedOpengl->setToolTip(tr("Disable advanced OpenGL features if live video doesn't appear correctly"));
-    layout->addWidget(m_advancedOpengl);
+    layout->addWidget(m_advancedOpengl);*/
 
 #if 0// defined(Q_OS_LINUX)
     m_eventPlayerHardwareDecoding = new QCheckBox(tr("Use hardware decoding in event player (vaapi)"));
@@ -180,8 +180,8 @@ void OptionsGeneralPage::saveChanges()
     settings.setValue(QLatin1String("eventPlayer/mplayer_vo"), m_mplayervo->itemText(m_mplayervo->currentIndex()));
     settings.setValue(QLatin1String("ui/main/closeToTray"), m_closeToTray->isChecked());
     bcApp->mainWindow->updateTrayIcon();
-    settings.setValue(QLatin1String("ui/liveview/disableHardwareAcceleration"), !m_liveHwAccel->isChecked());
-    settings.setValue(QLatin1String("ui/liveview/disableAdvancedOpengl"), !m_advancedOpengl->isChecked());
+    //settings.setValue(QLatin1String("ui/liveview/disableHardwareAcceleration"), !m_liveHwAccel->isChecked());
+    //settings.setValue(QLatin1String("ui/liveview/disableAdvancedOpengl"), !m_advancedOpengl->isChecked());
     settings.setValue(QLatin1String("ui/liveview/autoDeinterlace"), m_deinterlace->isChecked());
     settings.setValue(QLatin1String("ui/disableUpdateNotifications"), m_updateNotifications->isChecked());
     settings.setValue(QLatin1String("ui/enableThumbnails"), m_thumbnails->isChecked());
@@ -234,7 +234,6 @@ updateStartupFailed:
 
     m_startup->setChecked(on ? false : true);
     qDebug() << "Failed to update startup file!\n";
-    QMessageBox::critical(this, tr("Error"), tr("Failed to update startup file!"));
 
 #elif defined(Q_OS_WIN)
 
@@ -308,8 +307,6 @@ updateStartupFailed:
 
     m_startup->setChecked(on ? false : true);
     qDebug() << "Failed to update startup file!\n";
-    QMessageBox::critical(this, tr("Error"), tr("Failed to update startup file!"));
-
 #endif
 }
 
