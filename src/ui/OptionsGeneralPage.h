@@ -36,6 +36,7 @@ public:
 private slots:
     void ssUpdateForNever();
     void ssUpdateForOthers(bool checked);
+    void updateStartup(bool on);
 
 private:
     QCheckBox *m_eventsPauseLive, *m_closeToTray, *m_liveHwAccel,
