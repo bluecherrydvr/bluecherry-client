@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
 	QSharedPointer<LanguageController> languageController(new LanguageController);
 	QStringList translationPaths;
-	translationPaths << QLatin1String("./../share/bluecherry-client/translations") << QLatin1String("./") << QLatin1String("./translations") << QLatin1String("/../Resources/translations");
+    translationPaths << QLatin1String("./../share/bluecherry-client/translations") << QLatin1String("./") << QLatin1String("./translations") << QLatin1String("./../Resources/translations");
 	languageController->setTranslationFilesPaths(BluecherryApp::absolutePaths(translationPaths));
 	QString defaultLocale = QLocale::system().name(); // e.g. "de_DE"
 	if (!languageController->supportsLanguage(defaultLocale))

@@ -17,6 +17,9 @@ fi
 echo "Copying Icon..."
 mkdir -p $1/Contents/Resources/
 cp res/bluecherry.icns $1/Contents/Resources/
+echo "Copying translations.."
+mkdir -p $1/Contents/Resources/translations
+cp $BUILD_DIR/*.qm $1/Contents/Resources/translations/
 
 #echo "Copying Breakpad framework..."
 #rm -r $1/Contents/Frameworks/Breakpad.framework
