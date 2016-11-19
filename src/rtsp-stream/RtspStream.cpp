@@ -129,6 +129,9 @@ void RtspStream::setAudioFormat(enum AVSampleFormat fmt, int channelsNum, int sa
 
 void RtspStream::enableAudio(bool enable)
 {
+    if (!bcApp->audioPlayer->isDeviceEnabled())
+       return;
+
     //turn audio off on all other streams
     if (enable)
         bcApp->liveView->switchAudio(this);
@@ -154,8 +157,6 @@ void RtspStream::enableAudio(bool enable)
     }
 
     m_thread->enableAudio(enable);
-
-
 }
 
 void RtspStream::setState(State newState)

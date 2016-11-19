@@ -34,6 +34,8 @@ public:
     explicit AudioPlayer(QObject *parent = 0);
     ~AudioPlayer();
 
+    bool isDeviceEnabled() const { return (m_deviceID != 0 ? true : false); }
+
 public slots:
     void play();
     void stop();

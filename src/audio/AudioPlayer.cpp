@@ -66,7 +66,8 @@ void AudioPlayer::SDL_AudioCallback(void*  userdata, quint8 *stream, int len)
 
 void AudioPlayer::play()
 {
-    Q_ASSERT(m_isDeviceOpened);
+    if (!m_isDeviceOpened)
+        return;
 
     SDL_PauseAudioDevice(m_deviceID, 0);
     m_isPlaying = true;
@@ -149,7 +150,8 @@ void AudioPlayer::setAudioFormat(enum AVSampleFormat fmt, int channelsNum, int s
 
 void AudioPlayer::feedSamples(void *data, int samplesNum, int bytesNum)
 {
-    Q_ASSERT(m_isDeviceOpened);
+    if (!m_isDeviceOpened)
+        return;
 
     //qDebug() << "AudioPlayer: got " << samplesNum << " samples, " << bytesNum << " bytes, time elapsed: " << m_sampleClock.elapsed() << "ms";
 

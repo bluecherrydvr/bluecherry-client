@@ -19,6 +19,7 @@
 #include "MJpegStream.h"
 #include "LiveViewManager.h"
 #include "utils/ImageDecodeTask.h"
+#include "audio/AudioPlayer.h"
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
@@ -50,6 +51,9 @@ MJpegStream::~MJpegStream()
 
 void MJpegStream::enableAudio(bool enable)
 {
+    if (!bcApp->audioPlayer->isDeviceEnabled())
+       return;
+
     //turn audio off on all other streams
     if (enable)
         bcApp->liveView->switchAudio(this);

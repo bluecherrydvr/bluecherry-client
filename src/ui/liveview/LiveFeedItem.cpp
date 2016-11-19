@@ -28,6 +28,7 @@
 #include "utils/FileUtils.h"
 #include "server/DVRServer.h"
 #include "server/DVRServerRepository.h"
+#include "audio/AudioPlayer.h"
 #include <QMessageBox>
 #include <QSettings>
 #include <QDesktopServices>
@@ -185,7 +186,7 @@ void LiveFeedItem::updateAudioState(LiveFeedItem::AudioState state)
             goto removeID;
 
         if (serverId == m_camera.data()->data().server()->configuration().id() &&
-                cameraId == m_camera.data()->data().id() &&
+                cameraId == m_camera.data()->data().id() && bcApp->audioPlayer->isDeviceEnabled() &&
                      stream() && stream()->hasAudio() && !stream()->isAudioEnabled())
         {
             stream()->enableAudio(true);
@@ -294,7 +295,7 @@ void LiveFeedItem::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     menu.addAction(tr("Open as fullscreen"), this, SLOT(openFullScreen()));
     menu.addSeparator();
 
-    if (stream() && stream()->hasAudio())
+    if (bcApp->audioPlayer->isDeviceEnabled() && stream() && stream()->hasAudio())
     {
         if (stream()->isAudioEnabled())
             menu.addAction(tr("Disable audio"), this, SLOT(disableAudio()));
