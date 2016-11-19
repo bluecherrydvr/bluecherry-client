@@ -39,9 +39,18 @@ private slots:
 
 #include <QMacCocoaViewContainer>
 
+#ifndef Q_FORWARD_DECLARE_OBJC_CLASS
+#  ifdef __OBJC__
+#    define Q_FORWARD_DECLARE_OBJC_CLASS(classname) @class classname
+#  else
+#    define Q_FORWARD_DECLARE_OBJC_CLASS(classname) typedef struct objc_object classname
+#  endif
+#endif
+
+Q_FORWARD_DECLARE_OBJC_CLASS(NSPopUpButton);
+
 class QMenu;
 class QAction;
-class NSPopUpButton;
 
 class StatusBandwidthWidget : public QMacCocoaViewContainer
 {
