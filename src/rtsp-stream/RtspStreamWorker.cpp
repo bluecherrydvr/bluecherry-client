@@ -118,7 +118,7 @@ void RtspStreamWorker::processStreamLoop()
 
 bool RtspStreamWorker::processStream()
 {
-    bool ok;
+    bool ok = false;
     AVPacket packet = readPacket(&ok);
     if (!ok)
         return false;
@@ -171,7 +171,7 @@ bool RtspStreamWorker::processPacket(struct AVPacket packet)
 
                 emit audioSamplesAvailable(frame->data[0], frame->nb_samples, bytesNum);
 
-                av_free(frame);
+                av_frame_free(&frame);
             }
         }
 
@@ -181,7 +181,7 @@ bool RtspStreamWorker::processPacket(struct AVPacket packet)
             if (frame)
             {
                 processVideoFrame(frame);
-                av_free(frame);
+                av_frame_free(&frame);
             }
 
             if (m_decodeErrorsCnt >= maxDecodeErrors)
@@ -211,7 +211,7 @@ AVFrame * RtspStreamWorker::extractAudioFrame(AVPacket &packet)
 
     if (ret < 0)
     {
-        av_free(frame);
+        av_frame_free(&frame);
         return 0;
     }
 
@@ -220,7 +220,7 @@ AVFrame * RtspStreamWorker::extractAudioFrame(AVPacket &packet)
 
     if (!frameAvailable)
     {
-        av_free(frame);
+        av_frame_free(&frame);
         return 0;
     }
 
@@ -246,7 +246,7 @@ AVFrame * RtspStreamWorker::extractVideoFrame(AVPacket &packet)
         {
             emit fatalError(QString::fromLatin1("Decoding error: %1").arg(errorMessageFromCode(re)));
         }
-        av_free(frame);
+        av_frame_free(&frame);
         return 0;
     }
 
@@ -254,7 +254,7 @@ AVFrame * RtspStreamWorker::extractVideoFrame(AVPacket &packet)
 
     if (!pictureAvailable)
     {
-        av_free(frame);
+        av_frame_free(&frame);
         return 0;
     }
 

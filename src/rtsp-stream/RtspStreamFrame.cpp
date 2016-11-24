@@ -29,7 +29,7 @@ RtspStreamFrame::RtspStreamFrame(AVFrame *avFrame) : m_avFrame(avFrame)
 RtspStreamFrame::~RtspStreamFrame()
 {
     av_free(m_avFrame->data[0]);
-    av_free(m_avFrame);
+    av_frame_free(&m_avFrame);
 }
 
 AVFrame * RtspStreamFrame::avFrame() const
