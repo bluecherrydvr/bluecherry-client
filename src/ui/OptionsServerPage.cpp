@@ -201,7 +201,7 @@ void OptionsServerPage::currentServerChanged(const QModelIndex &newIndex, const 
     m_autoConnect->setChecked(server->configuration().autoConnect());
     m_connectionType->setCurrentIndex(server->configuration().connectionType());
 
-    connect(server, SIGNAL(loginSuccessful()), SLOT(setLoginSuccessful()));
+    connect(server, SIGNAL(loginSuccessful(DVRServer*)), SLOT(setLoginSuccessful()));
     connect(server, SIGNAL(loginError(QString)), SLOT(setLoginError(QString)));
     connect(server, SIGNAL(loginRequestStarted()), SLOT(setLoginConnecting()));
 
