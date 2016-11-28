@@ -31,6 +31,7 @@ class ServerMenu : public QMenu
 
 public:
 	explicit ServerMenu(DVRServer *server, const QString &title, QWidget *parent = 0);
+    ~ServerMenu();
 
 signals:
 	void showEventsWindow();

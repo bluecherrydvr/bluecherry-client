@@ -33,6 +33,15 @@ ServerMenu::ServerMenu(DVRServer *server, const QString &title, QWidget *parent)
 	connect(m_server, SIGNAL(statusChanged(int)), SLOT(updateMenuForServer()));
 }
 
+ServerMenu::~ServerMenu()
+{
+    m_connectAction->deleteLater();
+    m_browseEventsAction->deleteLater();
+    m_configureServerAction->deleteLater();
+    m_refreshDevicesAction->deleteLater();
+    m_settingsAction->deleteLater();
+}
+
 void ServerMenu::changeEvent(QEvent *event)
 {
 	if (event && event->type() == QEvent::LanguageChange)

@@ -78,7 +78,7 @@ BluecherryApp::BluecherryApp()
     connect(nam, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)), SLOT(sslErrors(QNetworkReply*,QList<QSslError>)));
 
     /* Don't use the system CAs to verify certificates */
-    QSslConfiguration sslConfig = QSslConfiguration::defaultConfiguration();
+    QSslConfiguration sslConfig(QSslConfiguration::defaultConfiguration());
     sslConfig.setCaCertificates(QList<QSslCertificate>());
 #if QT_VERSION >= 0x040800
     /* SNI breaks connections (before sslError, even) when the hostname does

@@ -81,6 +81,7 @@ void RtspStream::init()
 {
     av_lockmgr_register(bc_av_lockmgr);
     av_register_all();
+    //av_log_set_level(AV_LOG_FATAL);
     avformat_network_init();
 
     m_renderTimer = new AutoTimer;
