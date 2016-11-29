@@ -49,13 +49,13 @@ bool RtspStreamFrameFormatter::shouldTryDeinterlaceStream()
     /* Assume that H.264 D1-resolution video is interlaced, to work around a solo(?) bug
      * that results in interlaced_frame not being set for videos from solo6110. */
 
-    if (m_stream->codec->codec_id != AV_CODEC_ID_H264)
+    if (m_stream->codecpar->codec_id != AV_CODEC_ID_H264)
         return false;
 
-    if (m_stream->codec->width == 704 && m_stream->codec->height == 480)
+    if (m_stream->codecpar->width == 704 && m_stream->codecpar->height == 480)
         return true;
 
-    if (m_stream->codec->width == 720 && m_stream->codec->height == 576)
+    if (m_stream->codecpar->width == 720 && m_stream->codecpar->height == 576)
         return true;
 
     return false;
@@ -83,7 +83,7 @@ bool RtspStreamFrameFormatter::shouldTryDeinterlaceFrame(AVFrame *avFrame)
 void RtspStreamFrameFormatter::deinterlaceFrame(AVFrame* avFrame)
 {
     //int ret = avpicture_deinterlace((AVPicture*)avFrame, (AVPicture*)avFrame,
-    //                                m_stream->codec->pix_fmt, m_stream->codec->width, m_stream->codec->height);
+    //                                m_stream->codecpar->format, m_stream->codecpar->width, m_stream->codecpar->height);
     int ret = -1;
     if (ret < 0)
         qDebug("deinterlacing failed");
@@ -107,7 +107,7 @@ AVFrame * RtspStreamFrameFormatter::scaleFrame(AVFrame* avFrame)
 
     result->width = m_width;
     result->height = m_height;
-    result->pts = avFrame->pkt_pts;
+    result->pts = avFrame->pts;
 
     return result;
 }
@@ -118,7 +118,7 @@ void RtspStreamFrameFormatter::updateSWSContext()
 
     //convert deprecated pixel format in incoming stream
     //in order to suppress swscaler warning
-    switch (m_stream->codec->pix_fmt)
+    switch (m_stream->codecpar->format)
     {
     case AV_PIX_FMT_YUVJ420P :
         pixFormat = AV_PIX_FMT_YUV420P;
@@ -132,19 +132,21 @@ void RtspStreamFrameFormatter::updateSWSContext()
     case AV_PIX_FMT_YUVJ440P :
         pixFormat = AV_PIX_FMT_YUV440P;
     default:
-        pixFormat = m_stream->codec->pix_fmt;
+        pixFormat = (AVPixelFormat) m_stream->codecpar->format;
         break;
     }
 
-    if (m_stream->codec->width && m_stream->codec->height)
+    m_width = m_stream->codecpar->width;
+    m_height = m_stream->codecpar->height;
+
+    if (!m_stream->codecpar->width || !m_stream->codecpar->height)
     {
-        m_width = m_stream->codec->width;
-        m_height = m_stream->codec->height;
-    }
-    else //sometimes AVCodecContext->width can be zero, use coded_width & height instead
-    {
-        m_width = m_stream->codec->coded_width;
-        m_height = m_stream->codec->coded_height;
+        /* From old comments: "sometimes AVCodecContext->width can be zero,
+           use coded_width & height instead"
+           m_width = m_stream->codec->coded_width;
+           m_height = m_stream->codec->coded_height; */
+
+        qDebug("RtspStreamFrameFormatter: width or height in codec parameters is zero !");
     }
 
     m_sws_context = sws_getCachedContext(m_sws_context,
