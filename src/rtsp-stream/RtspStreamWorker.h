@@ -66,6 +66,7 @@ private:
     struct AVFormatContext *m_ctx;
     struct AVCodecContext *m_videoCodecCtx;
     struct AVCodecContext *m_audioCodecCtx;
+    struct AVFrame *m_frame;
     QDateTime m_timeout;
     QUrl m_url;
     bool m_cancelFlag;

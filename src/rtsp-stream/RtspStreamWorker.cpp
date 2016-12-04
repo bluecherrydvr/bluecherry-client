@@ -58,6 +58,8 @@ RtspStreamWorker::~RtspStreamWorker()
     if (!m_ctx)
         return;
 
+    av_frame_free(&m_frame);
+
     avcodec_close(m_videoCodecCtx);
     avcodec_close(m_audioCodecCtx);
 
@@ -163,34 +165,26 @@ bool RtspStreamWorker::processPacket(struct AVPacket packet)
             if (frame)
             {
                 //feed samples to audio player
-
                 int bytesNum = 0;
 
                 //bytesNum is set to linesize because only first plane is played in case of planar sample format
                 av_samples_get_buffer_size(&bytesNum, frame->channels, frame->nb_samples, (enum AVSampleFormat)frame->format, 0);
 
                 emit audioSamplesAvailable(frame->data[0], frame->nb_samples, bytesNum);
-
-                av_frame_free(&frame);
             }
         }
 
         if (packet.stream_index == m_videoStreamIndex)
         {
             AVFrame *frame = extractVideoFrame(packet);
+
             if (frame)
-            {
                 processVideoFrame(frame);
-                av_frame_free(&frame);
-            }
 
             if (m_decodeErrorsCnt >= maxDecodeErrors)
-            {
                 return false;
-            }
 
-            //always expect single frame in video packets
-            break;
+            break; //always expect single frame in video packets
         }
     }
 
@@ -199,66 +193,53 @@ bool RtspStreamWorker::processPacket(struct AVPacket packet)
 
 AVFrame * RtspStreamWorker::extractAudioFrame(AVPacket &packet)
 {
-    AVFrame *frame = av_frame_alloc();
     startInterruptableOperation(5);
 
-    int frameAvailable;
+    int ret = avcodec_send_packet(m_audioCodecCtx, &packet);
 
-    int ret = avcodec_decode_audio4(m_audioCodecCtx, frame, &frameAvailable, &packet);
-
-    if (ret == 0)
+    if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
         return 0;
 
-    if (ret < 0)
-    {
-        av_frame_free(&frame);
+    if (ret >= 0)
+        packet.size = 0;
+
+    ret = avcodec_receive_frame(m_audioCodecCtx, m_frame);
+
+    if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
         return 0;
-    }
 
-    packet.size -= ret;
-    packet.data += ret;
-
-    if (!frameAvailable)
-    {
-        av_frame_free(&frame);
-        return 0;
-    }
-
-    return frame;
+    return m_frame;
 }
 
 AVFrame * RtspStreamWorker::extractVideoFrame(AVPacket &packet)
 {
-    AVFrame *frame = av_frame_alloc();
     startInterruptableOperation(5);
 
-    int pictureAvailable;
-    int re = avcodec_decode_video2(m_videoCodecCtx, frame, &pictureAvailable, &packet);
-    if (re == 0) {
-        return 0;
-    }
+    int ret = avcodec_send_packet(m_videoCodecCtx, &packet);
 
-    if (re < 0)
-    {
-        m_decodeErrorsCnt++;
+    if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
+        goto fail;
 
-        if (m_decodeErrorsCnt >= maxDecodeErrors)
-        {
-            emit fatalError(QString::fromLatin1("Decoding error: %1").arg(errorMessageFromCode(re)));
-        }
-        av_frame_free(&frame);
-        return 0;
-    }
+    if (ret >= 0)
+        packet.size = 0;
 
-    m_decodeErrorsCnt = 0; //reset error counter if avcodec_decode_video2() call was successful
+    ret = avcodec_receive_frame(m_videoCodecCtx, m_frame);
 
-    if (!pictureAvailable)
-    {
-        av_frame_free(&frame);
-        return 0;
-    }
+    if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
+        goto fail;
 
-    return frame;
+    m_decodeErrorsCnt = 0; //reset error counter if extracting frame was successful
+
+    return m_frame;
+
+fail:
+
+    m_decodeErrorsCnt++;
+
+    if (m_decodeErrorsCnt >= maxDecodeErrors)
+        emit fatalError(QString::fromLatin1("Decoding error: %1").arg(errorMessageFromCode(ret)));
+
+    return 0;
 }
 
 void RtspStreamWorker::processVideoFrame(struct AVFrame *rawFrame)
@@ -291,6 +272,7 @@ bool RtspStreamWorker::setup()
     {
         m_frameFormatter.reset(new RtspStreamFrameFormatter(m_ctx->streams[m_videoStreamIndex]));
         m_frameFormatter->setAutoDeinterlacing(m_autoDeinterlacing);
+        m_frame = av_frame_alloc();
     }
     else if (m_ctx)
     {
