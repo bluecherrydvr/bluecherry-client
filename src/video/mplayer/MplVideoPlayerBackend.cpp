@@ -149,7 +149,10 @@ bool MplVideoPlayerBackend::start(const QUrl &url)
     }
 
     if (m_mplayer)
+    {
+        m_mplayer->disconnect();
         m_mplayer->deleteLater();
+    }
 
     createMplayerProcess();
 

@@ -64,7 +64,9 @@ MplayerProcess::~MplayerProcess()
     {
         quit();
     }
-    delete m_process;
+
+    m_process->disconnect();
+    m_process->deleteLater();
     m_process = 0;
 }
 
