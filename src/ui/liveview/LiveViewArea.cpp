@@ -113,6 +113,8 @@ void LiveViewArea::hideEvent(QHideEvent *event)
 //            }
 //        }
 //    }
+
+    QDeclarativeView::hideEvent(event);
 }
 
 /*
@@ -139,6 +141,15 @@ QSize LiveViewArea::sizeHint() const
 
     return m_sizeHint;
 }
+
+void LiveViewArea::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() >= Qt::Key_Left && event->key() <= Qt::Key_Down)
+    {
+        emit forwardKey(event);
+    }
+}
+
 /*
 void LiveViewArea::settingsChanged()
 {

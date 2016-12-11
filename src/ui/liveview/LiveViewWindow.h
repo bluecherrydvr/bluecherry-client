@@ -70,6 +70,7 @@ protected:
     virtual void closeEvent(QCloseEvent *event);
     virtual void resizeEvent(QResizeEvent *event);
     virtual void moveEvent(QMoveEvent *event);
+    virtual void keyPressEvent(QKeyEvent *event);
     virtual bool event(QEvent *event);
 
 private slots:
@@ -77,6 +78,7 @@ private slots:
     void showLayoutMenu(const QPoint &pos, int index = -1);
     void doAutoResize();
     void updateLayoutActionStates();
+    void receiveArrowKeys(QKeyEvent *event);
 
 private:
     LiveViewArea *m_liveView;
@@ -89,12 +91,18 @@ private:
     QAction *m_singleAction, *m_fullscreenAction, *m_closeAction;
     QWeakPointer<LiveViewWindow> m_fsSetWindow;
     int m_lastLayoutIndex;
+    int m_switchLayoutIndex;
+    int m_switchItemIndex;
+    QList<DVRCamera*> m_cameras;
     bool m_autoSized, m_isLayoutChanging, m_wasOpenedFs;
     static bool m_isSessionRestoring;
 
     void retranslateUI();
     void geometryChanged();
     void saveWindowLayoutName(QString name);
+    void switchLayout(bool next);
+    void switchCamera(bool next);
+    void clearBrowseParams();
 };
 
 #endif // LIVEVIEWWINDOW_H
