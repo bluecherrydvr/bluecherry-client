@@ -574,6 +574,8 @@ void LiveViewWindow::keyPressEvent(QKeyEvent *event)
     {
         receiveArrowKeys(event);
     }
+
+    QWidget::keyPressEvent(event);
 }
 
 void LiveViewWindow::receiveArrowKeys(QKeyEvent *event)

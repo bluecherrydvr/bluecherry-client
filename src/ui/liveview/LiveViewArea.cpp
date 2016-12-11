@@ -149,6 +149,8 @@ void LiveViewArea::keyPressEvent(QKeyEvent *event)
     {
         emit forwardKey(event);
     }
+
+    QDeclarativeView::keyPressEvent(event);
 }
 
 /*
