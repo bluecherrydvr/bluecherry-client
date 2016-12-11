@@ -613,6 +613,9 @@ void LiveViewWindow::switchCamera(bool next)
 {
     if (m_switchItemIndex == -1)
     {
+        if (m_liveView->layout()->count() <= 1)
+            return;
+
         int rows = m_liveView->layout()->rows();
         int columns = m_liveView->layout()->columns();
 

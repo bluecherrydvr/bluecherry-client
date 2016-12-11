@@ -54,6 +54,7 @@ public:
 
     int rows() const { return m_rows; }
     int columns() const { return m_columns; }
+    int count() const { return m_items.count(); }
 
     static int maxRows();
     static int maxColumns();
