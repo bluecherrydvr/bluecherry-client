@@ -139,16 +139,6 @@ void RtspStreamFrameFormatter::updateSWSContext()
     m_width = m_stream->codecpar->width;
     m_height = m_stream->codecpar->height;
 
-    if (!m_stream->codecpar->width || !m_stream->codecpar->height)
-    {
-        /* From old comments: "sometimes AVCodecContext->width can be zero,
-           use coded_width & height instead"
-           m_width = m_stream->codec->coded_width;
-           m_height = m_stream->codec->coded_height; */
-
-        qDebug("RtspStreamFrameFormatter: width or height in codec parameters is zero !");
-    }
-
     m_sws_context = sws_getCachedContext(m_sws_context,
                                          m_width, m_height,
                                          pixFormat,

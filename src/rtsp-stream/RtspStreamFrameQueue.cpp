@@ -48,7 +48,7 @@ RtspStreamFrame * RtspStreamFrameQueue::dequeue()
         m_ptsTimer.start();
     }
 
-    qint64 now = m_ptsTimer.elapsed() * 1000;
+    //qint64 now = m_ptsTimer.elapsed() * 1000;
 
     // TODO: needs checking
     // something is wrong with this code as after few minutes all frames are considered outdated - some calculation is off here

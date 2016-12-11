@@ -39,6 +39,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QCloseEvent>
+#include <QKeyEvent>
 
 #ifdef Q_OS_MAC
 #include <QMacStyle>
@@ -84,7 +85,7 @@ LiveViewWindow *LiveViewWindow::openWindow(DVRServerRepository *serverRepository
 
 LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *parent, bool openfs, Qt::WindowFlags f)
     : QWidget(parent, f), m_liveView(0), m_serverRepository(serverRepository), m_savedLayouts(new QComboBox),
-      m_lastLayoutIndex(-1), m_autoSized(false), m_isLayoutChanging(false),
+      m_lastLayoutIndex(-1), m_switchItemIndex(-1), m_autoSized(false), m_isLayoutChanging(false),
 	  m_wasOpenedFs(openfs)
 {
     QBoxLayout *layout = new QVBoxLayout(this);
@@ -110,6 +111,7 @@ LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *p
     m_savedLayouts->setContextMenuPolicy(Qt::CustomContextMenu);
     m_savedLayouts->setCurrentIndex(-1);
     m_savedLayouts->setMaxVisibleItems(22);
+    m_savedLayouts->setFocusPolicy(Qt::NoFocus);
 	m_toolBar->addWidget(m_savedLayouts);
 
     QWidget *spacer = new QWidget;
@@ -183,6 +185,7 @@ LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *p
 
     connect(m_liveView->layout(), SIGNAL(layoutChanged()), SLOT(updateLayoutActionStates()));
     connect(m_liveView->layout(), SIGNAL(layoutChanged()), SLOT(saveLayout()));
+    connect(m_liveView, SIGNAL(forwardKey(QKeyEvent*)), SLOT(receiveArrowKeys(QKeyEvent*)));
 
     QMainWindow *wnd = qobject_cast<QMainWindow*>(window());
     if (wnd)
@@ -260,7 +263,7 @@ QString LiveViewWindow::currentLayout() const
 
 void LiveViewWindow::savedLayoutChanged(int index)
 {
-    if (m_isLayoutChanging)
+    if (index == -1 || m_isLayoutChanging)
         return;
 
     m_isLayoutChanging = true;
@@ -362,6 +365,8 @@ void LiveViewWindow::saveLayout()
 {
     if (m_lastLayoutIndex < 0 || m_isLayoutChanging)
         return;
+
+    clearBrowseParams();
 
     QByteArray data = m_liveView->layout()->saveLayout();
     m_savedLayouts->setItemData(m_lastLayoutIndex, data, SavedLayoutsModel::LayoutDataRole);
@@ -560,5 +565,103 @@ bool LiveViewWindow::event(QEvent *event)
         bcApp->mainWindow->saveTopWindow(this);
 
     return QWidget::event(event);
+}
+
+void LiveViewWindow::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() >= Qt::Key_Left && event->key() <= Qt::Key_Down)
+    {
+        receiveArrowKeys(event);
+    }
+}
+
+void LiveViewWindow::receiveArrowKeys(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Up || event->key() == Qt::Key_Down)
+    {
+        switchLayout(event->key() == Qt::Key_Down ? true : false);
+    }
+    else if (event->key() == Qt::Key_Left || event->key() == Qt::Key_Right)
+    {
+        switchCamera(event->key() == Qt::Key_Right ? true : false);
+    }
+}
+
+void LiveViewWindow::switchLayout(bool next)
+{
+    if (!m_cameras.isEmpty())
+    {
+        clearBrowseParams();
+        setLayout(m_savedLayouts->itemText(m_switchLayoutIndex));
+        return;
+    }
+
+    if (m_savedLayouts->count() < 2)
+        return;
+
+    int index = m_savedLayouts->currentIndex();
+
+    if (next && index == m_savedLayouts->count() - 2)
+        setLayout(m_savedLayouts->itemText(0));
+    else if (!next && index == 0)
+        setLayout(m_savedLayouts->itemText(m_savedLayouts->count() - 2));
+    else
+        setLayout(m_savedLayouts->itemText(next ? index + 1 : index - 1));
+}
+
+void LiveViewWindow::switchCamera(bool next)
+{
+    if (m_switchItemIndex == -1)
+    {
+        int rows = m_liveView->layout()->rows();
+        int columns = m_liveView->layout()->columns();
+
+        QDeclarativeItem *item;
+
+        for (int x = 0; x < rows; x++)
+        {
+            for (int y = 0; y < columns; y++)
+            {
+                item = m_liveView->layout()->at(x, y);
+                if (item)
+                    m_cameras.append(item->property("camera").value<DVRCamera*>());
+            }
+        }
+
+        m_switchLayoutIndex = m_savedLayouts->currentIndex();
+        m_lastLayoutIndex = -1;
+        m_savedLayouts->setCurrentIndex(-1);
+
+        m_liveView->layout()->setGridSize(1, 1);
+        m_liveView->layout()->addItem(0, 0);
+    }
+
+    int size = m_cameras.count();
+
+    if (size <= 1)
+        return;
+
+    if (m_switchItemIndex == -1 || m_switchItemIndex >= size)
+        m_switchItemIndex = 0;
+    else if (next && m_switchItemIndex == size - 1)
+        m_switchItemIndex = 0;
+    else if (!next && m_switchItemIndex == 0)
+        m_switchItemIndex = size - 1;
+    else
+        m_switchItemIndex += (next ? 1 : -1);
+
+    QDeclarativeItem *item = m_liveView->layout()->at(0, 0);
+
+    if (item)
+        item->setProperty("camera", QVariant::fromValue(m_cameras.at(m_switchItemIndex)));
+}
+
+void LiveViewWindow::clearBrowseParams()
+{
+    if (!m_cameras.isEmpty())
+    {
+        m_switchItemIndex = -1;
+        m_cameras.clear();
+    }
 }
 

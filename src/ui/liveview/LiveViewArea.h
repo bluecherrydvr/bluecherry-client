@@ -44,9 +44,13 @@ public slots:
 
     //void settingsChanged();
 
+signals:
+    void forwardKey(QKeyEvent *event);
+
 protected:
     virtual void showEvent(QShowEvent *event);
     virtual void hideEvent(QHideEvent *event);
+    virtual void keyPressEvent(QKeyEvent *event);
 
 private slots:
     //void setViewportHack();
