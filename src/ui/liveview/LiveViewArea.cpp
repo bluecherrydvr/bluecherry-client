@@ -144,7 +144,8 @@ QSize LiveViewArea::sizeHint() const
 
 void LiveViewArea::keyPressEvent(QKeyEvent *event)
 {
-    if (event->key() >= Qt::Key_Left && event->key() <= Qt::Key_Down)
+    if (event->key() == Qt::Key_PageUp || event->key() == Qt::Key_PageDown ||
+            event->key() == Qt::Key_Comma || event->key() == Qt::Key_Period)
     {
         emit forwardKey(event);
     }

@@ -569,7 +569,8 @@ bool LiveViewWindow::event(QEvent *event)
 
 void LiveViewWindow::keyPressEvent(QKeyEvent *event)
 {
-    if (event->key() >= Qt::Key_Left && event->key() <= Qt::Key_Down)
+    if (event->key() == Qt::Key_PageUp || event->key() == Qt::Key_PageDown ||
+            event->key() == Qt::Key_Comma || event->key() == Qt::Key_Period)
     {
         receiveArrowKeys(event);
     }
@@ -577,13 +578,13 @@ void LiveViewWindow::keyPressEvent(QKeyEvent *event)
 
 void LiveViewWindow::receiveArrowKeys(QKeyEvent *event)
 {
-    if (event->key() == Qt::Key_Up || event->key() == Qt::Key_Down)
+    if (event->key() == Qt::Key_PageUp || event->key() == Qt::Key_PageDown)
     {
-        switchLayout(event->key() == Qt::Key_Down ? true : false);
+        switchLayout(event->key() == Qt::Key_PageDown ? true : false);
     }
-    else if (event->key() == Qt::Key_Left || event->key() == Qt::Key_Right)
+    else if (event->key() == Qt::Key_Comma || event->key() == Qt::Key_Period)
     {
-        switchCamera(event->key() == Qt::Key_Right ? true : false);
+        switchCamera(event->key() == Qt::Key_Period ? true : false);
     }
 }
 
