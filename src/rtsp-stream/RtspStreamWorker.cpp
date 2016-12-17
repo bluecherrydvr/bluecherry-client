@@ -44,7 +44,7 @@ int rtspStreamInterruptCallback(void *opaque)
 RtspStreamWorker::RtspStreamWorker(QSharedPointer<RtspStreamFrameQueue> &shared_queue, QObject *parent)
     : QObject(parent), m_ctx(0),
       m_videoCodecCtx(0), m_audioCodecCtx(0),
-      m_decodeErrorsCnt(0),
+      m_frame(0), m_decodeErrorsCnt(0),
       m_videoStreamIndex(-1), m_audioStreamIndex(-1),
       m_audioEnabled(false),
       m_cancelFlag(false), m_autoDeinterlacing(true),
