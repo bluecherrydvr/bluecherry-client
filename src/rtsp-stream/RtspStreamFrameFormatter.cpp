@@ -91,6 +91,11 @@ void RtspStreamFrameFormatter::deinterlaceFrame(AVFrame* avFrame)
 
 AVFrame * RtspStreamFrameFormatter::scaleFrame(AVFrame* avFrame)
 {
+    Q_ASSERT(avFrame->width != 0);
+    Q_ASSERT(avFrame->height != 0);
+    m_width = avFrame->width;
+    m_height = avFrame->height;
+
     updateSWSContext();
 
     if (!m_sws_context)
@@ -135,9 +140,6 @@ void RtspStreamFrameFormatter::updateSWSContext()
         pixFormat = (AVPixelFormat) m_stream->codecpar->format;
         break;
     }
-
-    m_width = m_stream->codecpar->width;
-    m_height = m_stream->codecpar->height;
 
     m_sws_context = sws_getCachedContext(m_sws_context,
                                          m_width, m_height,
