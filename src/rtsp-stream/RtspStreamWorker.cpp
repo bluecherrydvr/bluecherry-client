@@ -200,12 +200,12 @@ AVFrame * RtspStreamWorker::extractAudioFrame(AVPacket &packet)
     if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
         return 0;
 
-    if (ret >= 0)
+    if (ret == 0)
         packet.size = 0;
 
     ret = avcodec_receive_frame(m_audioCodecCtx, m_frame);
 
-    if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
+    if (ret < 0)
         return 0;
 
     return m_frame;
@@ -220,13 +220,16 @@ AVFrame * RtspStreamWorker::extractVideoFrame(AVPacket &packet)
     if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
         goto fail;
 
-    if (ret >= 0)
+    if (ret == 0)
         packet.size = 0;
 
     ret = avcodec_receive_frame(m_videoCodecCtx, m_frame);
 
     if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
         goto fail;
+
+    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+        return 0;
 
     m_decodeErrorsCnt = 0; //reset error counter if extracting frame was successful
 
