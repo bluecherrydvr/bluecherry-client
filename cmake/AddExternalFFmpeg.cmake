@@ -2,7 +2,7 @@
 ExternalProject_Add(ffmpeg
     PREFIX ffmpeg
     GIT_REPOSITORY "https://github.com/FFmpeg/FFmpeg.git"
-    GIT_TAG "2a3720bc22d92d236ce62112edf80103e33ece1b"
+    GIT_TAG "n3.2.2"
 
     CONFIGURE_COMMAND ./configure
 	--cc=${CMAKE_C_COMPILER} 
