@@ -16,6 +16,7 @@ ExternalProject_Add(ffmpeg
         --disable-doc
         --disable-everything
 	--disable-programs
+	--enable-runtime-cpudetect
 	--disable-static
         --enable-shared
                 
