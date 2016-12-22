@@ -19,6 +19,7 @@ ExternalProject_Add(ffmpeg
 	--enable-runtime-cpudetect
 	--disable-static
         --enable-shared
+        --enable-vaapi
                 
 	--enable-opengl
         --enable-xlib 
