@@ -70,25 +70,12 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     m_eventsPauseLive->setVisible(false); // Currently not functional
     layout->addWidget(m_eventsPauseLive);
 
-    /*m_liveHwAccel = new QCheckBox(tr("Use hardware acceleration (OpenGL)"));
-    m_liveHwAccel->setChecked(!settings.value(QLatin1String("ui/liveview/disableHardwareAcceleration"), true).toBool());
-    m_liveHwAccel->setToolTip(tr("Disable hardware acceleration only if you do not see anything in the live view area."));
-    layout->addWidget(m_liveHwAccel);*/
-
-    /*m_advancedOpengl = new QCheckBox(tr("Use advanced OpenGL features"));
-    m_advancedOpengl->setEnabled(m_liveHwAccel->isChecked());
-    connect(m_liveHwAccel, SIGNAL(toggled(bool)), m_advancedOpengl, SLOT(setEnabled(bool)));
-    m_advancedOpengl->setChecked(!settings.value(QLatin1String("ui/liveview/disableAdvancedOpengl"), false).toBool());
-    m_advancedOpengl->setToolTip(tr("Disable advanced OpenGL features if live video doesn't appear correctly"));
-    layout->addWidget(m_advancedOpengl);*/
-
-#if 0// defined(Q_OS_LINUX)
-    m_eventPlayerHardwareDecoding = new QCheckBox(tr("Use hardware decoding in event player (vaapi)"));
-    m_eventPlayerHardwareDecoding->setChecked(settings.value(QLatin1String("ui/eventplayer/enableHardwareDecoding"), false).toBool());
-    m_eventPlayerHardwareDecoding->setToolTip(tr("Disable hardware decoding if you do not see anything in the event player."));
-    layout->addWidget(m_eventPlayerHardwareDecoding);
+#if defined(Q_OS_LINUX)
+    m_vaapiDecodingAcceleration = new QCheckBox(tr("Use hardware acceleration for decoding liveview streams (VAAPI)"));
+    m_vaapiDecodingAcceleration->setChecked(settings.value(QLatin1String("ui/liveview/enableVAAPIdecoding"), false).toBool());
+    layout->addWidget(m_vaapiDecodingAcceleration);
 #else
-    m_eventPlayerHardwareDecoding = 0;
+    m_vaapiDecodingAcceleration = 0;
 #endif
 
     m_deinterlace = new QCheckBox(tr("Automatic deinterlacing"));
@@ -180,15 +167,14 @@ void OptionsGeneralPage::saveChanges()
     settings.setValue(QLatin1String("eventPlayer/mplayer_vo"), m_mplayervo->itemText(m_mplayervo->currentIndex()));
     settings.setValue(QLatin1String("ui/main/closeToTray"), m_closeToTray->isChecked());
     bcApp->mainWindow->updateTrayIcon();
-    //settings.setValue(QLatin1String("ui/liveview/disableHardwareAcceleration"), !m_liveHwAccel->isChecked());
-    //settings.setValue(QLatin1String("ui/liveview/disableAdvancedOpengl"), !m_advancedOpengl->isChecked());
     settings.setValue(QLatin1String("ui/liveview/autoDeinterlace"), m_deinterlace->isChecked());
     settings.setValue(QLatin1String("ui/disableUpdateNotifications"), m_updateNotifications->isChecked());
     settings.setValue(QLatin1String("ui/enableThumbnails"), m_thumbnails->isChecked());
     settings.setValue(QLatin1String("ui/saveSession"), m_session->isChecked());
     settings.setValue(QLatin1String("ui/startup"), m_startup->isChecked());
-    if (m_eventPlayerHardwareDecoding)
-        settings.setValue(QLatin1String("ui/eventplayer/enableHardwareDecoding"), m_eventPlayerHardwareDecoding->isChecked());
+
+    if (m_vaapiDecodingAcceleration)
+        settings.setValue(QLatin1String("ui/liveview/enableVAAPIdecoding"), m_vaapiDecodingAcceleration->isChecked());
 
     if (m_ssFullscreen && m_ssVideo && m_ssNever)
     {
