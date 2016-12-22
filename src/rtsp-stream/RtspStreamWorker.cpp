@@ -24,11 +24,12 @@
 #include <QCoreApplication>
 #include <QThread>
 
-extern "C" {
-#   include "libavcodec/avcodec.h"
-#   include "libavformat/avformat.h"
-#   include "libswscale/swscale.h"
-#   include "libavutil/mathematics.h"
+extern "C"
+{
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
+#include <libswscale/swscale.h>
+#include <libavutil/mathematics.h>
 }
 
 #define ASSERT_WORKER_THREAD() Q_ASSERT(QThread::currentThread() == thread())
