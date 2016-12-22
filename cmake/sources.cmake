@@ -41,6 +41,7 @@ set (bluecherry_client_main_SRCS
     src/core/TransferRateCalculator.cpp
     src/core/UpdateChecker.cpp
     src/core/Version.cpp
+    src/core/VaapiHWAccel.cpp
 
     src/event/CameraEventFilter.cpp
     src/event/EventDownloadManager.cpp
