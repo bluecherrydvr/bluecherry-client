@@ -4,6 +4,7 @@
 
 #include <QDebug>
 #include <QProcessEnvironment>
+#include <QByteArray>
 
 extern "C"
 {
@@ -27,16 +28,23 @@ VaapiHWAccel::VaapiHWAccel()
 {
     int err;
     const char *device;
+#if defined(Q_WS_X11)
     QProcessEnvironment env;
+    QByteArray x11display;
 
     env = QProcessEnvironment::systemEnvironment();
 
     if (env.contains(QLatin1String("DISPLAY")))
     {
-        device = env.value(QLatin1String("DISPLAY")).toAscii().constData();
+        x11display = env.value(QLatin1String("DISPLAY")).toAscii();
+        qDebug() << "VAAPI - using X11 display " << x11display;
+        device = x11display.constData();
     }
     else
+#endif
         device = "/dev/dri/renderD128";
+
+    qDebug() << "trying to create VAAPI device context \"" << device << "\"";
 
     err = av_hwdevice_ctx_create(&m_hw_device_ctx, AV_HWDEVICE_TYPE_VAAPI,
                                  device, NULL, 0);
