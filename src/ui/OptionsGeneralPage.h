@@ -39,8 +39,7 @@ private slots:
     void updateStartup(bool on);
 
 private:
-    QCheckBox *m_eventsPauseLive, *m_closeToTray, /**m_liveHwAccel,
-                    *m_advancedOpengl,*/ *m_eventPlayerHardwareDecoding,
+    QCheckBox *m_eventsPauseLive, *m_closeToTray, *m_vaapiDecodingAcceleration,
                     *m_deinterlace, *m_updateNotifications, *m_thumbnails,
                     *m_session, *m_startup, *m_fullScreen,
                     *m_ssFullscreen, *m_ssVideo, *m_ssNever;
