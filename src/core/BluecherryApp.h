@@ -43,7 +43,9 @@ class GstPluginLoader;
 class GstWrapper;
 class VideoPlayerFactory;
 class AudioPlayer;
-
+#if defined (Q_OS_LINUX)
+class VaapiHWAccel;
+#endif
 class BluecherryApp : public QObject
 {
     Q_OBJECT
@@ -54,6 +56,9 @@ public:
     QIcon appIcon;
     LiveViewManager * const liveView;
     AudioPlayer * const audioPlayer;
+#if defined (Q_OS_LINUX)
+    VaapiHWAccel * vaapi;
+#endif
     TransferRateCalculator * const globalRate;
 
     explicit BluecherryApp();
