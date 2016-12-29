@@ -25,7 +25,7 @@
 #undef MAC_OS_X_VERSION_MIN_REQUIRED
 #endif
 
-#define MAC_OS_X_VERSION_MIN_REQUIRED 1050
+#define MAC_OS_X_VERSION_MIN_REQUIRED 1060
 
 #endif
 #include <SDL2/SDL.h>
