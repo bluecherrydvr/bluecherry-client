@@ -37,6 +37,7 @@ endif (UNIX AND NOT APPLE)
 
 add_executable (bluecherry-client WIN32 MACOSX_BUNDLE ${bluecherry_client_SRCS} src/main.cpp)
 target_link_libraries (bluecherry-client ${bluecherry_client_LIBRARIES})
+set_property (TARGET bluecherry-client PROPERTY INSTALL_RPATH_USE_LINK_PATH FALSE)
 set_property (TARGET bluecherry-client PROPERTY INSTALL_RPATH /usr/lib/bluecherry/client )
 
 if (UNIX AND NOT APPLE)
