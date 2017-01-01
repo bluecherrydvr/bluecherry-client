@@ -78,7 +78,7 @@ private slots:
     void showLayoutMenu(const QPoint &pos, int index = -1);
     void doAutoResize();
     void updateLayoutActionStates();
-    void receiveArrowKeys(QKeyEvent *event);
+    void camerasBrowseKeys(QKeyEvent *event);
 
 private:
     LiveViewArea *m_liveView;

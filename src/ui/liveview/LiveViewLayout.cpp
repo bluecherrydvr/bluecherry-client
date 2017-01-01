@@ -440,6 +440,7 @@ void LiveViewLayout::setGridSize(int rows, int columns)
 
     Q_ASSERT(m_items.size() == (m_rows*m_columns));
 }
+
 QDeclarativeItem * LiveViewLayout::at(int row, int col) const
 {
     int index = coordinatesToIndex(row, col);

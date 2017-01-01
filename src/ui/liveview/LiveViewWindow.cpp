@@ -185,7 +185,7 @@ LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *p
 
     connect(m_liveView->layout(), SIGNAL(layoutChanged()), SLOT(updateLayoutActionStates()));
     connect(m_liveView->layout(), SIGNAL(layoutChanged()), SLOT(saveLayout()));
-    connect(m_liveView, SIGNAL(forwardKey(QKeyEvent*)), SLOT(receiveArrowKeys(QKeyEvent*)));
+    connect(m_liveView, SIGNAL(forwardKey(QKeyEvent*)), SLOT(camerasBrowseKeys(QKeyEvent*)));
 
     QMainWindow *wnd = qobject_cast<QMainWindow*>(window());
     if (wnd)
@@ -572,13 +572,13 @@ void LiveViewWindow::keyPressEvent(QKeyEvent *event)
     if (event->key() == Qt::Key_PageUp || event->key() == Qt::Key_PageDown ||
             event->key() == Qt::Key_Comma || event->key() == Qt::Key_Period)
     {
-        receiveArrowKeys(event);
+        camerasBrowseKeys(event);
     }
 
     QWidget::keyPressEvent(event);
 }
 
-void LiveViewWindow::receiveArrowKeys(QKeyEvent *event)
+void LiveViewWindow::camerasBrowseKeys(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_PageUp || event->key() == Qt::Key_PageDown)
     {
@@ -595,7 +595,7 @@ void LiveViewWindow::switchLayout(bool next)
     if (!m_cameras.isEmpty())
     {
         clearBrowseParams();
-        setLayout(m_savedLayouts->itemText(m_switchLayoutIndex));
+        m_savedLayouts->setCurrentIndex(m_switchLayoutIndex);
         return;
     }
 
@@ -605,11 +605,11 @@ void LiveViewWindow::switchLayout(bool next)
     int index = m_savedLayouts->currentIndex();
 
     if (next && index == m_savedLayouts->count() - 2)
-        setLayout(m_savedLayouts->itemText(0));
+        m_savedLayouts->setCurrentIndex(0);
     else if (!next && index == 0)
-        setLayout(m_savedLayouts->itemText(m_savedLayouts->count() - 2));
+        m_savedLayouts->setCurrentIndex(m_savedLayouts->count() - 2);
     else
-        setLayout(m_savedLayouts->itemText(next ? index + 1 : index - 1));
+        m_savedLayouts->setCurrentIndex(next ? index + 1 : index - 1);
 }
 
 void LiveViewWindow::switchCamera(bool next)
@@ -639,7 +639,9 @@ void LiveViewWindow::switchCamera(bool next)
         m_savedLayouts->setCurrentIndex(-1);
 
         m_liveView->layout()->setGridSize(1, 1);
-        m_liveView->layout()->addItem(0, 0);
+
+        if (m_liveView->layout()->count() == 0)
+            m_liveView->layout()->addItem(0, 0);
     }
 
     int size = m_cameras.count();

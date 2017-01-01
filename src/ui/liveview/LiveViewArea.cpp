@@ -148,6 +148,7 @@ void LiveViewArea::keyPressEvent(QKeyEvent *event)
             event->key() == Qt::Key_Comma || event->key() == Qt::Key_Period)
     {
         emit forwardKey(event);
+        return;
     }
 
     QDeclarativeView::keyPressEvent(event);
