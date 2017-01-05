@@ -23,7 +23,8 @@
 #include <QDebug>
 #include <QCoreApplication>
 #include <QThread>
-
+#include <QSettings>
+#include "core/VaapiHWAccel.h"
 extern "C"
 {
 #include <libavcodec/avcodec.h>
@@ -386,6 +387,24 @@ void RtspStreamWorker::openCodecs(AVFormatContext *context, AVDictionary *option
         }
 
         AVStream *stream = context->streams[i];
+
+#if defined(Q_OS_LINUX)
+        {
+            QSettings settings;
+
+            if (stream->codecpar->codec_type==AVMEDIA_TYPE_VIDEO && stream->codecpar->codec_id == AV_CODEC_ID_H264
+                    && settings.value(QLatin1String("ui/liveview/enableVAAPIdecoding"), false).toBool())
+            {
+                avctx->get_format = VaapiHWAccel::get_format;
+                avctx->get_buffer2 = VaapiHWAccel::get_buffer;
+
+                //TODO: filter out low-res video streams?
+
+                qDebug() << "trying to use VAAPI acceleration for video stream decoding";
+            }
+        }
+#endif
+
         bool codecOpened = openCodec(stream, avctx, options);
         if (!codecOpened)
         {
