@@ -37,11 +37,16 @@ public:
     VaapiHWAccel();
     ~VaapiHWAccel();
 
+    bool isAvailable() {return m_available;}
+
     //AVCodecContext callbacks
     static enum AVPixelFormat get_format(AVCodecContext *s, const enum AVPixelFormat *pix_fmts);
     static int get_buffer(AVCodecContext *s, AVFrame *frame, int flags);
 
 private:
+    static VaapiHWAccel *m_instance;
+
+    bool m_available;
     AVBufferRef *m_hw_device_ctx;
 
 };
