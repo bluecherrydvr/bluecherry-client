@@ -12,22 +12,49 @@ extern "C"
 #include <va/va_x11.h>
 #include <va/va_drm.h>
 #include <libavutil/hwcontext_vaapi.h>
+#include <libavutil/pixdesc.h>
 #include <libavcodec/vaapi.h>
 }
 
+VaapiHWAccel *VaapiHWAccel::m_instance = 0;
+
 enum AVPixelFormat VaapiHWAccel::get_format(AVCodecContext *s, const enum AVPixelFormat *pix_fmts)
 {
+    Q_ASSERT(m_instance != 0);
+
+
+    const enum AVPixelFormat *p;
+
+    for (p = pix_fmts; *p != -1; p++)
+    {
+        const AVPixFmtDescriptor *desc = av_pix_fmt_desc_get(*p);
+
+        if (!(desc->flags & AV_PIX_FMT_FLAG_HWACCEL))
+                    break;
+
+        if (*p == AV_PIX_FMT_VAAPI)
+        {
+            ...
+        }
+
+    }
+
+    return *p;
 }
 
 int VaapiHWAccel::get_buffer(AVCodecContext *s, AVFrame *frame, int flags)
 {
+    Q_ASSERT(m_instance != 0);
 }
 
 VaapiHWAccel::VaapiHWAccel()
-    : m_hw_device_ctx(0)
+    : m_available(false), m_hw_device_ctx(0)
 {
     int err;
     const char *device;
+
+    Q_ASSERT(m_instance == 0);
+
 #if defined(Q_WS_X11)
     QProcessEnvironment env;
     QByteArray x11display;
@@ -50,10 +77,14 @@ VaapiHWAccel::VaapiHWAccel()
                                  device, NULL, 0);
     if (err < 0)
         qDebug() << "Failed to create VAAPI device context";
+
+    m_available = true;
+    m_instance = this;
 }
 
 VaapiHWAccel::~VaapiHWAccel()
 {
+    Q_ASSERT(m_instance != 0);
 }
 
 #endif
