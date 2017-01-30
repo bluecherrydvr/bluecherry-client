@@ -235,6 +235,16 @@ AVFrame * RtspStreamWorker::extractVideoFrame(AVPacket &packet)
 
     m_decodeErrorsCnt = 0; //reset error counter if extracting frame was successful
 
+#if defined(Q_OS_LINUX)
+    if (m_videoCodecCtx->opaque)
+    {
+        ret = VaapiHWAccel::retrieveData(m_videoCodecCtx, m_frame);
+
+        if (ret < 0)
+            goto fail;
+    }
+#endif
+
     return m_frame;
 
 fail:
