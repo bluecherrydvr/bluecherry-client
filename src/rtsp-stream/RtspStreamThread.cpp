@@ -41,7 +41,7 @@ void RtspStreamThread::clearWorker()
     m_worker.clear();
 }
 
-void RtspStreamThread::start(const QUrl &url)
+void RtspStreamThread::start(const QUrl &url, bool hwaccelerated)
 {
     QMutexLocker locker(&m_workerMutex);
 
@@ -52,7 +52,7 @@ void RtspStreamThread::start(const QUrl &url)
         Q_ASSERT(!m_thread);
         m_thread = new QThread();
 
-        RtspStreamWorker *worker = new RtspStreamWorker(m_frameQueue);
+        RtspStreamWorker *worker = new RtspStreamWorker(m_frameQueue, hwaccelerated);
         m_worker = worker;
 
         worker->moveToThread(m_thread.data());
@@ -61,7 +61,8 @@ void RtspStreamThread::start(const QUrl &url)
 
         connect(m_thread.data(), SIGNAL(started()), m_worker.data(), SLOT(run()));
         connect(m_thread.data(), SIGNAL(finished()), m_thread.data(), SLOT(deleteLater()));
-        connect(m_worker.data(), SIGNAL(fatalError(QString)), this, SIGNAL(fatalError(QString)));        
+        connect(m_worker.data(), SIGNAL(fatalError(QString)), this, SIGNAL(fatalError(QString)));
+        connect(m_worker.data(), SIGNAL(hwAccelDisabled()), this, SIGNAL(hwAccelDisabled()));
         connect(m_worker.data(), SIGNAL(destroyed()), this, SLOT(clearWorker()), Qt::DirectConnection);
         connect(m_worker.data(), SIGNAL(destroyed()), m_thread.data(), SLOT(quit()));
         connect(m_worker.data(), SIGNAL(audioFormat(enum AVSampleFormat, int, int)), this, SIGNAL(audioFormat(enum AVSampleFormat,int,int)), Qt::DirectConnection);
@@ -81,10 +82,9 @@ void RtspStreamThread::enableAudio(bool enabled)
 {
     QMutexLocker locker(&m_workerMutex);
 
-    if (m_worker)
-    {
+
+    if (hasWorker())
         m_worker.data()->enableAudio(enabled);
-    }
 }
 
 void RtspStreamThread::stop()
@@ -109,7 +109,8 @@ void RtspStreamThread::setPaused(bool paused)
 {
     QMutexLocker locker(&m_workerMutex);
 
-    m_worker.data()->setPaused(paused);
+    if (hasWorker())
+        m_worker.data()->setPaused(paused);
 }
 
 bool RtspStreamThread::hasWorker()

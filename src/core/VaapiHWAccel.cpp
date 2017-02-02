@@ -17,7 +17,7 @@ extern "C"
 #include <libavcodec/vaapi.h>
 }
 
-#define VAAPIHWACCEL_SURFACES_NUM 16
+#define VAAPIHWACCEL_SURFACES_NUM 20
 
 VaapiHWAccel *VaapiHWAccel::m_instance = 0;
 
@@ -155,6 +155,7 @@ int VaapiHWAccel::get_buffer(AVCodecContext *s, AVFrame *frame, int flags)
 
         if (ret < 0)
         {
+            s->opaque = 0;
             qDebug() << "Failed to allocate VAAPI decoder surface!";
         }
     }

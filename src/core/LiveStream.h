@@ -36,6 +36,7 @@ class LiveStream : public QObject
     Q_PROPERTY(QString errdesc READ errorMessage CONSTANT)
     Q_PROPERTY(bool audio READ hasAudio NOTIFY audioChanged)
     Q_PROPERTY(bool audioPlaying READ isAudioEnabled NOTIFY audioChanged)
+    Q_PROPERTY(bool hwVA READ hwAccelStatus NOTIFY hwAccelChanged)
 
 public:
     enum State
@@ -52,6 +53,7 @@ public:
     explicit LiveStream(QObject *parent = 0);
     
     virtual int bandwidthMode() const = 0;
+    virtual bool hwAccelStatus() const = 0;
 
     virtual State state() const = 0;
     virtual QString errorMessage() const = 0;
@@ -76,11 +78,13 @@ public slots:
     virtual void setOnline(bool online) = 0;
     virtual void setBandwidthMode(int bandwidthMode) = 0;
     virtual void enableAudio(bool enable) = 0;
+    virtual void enableHWAccel(bool hwAccel) = 0;
 
 signals:
     void stateChanged(int newState);
     void pausedChanged(bool paused);
     void bandwidthModeChanged(int mode);
+    void hwAccelChanged(bool status);
 
     void streamRunning();
     void streamStopped();

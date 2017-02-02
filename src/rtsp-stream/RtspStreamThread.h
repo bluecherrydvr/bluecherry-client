@@ -38,7 +38,7 @@ public:
     explicit RtspStreamThread(QObject *parent = 0);
     virtual ~RtspStreamThread();
 
-    void start(const QUrl &url);
+    void start(const QUrl &url, bool hwaccelerated);
     void stop();
     void setPaused(bool paused);
 
@@ -54,6 +54,7 @@ signals:
     void finished();
     void audioFormat(enum AVSampleFormat fmt, int channelsNum, int sampleRate);
     void audioSamplesAvailable(void *data, int samplesNum, int bytesNum);
+    void hwAccelDisabled();
 
 private:
     QWeakPointer<QThread> m_thread;
