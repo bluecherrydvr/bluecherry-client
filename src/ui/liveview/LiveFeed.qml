@@ -136,6 +136,28 @@ LiveFeedBase {
                 visible: feedItem.hasPtz && parent.visible && !stream.paused
             }
 
+            Text {
+                id: vaText
+                color: "#beffbe"
+                height: parent.height
+                verticalAlignment: Text.AlignVCenter
+                visible: parent.visible
+                text: ""
+
+                states: [
+                    State {
+                        name: "vaActive"
+                        when: stream && stream.hwVA
+
+                        PropertyChanges {
+                            target: vaText
+                            text: "va"
+                        }
+                    }
+
+                ]
+            }
+
             Image {
                 id: audioStreamIcon
                 source: "qrc:/icons/audio-stream-available.png" /*stream !== null && stream.audioPlaying ? "qrc:/icons/audio-stream-on.png" : "qrc:/icons/audio-stream-available.png"*/
