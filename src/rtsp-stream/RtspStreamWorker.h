@@ -38,7 +38,7 @@ class RtspStreamWorker : public QObject
     Q_OBJECT
 
 public:
-    explicit RtspStreamWorker(QSharedPointer<RtspStreamFrameQueue> &shared_queue, QObject *parent = 0);
+    explicit RtspStreamWorker(QSharedPointer<RtspStreamFrameQueue> &shared_queue, bool hwaccelerated, QObject *parent = 0);
     virtual ~RtspStreamWorker();
 
     void setUrl(const QUrl &url);
@@ -61,6 +61,7 @@ signals:
     void bytesDownloaded(unsigned int bytes);
     void audioFormat(enum AVSampleFormat fmt, int channelsNum, int sampleRate);
     void audioSamplesAvailable(void *data, int samplesNum, int bytesNum);
+    void hwAccelDisabled();
 
 private:
     struct AVFormatContext *m_ctx;
@@ -77,6 +78,7 @@ private:
     int m_videoStreamIndex;
     int m_audioStreamIndex;
     bool m_audioEnabled;
+    bool m_hwaccelEnabled;
 
     ThreadPause m_threadPause;
     QScopedPointer<RtspStreamFrameFormatter> m_frameFormatter;

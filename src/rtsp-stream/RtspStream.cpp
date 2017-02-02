@@ -97,7 +97,7 @@ RtspStream::RtspStream(DVRCamera *camera, QObject *parent)
     : LiveStream(parent), m_camera(camera), m_thread(0), m_currentFrameMutex(QMutex::Recursive),
       m_frame(0), m_state(NotConnected),
       m_autoStart(false), m_bandwidthMode(LiveViewManager::FullBandwidth), m_fpsUpdateCnt(0), m_fpsUpdateHits(0),
-      m_fps(0), m_hasAudio(false), m_isAudioEnabled(false)
+      m_fps(0), m_hasAudio(false), m_isAudioEnabled(false), m_isHWAccelEnabled(false)
 {
     Q_ASSERT(m_camera);
     //connect(m_camera.data(), SIGNAL(destroyed(QObject*)), this, SLOT(deleteLater()));
@@ -208,6 +208,36 @@ void RtspStream::setBandwidthMode(int value)
     }
 }
 
+void RtspStream::enableHWAccel(bool hwAccel)
+{
+    if (m_isHWAccelEnabled == hwAccel)
+        return;
+
+    m_isHWAccelEnabled = hwAccel;
+
+    emit hwAccelChanged(hwAccel);
+
+    if (state() >= Connecting)
+    {
+        stop();
+        start();
+    }
+}
+
+void RtspStream::hwAccelDisabled()
+{
+    m_isHWAccelEnabled = false;
+    emit hwAccelChanged(false);
+}
+
+void RtspStream::updateHwAccelSettings()
+{
+    QSettings settings;
+#if defined(Q_OS_LINUX)
+    enableHWAccel(settings.value(QLatin1String("ui/liveview/enableVAAPIdecoding"), false).toBool());
+#endif
+}
+
 void RtspStream::start()
 {
     if (state() >= Connecting)
@@ -226,10 +256,13 @@ void RtspStream::start()
     if (m_thread)
         m_thread->stop();
 
+    updateHwAccelSettings();
+
     m_thread.reset(new RtspStreamThread());
     connect(m_thread.data(), SIGNAL(fatalError(QString)), this, SLOT(fatalError(QString)));
+    connect(m_thread.data(), SIGNAL(hwAccelDisabled()), this, SLOT(hwAccelDisabled()));
     connect(m_thread.data(), SIGNAL(audioFormat(enum AVSampleFormat, int, int)), this, SLOT(setAudioFormat(AVSampleFormat,int,int)), Qt::DirectConnection);
-    m_thread->start(url());
+    m_thread->start(url(), m_isHWAccelEnabled);
 
     updateSettings();
     setState(Connecting);
@@ -360,4 +393,6 @@ void RtspStream::updateSettings()
 
     QSettings settings;
     m_thread->setAutoDeinterlacing(settings.value(QLatin1String("ui/liveview/autoDeinterlace"), false).toBool());
+
+    updateHwAccelSettings();
 }

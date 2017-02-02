@@ -43,6 +43,7 @@ public:
     QUrl url() const;
 
     int bandwidthMode() const { return m_bandwidthMode; }
+    bool hwAccelStatus() const { return m_isHWAccelEnabled; };
 
     State state() const { return m_state; }
     QString errorMessage() const { return m_errorMessage; }
@@ -66,6 +67,7 @@ public slots:
     void setOnline(bool online);
     void setBandwidthMode(int bandwidthMode);
     void enableAudio(bool);
+    void enableHWAccel(bool hwAccel);
     void setAudioFormat(enum AVSampleFormat, int, int);
 
 private slots:
@@ -73,6 +75,8 @@ private slots:
     void fatalError(const QString &message);
     void updateSettings();
     void checkState();
+    void hwAccelDisabled();
+    void updateHwAccelSettings();
 
 private:
     static QTimer *m_renderTimer, *m_stateTimer;
@@ -92,6 +96,7 @@ private:
     float m_fps;
     bool m_hasAudio;
     bool m_isAudioEnabled;
+    bool m_isHWAccelEnabled;
 
     QElapsedTimer m_frameInterval;
 

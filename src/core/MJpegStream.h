@@ -43,6 +43,7 @@ public:
     QUrl url() const;
 
     int bandwidthMode() const { return m_bandwidthMode; }
+    bool hwAccelStatus() const { return false; }
 
     State state() const { return m_state; }
     QString errorMessage() const { return m_errorMessage; }
@@ -67,6 +68,7 @@ public slots:
     void setOnline(bool online);
     void setBandwidthMode(int bandwidthMode);
     void enableAudio(bool);
+    void enableHWAccel(bool hwAccel) {}
 
 private slots:
     void readable();

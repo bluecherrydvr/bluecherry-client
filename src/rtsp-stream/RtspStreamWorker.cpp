@@ -23,7 +23,6 @@
 #include <QDebug>
 #include <QCoreApplication>
 #include <QThread>
-#include <QSettings>
 #include "core/VaapiHWAccel.h"
 extern "C"
 {
@@ -43,12 +42,13 @@ int rtspStreamInterruptCallback(void *opaque)
     return worker->shouldInterrupt();
 }
 
-RtspStreamWorker::RtspStreamWorker(QSharedPointer<RtspStreamFrameQueue> &shared_queue, QObject *parent)
+RtspStreamWorker::RtspStreamWorker(QSharedPointer<RtspStreamFrameQueue> &shared_queue, bool hwaccelerated, QObject *parent)
     : QObject(parent), m_ctx(0),
       m_videoCodecCtx(0), m_audioCodecCtx(0),
       m_frame(0), m_decodeErrorsCnt(0),
       m_videoStreamIndex(-1), m_audioStreamIndex(-1),
       m_audioEnabled(false),
+      m_hwaccelEnabled(hwaccelerated),
       m_cancelFlag(false), m_autoDeinterlacing(true),
       m_frameQueue(new RtspStreamFrameQueue(6))
 {
@@ -236,17 +236,26 @@ AVFrame * RtspStreamWorker::extractVideoFrame(AVPacket &packet)
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
         return 0;
 
-    m_decodeErrorsCnt = 0; //reset error counter if extracting frame was successful
-
-#if defined(Q_OS_LINUX)
-    if (m_videoCodecCtx->opaque)
+    if (m_hwaccelEnabled)
     {
-        ret = VaapiHWAccel::retrieveData(m_videoCodecCtx, m_frame);
+#if defined(Q_OS_LINUX)
+        if (m_videoCodecCtx->opaque)
+        {
+            ret = VaapiHWAccel::retrieveData(m_videoCodecCtx, m_frame);
 
-        if (ret < 0)
-            goto fail;
-    }
+            if (ret < 0)
+            {
+                goto fail;
+            }
+        }
+        else
+        {
+            m_hwaccelEnabled = false;
+            emit hwAccelDisabled();
+        }
 #endif
+    }
+    m_decodeErrorsCnt = 0; //reset error counter if extracting frame was successful
 
     return m_frame;
 
@@ -401,12 +410,11 @@ void RtspStreamWorker::openCodecs(AVFormatContext *context, AVDictionary *option
 
         AVStream *stream = context->streams[i];
 
-#if defined(Q_OS_LINUX)
+        if (m_hwaccelEnabled)
         {
-            QSettings settings;
-
-            if (stream->codecpar->codec_type==AVMEDIA_TYPE_VIDEO && stream->codecpar->codec_id == AV_CODEC_ID_H264
-                    && settings.value(QLatin1String("ui/liveview/enableVAAPIdecoding"), false).toBool())
+#if defined(Q_OS_LINUX)
+            if (stream->codecpar->codec_type==AVMEDIA_TYPE_VIDEO
+                    && (stream->codecpar->codec_id == AV_CODEC_ID_H264 ||  stream->codecpar->codec_id == AV_CODEC_ID_MJPEG))
             {
                 avctx->get_format = VaapiHWAccel::get_format;
                 avctx->get_buffer2 = VaapiHWAccel::get_buffer;
@@ -415,8 +423,8 @@ void RtspStreamWorker::openCodecs(AVFormatContext *context, AVDictionary *option
 
                 qDebug() << "trying to use VAAPI acceleration for video stream decoding";
             }
-        }
 #endif
+        }
 
         bool codecOpened = openCodec(stream, avctx, options);
         if (!codecOpened)
