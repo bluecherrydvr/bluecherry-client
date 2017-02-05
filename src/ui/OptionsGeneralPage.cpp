@@ -31,6 +31,7 @@
 #include <QDir>
 #include <QFile>
 #include <QDebug>
+#include "core/VaapiHWAccel.h"
 
 OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     : OptionsDialogPage(parent)
@@ -74,6 +75,9 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     m_vaapiDecodingAcceleration = new QCheckBox(tr("Use hardware acceleration for decoding liveview streams (VAAPI)"));
     m_vaapiDecodingAcceleration->setChecked(settings.value(QLatin1String("ui/liveview/enableVAAPIdecoding"), false).toBool());
     layout->addWidget(m_vaapiDecodingAcceleration);
+
+    if (!bcApp->vaapi->isAvailable())
+        m_vaapiDecodingAcceleration->setEnabled(false);
 #else
     m_vaapiDecodingAcceleration = 0;
 #endif
