@@ -194,7 +194,11 @@ VaapiHWAccel::VaapiHWAccel()
     err = av_hwdevice_ctx_create(&m_hw_device_ctx, AV_HWDEVICE_TYPE_VAAPI,
                                  device, NULL, 0);
     if (err < 0)
+    {
         qDebug() << "Failed to create VAAPI device context";
+        m_available = false;
+        return;
+    }
 
     m_available = true;
     m_instance = this;
