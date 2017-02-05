@@ -108,10 +108,7 @@ BluecherryApp::BluecherryApp()
         startUpdateChecker();
     }
 #if defined (Q_OS_LINUX)
-    if (settings.value(QLatin1String("ui/liveview/enableVAAPIdecoding"), false).toBool())
-    {
         vaapi = new VaapiHWAccel();
-    }
 #endif
     m_thumbnailManager = new ThumbnailManager(this);
 
