@@ -186,6 +186,9 @@ bool RtspStreamWorker::processPacket(struct AVPacket packet)
 
             break; //always expect single frame in video packets
         }
+
+        if (packet.stream_index != m_audioStreamIndex && packet.stream_index != m_videoStreamIndex)
+            break;//drop packet from unknown stream
     }
 
     return true;
