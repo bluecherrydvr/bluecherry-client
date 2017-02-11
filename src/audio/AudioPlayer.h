@@ -19,7 +19,6 @@
 #define AUDIOPLAYER_H
 
 #include <QObject>
-#include <QElapsedTimer>
 
 extern "C"
 {
@@ -34,7 +33,7 @@ public:
     explicit AudioPlayer(QObject *parent = 0);
     ~AudioPlayer();
 
-    bool isDeviceEnabled() const { return (m_deviceID != 0 ? true : false); }
+    bool isDeviceEnabled() const { return m_deviceEnabled; }
 
 public slots:
     void play();
@@ -47,13 +46,7 @@ private:
     bool m_isDeviceOpened;
     bool m_isPlaying;
     int m_deviceID;
-
-    QElapsedTimer m_sampleClock;
-
-    //static void SDL_AudioCallback(void*  userdata, quint8* stream, int len);
-
-
-
+    bool m_deviceEnabled;
 };
 
 #endif

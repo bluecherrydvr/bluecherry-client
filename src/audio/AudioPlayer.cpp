@@ -39,7 +39,7 @@ extern "C"
 AudioPlayer::AudioPlayer(QObject *parent)
     : QObject(parent),
       m_isDeviceOpened(false), m_isPlaying(false),
-      m_deviceID(0)
+      m_deviceID(0), m_deviceEnabled(false)
 {
     if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_TIMER))
     {
@@ -49,6 +49,12 @@ AudioPlayer::AudioPlayer(QObject *parent)
     qDebug() << SDL_GetNumAudioDevices(0)  << " audio devices detected by SDL audio subsystem";
 
     setAudioFormat(AV_SAMPLE_FMT_S16, 2, 44100);
+
+    if (m_isDeviceOpened)
+    {
+        m_deviceEnabled = true;
+        this->stop();
+    }
 }
 
 AudioPlayer::~AudioPlayer()
@@ -71,8 +77,6 @@ void AudioPlayer::play()
 
     SDL_PauseAudioDevice(m_deviceID, 0);
     m_isPlaying = true;
-
-    m_sampleClock.start();
 }
 
 void AudioPlayer::stop()
