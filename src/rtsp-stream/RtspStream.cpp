@@ -239,6 +239,9 @@ void RtspStream::stop()
 {
     disconnect(m_renderTimer, SIGNAL(timeout()), this, SLOT(updateFrame()));
 
+    if (m_isAudioEnabled)
+        bcApp->audioPlayer->stop();
+
     m_thread.reset();
 
     delete m_frame;
