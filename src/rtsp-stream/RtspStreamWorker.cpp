@@ -414,7 +414,7 @@ void RtspStreamWorker::openCodecs(AVFormatContext *context, AVDictionary *option
         {
 #if defined(Q_OS_LINUX)
             if (stream->codecpar->codec_type==AVMEDIA_TYPE_VIDEO && bcApp->vaapi->isAvailable()
-                    && (stream->codecpar->codec_id == AV_CODEC_ID_H264 ||  stream->codecpar->codec_id == AV_CODEC_ID_MJPEG))
+                    && (stream->codecpar->codec_id == AV_CODEC_ID_H264))
             {
                 avctx->get_format = VaapiHWAccel::get_format;
                 avctx->get_buffer2 = VaapiHWAccel::get_buffer;
