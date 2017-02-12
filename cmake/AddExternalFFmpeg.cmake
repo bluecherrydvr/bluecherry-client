@@ -20,6 +20,7 @@ ExternalProject_Add(ffmpeg
 	--disable-static
         --enable-shared
         --enable-vaapi
+	--enable-hwaccel=h264_vaapi
                 
 	--enable-opengl
         --enable-xlib 
