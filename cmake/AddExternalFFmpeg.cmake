@@ -60,6 +60,7 @@ ExternalProject_Add(ffmpeg
 	--enable-decoder=pcm_mulaw
 	--enable-decoder=gsm
 	--enable-decoder=adpcm_g726
+	--enable-decoder=adpcm_g726le
 
 	--enable-parser=h264
         --enable-parser=mpeg4video
