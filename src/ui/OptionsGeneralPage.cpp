@@ -113,6 +113,10 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
 
     connect(m_startup, SIGNAL(toggled(bool)), SLOT(updateStartup(bool)));
 
+    m_fullScreen = new QCheckBox(tr("Startup in fullscreen"));
+    m_fullScreen->setChecked(settings.value(QLatin1String("ui/fullscreen"), false).toBool());
+    layout->addWidget(m_fullScreen);
+
 #if defined(Q_OS_WIN) || defined(Q_OS_MAC) || defined(Q_OS_LINUX)
     m_ssFullscreen = new QCheckBox(tr("Viewing live or recorded video in fullscreen"));
     m_ssVideo = new QCheckBox(tr("Playing recorded video"));
@@ -187,6 +191,7 @@ void OptionsGeneralPage::saveChanges()
     settings.setValue(QLatin1String("ui/enableThumbnails"), m_thumbnails->isChecked());
     settings.setValue(QLatin1String("ui/saveSession"), m_session->isChecked());
     settings.setValue(QLatin1String("ui/startup"), m_startup->isChecked());
+    settings.setValue(QLatin1String("ui/fullscreen"), m_fullScreen->isChecked());
     if (m_eventPlayerHardwareDecoding)
         settings.setValue(QLatin1String("ui/eventplayer/enableHardwareDecoding"), m_eventPlayerHardwareDecoding->isChecked());
 

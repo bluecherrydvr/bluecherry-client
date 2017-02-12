@@ -179,8 +179,15 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
 
     retranslateUI();
 
-    if (settings.value(QLatin1String("ui/saveSession"), false).toBool())
+    if (settings.value(QLatin1String("ui/fullscreen"), false).toBool() ||
+            QApplication::arguments().indexOf("-f") != -1)
+    {
+        m_liveView->setFullScreen(true);
+    }
+    else if (settings.value(QLatin1String("ui/saveSession"), false).toBool())
+    {
         m_liveView->restoreSession();
+    }
 }
 
 MainWindow::~MainWindow()
