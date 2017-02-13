@@ -17,7 +17,7 @@ extern "C"
 #include <libavcodec/vaapi.h>
 }
 
-#define VAAPIHWACCEL_SURFACES_NUM 20
+#define VAAPIHWACCEL_SURFACES_NUM 16
 
 VaapiHWAccel *VaapiHWAccel::m_instance = 0;
 
@@ -37,6 +37,9 @@ int VaapiHWAccel::retrieveData(AVCodecContext *s, AVFrame *input)
         return AVERROR(ENOMEM);
 
     output->format = s->sw_pix_fmt;
+
+    if (output->format == AV_PIX_FMT_YUVJ420P)
+        output->format = AV_PIX_FMT_YUV420P;
 
     ret = av_hwframe_transfer_data(output, input, 0);
 
