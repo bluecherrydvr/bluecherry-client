@@ -17,7 +17,7 @@ extern "C"
 #include <libavcodec/vaapi.h>
 }
 
-#define VAAPIHWACCEL_SURFACES_NUM 16
+#define VAAPIHWACCEL_SURFACES_NUM 0
 
 VaapiHWAccel *VaapiHWAccel::m_instance = 0;
 
