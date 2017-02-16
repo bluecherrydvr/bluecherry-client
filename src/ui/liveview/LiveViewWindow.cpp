@@ -73,7 +73,7 @@ LiveViewWindow *LiveViewWindow::openWindow(DVRServerRepository *serverRepository
         if (settings.childKeys().indexOf(QString::fromLatin1("Window-%1").arg(i)) == -1)
         {
             QString key = QString::fromLatin1("Window-%1").arg(i);
-            settings.setValue(key, key);
+            settings.setValue(key, QString());
             settings.setValue(QString::fromLatin1("geometry/%1").arg(key), bcApp->mainWindow->saveGeometry());
             window->setObjectName(key);
             break;
@@ -490,15 +490,24 @@ void LiveViewWindow::restoreSession()
 
     foreach(QString key, keyList)
     {
-        LiveViewWindow *window;
-        window = openWindow(m_serverRepository, bcApp->mainWindow, false, NULL);
-        window->setObjectName(key);
-        window->setLayout(settings.value(key).toString());
-        window->restoreGeometry(settings.value(QString::fromLatin1("geometry/%1").arg(key)).toByteArray());
-        window->show();
+        if (settings.value(key).toString().isEmpty())
+        {
+            settings.remove(key);
+            settings.remove(QString::fromLatin1("geometry/%1").arg(key));
+            keyList.removeOne(key);
+        }
+        else
+        {
+            LiveViewWindow *window;
+            window = openWindow(m_serverRepository, bcApp->mainWindow, false, NULL);
+            window->setObjectName(key);
+            window->setLayout(settings.value(key).toString());
+            window->restoreGeometry(settings.value(QString::fromLatin1("geometry/%1").arg(key)).toByteArray());
+            window->show();
 
-        if (!topWidget.isEmpty() && topWidget == key)
-            top = window;
+            if (!topWidget.isEmpty() && topWidget == key)
+                top = window;
+        }
     }
 
     m_isSessionRestoring = false;
@@ -670,6 +679,15 @@ void LiveViewWindow::clearBrowseParams()
     {
         m_switchItemIndex = -1;
         m_cameras.clear();
+    }
+}
+
+void LiveViewWindow::clean()
+{
+    if (m_fsSetWindow)
+    {
+        m_fsSetWindow.data()->close();
+        m_fsSetWindow.clear();
     }
 }
 

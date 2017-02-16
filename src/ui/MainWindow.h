@@ -82,9 +82,6 @@ private slots:
     void onServerAdded(DVRServer *server);
     void serverDevicesLoaded();
 
-signals:
-    void closing();
-
 protected:
 	virtual void changeEvent(QEvent *event);
     virtual void showEvent(QShowEvent *event);

@@ -98,15 +98,16 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     m_session->setChecked(settings.value(QLatin1String("ui/saveSession"), false).toBool());
     layout->addWidget(m_session);
 
+    m_fullScreen = new QCheckBox(tr("Startup in fullscreen"));
+    m_fullScreen->setChecked(settings.value(QLatin1String("ui/startupFullscreen"), false).toBool());
+    layout->addWidget(m_fullScreen);
+
     m_startup = new QCheckBox(tr("Run on startup"));
     m_startup->setChecked(settings.value(QLatin1String("ui/startup"), false).toBool());
     layout->addWidget(m_startup);
 
     connect(m_startup, SIGNAL(toggled(bool)), SLOT(updateStartup(bool)));
 
-    m_fullScreen = new QCheckBox(tr("Startup in fullscreen"));
-    m_fullScreen->setChecked(settings.value(QLatin1String("ui/fullscreen"), false).toBool());
-    layout->addWidget(m_fullScreen);
 
 #if defined(Q_OS_WIN) || defined(Q_OS_MAC) || defined(Q_OS_LINUX)
     m_ssFullscreen = new QCheckBox(tr("Viewing live or recorded video in fullscreen"));
@@ -179,8 +180,8 @@ void OptionsGeneralPage::saveChanges()
     settings.setValue(QLatin1String("ui/disableUpdateNotifications"), m_updateNotifications->isChecked());
     settings.setValue(QLatin1String("ui/enableThumbnails"), m_thumbnails->isChecked());
     settings.setValue(QLatin1String("ui/saveSession"), m_session->isChecked());
+    settings.setValue(QLatin1String("ui/startupFullscreen"), m_fullScreen->isChecked());
     settings.setValue(QLatin1String("ui/startup"), m_startup->isChecked());
-    settings.setValue(QLatin1String("ui/fullscreen"), m_fullScreen->isChecked());
 
     if (m_vaapiDecodingAcceleration)
         settings.setValue(QLatin1String("ui/liveview/enableVAAPIdecoding"), m_vaapiDecodingAcceleration->isChecked());

@@ -61,6 +61,7 @@ public slots:
     void setFullScreen(bool fullScreen = true);
     void toggleFullScreen() { setFullScreen(!isFullScreen()); }
     void exitFullScreen() { setFullScreen(false); }
+    void clean();
 
 signals:
     void layoutChanged(const QString &layout);
