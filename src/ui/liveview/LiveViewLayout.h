@@ -177,7 +177,7 @@ class LiveViewLayoutProps : public QObject
 
 public:
     LiveViewLayoutProps(QObject *parent)
-        : QObject(parent), m_sizePadding(0, 0), m_isDragItem(false), m_isDropTarget(false), m_fixedAspectRatio(false)
+        : QObject(parent), m_sizePadding(0, 0), m_isDragItem(false), m_isDropTarget(false), m_fixedAspectRatio(true)
     {
     }
 

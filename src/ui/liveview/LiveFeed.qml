@@ -26,7 +26,7 @@ LiveFeedBase {
     serverRepository: mainServerRepository
 
     LiveViewLayout.sizePadding: Qt.size(0, header.height)
-    LiveViewLayout.fixedAspectRatio: false
+    LiveViewLayout.fixedAspectRatio: true
 
     streamItem: videoArea
 
