@@ -61,12 +61,12 @@ bool RtspStreamFrameFormatter::shouldTryDeinterlaceStream()
     return false;
 }
 
-RtspStreamFrame * RtspStreamFrameFormatter::formatFrame(AVFrame* avFrame)
+RtspStreamFrame * RtspStreamFrameFormatter::formatFrame(AVFrame* avFrame, int width, int height)
 {
     if (shouldTryDeinterlaceFrame(avFrame))
         deinterlaceFrame(avFrame);
 
-    return new RtspStreamFrame(scaleFrame(avFrame));
+    return new RtspStreamFrame(scaleFrame(avFrame, width, height), avFrame->width, avFrame->height);
 }
 
 bool RtspStreamFrameFormatter::shouldTryDeinterlaceFrame(AVFrame *avFrame)
@@ -89,35 +89,41 @@ void RtspStreamFrameFormatter::deinterlaceFrame(AVFrame* avFrame)
         qDebug("deinterlacing failed");
 }
 
-AVFrame * RtspStreamFrameFormatter::scaleFrame(AVFrame* avFrame)
+AVFrame * RtspStreamFrameFormatter::scaleFrame(AVFrame* avFrame, int width, int height)
 {
     Q_ASSERT(avFrame->width != 0);
     Q_ASSERT(avFrame->height != 0);
     m_width = avFrame->width;
     m_height = avFrame->height;
 
-    updateSWSContext();
+    if (width == -1 || height == -1)
+    {
+        width = m_width;
+        height = m_height;
+    }
+
+    updateSWSContext(width, height);
 
     if (!m_sws_context)
         return NULL;
 
-    int bufSize  = av_image_get_buffer_size(m_pixelFormat, m_width, m_height, 1);
+    int bufSize  = av_image_get_buffer_size(m_pixelFormat, width, height, 1);
     uint8_t *buf = (uint8_t*) av_malloc(bufSize);
 
     AVFrame *result = av_frame_alloc();
 
-    av_image_fill_arrays(result->data, result->linesize, buf, m_pixelFormat, m_width, m_height, 1);
+    av_image_fill_arrays(result->data, result->linesize, buf, m_pixelFormat, width, height, 1);
     sws_scale(m_sws_context, (const uint8_t**)avFrame->data, avFrame->linesize, 0, m_height,
               result->data, result->linesize);
 
-    result->width = m_width;
-    result->height = m_height;
+    result->width = width;
+    result->height = height;
     result->pts = avFrame->pts;
 
     return result;
 }
 
-void RtspStreamFrameFormatter::updateSWSContext()
+void RtspStreamFrameFormatter::updateSWSContext(int dstWidth, int dstHeight)
 {
     AVPixelFormat pixFormat;
 
@@ -144,7 +150,7 @@ void RtspStreamFrameFormatter::updateSWSContext()
     m_sws_context = sws_getCachedContext(m_sws_context,
                                          m_width, m_height,
                                          pixFormat,
-                                         m_width, m_height,
+                                         dstWidth, dstHeight,
                                          m_pixelFormat,
-                                         SWS_BICUBIC, NULL, NULL, NULL);
+                                         SWS_FAST_BILINEAR, NULL, NULL, NULL);
 }

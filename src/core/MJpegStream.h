@@ -58,6 +58,9 @@ public:
 
     bool hasAudio() const { return false; }
     bool isAudioEnabled() const { return false; }
+    void setFrameSizeHint(int width, int height) { return; }
+    void ref() {}
+    void unref() {}
 
 public slots:
     void start();

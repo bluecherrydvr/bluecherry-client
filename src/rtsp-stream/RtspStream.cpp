@@ -97,7 +97,8 @@ RtspStream::RtspStream(DVRCamera *camera, QObject *parent)
     : LiveStream(parent), m_camera(camera), m_thread(0), m_currentFrameMutex(QMutex::Recursive),
       m_frame(0), m_state(NotConnected),
       m_autoStart(false), m_bandwidthMode(LiveViewManager::FullBandwidth), m_fpsUpdateCnt(0), m_fpsUpdateHits(0),
-      m_fps(0), m_hasAudio(false), m_isAudioEnabled(false), m_isHWAccelEnabled(false)
+      m_fps(0), m_hasAudio(false), m_isAudioEnabled(false), m_isHWAccelEnabled(false),
+      m_refcount(0)
 {
     Q_ASSERT(m_camera);
     //connect(m_camera.data(), SIGNAL(destroyed(QObject*)), this, SLOT(deleteLater()));
@@ -335,8 +336,7 @@ void RtspStream::updateFrame()
     if (!sf) // no new frame
         return;
 
-    delete m_frame;
-    m_frame = sf;
+
 
     m_fpsUpdateHits++;
 
@@ -345,15 +345,45 @@ void RtspStream::updateFrame()
     m_frameInterval.restart();
 
     QMutexLocker locker(&m_currentFrameMutex);
-    bool sizeChanged = (m_currentFrame.width() != sf->avFrame()->width ||
-                        m_currentFrame.height() != sf->avFrame()->height);
+    //bool sizeChanged = (m_currentFrame.width() != sf->avFrame()->width ||
+    //                    m_currentFrame.height() != sf->avFrame()->height);
+    bool sizeChanged = m_frame == 0 || (m_frame->width() != sf->width() || m_frame->height() != sf->height());
 
     m_currentFrame = QImage(sf->avFrame()->data[0], sf->avFrame()->width, sf->avFrame()->height,
                             sf->avFrame()->linesize[0], QImage::Format_RGB32).copy();
 
+    delete m_frame;
+    m_frame = sf;
+
     if (sizeChanged)
         emit streamSizeChanged(m_currentFrame.size());
     emit updated();
+}
+
+void RtspStream::setFrameSizeHint(int width, int height)
+{
+    if (m_refcount > 1)
+        return;
+
+    if (state() < Connecting || !m_thread || !m_thread->isRunning())
+        return;
+
+    QMutexLocker locker(&m_currentFrameMutex);
+
+    m_thread->setFrameSizeHint(width, height);
+}
+
+void RtspStream::ref()
+{
+    if (m_refcount)
+        setFrameSizeHint(-1, -1);
+
+    m_refcount++;
+}
+
+void RtspStream::unref()
+{
+    m_refcount--;
 }
 
 QImage RtspStream::currentFrame() const
@@ -365,7 +395,8 @@ QImage RtspStream::currentFrame() const
 QSize RtspStream::streamSize() const
 {
     QMutexLocker locker(&m_currentFrameMutex);
-    return m_currentFrame.size();
+    //return m_currentFrame.size();
+    return m_frame ? QSize(m_frame->width(), m_frame->height()) : QSize(0, 0);
 }
 
 void RtspStream::fatalError(const QString &message)

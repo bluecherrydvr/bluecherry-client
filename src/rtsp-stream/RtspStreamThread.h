@@ -48,6 +48,7 @@ public:
 
     void setAutoDeinterlacing(bool autoDeinterlacing);
     RtspStreamFrame * frameToDisplay();
+    void setFrameSizeHint(int width, int height);
 
 signals:
     void fatalError(const QString &error);

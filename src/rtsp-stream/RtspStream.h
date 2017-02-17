@@ -57,6 +57,9 @@ public:
     bool isConnected() const { return state() > Connecting; }
     bool hasAudio() const { return m_hasAudio; }
     bool isAudioEnabled() const { return m_isAudioEnabled; }
+    void setFrameSizeHint(int width, int height);
+    void ref();
+    void unref();
 
 public slots:
     void start();
@@ -103,6 +106,7 @@ private:
     enum AVSampleFormat m_audioSampleFmt;
     int m_audioChannels;
     int m_audioSampleRate;
+    int m_refcount;
 
     void setState(State newState);
 

@@ -51,6 +51,7 @@ public:
     RtspStreamFrame * frameToDisplay();
 
     void enableAudio(bool enabled) { m_audioEnabled = enabled; }
+    void setFrameSizeHint(int width, int height);
 
 public slots:
     void run();
@@ -79,6 +80,8 @@ private:
     int m_audioStreamIndex;
     bool m_audioEnabled;
     bool m_hwaccelEnabled;
+    int m_frameWidthHint;
+    int m_frameHeightHint;
 
     ThreadPause m_threadPause;
     QScopedPointer<RtspStreamFrameFormatter> m_frameFormatter;

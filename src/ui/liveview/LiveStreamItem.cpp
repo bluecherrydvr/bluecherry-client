@@ -48,6 +48,7 @@ LiveStreamItem::LiveStreamItem(QDeclarativeItem *parent)
 LiveStreamItem::~LiveStreamItem()
 {
     //clearTexture();
+    m_stream.data()->unref();
 }
 
 /* This is odd and hackish logic to manage deletion of textures. The problem here is
@@ -96,7 +97,10 @@ void LiveStreamItem::setStream(QSharedPointer<LiveStream> stream)
         return;
 
     if (m_stream)
+    {
         m_stream.data()->disconnect(this);
+        m_stream.data()->unref();
+    }
 
     m_stream = stream;
 
@@ -105,6 +109,7 @@ void LiveStreamItem::setStream(QSharedPointer<LiveStream> stream)
         connect(m_stream.data(), SIGNAL(updated()), SLOT(updateFrame()));
         connect(m_stream.data(), SIGNAL(streamSizeChanged(QSize)), SLOT(updateFrameSize()));
         m_stream.data()->start();
+        m_stream.data()->ref();
     }
 
     updateFrameSize();
@@ -136,6 +141,8 @@ void LiveStreamItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWi
         p->fillRect(opt->rect, Qt::black);
         return;
     }
+
+
 
     /* For advanced GL textures that were invalidated (deleted when the relevant context
      * was not current), attempt to delete them here if appropriate. */
@@ -217,7 +224,10 @@ void LiveStreamItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWi
         p->setCompositionMode(QPainter::CompositionMode_Source);
         p->drawImage(opt->rect, frame);
         p->restore();
+
+        m_stream.data()->setFrameSizeHint(opt->rect.width(), opt->rect.height());
     }
+
 }
 /*
 void LiveStreamItem::updateSettings()

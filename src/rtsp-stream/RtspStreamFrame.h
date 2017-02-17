@@ -27,14 +27,17 @@ class RtspStreamFrame
     Q_DISABLE_COPY(RtspStreamFrame);
 
 public:
-    explicit RtspStreamFrame(AVFrame *avFrame);
+    explicit RtspStreamFrame(AVFrame *avFrame, int width, int height);
     ~RtspStreamFrame();
 
     AVFrame * avFrame() const;
+    int width() { return m_streamWidth; }
+    int height() { return m_streamHeight; }
 
 private:
     AVFrame *m_avFrame;
-
+    int m_streamWidth;
+    int m_streamHeight;
 };
 
 #endif // RTSP_STREAM_FRAME_H

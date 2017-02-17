@@ -35,7 +35,7 @@ public:
     ~RtspStreamFrameFormatter();
 
     void setAutoDeinterlacing(bool autoDeinterlacing);
-    RtspStreamFrame * formatFrame(AVFrame *avFrame);
+    RtspStreamFrame * formatFrame(AVFrame *avFrame, int width, int height);
 
 private:
     AVStream *m_stream;
@@ -49,8 +49,8 @@ private:
     bool shouldTryDeinterlaceStream();
     bool shouldTryDeinterlaceFrame(AVFrame *avFrame);
     void deinterlaceFrame(AVFrame *avFrame);
-    AVFrame * scaleFrame(AVFrame *avFrame);
-    void updateSWSContext();
+    AVFrame * scaleFrame(AVFrame *avFrame, int width, int height);
+    void updateSWSContext(int dstWidth, int dstHeight);
 
 };
 

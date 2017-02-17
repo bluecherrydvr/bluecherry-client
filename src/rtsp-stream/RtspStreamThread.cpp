@@ -82,9 +82,16 @@ void RtspStreamThread::enableAudio(bool enabled)
 {
     QMutexLocker locker(&m_workerMutex);
 
-
     if (hasWorker())
         m_worker.data()->enableAudio(enabled);
+}
+
+void RtspStreamThread::setFrameSizeHint(int width, int height)
+{
+    QMutexLocker locker(&m_workerMutex);
+
+    if (hasWorker())
+        m_worker.data()->setFrameSizeHint(width, height);
 }
 
 void RtspStreamThread::stop()

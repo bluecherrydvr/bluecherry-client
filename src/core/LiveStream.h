@@ -68,6 +68,9 @@ public:
 
     virtual bool hasAudio() const = 0;
     virtual bool isAudioEnabled() const  = 0;
+    virtual void setFrameSizeHint(int width, int height) = 0;
+    virtual void ref() = 0;
+    virtual void unref() = 0;
 
 public slots:
     virtual void start() = 0;

@@ -21,7 +21,8 @@ extern "C" {
 #   include "libavformat/avformat.h"
 }
 
-RtspStreamFrame::RtspStreamFrame(AVFrame *avFrame) : m_avFrame(avFrame)
+RtspStreamFrame::RtspStreamFrame(AVFrame *avFrame, int width, int height)
+    : m_avFrame(avFrame), m_streamWidth(width), m_streamHeight(height)
 {
     Q_ASSERT(m_avFrame);
 }

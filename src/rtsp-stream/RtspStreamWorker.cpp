@@ -49,6 +49,7 @@ RtspStreamWorker::RtspStreamWorker(QSharedPointer<RtspStreamFrameQueue> &shared_
       m_videoStreamIndex(-1), m_audioStreamIndex(-1),
       m_audioEnabled(false),
       m_hwaccelEnabled(hwaccelerated),
+      m_frameWidthHint(-1), m_frameHeightHint(-1),
       m_cancelFlag(false), m_autoDeinterlacing(true),
       m_frameQueue(new RtspStreamFrameQueue(6))
 {
@@ -273,7 +274,7 @@ void RtspStreamWorker::processVideoFrame(struct AVFrame *rawFrame)
 {
     Q_ASSERT(m_frameFormatter);
     startInterruptableOperation(5);
-    m_frameQueue->enqueue(m_frameFormatter->formatFrame(rawFrame));
+    m_frameQueue->enqueue(m_frameFormatter->formatFrame(rawFrame, m_frameWidthHint, m_frameHeightHint));
 }
 
 QString RtspStreamWorker::errorMessageFromCode(int errorCode)
@@ -422,6 +423,7 @@ void RtspStreamWorker::openCodecs(AVFormatContext *context, AVDictionary *option
                 //TODO: filter out low-res video streams?
 
                 qDebug() << "trying to use VAAPI acceleration for video stream decoding";
+                av_log_set_level(AV_LOG_VERBOSE);
             }
 #endif
         }
@@ -498,6 +500,12 @@ RtspStreamFrame * RtspStreamWorker::frameToDisplay()
         return 0;
 
     return m_frameQueue.data()->dequeue();
+}
+
+void RtspStreamWorker::setFrameSizeHint(int width, int height)
+{
+    m_frameWidthHint = width;
+    m_frameHeightHint = height;
 }
 
 void RtspStreamWorker::stop()
