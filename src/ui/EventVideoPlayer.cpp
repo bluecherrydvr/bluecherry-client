@@ -219,16 +219,16 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     connect(sc, SIGNAL(activated()), SLOT(zoomOut()));
 
     sc = new QShortcut(QKeySequence(Qt::Key_Left + Qt::ALT), m_videoWidget);
-    connect(sc, SIGNAL(activated()), SLOT(moveLeft()));
-
-    sc = new QShortcut(QKeySequence(Qt::Key_Right + Qt::ALT), m_videoWidget);
     connect(sc, SIGNAL(activated()), SLOT(moveRight()));
 
+    sc = new QShortcut(QKeySequence(Qt::Key_Right + Qt::ALT), m_videoWidget);
+    connect(sc, SIGNAL(activated()), SLOT(moveLeft()));
+
     sc = new QShortcut(QKeySequence(Qt::Key_Up + Qt::ALT), m_videoWidget);
-    connect(sc, SIGNAL(activated()), SLOT(moveUp()));
+    connect(sc, SIGNAL(activated()), SLOT(moveDown()));
 
     sc = new QShortcut(QKeySequence(Qt::Key_Down + Qt::ALT), m_videoWidget);
-    connect(sc, SIGNAL(activated()), SLOT(moveDown()));
+    connect(sc, SIGNAL(activated()), SLOT(moveUp()));
 
     setControlsEnabled(false);
 
@@ -787,10 +787,10 @@ void EventVideoPlayer::videoContextMenu(const QPoint &rpos)
     menu.addAction(tr("Zoom In"), this, SLOT(zoomIn()), Qt::Key_E);
     menu.addAction(tr("Zoom Out"), this, SLOT(zoomOut()), Qt::Key_W);
 
-    menu.addAction(tr("Move Left"), this, SLOT(moveLeft()), Qt::ALT + Qt::Key_Left);
-    menu.addAction(tr("Move Right"), this, SLOT(moveRight()), Qt::ALT + Qt::Key_Right);
-    menu.addAction(tr("Move Up"), this, SLOT(moveUp()), Qt::ALT + Qt::Key_Up);
-    menu.addAction(tr("Move Down"), this, SLOT(moveDown()), Qt::ALT + Qt::Key_Down);
+    menu.addAction(tr("Move Left"), this, SLOT(moveRight()), Qt::ALT + Qt::Key_Left);
+    menu.addAction(tr("Move Right"), this, SLOT(moveLeft()), Qt::ALT + Qt::Key_Right);
+    menu.addAction(tr("Move Up"), this, SLOT(moveDown()), Qt::ALT + Qt::Key_Up);
+    menu.addAction(tr("Move Down"), this, SLOT(moveUp()), Qt::ALT + Qt::Key_Down);
 
     menu.exec(pos);
 }
