@@ -101,6 +101,7 @@ Section
 	File "${MINGW_SYSROOT_PATH}\bin\iconv.dll"
 	File "${MINGW_SYSROOT_PATH}\bin\liblzma-5.dll"
 	File "${MINGW_SYSROOT_PATH}\bin\libjpeg-8.dll"
+	File "${MINGW_SYSROOT_PATH}\bin\libwinpthread-1.dll"
 
         CreateDirectory "$SMPROGRAMS\Bluecherry"
         CreateShortCut "$SMPROGRAMS\Bluecherry\Bluecherry Client.lnk" "$INSTDIR\BluecherryClient.exe"
