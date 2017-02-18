@@ -49,6 +49,9 @@ public:
 
     void restoreSession();
 
+    QWidget *topWidget() { return m_topWidget; }
+    QWidget *fullScreenWidget() { return m_fsSetWindow.data(); }
+
 public slots:
     void showSingleCamera(DVRCamera *camera);
     bool setLayout(const QString &layout);
@@ -91,6 +94,7 @@ private:
     QAction *m_addColumnAction, *m_removeColumnAction;
     QAction *m_singleAction, *m_fullscreenAction, *m_closeAction;
     QWeakPointer<LiveViewWindow> m_fsSetWindow;
+    static QWidget *m_topWidget;
     int m_lastLayoutIndex;
     int m_switchLayoutIndex;
     int m_switchItemIndex;

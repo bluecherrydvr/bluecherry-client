@@ -46,6 +46,7 @@
 #endif
 
 bool LiveViewWindow::m_isSessionRestoring = false;
+QWidget *LiveViewWindow::m_topWidget = NULL;
 
 LiveViewWindow *LiveViewWindow::openWindow(DVRServerRepository *serverRepository, QWidget *parent, bool fullscreen, DVRCamera *camera)
 {
@@ -510,12 +511,9 @@ void LiveViewWindow::restoreSession()
         }
     }
 
-    m_isSessionRestoring = false;
+    m_topWidget = top;
 
-    if (top != NULL)
-        QTimer::singleShot(50, top, SLOT(raise()));
-    else
-        QTimer::singleShot(50, bcApp->mainWindow, SLOT(raise()));
+    m_isSessionRestoring = false;
 }
 
 void LiveViewWindow::geometryChanged()

@@ -177,17 +177,29 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
     connect(m_expandAllServersAction, SIGNAL(triggered()), m_sourcesList, SLOT(expandAll()));
     connect(m_collapseAllServersAction, SIGNAL(triggered()), m_sourcesList, SLOT(collapseAll()));
 
+    QWidget *top = NULL;
+
     if (settings.value(QLatin1String("ui/startupFullscreen"), false).toBool() ||
             QApplication::arguments().indexOf("-f") != -1)
     {
         m_liveView->setFullScreen(true);
+        top = m_liveView->fullScreenWidget();
     }
     else if (settings.value(QLatin1String("ui/saveSession"), false).toBool())
     {
         m_liveView->restoreSession();
+        top = m_liveView->topWidget();
+
+        if (settings.value(QLatin1String("ui/liveview/fullscreen"), false).toBool())
+            m_liveView->setFullScreen(true);
     }
 
     retranslateUI();
+
+    if (top == NULL)
+        top = bcApp->mainWindow;
+
+    QTimer::singleShot(50, top, SLOT(raise()));
 }
 
 MainWindow::~MainWindow()
@@ -247,6 +259,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
         return;
     }
 
+    settings.setValue(QLatin1String("ui/liveview/fullscreen"), m_liveView->isFullScreen());
     m_liveView->clean();
     QMainWindow::closeEvent(event);
     QApplication::quit();
