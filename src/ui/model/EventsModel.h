@@ -21,9 +21,11 @@
 #include <QAbstractItemModel>
 #include <QSharedPointer>
 
+#include "../../core/EventData.h"
+
 class DVRServer;
 class DVRServerRepository;
-class EventData;
+
 
 class EventsModel : public QAbstractItemModel
 {
