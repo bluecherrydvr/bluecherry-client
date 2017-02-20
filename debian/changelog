@@ -1,3 +1,28 @@
+bluecherry-client (1:2.2.6-1) trusty; urgency=low
+
+  * Significantly improved liveview performance, now displaying live cameras
+    consumes less CPU power
+  * Implemented support for hardware accelerated decoding of liveview streams
+    using VAAPI (reduces CPU usage on Linux with supported hardware)
+  * New option - startup in fullscreen (command line switch -f)
+  * New option - restoring previous session (windows and layouts) on startup
+  * New option - automatic startup when user logs in
+  * Keyboard shortcuts for switching cameras (, .) and layouts (PgUp, PgDown)
+  * Reversed controls for moving zoomed picture in event player (issue #251)
+  * Fixed aspect ratio in liveview (issue #241)
+  * Fixed excessive CPU usage in idle state and while playing audio on Linux systems with
+    PulseAudio (issues #289 #291)
+  * Fixed crash on stream resolution change (issue #286)
+  * Fixed RPATH issue on Ubuntu 16.10 that caused crash when ffmpeg from repository is
+    installed (issue #287)
+  * Fixed missing translations on OS X (issue #278)
+  * Fixed issues with displaying thumbnails in 64 bit Windows build (#271) and
+    OS X
+  * Fixed crash during switching between recordings
+  * Removed OpenGL acceleration of liveview
+
+ -- Anton Sviridenko <anton@corp.bluecherry.net>  Mon, 20 Feb 2017 22:20:16 +0400
+
 bluecherry-client (1:2.2.5-1) precise; urgency=low
 
   * Fixed crash #244 on closing event player
