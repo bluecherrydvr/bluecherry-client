@@ -68,6 +68,7 @@ include (cmake/resources.cmake)
 include (cmake/libav.cmake)
 
 include (cmake/libSDL2.cmake)
+include (cmake/libmpv.cmake)
 
 if (ENABLE_BREAKPAD)
     include (cmake/breakpad.cmake)
