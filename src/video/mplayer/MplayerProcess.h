@@ -50,7 +50,7 @@ public:
     void sendCommand(QString cmd);
 
     bool isRunning();
-    bool isReadyToPlay() {return m_isreadytoplay;};
+    bool isReadyToPlay() { return m_isreadytoplay; }
 
     bool saveScreenshot(QString &file);
 

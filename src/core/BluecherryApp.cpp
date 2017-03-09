@@ -27,7 +27,7 @@
 #include "server/DVRServer.h"
 #include "server/DVRServerConfiguration.h"
 #include "server/DVRServerRepository.h"
-#include "video/mplayer/MplVideoPlayerFactory.h"
+#include "video/libmpv/MpvVideoPlayerFactory.h"
 #include <QSettings>
 #include <QStringList>
 #include <QNetworkAccessManager>
@@ -157,7 +157,7 @@ void BluecherryApp::stopUpdateChecker()
 
 void BluecherryApp::registerVideoPlayerFactory()
 {
-    m_videoPlayerFactory.reset(new MplVideoPlayerFactory());
+    m_videoPlayerFactory.reset(new MpvVideoPlayerFactory());
 }
 
 void BluecherryApp::unregisterVideoPlayerFactory()

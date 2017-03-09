@@ -106,9 +106,9 @@ set (bluecherry_client_MOC_SRCS
     src/video/VideoPlayerBackend.h
     src/video/VideoWidget.h
 
-    src/video/mplayer/MplVideoPlayerBackend.h
-    src/video/mplayer/MplVideoWidget.h
-    src/video/mplayer/MplayerProcess.h
+    src/video/libmpv/MpvVideoPlayerBackend.h
+    src/video/libmpv/MpvVideoWidget.h
+#    src/video/mplayer/MplayerProcess.h
 
 )
 
