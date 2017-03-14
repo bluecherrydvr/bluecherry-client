@@ -244,6 +244,8 @@ EventVideoPlayer::~EventVideoPlayer()
 
     if (m_videoBackend)
     {
+        m_videoBackend.data()->clear();
+
 #ifdef Q_OS_MAC
         qDebug() << "deleting videoBackend first, before VideoWidget\n";
         delete m_videoBackend.data();
