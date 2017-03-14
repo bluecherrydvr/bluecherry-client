@@ -179,6 +179,9 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
 
     QWidget *top = NULL;
 
+    if (QApplication::arguments().indexOf("--kiosk-mode") != -1)
+        settings.setValue(QLatin1String("ui/startupFullscreen"), true);
+
     if (settings.value(QLatin1String("ui/startupFullscreen"), false).toBool() ||
             QApplication::arguments().indexOf("-f") != -1)
     {

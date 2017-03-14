@@ -20,8 +20,6 @@
 
 #include "video/VideoWidget.h"
 
-class MpvVideoPlayerBackend;
-
 class MpvVideoWidget : public VideoWidget
 {
     Q_OBJECT
@@ -62,7 +60,6 @@ private:
     double m_zoomFactor;
     int m_originalWidth;
     int m_originalHeight;
-    MpvVideoPlayerBackend *m_backend;
 
     void setZoom(double z);
 };
