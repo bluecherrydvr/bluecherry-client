@@ -29,8 +29,7 @@
 
 MpvVideoWidget::~MpvVideoWidget()
 {
-    if (m_backend)
-        m_backend->deleteLater();
+
 }
 
 MpvVideoWidget::MpvVideoWidget(QWidget *parent)
@@ -43,8 +42,6 @@ MpvVideoWidget::MpvVideoWidget(QWidget *parent)
       m_originalWidth(0),
       m_originalHeight(0)
 {
-    m_backend = NULL;
-
     setAutoFillBackground(false);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -63,8 +60,6 @@ void MpvVideoWidget::initVideo(VideoPlayerBackend *videoPlayerBackend)
     MpvVideoPlayerBackend *backend = reinterpret_cast<MpvVideoPlayerBackend *>(videoPlayerBackend);
 
     backend->setWindowId((quint64) m_viewport->winId());
-
-    m_backend = backend;
 }
 
 void MpvVideoWidget::clearVideo()

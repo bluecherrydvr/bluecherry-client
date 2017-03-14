@@ -87,7 +87,7 @@ LiveViewWindow *LiveViewWindow::openWindow(DVRServerRepository *serverRepository
 LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *parent, bool openfs, Qt::WindowFlags f)
     : QWidget(parent, f), m_liveView(0), m_serverRepository(serverRepository), m_savedLayouts(new QComboBox),
       m_lastLayoutIndex(-1), m_switchItemIndex(-1), m_autoSized(false), m_isLayoutChanging(false),
-	  m_wasOpenedFs(openfs)
+      m_wasOpenedFs(openfs)
 {
     QBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
