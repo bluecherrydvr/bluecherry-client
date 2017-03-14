@@ -36,7 +36,7 @@ public:
 
     virtual int duration() const;
     virtual int position() const;
-    virtual void queryPosition() const;
+    virtual void queryPosition() const { }
     virtual double playbackSpeed() const { return m_playbackSpeed; }
     virtual bool isSeekable() const;
     virtual bool atEnd() const { return m_state == Done; }
@@ -68,10 +68,10 @@ private slots:
     void streamError(const QString &message);
     void setError(bool permanent, const QString message);
     void handleEof();
-    void mplayerReady();
+    void mpvPlayerReady();
     void durationIsKnown();
     void playDuringDownloadTimerShot();
-    void checkDownloadAndPlayProgress(double position);
+    void checkDownloadAndPlayProgress();
     void receiveMpvEvents();
 
 signals:

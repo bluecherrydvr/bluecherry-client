@@ -45,10 +45,10 @@ MpvVideoPlayerBackend::~MpvVideoPlayerBackend()
 MpvVideoPlayerBackend::MpvVideoPlayerBackend(QObject *parent)
     : VideoPlayerBackend(parent),
       m_videoBuffer(0), m_state(Stopped),
-      m_playbackSpeed(1.0), m_mpv(0),
-      m_duration(-1), m_position(-1),
-      m_id(0), m_errorMessage(QString()),
-      m_playDuringDownload(false), m_pausedBySlowDownload(false)
+      m_errorMessage(QString()), m_playbackSpeed(1.0),
+      m_mpv(0), m_id(0),
+      m_playDuringDownload(false), m_pausedBySlowDownload(false),
+      m_duration(-1), m_position(-1)
 {
     std::setlocale(LC_NUMERIC, "C");
 
@@ -75,7 +75,7 @@ void MpvVideoPlayerBackend::setVideoBuffer(VideoHttpBuffer *videoHttpBuffer)
     }
 }
 
-void MpvVideoPlayerBackend::checkDownloadAndPlayProgress(double position)
+void MpvVideoPlayerBackend::checkDownloadAndPlayProgress()
 {
     if (!m_playDuringDownload)
         return;
@@ -84,14 +84,14 @@ void MpvVideoPlayerBackend::checkDownloadAndPlayProgress(double position)
     {
         m_playDuringDownload = false;
         m_pausedBySlowDownload = false;
-        //disconnect(this, SIGNAL(currentPosition(double)), this, SLOT(checkDownloadAndPlayProgress(double)));
+        disconnect(this, SIGNAL(currentPosition(double)), this, SLOT(checkDownloadAndPlayProgress()));
 
         return;
     }
 
     if (m_playDuringDownload && m_state == Playing)
     {
-        if (m_videoBuffer->bufferedPercent() - qRound((position / m_duration) * 100) < DOWNLOADED_THRESHOLD)
+        if (m_videoBuffer->bufferedPercent() - qRound((m_position / m_duration) * 100) < DOWNLOADED_THRESHOLD)
         {
             pause();
             m_pausedBySlowDownload = true;
@@ -101,12 +101,14 @@ void MpvVideoPlayerBackend::checkDownloadAndPlayProgress(double position)
 
     if (m_pausedBySlowDownload && m_state == Paused)
     {
-        if (m_videoBuffer->bufferedPercent() - qRound((position / m_duration) * 100) > DOWNLOADED_THRESHOLD)
+        if (m_videoBuffer->bufferedPercent() - qRound((m_position / m_duration) * 100) > DOWNLOADED_THRESHOLD)
         {
             m_pausedBySlowDownload = false;
             play();
             qDebug() << "continued playback after downloading portion of file";
         }
+        else
+            QTimer::singleShot(1000, this, SLOT(checkDownloadAndPlayProgress()));
     }
 }
 
@@ -124,7 +126,7 @@ void MpvVideoPlayerBackend::playDuringDownloadTimerShot()
         m_playDuringDownload = true;
 
         qDebug() << "started playback while download is in progress";
-        //connect(this, SIGNAL(currentPosition(double)), this, SLOT(checkDownloadAndPlayProgress(double)));
+        connect(this, SIGNAL(currentPosition(double)), this, SLOT(checkDownloadAndPlayProgress()));
         playIfReady();
     }
     else
@@ -139,6 +141,7 @@ void MpvVideoPlayerBackend::setWindowId(quint64 wid)
 bool MpvVideoPlayerBackend::createMpvProcess()
 {
     m_mpv = mpv_create();
+
     if (!m_mpv)
     {
         qDebug() << "MpvVideoPlayerBackend: Can't create mpv instance!\n";
@@ -149,10 +152,14 @@ bool MpvVideoPlayerBackend::createMpvProcess()
 
     mpv_set_option_string(m_mpv, "input-default-bindings", "yes");
     mpv_set_option_string(m_mpv, "input-vo-keyboard", "yes");
+    mpv_set_option_string(m_mpv, "input-cursor", "no");
+    mpv_set_option_string(m_mpv, "cursor-autohide", "no");
 
     mpv_observe_property(m_mpv, 0, "time-pos", MPV_FORMAT_DOUBLE);
     mpv_observe_property(m_mpv, 0, "duration", MPV_FORMAT_DOUBLE);
+    mpv_observe_property(m_mpv, 0, "pause", MPV_FORMAT_FLAG);
 
+    //mpv_request_log_messages(m_mpv, "v"); // "debug"
     mpv_request_log_messages(m_mpv, "fatal");
 
     connect(this, SIGNAL(mpvEvents()), this, SLOT(receiveMpvEvents()), Qt::QueuedConnection);
@@ -189,7 +196,6 @@ bool MpvVideoPlayerBackend::start(const QUrl &url)
 
     if (!createMpvProcess())
     {
-        //setError(false, tr("MpvVideoPlayerBackend: MPV failed to create!"));
         qDebug() << "MpvVideoPlayerBackend: start - failed to create MPV \n";
         return false;
     }
@@ -210,6 +216,8 @@ void MpvVideoPlayerBackend::clear()
 {
     if (m_mpv)
         mpv_terminate_destroy(m_mpv);
+
+    m_mpv = NULL;
 
     setVideoBuffer(0);
 
@@ -236,12 +244,13 @@ void MpvVideoPlayerBackend::streamError(const QString &message)
 
 bool MpvVideoPlayerBackend::saveScreenshot(QString &file)
 {
-    /*if (!m_mplayer || !m_mplayer->isRunning() || !m_mplayer->isReadyToPlay())
+    if (!m_mpv)
         return false;
 
-    return m_mplayer->saveScreenshot(file);*/
+    const char *cmd[] = { "screenshot-to-file", file.toUtf8(), "video", NULL };
+    mpv_command(m_mpv, cmd);
 
-    return false;
+    return true;
 }
 
 
@@ -254,9 +263,9 @@ void MpvVideoPlayerBackend::handleEof()
     emit endOfStream();
 }
 
-void MpvVideoPlayerBackend::mplayerReady()
+void MpvVideoPlayerBackend::mpvPlayerReady()
 {
-    qDebug() << this << "mplayer is ready to play\n";
+    qDebug() << this << "MPV is ready to play\n";
 
     emit streamsInitialized(true);
 
@@ -285,17 +294,14 @@ void MpvVideoPlayerBackend::playIfReady()
         return;
     }
 
-    //if (!m_mplayer || m_mplayer->isRunning() || !m_mplayer->start(m_videoBuffer->bufferFilePath()))
-        //return;
-
     if (!m_mpv || m_state == Playing)
         return;
-
-    qDebug() << "MpvVideoPlayerBackend::playIfReady()___1 \n";
 
     const QByteArray filename = m_videoBuffer->bufferFilePath().toUtf8();
     const char *args[] = { "loadfile", filename.data(), NULL };
     mpv_command_async(m_mpv, 0, args);
+
+    mpvPlayerReady();
 
     VideoState old = m_state;
     m_state = Playing;
@@ -304,16 +310,16 @@ void MpvVideoPlayerBackend::playIfReady()
 
 void MpvVideoPlayerBackend::play()
 {
-    //if (!m_mplayer || !m_mplayer->isRunning() || !m_mplayer->isReadyToPlay())
-      //  return;
-
     if (!m_mpv || m_state == Playing)
         return;
 
     if (m_pausedBySlowDownload)
-        return;
-
-    //m_mplayer->play();
+    {
+        if (m_videoBuffer->bufferedPercent() - qRound((m_position / m_duration) * 100) > DOWNLOADED_THRESHOLD)
+            m_pausedBySlowDownload = false;
+        else
+            return;
+    }
 
     int pause = 0;
     mpv_set_property(m_mpv, "pause", MPV_FORMAT_FLAG, &pause);
@@ -327,9 +333,6 @@ void MpvVideoPlayerBackend::play()
 
 void MpvVideoPlayerBackend::pause()
 {
-    //if (!m_mplayer || !m_mplayer->isRunning() || !m_mplayer->isReadyToPlay())
-        //return;
-
     if (!m_mpv)
         return;
 
@@ -345,32 +348,25 @@ void MpvVideoPlayerBackend::pause()
 
 void MpvVideoPlayerBackend::restart()
 {
-    qDebug() << "MpvVideoPlayerBackend::restart()___1 \n";
-
     if (!m_mpv)
         return;
 
-    //m_mplayer->deleteLater();
     mpv_terminate_destroy(m_mpv);
     m_mpv = NULL;
 
-    //createMpvProcess();
-    if (createMpvProcess())
+    if (!createMpvProcess())
     {
         setError(false, tr("MpvVideoWidget: MPV failed to create!"));
         return;
     }
 
-    qDebug() << "MpvVideoPlayerBackend::restart()___2 \n";
-
-    //m_mplayer->start(m_videoBuffer->bufferFilePath());
     const QByteArray filename = m_videoBuffer->bufferFilePath().toUtf8();
     const char *args[] = { "loadfile", filename.data(), NULL };
     mpv_command_async(m_mpv, 0, args);
 
-    //VideoState old = m_state;
-    //m_state = Stopped;
-    //emit stateChanged(m_state, old);
+    VideoState old = m_state;
+    m_state = Playing;
+    emit stateChanged(m_state, old);
 }
 
 void MpvVideoPlayerBackend::mute(bool mute)
@@ -407,16 +403,6 @@ int MpvVideoPlayerBackend::position() const
     return m_position > 0 ? m_position * 1000.0 : -1;
 }
 
-void MpvVideoPlayerBackend::queryPosition() const
-{
-    /*if (!m_mplayer || !m_mplayer->isRunning())
-    {
-        return;
-    }
-
-    m_mplayer->queryPosition();*/
-}
-
 void MpvVideoPlayerBackend::setHardwareDecodingEnabled(bool enable)
 {
     //implement later
@@ -427,15 +413,14 @@ bool MpvVideoPlayerBackend::seek(int position)
     if (!m_mpv)
         return false;
 
-    if (m_playDuringDownload && (position/duration()*100) > m_videoBuffer->bufferedPercent())
+    if (m_playDuringDownload &&
+            m_videoBuffer->bufferedPercent() - qRound(position * 100 / duration()) < DOWNLOADED_THRESHOLD + 1)
         return false;
 
     char num[32];
     double pos = double (position);
     pos /= 1000;
     sprintf(num, "%.3f", pos);
-
-    //qDebug() << "MpvVideoPlayerBackend::seek(int position)______ " << num << "\n";
 
     const char *cmd[] = { "seek", num, "absolute", NULL };
     mpv_command(m_mpv, cmd);
@@ -462,7 +447,8 @@ bool MpvVideoPlayerBackend::setSpeed(double speed)
 
 void MpvVideoPlayerBackend::emitEvents()
 {
-    emit mpvEvents();
+    if (m_mpv)
+        emit mpvEvents();
 }
 
 void MpvVideoPlayerBackend::receiveMpvEvents()
@@ -481,69 +467,64 @@ void MpvVideoPlayerBackend::handleMpvEvent(mpv_event *event)
 {
     switch (event->event_id)
     {
-    case MPV_EVENT_PROPERTY_CHANGE:
-    {
-        mpv_event_property *prop = (mpv_event_property *)event->data;
-        if (strcmp(prop->name, "time-pos") == 0)
+        case MPV_EVENT_PROPERTY_CHANGE:
         {
-            if (prop->format == MPV_FORMAT_DOUBLE)
+            mpv_event_property *prop = (mpv_event_property *)event->data;
+            if (strcmp(prop->name, "time-pos") == 0)
             {
-                m_position = *(double *)prop->data;
-                emit currentPosition(m_position);
-            }
-        }
-        else if (strcmp(prop->name, "duration") == 0)
-        {
-            if (prop->format == MPV_FORMAT_DOUBLE)
-            {
-                double duration = *(double *)prop->data;
-                if (m_duration != duration)
+                if (prop->format == MPV_FORMAT_DOUBLE)
                 {
-                    m_duration = duration;
-                    durationIsKnown();
+                    m_position = *(double *)prop->data;
+                    emit currentPosition(m_position);
                 }
             }
+            else if (strcmp(prop->name, "duration") == 0)
+            {
+                if (prop->format == MPV_FORMAT_DOUBLE)
+                {
+                    double duration = *(double *)prop->data;
+                    if (m_duration != duration)
+                    {
+                        m_duration = duration;
+                        durationIsKnown();
+                    }
+                }
+            }
+            else if (strcmp(prop->name, "pause") == 0)
+            {
+                if (prop->format == MPV_FORMAT_FLAG)
+                {
+                    int pause = *(int *)prop->data;
+
+                    if (pause && m_state != Paused)
+                    {
+                        VideoState old = m_state;
+                        m_state = Paused;
+                        emit stateChanged(m_state, old);
+                    }
+                }
+            }     //qDebug() << "pos= " << m_position << "    duration= " << m_duration;
+
+            break;
         }
-
-        qDebug() << "pos= " << m_position << "    duration= " << m_duration;
-
-        break;
-    }
-    case MPV_EVENT_VIDEO_RECONFIG:
-    {
-        // Retrieve the new video size.
-        int64_t w, h;
-        if (mpv_get_property(m_mpv, "dwidth", MPV_FORMAT_INT64, &w) >= 0 &&
-            mpv_get_property(m_mpv, "dheight", MPV_FORMAT_INT64, &h) >= 0 &&
-            w > 0 && h > 0)
+        case MPV_EVENT_LOG_MESSAGE:
         {
-            // Note that the MPV_EVENT_VIDEO_RECONFIG event doesn't necessarily
-            // imply a resize, and you should check yourself if the video
-            // dimensions really changed.
-            // mpv itself will scale/letter box the video to the container size
-            // if the video doesn't fit.
-            //std::stringstream ss;
-            //ss << "Reconfig: " << w << " " << h;
-            //statusBar()->showMessage(QString::fromStdString(ss.str()));
-        }
-        break;
-    }
-    case MPV_EVENT_LOG_MESSAGE:
-    {
-        struct mpv_event_log_message *msg = (struct mpv_event_log_message*) event->data;
+            struct mpv_event_log_message *msg = (struct mpv_event_log_message*) event->data;
 
-        qDebug() << "MpvVideoWidget: [" << msg->prefix << "] "
-                 << msg->level << ": " << msg->text << "\n";
-        break;
-    }
-    case MPV_EVENT_SHUTDOWN:
-    {
-        mpv_terminate_destroy(m_mpv);
-        m_mpv = NULL;
-        break;
-    }
-    default: ;
-        // Ignore uninteresting or unknown events.
+            qDebug() << "MpvVideoPlayerBackend: [" << msg->prefix << "] "
+                     << msg->level << ": " << msg->text;
+            break;
+        }
+        case MPV_EVENT_SHUTDOWN:
+        {
+            qDebug() << "MpvVideoPlayerBackend: MPV shutdown event";
+
+            mpv_terminate_destroy(m_mpv);
+            m_mpv = NULL;
+            break;
+        }
+        default: ;
+            // Ignore uninteresting or unknown events.
     }
 }
 
