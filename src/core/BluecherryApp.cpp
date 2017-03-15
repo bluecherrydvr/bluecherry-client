@@ -64,7 +64,8 @@ BluecherryApp::BluecherryApp()
 #endif
       globalRate(new TransferRateCalculator(this)), m_updateChecker(0),
       m_livePaused(false), m_inPauseQuery(false),
-      m_screensaverInhibited(false), m_screensaveValue(0)
+      m_screensaverInhibited(false), m_screensaveValue(0),
+      m_kioskMode(false)
 {
     Q_ASSERT(!bcApp);
     bcApp = this;
@@ -398,6 +399,11 @@ void BluecherryApp::releaseLive()
 
     if (!m_livePaused)
         emit livePausedChanged(false);
+}
+
+void BluecherryApp::setKioskMode(bool on)
+{
+    m_kioskMode = on;
 }
 
 #ifdef Q_OS_WIN

@@ -95,6 +95,10 @@ public:
 
     static QStringList mplayerVideoOutputs();
 
+    void setKioskMode(bool on);
+
+    bool kioskMode() { return m_kioskMode; }
+
 public slots:
     void pauseLive();
     void releaseLive();
@@ -129,6 +133,7 @@ private:
     QSharedPointer<LanguageController> m_languageController;
 
     bool m_livePaused, m_inPauseQuery, m_screensaverInhibited;
+
 #ifdef Q_OS_WIN
     int m_screensaveValue;
 #elif defined (Q_OS_LINUX)
@@ -137,6 +142,8 @@ private:
     int m_screensaveValue;
     QTimer *m_screensaveTimer;
 #endif
+
+    bool m_kioskMode;
 
     void registerVideoPlayerFactory();
     void unregisterVideoPlayerFactory();

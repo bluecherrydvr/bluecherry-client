@@ -82,6 +82,15 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
         statusBar()->setFixedHeight(24);
 #endif
 
+    QSettings settings;
+
+    if (QApplication::arguments().indexOf("--kiosk-mode") != -1)
+    {
+        // Set kiosk mode before main widgets created.
+        bcApp->setKioskMode(true);
+        settings.setValue(QLatin1String("ui/startupFullscreen"), true);
+    }
+
     /* Experimental toolbar */
     m_mainToolbar = new QToolBar(tr("Main"));
     m_mainToolbar->setMovable(false);
@@ -136,7 +145,6 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
     }
 #endif
 
-    QSettings settings;
     bcApp->liveView->setBandwidthMode(settings.value(QLatin1String("ui/liveview/bandwidthMode")).toInt());
     restoreGeometry(settings.value(QLatin1String("ui/main/geometry")).toByteArray());
     if (!m_centerSplit->restoreState(settings.value(QLatin1String("ui/main/centerSplit")).toByteArray()))

@@ -100,6 +100,8 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
 
     m_fullScreen = new QCheckBox(tr("Startup in fullscreen"));
     m_fullScreen->setChecked(settings.value(QLatin1String("ui/startupFullscreen"), false).toBool());
+    if (bcApp->kioskMode())
+        m_fullScreen->setEnabled(false);
     layout->addWidget(m_fullScreen);
 
     m_startup = new QCheckBox(tr("Run on startup"));
