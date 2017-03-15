@@ -36,7 +36,7 @@
 
 MplayerProcess::MplayerProcess(QString &wid, QObject *parent)
     : QObject(parent),
-      m_wid(wid), m_process(0),
+      m_process(0), m_wid(wid),
       m_duration(-1), m_position(-1),
       m_isreadytoplay(false),
       m_durreqsent(false),

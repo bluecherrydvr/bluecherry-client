@@ -37,8 +37,8 @@ MplVideoPlayerBackend::~MplVideoPlayerBackend()
 MplVideoPlayerBackend::MplVideoPlayerBackend(QObject *parent)
     : VideoPlayerBackend(parent),
       m_videoBuffer(0), m_state(Stopped),
-      m_playbackSpeed(1.0), m_mplayer(0),
-      m_wid(QString()), m_errorMessage(QString()),
+      m_errorMessage(QString()), m_playbackSpeed(1.0),
+      m_mplayer(0), m_wid(QString()),
       m_playDuringDownload(false), m_pausedBySlowDownload(false)
 {
     qDebug() << "MplVideoPlayerBackend() this =" << this << "\n";
