@@ -121,6 +121,10 @@ BluecherryApp::BluecherryApp()
 
     registerVideoPlayerFactory();
 
+
+    if (QApplication::arguments().indexOf("--kiosk-mode") != -1)
+        m_kioskMode = true;
+
     connect(qApp, SIGNAL(commitDataRequest(QSessionManager&)), this, SLOT(commitDataRequest(QSessionManager&)));
     connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(saveSettings()));
 }
@@ -399,11 +403,6 @@ void BluecherryApp::releaseLive()
 
     if (!m_livePaused)
         emit livePausedChanged(false);
-}
-
-void BluecherryApp::setKioskMode(bool on)
-{
-    m_kioskMode = on;
 }
 
 #ifdef Q_OS_WIN

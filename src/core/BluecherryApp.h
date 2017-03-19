@@ -95,8 +95,6 @@ public:
 
     static QStringList mplayerVideoOutputs();
 
-    void setKioskMode(bool on);
-
     bool kioskMode() { return m_kioskMode; }
 
 public slots:

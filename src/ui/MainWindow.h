@@ -123,8 +123,6 @@ private:
 	QAction *m_suggestionsAction;
 	QAction *m_aboutAction;
 
-    bool m_exit;
-
 
     void createMenu();
 
