@@ -441,14 +441,14 @@ void MplVideoWidget::setFullScreen(bool on)
 {
     if (on)
     {
-        setWindowFlags(windowFlags() | Qt::Window);
+        setWindowFlags(windowFlags() | Qt::Dialog);
         m_normalFrameStyle = frameStyle();
         setFrameStyle(QFrame::NoFrame);
         showFullScreen();
     }
     else
     {
-        setWindowFlags(windowFlags() & ~Qt::Window);
+        setWindowFlags(windowFlags() & ~Qt::Dialog);
         setFrameStyle(m_normalFrameStyle);
         showNormal();
         //update();

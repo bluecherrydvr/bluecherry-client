@@ -54,7 +54,7 @@ LiveViewWindow *LiveViewWindow::openWindow(DVRServerRepository *serverRepository
     /* Child windows are undesirable on Mac, and cause problems (QTBUG-20652) */
     parent = 0;
 #endif
-    LiveViewWindow *window = new LiveViewWindow(serverRepository, parent, fullscreen, Qt::Window);
+    LiveViewWindow *window = new LiveViewWindow(serverRepository, parent, fullscreen, Qt::Dialog);
     window->setAutoSized(!fullscreen);
     window->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -171,21 +171,19 @@ LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *p
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 	m_toolBar->addWidget(spacer);
 
-    if (bcApp->kioskMode() == false)
-    {
-        m_fullscreenAction = m_toolBar->addAction(QIcon(QLatin1String(":/icons/application-resize-full.png")),
-                           tr("Fullscreen"), this, SLOT(toggleFullScreen()));
-        m_fullscreenAction->setShortcut(Qt::Key_F11);
 
-        if (m_wasOpenedFs)
-        {
-            m_closeAction = m_toolBar->addAction(QIcon(QLatin1String(":/icons/cross.png")), tr("Exit"),
-                               this, SLOT(close()));
-            new QShortcut(Qt::Key_Escape, this, SLOT(close()), 0, Qt::WindowShortcut);
-        }
-        else
-            new QShortcut(Qt::Key_Escape, this, SLOT(exitFullScreen()), 0, Qt::WindowShortcut);
+    m_fullscreenAction = m_toolBar->addAction(QIcon(QLatin1String(":/icons/application-resize-full.png")),
+                       tr("Fullscreen"), this, SLOT(toggleFullScreen()));
+    m_fullscreenAction->setShortcut(Qt::Key_F11);
+
+    if (m_wasOpenedFs)
+    {
+        m_closeAction = m_toolBar->addAction(QIcon(QLatin1String(":/icons/cross.png")), tr("Exit"),
+                           this, SLOT(close()));
+        new QShortcut(Qt::Key_Escape, this, SLOT(close()), 0, Qt::WindowShortcut);
     }
+    else
+        new QShortcut(Qt::Key_Escape, this, SLOT(exitFullScreen()), 0, Qt::WindowShortcut);
 
     connect(m_liveView->layout(), SIGNAL(layoutChanged()), SLOT(updateLayoutActionStates()));
     connect(m_liveView->layout(), SIGNAL(layoutChanged()), SLOT(saveLayout()));
@@ -461,10 +459,9 @@ void LiveViewWindow::retranslateUI()
 	m_addColumnAction->setText(tr("Add Column"));
 	m_removeColumnAction->setText(tr("Remove Column"));
 	m_singleAction->setText(tr("Single"));
-    if (!bcApp->kioskMode())
-        m_fullscreenAction->setText(tr("Fullscreen"));
+    m_fullscreenAction->setText(tr("Fullscreen"));
 
-    if (m_wasOpenedFs && !bcApp->kioskMode())
+    if (m_wasOpenedFs)
 		m_closeAction->setText(tr("Exit"));
 
 }
@@ -574,9 +571,6 @@ bool LiveViewWindow::event(QEvent *event)
 {
     if (event && event->type() == QEvent::WindowActivate)
         bcApp->mainWindow->saveTopWindow(this);
-    else if (bcApp->kioskMode() && event &&
-                 event->type() == QEvent::ZOrderChange)
-        QTimer::singleShot(300, this, SLOT(raise()));
 
     return QWidget::event(event);
 }

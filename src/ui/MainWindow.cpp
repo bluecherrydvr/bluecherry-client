@@ -67,10 +67,13 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
     connect(bcApp->eventDownloadManager(), SIGNAL(eventVideoDownloadAdded(EventVideoDownload*)),
             this, SLOT(showDownloadsWindow()));
 
+    m_exit = true;
+
     if (QApplication::arguments().indexOf("--kiosk-mode") != -1)
     {
         // Set kiosk mode before main widgets created.
         bcApp->setKioskMode(true);
+        m_exit = false;
     }
 
     setUnifiedTitleAndToolBarOnMac(true);
@@ -260,6 +263,13 @@ void MainWindow::saveSettings()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    if (bcApp->kioskMode() && !m_exit)
+    {
+        // Ignore any try to close app in kiosk mode.
+        event->ignore();
+        return;
+    }
+
     saveSettings();
 
     QSettings settings;
@@ -337,6 +347,8 @@ void MainWindow::showDownloadsWindow()
 
 void MainWindow::createMenu()
 {
+    menuBar()->setNativeMenuBar(true);
+
 	m_appMenu = menuBar()->addMenu(tr("&Bluecherry"));
 	m_browseEventsAction = m_appMenu->addAction(tr("Browse &events"), this, SLOT(showEventsWindow()));
 	m_downloadManagerAction = m_appMenu->addAction(tr("Show &download manager"), this, SLOT(showDownloadsWindow()));
