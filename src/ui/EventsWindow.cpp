@@ -55,7 +55,7 @@
 #include <QDebug>
 
 EventsWindow::EventsWindow(DVRServerRepository *serverRepository, QWidget *parent)
-	: QWidget(parent, Qt::Window), m_serverRepository(serverRepository),
+    : QWidget(parent, Qt::Dialog), m_serverRepository(serverRepository),
 	  m_tagsLabel(0), m_tagInput(0)
 {
     setAttribute(Qt::WA_DeleteOnClose);

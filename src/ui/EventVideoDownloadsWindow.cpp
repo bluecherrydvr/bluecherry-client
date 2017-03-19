@@ -27,7 +27,7 @@
 #include <QVBoxLayout>
 
 EventVideoDownloadsWindow::EventVideoDownloadsWindow(QWidget *parent) :
-    QFrame(parent)
+    QDialog(parent)
 {
     setAttribute(Qt::WA_DeleteOnClose, true);
     setMinimumSize(550, 300);
@@ -95,7 +95,7 @@ void EventVideoDownloadsWindow::changeEvent(QEvent *event)
 	if (event && event->type() == QEvent::LanguageChange)
 		setWindowTitle(tr("Bluecherry - Download Manager"));
 
-	QFrame::changeEvent(event);
+    QDialog::changeEvent(event);
 }
 
 void EventVideoDownloadsWindow::eventVideoDownloadAdded(EventVideoDownload *eventVideoDownload)

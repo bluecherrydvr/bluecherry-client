@@ -67,6 +67,12 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
     connect(bcApp->eventDownloadManager(), SIGNAL(eventVideoDownloadAdded(EventVideoDownload*)),
             this, SLOT(showDownloadsWindow()));
 
+    if (QApplication::arguments().indexOf("--kiosk-mode") != -1)
+    {
+        // Set kiosk mode before main widgets created.
+        bcApp->setKioskMode(true);
+    }
+
     setUnifiedTitleAndToolBarOnMac(true);
 	resize(1100, 750);
     createMenu();
@@ -81,15 +87,6 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
     if (style()->inherits("QMacStyle"))
         statusBar()->setFixedHeight(24);
 #endif
-
-    QSettings settings;
-
-    if (QApplication::arguments().indexOf("--kiosk-mode") != -1)
-    {
-        // Set kiosk mode before main widgets created.
-        bcApp->setKioskMode(true);
-        settings.setValue(QLatin1String("ui/startupFullscreen"), true);
-    }
 
     /* Experimental toolbar */
     m_mainToolbar = new QToolBar(tr("Main"));
@@ -144,6 +141,8 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
         centerLayout->addWidget(line);
     }
 #endif
+
+    QSettings settings;
 
     bcApp->liveView->setBandwidthMode(settings.value(QLatin1String("ui/liveview/bandwidthMode")).toInt());
     restoreGeometry(settings.value(QLatin1String("ui/main/geometry")).toByteArray());
@@ -202,11 +201,15 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
             m_liveView->setFullScreen(true);
     }
 
-    retranslateUI();
-
     if (top == NULL)
         top = bcApp->mainWindow;
 
+    retranslateUI();
+
+    if (bcApp->kioskMode())
+        showFullScreen();
+
+    QApplication::setActiveWindow(top);
     QTimer::singleShot(50, top, SLOT(raise()));
 }
 
@@ -324,7 +327,7 @@ void MainWindow::showDownloadsWindow()
 {
     if (!m_eventVideoDownloadsWindow)
     {
-        m_eventVideoDownloadsWindow = new EventVideoDownloadsWindow();
+        m_eventVideoDownloadsWindow = new EventVideoDownloadsWindow(this);
         m_eventVideoDownloadsWindow.data()->setEventDownloadManager(bcApp->eventDownloadManager());
     }
 
@@ -355,10 +358,15 @@ void MainWindow::createMenu()
     connect(bcApp->liveView, SIGNAL(bandwidthModeChanged(int)), SLOT(bandwidthModeChanged(int)));
 
 	m_helpMenu = menuBar()->addMenu(tr("&Help"));
-	m_documentationAction = m_helpMenu->addAction(tr("&Documentation"), this, SLOT(openDocumentation()));
-	m_supportAction = m_helpMenu->addAction(tr("Bluecherry &support"), this, SLOT(openSupport()));
-	m_suggestionsAction = m_helpMenu->addAction(tr("Suggest a &feature"), this, SLOT(openIdeas()));
-	m_helpMenu->addSeparator();
+
+    if (!bcApp->kioskMode())
+    {
+        m_documentationAction = m_helpMenu->addAction(tr("&Documentation"), this, SLOT(openDocumentation()));
+        m_supportAction = m_helpMenu->addAction(tr("Bluecherry &support"), this, SLOT(openSupport()));
+        m_suggestionsAction = m_helpMenu->addAction(tr("Suggest a &feature"), this, SLOT(openIdeas()));
+        m_helpMenu->addSeparator();
+    }
+
 	m_aboutAction = m_helpMenu->addAction(tr("&About Bluecherry"), this, SLOT(openAbout()));
 }
 
@@ -507,9 +515,12 @@ void MainWindow::retranslateUI()
 	m_newWindowAction->setText(tr("New window"));
 
 	m_helpMenu->setTitle(tr("&Help"));
-	m_documentationAction->setText(tr("&Documentation"));
-	m_supportAction->setText(tr("Bluecherry &support"));
-	m_suggestionsAction->setText(tr("Suggest a &feature"));
+    if (!bcApp->kioskMode())
+    {
+        m_documentationAction->setText(tr("&Documentation"));
+        m_supportAction->setText(tr("Bluecherry &support"));
+        m_suggestionsAction->setText(tr("Suggest a &feature"));
+    }
 	m_aboutAction->setText(tr("&About Bluecherry"));
 
 	updateLiveMenu();
@@ -532,7 +543,7 @@ void MainWindow::showOptionsDialog()
 void MainWindow::showEventsWindow()
 {
     if (!m_eventsWindow)
-        m_eventsWindow = new EventsWindow(m_serverRepository);
+        m_eventsWindow = new EventsWindow(m_serverRepository, this);
 
     m_eventsWindow.data()->show();
     m_eventsWindow.data()->raise();
@@ -800,6 +811,12 @@ bool MainWindow::event(QEvent *event)
 {
     if (event && event->type() == QEvent::WindowActivate)
         saveTopWindow(this);
+    else if (bcApp->kioskMode() && event &&
+                 event->type() == QEvent::ZOrderChange)
+    {
+        activateWindow();
+        QTimer::singleShot(300, this, SLOT(raise()));
+    }
 
     return QWidget::event(event);
 }

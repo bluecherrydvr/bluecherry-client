@@ -45,7 +45,7 @@
 #include <QDebug>
 
 EventViewWindow::EventViewWindow(QWidget *parent)
-    : QWidget(parent, Qt::Window)
+    : QWidget(parent, Qt::Dialog)
 {
     resize(590, 380);
 

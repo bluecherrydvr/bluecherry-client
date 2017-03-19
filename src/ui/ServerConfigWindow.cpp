@@ -63,7 +63,7 @@ protected:
 };
 
 ServerConfigWindow::ServerConfigWindow(QWidget *parent)
-    : QWidget(parent, Qt::Window), m_server(0)
+    : QWidget(parent, Qt::Dialog), m_server(0)
 {
     setWindowTitle(tr("Bluecherry - Server Configuration"));
     setMinimumSize(970, 600);

@@ -19,14 +19,14 @@
 #define EVENTVIDEODOWNLOADSWINDOW_H
 
 #include <QMap>
-#include <QFrame>
+#include <QDialog>
 
 class QVBoxLayout;
 class EventDownloadManager;
 class EventVideoDownload;
 class EventVideoDownloadWidget;
 
-class EventVideoDownloadsWindow : public QFrame
+class EventVideoDownloadsWindow : public QDialog
 {
     Q_OBJECT
 
