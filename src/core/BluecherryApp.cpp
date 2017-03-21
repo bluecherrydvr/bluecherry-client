@@ -40,6 +40,7 @@
 #include <QSslCertificate>
 #include <QApplication>
 #include <QThread>
+#include <QProcess>
 #include <QMessageBox>
 #include <QDesktopServices>
 #include <QAbstractButton>
@@ -403,6 +404,66 @@ void BluecherryApp::releaseLive()
 
     if (!m_livePaused)
         emit livePausedChanged(false);
+}
+
+void BluecherryApp::systemReboot()
+{
+#if defined(Q_OS_LINUX)
+
+    QProcess process;
+    QStringList args;
+    args << "--system" << "--print-reply" << "--dest=org.freedesktop.login1"
+         << "/org/freedesktop/login1" << "org.freedesktop.login1.Manager.Reboot"
+         << "boolean:true";
+    process.start("dbus-send", args);
+
+    if (!process.waitForStarted())
+        qDebug() << "BluecherryApp: Reboot process start error:\n" << process.readAllStandardError();
+    else if (process.waitForFinished(50))
+        qDebug() << "BluecherryApp: Reboot process finish error:\n" << process.readAllStandardError();
+    else if (process.state() == QProcess::Running)
+    {
+        qDebug() << "BluecherryApp: Reboot in progress...";
+        QApplication::quit();
+    }
+    else
+        qDebug() << "BluecherryApp: Reboot process error:\n" << process.readAllStandardError();
+
+#elif defined(Q_OS_WIN)
+
+#elif defined(Q_OS_MAC)
+
+#endif
+}
+
+void BluecherryApp::systemShutdown()
+{
+#if defined(Q_OS_LINUX)
+
+    QProcess process;
+    QStringList args;
+    args << "--system" << "--print-reply" << "--dest=org.freedesktop.login1"
+         << "/org/freedesktop/login1" << "org.freedesktop.login1.Manager.PowerOff"
+         << "boolean:true";
+    process.start("dbus-send", args);
+
+    if (!process.waitForStarted())
+        qDebug() << "BluecherryApp: Shutdown process start error:\n" << process.readAllStandardError();
+    else if (process.waitForFinished(50))
+        qDebug() << "BluecherryApp: Shutdown process finish error:\n" << process.readAllStandardError();
+    else if (process.state() == QProcess::Running)
+    {
+        qDebug() << "BluecherryApp: Shutdown in progress...";
+        QApplication::quit();
+    }
+    else
+        qDebug() << "BluecherryApp: Shutdown process error:\n" << process.readAllStandardError();
+
+#elif defined(Q_OS_WIN)
+
+#elif defined(Q_OS_MAC)
+
+#endif
 }
 
 #ifdef Q_OS_WIN

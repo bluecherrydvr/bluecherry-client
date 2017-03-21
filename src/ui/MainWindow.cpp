@@ -180,8 +180,8 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
 
     QWidget *top = NULL;
 
-    if (settings.value(QLatin1String("ui/startupFullscreen"), false).toBool() ||
-            QApplication::arguments().indexOf("-f") != -1)
+    if ((settings.value(QLatin1String("ui/startupFullscreen"), false).toBool() ||
+            QApplication::arguments().indexOf("-f") != -1) && !bcApp->kioskMode())
     {
         m_liveView->setFullScreen(true);
         top = m_liveView->fullScreenWidget();
@@ -195,13 +195,13 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
             m_liveView->setFullScreen(true);
     }
 
-    if (top == NULL)
-        top = bcApp->mainWindow;
-
     retranslateUI();
 
     if (bcApp->kioskMode())
         showFullScreen();
+
+    if (top == NULL)
+        top = bcApp->mainWindow;
 
     QApplication::setActiveWindow(top);
     QTimer::singleShot(50, top, SLOT(raise()));
@@ -338,7 +338,7 @@ void MainWindow::showDownloadsWindow()
 
 void MainWindow::createMenu()
 {
-    menuBar()->setNativeMenuBar(true);
+    menuBar()->setNativeMenuBar(false);
 
 	m_appMenu = menuBar()->addMenu(tr("&Bluecherry"));
 	m_browseEventsAction = m_appMenu->addAction(tr("Browse &events"), this, SLOT(showEventsWindow()));
@@ -347,6 +347,14 @@ void MainWindow::createMenu()
 	m_addServerAction = m_appMenu->addAction(tr("Add another server"), this, SLOT(addServer()));
 	m_optionsAction = m_appMenu->addAction(tr("&Options"), this, SLOT(showOptionsDialog()));
 	m_appMenu->addSeparator();
+
+    if (bcApp->kioskMode())
+    {
+        m_appMenu->addAction(tr("System &reboot"), bcApp, SLOT(systemReboot()));
+        m_appMenu->addAction(tr("System &shutdown"), bcApp, SLOT(systemShutdown()));
+        m_appMenu->addSeparator();
+    }
+
 	m_quitAction = m_appMenu->addAction(tr("&Quit"), qApp, SLOT(quit()));
 
     m_serversMenu = menuBar()->addMenu(QString());

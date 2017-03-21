@@ -104,6 +104,8 @@ public slots:
     void commitDataRequest(QSessionManager &sessionManager);
     void startUpdateChecker();
     void stopUpdateChecker();
+    void systemReboot();
+    void systemShutdown();
 
 signals:
     void sslConfirmRequired(DVRServer *server, const QList<QSslError> &errors, const QSslConfiguration &config);

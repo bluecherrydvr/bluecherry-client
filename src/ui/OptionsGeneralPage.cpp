@@ -99,11 +99,22 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     layout->addWidget(m_session);
 
     m_fullScreen = new QCheckBox(tr("Startup in fullscreen"));
-    m_fullScreen->setChecked(settings.value(QLatin1String("ui/startupFullscreen"), false).toBool());
+    if (bcApp->kioskMode())
+        m_fullScreen->setEnabled(false);
+    else
+        m_fullScreen->setChecked(settings.value(QLatin1String("ui/startupFullscreen"), false).toBool());
     layout->addWidget(m_fullScreen);
 
     m_startup = new QCheckBox(tr("Run on startup"));
-    m_startup->setChecked(settings.value(QLatin1String("ui/startup"), false).toBool());
+    if (bcApp->kioskMode())
+    {
+        m_startup->setChecked(true);
+        m_startup->setEnabled(false);
+        if (! settings.value(QLatin1String("ui/startup"), false).toBool())
+            updateStartup(true);
+    }
+    else
+        m_startup->setChecked(settings.value(QLatin1String("ui/startup"), false).toBool());
     layout->addWidget(m_startup);
 
     connect(m_startup, SIGNAL(toggled(bool)), SLOT(updateStartup(bool)));
