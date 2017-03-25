@@ -73,8 +73,26 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
     updateTrayIcon();
     setObjectName("MainWindow");
 
+    if (bcApp->kioskMode())
+    {
+        QToolButton *btn = new QToolButton(statusBar());
+        btn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        btn->setIcon(QIcon(QLatin1String(":/icons/cross.png")));
+        btn->setPopupMode(QToolButton::MenuButtonPopup);
+        btn->setAutoRaise(true);
+        QAction *reboot = new QAction(tr("Reboot"), btn);
+        QAction *shutdown = new QAction(tr("Shutdown"), btn);
+        btn->addAction(reboot);
+        btn->addAction(shutdown);
+        connect(reboot, SIGNAL(triggered()), bcApp, SLOT(systemReboot()));
+        connect(shutdown, SIGNAL(triggered()), bcApp, SLOT(systemShutdown()));
+        connect(btn, SIGNAL(pressed()), btn, SLOT(showMenu()));
+        statusBar()->addWidget(btn);
+    }
+
     statusBar()->addPermanentWidget(new StatusBandwidthWidget(statusBar()));
     statusBar()->addWidget(new StatusBarServerAlert(m_serverRepository, statusBar()));
+
 
 #ifdef Q_OS_MAC
     statusBar()->setSizeGripEnabled(false);
@@ -245,7 +263,8 @@ void MainWindow::saveSettings()
         liveView()->saveLayout();
 
     QSettings settings;
-    settings.setValue(QLatin1String("ui/main/geometry"), saveGeometry());
+    if (!bcApp->kioskMode())
+        settings.setValue(QLatin1String("ui/main/geometry"), saveGeometry());
     settings.setValue(QLatin1String("ui/main/centerSplit"), m_centerSplit->saveState());
     settings.setValue(QLatin1String("ui/main/leftSplit"), m_leftSplit->saveState());
     settings.setValue(QLatin1String("ui/main/eventsView"), m_eventsView->header()->saveState());
@@ -347,15 +366,7 @@ void MainWindow::createMenu()
 	m_addServerAction = m_appMenu->addAction(tr("Add another server"), this, SLOT(addServer()));
 	m_optionsAction = m_appMenu->addAction(tr("&Options"), this, SLOT(showOptionsDialog()));
 	m_appMenu->addSeparator();
-
-    if (bcApp->kioskMode())
-    {
-        m_appMenu->addAction(tr("System &reboot"), bcApp, SLOT(systemReboot()));
-        m_appMenu->addAction(tr("System &shutdown"), bcApp, SLOT(systemShutdown()));
-        m_appMenu->addSeparator();
-    }
-
-	m_quitAction = m_appMenu->addAction(tr("&Quit"), qApp, SLOT(quit()));
+    m_quitAction = m_appMenu->addAction(tr("&Quit"), qApp, SLOT(quit()));
 
     m_serversMenu = menuBar()->addMenu(QString());
     updateServersMenu();
