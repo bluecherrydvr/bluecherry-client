@@ -75,13 +75,17 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
 
     if (bcApp->kioskMode())
     {
+        setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint);
+
         QToolButton *btn = new QToolButton(statusBar());
         btn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-        btn->setIcon(QIcon(QLatin1String(":/icons/cross.png")));
+        btn->setIcon(QIcon(QLatin1String(":/icons/shutdown.png")));
         btn->setPopupMode(QToolButton::MenuButtonPopup);
         btn->setAutoRaise(true);
-        QAction *reboot = new QAction(tr("Reboot"), btn);
+        QAction *cancel = new QAction(tr("Cancel"), btn);
+        QAction *reboot = new QAction(tr("Restart"), btn);
         QAction *shutdown = new QAction(tr("Shutdown"), btn);
+        btn->addAction(cancel);
         btn->addAction(reboot);
         btn->addAction(shutdown);
         connect(reboot, SIGNAL(triggered()), bcApp, SLOT(systemReboot()));
@@ -836,8 +840,7 @@ bool MainWindow::event(QEvent *event)
     else if (bcApp->kioskMode() && event &&
                  event->type() == QEvent::ZOrderChange)
     {
-        activateWindow();
-        QTimer::singleShot(300, this, SLOT(raise()));
+        QTimer::singleShot(300, this, SLOT(moveOnTop()));
     }
 
     return QWidget::event(event);
@@ -847,5 +850,21 @@ void MainWindow::saveTopWindow(QWidget *w)
 {
     QSettings settings;
     settings.setValue(QLatin1String("ui/topWindow"), w->objectName());
+}
+
+#if defined(Q_OS_WIN)
+#include <Windows.h>
+#endif
+
+void MainWindow::moveOnTop()
+{
+#if defined(Q_OS_LINUX)
+
+    activateWindow();
+    raise();
+
+#elif defined(Q_OS_WIN)
+
+#endif
 }
 

@@ -431,6 +431,23 @@ void BluecherryApp::systemReboot()
 
 #elif defined(Q_OS_WIN)
 
+    QProcess process;
+    QStringList args;
+    args << "/r" << "/f" << "/t" << "0";
+    process.start("shutdown", args);
+
+    if (!process.waitForStarted())
+        qDebug() << "BluecherryApp: Shutdown process start error:\n" << process.readAllStandardError();
+    else if (process.waitForFinished(50))
+        qDebug() << "BluecherryApp: Shutdown process finish error:\n" << process.readAllStandardError();
+    else if (process.state() == QProcess::Running)
+    {
+        qDebug() << "BluecherryApp: Shutdown in progress...";
+        QApplication::quit();
+    }
+    else
+        qDebug() << "BluecherryApp: Shutdown process error:\n" << process.readAllStandardError();
+
 #elif defined(Q_OS_MAC)
 
 #endif
@@ -460,6 +477,23 @@ void BluecherryApp::systemShutdown()
         qDebug() << "BluecherryApp: Shutdown process error:\n" << process.readAllStandardError();
 
 #elif defined(Q_OS_WIN)
+
+    QProcess process;
+    QStringList args;
+    args << "/s" << "/f" << "/t" << "0";
+    process.start("shutdown", args);
+
+    if (!process.waitForStarted())
+        qDebug() << "BluecherryApp: Shutdown process start error:\n" << process.readAllStandardError();
+    else if (process.waitForFinished(50))
+        qDebug() << "BluecherryApp: Shutdown process finish error:\n" << process.readAllStandardError();
+    else if (process.state() == QProcess::Running)
+    {
+        qDebug() << "BluecherryApp: Shutdown in progress...";
+        QApplication::quit();
+    }
+    else
+        qDebug() << "BluecherryApp: Shutdown process error:\n" << process.readAllStandardError();
 
 #elif defined(Q_OS_MAC)
 

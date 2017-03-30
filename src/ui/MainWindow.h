@@ -81,6 +81,7 @@ private slots:
     void saveSettings();
     void onServerAdded(DVRServer *server);
     void serverDevicesLoaded();
+    void moveOnTop();
 
 protected:
 	virtual void changeEvent(QEvent *event);
