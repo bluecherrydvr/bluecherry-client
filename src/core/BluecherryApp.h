@@ -106,6 +106,7 @@ public slots:
     void stopUpdateChecker();
     void systemReboot();
     void systemShutdown();
+    void updateStartup(bool on);
 
 signals:
     void sslConfirmRequired(DVRServer *server, const QList<QSslError> &errors, const QSslConfiguration &config);

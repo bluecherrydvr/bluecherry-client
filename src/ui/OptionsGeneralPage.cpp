@@ -109,15 +109,13 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     if (bcApp->kioskMode())
     {
         m_startup->setChecked(true);
-        m_startup->setEnabled(false);
-        if (! settings.value(QLatin1String("ui/startup"), false).toBool())
-            updateStartup(true);
+        m_startup->setDisabled(true);
     }
     else
         m_startup->setChecked(settings.value(QLatin1String("ui/startup"), false).toBool());
     layout->addWidget(m_startup);
 
-    connect(m_startup, SIGNAL(toggled(bool)), SLOT(updateStartup(bool)));
+    connect(m_startup, SIGNAL(toggled(bool)), bcApp, SLOT(updateStartup(bool)));
 
 
 #if defined(Q_OS_WIN) || defined(Q_OS_MAC) || defined(Q_OS_LINUX)
@@ -207,113 +205,5 @@ void OptionsGeneralPage::saveChanges()
     }
 
     bcApp->sendSettingsChanged();
-}
-
-void OptionsGeneralPage::updateStartup(bool on)
-{
-#if defined(Q_OS_LINUX)
-
-    QString path;
-    QDir dir;
-
-    path = QDir::homePath() + QDir::separator() + QString(".config/autostart");
-    dir.setPath(path);
-
-    if (!dir.exists(path) && !dir.mkpath(path))
-        goto updateStartupFailed;
-
-    path.append(QDir::separator()).append("bluecherry-client.desktop");
-
-    if (on)
-    {
-        if (!QFile::copy(QString("/usr/share/applications/bluecherry-client.desktop"), path))
-            goto updateStartupFailed;
-    }
-    else
-    {
-        if (QFile::exists(path) && !QFile::remove(path))
-            goto updateStartupFailed;
-    }
-
-    return;
-
-updateStartupFailed:
-
-    m_startup->setChecked(on ? false : true);
-    qDebug() << "Failed to update startup file!\n";
-
-#elif defined(Q_OS_WIN)
-
-    QString autorun = QString("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run");
-    QSettings settings(autorun, QSettings::NativeFormat);
-
-    if (on)
-    {
-        QDir dir;
-        QString path = dir.absolutePath() + QDir::separator() + QString("bluecherry-client.exe");
-        path = QDir::toNativeSeparators(path);
-
-        settings.setValue("bluecherry-client", path);
-    }
-    else
-        settings.remove("bluecherry-client");
-
-#elif defined(Q_OS_MAC)
-
-    QString path;
-    QDir dir;
-
-    path = QDir::homePath() + QDir::separator() + QString("Library/LaunchAgents");
-    dir.setPath(path);
-
-    if (!dir.exists(path) && !dir.mkpath(path))
-        goto updateStartupFailed;
-
-    path.append(QDir::separator()).append("bluecherry-client.plist");
-
-    if (on)
-    {
-        const char *data = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-        "<plist version=\"1.0\">\n"
-        "<dict>\n"
-        "    <key>Label</key>\n"
-        "    <string>bluecherry-client</string>\n"
-        "    <key>ProgramArguments</key>\n"
-        "    <array>\n"
-        "    <string>/Applications/Bluecherry Client.app/Contents/MacOS/bluecherry-client</string>\n"
-        "    </array>\n"
-        "    <key>ProcessType</key>\n"
-        "    <string>Interactive</string>\n"
-        "    <key>RunAtLoad</key>\n"
-        "    <true/>\n"
-        "    <key>KeepAlive</key>\n"
-        "    <false/>\n"
-        "</dict>\n"
-        "</plist>\n";
-
-        QFile plist;
-        plist.setFileName(path);
-
-        if (!plist.open(QIODevice::WriteOnly | QIODevice::Text))
-            goto updateStartupFailed;
-
-        plist.write(data);
-        plist.close();
-    }
-    else
-    {
-        QFile plist;
-        plist.setFileName(path);
-        plist.remove();
-    }
-
-    return;
-
-updateStartupFailed:
-
-    m_startup->setChecked(on ? false : true);
-    qDebug() << "Failed to update startup file!\n";
-#endif
 }
 

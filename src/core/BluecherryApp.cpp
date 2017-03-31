@@ -408,95 +408,175 @@ void BluecherryApp::releaseLive()
 
 void BluecherryApp::systemReboot()
 {
+    QStringList args;
+    int res = -2;
+
 #if defined(Q_OS_LINUX)
 
-    QProcess process;
-    QStringList args;
     args << "--system" << "--print-reply" << "--dest=org.freedesktop.login1"
          << "/org/freedesktop/login1" << "org.freedesktop.login1.Manager.Reboot"
          << "boolean:true";
-    process.start("dbus-send", args);
-
-    if (!process.waitForStarted())
-        qDebug() << "BluecherryApp: Reboot process start error:\n" << process.readAllStandardError();
-    else if (process.waitForFinished(50))
-        qDebug() << "BluecherryApp: Reboot process finish error:\n" << process.readAllStandardError();
-    else if (process.state() == QProcess::Running)
-    {
-        qDebug() << "BluecherryApp: Reboot in progress...";
-        QApplication::quit();
-    }
-    else
-        qDebug() << "BluecherryApp: Reboot process error:\n" << process.readAllStandardError();
+    res = QProcess::execute("dbus-send", args);
 
 #elif defined(Q_OS_WIN)
 
-    QProcess process;
-    QStringList args;
-    args << "/r" << "/f" << "/t" << "0";
-    process.start("shutdown", args);
-
-    if (!process.waitForStarted())
-        qDebug() << "BluecherryApp: Shutdown process start error:\n" << process.readAllStandardError();
-    else if (process.waitForFinished(50))
-        qDebug() << "BluecherryApp: Shutdown process finish error:\n" << process.readAllStandardError();
-    else if (process.state() == QProcess::Running)
-    {
-        qDebug() << "BluecherryApp: Shutdown in progress...";
-        QApplication::quit();
-    }
-    else
-        qDebug() << "BluecherryApp: Shutdown process error:\n" << process.readAllStandardError();
+    args << "-r" << "-f" << "-t" << "0";
+    res = QProcess::execute("shutdown", args);
 
 #elif defined(Q_OS_MAC)
 
 #endif
+
+    if (res == -2)
+        qDebug() << "BluecherryApp: Reboot process start error";
+    else if (res == -1)
+        qDebug() << "BluecherryApp: Reboot process crashed";
+    else
+    {
+        qDebug() << "BluecherryApp: Reboot in progress...";
+        QApplication::quit();
+    }
 }
 
 void BluecherryApp::systemShutdown()
-{
+{    
+    QStringList args;
+    int res = -2;
+
 #if defined(Q_OS_LINUX)
 
-    QProcess process;
-    QStringList args;
     args << "--system" << "--print-reply" << "--dest=org.freedesktop.login1"
          << "/org/freedesktop/login1" << "org.freedesktop.login1.Manager.PowerOff"
-         << "boolean:true";
-    process.start("dbus-send", args);
-
-    if (!process.waitForStarted())
-        qDebug() << "BluecherryApp: Shutdown process start error:\n" << process.readAllStandardError();
-    else if (process.waitForFinished(50))
-        qDebug() << "BluecherryApp: Shutdown process finish error:\n" << process.readAllStandardError();
-    else if (process.state() == QProcess::Running)
-    {
-        qDebug() << "BluecherryApp: Shutdown in progress...";
-        QApplication::quit();
-    }
-    else
-        qDebug() << "BluecherryApp: Shutdown process error:\n" << process.readAllStandardError();
+         << "boolean:true"
+    res = QProcess::execute("dbus-send", args);
 
 #elif defined(Q_OS_WIN)
 
-    QProcess process;
-    QStringList args;
-    args << "/s" << "/f" << "/t" << "0";
-    process.start("shutdown", args);
+    args << "-s" << "-f" << "-t" << "0";
+    res = QProcess::execute("shutdown", args);
 
-    if (!process.waitForStarted())
-        qDebug() << "BluecherryApp: Shutdown process start error:\n" << process.readAllStandardError();
-    else if (process.waitForFinished(50))
-        qDebug() << "BluecherryApp: Shutdown process finish error:\n" << process.readAllStandardError();
-    else if (process.state() == QProcess::Running)
+#elif defined(Q_OS_MAC)
+
+#endif
+
+    if (res == -2)
+        qDebug() << "BluecherryApp: Shutdown process start error";
+    else if (res == -1)
+        qDebug() << "BluecherryApp: Shutdown process crashed";
+    else
     {
         qDebug() << "BluecherryApp: Shutdown in progress...";
         QApplication::quit();
     }
+}
+
+void BluecherryApp::updateStartup(bool on)
+{
+#if defined(Q_OS_LINUX)
+
+    QString path;
+    QDir dir;
+
+    path = QDir::homePath() + QDir::separator() + QString(".config/autostart");
+    dir.setPath(path);
+
+    if (!dir.exists(path) && !dir.mkpath(path))
+        goto updateStartupFailed;
+
+    path.append(QDir::separator()).append("bluecherry-client.desktop");
+
+    if (on)
+    {
+        if (!QFile::copy(QString("/usr/share/applications/bluecherry-client.desktop"), path))
+            goto updateStartupFailed;
+    }
     else
-        qDebug() << "BluecherryApp: Shutdown process error:\n" << process.readAllStandardError();
+    {
+        if (QFile::exists(path) && !QFile::remove(path))
+            goto updateStartupFailed;
+    }
+
+    return;
+
+updateStartupFailed:
+
+    m_startup->setChecked(on ? false : true);
+    qDebug() << "Failed to update startup file!\n";
+
+#elif defined(Q_OS_WIN)
+
+    QString autorun = QString("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run");
+    QSettings settings(autorun, QSettings::NativeFormat);
+
+    if (on)
+    {
+        QDir dir;
+        QString path = dir.absolutePath() + QDir::separator() + QString("BluecherryClient.exe");
+        if (kioskMode())
+            path.append(" --kiosk-mode");
+        path = QDir::toNativeSeparators(path);
+
+        settings.setValue("bluecherry-client", path);
+    }
+    else
+        settings.remove("bluecherry-client");
 
 #elif defined(Q_OS_MAC)
 
+    QString path;
+    QDir dir;
+
+    path = QDir::homePath() + QDir::separator() + QString("Library/LaunchAgents");
+    dir.setPath(path);
+
+    if (!dir.exists(path) && !dir.mkpath(path))
+        goto updateStartupFailed;
+
+    path.append(QDir::separator()).append("bluecherry-client.plist");
+
+    if (on)
+    {
+        const char *data = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+        "<plist version=\"1.0\">\n"
+        "<dict>\n"
+        "    <key>Label</key>\n"
+        "    <string>bluecherry-client</string>\n"
+        "    <key>ProgramArguments</key>\n"
+        "    <array>\n"
+        "    <string>/Applications/Bluecherry Client.app/Contents/MacOS/bluecherry-client</string>\n"
+        "    </array>\n"
+        "    <key>ProcessType</key>\n"
+        "    <string>Interactive</string>\n"
+        "    <key>RunAtLoad</key>\n"
+        "    <true/>\n"
+        "    <key>KeepAlive</key>\n"
+        "    <false/>\n"
+        "</dict>\n"
+        "</plist>\n";
+
+        QFile plist;
+        plist.setFileName(path);
+
+        if (!plist.open(QIODevice::WriteOnly | QIODevice::Text))
+            goto updateStartupFailed;
+
+        plist.write(data);
+        plist.close();
+    }
+    else
+    {
+        QFile plist;
+        plist.setFileName(path);
+        plist.remove();
+    }
+
+    return;
+
+updateStartupFailed:
+
+    m_startup->setChecked(on ? false : true);
+    qDebug() << "Failed to update startup file!\n";
 #endif
 }
 
