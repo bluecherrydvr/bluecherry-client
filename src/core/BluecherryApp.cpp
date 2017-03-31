@@ -447,7 +447,7 @@ void BluecherryApp::systemShutdown()
 
     args << "--system" << "--print-reply" << "--dest=org.freedesktop.login1"
          << "/org/freedesktop/login1" << "org.freedesktop.login1.Manager.PowerOff"
-         << "boolean:true"
+         << "boolean:true";
     res = QProcess::execute("dbus-send", args);
 
 #elif defined(Q_OS_WIN)
@@ -500,7 +500,6 @@ void BluecherryApp::updateStartup(bool on)
 
 updateStartupFailed:
 
-    m_startup->setChecked(on ? false : true);
     qDebug() << "Failed to update startup file!\n";
 
 #elif defined(Q_OS_WIN)
@@ -575,7 +574,6 @@ updateStartupFailed:
 
 updateStartupFailed:
 
-    m_startup->setChecked(on ? false : true);
     qDebug() << "Failed to update startup file!\n";
 #endif
 }
