@@ -220,7 +220,10 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
     retranslateUI();
 
     if (bcApp->kioskMode())
+    {
+        bcApp->updateStartup(true);
         showFullScreen();
+    }
 
     if (top == NULL)
         top = bcApp->mainWindow;

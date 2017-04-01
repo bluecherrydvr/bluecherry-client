@@ -487,8 +487,52 @@ void BluecherryApp::updateStartup(bool on)
 
     if (on)
     {
-        if (!QFile::copy(QString("/usr/share/applications/bluecherry-client.desktop"), path))
-            goto updateStartupFailed;
+        if (!kioskMode())
+        {
+            if (!QFile::copy(QString("/usr/share/applications/bluecherry-client.desktop"), path))
+                goto updateStartupFailed;
+        }
+        else
+        {
+            QFile desktopFile;
+            desktopFile.setFileName(path);
+
+            if (QFile::exists(path))
+            {
+                if (!desktopFile.open(QIODevice::ReadOnly | QIODevice::Text))
+                    goto updateStartupFailed;
+
+                QString content(desktopFile.readAll());
+                desktopFile.close();
+
+                if (!content.contains("--kiosk-mode"))
+                {
+                    if (!QFile::remove(path))
+                        goto updateStartupFailed;
+                }
+                else
+                    return;
+            }
+
+            if (!desktopFile.open(QIODevice::WriteOnly | QIODevice::Text))
+                 goto updateStartupFailed;
+            else
+            {
+                const char *data =
+                    "[Desktop Entry]\n"
+                    "Encoding=UTF-8\n"
+                    "Type=Application\n"
+                    "Name=Bluecherry Client\n"
+                    "Categories=Network;Qt\n"
+                    "Comment=Bluecherry DVR Client\n"
+                    "Icon=/usr/share/icons/bluecherry-client.png\n"
+                    "Exec=sh -c \"/usr/bin/bluecherry-client --kiosk-mode\"\n"
+                    "Terminal=false\n";
+
+                desktopFile.write(data);
+                desktopFile.close();
+            }
+        }
     }
     else
     {
@@ -513,8 +557,8 @@ updateStartupFailed:
         QString path = dir.absolutePath() + QDir::separator() + QString("BluecherryClient.exe");
         if (kioskMode())
             path.append(" --kiosk-mode");
-        path = QDir::toNativeSeparators(path);
 
+        path = QDir::toNativeSeparators(path);
         settings.setValue("bluecherry-client", path);
     }
     else
