@@ -31,8 +31,10 @@
 #include <QtPlugin>
 #include <QSettings>
 
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN)
 #include <utils/explorerstyle.h>
+#elif defined(Q_OS_LINUX)
+#include <X11/Xlib.h>
 #endif
 
 #ifdef QT_STATIC
@@ -48,6 +50,10 @@ const char *jpegFormatName = "jpeg";
 
 int main(int argc, char *argv[])
 {
+#ifdef Q_OS_LINUX   /* Without this call client may crash on exit when using libmpv */
+    XInitThreads(); /* Shoud be called before any Qt initialization */
+#endif
+
     QApplication a(argc, argv);
 
     /* These are used for the configuration file - do not change! */
