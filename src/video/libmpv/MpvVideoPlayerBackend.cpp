@@ -447,7 +447,6 @@ bool MpvVideoPlayerBackend::setSpeed(double speed)
 
 void MpvVideoPlayerBackend::setBrightness(int brightness)
 {
-
     if (!m_mpv)
         return;
 
