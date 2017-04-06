@@ -75,6 +75,10 @@ public slots:
     virtual void mute(bool mute) = 0;
     virtual void setVolume(double volume) = 0;
 
+    virtual void setBrightness(int brighness) = 0;
+    virtual void setContrast(int contrast) = 0;
+    virtual void setColor(int balance) = 0;
+
 signals:
     void stateChanged(int newState, int oldState);
     void durationChanged(int duration);

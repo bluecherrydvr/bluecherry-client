@@ -95,7 +95,7 @@ private:
     QPushButton *m_zoomOutBtn;
     QSlider *m_seekSlider;
     QLabel *m_startTime, *m_endTime, *m_statusText, *m_rateText, *m_zoomText;
-    QSlider *m_volumeSlider;
+    QSlider *m_volumeSlider, *m_brightness, *m_contrast, *m_color;
     QTimer m_uiTimer;
     double m_lastspeed;
     double m_zoomFactor;

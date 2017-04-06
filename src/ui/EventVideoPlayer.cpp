@@ -145,6 +145,7 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     connect(m_muteBtn, SIGNAL(clicked()), SLOT(mute()));
 
     m_volumeSlider = new QSlider(Qt::Horizontal);
+    m_volumeSlider->setMinimumWidth(40);
     m_volumeSlider->setTickInterval(2);
     m_volumeSlider->setTickPosition(QSlider::TicksBelow);
     m_volumeSlider->setMinimum(0);
@@ -196,6 +197,52 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
 	m_saveBtn = new QPushButton;
     btnLayout->addWidget(m_saveBtn);
     connect(m_saveBtn, SIGNAL(clicked()), SLOT(saveVideo()));
+
+    QBoxLayout *colorsLayout = new QHBoxLayout;
+    colorsLayout->setMargin(0);
+    colorsLayout->setSpacing(3);
+    controlsLayout->addLayout(colorsLayout);
+
+    m_brightness = new QSlider(Qt::Horizontal);
+    m_brightness->setMinimumWidth(50);
+    m_brightness->setTickInterval(1);
+    m_brightness->setTickPosition(QSlider::TicksBothSides);
+    m_brightness->setMinimum(0);
+    m_brightness->setMaximum(16);
+    m_brightness->setValue(8);
+    colorsLayout->addWidget(m_brightness);
+
+    QLabel *brightness = new QLabel();
+    brightness->setPixmap(QPixmap(QLatin1String(":/icons/brightness.ico")));
+    colorsLayout->addWidget(brightness);
+    colorsLayout->addStretch();
+
+    m_contrast = new QSlider(Qt::Horizontal);
+    m_contrast->setMinimumWidth(50);
+    m_contrast->setTickInterval(1);
+    m_contrast->setTickPosition(QSlider::TicksBothSides);
+    m_contrast->setMinimum(0);
+    m_contrast->setMaximum(16);
+    m_contrast->setValue(8);
+    colorsLayout->addWidget(m_contrast);
+
+    QLabel *contrast = new QLabel();
+    contrast->setPixmap(QPixmap(QLatin1String(":/icons/contrast.ico")));
+    colorsLayout->addWidget(contrast);
+    colorsLayout->addStretch();
+
+    m_color = new QSlider(Qt::Horizontal);
+    m_color->setMinimumWidth(50);
+    m_color->setTickInterval(1);
+    m_color->setTickPosition(QSlider::TicksBothSides);
+    m_color->setMinimum(0);
+    m_color->setMaximum(16);
+    m_color->setValue(8);
+    colorsLayout->addWidget(m_color);
+
+    QLabel *color = new QLabel();
+    color->setPixmap(QPixmap(QLatin1String(":/icons/color.ico")));
+    colorsLayout->addWidget(color);
 
     QShortcut *sc = new QShortcut(QKeySequence(Qt::Key_Space), m_videoWidget);
     connect(sc, SIGNAL(activated()), SLOT(playPause()));
@@ -295,8 +342,11 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     connect(m_videoBackend.data(), SIGNAL(endOfStream()), SLOT(durationChanged()));
     connect(m_videoBackend.data(), SIGNAL(playbackSpeedChanged(double)), SLOT(playbackSpeedChanged(double)));
     connect(m_videoBackend.data(), SIGNAL(streamsInitialized(bool)), SLOT(streamsInitialized(bool)));
-    connect(m_videoBackend.data(), SIGNAL(currentPosition(double))
-            ,this, SLOT(updateSliderPosition(double)));
+    connect(m_videoBackend.data(), SIGNAL(currentPosition(double)), SLOT(updateSliderPosition(double)));
+
+    connect(m_brightness, SIGNAL(sliderMoved(int)), m_videoBackend.data(), SLOT(setBrightness(int)));
+    connect(m_contrast, SIGNAL(sliderMoved(int)), m_videoBackend.data(), SLOT(setContrast(int)));
+    connect(m_color, SIGNAL(sliderMoved(int)), m_videoBackend.data(), SLOT(setColor(int)));
 
     m_videoWidget->initVideo(m_videoBackend.data());
 
