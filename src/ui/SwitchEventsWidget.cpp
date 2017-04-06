@@ -73,5 +73,5 @@ void SwitchEventsWidget::changeEvent(QEvent *event)
 void SwitchEventsWidget::retranslateUI()
 {
 	m_previousButton->setText(tr("Previous"));
-	m_nextButton->setText(tr("Next"));
+    m_nextButton->setText(tr("Next"));
 }

@@ -445,6 +445,37 @@ bool MpvVideoPlayerBackend::setSpeed(double speed)
     return speed;
 }
 
+void MpvVideoPlayerBackend::setBrightness(int brightness)
+{
+
+    if (!m_mpv)
+        return;
+
+    long bri = (brightness - 8) * 5;
+
+    mpv_set_property(m_mpv, "brightness", MPV_FORMAT_INT64, &bri);
+}
+
+void MpvVideoPlayerBackend::setContrast(int contrast)
+{
+    if (!m_mpv)
+        return;
+
+    long con = (contrast - 8) * 8;
+
+    mpv_set_property(m_mpv, "contrast", MPV_FORMAT_INT64, &con);
+}
+
+void MpvVideoPlayerBackend::setColor(int balance)
+{
+    if (!m_mpv)
+        return;
+
+    long bal = (balance - 8) * 8;
+
+    mpv_set_property(m_mpv, "saturation", MPV_FORMAT_INT64, &bal);
+}
+
 void MpvVideoPlayerBackend::emitEvents()
 {
     if (m_mpv)

@@ -63,6 +63,9 @@ public slots:
     virtual void restart();
     virtual void mute(bool mute);
     virtual void setVolume(double volume);
+    virtual void setBrightness(int brighness);
+    virtual void setContrast(int contrast);
+    virtual void setColor(int balance);
 
 private slots:
     void streamError(const QString &message);
