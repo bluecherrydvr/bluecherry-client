@@ -27,9 +27,9 @@ list (APPEND LIBMPV_INCLUDE_DIRS ${LIBMPV_INCLUDE_DIR})
 find_library (LIBMPV_LIBRARY NAMES mpv HINTS ${LIBMPV_LIBDIR} ${LIBMPV_LIBRARY_DIRS} ${WIN32_LIBMPV_DIR}/bin)
 list (APPEND LIBMPV_LIBRARIES ${LIBMPV_LIBRARY})
 
-#if (UNIX AND NOT APPLE)
-#	list (APPEND LIBMPV_LIBRARIES "-ldl" "-lpthread" "-lasound" "-lm")
-#endif()
+if (UNIX AND NOT APPLE)
+	list (APPEND LIBMPV_LIBRARIES "-lX11")
+endif()
 
 include (FindPackageHandleStandardArgs)
 find_package_handle_standard_args (LibMPV DEFAULT_MSG LIBMPV_LIBRARIES LIBMPV_INCLUDE_DIRS)
