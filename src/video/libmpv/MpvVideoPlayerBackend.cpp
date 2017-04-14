@@ -50,7 +50,9 @@ MpvVideoPlayerBackend::MpvVideoPlayerBackend(QObject *parent)
       m_playDuringDownload(false), m_pausedBySlowDownload(false),
       m_duration(-1), m_position(-1)
 {
+#ifdef Q_OS_LINUX
     std::setlocale(LC_NUMERIC, "C");
+#endif
 
     qDebug() << "MpvVideoPlayerBackend() this =" << this << "\n";
 }
@@ -450,7 +452,7 @@ void MpvVideoPlayerBackend::setBrightness(int brightness)
     if (!m_mpv)
         return;
 
-    long bri = (brightness - 8) * 5;
+    int64_t bri = (brightness - 8) * 5;
 
     mpv_set_property(m_mpv, "brightness", MPV_FORMAT_INT64, &bri);
 }
@@ -460,7 +462,7 @@ void MpvVideoPlayerBackend::setContrast(int contrast)
     if (!m_mpv)
         return;
 
-    long con = (contrast - 8) * 8;
+    int64_t con = (contrast - 8) * 8;
 
     mpv_set_property(m_mpv, "contrast", MPV_FORMAT_INT64, &con);
 }
@@ -470,7 +472,7 @@ void MpvVideoPlayerBackend::setColor(int balance)
     if (!m_mpv)
         return;
 
-    long bal = (balance - 8) * 8;
+    int64_t bal = (balance - 8) * 8;
 
     mpv_set_property(m_mpv, "saturation", MPV_FORMAT_INT64, &bal);
 }
