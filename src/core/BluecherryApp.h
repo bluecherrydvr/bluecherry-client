@@ -97,6 +97,10 @@ public:
 
     bool kioskMode() { return m_kioskMode; }
 
+#ifdef Q_OS_WIN
+    void showWindowsTaskbar(bool show);
+#endif
+
 public slots:
     void pauseLive();
     void releaseLive();

@@ -235,6 +235,11 @@ MainWindow::MainWindow(DVRServerRepository *serverRepository, QWidget *parent)
 MainWindow::~MainWindow()
 {
     saveSettings();
+
+#ifdef Q_OS_WIN
+    if (bcApp->kioskMode())
+        bcApp->showWindowsTaskbar(true);
+#endif
 }
 
 void MainWindow::showEvent(QShowEvent *event)
@@ -855,10 +860,6 @@ void MainWindow::saveTopWindow(QWidget *w)
     settings.setValue(QLatin1String("ui/topWindow"), w->objectName());
 }
 
-#if defined(Q_OS_WIN)
-#include <Windows.h>
-#endif
-
 void MainWindow::moveOnTop()
 {
 #if defined(Q_OS_LINUX)
@@ -867,6 +868,8 @@ void MainWindow::moveOnTop()
     raise();
 
 #elif defined(Q_OS_WIN)
+
+    bcApp->showWindowsTaskbar(false);
 
 #endif
 }

@@ -686,3 +686,26 @@ void BluecherryApp::resetSystemActivity()
 #endif
 }
 
+#if defined(Q_OS_WIN)
+
+void BluecherryApp::showWindowsTaskbar(bool show)
+{
+    HWND taskbar = FindWindow(L"Shell_TrayWnd", NULL);
+    HWND start = FindWindow(L"Button", NULL);
+
+    if (taskbar != NULL)
+    {
+        ShowWindow(taskbar, show ? SW_SHOW : SW_HIDE);
+        UpdateWindow(taskbar);
+    }
+
+    if (start != NULL)
+    {
+        // Vista
+        ShowWindow(start, show ? SW_SHOW : SW_HIDE);
+        UpdateWindow(start);
+    }
+}
+
+#endif
+
