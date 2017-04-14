@@ -8,7 +8,8 @@
 !define LIBOPENSSL_PATH "@WIN32_OPENSSL_DIR@\bin"
 !define LIBSDL2_PATH "@WIN32_LIBSDL2_DIR@\bin"
 !define WINDOWS_DLL_PATH "C:\Windows\System32"
-!define MPLAYER_PATH "@CMAKE_SOURCE_DIR@\mplayer-bin\win\i386"
+#!define MPLAYER_PATH "@CMAKE_SOURCE_DIR@\mplayer-bin\win\i386"
+!define LIBMPV_PATH "@WIN32_LIBMPV_DIR@\bin"
 !define VERSION "@VERSION@"
 
 Name "Bluecherry Client"
@@ -76,9 +77,12 @@ Section
         File "${LIBAV_PATH}\swscale-4.dll"
         File "${LIBAV_PATH}\swresample-2.dll"
 
+        # libmpv
+        File "${LIBMPV_PATH}\mpv.dll"
+
         SetOutPath "$INSTDIR"
 		# mplayer
-		File "${MPLAYER_PATH}\mplayer.exe"
+		# File "${MPLAYER_PATH}\mplayer.exe"
 
         # OpenSSL
         File "${LIBOPENSSL_PATH}\ssleay32.dll"
