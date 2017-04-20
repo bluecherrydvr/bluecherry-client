@@ -25,12 +25,14 @@ cp $BUILD_DIR/*.qm $1/Contents/Resources/translations/
 #rm -r $1/Contents/Frameworks/Breakpad.framework
 #cp -R breakpad-bin/mac/Breakpad.framework $1/Contents/Frameworks/
 
-echo "Copying mplayer..."
-cp mplayer-bin/mac/mplayer $1/Contents/MacOS/
+#echo "Copying mplayer..."
+#cp mplayer-bin/mac/mplayer $1/Contents/MacOS/
 
 echo "Copying libav..."
-LIBAV_PATH=/usr/lib/bluecherry/client
-cp -a $BUILD_DIR/ffmpeg/install${LIBAV_PATH}/lib*.dylib $1/Contents/Frameworks
+#LIBAV_PATH=/usr/lib/bluecherry/client
+#cp -a $BUILD_DIR/ffmpeg/install${LIBAV_PATH}/lib*.dylib $1/Contents/Frameworks
+LIBAV_PATH=$HOME/bc-dev/ffmpeg
+cp -a $LIBAV_PATH/lib/lib*.dylib $1/Contents/Frameworks
 
 echo "Replacing library paths..."
 #$BINPATH/replacepath.py --old $HOME/dev/usr/lib/ --new @executable_path/../Frameworks/ --file $1/Contents/MacOS/$EXENAME
