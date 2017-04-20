@@ -50,7 +50,7 @@ MpvVideoPlayerBackend::MpvVideoPlayerBackend(QObject *parent)
       m_playDuringDownload(false), m_pausedBySlowDownload(false),
       m_duration(-1), m_position(-1)
 {
-#ifdef Q_OS_LINUX
+#ifndef Q_OS_WIN
     std::setlocale(LC_NUMERIC, "C");
 #endif
 
@@ -161,8 +161,7 @@ bool MpvVideoPlayerBackend::createMpvProcess()
     mpv_observe_property(m_mpv, 0, "duration", MPV_FORMAT_DOUBLE);
     mpv_observe_property(m_mpv, 0, "pause", MPV_FORMAT_FLAG);
 
-    //mpv_request_log_messages(m_mpv, "v"); // "debug"
-    mpv_request_log_messages(m_mpv, "fatal");
+    mpv_request_log_messages(m_mpv, "warn");  // no fatal error warn info v debug trace
 
     connect(this, SIGNAL(mpvEvents()), this, SLOT(receiveMpvEvents()), Qt::QueuedConnection);
     mpv_set_wakeup_callback(m_mpv, wakeup, this);
