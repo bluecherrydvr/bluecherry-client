@@ -1,5 +1,5 @@
 <RCC>
-    <qresource lang="en-us" prefix="/">
+    <qresource prefix="/" lang="en-us">
         <file>license.txt</file>
     </qresource>
     <qresource prefix="/images">
@@ -49,8 +49,8 @@
         <file>expand-all.png</file>
         <file>layout-12.png</file>
         <file>layout-32.png</file>
-        <file>brightness.ico</file>
-        <file>color.ico</file>
-        <file>contrast.ico</file>
+        <file>brightness.png</file>
+        <file>color.png</file>
+        <file>contrast.png</file>
     </qresource>
 </RCC>

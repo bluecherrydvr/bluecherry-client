@@ -213,7 +213,7 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     colorsLayout->addWidget(m_brightness);
 
     QLabel *brightness = new QLabel();
-    brightness->setPixmap(QPixmap(QLatin1String(":/icons/brightness.ico")));
+    brightness->setPixmap(QPixmap(QLatin1String(":/icons/brightness.png")));
     colorsLayout->addWidget(brightness);
     colorsLayout->addStretch();
 
@@ -227,7 +227,7 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     colorsLayout->addWidget(m_contrast);
 
     QLabel *contrast = new QLabel();
-    contrast->setPixmap(QPixmap(QLatin1String(":/icons/contrast.ico")));
+    contrast->setPixmap(QPixmap(QLatin1String(":/icons/contrast.png")));
     colorsLayout->addWidget(contrast);
     colorsLayout->addStretch();
 
@@ -241,7 +241,7 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     colorsLayout->addWidget(m_color);
 
     QLabel *color = new QLabel();
-    color->setPixmap(QPixmap(QLatin1String(":/icons/color.ico")));
+    color->setPixmap(QPixmap(QLatin1String(":/icons/color.png")));
     colorsLayout->addWidget(color);
 
     QShortcut *sc = new QShortcut(QKeySequence(Qt::Key_Space), m_videoWidget);
