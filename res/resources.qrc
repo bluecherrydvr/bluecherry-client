@@ -52,5 +52,8 @@
         <file>brightness.png</file>
         <file>color.png</file>
         <file>contrast.png</file>
+        <file>control-stop-square.png</file>
+        <file>control-double-000-small.png</file>
+        <file>control-double-180-small.png</file>
     </qresource>
 </RCC>

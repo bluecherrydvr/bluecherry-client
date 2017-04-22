@@ -23,7 +23,6 @@
 #include <QByteArray>
 #include <QTimer>
 #include <QDebug>
-//#include <stdlib.h>
 
 #include "MpvVideoPlayerBackend.h"
 #include "video/VideoHttpBuffer.h"
@@ -161,7 +160,7 @@ bool MpvVideoPlayerBackend::createMpvProcess()
     mpv_observe_property(m_mpv, 0, "duration", MPV_FORMAT_DOUBLE);
     mpv_observe_property(m_mpv, 0, "pause", MPV_FORMAT_FLAG);
 
-    mpv_request_log_messages(m_mpv, "warn");  // no fatal error warn info v debug trace
+    mpv_request_log_messages(m_mpv, "error");  // no fatal error warn info v debug trace
 
     connect(this, SIGNAL(mpvEvents()), this, SLOT(receiveMpvEvents()), Qt::QueuedConnection);
     mpv_set_wakeup_callback(m_mpv, wakeup, this);
@@ -352,20 +351,18 @@ void MpvVideoPlayerBackend::restart()
     if (!m_mpv)
         return;
 
-    mpv_terminate_destroy(m_mpv);
-    m_mpv = NULL;
+    const char *arg[] = { "stop", NULL };
+    mpv_command_async(m_mpv, 0, arg);
 
-    if (!createMpvProcess())
-    {
-        setError(false, tr("MpvVideoWidget: MPV failed to create!"));
-        return;
-    }
+    VideoState old = m_state;
+    m_state = Stopped;
+    emit stateChanged(m_state, old);
 
     const QByteArray filename = m_videoBuffer->bufferFilePath().toUtf8();
     const char *args[] = { "loadfile", filename.data(), NULL };
     mpv_command_async(m_mpv, 0, args);
 
-    VideoState old = m_state;
+    old = m_state;
     m_state = Playing;
     emit stateChanged(m_state, old);
 }
@@ -476,6 +473,11 @@ void MpvVideoPlayerBackend::setColor(int balance)
     mpv_set_property(m_mpv, "saturation", MPV_FORMAT_INT64, &bal);
 }
 
+void MpvVideoPlayerBackend::queryPosition()
+{
+    emit currentPosition(m_position);
+}
+
 void MpvVideoPlayerBackend::emitEvents()
 {
     if (m_mpv)
@@ -538,9 +540,28 @@ void MpvVideoPlayerBackend::handleMpvEvent(mpv_event *event)
 
             break;
         }
+        case MPV_EVENT_END_FILE:
+        {
+            mpv_event_end_file *eef = (mpv_event_end_file*) event->data;
+            switch (eef->reason)
+            {
+                case MPV_END_FILE_REASON_EOF:
+                {
+                    handleEof();
+                    break;
+                }
+                case MPV_END_FILE_REASON_STOP:
+                case MPV_END_FILE_REASON_QUIT:
+                case MPV_END_FILE_REASON_ERROR:
+                case MPV_END_FILE_REASON_REDIRECT:
+                default: m_position = -1;
+            }
+
+            break;
+        }
         case MPV_EVENT_LOG_MESSAGE:
         {
-            struct mpv_event_log_message *msg = (struct mpv_event_log_message*) event->data;
+            mpv_event_log_message *msg = (mpv_event_log_message*) event->data;
 
             qDebug() << "MpvVideoPlayerBackend: [" << msg->prefix << "] "
                      << msg->level << ": " << msg->text;
@@ -554,8 +575,7 @@ void MpvVideoPlayerBackend::handleMpvEvent(mpv_event *event)
             m_mpv = NULL;
             break;
         }
-        default: ;
-            // Ignore uninteresting or unknown events.
+        default: ; // Ignore uninteresting or unknown events.
     }
 }
 

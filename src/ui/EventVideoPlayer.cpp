@@ -124,10 +124,18 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     btnLayout->addWidget(m_restartBtn);
     connect(m_restartBtn, SIGNAL(clicked()), SLOT(restart()));
 
+    m_backward = new QToolButton;
+    m_backward->setIcon(QIcon(QLatin1String(":/icons/control-double-180-small.png")));
+    btnLayout->addWidget(m_backward);
+
     m_playBtn = new QToolButton;
     m_playBtn->setIcon(QIcon(QLatin1String(":/icons/control.png")));
     btnLayout->addWidget(m_playBtn);
     connect(m_playBtn, SIGNAL(clicked()), SLOT(playPause()));
+
+    m_forward = new QToolButton;
+    m_forward->setIcon(QIcon(QLatin1String(":/icons/control-double-000-small.png")));
+    btnLayout->addWidget(m_forward);
 
     QSettings settings;
 

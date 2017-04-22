@@ -36,7 +36,7 @@ public:
 
     virtual int duration() const;
     virtual int position() const;
-    virtual void queryPosition() const { }
+    virtual void queryPosition();
     virtual double playbackSpeed() const { return m_playbackSpeed; }
     virtual bool isSeekable() const;
     virtual bool atEnd() const { return m_state == Done; }
