@@ -34,6 +34,7 @@ public:
         Error = -1, /* Recoverable errors, generally by stopping and restarting the pipeline */
         Stopped,
         Playing,
+        Backward,
         Paused,
         Done
     };
@@ -48,7 +49,7 @@ public:
 
     virtual int duration() const = 0;
     virtual int position() const = 0;
-    virtual void queryPosition() const = 0;
+    virtual void queryPosition() = 0;
     virtual double playbackSpeed() const = 0;
     virtual bool isSeekable() const = 0;
     virtual bool atEnd() const = 0;
