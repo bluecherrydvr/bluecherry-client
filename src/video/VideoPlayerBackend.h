@@ -72,6 +72,8 @@ public slots:
     virtual bool seek(int position) = 0;
     virtual bool setSpeed(double speed) = 0;
     virtual void restart() = 0;
+    virtual void playForward() = 0;
+    virtual void playBackward() = 0;
 
     virtual void mute(bool mute) = 0;
     virtual void setVolume(double volume) = 0;

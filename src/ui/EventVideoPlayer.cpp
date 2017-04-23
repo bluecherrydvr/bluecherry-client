@@ -355,6 +355,8 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     connect(m_brightness, SIGNAL(sliderMoved(int)), m_videoBackend.data(), SLOT(setBrightness(int)));
     connect(m_contrast, SIGNAL(sliderMoved(int)), m_videoBackend.data(), SLOT(setContrast(int)));
     connect(m_color, SIGNAL(sliderMoved(int)), m_videoBackend.data(), SLOT(setColor(int)));
+    connect(m_backward, SIGNAL(clicked()), m_videoBackend.data(), SLOT(playBackward()));
+    connect(m_forward, SIGNAL(clicked()), m_videoBackend.data(), SLOT(playForward()));
 
     m_videoWidget->initVideo(m_videoBackend.data());
 
@@ -405,7 +407,8 @@ void EventVideoPlayer::playPause()
     if (!m_videoBackend)
         return;
 
-    if (m_videoBackend.data()->state() == VideoPlayerBackend::Playing)
+    if (m_videoBackend.data()->state() == VideoPlayerBackend::Playing ||
+            m_videoBackend.data()->state() == VideoPlayerBackend::Backward)
         m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "pause", Qt::QueuedConnection);
     else if (m_videoBackend.data()->atEnd())
         restart();
@@ -615,7 +618,7 @@ void EventVideoPlayer::stateChanged(int state)
     Q_ASSERT(QThread::currentThread() == qApp->thread());
 
     qDebug("state change %d", state);
-    if (state == VideoPlayerBackend::Playing)
+    if (state == VideoPlayerBackend::Playing || state == VideoPlayerBackend::Backward)
     {
         m_playBtn->setIcon(QIcon(QLatin1String(":/icons/control-pause.png")));
         m_uiTimer.start();
