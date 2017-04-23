@@ -47,7 +47,7 @@ MpvVideoPlayerBackend::MpvVideoPlayerBackend(QObject *parent)
       m_errorMessage(QString()), m_playbackSpeed(1.0),
       m_mpv(0), m_id(0),
       m_playDuringDownload(false), m_pausedBySlowDownload(false),
-      m_duration(-1), m_position(-1)
+      m_duration(-1), m_position(-1), m_seek_step(0.0)
 {
 #ifndef Q_OS_WIN
     std::setlocale(LC_NUMERIC, "C");
@@ -155,6 +155,7 @@ bool MpvVideoPlayerBackend::createMpvProcess()
     mpv_set_option_string(m_mpv, "input-vo-keyboard", "yes");
     mpv_set_option_string(m_mpv, "input-cursor", "no");
     mpv_set_option_string(m_mpv, "cursor-autohide", "no");
+    mpv_set_option_string(m_mpv, "hr-seek", "yes");
 
     mpv_observe_property(m_mpv, 0, "time-pos", MPV_FORMAT_DOUBLE);
     mpv_observe_property(m_mpv, 0, "duration", MPV_FORMAT_DOUBLE);
@@ -299,7 +300,7 @@ void MpvVideoPlayerBackend::playIfReady()
 
     const QByteArray filename = m_videoBuffer->bufferFilePath().toUtf8();
     const char *args[] = { "loadfile", filename.data(), NULL };
-    mpv_command_async(m_mpv, 0, args);
+    mpv_command(m_mpv, args);
 
     mpvPlayerReady();
 
@@ -321,6 +322,8 @@ void MpvVideoPlayerBackend::play()
             return;
     }
 
+    m_seek_step = 0.0;
+
     int pause = 0;
     mpv_set_property(m_mpv, "pause", MPV_FORMAT_FLAG, &pause);
 
@@ -337,6 +340,7 @@ void MpvVideoPlayerBackend::pause()
         return;
 
     m_pausedBySlowDownload = false;
+    m_seek_step = 0.0;
 
     int pause = 1;
     mpv_set_property(m_mpv, "pause", MPV_FORMAT_FLAG, &pause);
@@ -351,8 +355,10 @@ void MpvVideoPlayerBackend::restart()
     if (!m_mpv)
         return;
 
+    m_seek_step = 0.0;
+
     const char *arg[] = { "stop", NULL };
-    mpv_command_async(m_mpv, 0, arg);
+    mpv_command(m_mpv, arg);
 
     VideoState old = m_state;
     m_state = Stopped;
@@ -360,11 +366,81 @@ void MpvVideoPlayerBackend::restart()
 
     const QByteArray filename = m_videoBuffer->bufferFilePath().toUtf8();
     const char *args[] = { "loadfile", filename.data(), NULL };
-    mpv_command_async(m_mpv, 0, args);
+    mpv_command(m_mpv, args);
 
     old = m_state;
     m_state = Playing;
     emit stateChanged(m_state, old);
+}
+
+static const float seekStepRates[] = { -0.400, -0.200, -0.100, -0.050, -0.025,
+    0.0, 0.025, 0.050, 0.100, 0.200, 0.400 };
+static const int seekStepsCount = 11;
+
+void MpvVideoPlayerBackend::playForward()
+{
+    if (m_state != Backward)
+    {
+        int pause = 1;
+        mpv_set_property(m_mpv, "pause", MPV_FORMAT_FLAG, &pause);
+
+        VideoState old = m_state;
+        m_state = Backward;
+        emit stateChanged(m_state, old);
+    }
+
+    for (int i = 0; i < seekStepsCount; ++i)
+    {
+        if (m_seek_step == seekStepRates[10])
+            break;
+
+        if (m_seek_step == seekStepRates[i])
+        {
+            m_seek_step = seekStepRates[i + 1];
+            break;
+        }
+    }
+
+    hrSeek();
+}
+
+void MpvVideoPlayerBackend::playBackward()
+{
+    if (m_state != Backward)
+    {
+        int pause = 1;
+        mpv_set_property(m_mpv, "pause", MPV_FORMAT_FLAG, &pause);
+
+        VideoState old = m_state;
+        m_state = Backward;
+        emit stateChanged(m_state, old);
+    }
+
+    for (int i = 0; i < seekStepsCount; ++i)
+    {
+        if (m_seek_step == seekStepRates[0])
+            break;
+
+        if (m_seek_step == seekStepRates[i])
+        {
+            m_seek_step = seekStepRates[i - 1];
+            break;
+        }
+    }
+
+    hrSeek();
+}
+
+void MpvVideoPlayerBackend::hrSeek()
+{
+    int ret;
+    char num[32];
+
+    sprintf(num, "%.3f", m_position + m_seek_step);
+
+    const char *cmd[] = { "seek", num, "absolute", NULL };
+    if ((ret = mpv_command_async(m_mpv, 0, cmd)) < 0)
+        qDebug() << "MpvVideoPlayerBackend: Seek error - " << ret;
 }
 
 void MpvVideoPlayerBackend::mute(bool mute)
@@ -531,12 +607,19 @@ void MpvVideoPlayerBackend::handleMpvEvent(mpv_event *event)
 
                     if (pause && m_state != Paused)
                     {
-                        VideoState old = m_state;
+                        /*VideoState old = m_state;
                         m_state = Paused;
-                        emit stateChanged(m_state, old);
+                        emit stateChanged(m_state, old);*/
                     }
                 }
             }     //qDebug() << "pos= " << m_position << "    duration= " << m_duration;
+
+            break;
+        }
+        case MPV_EVENT_SEEK:
+        {
+            if (m_state == Backward && m_seek_step != 0.0)
+                hrSeek();
 
             break;
         }
