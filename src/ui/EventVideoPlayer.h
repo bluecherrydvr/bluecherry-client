@@ -81,7 +81,6 @@ private slots:
     void mute();
     void setVolume(int volume);
 
-    void updateUI();
     void settingsChanged();
 
 private:

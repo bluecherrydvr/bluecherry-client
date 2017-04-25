@@ -80,7 +80,7 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
 {
     connect(bcApp, SIGNAL(queryLivePaused()), SLOT(queryLivePaused()));
     connect(bcApp, SIGNAL(settingsChanged()), SLOT(settingsChanged()));
-    connect(&m_uiTimer, SIGNAL(timeout()), SLOT(updateUI()));
+    connect(&m_uiTimer, SIGNAL(timeout()), SLOT(updateBufferStatus()));
 
     m_uiTimer.setInterval(333);
 
@@ -408,7 +408,8 @@ void EventVideoPlayer::playPause()
         return;
 
     if (m_videoBackend.data()->state() == VideoPlayerBackend::Playing ||
-            m_videoBackend.data()->state() == VideoPlayerBackend::Backward)
+            m_videoBackend.data()->state() == VideoPlayerBackend::Backward ||
+                 m_videoBackend.data()->state() == VideoPlayerBackend::Forward)
         m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "pause", Qt::QueuedConnection);
     else if (m_videoBackend.data()->atEnd())
         restart();
@@ -515,7 +516,8 @@ void EventVideoPlayer::queryLivePaused()
 
 bool EventVideoPlayer::uiRefreshNeeded() const
 {
-	return m_videoBackend && (m_videoBackend.data()->videoBuffer()) && (m_videoBackend.data()->videoBuffer()->isBuffering() || m_videoBackend.data()->state() == VideoPlayerBackend::Playing);
+    return m_videoBackend && (m_videoBackend.data()->videoBuffer()) &&
+            (m_videoBackend.data()->videoBuffer()->isBuffering());
 }
 
 void EventVideoPlayer::retranslateUI()
@@ -524,12 +526,6 @@ void EventVideoPlayer::retranslateUI()
     m_zoomInBtn->setText(tr("+"));
     m_zoomOutBtn->setText(tr("-"));
 	updateBufferStatus();
-}
-
-void EventVideoPlayer::updateUI()
-{
-    updatePosition();
-    updateBufferStatus();
 }
 
 void EventVideoPlayer::settingsChanged()
@@ -616,28 +612,22 @@ void EventVideoPlayer::streamsInitialized(bool hasAudioSupport)
 void EventVideoPlayer::stateChanged(int state)
 {
     Q_ASSERT(QThread::currentThread() == qApp->thread());
+    qDebug("State change %d", state);
 
-    qDebug("state change %d", state);
-    if (state == VideoPlayerBackend::Playing || state == VideoPlayerBackend::Backward)
-    {
+    if (state == VideoPlayerBackend::Playing ||
+            state == VideoPlayerBackend::Backward ||
+                state == VideoPlayerBackend::Forward)
         m_playBtn->setIcon(QIcon(QLatin1String(":/icons/control-pause.png")));
-        m_uiTimer.start();
-        updatePosition();
-    }
     else
-    {
         m_playBtn->setIcon(QIcon(QLatin1String(":/icons/control.png")));
-        updatePosition();
-        if (!uiRefreshNeeded())
-            m_uiTimer.stop();
-    }
+
+    updatePosition();
 
     if (state == VideoPlayerBackend::Error || state == VideoPlayerBackend::PermanentError)
     {
         m_statusText->setText(QLatin1String("<span style='color:red;font-weight:bold'>") +
                               m_videoBackend.data()->errorMessage() + QLatin1String("</span>"));
     }
-
 }
 
 void EventVideoPlayer::durationChanged(int msDuration)
