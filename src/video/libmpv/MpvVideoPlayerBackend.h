@@ -95,12 +95,10 @@ private:
     bool m_pausedBySlowDownload;
     double m_duration;
     double m_position;
-    double m_seek_step;
 
     void setVideoBuffer(VideoHttpBuffer *videoHttpBuffer);
     bool createMpvProcess();
     void handleMpvEvent(mpv_event *event);
-    void hrSeek();
 };
 
 #endif // MPV_VIDEO_PLAYER_BACKEND_H

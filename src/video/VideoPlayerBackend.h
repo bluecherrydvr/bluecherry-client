@@ -34,6 +34,7 @@ public:
         Error = -1, /* Recoverable errors, generally by stopping and restarting the pipeline */
         Stopped,
         Playing,
+        Forward,
         Backward,
         Paused,
         Done
