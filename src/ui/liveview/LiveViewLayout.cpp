@@ -417,6 +417,21 @@ void LiveViewLayout::removeColumns(int remove)
     Q_ASSERT(!remove);
 }
 
+void LiveViewLayout::setGridSize(QString size)
+{
+    QStringList list = size.split("x");
+
+    if (list.count() != 2)
+        return;
+
+    int columns = list[0].toInt();
+    int rows = list[1].toInt();
+    if (rows == 0 || columns == 0)
+        return;
+
+    setGridSize(rows, columns);
+}
+
 void LiveViewLayout::setGridSize(int rows, int columns)
 {
     rows = qBound(1, rows, maxRows());

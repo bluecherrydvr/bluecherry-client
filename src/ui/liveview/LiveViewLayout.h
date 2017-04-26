@@ -116,6 +116,7 @@ public slots:
     void removeColumn() { setGridSize(m_rows, m_columns-1); }
 
     void setGridSize(int size) { setGridSize(size, size); }
+    void setGridSize(QString size);
 
     void removeItem(QDeclarativeItem *item);
 

@@ -153,19 +153,26 @@ LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *p
 
     QSignalMapper *mapper = new QSignalMapper(this);
     connect(mapper, SIGNAL(mapped(int)), viewLayout, SLOT(setGridSize(int)));
+    connect(mapper, SIGNAL(mapped(QString)), viewLayout, SLOT(setGridSize(QString)));
 
-	m_singleAction = m_toolBar->addAction(QIcon(QLatin1String(":/icons/layout.png")),
+    m_singleAction = m_toolBar->addAction(QIcon(QLatin1String(":/icons/layout.png")),
                                     tr("Single"), mapper, SLOT(map()));
-	mapper->setMapping(m_singleAction, 1);
-	QAction *a = m_toolBar->addAction(QIcon(QLatin1String(":/icons/layout-4.png")),
+    mapper->setMapping(m_singleAction, 1);
+    QAction *a = m_toolBar->addAction(QIcon(QLatin1String(":/icons/layout-4.png")),
                            tr("2x2"), mapper, SLOT(map()));
     mapper->setMapping(a, 2);
-	a = m_toolBar->addAction(QIcon(QLatin1String(":/icons/layout-9.png")),
+    a = m_toolBar->addAction(QIcon(QLatin1String(":/icons/layout-9.png")),
                            tr("3x3"), mapper, SLOT(map()));
     mapper->setMapping(a, 3);
-	a = m_toolBar->addAction(QIcon(QLatin1String(":/icons/layout-16.png")),
+    a = m_toolBar->addAction(QIcon(QLatin1String(":/icons/layout-12.png")),
+                           tr("4x3"), mapper, SLOT(map()));
+    mapper->setMapping(a, QString("4x3"));
+    a = m_toolBar->addAction(QIcon(QLatin1String(":/icons/layout-16.png")),
                            tr("4x4"), mapper, SLOT(map()));
     mapper->setMapping(a, 4);
+    a = m_toolBar->addAction(QIcon(QLatin1String(":/icons/layout-32.png")),
+                           tr("8x4"), mapper, SLOT(map()));
+    mapper->setMapping(a, QString("8x4"));
 
     spacer = new QWidget;
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);

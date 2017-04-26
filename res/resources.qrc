@@ -47,5 +47,7 @@
         <file>exclamation-yellow.png</file>
         <file>collapse-all.png</file>
         <file>expand-all.png</file>
+        <file>layout-12.png</file>
+        <file>layout-32.png</file>
     </qresource>
 </RCC>
