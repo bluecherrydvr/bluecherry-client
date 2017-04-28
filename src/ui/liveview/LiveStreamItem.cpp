@@ -142,8 +142,6 @@ void LiveStreamItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWi
         return;
     }
 
-
-
     /* For advanced GL textures that were invalidated (deleted when the relevant context
      * was not current), attempt to delete them here if appropriate. */
     /*const bool glContextChanged = QGLContext::currentContext() != m_texLastContext;
@@ -225,9 +223,10 @@ void LiveStreamItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWi
         p->drawImage(opt->rect, frame);
         p->restore();
 
-        m_stream.data()->setFrameSizeHint(opt->rect.width(), opt->rect.height());
+        /* In some cases opt rect width and height may be negative */
+        if (opt->rect.width() > 0 && opt->rect.height() > 0)
+            m_stream.data()->setFrameSizeHint(opt->rect.width(), opt->rect.height());
     }
-
 }
 /*
 void LiveStreamItem::updateSettings()

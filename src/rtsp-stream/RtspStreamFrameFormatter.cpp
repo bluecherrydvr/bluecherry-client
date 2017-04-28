@@ -142,6 +142,10 @@ void RtspStreamFrameFormatter::updateSWSContext(int dstWidth, int dstHeight)
         break;
     case AV_PIX_FMT_YUVJ440P :
         pixFormat = AV_PIX_FMT_YUV440P;
+        break;
+    case AV_PIX_FMT_NONE:
+        pixFormat = AV_PIX_FMT_YUV420P; /* Try mostly used format */
+        break;
     default:
         pixFormat = (AVPixelFormat) m_stream->codecpar->format;
         break;
