@@ -66,11 +66,11 @@ void ServerMenu::createActions()
 
 	addSeparator();
 
-	m_configureServerAction = addAction(tr("Refresh devices"), m_server, SLOT(updateCameras()));
-	m_configureServerAction->setEnabled(m_server->isOnline());
-	connect(m_server, SIGNAL(onlineChanged(bool)), m_configureServerAction, SLOT(setEnabled(bool)));
+    m_refreshDevicesAction = addAction(tr("Refresh devices"), m_server, SLOT(updateCameras()));
+    m_refreshDevicesAction->setEnabled(m_server->isOnline());
+    connect(m_server, SIGNAL(onlineChanged(bool)), m_refreshDevicesAction, SLOT(setEnabled(bool)));
 
-	m_configureServerAction = addAction(tr("Settings"), this, SIGNAL(openServerSettings()));
+    m_settingsAction = addAction(tr("Settings"), this, SIGNAL(openServerSettings()));
 
 	updateMenuForServer();
 }
@@ -90,6 +90,6 @@ void ServerMenu::retranslateUI()
 	m_connectAction->setText(m_server->isOnline() ? tr("Disconnect") : tr("Connect"));
 	m_browseEventsAction->setText(tr("Browse &events"));
 	m_configureServerAction->setText(tr("&Configure server"));
-	m_configureServerAction->setText(tr("Refresh devices"));
-	m_configureServerAction->setText(tr("Settings"));
+    m_refreshDevicesAction->setText(tr("Refresh devices"));
+    m_settingsAction->setText(tr("Settings"));
 }
