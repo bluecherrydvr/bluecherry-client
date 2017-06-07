@@ -23,6 +23,7 @@
 #include <QByteArray>
 #include <QTimer>
 #include <QDebug>
+#include <QSettings>
 
 #include "MpvVideoPlayerBackend.h"
 #include "video/VideoHttpBuffer.h"
@@ -150,6 +151,20 @@ bool MpvVideoPlayerBackend::createMpvProcess()
     }
 
     mpv_set_option(m_mpv, "wid", MPV_FORMAT_INT64, &m_id);
+
+    {
+        QSettings settings;
+        QString vo = settings.value(QLatin1String("eventPlayer/mpv_vo"), QLatin1String("default")).toString();
+
+        if (vo == QLatin1String("default"))
+    #ifdef Q_OS_WIN
+            vo = QLatin1String("opengl,direct3d,sdl");
+    #else
+            vo = QLatin1String("");
+    #endif
+        mpv_set_option_string(m_mpv, "vo", vo.toAscii().data());
+    }
+
 
     mpv_set_option_string(m_mpv, "input-default-bindings", "yes");
     mpv_set_option_string(m_mpv, "input-vo-keyboard", "yes");

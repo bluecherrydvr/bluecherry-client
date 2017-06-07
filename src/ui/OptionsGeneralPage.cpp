@@ -48,14 +48,14 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
 
 	layout->addLayout(languagesLayout);
 
-    QFormLayout *mplayervoLayout = new QFormLayout();
-    m_mplayervo = new QComboBox();
-    fillMplayerVOComboBox();
-    m_mplayervo->setCurrentIndex(m_mplayervo->findText(
-                                     settings.value(QLatin1String("eventPlayer/mplayer_vo"), QLatin1String("default")).toString()));
-    mplayervoLayout->addRow(new QLabel(tr("MPlayer video output driver:")), m_mplayervo);
+    QFormLayout *mpvvoLayout = new QFormLayout();
+    m_mpvvo = new QComboBox();
+    fillMpvVOComboBox();
+    m_mpvvo->setCurrentIndex(m_mpvvo->findText(
+                                     settings.value(QLatin1String("eventPlayer/mpv_vo"), QLatin1String("default")).toString()));
+    mpvvoLayout->addRow(new QLabel(tr("MPV video output driver:")), m_mpvvo);
 
-    layout->addLayout(mplayervoLayout);
+    layout->addLayout(mpvvoLayout);
 
 
     m_closeToTray = new QCheckBox(tr("Close to tray"));
@@ -161,9 +161,9 @@ void OptionsGeneralPage::fillLanguageComboBox()
 		m_languages->addItem(it.value(), it.key());
 }
 
-void OptionsGeneralPage::fillMplayerVOComboBox()
+void OptionsGeneralPage::fillMpvVOComboBox()
 {
-    m_mplayervo->addItems(bcApp->mplayerVideoOutputs());
+    m_mpvvo->addItems(bcApp->mpvVideoOutputs());
 }
 
 void OptionsGeneralPage::saveChanges()
@@ -173,7 +173,7 @@ void OptionsGeneralPage::saveChanges()
     bcApp->releaseLive();
 	settings.setValue(QLatin1String("ui/main/language"), m_languages->itemData(m_languages->currentIndex()));
 	bcApp->languageController()->loadLanguage(m_languages->itemData(m_languages->currentIndex()).toString());
-    settings.setValue(QLatin1String("eventPlayer/mplayer_vo"), m_mplayervo->itemText(m_mplayervo->currentIndex()));
+    settings.setValue(QLatin1String("eventPlayer/mpv_vo"), m_mpvvo->itemText(m_mpvvo->currentIndex()));
     settings.setValue(QLatin1String("ui/main/closeToTray"), m_closeToTray->isChecked());
     bcApp->mainWindow->updateTrayIcon();
     settings.setValue(QLatin1String("ui/liveview/autoDeinterlace"), m_deinterlace->isChecked());
