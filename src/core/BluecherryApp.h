@@ -93,7 +93,7 @@ public:
 
     static QStringList absolutePaths(const QStringList &paths);
 
-    static QStringList mplayerVideoOutputs();
+    static QStringList mpvVideoOutputs();
 
 public slots:
     void pauseLive();

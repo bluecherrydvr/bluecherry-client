@@ -45,10 +45,10 @@ private:
                     *m_ssFullscreen, *m_ssVideo, *m_ssNever;
 
 	QComboBox *m_languages;
-    QComboBox *m_mplayervo;
+    QComboBox *m_mpvvo;
 
-	void fillLanguageComboBox();
-    void fillMplayerVOComboBox();
+    void fillLanguageComboBox();
+    void fillMpvVOComboBox();
 };
 
 #endif // OPTIONSGENERALPAGE_H
