@@ -104,18 +104,17 @@ AVFrame * RtspStreamFrameFormatter::scaleFrame(AVFrame* avFrame, int width, int 
 
     updateSWSContext(width, height);
 
+    if (!m_sws_context)
+        return NULL;
+
     int bufSize  = av_image_get_buffer_size(m_pixelFormat, width, height, 1);
     uint8_t *buf = (uint8_t*) av_malloc(bufSize);
 
     AVFrame *result = av_frame_alloc();
 
     av_image_fill_arrays(result->data, result->linesize, buf, m_pixelFormat, width, height, 1);
-
-    if (m_sws_context)
-        sws_scale(m_sws_context, (const uint8_t**)avFrame->data, avFrame->linesize, 0, m_height,
-                  result->data, result->linesize);
-    else
-        qDebug() << "RtspStreamFrameFormatter: Skip frame scalling";
+    sws_scale(m_sws_context, (const uint8_t**)avFrame->data, avFrame->linesize, 0, m_height,
+              result->data, result->linesize);
 
     result->width = width;
     result->height = height;
@@ -144,10 +143,9 @@ void RtspStreamFrameFormatter::updateSWSContext(int dstWidth, int dstHeight)
     case AV_PIX_FMT_YUVJ440P :
         pixFormat = AV_PIX_FMT_YUV440P;
         break;
-    case AV_PIX_FMT_NONE :
-        m_sws_context = NULL;
-        qDebug() << "RtspStreamFrameFormatter: Frame format not recognized!";
-        return;
+    case AV_PIX_FMT_NONE:
+        pixFormat = AV_PIX_FMT_YUV420P; /* Try mostly used format */
+        break;
     default:
         pixFormat = (AVPixelFormat) m_stream->codecpar->format;
         break;
