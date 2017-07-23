@@ -441,7 +441,6 @@ void RtspStreamWorker::openCodecs(AVFormatContext *context, AVDictionary *option
         {
             m_videoStreamIndex = i;
             m_videoCodecCtx = avctx;
-            setFrameSizeHint(m_videoCodecCtx->width, m_videoCodecCtx->height);
         }
 
         if (stream->codecpar->codec_type==AVMEDIA_TYPE_AUDIO)
