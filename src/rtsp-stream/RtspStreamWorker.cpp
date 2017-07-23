@@ -237,9 +237,6 @@ AVFrame * RtspStreamWorker::extractVideoFrame(AVPacket &packet)
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
         return 0;
 
-    if (m_ctx->streams[m_videoStreamIndex]->codecpar->format == AV_PIX_FMT_NONE)
-        return 0;
-
     if (m_hwaccelEnabled)
     {
 #if defined(Q_OS_LINUX)
