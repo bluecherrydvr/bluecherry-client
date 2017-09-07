@@ -21,6 +21,7 @@ ExternalProject_Add(ffmpeg
         --enable-shared
         --enable-vaapi
 	--enable-hwaccel=h264_vaapi
+	--enable-hwaccel=hevc_vaapi
                 
 	--enable-opengl
         --enable-xlib 
@@ -49,6 +50,7 @@ ExternalProject_Add(ffmpeg
         --enable-demuxer=rawvideo
                
         --enable-decoder=h264
+	--enable-decoder=hevc
         --enable-decoder=mpeg4
         --enable-decoder=mjpeg
 	--enable-decoder=rawvideo
@@ -63,6 +65,7 @@ ExternalProject_Add(ffmpeg
 	--enable-decoder=adpcm_g726le
 
 	--enable-parser=h264
+	--enable-parser=hevc
         --enable-parser=mpeg4video
         --enable-parser=mjpeg
                 
