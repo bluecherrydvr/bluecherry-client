@@ -474,6 +474,11 @@ bool RtspStreamWorker::openCodecs(AVFormatContext *context, AVDictionary *option
         emit fatalError(QString::fromLatin1("Failed to open video stream"));
         return false;
     }
+    else if (context->streams[m_videoStreamIndex]->codecpar->format == AV_PIX_FMT_NONE)
+    {
+        emit fatalError(QString::fromLatin1("Unknown pixel format in video stream"));
+        return false;
+    }
 
     return true;
 }
