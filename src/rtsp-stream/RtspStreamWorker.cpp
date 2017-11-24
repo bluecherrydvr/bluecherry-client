@@ -319,7 +319,9 @@ bool RtspStreamWorker::prepareStream(AVFormatContext **context, AVDictionary *op
     if (!findStreamInfo(*context, options))
         return false;
 
-    openCodecs(*context, options);
+    if (!openCodecs(*context, options))
+        return false;
+
     return true;
 }
 
@@ -395,7 +397,7 @@ void RtspStreamWorker::destroyStreamOptions(AVFormatContext *context, AVDictiona
     delete[] streamOptions;
 }
 
-void RtspStreamWorker::openCodecs(AVFormatContext *context, AVDictionary *options)
+bool RtspStreamWorker::openCodecs(AVFormatContext *context, AVDictionary *options)
 {
     for (unsigned int i = 0; i < context->nb_streams; i++)
     {
@@ -466,6 +468,14 @@ void RtspStreamWorker::openCodecs(AVFormatContext *context, AVDictionary *option
 
     qDebug() << "video stream index: " << m_videoStreamIndex;
     qDebug() << "audio steam index: " << m_audioStreamIndex;
+
+    if (m_videoStreamIndex == -1)
+    {
+        emit fatalError(QString::fromLatin1("Failed to open video stream"));
+        return false;
+    }
+
+    return true;
 }
 
 bool RtspStreamWorker::openCodec(AVStream *stream, AVCodecContext *avctx, AVDictionary *options)

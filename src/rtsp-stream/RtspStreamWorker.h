@@ -95,7 +95,7 @@ private:
     bool findStreamInfo(AVFormatContext *context, AVDictionary *options);
     AVDictionary ** createStreamsOptions(AVFormatContext *context, AVDictionary *options) const;
     void destroyStreamOptions(AVFormatContext *context, AVDictionary **streamOptions);
-    void openCodecs(AVFormatContext *context, AVDictionary *options);
+    bool openCodecs(AVFormatContext *context, AVDictionary *options);
     bool openCodec(AVStream *stream, AVCodecContext *avctx, AVDictionary *options);
 
     void pause();
