@@ -26,7 +26,7 @@
 #include "EventsWindow.h"
 #include "AboutDialog.h"
 #include "OptionsServerPage.h"
-#include "ServerConfigWindow.h"
+#include <QDesktopServices>
 #include "EventsView.h"
 #include "EventViewWindow.h"
 #include "SetupWizard.h"
@@ -612,9 +612,7 @@ void MainWindow::openServerConfig()
     if (!server)
         return;
 
-    ServerConfigWindow::instance()->setServer(server);
-    ServerConfigWindow::instance()->show();
-    ServerConfigWindow::instance()->raise();
+    QDesktopServices::openUrl(server->url());
 }
 
 void MainWindow::refreshServerDevices()
@@ -772,9 +770,7 @@ void MainWindow::serverDevicesLoaded()
         msg.exec();
         if (msg.clickedButton() == yes)
         {
-            ServerConfigWindow::instance()->setServer(server);
-            ServerConfigWindow::instance()->show();
-            ServerConfigWindow::instance()->raise();
+            QDesktopServices::openUrl(server->url());
         }
     }
 }

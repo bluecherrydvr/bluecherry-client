@@ -762,7 +762,7 @@ IF (QT_QMAKE_EXECUTABLE AND QTVERSION)
   ########################################
 
   SET(QT_MODULES QtGui Qt3Support QtSvg QtScript QtTest QtUiTools
-                 QtHelp QtWebKit QtXmlPatterns phonon QtNetwork QtMultimedia
+                 QtHelp QtXmlPatterns phonon QtNetwork QtMultimedia
                  QtNsPlugin QtOpenGL QtSql QtXml QtDesigner QtDBus QtScriptTools
                  QtDeclarative)
   

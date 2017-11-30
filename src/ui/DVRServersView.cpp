@@ -19,7 +19,7 @@
 #include "model/DVRServersModel.h"
 #include "OptionsDialog.h"
 #include "OptionsServerPage.h"
-#include "ServerConfigWindow.h"
+#include <QDesktopServices>
 #include "server/DVRServer.h"
 #include "core/BluecherryApp.h"
 #include "MainWindow.h"
@@ -227,9 +227,7 @@ void DVRServersView::mouseDoubleClickEvent(QMouseEvent *event)
 
     if (server)
     {
-        ServerConfigWindow::instance()->setServer(server);
-        ServerConfigWindow::instance()->show();
-        ServerConfigWindow::instance()->raise();
+        QDesktopServices::openUrl(server->url());
         return;
     }
 

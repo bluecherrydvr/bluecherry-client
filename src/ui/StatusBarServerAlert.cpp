@@ -16,7 +16,7 @@
  */
 
 #include "StatusBarServerAlert.h"
-#include "ServerConfigWindow.h"
+#include <QDesktopServices>
 #include "server/DVRServer.h"
 #include "server/DVRServerConfiguration.h"
 #include "server/DVRServerRepository.h"
@@ -80,7 +80,5 @@ void StatusBarServerAlert::mousePressEvent(QMouseEvent *ev)
         return;
 
     ev->accept();
-    ServerConfigWindow::instance()->setServer(servers[0]);
-    ServerConfigWindow::instance()->show();
-    ServerConfigWindow::instance()->raise();
+    QDesktopServices::openUrl(servers[0]->url());
 }
