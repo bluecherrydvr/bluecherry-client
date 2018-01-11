@@ -95,6 +95,7 @@ private:
     bool m_pausedBySlowDownload;
     double m_duration;
     double m_position;
+    double m_timepos;
 
     void setVideoBuffer(VideoHttpBuffer *videoHttpBuffer);
     bool createMpvProcess();

@@ -108,6 +108,7 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     sliderLayout->addWidget(m_startTime);
 
     m_seekSlider = new CustomSlider(Qt::Horizontal);
+    m_seekSlider->setRange(0, 100);
     connect(m_seekSlider, SIGNAL(valueChanged(int)), SLOT(seek(int)));
     sliderLayout->addWidget(m_seekSlider);
 
@@ -641,9 +642,6 @@ void EventVideoPlayer::durationChanged(int msDuration)
         //return;
         msDuration = m_videoBackend.data()->duration();
 
-    m_seekSlider->blockSignals(true);
-    m_seekSlider->setMaximum(msDuration);
-    m_seekSlider->blockSignals(false);
     updatePosition();
 }
 
@@ -681,17 +679,15 @@ void EventVideoPlayer::updateSliderPosition(double position)
         return;
     }
 
-    int msPosition = static_cast<int>(position > 0 ? position * 1000.0 : -1);
-
     if (m_videoBackend.data()->atEnd())
     {
-        msPosition = m_seekSlider->maximum();
+        position = 100;
     }
 
     if (!m_seekSlider->isSliderDown())
     {
         m_seekSlider->blockSignals(true);
-        m_seekSlider->setValue(msPosition);
+        m_seekSlider->setValue(position);
         m_seekSlider->blockSignals(false);
     }
 }

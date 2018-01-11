@@ -93,7 +93,7 @@ void MpvVideoPlayerBackend::checkDownloadAndPlayProgress()
 
     if (m_playDuringDownload && m_state == Playing)
     {
-        if (m_videoBuffer->bufferedPercent() - qRound((m_position / m_duration) * 100) < DOWNLOADED_THRESHOLD)
+        if (m_videoBuffer->bufferedPercent() - m_position < DOWNLOADED_THRESHOLD)
         {
             pause();
             m_pausedBySlowDownload = true;
@@ -103,7 +103,7 @@ void MpvVideoPlayerBackend::checkDownloadAndPlayProgress()
 
     if (m_pausedBySlowDownload && m_state == Paused)
     {
-        if (m_videoBuffer->bufferedPercent() - qRound((m_position / m_duration) * 100) > DOWNLOADED_THRESHOLD)
+        if (m_videoBuffer->bufferedPercent() - m_position > DOWNLOADED_THRESHOLD)
         {
             m_pausedBySlowDownload = false;
             play();
@@ -170,8 +170,8 @@ bool MpvVideoPlayerBackend::createMpvProcess()
     mpv_set_option_string(m_mpv, "input-vo-keyboard", "yes");
     mpv_set_option_string(m_mpv, "input-cursor", "no");
     mpv_set_option_string(m_mpv, "cursor-autohide", "no");
-    mpv_set_option_string(m_mpv, "hr-seek", "yes");
 
+    mpv_observe_property(m_mpv, 0, "percent-pos", MPV_FORMAT_DOUBLE);
     mpv_observe_property(m_mpv, 0, "time-pos", MPV_FORMAT_DOUBLE);
     mpv_observe_property(m_mpv, 0, "duration", MPV_FORMAT_DOUBLE);
     mpv_observe_property(m_mpv, 0, "pause", MPV_FORMAT_FLAG);
@@ -330,7 +330,7 @@ void MpvVideoPlayerBackend::play()
 
     if (m_pausedBySlowDownload)
     {
-        if (m_videoBuffer->bufferedPercent() - qRound((m_position / m_duration) * 100) > DOWNLOADED_THRESHOLD)
+        if (m_videoBuffer->bufferedPercent() - m_position > DOWNLOADED_THRESHOLD)
             m_pausedBySlowDownload = false;
         else
             return;
@@ -366,6 +366,7 @@ void MpvVideoPlayerBackend::restart()
     if (!m_mpv)
         return;
 
+    qDebug() << "restart()";
     const char *arg[] = { "stop", NULL };
     mpv_command(m_mpv, arg);
 
@@ -384,6 +385,7 @@ void MpvVideoPlayerBackend::restart()
 
 void MpvVideoPlayerBackend::playForward()
 {
+    qDebug() << "playForward()";
     if (m_state != Forward)
     {
         VideoState old = m_state;
@@ -391,7 +393,7 @@ void MpvVideoPlayerBackend::playForward()
         emit stateChanged(m_state, old);
     }
 
-    if (m_position >= m_duration)
+    if (m_position >= 100)
     {
         pause();
         return;
@@ -469,16 +471,20 @@ bool MpvVideoPlayerBackend::seek(int position)
         return false;
 
     if (m_playDuringDownload &&
-            m_videoBuffer->bufferedPercent() - qRound(position * 100 / duration()) < DOWNLOADED_THRESHOLD + 1)
+            m_videoBuffer->bufferedPercent() - position < DOWNLOADED_THRESHOLD + 1)
         return false;
 
-    char num[32];
-    double pos = double (position);
-    pos /= 1000;
-    sprintf(num, "%.3f", pos);
-
-    const char *cmd[] = { "seek", num, "absolute", NULL };
-    mpv_command(m_mpv, cmd);
+    if (m_duration > 0)
+    {
+        const char *cmd[] = { "seek", QString::number(position).toLatin1().constData(), "absolute-percent", "exact", NULL };
+        mpv_command(m_mpv, cmd);
+    }
+    else if (m_position > 0)
+    {
+        double seekval = (position - m_position) * m_timepos / m_position;
+        const char *cmd[] = { "seek", QString::number(seekval).toLatin1().constData(), "relative", "exact", NULL };
+        mpv_command(m_mpv, cmd);
+    }
 
     return true;
 }
@@ -560,7 +566,7 @@ void MpvVideoPlayerBackend::handleMpvEvent(mpv_event *event)
         case MPV_EVENT_PROPERTY_CHANGE:
         {
             mpv_event_property *prop = (mpv_event_property *)event->data;
-            if (strcmp(prop->name, "time-pos") == 0)
+            if (strcmp(prop->name, "percent-pos") == 0)
             {
                 if (prop->format == MPV_FORMAT_DOUBLE)
                 {
@@ -574,6 +580,13 @@ void MpvVideoPlayerBackend::handleMpvEvent(mpv_event *event)
                     emit currentPosition(m_position);
                 }
             }
+            else if (strcmp(prop->name, "time-pos") == 0)
+            {
+                if (prop->format == MPV_FORMAT_DOUBLE)
+                {
+                    m_timepos = *(double *)prop->data;
+                }
+            }
             else if (strcmp(prop->name, "duration") == 0)
             {
                 if (prop->format == MPV_FORMAT_DOUBLE)
@@ -582,6 +595,9 @@ void MpvVideoPlayerBackend::handleMpvEvent(mpv_event *event)
                     if (m_duration != duration)
                     {
                         m_duration = duration;
+
+                        if (m_duration > 0)
+                            mpv_set_option_string(m_mpv, "hr-seek", "yes");
                         durationIsKnown();
                     }
                 }
