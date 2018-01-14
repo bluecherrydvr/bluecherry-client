@@ -31,9 +31,6 @@ if ( UNIX )
 	include(cmake/AddExternalFFmpeg.cmake)
     endif()
 
-    if (NOT BC_NO_BUNDLED_MPLAYER AND NOT APPLE)
-	include(cmake/AddExternalMplayer.cmake)
-    endif()
 
 endif()
 
