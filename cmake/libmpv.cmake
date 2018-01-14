@@ -21,6 +21,7 @@ find_package (LibMPV  REQUIRED)
 
 include_directories (${LIBMPV_INCLUDE_DIRS})
 
+link_directories (${LIBAVCODEC_LIBRARY_DIRS})
 
 list (APPEND bluecherry_client_LIBRARIES
 	${LIBMPV_LIBRARIES}

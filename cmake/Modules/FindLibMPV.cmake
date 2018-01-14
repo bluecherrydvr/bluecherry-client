@@ -28,7 +28,9 @@ find_library (LIBMPV_LIBRARY NAMES mpv HINTS ${LIBMPV_LIBDIR} ${LIBMPV_LIBRARY_D
 list (APPEND LIBMPV_LIBRARIES ${LIBMPV_LIBRARY})
 
 if (UNIX AND NOT APPLE)
-	list (APPEND LIBMPV_LIBRARIES "-lX11")
+	find_library (LIBASS_LIBRARY NAMES ass HINTS ${LIBMPV_LIBDIR} ${LIBMPV_LIBRARY_DIRS})
+	list (APPEND LIBMPV_LIBRARIES ${LIBASS_LIBRARY} "-lX11" "-lz" "-lXrandr" "-lXinerama" "-lXext" "-lswresample" "-lva"
+	      "-lva-x11" "-lXv" "-lavfilter" "-lXss" "-lfreetype" "-lfribidi" "-lGL" "-lasound")
 endif()
 
 include (FindPackageHandleStandardArgs)
