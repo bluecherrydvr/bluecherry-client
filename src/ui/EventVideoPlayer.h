@@ -66,7 +66,6 @@ private slots:
     void stateChanged(int state);
     void durationChanged(int msDuration = -1);
     void playbackSpeedChanged(double playbackSpeed);
-    void updatePosition();
     void updateSliderPosition(double position);
     void videoNonFatalError(const QString &message);
     void streamsInitialized(bool hasAudioSupport);

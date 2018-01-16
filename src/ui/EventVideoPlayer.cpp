@@ -345,6 +345,8 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
 
 	settingsChanged();
 
+    m_seekSlider->setRange(0, 100);
+
     connect(m_videoBackend.data(), SIGNAL(stateChanged(int,int)), SLOT(stateChanged(int)));
     connect(m_videoBackend.data(), SIGNAL(nonFatalError(QString)), SLOT(videoNonFatalError(QString)));
     connect(m_videoBackend.data(), SIGNAL(durationChanged(int)), SLOT(durationChanged(int)));
@@ -622,8 +624,6 @@ void EventVideoPlayer::stateChanged(int state)
     else
         m_playBtn->setIcon(QIcon(QLatin1String(":/icons/control.png")));
 
-    updatePosition();
-
     if (state == VideoPlayerBackend::Error || state == VideoPlayerBackend::PermanentError)
     {
         m_statusText->setText(QLatin1String("<span style='color:red;font-weight:bold'>") +
@@ -638,31 +638,6 @@ void EventVideoPlayer::durationChanged(int msDuration)
     if (!m_videoBackend)
         return;
 
-    if (msDuration == -1)
-        //return;
-        msDuration = m_videoBackend.data()->duration();
-
-    updatePosition();
-}
-
-void EventVideoPlayer::updatePosition()
-{
-    Q_ASSERT(QThread::currentThread() == qApp->thread());
-
-    if (!m_videoBackend)
-        return;
-
-    if (!m_seekSlider->maximum())
-    {
-        int msDuration = m_videoBackend.data()->duration();
-        if (msDuration)
-        {
-            durationChanged(msDuration);
-            return;
-        }
-    }
-
-    m_videoBackend.data()->queryPosition();
 }
 
 void EventVideoPlayer::updateSliderPosition(double position)
