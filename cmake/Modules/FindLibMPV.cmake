@@ -29,7 +29,7 @@ list (APPEND LIBMPV_LIBRARIES ${LIBMPV_LIBRARY})
 
 if (UNIX AND NOT APPLE)
 	find_library (LIBASS_LIBRARY NAMES ass HINTS ${LIBMPV_LIBDIR} ${LIBMPV_LIBRARY_DIRS})
-	list (APPEND LIBMPV_LIBRARIES ${LIBASS_LIBRARY} "-lX11" "-lz" "-lXrandr" "-lXinerama" "-lXext" "-lswresample" "-lva"
+	list (APPEND LIBMPV_LIBRARIES ${LIBASS_LIBRARY} "-ldl" "-lpthread" "-lX11" "-lz" "-lXrandr" "-lXinerama" "-lXext" "-lswresample" "-lva"
 	      "-lva-x11" "-lXv" "-lavfilter" "-lXss" "-lfreetype" "-lfribidi" "-lGL" "-lasound")
 endif()
 
