@@ -41,5 +41,5 @@ set_property (TARGET bluecherry-client PROPERTY INSTALL_RPATH_USE_LINK_PATH FALS
 set_property (TARGET bluecherry-client PROPERTY INSTALL_RPATH /usr/lib/bluecherry/client )
 
 if (UNIX AND NOT APPLE)
-    add_dependencies(bluecherry-client ffmpeg mplayer)
+    add_dependencies(bluecherry-client ffmpeg)
 endif()

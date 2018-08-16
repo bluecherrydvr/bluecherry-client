@@ -25,13 +25,6 @@ if (UNIX AND NOT APPLE)
 	install (FILES "res/bluecherry-client.png" DESTINATION share/icons)
 
         install (FILES ${TRANSLATION_FILES} DESTINATION "${CMAKE_INSTALL_DATADIR}/bluecherry-client/translations")
-	if (NOT BC_NO_BUNDLED_MPLAYER)
-		# mplayer
-		install( PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/ffmpeg/install/usr/bin/mplayer"
-			DESTINATION bin
-			RENAME bc-mplayer
-		)
-	endif()
 	if (NOT BC_NO_BUNDLED_FFMPEG)
 		# ffmpeg
 		install( DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/ffmpeg/install/usr/lib/bluecherry"
