@@ -27,6 +27,7 @@ cp $BUILD_DIR/*.qm $1/Contents/Resources/translations/
 
 #echo "Copying mplayer..."
 #cp mplayer-bin/mac/mplayer $1/Contents/MacOS/
+cp -a ~/bc-dev/libmpv/lib/lib*.dylib $1/Contents/Frameworks/
 
 echo "Copying libav..."
 #LIBAV_PATH=/usr/lib/bluecherry/client
