@@ -28,6 +28,7 @@
 #include "MpvVideoPlayerBackend.h"
 #include "video/VideoHttpBuffer.h"
 #include "mpv/qthelper.hpp"
+#include <locale.h>
 
 #define DOWNLOADED_THRESHOLD 10
 
@@ -51,7 +52,7 @@ MpvVideoPlayerBackend::MpvVideoPlayerBackend(QObject *parent)
       m_duration(-1), m_position(-1)
 {
 #ifndef Q_OS_WIN
-    std::setlocale(LC_NUMERIC, "C");
+    setlocale(LC_NUMERIC, "C");
 #endif
 
     qDebug() << "MpvVideoPlayerBackend() this =" << this << "\n";
