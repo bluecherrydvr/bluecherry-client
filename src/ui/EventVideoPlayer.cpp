@@ -138,8 +138,8 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     m_forward->setIcon(QIcon(QLatin1String(":/icons/control-double-000-small.png")));
     btnLayout->addWidget(m_forward);
 
-    /*QSettings settings;
-
+    QSettings settings;
+/*
     if (settings.value(QLatin1String("ui/disableScreensaver/onVideo")).toBool())
     {
         bcApp->setScreensaverInhibited(true);
@@ -310,9 +310,9 @@ EventVideoPlayer::~EventVideoPlayer()
         m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "deleteLater", Qt::QueuedConnection);
 #endif
     }
-/*
+
     QSettings settings;
-    if (settings.value(QLatin1String("ui/disableScreensaver/onVideo")).toBool())
+/*    if (settings.value(QLatin1String("ui/disableScreensaver/onVideo")).toBool())
     {
         bcApp->setScreensaverInhibited(false);
     }*/
