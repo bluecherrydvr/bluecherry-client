@@ -138,7 +138,7 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
 */
     layout->addStretch();
 }
-
+/*
 void OptionsGeneralPage::ssUpdateForNever()
 {
     if (m_ssNever->isChecked())
@@ -153,7 +153,7 @@ void OptionsGeneralPage::ssUpdateForOthers(bool checked)
     if (!checked && m_ssNever->isChecked())
 		m_ssNever->setChecked(false);
 }
-
+*/
 void OptionsGeneralPage::fillLanguageComboBox()
 {
 	QMap<QString, QString> supportedLanguages = bcApp->languageController()->supportedLanguages();
