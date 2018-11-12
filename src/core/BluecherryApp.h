@@ -87,7 +87,7 @@ public:
 
     void sendSettingsChanged();
 
-    bool screensaverInhibited() const { return m_screensaverInhibited; }
+//    bool screensaverInhibited() const { return m_screensaverInhibited; }
 
     void setLanguageController(const QSharedPointer<LanguageController> &controller);
 

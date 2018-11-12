@@ -116,9 +116,9 @@ void MpvVideoWidget::setFullScreen(bool on)
         showNormal();
     }
 
-    QSettings settings;
+    /*QSettings settings;
     if (settings.value(QLatin1String("ui/disableScreensaver/onFullscreen")).toBool())
-        bcApp->setScreensaverInhibited(on);
+        bcApp->setScreensaverInhibited(on);*/
 }
 
 void MpvVideoWidget::resizeEvent(QResizeEvent *ev)

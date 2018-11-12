@@ -439,9 +439,9 @@ void LiveViewWindow::setFullScreen(bool on)
             showNormal();
     }
 
-    QSettings settings;
-    if (settings.value(QLatin1String("ui/disableScreensaver/onFullscreen")).toBool())
-        bcApp->setScreensaverInhibited(on);
+//    QSettings settings;
+//    if (settings.value(QLatin1String("ui/disableScreensaver/onFullscreen")).toBool())
+//        bcApp->setScreensaverInhibited(on);
 }
 
 void LiveViewWindow::updateLayoutActionStates()

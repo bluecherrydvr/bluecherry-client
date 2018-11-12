@@ -138,12 +138,12 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
     m_forward->setIcon(QIcon(QLatin1String(":/icons/control-double-000-small.png")));
     btnLayout->addWidget(m_forward);
 
-    QSettings settings;
+    /*QSettings settings;
 
     if (settings.value(QLatin1String("ui/disableScreensaver/onVideo")).toBool())
     {
         bcApp->setScreensaverInhibited(true);
-    }
+    }*/
 
     m_muteBtn = new QToolButton;
     m_muteBtn->setCheckable(true);
@@ -310,12 +310,12 @@ EventVideoPlayer::~EventVideoPlayer()
         m_videoBackend.data()->metaObject()->invokeMethod(m_videoBackend.data(), "deleteLater", Qt::QueuedConnection);
 #endif
     }
-
+/*
     QSettings settings;
     if (settings.value(QLatin1String("ui/disableScreensaver/onVideo")).toBool())
     {
         bcApp->setScreensaverInhibited(false);
-    }
+    }*/
     settings.setValue(QLatin1String("eventPlayer/isMuted"), m_muteBtn->isChecked());
     settings.setValue(QLatin1String("eventPlayer/volume"), m_volumeSlider->value());
 

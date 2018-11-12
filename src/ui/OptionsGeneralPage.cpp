@@ -108,7 +108,7 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
 
     connect(m_startup, SIGNAL(toggled(bool)), SLOT(updateStartup(bool)));
 
-
+/*
 #if defined(Q_OS_WIN) || defined(Q_OS_MAC) || defined(Q_OS_LINUX)
     m_ssFullscreen = new QCheckBox(tr("Viewing live or recorded video in fullscreen"));
     m_ssVideo = new QCheckBox(tr("Playing recorded video"));
@@ -135,7 +135,7 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
 #else
     m_ssVideo = m_ssFullscreen = m_ssNever = 0;
 #endif
-
+*/
     layout->addStretch();
 }
 
@@ -186,14 +186,14 @@ void OptionsGeneralPage::saveChanges()
     if (m_vaapiDecodingAcceleration)
         settings.setValue(QLatin1String("ui/liveview/enableVAAPIdecoding"), m_vaapiDecodingAcceleration->isChecked());
 
-    if (m_ssFullscreen && m_ssVideo && m_ssNever)
-    {
-        /* If 'always' is set, don't enable the other options (even though they appear enabled in the UI),
-         * because they would complicate the logic for maintaining the appropriate screensaver state. */
-        settings.setValue(QLatin1String("ui/disableScreensaver/onFullscreen"), m_ssFullscreen->isChecked());
-        settings.setValue(QLatin1String("ui/disableScreensaver/onVideo"), m_ssVideo->isChecked());
-        settings.setValue(QLatin1String("ui/disableScreensaver/always"), m_ssNever->isChecked());
-    }
+//    if (m_ssFullscreen && m_ssVideo && m_ssNever)
+//    {
+//        /* If 'always' is set, don't enable the other options (even though they appear enabled in the UI),
+//         * because they would complicate the logic for maintaining the appropriate screensaver state. */
+//        settings.setValue(QLatin1String("ui/disableScreensaver/onFullscreen"), m_ssFullscreen->isChecked());
+//        settings.setValue(QLatin1String("ui/disableScreensaver/onVideo"), m_ssVideo->isChecked());
+//        settings.setValue(QLatin1String("ui/disableScreensaver/always"), m_ssNever->isChecked());
+//    }
 
     bcApp->sendSettingsChanged();
 }

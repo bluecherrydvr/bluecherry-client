@@ -254,7 +254,7 @@ void BluecherryApp::sendSettingsChanged()
     QSettings settings;
     /* If always is disabled while another condition would keep the screensaver off right now,
      * this will incorrectly turn off inhibition. Detecting this case is complicated. */
-    setScreensaverInhibited(settings.value(QLatin1String("ui/disableScreensaver/always"), true).toBool());
+    //setScreensaverInhibited(settings.value(QLatin1String("ui/disableScreensaver/always"), true).toBool());
 
     if (settings.value(QLatin1String("ui/disableUpdateNotifications"), false).toBool())
         stopUpdateChecker();
@@ -401,7 +401,7 @@ void BluecherryApp::releaseLive()
 #include <Windows.h>
 #endif
 
-void BluecherryApp::setScreensaverInhibited(bool inhibit)
+/*void BluecherryApp::setScreensaverInhibited(bool inhibit)
 {
     if (m_screensaverInhibited == inhibit)
         return;
@@ -448,7 +448,7 @@ void BluecherryApp::setScreensaverInhibited(bool inhibit)
         }
 #endif
     }
-}
+}*/
 
 #ifdef Q_OS_MAC
 void resetSystemActivity(); // PlatformOSX.mm
