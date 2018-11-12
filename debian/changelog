@@ -1,3 +1,9 @@
+bluecherry-client (1:2.2.7-1) trusty; urgency=low
+
+  * New recordings player based on mpv project
+
+ -- Anton Sviridenko <anton@corp.bluecherry.net>  Mon, 12 Nov 2018 22:00:16 +0400
+
 bluecherry-client (1:2.2.6-1) trusty; urgency=low
 
   * Significantly improved liveview performance, now displaying live cameras
