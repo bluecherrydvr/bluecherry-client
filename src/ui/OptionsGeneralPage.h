@@ -34,8 +34,8 @@ public:
     virtual void saveChanges();
 
 private slots:
-    void ssUpdateForNever();
-    void ssUpdateForOthers(bool checked);
+    /*void ssUpdateForNever();
+    void ssUpdateForOthers(bool checked);*/
     void updateStartup(bool on);
 
 private:
