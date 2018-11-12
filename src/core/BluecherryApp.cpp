@@ -243,7 +243,7 @@ void BluecherryApp::newVersionAvailable(const Version &newVersion)
 
 void BluecherryApp::aboutToQuit()
 {
-    setScreensaverInhibited(false);
+    //setScreensaverInhibited(false);
     delete m_thumbnailManager;
 }
 
