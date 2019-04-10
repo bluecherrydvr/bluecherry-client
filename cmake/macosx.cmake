@@ -1,5 +1,5 @@
 #
-# Copyright 2010-2013 Bluecherry
+# Copyright 2010-2019 Bluecherry, LLC
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -40,7 +40,7 @@ set (MACOSX_BUNDLE_LONG_VERSION_STRING ${VERSION})
 set (MACOSX_BUNDLE_BUNDLE_NAME "Bluecherry Client")
 set (MACOSX_BUNDLE_SHORT_VERSION_STRING ${VERSION})
 set (MACOSX_BUNDLE_BUNDLE_VERSION ${VERSION})
-set (MACOSX_BUNDLE_COPYRIGHT "Copyright 2010-2016 Bluecherry")
+set (MACOSX_BUNDLE_COPYRIGHT "Copyright 2010-2019 Bluecherry, LLC")
 
 add_custom_command (
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/bluecherry-client.app/Contents/Resources/qt.conf

@@ -8,7 +8,7 @@
 #  LIBSWSCALE_LIBRARY, where to find the JPEG library.
 
 #
-# Copyright 2010-2013 Bluecherry
+# Copyright 2010-2019 Bluecherry, LLC
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
