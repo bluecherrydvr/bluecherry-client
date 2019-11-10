@@ -1,8 +1,8 @@
 bin_PROGRAMS = bluecherry-client
 
 bluecherry_client_CPPFLAGS =  -I$(srcdir)/src
-bluecherry_client_CXXFLAGS = $(QT_DEPENDENCIES_CFLAGS) $(FFMPEG_CFLAGS)
-bluecherry_client_LDADD = $(QT_DEPENDENCIES_LIBS) $(FFMPEG_LIBS)
+bluecherry_client_CXXFLAGS = $(QT_DEPENDENCIES_CFLAGS) $(FFMPEG_CFLAGS) $(MPV_CFLAGS)
+bluecherry_client_LDADD = $(QT_DEPENDENCIES_LIBS) $(FFMPEG_LIBS) $(MPV_LIBS)
 
 bluecherry_client_SOURCES = \
 src/audio/AudioPlayer.cpp \

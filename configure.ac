@@ -1,5 +1,5 @@
 AC_PREREQ([2.68])
-AC_INIT([Bluecherry client], [2.2.7], [https://github.com/bluecherrydvr/bluecherry-client/issues], [bluecherry-client], [https://bluecherrydvr.com])
+AC_INIT([Bluecherry client], [2.2.8dev], [https://github.com/bluecherrydvr/bluecherry-client/issues], [bluecherry-client], [https://bluecherrydvr.com])
 AM_INIT_AUTOMAKE([-Wall  foreign subdir-objects])
 AC_CONFIG_SRCDIR([src/main.cpp])
 
@@ -28,15 +28,16 @@ AC_ARG_WITH([qt],
 
 AS_IF([test "x$qt_version" = xqt5],
 	[
-	QT_MODULES="Qt5Core Qt5Gui Qt5Sql Qt5Network Qt5Widgets"
+	QT_MODULES="Qt5Core Qt5Gui Qt5Sql Qt5Network Qt5Widgets Qt5Concurrent"
 	QT_UIC_NAMES="uic-qt5 uic5 uic"
 	QT_MOC_NAMES="moc-qt5 moc5 moc"
 	CFLAGS="-fPIC $CFLAGS"
 	CXXFLAGS="-fPIC $CXXFLAGS"
+	CPPFLAGS="-DQT_DISABLE_DEPRECATED_BEFORE=0 $CPPFLAGS"
 	],
   [test "x$qt_version" = xqt4],
   	[
-	QT_MODULES="QtCore QtGui QtSql QtNetwork"
+	QT_MODULES="QtCore QtGui QtSql QtNetwork QtDeclarative QtOpenGL"
 	QT_UIC_NAMES="uic-qt4 uic4 uic"
 	QT_MOC_NAMES="moc-qt4 moc4 moc"
 	],
@@ -55,10 +56,15 @@ AC_CHECK_PROGS([MOC], [$QT_MOC_NAMES], [notfound])
 AS_IF([test "x$UIC" = xnotfound],[AC_MSG_ERROR(["uic program not found. Please install Qt development package"])])
 AS_IF([test "x$MOC" = xnotfound],[AC_MSG_ERROR(["moc program not found. Please install Qt development package"])])
 
+AC_CHECK_LIB([pthread], [pthread_create])
 
 PKG_CHECK_MODULES(FFMPEG, libavutil libavformat libavcodec libswscale, HAVE_FFMPEG=yes, AC_MSG_ERROR(["FFMpeg libraries not found"]))
 
+PKG_CONFIG="pkg-config --static"
+PKG_CHECK_MODULES(MPV, mpv, HAVE_MPV=yes, AC_MSG_ERROR(["libmpv not found"]))
 
-AC_CONFIG_FILES([Makefile])
+VERSION=$PACKAGE_VERSION
+AC_SUBST([VERSION])
+AC_CONFIG_FILES([Makefile src/bluecherry-config.h])
 AC_OUTPUT
 
