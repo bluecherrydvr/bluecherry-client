@@ -19,6 +19,7 @@
 #include "server/DVRServer.h"
 #include "server/DVRServerRepository.h"
 #include "DVRCameraStreamReader.h"
+#include <QDataStream>
 
 DVRCameraStreamReader::DVRCameraStreamReader(DVRServerRepository *serverRepository, QDataStream &dataStream)
     : m_serverRepository(serverRepository), m_dataStream(dataStream)

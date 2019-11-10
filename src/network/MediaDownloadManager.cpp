@@ -18,6 +18,7 @@
 #include "MediaDownloadManager.h"
 #include "video/MediaDownload.h"
 #include <QNetworkCookieJar>
+#include <QNetworkCookie>
 
 MediaDownloadManager::MediaDownloadManager(QObject *parent)
     : QObject(parent), m_cookieJar(0)

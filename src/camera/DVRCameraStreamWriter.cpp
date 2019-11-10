@@ -28,7 +28,7 @@ DVRCameraStreamWriter::DVRCameraStreamWriter(QDataStream &dataStream)
 void DVRCameraStreamWriter::writeCamera(DVRCamera *camera)
 {
     if (!camera)
-        m_dataStream << -1;
+        m_dataStream << QVariant(-1);
     else
-        m_dataStream << camera->data().server()->configuration().id() << camera->data().id();
+        m_dataStream << QVariant(camera->data().server()->configuration().id() << camera->data().id());
 }

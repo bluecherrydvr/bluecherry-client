@@ -24,6 +24,7 @@
 #include <QNetworkRequest>
 #include <QSslSocket>
 #include <QDebug>
+#include <QNetworkCookie>
 
 ServerRequestManager::ServerRequestManager(DVRServer *s)
     : QObject(s), server(s), m_loginReply(0), m_status(DVRServer::Offline)
