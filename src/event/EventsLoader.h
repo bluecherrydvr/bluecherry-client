@@ -20,7 +20,7 @@
 
 #include <QDateTime>
 #include <QObject>
-#include "src/server/DVRServer.h"
+#include "server/DVRServer.h"
 
 class EventData;
 
