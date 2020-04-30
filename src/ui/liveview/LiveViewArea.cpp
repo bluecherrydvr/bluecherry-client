@@ -32,8 +32,8 @@
 #include <QApplication>
 #include <QTimer>
 
-LiveViewArea::LiveViewArea(DVRServerRepository *serverRepository, QWidget *parent)
-    : QDeclarativeView(parent)
+LiveViewArea::LiveViewArea(DVRServerRepository *serverRepository, QWindow *parent)
+    : QQuickView(parent)
 {
     //connect(bcApp, SIGNAL(settingsChanged()), SLOT(settingsChanged()));
 
@@ -93,7 +93,7 @@ void LiveViewArea::showEvent(QShowEvent *event)
 //        }
 //    }
 
-    QDeclarativeView::showEvent(event);
+    QQuickView::showEvent(event);
 }
 
 void LiveViewArea::hideEvent(QHideEvent *event)
@@ -114,7 +114,7 @@ void LiveViewArea::hideEvent(QHideEvent *event)
 //        }
 //    }
 
-    QDeclarativeView::hideEvent(event);
+    QQuickView::hideEvent(event);
 }
 
 /*
@@ -151,7 +151,7 @@ void LiveViewArea::keyPressEvent(QKeyEvent *event)
         return;
     }
 
-    QDeclarativeView::keyPressEvent(event);
+    QQuickView::keyPressEvent(event);
 }
 
 /*
