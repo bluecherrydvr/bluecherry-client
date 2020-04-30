@@ -23,6 +23,10 @@
 #include "camera/DVRCamera.h"
 #include "core/CameraPtzControl.h"
 #include "core/LiveStream.h"
+#include <QGraphicsSceneMouseEvent>
+#include <QGraphicsSceneContextMenuEvent>
+#include <QGraphicsSceneWheelEvent>
+#include <QMenu>
 
 /* Base of LiveFeed.qml, used to implement some features that are currently missing in pure QML. */
 

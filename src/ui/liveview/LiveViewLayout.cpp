@@ -17,8 +17,8 @@
 
 #include "LiveViewLayout.h"
 #include "camera/DVRCamera.h"
-#include <QDeclarativeEngine>
-#include <QDeclarativeContext>
+#include <QQmlEngine>
+#include <QQmlContext>
 #include <QTimerEvent>
 #include <QDebug>
 #include <QGraphicsSceneDragDropEvent>

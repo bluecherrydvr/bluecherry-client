@@ -24,13 +24,18 @@
 #include "core/BluecherryApp.h"
 #include "core/LiveStream.h"
 #include "server/DVRServerRepository.h"
-#include <QGLWidget>
-#include <QDeclarativeContext>
-#include <QDeclarativeEngine>
+#include <QQmlContext>
+#include <QQmlEngine>
 #include <QSettings>
 #include <QShowEvent>
 #include <QApplication>
 #include <QTimer>
+#include <QStyleOptionGraphicsItem>
+#include <QGraphicsSceneMouseEvent>
+#include <QGraphicsSceneContextMenuEvent>
+#include <QGraphicsSceneWheelEvent>
+#include <QMenu>
+#include <QGraphicsItem>
 
 LiveViewArea::LiveViewArea(DVRServerRepository *serverRepository, QWindow *parent)
     : QQuickView(parent)

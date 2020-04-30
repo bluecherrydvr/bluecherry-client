@@ -23,7 +23,6 @@
 #include "ui/CrashReportDialog.h"
 #include <QApplication>
 #include <QDateTime>
-#include <QGLFormat>
 #include <QImageReader>
 #include <QLocale>
 #include <QMessageBox>

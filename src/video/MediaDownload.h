@@ -25,6 +25,7 @@
 #include <QMutex>
 #include <QAtomicInt>
 #include "utils/RangeMap.h"
+#include <QNetworkCookie>
 
 class QNetworkReply;
 class MediaDownloadTask;

@@ -20,6 +20,7 @@
 
 #include <QQuickItem>
 #include <QBasicTimer>
+#include <QGraphicsSceneDragDropEvent>
 
 class DVRServerRepository;
 class LiveViewLayoutProps;
