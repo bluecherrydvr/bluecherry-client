@@ -21,10 +21,11 @@
 #include <QQuickItem>
 #include <QSharedPointer>
 #include "core/LiveStream.h"
+#include <QQuickPaintedItem>
 
 //class QGLContext;
 
-class LiveStreamItem : public QQuickItem
+class LiveStreamItem : public QQuickPaintedItem
 {
     Q_OBJECT
 
@@ -35,7 +36,7 @@ public:
     explicit LiveStreamItem(QQuickItem *parent = 0);
     virtual ~LiveStreamItem();
 
-    virtual void paint(QPainter *, const QStyleOptionGraphicsItem *, QWidget *);
+    void paint(QPainter *p) override;
 
     LiveStream * stream() const { return m_stream.data(); }
     void setStream(QSharedPointer<LiveStream> stream);
