@@ -200,7 +200,7 @@ LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *p
 		wnd->addToolBar(Qt::TopToolBarArea, m_toolBar);
     else
 		layout->addWidget(m_toolBar);
-    layout->addWidget(m_liveView);
+    layout->addWidget(QWidget::createWindowContainer(m_liveView));
 
     updateLayoutActionStates();
 }
