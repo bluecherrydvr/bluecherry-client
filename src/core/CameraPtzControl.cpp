@@ -22,6 +22,7 @@
 #include <QNetworkReply>
 #include <QVariant>
 #include <QXmlStreamReader>
+#include <QUrlQuery>
 
 Q_DECLARE_METATYPE(QWeakPointer<CameraPtzControl>)
 
@@ -50,9 +51,12 @@ QNetworkReply *CameraPtzControl::sendCommand(const QUrl &partialUrl)
 
     QUrl url(QLatin1String("/media/ptz.php"));
     url = url.resolved(partialUrl);
-    url.addEncodedQueryItem("id", QByteArray::number(m_camera.data()->data().id()));
+    QUrlQuery urlQuery(url);
+    urlQuery.addQueryItem("id", QByteArray::number(m_camera.data()->data().id()));
 
-    Q_ASSERT(url.hasQueryItem(QLatin1String("command")));
+    Q_ASSERT(urlQuery.hasQueryItem(QLatin1String("command")));
+
+    url.setQuery(urlQuery);
 
     QNetworkReply *reply = m_camera.data()->data().server()->sendRequest(url);
     connect(reply, SIGNAL(finished()), SLOT(finishCommand()));
@@ -226,30 +230,32 @@ void CameraPtzControl::move(Movements movements, int panSpeed, int tiltSpeed, in
         return;
 
     QUrl url;
-    url.addEncodedQueryItem("command", "move");
-    url.addEncodedQueryItem("panspeed", "32");
-    url.addEncodedQueryItem("tiltspeed", "32");
-    url.addEncodedQueryItem("duration", "250");
+    QUrlQuery urlQuery(url);
+    urlQuery.addQueryItem("command", "move");
+    urlQuery.addQueryItem("panspeed", "32");
+    urlQuery.addQueryItem("tiltspeed", "32");
+    urlQuery.addQueryItem("duration", "250");
 
     if (movements & MoveNorth)
-        url.addEncodedQueryItem("tilt", "u");
+        urlQuery.addQueryItem("tilt", "u");
     else if (movements & MoveSouth)
-        url.addEncodedQueryItem("tilt", "d");
+        urlQuery.addQueryItem("tilt", "d");
     if (movements & MoveWest)
-        url.addEncodedQueryItem("pan", "l");
+        urlQuery.addQueryItem("pan", "l");
     else if (movements & MoveEast)
-        url.addEncodedQueryItem("pan", "r");
+        urlQuery.addQueryItem("pan", "r");
     if (movements & MoveWide)
-        url.addEncodedQueryItem("zoom", "w");
+        urlQuery.addQueryItem("zoom", "w");
     else if (movements & MoveTele)
-        url.addEncodedQueryItem("zoom" ,"t");
+        urlQuery.addQueryItem("zoom" ,"t");
 
     if (panSpeed > 0)
-        url.addEncodedQueryItem("panspeed", QByteArray::number(panSpeed));
+        urlQuery.addQueryItem("panspeed", QByteArray::number(panSpeed));
     if (tiltSpeed > 0)
-        url.addEncodedQueryItem("tiltspeed", QByteArray::number(tiltSpeed));
+        urlQuery.addQueryItem("tiltspeed", QByteArray::number(tiltSpeed));
     if (duration > 0)
-        url.addEncodedQueryItem("duration", QByteArray::number(duration));
+        urlQuery.addQueryItem("duration", QByteArray::number(duration));
+    url.setQuery(urlQuery);
 
     QNetworkReply *reply = sendCommand(url);
     if (reply)
@@ -282,8 +288,10 @@ void CameraPtzControl::moveResult()
 void CameraPtzControl::moveToPreset(int preset)
 {
     QUrl url;
-    url.addEncodedQueryItem("command", "go");
-    url.addEncodedQueryItem("preset", QByteArray::number(preset));
+    QUrlQuery urlQuery(url);
+    urlQuery.addQueryItem("command", "go");
+    urlQuery.addQueryItem("preset", QByteArray::number(preset));
+    url.setQuery(urlQuery);
 
     QNetworkReply *reply = sendCommand(url);
     if (reply)
@@ -339,9 +347,11 @@ int CameraPtzControl::savePreset(int preset, const QString &name)
         actualName = validatePresetName(name);
 
     QUrl url;
-    url.addEncodedQueryItem("command", "save");
-    url.addEncodedQueryItem("preset", QByteArray::number(preset));
-    url.addQueryItem(QLatin1String("name"), actualName);
+    QUrlQuery urlQuery(url);
+    urlQuery.addQueryItem("command", "save");
+    urlQuery.addQueryItem("preset", QByteArray::number(preset));
+    urlQuery.addQueryItem(QLatin1String("name"), actualName);
+    url.setQuery(urlQuery);
 
     QNetworkReply *reply = sendCommand(url);
     if (reply)
@@ -353,9 +363,11 @@ int CameraPtzControl::savePreset(int preset, const QString &name)
 void CameraPtzControl::updatePreset(int preset)
 {
     QUrl url;
-    url.addEncodedQueryItem("command", "sync");
-    url.addEncodedQueryItem("preset", QByteArray::number(preset));
-    url.addQueryItem(QLatin1String("name"), m_presets.value(preset));
+    QUrlQuery urlQuery(url);
+    urlQuery.addQueryItem("command", "sync");
+    urlQuery.addQueryItem("preset", QByteArray::number(preset));
+    urlQuery.addQueryItem(QLatin1String("name"), m_presets.value(preset));
+    url.setQuery(urlQuery);
 
     QNetworkReply *reply = sendCommand(url);
     if (reply)
@@ -405,9 +417,11 @@ void CameraPtzControl::renamePreset(int preset, const QString &name)
     QString actualName = validatePresetName(name);
 
     QUrl url;
-    url.addEncodedQueryItem("command", "rename");
-    url.addEncodedQueryItem("preset", QByteArray::number(preset));
-    url.addQueryItem(QLatin1String("name"), actualName);
+    QUrlQuery urlQuery(url);
+    urlQuery.addQueryItem("command", "rename");
+    urlQuery.addQueryItem("preset", QByteArray::number(preset));
+    urlQuery.addQueryItem(QLatin1String("name"), actualName);
+    url.setQuery(urlQuery);
 
     sendCommand(url);
 
@@ -421,8 +435,10 @@ void CameraPtzControl::renamePreset(int preset, const QString &name)
 void CameraPtzControl::clearPreset(int preset)
 {
     QUrl url;
-    url.addEncodedQueryItem("command", "clear");
-    url.addEncodedQueryItem("preset", QByteArray::number(preset));
+    QUrlQuery urlQuery(url);
+    urlQuery.addQueryItem("command", "clear");
+    urlQuery.addQueryItem("preset", QByteArray::number(preset));
+    url.setQuery(urlQuery);
 
     QNetworkReply *reply = sendCommand(url);
     if (reply)
