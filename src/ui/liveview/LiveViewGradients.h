@@ -18,9 +18,9 @@
 #ifndef LIVEVIEWGRADIENTS_H
 #define LIVEVIEWGRADIENTS_H
 
-#include <QDeclarativeImageProvider>
+#include <QQuickImageProvider>
 
-class LiveViewGradients : public QDeclarativeImageProvider
+class LiveViewGradients : public QQuickImageProvider
 {
 public:
     LiveViewGradients();
