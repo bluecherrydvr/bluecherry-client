@@ -125,7 +125,7 @@ void LiveViewArea::setViewportHack()
 
 void LiveViewArea::addCamera(DVRCamera *camera)
 {
-    QDeclarativeItem *item = m_layout->addItemAuto();
+    QQuickItem *item = m_layout->addItemAuto();
     if (!item || !camera)
         return;
 

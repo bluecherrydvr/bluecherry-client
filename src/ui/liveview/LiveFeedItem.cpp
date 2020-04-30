@@ -45,8 +45,8 @@
 #include <QApplication>
 #include <QDesktopWidget>
 
-LiveFeedItem::LiveFeedItem(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent), m_streamItem(0), m_serverRepository(0), m_customCursor(DefaultCursor)
+LiveFeedItem::LiveFeedItem(QQuickItem *parent)
+    : QQuickItem(parent), m_streamItem(0), m_serverRepository(0), m_customCursor(DefaultCursor)
 {
     setAcceptedMouseButtons(acceptedMouseButtons() | Qt::RightButton);
 }
@@ -148,7 +148,7 @@ void LiveFeedItem::disableAudio()
 
 void LiveFeedItem::close()
 {
-    bool closeFeedItem = parentItem()->metaObject()->invokeMethod(parentItem(), "removeItem", Q_ARG(QDeclarativeItem*, this));
+    bool closeFeedItem = parentItem()->metaObject()->invokeMethod(parentItem(), "removeItem", Q_ARG(QQuickItem*, this));
     Q_ASSERT(closeFeedItem);
     Q_UNUSED(closeFeedItem);
 }
@@ -506,7 +506,7 @@ QList<QAction*> LiveFeedItem::bandwidthActions()
     return actions;
 }
 
-QPoint LiveFeedItem::globalPosForItem(QDeclarativeItem *item)
+QPoint LiveFeedItem::globalPosForItem(QQuickItem *item)
 {
     QPoint pos = QCursor::pos();
     if (item)
@@ -519,7 +519,7 @@ QPoint LiveFeedItem::globalPosForItem(QDeclarativeItem *item)
     return pos;
 }
 
-void LiveFeedItem::showPtzMenu(QDeclarativeItem *sourceItem)
+void LiveFeedItem::showPtzMenu(QQuickItem *sourceItem)
 {
     QPoint pos = globalPosForItem(sourceItem);
     QMenu *menu = ptzMenu();
@@ -564,7 +564,7 @@ void LiveFeedItem::ptzPresetWindow()
     window->show();
 }
 
-void LiveFeedItem::showFpsMenu(QDeclarativeItem *sourceItem)
+void LiveFeedItem::showFpsMenu(QQuickItem *sourceItem)
 {
     QPoint pos = globalPosForItem(sourceItem);
     QMenu menu;

@@ -18,13 +18,13 @@
 #ifndef LIVESTREAMITEM_H
 #define LIVESTREAMITEM_H
 
-#include <QDeclarativeItem>
+#include <QQuickItem>
 #include <QSharedPointer>
 #include "core/LiveStream.h"
 
 //class QGLContext;
 
-class LiveStreamItem : public QDeclarativeItem
+class LiveStreamItem : public QQuickItem
 {
     Q_OBJECT
 
@@ -32,7 +32,7 @@ class LiveStreamItem : public QDeclarativeItem
     Q_PROPERTY(QSizeF frameSize READ frameSize NOTIFY frameSizeChanged)
 
 public:
-    explicit LiveStreamItem(QDeclarativeItem *parent = 0);
+    explicit LiveStreamItem(QQuickItem *parent = 0);
     virtual ~LiveStreamItem();
 
     virtual void paint(QPainter *, const QStyleOptionGraphicsItem *, QWidget *);

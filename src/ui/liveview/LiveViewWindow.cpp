@@ -246,7 +246,7 @@ void LiveViewWindow::doAutoResize()
 void LiveViewWindow::showSingleCamera(DVRCamera *camera)
 {
     m_liveView->layout()->setGridSize(1, 1);
-    QDeclarativeItem *item = m_liveView->layout()->addItem(0, 0);
+    QQuickItem *item = m_liveView->layout()->addItem(0, 0);
     if (item)
         item->setProperty("camera", QVariant::fromValue(camera));
 }
@@ -636,7 +636,7 @@ void LiveViewWindow::switchCamera(bool next)
         int rows = m_liveView->layout()->rows();
         int columns = m_liveView->layout()->columns();
 
-        QDeclarativeItem *item;
+        QQuickItem *item;
 
         for (int x = 0; x < rows; x++)
         {
@@ -672,7 +672,7 @@ void LiveViewWindow::switchCamera(bool next)
     else
         m_switchItemIndex += (next ? 1 : -1);
 
-    QDeclarativeItem *item = m_liveView->layout()->at(0, 0);
+    QQuickItem *item = m_liveView->layout()->at(0, 0);
 
     if (item)
         item->setProperty("camera", QVariant::fromValue(m_cameras.at(m_switchItemIndex)));
