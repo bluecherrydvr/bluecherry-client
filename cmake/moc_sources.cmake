@@ -117,7 +117,7 @@ if (WIN32)
     )
 endif (WIN32)
 
-qt4_wrap_cpp (bluecherry_client_MOC_FILES ${bluecherry_client_MOC_SRCS})
+qt5_wrap_cpp (bluecherry_client_MOC_FILES ${bluecherry_client_MOC_SRCS})
 
 list (APPEND bluecherry_client_SRCS
     ${bluecherry_client_MOC_FILES}

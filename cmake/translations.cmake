@@ -24,7 +24,7 @@ set(TRANSLATION_SOURCES translations/bluecherryclient_en.ts
 	translations/bluecherryclient_sv_SE.ts
 )
 
-qt4_add_translation (TRANSLATION_FILES ${TRANSLATION_SOURCES})
+qt5_add_translation (TRANSLATION_FILES ${TRANSLATION_SOURCES})
 
 add_custom_target (translations DEPENDS ${TRANSLATION_FILES})
 add_dependencies (bluecherry-client translations)
