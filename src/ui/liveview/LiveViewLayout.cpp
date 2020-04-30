@@ -77,7 +77,7 @@ QQuickItem *LiveViewLayout::createNewItem()
     if (!m_itemComponent)
         return 0;
 
-    QDeclarativeContext *context = QDeclarativeEngine::contextForObject(this);
+    QQmlContext *context = QQmlEngine::contextForObject(this);
     Q_ASSERT(context);
 
     QQuickItem *element = qobject_cast<QQuickItem*>(m_itemComponent->create(context));
@@ -92,7 +92,7 @@ QQuickItem *LiveViewLayout::createNewItem()
     return element;
 }
 
-void LiveViewLayout::setItem(QDeclarativeComponent *c)
+void LiveViewLayout::setItem(QQmlComponent *c)
 {
     Q_ASSERT(!m_itemComponent || m_itemComponent == c);
     if (m_itemComponent || !c)

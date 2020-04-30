@@ -31,7 +31,7 @@ class LiveViewLayout : public QQuickItem
 
     Q_PROPERTY(int rows READ rows WRITE setRows NOTIFY layoutChanged)
     Q_PROPERTY(int columns READ columns WRITE setColumns NOTIFY layoutChanged)
-    Q_PROPERTY(QDeclarativeComponent* item READ item WRITE setItem)
+    Q_PROPERTY(QQmlComponent* item READ item WRITE setItem)
     Q_PROPERTY(QQuickItem* dropTarget READ dropTarget NOTIFY dropTargetChanged)
     Q_PROPERTY(QQuickItem* dragItem READ dragItem NOTIFY dragItemChanged)
     Q_PROPERTY(DVRServerRepository *serverRepository READ serverRepository WRITE setServerRepository)
@@ -79,8 +79,8 @@ public:
     Q_INVOKABLE QQuickItem *takeItem(QQuickItem *item);
 
     /* The item created to fill spaces in the layout */
-    QDeclarativeComponent *item() const { return m_itemComponent; }
-    void setItem(QDeclarativeComponent *c);
+    QQmlComponent *item() const { return m_itemComponent; }
+    void setItem(QQmlComponent *c);
 
     QQuickItem *dropTarget() const;
     QQuickItem *dragItem() const;
@@ -141,7 +141,7 @@ private:
     int m_rows, m_columns;
     DVRServerRepository *m_serverRepository;
     QList<QWeakPointer<QQuickItem> > m_items;
-    QDeclarativeComponent *m_itemComponent;
+    QQmlComponent *m_itemComponent;
     QBasicTimer m_layoutTimer;
 
     struct DragDropData;
