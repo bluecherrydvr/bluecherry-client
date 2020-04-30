@@ -16,7 +16,8 @@
  */
 
 import Bluecherry 1.0
-import Qt 4.7
+import QtQuick 2.14
+import "./" as DummyNameSpace	//fixme
 
 LiveFeedBase {
     id: feedItem
@@ -130,7 +131,7 @@ LiveFeedBase {
             }
 */
 
-            HeaderPTZControl {
+            DummyNameSpace.HeaderPTZControl {
                 id: headerPtzElement
                 height: parent.height
                 visible: feedItem.hasPtz && parent.visible && !stream.paused
