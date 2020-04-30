@@ -20,7 +20,7 @@
 #include "server/DVRServer.h"
 #include "video/MediaDownload.h"
 #include "network/MediaDownloadManager.h"
-#include <QtConcurrentRun>
+#include <QtConcurrent/QtConcurrent>
 #include <QFutureWatcher>
 
 QString EventVideoDownload::statusToString(DownloadStatus status)
