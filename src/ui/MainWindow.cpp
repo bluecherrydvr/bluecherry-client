@@ -50,7 +50,6 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QMessageBox>
-#include <QMacStyle>
 #include <QSslConfiguration>
 #include <QTextDocument>
 #include <QShowEvent>

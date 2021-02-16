@@ -18,18 +18,18 @@
 #ifndef LIVEVIEWAREA_H
 #define LIVEVIEWAREA_H
 
-#include <QDeclarativeView>
+#include <QQuickView>
 
 class LiveViewLayout;
 class DVRCamera;
 class DVRServerRepository;
 
-class LiveViewArea : public QDeclarativeView
+class LiveViewArea : public QQuickView
 {
     Q_OBJECT
 
 public:
-    explicit LiveViewArea(DVRServerRepository *serverRepository, QWidget *parent = 0);
+    explicit LiveViewArea(DVRServerRepository *serverRepository, QWindow *parent = 0);
     virtual ~LiveViewArea();
 
     LiveViewLayout *layout() const { return m_layout; }
@@ -40,7 +40,7 @@ public:
 
 public slots:
     void addCamera(DVRCamera *camera);
-    void updateGeometry() { m_sizeHint = QSize(); QDeclarativeView::updateGeometry(); }
+    void updateGeometry() { m_sizeHint = QSize(); QQuickView::updateGeometry(); }
 
     //void settingsChanged();
 

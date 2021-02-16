@@ -214,16 +214,16 @@ int DVRServersModel::columnCount(const QModelIndex &parent) const
 
 QModelIndex DVRServersModel::index(int row, int column, const QModelIndex &parent) const
 {
+    DVRServer *s = 0;
     if (!parent.isValid())
     {
         if (row < 0 || column < 0 || row >= m_items.size() || column >= columnCount())
             return QModelIndex();
 
-        return createIndex(row, column, 0);
+        return createIndex(row, column, s);
     }
     else
     {
-        DVRServer *s;
         if (!(s = serverForRow(parent)) || row < 0 || column < 0 || column >= columnCount(parent))
             return QModelIndex();
 

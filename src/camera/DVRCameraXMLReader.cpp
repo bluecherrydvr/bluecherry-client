@@ -19,6 +19,7 @@
 #include "camera/DVRCamera.h"
 #include "server/DVRServer.h"
 #include <QUrl>
+#include <QUrlQuery>
 
 bool DVRCameraXMLReader::readCamera(DVRCamera *camera, QXmlStreamReader &xmlStreamReader) const
 {
@@ -64,7 +65,7 @@ bool DVRCameraXMLReader::readCamera(DVRCamera *camera, QXmlStreamReader &xmlStre
     url.setPassword(camera->data().server()->configuration().password());
     url.setHost(camera->data().server()->url().host());
     url.setPort(camera->data().server()->rtspPort());
-    url.setPath(QString::fromLatin1("live/") + QString::number(camera->data().id()));
+    url.setPath(QString::fromLatin1("/live/") + QString::number(camera->data().id()));
     camera->setRtspStreamUrl(url);
 
     QUrl mjpegUrl;
@@ -74,8 +75,10 @@ bool DVRCameraXMLReader::readCamera(DVRCamera *camera, QXmlStreamReader &xmlStre
     mjpegUrl.setHost(camera->data().server()->url().host());
     mjpegUrl.setPort(camera->data().server()->serverPort());
     mjpegUrl.setPath(QLatin1String("/media/mjpeg.php"));
-    mjpegUrl.addQueryItem(QLatin1String("id"), QString::number(camera->data().id()));
-    mjpegUrl.addQueryItem(QLatin1String("multipart"), QLatin1String("true"));
+    QUrlQuery urlQuery(mjpegUrl);
+    urlQuery.addQueryItem(QLatin1String("id"), QString::number(camera->data().id()));
+    urlQuery.addQueryItem(QLatin1String("multipart"), QLatin1String("true"));
+    mjpegUrl.setQuery(urlQuery);
 
     camera->setMjpegStreamUrl(mjpegUrl);
 

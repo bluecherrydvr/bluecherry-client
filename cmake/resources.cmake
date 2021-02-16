@@ -20,7 +20,7 @@ set (bluecherry_client_RRCS
 	src/ui/qml.qrc
 )
 
-qt4_add_resources (bluecherry_client_RCC_FILES ${bluecherry_client_RRCS})
+qt5_add_resources (bluecherry_client_RCC_FILES ${bluecherry_client_RRCS})
 
 list (APPEND bluecherry_client_SRCS
 	${bluecherry_client_RCC_FILES}

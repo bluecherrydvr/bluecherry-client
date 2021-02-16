@@ -24,16 +24,21 @@
 #include "core/BluecherryApp.h"
 #include "core/LiveStream.h"
 #include "server/DVRServerRepository.h"
-#include <QGLWidget>
-#include <QDeclarativeContext>
-#include <QDeclarativeEngine>
+#include <QQmlContext>
+#include <QQmlEngine>
 #include <QSettings>
 #include <QShowEvent>
 #include <QApplication>
 #include <QTimer>
+#include <QStyleOptionGraphicsItem>
+#include <QGraphicsSceneMouseEvent>
+#include <QGraphicsSceneContextMenuEvent>
+#include <QGraphicsSceneWheelEvent>
+#include <QMenu>
+#include <QGraphicsItem>
 
-LiveViewArea::LiveViewArea(DVRServerRepository *serverRepository, QWidget *parent)
-    : QDeclarativeView(parent)
+LiveViewArea::LiveViewArea(DVRServerRepository *serverRepository, QWindow *parent)
+    : QQuickView(parent)
 {
     //connect(bcApp, SIGNAL(settingsChanged()), SLOT(settingsChanged()));
 
@@ -93,7 +98,7 @@ void LiveViewArea::showEvent(QShowEvent *event)
 //        }
 //    }
 
-    QDeclarativeView::showEvent(event);
+    QQuickView::showEvent(event);
 }
 
 void LiveViewArea::hideEvent(QHideEvent *event)
@@ -114,7 +119,7 @@ void LiveViewArea::hideEvent(QHideEvent *event)
 //        }
 //    }
 
-    QDeclarativeView::hideEvent(event);
+    QQuickView::hideEvent(event);
 }
 
 /*
@@ -125,7 +130,7 @@ void LiveViewArea::setViewportHack()
 
 void LiveViewArea::addCamera(DVRCamera *camera)
 {
-    QDeclarativeItem *item = m_layout->addItemAuto();
+    QQuickItem *item = m_layout->addItemAuto();
     if (!item || !camera)
         return;
 
@@ -151,7 +156,7 @@ void LiveViewArea::keyPressEvent(QKeyEvent *event)
         return;
     }
 
-    QDeclarativeView::keyPressEvent(event);
+    QQuickView::keyPressEvent(event);
 }
 
 /*

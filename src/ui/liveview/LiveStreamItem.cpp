@@ -36,8 +36,8 @@
 #endif
 */
 
-LiveStreamItem::LiveStreamItem(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent)/*, m_useAdvancedGL(true), m_texId(0), m_texLastContext(0), m_texInvalidate(false),
+LiveStreamItem::LiveStreamItem(QQuickItem *parent)
+    : QQuickPaintedItem(parent)/*, m_useAdvancedGL(true), m_texId(0), m_texLastContext(0), m_texInvalidate(false),
       m_texDataPtr(0)*/
 {
     this->setFlag(QGraphicsItem::ItemHasNoContents, false);
@@ -128,7 +128,7 @@ void LiveStreamItem::updateFrameSize()
     emit frameSizeChanged(frameSize());
 }
 
-void LiveStreamItem::paint(QPainter *p, const QStyleOptionGraphicsItem *opt, QWidget *widget)
+void LiveStreamItem::paint(QPainter *p)
 {
     Q_UNUSED(widget);
     if (!m_stream)

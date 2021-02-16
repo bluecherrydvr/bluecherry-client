@@ -18,11 +18,15 @@
 #ifndef LIVEFEEDITEM_H
 #define LIVEFEEDITEM_H
 
-#include <QDeclarativeItem>
+#include <QQuickItem>
 #include <QSharedPointer>
 #include "camera/DVRCamera.h"
 #include "core/CameraPtzControl.h"
 #include "core/LiveStream.h"
+#include <QGraphicsSceneMouseEvent>
+#include <QGraphicsSceneContextMenuEvent>
+#include <QGraphicsSceneWheelEvent>
+#include <QMenu>
 
 /* Base of LiveFeed.qml, used to implement some features that are currently missing in pure QML. */
 
@@ -31,7 +35,7 @@ class LiveStreamItem;
 
 class DVRServerRepository;
 
-class LiveFeedItem : public QDeclarativeItem
+class LiveFeedItem : public QQuickItem
 {
     Q_OBJECT
     Q_ENUMS(CustomCursor RecordingState)
@@ -74,7 +78,7 @@ public:
         Load = 2
     };
 
-    explicit LiveFeedItem(QDeclarativeItem *parent = 0);
+    explicit LiveFeedItem(QQuickItem *parent = 0);
 
     LiveStreamItem *streamItem() const { return m_streamItem; }
     void setStreamItem(LiveStreamItem *item);
@@ -110,11 +114,11 @@ public slots:
     void setPtzEnabled(bool ptzEnabled);
     void togglePtzEnabled() { setPtzEnabled(!ptz()); }
 
-    void showPtzMenu(QDeclarativeItem *sourceItem = 0);
+    void showPtzMenu(QQuickItem *sourceItem = 0);
     void ptzPresetSave();
     void ptzPresetWindow();
 
-    void showFpsMenu(QDeclarativeItem *sourceItem = 0);
+    void showFpsMenu(QQuickItem *sourceItem = 0);
 
     void enableAudio();
     void disableAudio();
@@ -149,7 +153,7 @@ private:
     QMenu *ptzMenu();
     QList<QAction*> bandwidthActions();
 
-    QPoint globalPosForItem(QDeclarativeItem *item);
+    QPoint globalPosForItem(QQuickItem *item);
 };
 
 #endif // LIVEFEEDITEM_H

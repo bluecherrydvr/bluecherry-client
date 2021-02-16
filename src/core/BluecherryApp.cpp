@@ -171,7 +171,7 @@ QStringList BluecherryApp::absolutePaths(const QStringList& paths)
 
     foreach (const QString &path, paths)
         if (path.startsWith(QLatin1String("./")))
-            result.append(QString::fromAscii("%1/%2").arg(QApplication::applicationDirPath()).arg(path));
+            result.append(QString::fromLatin1("%1/%2").arg(QApplication::applicationDirPath()).arg(path));
         else
             result.append(path);
 

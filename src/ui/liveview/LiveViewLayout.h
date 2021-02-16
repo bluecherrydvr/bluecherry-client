@@ -18,22 +18,23 @@
 #ifndef LIVEVIEWLAYOUT_H
 #define LIVEVIEWLAYOUT_H
 
-#include <QDeclarativeItem>
+#include <QQuickItem>
 #include <QBasicTimer>
+#include <QGraphicsSceneDragDropEvent>
 
 class DVRServerRepository;
 class LiveViewLayoutProps;
 
-class LiveViewLayout : public QDeclarativeItem
+class LiveViewLayout : public QQuickItem
 {
     Q_OBJECT
     Q_ENUMS(DragDropMode)
 
     Q_PROPERTY(int rows READ rows WRITE setRows NOTIFY layoutChanged)
     Q_PROPERTY(int columns READ columns WRITE setColumns NOTIFY layoutChanged)
-    Q_PROPERTY(QDeclarativeComponent* item READ item WRITE setItem)
-    Q_PROPERTY(QDeclarativeItem* dropTarget READ dropTarget NOTIFY dropTargetChanged)
-    Q_PROPERTY(QDeclarativeItem* dragItem READ dragItem NOTIFY dragItemChanged)
+    Q_PROPERTY(QQmlComponent* item READ item WRITE setItem)
+    Q_PROPERTY(QQuickItem* dropTarget READ dropTarget NOTIFY dropTargetChanged)
+    Q_PROPERTY(QQuickItem* dragItem READ dragItem NOTIFY dragItemChanged)
     Q_PROPERTY(DVRServerRepository *serverRepository READ serverRepository WRITE setServerRepository)
 
     enum LayoutChange {
@@ -49,7 +50,7 @@ public:
         DragSwap
     };
 
-    explicit LiveViewLayout(QDeclarativeItem *parent = 0);
+    explicit LiveViewLayout(QQuickItem *parent = 0);
     virtual ~LiveViewLayout();
 
     int rows() const { return m_rows; }
@@ -64,26 +65,26 @@ public:
 
     void setGridSize(int rows, int columns);
     void gridPos(const QPointF &pos, int *row, int *column);
-    bool gridPos(QDeclarativeItem *item, int *row, int *column);
+    bool gridPos(QQuickItem *item, int *row, int *column);
 
     QSize idealSize() const;
 
-    QDeclarativeItem *at(int row, int col) const;
-    Q_INVOKABLE void set(int row, int col, QDeclarativeItem *item);
+    QQuickItem *at(int row, int col) const;
+    Q_INVOKABLE void set(int row, int col, QQuickItem *item);
 
     /* Add a new item, automatically placing it in the best available position */
-    QDeclarativeItem *addItemAuto();
-    QDeclarativeItem *addItem(int row, int column);
+    QQuickItem *addItemAuto();
+    QQuickItem *addItem(int row, int column);
 
-    QDeclarativeItem *takeItem(int row, int column);
-    Q_INVOKABLE QDeclarativeItem *takeItem(QDeclarativeItem *item);
+    QQuickItem *takeItem(int row, int column);
+    Q_INVOKABLE QQuickItem *takeItem(QQuickItem *item);
 
     /* The item created to fill spaces in the layout */
-    QDeclarativeComponent *item() const { return m_itemComponent; }
-    void setItem(QDeclarativeComponent *c);
+    QQmlComponent *item() const { return m_itemComponent; }
+    void setItem(QQmlComponent *c);
 
-    QDeclarativeItem *dropTarget() const;
-    QDeclarativeItem *dragItem() const;
+    QQuickItem *dropTarget() const;
+    QQuickItem *dragItem() const;
 
     QByteArray saveLayout() const;
     bool loadLayout(const QByteArray &data);
@@ -91,7 +92,7 @@ public:
     DVRServerRepository * serverRepository() const;
 
     /* Called at the start of a drag movement operation for the item */
-    Q_INVOKABLE void startDrag(QDeclarativeItem *item, DragDropMode mode = DragSwap);
+    Q_INVOKABLE void startDrag(QQuickItem *item, DragDropMode mode = DragSwap);
     Q_INVOKABLE void updateDrag();
     Q_INVOKABLE bool drop();
     Q_INVOKABLE void endDrag(bool dropped);
@@ -118,13 +119,13 @@ public slots:
     void setGridSize(int size) { setGridSize(size, size); }
     void setGridSize(QString size);
 
-    void removeItem(QDeclarativeItem *item);
+    void removeItem(QQuickItem *item);
 
     void setServerRepository(DVRServerRepository *serverRepository);
 
 signals:
-    void dropTargetChanged(QDeclarativeItem *item);
-    void dragItemChanged(QDeclarativeItem *item);
+    void dropTargetChanged(QQuickItem *item);
+    void dragItemChanged(QQuickItem *item);
     void idealSizeChanged(const QSize &idealSize);
     void layoutChanged();
 
@@ -140,8 +141,8 @@ protected:
 private:
     int m_rows, m_columns;
     DVRServerRepository *m_serverRepository;
-    QList<QWeakPointer<QDeclarativeItem> > m_items;
-    QDeclarativeComponent *m_itemComponent;
+    QList<QWeakPointer<QQuickItem> > m_items;
+    QQmlComponent *m_itemComponent;
     QBasicTimer m_layoutTimer;
 
     struct DragDropData;
@@ -151,7 +152,7 @@ private:
 
     void doLayout();
 
-    QDeclarativeItem *createNewItem();
+    QQuickItem *createNewItem();
 
     int coordinatesToIndex(int row, int column) const;
 

@@ -21,6 +21,7 @@
 #include <QWidget>
 #include <QWeakPointer>
 #include "camera/DVRCamera.h"
+#include <QCloseEvent>
 
 class DVRServerRepository;
 class LiveViewArea;

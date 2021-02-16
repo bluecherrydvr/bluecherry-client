@@ -24,7 +24,7 @@
 #include <QFutureWatcher>
 #include <QNetworkReply>
 #include <QNetworkRequest>
-#include <QtConcurrentRun>
+#include <QtConcurrent/QtConcurrent>
 
 EventsLoader::EventsLoader(DVRServer *server, QObject *parent)
     : QObject(parent), m_server(server), m_limit(-1), m_lastId(-1)

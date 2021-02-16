@@ -21,7 +21,7 @@
 #include <QDebug>
 
 LiveViewGradients::LiveViewGradients()
-    : QDeclarativeImageProvider(Pixmap)
+    : QQuickImageProvider(Pixmap)
 {
 }
 

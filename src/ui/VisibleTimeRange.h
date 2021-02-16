@@ -19,6 +19,7 @@
 #define VISIBLETIMERANGE_H
 
 #include "utils/DateTimeRange.h"
+#include <QObject>
 
 class VisibleTimeRange : public QObject
 {

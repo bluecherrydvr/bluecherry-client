@@ -16,7 +16,7 @@
  */
 
 import Bluecherry 1.0
-import Qt 4.7
+import QtQuick 2.14
 
 Rectangle {
     id: viewArea
