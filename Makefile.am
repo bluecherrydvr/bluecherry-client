@@ -2,7 +2,7 @@ bin_PROGRAMS = bluecherry-client
 
 bluecherry_client_CPPFLAGS =  -I$(srcdir)/src
 bluecherry_client_CXXFLAGS = $(QT_DEPENDENCIES_CFLAGS) $(FFMPEG_CFLAGS) $(MPV_CFLAGS)
-bluecherry_client_LDADD = $(QT_DEPENDENCIES_LIBS) $(FFMPEG_LIBS) $(MPV_LIBS)
+bluecherry_client_LDADD = $(QT_DEPENDENCIES_LIBS) $(FFMPEG_LIBS) $(MPV_LIBS) $(SDL2_LIBS)
 
 bluecherry_client_SOURCES = \
 src/audio/AudioPlayer.cpp \
@@ -107,7 +107,9 @@ src/ui/SwitchEventsWidget.cpp \
 src/ui/TimeRangeScrollBar.cpp \
 src/ui/VisibleTimeRange.cpp \
 src/ui/WebRtpPortCheckerWidget.cpp \
- \
+\
+src/ui/StatusBandwidthWidget.cpp \
+\
 src/utils/DateTimeRange.cpp \
 src/utils/DateTimeUtils.cpp \
 src/utils/FileUtils.cpp \
@@ -127,5 +129,134 @@ src/video/libmpv/MpvVideoWidget.cpp \
 src/video/libmpv/MpvVideoPlayerBackend.cpp \
 src/video/libmpv/MpvVideoPlayerFactory.cpp \
 src/main.cpp
+
+nodist_bluecherry_client_SOURCES  = \
+moc_SetupWizard_p.cpp \
+moc_CrashReportDialog.cpp \
+moc_EventsView.cpp \
+moc_StatusBarServerAlert.cpp \
+moc_MacSplitter.cpp \
+moc_OptionsGeneralPage.cpp \
+moc_AboutDialog.cpp \
+moc_EventTimelineWidget.cpp \
+moc_LiveViewArea.cpp \
+moc_LiveStreamItem.cpp \
+moc_LiveFeedItem.cpp \
+moc_LiveViewLayout.cpp \
+moc_PtzPresetsWindow.cpp \
+moc_LiveViewWindow.cpp \
+moc_VisibleTimeRange.cpp \
+moc_EventVideoDownloadWidget.cpp \
+moc_OptionsDialog.cpp \
+moc_EventTagsDelegate.cpp \
+moc_MainWindow.cpp \
+moc_MacSplitterHandle.cpp \
+moc_EventCommentsWidget.cpp \
+moc_StatusBandwidthWidget.cpp \
+moc_OptionsServerPage.cpp \
+moc_TimeRangeScrollBar.cpp \
+moc_EventsWindow.cpp \
+moc_ExpandingTextEdit.cpp \
+moc_DVRServersView.cpp \
+moc_EventTypesFilter.cpp \
+moc_DVRServersProxyModel.cpp \
+moc_EventSourcesModel.cpp \
+moc_EventsProxyModel.cpp \
+moc_EventTagsModel.cpp \
+moc_EventsModel.cpp \
+moc_DVRServersModel.cpp \
+moc_SavedLayoutsModel.cpp \
+moc_EventViewWindow.cpp \
+moc_SwitchEventsWidget.cpp \
+moc_EventVideoDownloadsWindow.cpp \
+moc_SetupWizard.cpp \
+moc_ServerMenu.cpp \
+moc_RemotePortCheckerWidget.cpp \
+moc_NumericOffsetWidget.cpp \
+moc_WebRtpPortCheckerWidget.cpp \
+moc_EventVideoPlayer.cpp \
+moc_EventTagsView.cpp \
+moc_DVRServer.cpp \
+moc_DVRServerConfiguration.cpp \
+moc_DVRServerRepository.cpp \
+moc_DVRCameraData.cpp \
+moc_DVRCamera.cpp \
+moc_AudioPlayer.cpp \
+moc_RemotePortChecker.cpp \
+moc_MediaDownloadManager.cpp \
+moc_RtspStreamThread.cpp \
+moc_RtspStreamWorker.cpp \
+moc_RtspStream.cpp \
+moc_EventsCursor.cpp \
+moc_ModelEventsCursor.cpp \
+moc_EventVideoDownload.cpp \
+moc_EventsUpdater.cpp \
+moc_ThumbnailManager.cpp \
+moc_EventsLoader.cpp \
+moc_EventDownloadManager.cpp \
+moc_ThreadTaskCourier.cpp \
+moc_VideoWidget.cpp \
+moc_VideoHttpBuffer.cpp \
+moc_MediaDownload.cpp \
+moc_MpvVideoWidget.cpp \
+moc_MpvVideoPlayerBackend.cpp \
+moc_VideoPlayerBackend.cpp \
+moc_MediaDownload_p.cpp \
+moc_TransferRateCalculator.cpp \
+moc_LiveViewManager.cpp \
+moc_PtzPresetsModel.cpp \
+moc_BluecherryApp.cpp \
+moc_UpdateChecker.cpp \
+moc_ServerRequestManager.cpp \
+moc_CameraPtzControl.cpp \
+moc_MJpegStream.cpp \
+moc_LiveStream.cpp \
+qml_resources.cpp \
+resources.cpp
+
+resources.cpp: res/resources.qrc
+	$(RCC) -g cpp -name bluecherry $< > $@
+
+qml_resources.cpp: src/ui/qml.qrc
+	$(RCC) -g cpp -name bluecherry_qrc $< > $@
+
+moc_%.cpp: src/ui/%.h
+	$(MOC) $< -o $@
+
+moc_%.cpp: src/ui/liveview/%.h
+	$(MOC) $< -o $@
+
+moc_%.cpp: src/ui/model/%.h
+	$(MOC) $< -o $@
+
+moc_%.cpp: src/server/%.h
+	$(MOC) $< -o $@
+
+moc_%.cpp: src/camera/%.h
+	$(MOC) $< -o $@
+
+moc_%.cpp: src/audio/%.h
+	$(MOC) $< -o $@
+
+moc_%.cpp: src/network/%.h
+	$(MOC) $< -o $@
+
+moc_%.cpp: src/rtsp-stream/%.h
+	$(MOC) $< -o $@
+
+moc_%.cpp: src/event/%.h
+	$(MOC) $< -o $@
+
+moc_%.cpp: src/utils/%.h
+	$(MOC) $< -o $@
+
+moc_%.cpp: src/video/%.h
+	$(MOC) $< -o $@
+
+moc_%.cpp: src/video/libmpv/%.h
+	$(MOC) $< -o $@
+
+moc_%.cpp: src/core/%.h
+	$(MOC) $< -o $@
 
 

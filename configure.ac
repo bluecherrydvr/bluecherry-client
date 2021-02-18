@@ -28,9 +28,10 @@ AC_ARG_WITH([qt],
 
 AS_IF([test "x$qt_version" = xqt5],
 	[
-	QT_MODULES="Qt5Core Qt5Gui Qt5Sql Qt5Network Qt5Widgets Qt5Concurrent"
+	QT_MODULES="Qt5Core Qt5Gui Qt5Sql Qt5Network Qt5Widgets Qt5Concurrent Qt5Quick"
 	QT_UIC_NAMES="uic-qt5 uic5 uic"
 	QT_MOC_NAMES="moc-qt5 moc5 moc"
+	QT_RCC_NAMES="rcc-qt5 rcc5 rcc"
 	CFLAGS="-fPIC $CFLAGS"
 	CXXFLAGS="-fPIC $CXXFLAGS"
 	CPPFLAGS="-DQT_DISABLE_DEPRECATED_BEFORE=0 $CPPFLAGS"
@@ -40,6 +41,7 @@ AS_IF([test "x$qt_version" = xqt5],
 	QT_MODULES="QtCore QtGui QtSql QtNetwork QtDeclarative QtOpenGL"
 	QT_UIC_NAMES="uic-qt4 uic4 uic"
 	QT_MOC_NAMES="moc-qt4 moc4 moc"
+	QT_RCC_NAMES="rcc-qt4 rcc4 rcc"
 	],
   [AC_MSG_ERROR(["Invalid Qt version"])])
 
@@ -52,6 +54,7 @@ AC_SUBST([QT_DEPENDENCIES_CFLAGS])
 AC_SUBST([QT_DEPENDENCIES_LIBS])
 AC_CHECK_PROGS([UIC], [$QT_UIC_NAMES], [notfound])
 AC_CHECK_PROGS([MOC], [$QT_MOC_NAMES], [notfound])
+AC_CHECK_PROGS([RCC], [$QT_RCC_NAMES], [notfound])
 #fail if not found ...
 AS_IF([test "x$UIC" = xnotfound],[AC_MSG_ERROR(["uic program not found. Please install Qt development package"])])
 AS_IF([test "x$MOC" = xnotfound],[AC_MSG_ERROR(["moc program not found. Please install Qt development package"])])
@@ -60,6 +63,7 @@ AC_CHECK_LIB([pthread], [pthread_create])
 
 PKG_CHECK_MODULES(FFMPEG, libavutil libavformat libavcodec libswscale, HAVE_FFMPEG=yes, AC_MSG_ERROR(["FFMpeg libraries not found"]))
 
+PKG_CHECK_MODULES(SDL2, sdl2, HAVE_LIBSDL2=yes, AC_MSG_ERROR(["libSDL2 not found"]))
 PKG_CONFIG="pkg-config --static"
 PKG_CHECK_MODULES(MPV, mpv, HAVE_MPV=yes, AC_MSG_ERROR(["libmpv not found"]))
 
