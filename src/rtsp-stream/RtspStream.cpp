@@ -29,6 +29,7 @@
 #include <QDebug>
 #include <QSettings>
 #include <QDateTime>
+#include <QMetaMethod>
 
 extern "C" {
 #   include "libavcodec/avcodec.h"
@@ -59,13 +60,13 @@ static int bc_av_lockmgr(void **mutex, enum AVLockOp op)
 class AutoTimer : public QTimer
 {
 protected:
-    virtual void connectNotify(const char *signal)
+    virtual void connectNotify(const QMetaMethod &signal)
     {
-        if (!strcmp(signal, SIGNAL(timeout())))
+        if (signal == QMetaMethod::fromSignal(&QTimer::timeout))
             start();
     }
 
-    virtual void disconnectNotify(const char *signal)
+    virtual void disconnectNotify(const QMetaMethod &signal)
     {
         Q_UNUSED(signal);
         if (!receivers(SIGNAL(timeout())))
