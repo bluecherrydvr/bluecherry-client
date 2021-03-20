@@ -30,12 +30,14 @@
 #include <QContextMenuEvent>
 #include <QSignalMapper>
 #include <QInputDialog>
+#include <QPixmapCache>
 #include <QDebug>
 
 CameraContainerWidget::CameraContainerWidget(QWidget *parent) : QFrame(parent),
   m_cameraview(0), m_serverRepository(0)
 {
     setFrameShape(QFrame::Box);
+    setFocusPolicy(Qt::StrongFocus);
     QGridLayout *vl = new QGridLayout();
     QHBoxLayout *headerlayout = new QHBoxLayout();
     m_cameraview = new CameraWidget();
@@ -225,10 +227,80 @@ void CameraContainerWidget::saveSnapshot()
     }
 }
 
+CameraPtzControl::Movement CameraContainerWidget::moveForPosition(int x, int y)
+{
+    int xarea = width() / 4, yarea = height() / 4;
+    int movement = CameraPtzControl::NoMovement;
+
+    if (x < xarea)
+        movement |= CameraPtzControl::MoveWest;
+    else if (x >= 3*xarea)
+        movement |= CameraPtzControl::MoveEast;
+    if (y < yarea)
+        movement |= CameraPtzControl::MoveNorth;
+    else if (y >= 3*yarea)
+        movement |= CameraPtzControl::MoveSouth;
+
+    return (CameraPtzControl::Movement) movement;
+}
+
+void CameraContainerWidget::setCustomCursor(CustomCursor cursor)
+{
+    if (cursor == m_customCursor)
+        return;
+
+    m_customCursor = cursor;
+
+    int rotate = 0;
+
+    switch (m_customCursor)
+    {
+    case DefaultCursor:
+        setCursor(QCursor());
+        return;
+    case MoveCursorE:
+        break;
+    case MoveCursorSE:
+        rotate = 45;
+        break;
+    case MoveCursorS:
+        rotate = 90;
+        break;
+    case MoveCursorSW:
+        rotate = 135;
+        break;
+    case MoveCursorW:
+        rotate = 180;
+        break;
+    case MoveCursorNW:
+        rotate = 225;
+        break;
+    case MoveCursorN:
+        rotate = 270;
+        break;
+    case MoveCursorNE:
+        rotate = 315;
+        break;
+    }
+
+    QString key = QString::fromLatin1("ptzcursor-%1").arg(rotate);
+    QPixmap pm;
+    if (!QPixmapCache::find(key, pm))
+    {
+        pm = QPixmap(QLatin1String(":/images/ptz-arrow.png")).transformed(QTransform().rotate(rotate), Qt::SmoothTransformation);
+        QPixmapCache::insert(key, pm);
+    }
+
+    setCursor(QCursor(pm));
+}
+
 void CameraContainerWidget::setPtzEnabled(bool ptzEnabled)
 {
     if (ptzEnabled == !m_ptz.isNull())
         return;
+
+    if (ptzEnabled)
+        setMouseTracking(true);
 
     if (ptzEnabled && m_camera)
         m_ptz = m_camera.data()->sharedPtzControl();
@@ -379,6 +451,133 @@ void CameraContainerWidget::contextMenuEvent(QContextMenuEvent *event)
     delete ptzmenu;
 }
 
+void CameraContainerWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    if (!m_ptz)
+    {
+        event->ignore();
+        setMouseTracking(false);
+        return;
+    }
+
+    event->accept();
+
+    CameraPtzControl::Movement movements = moveForPosition(event->x(), event->y());
+    CustomCursor cursor = DefaultCursor;
+
+    if (movements & CameraPtzControl::MoveNorth) {
+        if (movements & CameraPtzControl::MoveWest)
+            cursor = MoveCursorNW;
+        else if (movements & CameraPtzControl::MoveEast)
+            cursor = MoveCursorNE;
+        else
+            cursor = MoveCursorN;
+    }
+    else if (movements & CameraPtzControl::MoveSouth) {
+        if (movements & CameraPtzControl::MoveWest)
+            cursor = MoveCursorSW;
+        else if (movements & CameraPtzControl::MoveEast)
+            cursor = MoveCursorSE;
+        else
+            cursor = MoveCursorS;
+    }
+    else if (movements & CameraPtzControl::MoveWest)
+        cursor = MoveCursorW;
+    else if (movements & CameraPtzControl::MoveEast)
+        cursor = MoveCursorE;
+
+    setCustomCursor(cursor);
+}
+
+void CameraContainerWidget::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    if (!m_ptz)
+    {
+        event->ignore();
+        return;
+    }
+    CameraPtzControl::Movement movement = moveForPosition(event->x(), event->y());
+    if (movement == CameraPtzControl::NoMovement)
+    {
+        event->accept();
+        m_ptz->move(CameraPtzControl::MoveTele);
+    }
+    else
+        event->ignore();
+}
+
+void CameraContainerWidget::mousePressEvent(QMouseEvent *event)
+{
+    if (!m_ptz)
+    {
+        event->ignore();
+        return;
+    }
+
+    event->accept();
+
+    CameraPtzControl::Movement movement = moveForPosition(event->x(), event->y());
+    if (movement != CameraPtzControl::NoMovement)
+        m_ptz->move(movement);
+}
+
+void CameraContainerWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (!m_ptz)
+    {
+        event->ignore();
+        return;
+    }
+
+    event->accept();
+    setCustomCursor(DefaultCursor);
+}
+
+void CameraContainerWidget::wheelEvent(QWheelEvent *event)
+{
+    if (!m_ptz)
+    {
+        event->ignore();
+        return;
+    }
+
+    event->accept();
+
+    int steps = event->delta() / 120;
+    if (!steps)
+        return;
+
+    m_ptz->move((steps < 0) ? CameraPtzControl::MoveWide : CameraPtzControl::MoveTele);
+}
+
+void CameraContainerWidget::keyPressEvent(QKeyEvent *event)
+{
+    if (!m_ptz)
+    {
+        QFrame::keyPressEvent(event);
+        return;
+    }
+
+    switch (event->key())
+    {
+    case Qt::Key_Left:
+        m_ptz->move(CameraPtzControl::MoveWest);
+        break;
+    case Qt::Key_Right:
+        m_ptz->move(CameraPtzControl::MoveEast);
+        break;
+    case Qt::Key_Up:
+        m_ptz->move((event->modifiers() & Qt::ShiftModifier) ? CameraPtzControl::MoveTele : CameraPtzControl::MoveNorth);
+        break;
+    case Qt::Key_Down:
+        m_ptz->move((event->modifiers() & Qt::ShiftModifier) ? CameraPtzControl::MoveWide : CameraPtzControl::MoveSouth);
+        break;
+    default:
+        QFrame::keyPressEvent(event);
+        return;
+    }
+}
+
 void CameraContainerWidget::setCamera(DVRCamera *camera)
 {
     if (camera == m_camera.data())
@@ -414,4 +613,65 @@ void CameraContainerWidget::setCamera(DVRCamera *camera)
     vl->setRowStretch(1, 4);
     //vl->setColumnStretch(1, 0);
     setLayout(vl);
+
+    if (m_camera)
+    {
+        connect(m_camera.data()->data().server(), SIGNAL(changed()), SLOT(cameraDataUpdated()));
+        connect(m_camera.data(), SIGNAL(dataUpdated()), SLOT(cameraDataUpdated()));
+        connect(m_camera.data(), SIGNAL(onlineChanged(bool)), SLOT(cameraDataUpdated()));
+        connect(m_camera.data(), SIGNAL(recordingStateChanged(int)), SIGNAL(recordingStateChanged()));
+    }
+
+    cameraDataUpdated();
+    emit cameraChanged(camera);
+    emit recordingStateChanged();
+
+    if (camera && stream())
+        connect(stream(), SIGNAL(audioChanged()), SLOT(updateAudioState()));
+}
+
+void CameraContainerWidget::cameraDataUpdated()
+{
+    emit cameraNameChanged(cameraName());
+    emit hasPtzChanged();
+
+    m_cameraview->setStream(m_camera.data()->liveStream());
+
+    emit cameraChanged(m_camera.data());
+}
+
+void CameraContainerWidget::saveState(QDataStream *data)
+{
+    Q_ASSERT(data);
+
+    if (m_camera)
+    {
+        DVRCameraStreamWriter writer(*data);
+        writer.writeCamera(m_camera.data());
+
+        *data << (stream() ? stream()->bandwidthMode() : 0);
+    }
+}
+
+void CameraContainerWidget::loadState(QDataStream *data, int version)
+{
+    Q_ASSERT(data);
+
+    DVRCameraStreamReader reader(m_serverRepository, *data);
+    DVRCamera *camera = reader.readCamera();
+    if (camera)
+        setCamera(camera);
+    else
+        clear();
+
+    if (version >= 1) {
+        int bandwidth_mode = 0;
+        *data >> bandwidth_mode;
+        // this assert assumes that configuration file is always valid
+        // but this is something we cannot be sure of
+        // Q_ASSERT(stream());
+
+        if (stream())
+            stream()->setBandwidthMode(bandwidth_mode);
+    }
 }
