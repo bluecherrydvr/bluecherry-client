@@ -1,3 +1,4 @@
-debian/tmp/usr/bin/*
-debian/tmp/usr/share/*
+debian/tmp/usr/bin/bluecherry-client
+linux/bluecherry-client.desktop usr/share/applications
+res/bluecherry-client.png  usr/share/pixmaps
 

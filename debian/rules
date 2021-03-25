@@ -9,14 +9,3 @@ override_dh_strip:
 override_dh_shlibdeps:
 	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:debian/bluecherry-client/usr/lib/bluecherry/client dh_shlibdeps
 
-override_dh_auto_install:
-	dh_auto_install
-	mkdir -p debian/bluecherry-client/usr/lib/bluecherry/client
-	cp -a /usr/lib/bluecherry/client/libavformat.so* debian/bluecherry-client/usr/lib/bluecherry/client/
-	cp -a /usr/lib/bluecherry/client/libavfilter.so* debian/bluecherry-client/usr/lib/bluecherry/client/
-	cp -a /usr/lib/bluecherry/client/libavdevice.so* debian/bluecherry-client/usr/lib/bluecherry/client/
-	cp -a /usr/lib/bluecherry/client/libavcodec.so* debian/bluecherry-client/usr/lib/bluecherry/client/
-	cp -a /usr/lib/bluecherry/client/libavutil.so* debian/bluecherry-client/usr/lib/bluecherry/client/
-	cp -a /usr/lib/bluecherry/client/libswscale.so* debian/bluecherry-client/usr/lib/bluecherry/client/
-	cp -a /usr/lib/bluecherry/client/libswresample.so* debian/bluecherry-client/usr/lib/bluecherry/client/
-
