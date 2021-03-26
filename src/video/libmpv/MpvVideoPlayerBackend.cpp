@@ -27,7 +27,7 @@
 
 #include "MpvVideoPlayerBackend.h"
 #include "video/VideoHttpBuffer.h"
-#include "mpv/qthelper.hpp"
+//#include "mpv/qthelper.hpp"
 #include <locale.h>
 
 #define DOWNLOADED_THRESHOLD 10

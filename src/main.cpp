@@ -50,7 +50,7 @@ const char *jpegFormatName = "jpeg";
 int main(int argc, char *argv[])
 {
 #ifdef Q_OS_LINUX   /* Without this call client may crash on exit when using libmpv */
-    XInitThreads(); /* Shoud be called before any Qt initialization */
+//    XInitThreads(); /* Shoud be called before any Qt initialization */
 #endif
 
     QApplication a(argc, argv);
