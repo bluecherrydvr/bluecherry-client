@@ -26,19 +26,19 @@ void DVRServerSettingsWriter::writeServer(DVRServer *server) const
 
     int serverId = server->configuration().id();
     Q_ASSERT(serverId >= 0);
+    QSettings settings;
 
-    writeSetting(serverId, QLatin1String("displayName"), server->configuration().displayName());
-    writeSetting(serverId, QLatin1String("hostname"), server->configuration().hostname());
-    writeSetting(serverId, QLatin1String("port"), server->configuration().port());
-    writeSetting(serverId, QLatin1String("username"), server->configuration().username());
-    writeSetting(serverId, QLatin1String("password"), server->configuration().password());
-    writeSetting(serverId, QLatin1String("autoConnect"), server->configuration().autoConnect());
-    writeSetting(serverId, QLatin1String("sslDigest"), server->configuration().sslDigest());
-    writeSetting(serverId, QLatin1String("connectionType"), server->configuration().connectionType());
+    writeSetting(settings, serverId, QLatin1String("displayName"), server->configuration().displayName());
+    writeSetting(settings, serverId, QLatin1String("hostname"), server->configuration().hostname());
+    writeSetting(settings, serverId, QLatin1String("port"), server->configuration().port());
+    writeSetting(settings, serverId, QLatin1String("username"), server->configuration().username());
+    writeSetting(settings, serverId, QLatin1String("password"), server->configuration().password());
+    writeSetting(settings, serverId, QLatin1String("autoConnect"), server->configuration().autoConnect());
+    writeSetting(settings, serverId, QLatin1String("sslDigest"), server->configuration().sslDigest());
+    writeSetting(settings, serverId, QLatin1String("connectionType"), server->configuration().connectionType());
 }
 
-void DVRServerSettingsWriter::writeSetting(int serverId, const QString &key, const QVariant &value) const
+void DVRServerSettingsWriter::writeSetting(QSettings &settings, int serverId, const QString &key, const QVariant &value) const
 {
-    QSettings settings;
     settings.setValue(QString::fromLatin1("servers/%1/%2").arg(serverId).arg(key), value);
 }

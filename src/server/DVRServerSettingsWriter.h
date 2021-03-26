@@ -21,6 +21,7 @@
 #include <QVariant>
 
 class DVRServer;
+class QSettings;
 
 class DVRServerSettingsWriter
 {
@@ -28,8 +29,7 @@ public:
     void writeServer(DVRServer *server) const;
 
 private:
-    void writeSetting(int serverId, const QString &key, const QVariant &value) const;
-
+    void writeSetting(QSettings &settings, int serverId, const QString &key, const QVariant &value) const;
 };
 
 #endif // DVRSERVERSETTINGSWRITER_H
