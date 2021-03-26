@@ -1,11 +1,9 @@
 #!/usr/bin/make -f
 
 %:
-	dh $@
+	dh $@ --with autoreconf
 
 override_dh_strip:
 	dh_strip --dbg-package=bluecherry-client-dbg
 
-override_dh_shlibdeps:
-	LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:debian/bluecherry-client/usr/lib/bluecherry/client dh_shlibdeps
 
