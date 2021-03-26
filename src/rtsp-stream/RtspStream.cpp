@@ -75,7 +75,7 @@ protected:
 };
 
 QTimer *RtspStream::m_renderTimer = 0;
-static const int renderTimerFps = 30;
+static const int renderTimerFps = 60;
 QTimer *RtspStream::m_stateTimer = 0;
 
 void RtspStream::init()
