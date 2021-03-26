@@ -10,6 +10,7 @@ class CameraWidget;
 class DVRCamera;
 class QMenu;
 class DVRServerRepository;
+class QLabel;
 
 class CameraContainerWidget : public QFrame//QWidget
 {
@@ -59,6 +60,7 @@ public slots:
     void disableAudio();
     void close();
 signals:
+    void cameraClosed(QWidget *widget);
     void cameraChanged(DVRCamera *camera);
     void cameraNameChanged(const QString &cameraName);
     void pausedChanged(bool isPaused);
@@ -73,6 +75,7 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent *event);
     virtual void wheelEvent(QWheelEvent *event);
     virtual void keyPressEvent(QKeyEvent *event);
+    void paintEvent(QPaintEvent *event);
 
 private slots:
     void cameraDataUpdated();
@@ -84,6 +87,9 @@ private:
     QWeakPointer<DVRCamera> m_camera;
     QSharedPointer<CameraPtzControl> m_ptz;
     CameraWidget *m_cameraview;
+    QLabel *m_cameraname;
+    QLabel *m_headerptz;
+    QLabel *m_headerfps;
     DVRServerRepository *m_serverRepository;
     CustomCursor m_customCursor;
     /* Caller is responsible for deleting */

@@ -31,34 +31,58 @@
 #include <QSignalMapper>
 #include <QInputDialog>
 #include <QPixmapCache>
+#include <QPainter>
 #include <QDebug>
 
 CameraContainerWidget::CameraContainerWidget(QWidget *parent) : QFrame(parent),
-  m_cameraview(0), m_serverRepository(0)
+  m_cameraview(0), m_cameraname(0), m_headerptz(0),
+  m_headerfps(0), m_serverRepository(0)
 {
+    setAttribute(Qt::WA_OpaquePaintEvent);
+    setBackgroundRole(QPalette::Shadow);
     setFrameShape(QFrame::Box);
     setFocusPolicy(Qt::StrongFocus);
     QGridLayout *vl = new QGridLayout();
     QHBoxLayout *headerlayout = new QHBoxLayout();
     m_cameraview = new CameraWidget();
 
-    QLabel *lb_name = new QLabel(cameraName());
-    QLabel *lb_fps = new QLabel(tr("0fps"));
+    m_cameraname = new QLabel(cameraName());
+    //QFont f = m_cameraname->font();
+    //f.setBold(true);
+    m_cameraname->setStyleSheet("font-weight: bold;");
+    m_cameraname->setAttribute(Qt::WA_OpaquePaintEvent);
+    m_cameraname->setBackgroundRole(QPalette::Shadow);
+
+    m_headerfps = new QLabel(tr("0fps"));
+    m_headerfps->setAttribute(Qt::WA_OpaquePaintEvent);
+    m_headerptz = new QLabel(tr("PTZ"));
+    m_headerptz->setAttribute(Qt::WA_OpaquePaintEvent);
     //headerlayout->addStrut(12);
-    headerlayout->addWidget(lb_name);
+    headerlayout->addWidget(m_cameraname);
     headerlayout->addStretch(1);
-    headerlayout->addWidget(lb_fps);
+    headerlayout->addWidget(m_headerptz);
+    headerlayout->addWidget(m_headerfps);
     vl->setSizeConstraint(QLayout::SetNoConstraint);
-    vl->addLayout(headerlayout, 0, 0);
     vl->addWidget(m_cameraview, 1, 0);
+    vl->addLayout(headerlayout, 0, 0);
     vl->setRowStretch(1, 4);
     //vl->setColumnStretch(1, 0);
     setLayout(vl);
+    m_cameraname->raise();
+    m_cameraview->show();
 }
 
 void CameraContainerWidget::close()
 {
-    //
+    emit cameraClosed(this);
+}
+
+void CameraContainerWidget::paintEvent(QPaintEvent *event)
+{
+    QPainter p(this);
+    p.fillRect(event->rect(), Qt::black);
+    p.drawText(event->rect(), Qt::AlignCenter, tr("cameracontainerwidget paint event"));
+    qDebug() << "cameracontainerwidget paint event" << event->rect();
 }
 
 QString CameraContainerWidget::cameraName() const
@@ -552,7 +576,7 @@ void CameraContainerWidget::wheelEvent(QWheelEvent *event)
 
 void CameraContainerWidget::keyPressEvent(QKeyEvent *event)
 {
-    if (!m_ptz)
+    if (!m_ptz || event->isAutoRepeat())
     {
         QFrame::keyPressEvent(event);
         return;
@@ -648,7 +672,6 @@ void CameraContainerWidget::saveState(QDataStream *data)
     {
         DVRCameraStreamWriter writer(*data);
         writer.writeCamera(m_camera.data());
-
         *data << (stream() ? stream()->bandwidthMode() : 0);
     }
 }
@@ -660,16 +683,17 @@ void CameraContainerWidget::loadState(QDataStream *data, int version)
     DVRCameraStreamReader reader(m_serverRepository, *data);
     DVRCamera *camera = reader.readCamera();
     if (camera)
+    {
         setCamera(camera);
+    }
     else
+    {
         clear();
+    }
 
     if (version >= 1) {
         int bandwidth_mode = 0;
         *data >> bandwidth_mode;
-        // this assert assumes that configuration file is always valid
-        // but this is something we cannot be sure of
-        // Q_ASSERT(stream());
 
         if (stream())
             stream()->setBandwidthMode(bandwidth_mode);

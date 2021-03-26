@@ -2,6 +2,7 @@
 #include <QPainter>
 #include <QPaintEvent>
 #include <QImage>
+#include <QDebug>
 #include <stdlib.h>
 
 CameraWidget::CameraWidget(QWidget *parent) : QWidget(parent)
@@ -11,7 +12,8 @@ CameraWidget::CameraWidget(QWidget *parent) : QWidget(parent)
 
 CameraWidget::~CameraWidget()
 {
-    m_stream.data()->unref();
+    if (m_stream)
+        m_stream.data()->unref();
 }
 
 void CameraWidget::paintEvent(QPaintEvent *event)
@@ -26,6 +28,8 @@ void CameraWidget::paintEvent(QPaintEvent *event)
     if (frame.isNull())
     {
         p.fillRect(event->rect(), Qt::black);
+        p.drawText(event->rect(), Qt::AlignCenter, tr("camerawidget paint event"));
+        qDebug() << "camerawidget paint event" << event->rect();
         return;
     }
     m_framesize = frame.size();

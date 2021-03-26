@@ -28,7 +28,7 @@ AC_ARG_WITH([qt],
 
 AS_IF([test "x$qt_version" = xqt5],
 	[
-	QT_MODULES="Qt5Core Qt5Gui Qt5Sql Qt5Network Qt5Widgets Qt5Concurrent Qt5Quick"
+	QT_MODULES="Qt5Core Qt5Gui Qt5Sql Qt5Network Qt5Widgets Qt5Concurrent"
 	QT_UIC_NAMES="uic-qt5 uic5 uic"
 	QT_MOC_NAMES="moc-qt5 moc5 moc"
 	QT_RCC_NAMES="rcc-qt5 rcc5 rcc"
@@ -64,7 +64,6 @@ AC_CHECK_LIB([pthread], [pthread_create])
 PKG_CHECK_MODULES(FFMPEG, libavutil libavformat libavcodec libswscale, HAVE_FFMPEG=yes, AC_MSG_ERROR(["FFMpeg libraries not found"]))
 
 PKG_CHECK_MODULES(SDL2, sdl2, HAVE_LIBSDL2=yes, AC_MSG_ERROR(["libSDL2 not found"]))
-PKG_CONFIG="pkg-config --static"
 PKG_CHECK_MODULES(MPV, mpv, HAVE_MPV=yes, AC_MSG_ERROR(["libmpv not found"]))
 
 VERSION=$PACKAGE_VERSION

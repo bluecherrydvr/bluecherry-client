@@ -60,14 +60,11 @@ src/server/DVRServerRepository.cpp \
 src/server/DVRServerSettingsReader.cpp \
 src/server/DVRServerSettingsWriter.cpp \
  \
-src/ui/liveview/LiveFeedItem.cpp \
-src/ui/liveview/LiveStreamItem.cpp \
-src/ui/liveview/LiveViewArea.cpp \
-src/ui/liveview/LiveViewGradients.cpp \
-src/ui/liveview/LiveViewLayout.cpp \
 src/ui/liveview/LiveViewWindow.cpp \
+src/ui/liveview/camerawidget.cpp \
+src/ui/liveview/cameracontainerwidget.cpp \
 src/ui/liveview/PtzPresetsWindow.cpp \
- \
+\
 src/ui/model/DVRServersModel.cpp \
 src/ui/model/DVRServersProxyModel.cpp \
 src/ui/model/EventsModel.cpp \
@@ -130,6 +127,8 @@ src/video/libmpv/MpvVideoPlayerBackend.cpp \
 src/video/libmpv/MpvVideoPlayerFactory.cpp \
 src/main.cpp
 
+# src/ui/liveview/LiveViewGradients.cpp
+
 nodist_bluecherry_client_SOURCES  = \
 moc_SetupWizard_p.cpp \
 moc_CrashReportDialog.cpp \
@@ -139,12 +138,10 @@ moc_MacSplitter.cpp \
 moc_OptionsGeneralPage.cpp \
 moc_AboutDialog.cpp \
 moc_EventTimelineWidget.cpp \
-moc_LiveViewArea.cpp \
-moc_LiveStreamItem.cpp \
-moc_LiveFeedItem.cpp \
-moc_LiveViewLayout.cpp \
-moc_PtzPresetsWindow.cpp \
+moc_camerawidget.cpp \
+moc_cameracontainerwidget.cpp \
 moc_LiveViewWindow.cpp \
+moc_PtzPresetsWindow.cpp \
 moc_VisibleTimeRange.cpp \
 moc_EventVideoDownloadWidget.cpp \
 moc_OptionsDialog.cpp \

@@ -22,6 +22,7 @@
 #include <QWeakPointer>
 #include "camera/DVRCamera.h"
 #include <QCloseEvent>
+#include <QGridLayout>
 
 class DVRServerRepository;
 class LiveViewArea;
@@ -41,7 +42,7 @@ public:
      * unset this attribute. */
     static LiveViewWindow *openWindow(DVRServerRepository *serverRepository, QWidget *parent, bool fullscreen, DVRCamera *camera = 0);
 
-    LiveViewArea *view() const { return m_liveView; }
+
     QString currentLayout() const;
 
     void setAutoSized(bool autoSized);
@@ -52,11 +53,33 @@ public:
 
     QWidget *topWidget() { return m_topWidget; }
     QWidget *fullScreenWidget() { return m_fsSetWindow.data(); }
+    void addCamera(DVRCamera *camera);
+    static int maxRows();
+    static int maxColumns();
+    void setGridSize(int rows, int columns);
+    bool isRowEmpty(int rowIndex) const;
+    bool isColumnEmpty(int rowIndex) const;
+    QByteArray serializeLayout() const;
 
 public slots:
     void showSingleCamera(DVRCamera *camera);
     bool setLayout(const QString &layout);
     void saveLayout();
+    void setRows(int r) { setGridSize(r, m_liveviewlayout->columnCount()); }
+    void insertRow(int row);
+    void appendRow() { insertRow(m_liveviewlayout->rowCount()); }
+    void removeRow(int row);
+    void removeRow() { setGridSize(m_liveviewlayout->rowCount() - 1, m_liveviewlayout->columnCount()); }
+
+    void setColumns(int c) { setGridSize(m_liveviewlayout->rowCount(), c); }
+    void insertColumn(int column);
+    void appendColumn() { insertColumn(m_liveviewlayout->columnCount()); }
+    void removeColumn(int column);
+    void removeColumn() { setGridSize(m_liveviewlayout->rowCount(), m_liveviewlayout->columnCount() - 1); }
+
+    void setGridSize(int size) { setGridSize(size, size); }
+    void setGridSize(QString size);
+    bool loadLayout(const QByteArray &buf);
 
     bool createNewLayout(QString name = QString());
     void renameLayout(QString name = QString());
@@ -77,6 +100,7 @@ protected:
     virtual void moveEvent(QMoveEvent *event);
     virtual void keyPressEvent(QKeyEvent *event);
     virtual bool event(QEvent *event);
+    virtual void paintEvent(QPaintEvent *event);
 
 private slots:
     void savedLayoutChanged(int index);
@@ -84,9 +108,11 @@ private slots:
     void doAutoResize();
     void updateLayoutActionStates();
     void camerasBrowseKeys(QKeyEvent *event);
+    void removeCamera(QWidget *widget);
 
 private:
-    LiveViewArea *m_liveView;
+
+
     DVRServerRepository *m_serverRepository;
     QToolBar *m_toolBar;
     QComboBox * const m_savedLayouts;
@@ -102,6 +128,7 @@ private:
     QList<DVRCamera*> m_cameras;
     bool m_autoSized, m_isLayoutChanging, m_wasOpenedFs;
     static bool m_isSessionRestoring;
+    QGridLayout *m_liveviewlayout;
 
     void retranslateUI();
     void geometryChanged();
@@ -109,6 +136,9 @@ private:
     void switchLayout(bool next);
     void switchCamera(bool next);
     void clearBrowseParams();
+    void removeRows(int remove);
+    void removeColumns(int remove);
+    bool findEmptyLayoutCell(int *r, int *c);
 };
 
 #endif // LIVEVIEWWINDOW_H
