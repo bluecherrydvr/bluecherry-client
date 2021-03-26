@@ -19,6 +19,7 @@
 #include "server/DVRServer.h"
 #include "server/DVRServerConfiguration.h"
 #include "DVRCameraStreamWriter.h"
+#include <QDataStream>
 
 DVRCameraStreamWriter::DVRCameraStreamWriter(QDataStream &dataStream)
     : m_dataStream(dataStream)
@@ -28,7 +29,7 @@ DVRCameraStreamWriter::DVRCameraStreamWriter(QDataStream &dataStream)
 void DVRCameraStreamWriter::writeCamera(DVRCamera *camera)
 {
     if (!camera)
-        m_dataStream << QVariant(-1);
+        m_dataStream << (qint32)-1;
     else
-        m_dataStream << QVariant(camera->data().server()->configuration().id() << camera->data().id());
+        m_dataStream << (qint32) camera->data().server()->configuration().id() << (qint32)camera->data().id();
 }
