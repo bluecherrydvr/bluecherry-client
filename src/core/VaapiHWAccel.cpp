@@ -8,9 +8,6 @@
 
 extern "C"
 {
-#include <va/va.h>
-#include <va/va_x11.h>
-#include <va/va_drm.h>
 #include <libavutil/hwcontext_vaapi.h>
 #include <libavutil/pixdesc.h>
 #include <libavutil/frame.h>
@@ -70,37 +67,10 @@ fail:
 
 int VaapiHWAccel::decoderInit(AVCodecContext *s)
 {
-    AVBufferRef* ref;
-    AVHWFramesContext* frctx;
-
     qDebug() << "initializing VAAPI decoder...";
 
-    ref = av_hwframe_ctx_alloc(m_instance->m_hw_device_ctx);
-
-    if (ref == NULL)
-    {
-        qDebug() << "failed to allocate VAAPI frame context!";
-        return 0;
-    }
-
-    frctx = (AVHWFramesContext*)ref->data;
-
-    frctx->format = AV_PIX_FMT_VAAPI;
-    frctx->width = s->coded_width;
-    frctx->height = s->coded_height;
-    frctx->sw_format = (s->sw_pix_fmt == AV_PIX_FMT_YUV420P10 ?
-                            AV_PIX_FMT_P010 : AV_PIX_FMT_NV12);
-    frctx->initial_pool_size = VAAPIHWACCEL_SURFACES_NUM;
-
-    if (av_hwframe_ctx_init(ref) < 0)
-    {
-        qDebug() << "failed to initialize VAAPI frame context!";
-        av_buffer_unref(&ref);
-        return 0;
-    }
-
     s->pix_fmt = s->sw_pix_fmt;
-    s->hw_frames_ctx = ref;
+    s->hw_device_ctx = av_buffer_ref(m_instance->m_hw_device_ctx);
 
     s->opaque = (void*)1; //hardware acceleration is enabled for this AVCodecContext instance
 
@@ -144,28 +114,6 @@ enum AVPixelFormat VaapiHWAccel::get_format(AVCodecContext *s, const enum AVPixe
 
     qDebug() << "returning pix_fmt " << av_get_pix_fmt_string(pixdescbuf, 63, *p);
     return *p;
-}
-
-int VaapiHWAccel::get_buffer(AVCodecContext *s, AVFrame *frame, int flags)
-{
-    Q_ASSERT(m_instance != 0);
-
-    int ret = 0;
-
-    if (s->opaque)
-    {
-        ret = av_hwframe_get_buffer(s->hw_frames_ctx, frame, 0);
-
-        if (ret < 0)
-        {
-            s->opaque = 0;
-            qDebug() << "Failed to allocate VAAPI decoder surface!";
-        }
-    }
-    else
-        return avcodec_default_get_buffer2(s, frame, flags);
-
-    return ret;
 }
 
 VaapiHWAccel::VaapiHWAccel()

@@ -41,7 +41,6 @@ public:
 
     //AVCodecContext callbacks
     static enum AVPixelFormat get_format(AVCodecContext *s, const enum AVPixelFormat *pix_fmts);
-    static int get_buffer(AVCodecContext *s, AVFrame *frame, int flags);
     static int decoderInit(AVCodecContext *s);
     static int retrieveData(AVCodecContext *s, AVFrame *input);
 private:
