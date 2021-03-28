@@ -65,17 +65,17 @@ public slots:
     void showSingleCamera(DVRCamera *camera);
     bool setLayout(const QString &layout);
     void saveLayout();
-    void setRows(int r) { setGridSize(r, m_liveviewlayout->columnCount()); }
+    void setRows(int r) { setGridSize(r, m_cols); }
     void insertRow(int row);
-    void appendRow() { insertRow(m_liveviewlayout->rowCount()); }
+    void appendRow() { insertRow(m_rows); }
     void removeRow(int row);
-    void removeRow() { setGridSize(m_liveviewlayout->rowCount() - 1, m_liveviewlayout->columnCount()); }
+    void removeRow() { setGridSize(m_rows - 1, m_cols); }
 
-    void setColumns(int c) { setGridSize(m_liveviewlayout->rowCount(), c); }
+    void setColumns(int c) { setGridSize(m_rows, c); }
     void insertColumn(int column);
-    void appendColumn() { insertColumn(m_liveviewlayout->columnCount()); }
+    void appendColumn() { insertColumn(m_cols); }
     void removeColumn(int column);
-    void removeColumn() { setGridSize(m_liveviewlayout->rowCount(), m_liveviewlayout->columnCount() - 1); }
+    void removeColumn() { setGridSize(m_rows, m_cols - 1); }
 
     void setGridSize(int size) { setGridSize(size, size); }
     void setGridSize(QString size);
@@ -129,6 +129,7 @@ private:
     bool m_autoSized, m_isLayoutChanging, m_wasOpenedFs;
     static bool m_isSessionRestoring;
     QGridLayout *m_liveviewlayout;
+    int m_rows, m_cols;
 
     void retranslateUI();
     void geometryChanged();

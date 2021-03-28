@@ -97,7 +97,8 @@ void LiveViewWindow::paintEvent(QPaintEvent *event)
 LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *parent, bool openfs, Qt::WindowFlags f)
     : QWidget(parent, f), m_serverRepository(serverRepository), m_savedLayouts(new QComboBox),
       m_lastLayoutIndex(-1), m_switchItemIndex(-1), m_autoSized(false), m_isLayoutChanging(false),
-      m_wasOpenedFs(openfs), m_liveviewlayout(0)
+      m_wasOpenedFs(openfs), m_liveviewlayout(0),
+      m_rows(1), m_cols(1)
 {
     setBackgroundRole(QPalette::Shadow);
     setAttribute(Qt::WA_OpaquePaintEvent);
@@ -225,8 +226,8 @@ LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *p
 bool LiveViewWindow::findEmptyLayoutCell(int *r, int *c)
 {
     int rc, cc, ar = -1, ac = -1;
-    rc = m_liveviewlayout->rowCount();
-    cc = m_liveviewlayout->columnCount();
+    rc = m_rows;
+    cc = m_cols;
     for (int i = 0; i < rc; i++)
     {
         for (int j = 0; j < cc; j++)
@@ -264,8 +265,8 @@ void LiveViewWindow::removeCamera(QWidget *widget)
 void LiveViewWindow::addCamera(DVRCamera *camera)
 {
     int rc, cc, ar = -1, ac = -1;
-    rc = m_liveviewlayout->rowCount();
-    cc = m_liveviewlayout->columnCount();
+    rc = m_rows;
+    cc = m_cols;
 
     if (!findEmptyLayoutCell(&ar, &ac))
     {
@@ -385,7 +386,7 @@ int LiveViewWindow::maxColumns()
 }
 void LiveViewWindow::insertRow(int row)
 {
-    int cols = m_liveviewlayout->columnCount();
+    int cols = m_cols;
     if (cols == 0)
         cols = 1;
     for (int i = 0; i < cols; i++)
@@ -393,17 +394,19 @@ void LiveViewWindow::insertRow(int row)
         m_liveviewlayout->addWidget(new CameraContainerWidget(), row, i);
     }
 
+    m_rows++;
     updateLayoutActionStates();
     saveLayout();
 }
 
 void LiveViewWindow::removeRow(int row)
 {
-    if (!m_liveviewlayout->rowCount())
+    qDebug() << "removeRow(" << row << ")";
+    if (!m_rows)
         return;
-    row = qBound(0, row, m_liveviewlayout->rowCount() - 1);
+    row = qBound(0, row, m_rows - 1);
 
-    int cols = m_liveviewlayout->columnCount();
+    int cols = m_cols;
     for (int i = 0; i < cols; i++)
     {
         QLayoutItem *item = m_liveviewlayout->itemAtPosition(row, i);
@@ -415,8 +418,9 @@ void LiveViewWindow::removeRow(int row)
         delete item;
     }
 
+    m_rows--;
     /* Ensure that we always have at least one row, but still clear it if asked to remove */
-    if (m_liveviewlayout->rowCount() == 0)
+    if (m_rows == 0)
         insertRow(0);
 
     updateLayoutActionStates();
@@ -425,7 +429,7 @@ void LiveViewWindow::removeRow(int row)
 
 void LiveViewWindow::insertColumn(int column)
 {
-    int rows = m_liveviewlayout->rowCount();
+    int rows = m_rows;
 
     if (rows == 0)
         rows = 1;
@@ -434,17 +438,18 @@ void LiveViewWindow::insertColumn(int column)
     {
         m_liveviewlayout->addWidget(new CameraContainerWidget(), i, column);
     }
+    m_cols++;
     updateLayoutActionStates();
     saveLayout();
 }
 
 void LiveViewWindow::removeColumn(int column)
 {
-    if (!m_liveviewlayout->columnCount())
+    if (!m_cols)
         return;
-    column = qBound(0, column, m_liveviewlayout->columnCount() - 1);
+    column = qBound(0, column, m_cols - 1);
 
-    int rows = m_liveviewlayout->rowCount();
+    int rows = m_rows;
     for (int i = 0; i < rows; i++)
     {
         QLayoutItem *item = m_liveviewlayout->itemAtPosition(i, column);
@@ -455,15 +460,16 @@ void LiveViewWindow::removeColumn(int column)
         }
         delete(item);
     }
+    m_cols--;
 
-    if (m_liveviewlayout->columnCount() == 0)
+    if (m_cols == 0)
         insertColumn(0);
     updateLayoutActionStates();
     saveLayout();
 }
 bool LiveViewWindow::isRowEmpty(int rowIndex) const
 {
-    for (int c = 0; c < m_liveviewlayout->columnCount(); ++c)
+    for (int c = 0; c < m_cols; ++c)
     {
         QLayoutItem *item = m_liveviewlayout->itemAtPosition(rowIndex, c);
 
@@ -476,7 +482,7 @@ bool LiveViewWindow::isRowEmpty(int rowIndex) const
 
 bool LiveViewWindow::isColumnEmpty(int columnIndex) const
 {
-    for (int r = 0; r < m_liveviewlayout->rowCount(); ++r)
+    for (int r = 0; r < m_rows; ++r)
     {
         QLayoutItem *item = m_liveviewlayout->itemAtPosition(r, columnIndex);
 
@@ -488,20 +494,10 @@ bool LiveViewWindow::isColumnEmpty(int columnIndex) const
 
 void LiveViewWindow::removeRows(int remove)
 {
+    qDebug() << "removeRows(" << remove << ")";
     /* If there are any empty rows, remove those first */
-    int rows = m_liveviewlayout->rowCount();
-    for (int r = 0; r < rows; ++r)
-    {
-        if (isRowEmpty(r))
-        {
-            removeRow(r);
-            if (!--remove)
-                break;
-            --r;
-        }
-    }
+    int rows = m_rows;
 
-    /* Otherwise, take rows from the bottom */
     for (int r = rows - 1; remove && r >= 0; --r, --remove)
         removeRow(r);
 
@@ -510,20 +506,8 @@ void LiveViewWindow::removeRows(int remove)
 
 void LiveViewWindow::removeColumns(int remove)
 {
-    int cols = m_liveviewlayout->columnCount();
-    for (int c = 0; c < cols; ++c)
-    {
-        /* If there are any empty columns, remove those first */
-        if (isColumnEmpty(c))
-        {
-            removeColumn(c);
-            if (!--remove)
-                break;
-            --c;
-        }
-    }
+    int cols = m_cols;
 
-    /* Otherwise, take columns from the right */
     for (int c = cols - 1; remove && c >= 0; --c, --remove)
         removeColumn(c);
 
@@ -549,20 +533,20 @@ void LiveViewWindow::setGridSize(int rows, int columns)
 {
     rows = qBound(1, rows, maxRows());
     columns = qBound(1, columns, maxColumns());
-    if (rows == m_liveviewlayout->rowCount() && columns == m_liveviewlayout->columnCount())
+    if (rows == m_rows && columns == m_cols)
         return;
 
-    if (m_liveviewlayout->rowCount() > rows)
-        removeRows(m_liveviewlayout->rowCount() - rows);
+    if (m_rows > rows)
+        removeRows(m_rows - rows);
 
-    if (m_liveviewlayout->columnCount() > columns)
-        removeColumns(m_liveviewlayout->columnCount() - columns);
+    if (m_cols > columns)
+        removeColumns(m_cols - columns);
 
-    while (m_liveviewlayout->columnCount() < columns)
-        insertColumn(m_liveviewlayout->columnCount());
+    while (m_cols < columns)
+        insertColumn(m_cols);
 
-    while (m_liveviewlayout->rowCount() < rows)
-        insertRow(m_liveviewlayout->rowCount());
+    while (m_rows < rows)
+        insertRow(m_rows);
 }
 
 bool LiveViewWindow::loadLayout(const QByteArray &buf)
@@ -591,8 +575,8 @@ bool LiveViewWindow::loadLayout(const QByteArray &buf)
     setGridSize(rc, cc);
 
     // update rc, cc values if were invalid
-    rc = m_liveviewlayout->rowCount();
-    cc = m_liveviewlayout->columnCount();
+    rc = m_rows;
+    cc = m_cols;
 
     for (int r = 0; r < rc; ++r)
     {
@@ -638,8 +622,8 @@ QByteArray LiveViewWindow::serializeLayout() const
     QDataStream data(&re, QIODevice::WriteOnly);
     data.setVersion(QDataStream::Qt_4_5);
     int rc, cc;
-    rc = m_liveviewlayout->rowCount();
-    cc = m_liveviewlayout->columnCount();
+    rc = m_rows;
+    cc = m_cols;
 
     /* -1, then version */
     data << -1 << 1;
@@ -648,7 +632,7 @@ QByteArray LiveViewWindow::serializeLayout() const
     {
         QLayoutItem *item;
         item = m_liveviewlayout->itemAt(i);
-        if (!item || !item->widget())
+        if (!item || !item->widget() || !((CameraContainerWidget*)(item->widget()))->camera())
             data << -1;
         else
             ((CameraContainerWidget *)item->widget())->saveState(&data);
@@ -836,8 +820,8 @@ void LiveViewWindow::setFullScreen(bool on)
 void LiveViewWindow::updateLayoutActionStates()
 {
     int rc, cc;
-    rc = m_liveviewlayout->rowCount();
-    cc = m_liveviewlayout->columnCount();
+    rc = m_rows;
+    cc = m_cols;
     m_addRowAction->setEnabled(rc < maxRows());
     m_removeRowAction->setEnabled(rc > 1);
     m_addColumnAction->setEnabled(cc < maxColumns());
