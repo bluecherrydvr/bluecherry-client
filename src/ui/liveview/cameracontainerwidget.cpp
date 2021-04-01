@@ -1,5 +1,4 @@
 #include "cameracontainerwidget.h"
-#include "camerawidget.h"
 #include "camera/DVRCameraStreamReader.h"
 #include "camera/DVRCameraStreamWriter.h"
 #include "server/DVRServer.h"
@@ -34,42 +33,13 @@
 #include <QPainter>
 #include <QDebug>
 
-CameraContainerWidget::CameraContainerWidget(QWidget *parent) : QFrame(parent),
-  m_cameraview(0), m_cameraname(0), m_headerptz(0),
-  m_headerfps(0), m_serverRepository(0)
+CameraContainerWidget::CameraContainerWidget(QWidget *parent)
+    : QFrame(parent),m_serverRepository(0)
 {
     setAttribute(Qt::WA_OpaquePaintEvent);
-    setBackgroundRole(QPalette::Shadow);
+    //setBackgroundRole(QPalette::Shadow);
     setFrameShape(QFrame::Box);
     setFocusPolicy(Qt::StrongFocus);
-    QGridLayout *vl = new QGridLayout();
-    QHBoxLayout *headerlayout = new QHBoxLayout();
-    m_cameraview = new CameraWidget();
-
-    m_cameraname = new QLabel(cameraName());
-    //QFont f = m_cameraname->font();
-    //f.setBold(true);
-    m_cameraname->setStyleSheet("font-weight: bold;");
-    m_cameraname->setAttribute(Qt::WA_OpaquePaintEvent);
-    m_cameraname->setBackgroundRole(QPalette::Shadow);
-
-    m_headerfps = new QLabel(tr("0fps"));
-    m_headerfps->setAttribute(Qt::WA_OpaquePaintEvent);
-    m_headerptz = new QLabel(tr("PTZ"));
-    m_headerptz->setAttribute(Qt::WA_OpaquePaintEvent);
-    //headerlayout->addStrut(12);
-    headerlayout->addWidget(m_cameraname);
-    headerlayout->addStretch(1);
-    headerlayout->addWidget(m_headerptz);
-    headerlayout->addWidget(m_headerfps);
-    vl->setSizeConstraint(QLayout::SetNoConstraint);
-    vl->addWidget(m_cameraview, 1, 0);
-    vl->addLayout(headerlayout, 0, 0);
-    vl->setRowStretch(1, 4);
-    //vl->setColumnStretch(1, 0);
-    setLayout(vl);
-    m_cameraname->raise();
-    m_cameraview->show();
 }
 
 void CameraContainerWidget::close()
@@ -77,12 +47,39 @@ void CameraContainerWidget::close()
     emit cameraClosed(this);
 }
 
+QString CameraContainerWidget::statusOverlayMessage()
+{
+
+}
+
+void CameraContainerWidget::drawHeader(QPainter *p, const QRect &r)
+{
+    QRect headerText(r);
+    headerText.adjust(5, 2, -10, -4);
+    p->drawText(headerText, Qt::AlignLeft | Qt::AlignTop, cameraName());
+    p->drawText(headerText, Qt::AlignRight | Qt::AlignTop, tr("PTZ 0fps"));
+}
+
 void CameraContainerWidget::paintEvent(QPaintEvent *event)
 {
     QPainter p(this);
+    p.setCompositionMode(QPainter::CompositionMode_Source);
+
     p.fillRect(event->rect(), Qt::black);
-    p.drawText(event->rect(), Qt::AlignCenter, tr("cameracontainerwidget paint event"));
-    qDebug() << "cameracontainerwidget paint event" << event->rect();
+    if (!m_stream)
+    {
+        return;
+    }
+
+    drawHeader(&p, event->rect());
+
+    QImage frame = m_stream.data()->currentFrame();
+
+    if (frame.isNull())
+        return;
+
+    QRect frameRect(event->rect().topLeft() += QPoint(0, 20), event->rect().size() -= QSize(0, 20));
+    p.drawImage(frameRect, frame);
 }
 
 QString CameraContainerWidget::cameraName() const
@@ -92,7 +89,7 @@ QString CameraContainerWidget::cameraName() const
 
 LiveStream *CameraContainerWidget::stream() const
 {
-    return m_cameraview ? m_cameraview->stream() : 0;
+    return m_stream.data();
 }
 
 void CameraContainerWidget::showFpsMenu()
@@ -429,7 +426,7 @@ void CameraContainerWidget::contextMenuEvent(QContextMenuEvent *event)
     QMenu menu(this);
 
     QAction *a = menu.addAction(tr("Snapshot"), this, SLOT(saveSnapshot()));
-    a->setEnabled(m_cameraview->stream() && !m_cameraview->stream()->currentFrame().isNull());
+    a->setEnabled(stream() && stream()->currentFrame().isNull());
 
     QMenu *ptzmenu = 0;
     if (camera() && camera()->hasPtz())
@@ -615,28 +612,29 @@ void CameraContainerWidget::setCamera(DVRCamera *camera)
 
     m_camera = camera;
 
-    if (layout())
     {
-        delete layout();
+        if (camera->liveStream() == m_stream)
+            return;
+
+        if (m_stream)
+        {
+            m_stream.data()->disconnect(this);
+            m_stream.data()->unref();
+        }
+
+        m_stream = camera->liveStream();
+
+        if (m_stream.data())
+        {
+            connect(m_stream.data(), SIGNAL(updated()), SLOT(updateFrame()));
+            //connect(m_stream.data(), SIGNAL(streamSizeChanged(QSize)), SLOT(updateFrameSize()));
+            m_stream.data()->start();
+            m_stream.data()->ref();
+        }
+
+        //updateFrameSize();
+        updateFrame();
     }
-
-    QGridLayout *vl = new QGridLayout();
-    QHBoxLayout *headerlayout = new QHBoxLayout();
-    m_cameraview = new CameraWidget();
-    m_cameraview->setStream(camera->liveStream());
-
-    QLabel *lb_name = new QLabel(cameraName());
-    QLabel *lb_fps = new QLabel(tr("0fps"));
-    //headerlayout->addStrut(12);
-    headerlayout->addWidget(lb_name);
-    headerlayout->addStretch(1);
-    headerlayout->addWidget(lb_fps);
-    vl->setSizeConstraint(QLayout::SetNoConstraint);
-    vl->addLayout(headerlayout, 0, 0);
-    vl->addWidget(m_cameraview, 1, 0);
-    vl->setRowStretch(1, 4);
-    //vl->setColumnStretch(1, 0);
-    setLayout(vl);
 
     if (m_camera)
     {
@@ -658,8 +656,6 @@ void CameraContainerWidget::cameraDataUpdated()
 {
     emit cameraNameChanged(cameraName());
     emit hasPtzChanged();
-
-    m_cameraview->setStream(m_camera.data()->liveStream());
 
     emit cameraChanged(m_camera.data());
 }

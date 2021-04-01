@@ -61,7 +61,6 @@ src/server/DVRServerSettingsReader.cpp \
 src/server/DVRServerSettingsWriter.cpp \
  \
 src/ui/liveview/LiveViewWindow.cpp \
-src/ui/liveview/camerawidget.cpp \
 src/ui/liveview/cameracontainerwidget.cpp \
 src/ui/liveview/PtzPresetsWindow.cpp \
 \
@@ -138,7 +137,6 @@ moc_MacSplitter.cpp \
 moc_OptionsGeneralPage.cpp \
 moc_AboutDialog.cpp \
 moc_EventTimelineWidget.cpp \
-moc_camerawidget.cpp \
 moc_cameracontainerwidget.cpp \
 moc_LiveViewWindow.cpp \
 moc_PtzPresetsWindow.cpp \

@@ -6,7 +6,6 @@
 #include "core/CameraPtzControl.h"
 #include "core/LiveStream.h"
 
-class CameraWidget;
 class DVRCamera;
 class QMenu;
 class DVRServerRepository;
@@ -82,20 +81,22 @@ private slots:
     void updateAudioState(enum AudioState state = Load);
     void setBandwidthModeFromAction();
     void serverRemoved(DVRServer *server);
-
+    void updateFrame()
+    {
+        update();
+    }
 private:
     QWeakPointer<DVRCamera> m_camera;
     QSharedPointer<CameraPtzControl> m_ptz;
-    CameraWidget *m_cameraview;
-    QLabel *m_cameraname;
-    QLabel *m_headerptz;
-    QLabel *m_headerfps;
     DVRServerRepository *m_serverRepository;
     CustomCursor m_customCursor;
+    QSharedPointer<LiveStream> m_stream;
     /* Caller is responsible for deleting */
     QMenu *ptzMenu();
     QList<QAction*> bandwidthActions();
     CameraPtzControl::Movement moveForPosition(int x, int y);
+    QString statusOverlayMessage();
+    void drawHeader(QPainter *p, const QRect &r);
 };
 
 #endif // CAMERACONTAINERWIDGET_H
