@@ -20,8 +20,6 @@
 #include "ui/MainWindow.h"
 #include "core/BluecherryApp.h"
 #include "server/DVRServer.h"
-//#include "ui/liveview/CameraLayoutItem.h"
-#include "ui/liveview/camerawidget.h"
 #include "ui/liveview/cameracontainerwidget.h"
 #include <QBoxLayout>
 #include <QToolBar>
