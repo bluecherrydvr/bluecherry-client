@@ -31,6 +31,7 @@
 #include <QInputDialog>
 #include <QPixmapCache>
 #include <QPainter>
+#include <math.h>
 #include <QDebug>
 
 CameraContainerWidget::CameraContainerWidget(QWidget *parent)
@@ -75,11 +76,34 @@ void CameraContainerWidget::paintEvent(QPaintEvent *event)
 
     QImage frame = m_stream.data()->currentFrame();
 
-    if (frame.isNull())
-        return;
+    if (!frame.isNull())
+    {
+        QRect frameRect(event->rect().topLeft() += QPoint(0, 20), event->rect().size() -= QSize(0, 20));
+        float xScale, yScale;
+        bool rescale = false;
 
-    QRect frameRect(event->rect().topLeft() += QPoint(0, 20), event->rect().size() -= QSize(0, 20));
-    p.drawImage(frameRect, frame);
+        if (frame.size().width() != frameRect.width() || frame.size().height() != frameRect.height())
+        {
+            xScale = (float)frameRect.width() / (float)frame.size().width();
+            yScale = (float)frameRect.height() / (float)frame.size().height();
+
+            if(xScale * frame.size().height() > frameRect.height())
+            {
+                int dx = (frameRect.width() - frame.size().width() * yScale) / 2;
+                frameRect.setRect(frameRect.x() + dx, frameRect.y(), frame.size().width() * yScale, frameRect.height());
+            }
+            else
+            {
+                int dy = (frameRect.height() - frame.size().height() * xScale) / 2;
+                frameRect.setRect(frameRect.x(), frameRect.y() + dy, frameRect.width(), frame.size().height() * xScale);
+            }
+            rescale = true;
+        }
+        p.drawImage(frameRect, frame);
+
+        if (rescale && frameRect.width() > 0 &&  frameRect.height() > 0)
+            m_stream.data()->setFrameSizeHint(frameRect.width(), frameRect.height());
+    }
 }
 
 QString CameraContainerWidget::cameraName() const
