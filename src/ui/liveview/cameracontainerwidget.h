@@ -3,8 +3,10 @@
 
 #include <QWidget>
 #include <QFrame>
+#include <QStaticText>
 #include "core/CameraPtzControl.h"
 #include "core/LiveStream.h"
+
 
 class DVRCamera;
 class QMenu;
@@ -91,6 +93,8 @@ private:
     DVRServerRepository *m_serverRepository;
     CustomCursor m_customCursor;
     QSharedPointer<LiveStream> m_stream;
+    QStaticText m_cameraname;
+    QStaticText m_streamstatus;
     /* Caller is responsible for deleting */
     QMenu *ptzMenu();
     QList<QAction*> bandwidthActions();

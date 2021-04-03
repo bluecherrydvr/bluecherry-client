@@ -50,15 +50,53 @@ void CameraContainerWidget::close()
 
 QString CameraContainerWidget::statusOverlayMessage()
 {
+    if (!m_stream)
+        return QString();
 
+    LiveStream::State state = m_stream->state();
+    QString status;
+
+    switch (state)
+    {
+    case LiveStream::Error:
+        status = QString::fromLatin1("<span style='color:#ff0000'>Error<br><font size=10px>%1</font></span>")
+                                    .arg(m_stream->errorMessage());
+        break;
+    case LiveStream::StreamOffline:
+        status = QString::fromLatin1("<span style='color:#888888'>Offline</span>");
+        break;
+    case LiveStream::NotConnected:
+        status =  QString::fromLatin1("Disconnected");
+        break;
+    case LiveStream::Connecting:
+        status = QString::fromLatin1("Connecting...");
+    }
+
+    return status;
 }
 
 void CameraContainerWidget::drawHeader(QPainter *p, const QRect &r)
 {
+    int fps;
     QRect headerText(r);
     headerText.adjust(5, 2, -10, -4);
     p->drawText(headerText, Qt::AlignLeft | Qt::AlignTop, cameraName());
-    p->drawText(headerText, Qt::AlignRight | Qt::AlignTop, tr("PTZ 0fps"));
+    if (m_stream)
+        fps = (int)ceilf(m_stream->receivedFps());
+    p->drawText(headerText, Qt::AlignRight | Qt::AlignTop, tr("PTZ %1fps").arg(fps));
+
+    if (m_stream && m_stream.data()->hasAudio())
+    {
+        QString key = m_stream->isAudioEnabled() ? QString::fromLatin1("audio-stream-on") : QString::fromLatin1("audio-stream-available");
+        QPixmap pm;
+        if (!QPixmapCache::find(key, pm))
+        {
+            pm = QPixmap(QLatin1String(":/icons/%1.png").arg(key));
+            QPixmapCache::insert(key, pm);
+        }
+        QRect audioIconRect(r.x() + r.width() / 2, r.y(), 20, 20);
+        p->drawPixmap(audioIconRect, pm);
+    }
 }
 
 void CameraContainerWidget::paintEvent(QPaintEvent *event)
@@ -104,6 +142,9 @@ void CameraContainerWidget::paintEvent(QPaintEvent *event)
         if (rescale && frameRect.width() > 0 &&  frameRect.height() > 0)
             m_stream.data()->setFrameSizeHint(frameRect.width(), frameRect.height());
     }
+
+    if (m_stream->state() != LiveStream::Streaming)
+        p.drawText(event->rect(), Qt::AlignCenter, statusOverlayMessage());
 }
 
 QString CameraContainerWidget::cameraName() const
