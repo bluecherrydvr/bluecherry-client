@@ -99,7 +99,6 @@ LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *p
       m_rows(1), m_cols(1)
 {
     setBackgroundRole(QPalette::Shadow);
-    setAttribute(Qt::WA_OpaquePaintEvent);
     QBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
     layout->setSpacing(0);
@@ -209,9 +208,8 @@ LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *p
     QMainWindow *wnd = qobject_cast<QMainWindow*>(window());
     if (wnd)
 		wnd->addToolBar(Qt::TopToolBarArea, m_toolBar);
-//    else
-//		layout->addWidget(m_toolBar);
-    //>>layout->addWidget(m_liveView);
+    else
+                layout->addWidget(m_toolBar);
     {
         m_liveviewlayout = new QGridLayout();
         layout->addLayout(m_liveviewlayout);
