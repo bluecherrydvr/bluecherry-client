@@ -85,13 +85,6 @@ LiveViewWindow *LiveViewWindow::openWindow(DVRServerRepository *serverRepository
     return window;
 }
 
-void LiveViewWindow::paintEvent(QPaintEvent *event)
-{
-    QPainter p(this);
-    p.setCompositionMode(QPainter::CompositionMode_Source);
-    p.fillRect(event->rect(), Qt::black);
-}
-
 LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *parent, bool openfs, Qt::WindowFlags f)
     : QWidget(parent, f), m_serverRepository(serverRepository), m_savedLayouts(new QComboBox),
       m_lastLayoutIndex(-1), m_switchItemIndex(-1), m_autoSized(false), m_isLayoutChanging(false),

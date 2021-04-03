@@ -100,7 +100,6 @@ protected:
     virtual void moveEvent(QMoveEvent *event);
     virtual void keyPressEvent(QKeyEvent *event);
     virtual bool event(QEvent *event);
-    virtual void paintEvent(QPaintEvent *event);
 
 private slots:
     void savedLayoutChanged(int index);
