@@ -59,11 +59,11 @@ QString CameraContainerWidget::statusOverlayMessage()
     switch (state)
     {
     case LiveStream::Error:
-        status = QString::fromLatin1("<span style='color:#ff0000'>Error<br><font size=10px>%1</font></span>")
+        status = QString::fromLatin1("Error: %1")
                                     .arg(m_stream->errorMessage());
         break;
     case LiveStream::StreamOffline:
-        status = QString::fromLatin1("<span style='color:#888888'>Offline</span>");
+        status = QString::fromLatin1("Offline");
         break;
     case LiveStream::NotConnected:
         status =  QString::fromLatin1("Disconnected");
@@ -75,15 +75,34 @@ QString CameraContainerWidget::statusOverlayMessage()
     return status;
 }
 
+void CameraContainerWidget::initStaticText()
+{
+    m_streamstatus.setText(statusOverlayMessage());
+    m_cameraname.setText(cameraName());
+}
+
 void CameraContainerWidget::drawHeader(QPainter *p, const QRect &r)
 {
     int fps;
     QRect headerText(r);
+    QRect brect;
     headerText.adjust(5, 2, -10, -4);
-    p->drawText(headerText, Qt::AlignLeft | Qt::AlignTop, cameraName());
+    QString ptztext;
+
+    brect = p->boundingRect(headerText, Qt::AlignLeft | Qt::AlignTop, cameraName());
+    p->drawStaticText(brect.topLeft(), m_cameraname);
     if (m_stream)
         fps = (int)ceilf(m_stream->receivedFps());
-    p->drawText(headerText, Qt::AlignRight | Qt::AlignTop, tr("PTZ %1fps").arg(fps));
+
+    if (camera() && camera()->hasPtz())
+    {
+        ptztext = tr("PTZ");
+        if (m_ptz && m_ptz->currentPreset() != -1)
+            ptztext.append(QString(": %1").arg(m_ptz->currentPresetName()));
+    }
+
+
+    p->drawText(headerText, Qt::AlignRight | Qt::AlignTop, tr("%1 %2fps").arg(ptztext).arg(fps), &brect);
 
     if (m_stream && m_stream.data()->hasAudio())
     {
@@ -94,7 +113,7 @@ void CameraContainerWidget::drawHeader(QPainter *p, const QRect &r)
             pm = QPixmap(QLatin1String(":/icons/%1.png").arg(key));
             QPixmapCache::insert(key, pm);
         }
-        QRect audioIconRect(r.x() + r.width() / 2, r.y(), 20, 20);
+        QRect audioIconRect(brect.x() - 20, r.y(), 20, 20);
         p->drawPixmap(audioIconRect, pm);
     }
 }
@@ -102,6 +121,7 @@ void CameraContainerWidget::drawHeader(QPainter *p, const QRect &r)
 void CameraContainerWidget::paintEvent(QPaintEvent *event)
 {
     QPainter p(this);
+    QRect brect;
     p.setCompositionMode(QPainter::CompositionMode_Source);
 
     p.fillRect(event->rect(), Qt::black);
@@ -144,7 +164,10 @@ void CameraContainerWidget::paintEvent(QPaintEvent *event)
     }
 
     if (m_stream->state() != LiveStream::Streaming)
-        p.drawText(event->rect(), Qt::AlignCenter, statusOverlayMessage());
+    {
+        brect = p.boundingRect(event->rect(), Qt::AlignCenter, m_streamstatus.text());
+        p.drawStaticText(brect.topLeft(), m_streamstatus);
+    }
 }
 
 QString CameraContainerWidget::cameraName() const
@@ -491,7 +514,7 @@ void CameraContainerWidget::contextMenuEvent(QContextMenuEvent *event)
     QMenu menu(this);
 
     QAction *a = menu.addAction(tr("Snapshot"), this, SLOT(saveSnapshot()));
-    a->setEnabled(stream() && stream()->currentFrame().isNull());
+    a->setEnabled(stream() && !stream()->currentFrame().isNull());
 
     QMenu *ptzmenu = 0;
     if (camera() && camera()->hasPtz())
@@ -723,6 +746,7 @@ void CameraContainerWidget::cameraDataUpdated()
     emit hasPtzChanged();
 
     emit cameraChanged(m_camera.data());
+    initStaticText();
 }
 
 void CameraContainerWidget::saveState(QDataStream *data)

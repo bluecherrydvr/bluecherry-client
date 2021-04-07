@@ -101,6 +101,7 @@ private:
     CameraPtzControl::Movement moveForPosition(int x, int y);
     QString statusOverlayMessage();
     void drawHeader(QPainter *p, const QRect &r);
+    void initStaticText();
 };
 
 #endif // CAMERACONTAINERWIDGET_H
