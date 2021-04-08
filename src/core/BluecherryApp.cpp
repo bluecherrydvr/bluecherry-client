@@ -52,8 +52,6 @@
 #include <QtDBus/QDBusReply>
 #endif
 
-#include "bluecherry-config.h"
-
 BluecherryApp *bcApp = 0;
 
 BluecherryApp::BluecherryApp()

@@ -15,7 +15,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "bluecherry-config.h"
 #include "core/BluecherryApp.h"
 #include "core/LanguageController.h"
 #include "rtsp-stream/RtspStream.h"
@@ -60,7 +59,7 @@ int main(int argc, char *argv[])
     a.setOrganizationDomain(QLatin1String("bluecherrydvr.com"));
     a.setApplicationName(QLatin1String("bluecherry"));
 
-    a.setApplicationVersion(QLatin1String(VERSION));
+    a.setApplicationVersion(QLatin1String(PACKAGE_VERSION));
 
 #ifdef Q_OS_WIN
     /* Use explorer style for fancier toolbars */
