@@ -72,6 +72,7 @@ public:
     Status status() const;
 
     QNetworkReply * sendRequest(const QUrl &relativeUrl);
+    void switchSubstream(int device_id, bool substream_enabled);
 
 public slots:
     /* Permanently remove from config and delete */

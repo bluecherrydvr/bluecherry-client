@@ -38,6 +38,7 @@ public:
     QString errorMessage() const { return m_errorMessage; }
 
     void login(const QString &username, const QString &password);
+    void switchSubstream(int device_id, bool substream_enabled);
     void setError(const QString &message) { setStatus(DVRServer::ServerError, message); }
 
     QUrl serverUrl() const;
@@ -59,10 +60,12 @@ public slots:
 
 private slots:
     void loginReplyReady();
+    void switchSubstreamReplyReady();
 
 private:
     QString m_errorMessage;
     QNetworkReply *m_loginReply;
+    QNetworkReply *m_switchSubstreamReply;
     DVRServer::Status m_status;
 
     void setStatus(DVRServer::Status status, const QString &errorMessage = QString());

@@ -504,6 +504,22 @@ QList<QAction*> CameraContainerWidget::bandwidthActions()
     return actions;
 }
 
+void CameraContainerWidget::set_main_stream()
+{
+    if (!camera())
+        return;
+
+    camera()->data().server()->switchSubstream(camera()->data().id(), false);
+}
+
+void CameraContainerWidget::set_sub_stream()
+{
+    if (!camera())
+        return;
+
+    camera()->data().server()->switchSubstream(camera()->data().id(), true);
+}
+
 void CameraContainerWidget::contextMenuEvent(QContextMenuEvent *event)
 {
     event->accept();
@@ -515,6 +531,13 @@ void CameraContainerWidget::contextMenuEvent(QContextMenuEvent *event)
 
     QAction *a = menu.addAction(tr("Snapshot"), this, SLOT(saveSnapshot()));
     a->setEnabled(stream() && !stream()->currentFrame().isNull());
+
+    QMenu substream_menu;
+    substream_menu.setTitle(tr("Switch liveview substream"));
+    substream_menu.addAction(tr("Main Stream"), this, SLOT(set_main_stream()));
+    substream_menu.addAction(tr("Sub Stream"), this, SLOT(set_sub_stream()));
+    a = menu.addMenu(&substream_menu);
+    a->setEnabled(camera());
 
     QMenu *ptzmenu = 0;
     if (camera() && camera()->hasPtz())

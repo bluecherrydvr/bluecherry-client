@@ -365,6 +365,11 @@ DVRServer::Status DVRServer::status() const
     return m_api->status();
 }
 
+void DVRServer::switchSubstream(int device_id, bool substream_enabled)
+{
+    m_api->switchSubstream(device_id, substream_enabled);
+}
+
 QNetworkReply * DVRServer::sendRequest(const QUrl &relativeUrl)
 {
     return m_api->sendRequest(relativeUrl);

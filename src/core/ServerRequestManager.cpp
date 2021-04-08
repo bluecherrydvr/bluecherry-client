@@ -27,7 +27,7 @@
 #include <QNetworkCookie>
 
 ServerRequestManager::ServerRequestManager(DVRServer *s)
-    : QObject(s), server(s), m_loginReply(0), m_status(DVRServer::Offline)
+    : QObject(s), server(s), m_loginReply(0), m_switchSubstreamReply(0), m_status(DVRServer::Offline)
 {
 }
 
@@ -94,6 +94,49 @@ QNetworkReply *ServerRequestManager::sendRequest(const QUrl &relativeUrl)
     QNetworkReply *result = bcApp->nam->get(buildRequest(relativeUrl));
     result->ignoreSslErrors();
     return result;
+}
+
+void ServerRequestManager::switchSubstream(int device_id, bool substream_enabled)
+{
+    if (m_switchSubstreamReply)
+    {
+        m_switchSubstreamReply->disconnect(this);
+        m_switchSubstreamReply->abort();
+        m_switchSubstreamReply->deleteLater();
+        m_switchSubstreamReply = 0;
+    }
+
+    QNetworkRequest req = buildRequest(QUrl(QLatin1String("/ajax/update.php")));
+    req.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/x-www-form-urlencoded"));
+
+    QUrl queryData;
+    queryData.addQueryItem(QLatin1String("mode"), QLatin1String("update"));
+    queryData.addQueryItem(QLatin1String("type"), QLatin1String("Devices"));
+    queryData.addQueryItem(QLatin1String("id"), QString::number(device_id));
+    queryData.addQueryItem(QLatin1String("substream_mode"), QString::number(substream_enabled ? 1 : 0));
+
+    m_switchSubstreamReply = bcApp->nam->post(req, queryData.encodedQuery());
+    m_switchSubstreamReply->ignoreSslErrors();
+    connect(m_switchSubstreamReply, SIGNAL(finished()), SLOT(switchSubstreamReplyReady()));
+}
+
+void ServerRequestManager::switchSubstreamReplyReady()
+{
+    if (!m_switchSubstreamReply || sender() != m_switchSubstreamReply)
+        return;
+
+    QNetworkReply *reply = m_switchSubstreamReply;
+    m_switchSubstreamReply->deleteLater();
+    m_switchSubstreamReply = 0;
+
+    if (reply->error() != QNetworkReply::NoError)
+    {
+        qDebug() << tr("Substream switch request failed: %1").arg(reply->errorString());
+        return;
+    }
+
+    QByteArray data = reply->readAll();
+    qDebug() << data;
 }
 
 void ServerRequestManager::login(const QString &username, const QString &password)

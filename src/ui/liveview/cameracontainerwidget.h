@@ -83,6 +83,8 @@ private slots:
     void updateAudioState(enum AudioState state = Load);
     void setBandwidthModeFromAction();
     void serverRemoved(DVRServer *server);
+    void set_main_stream();
+    void set_sub_stream();
     void updateFrame()
     {
         update();
