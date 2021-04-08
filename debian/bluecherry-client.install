@@ -1,5 +1,5 @@
 debian/tmp/usr/bin/bluecherry-client
 linux/bluecherry-client.desktop usr/share/applications
 res/bluecherry-client.png  usr/share/pixmaps
-debian/tmp/usr/share/translations/*.qm
+debian/tmp/usr/share/bluecherry-client/translations/*.qm
 
