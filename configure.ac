@@ -73,6 +73,6 @@ PKG_CHECK_MODULES(MPV, mpv, HAVE_MPV=yes, AC_MSG_ERROR(["libmpv not found"]))
 
 VERSION=$PACKAGE_VERSION
 AC_SUBST([VERSION])
-AC_CONFIG_FILES([Makefile src/bluecherry-config.h])
+AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 

@@ -1,3 +1,0 @@
-//#cmakedefine USE_BREAKPAD
-#define VERSION "@VERSION@"
-#define TEST_DATA_DIR "@CMAKE_SOURCE_DIR@/tests/data"
