@@ -1,5 +1,77 @@
 bin_PROGRAMS = bluecherry-client
 
+EXTRA_DIST = \
+COPYING README.txt translations/README translations/setup-transifex.sh linux/bluecherry-client.desktop \
+res/application-resize-full.png \
+res/arrow-circle-double.png \
+res/audio-stream-available.png \
+res/audio-stream-on.png \
+res/bluecherry-client.png \
+res/bluecherry.icns \
+res/bluecherry.ico \
+res/brightness.png \
+res/cassette.png \
+res/collapse-all.png \
+res/color.png \
+res/contrast.png \
+res/control-000-small.png \
+res/control-180-small.png \
+res/control-double-000-small.png \
+res/control-double-180.png \
+res/control-double-180-small.png \
+res/control-double.png \
+res/control-pause.png \
+res/control.png \
+res/control-stop-180.png \
+res/control-stop.png \
+res/control-stop-square.png \
+res/cross.png \
+res/down-arrow.png \
+res/exclamation-red.png \
+res/exclamation-yellow.png \
+res/expand-all.png \
+res/icon16.png \
+res/icon32.png \
+res/icon64.png \
+res/layout-12.png \
+res/layout-16.png \
+res/layout-32.png \
+res/layout-4.png \
+res/layout-9.png \
+res/layout-join.png \
+res/layout-join-vertical.png \
+res/layout.png \
+res/layout-split.png \
+res/layout-split-vertical.png \
+res/license.txt \
+res/loading-circle.gif \
+res/loading.gif \
+res/logo.png \
+res/pencil.png \
+res/plus.png \
+res/ptz-arrow.png \
+res/status-alert.png \
+res/status-error.png \
+res/status-offline.png \
+res/status.png \
+res/system-monitor.png \
+res/tick.png \
+res/webcam.png
+
+CLEANFILES = moc_*.cpp translations/*.qm resources.cpp
+
+
+pkgbluecherryclientdir = ${datarootdir}/bluecherry-client/translations
+dist_pkgbluecherryclient_DATA =  \
+translations/bluecherryclient_de_DE.qm \
+translations/bluecherryclient_en.qm \
+translations/bluecherryclient_es.qm \
+translations/bluecherryclient_no.qm \
+translations/bluecherryclient_pl.qm \
+translations/bluecherryclient_pt_BR.qm \
+translations/bluecherryclient_ru.qm \
+translations/bluecherryclient_sv_SE.qm
+
 bluecherry_client_CPPFLAGS =  -I$(srcdir)/src
 bluecherry_client_CXXFLAGS = $(QT_DEPENDENCIES_CFLAGS) $(FFMPEG_CFLAGS) $(MPV_CFLAGS)
 bluecherry_client_LDADD = $(QT_DEPENDENCIES_LIBS) $(FFMPEG_LIBS) $(MPV_LIBS) $(SDL2_LIBS)
@@ -124,9 +196,144 @@ src/video/VideoWidget.cpp \
 src/video/libmpv/MpvVideoWidget.cpp \
 src/video/libmpv/MpvVideoPlayerBackend.cpp \
 src/video/libmpv/MpvVideoPlayerFactory.cpp \
-src/main.cpp
-
-# src/ui/liveview/LiveViewGradients.cpp
+src/main.cpp \
+\
+src/camera/RecordingState.h \
+src/server/DVRServerConnectionType.h \
+src/video/VideoPlayerFactory.h \
+src/ui/SetupWizard_p.h \
+src/video/MediaDownload_p.h \
+\
+src/audio/AudioPlayer.h \
+src/camera/DVRCamera.h \
+src/camera/DVRCameraData.h \
+src/camera/DVRCameraSettingsReader.h \
+src/camera/DVRCameraSettingsWriter.h \
+src/camera/DVRCameraStreamReader.h \
+src/camera/DVRCameraStreamWriter.h \
+src/camera/DVRCameraXMLReader.h \
+ \
+src/core/BluecherryApp.h \
+src/core/CameraPtzControl.h \
+src/core/EventData.h \
+src/core/LanguageController.h \
+src/core/LiveStream.h \
+src/core/LiveViewManager.h \
+src/core/LoggableUrl.h \
+src/core/MJpegStream.h \
+src/core/PtzPresetsModel.h \
+src/core/ServerRequestManager.h \
+src/core/ThreadPause.h \
+src/core/TransferRateCalculator.h \
+src/core/UpdateChecker.h \
+src/core/Version.h \
+src/core/VaapiHWAccel.h \
+ \
+src/event/CameraEventFilter.h \
+src/event/EventDownloadManager.h \
+src/event/EventFilter.h \
+src/event/EventList.h \
+src/event/EventParser.h \
+src/event/EventsCursor.h \
+src/event/EventsLoader.h \
+src/event/EventsUpdater.h \
+src/event/EventVideoDownload.h \
+src/event/MediaEventFilter.h \
+src/event/ModelEventsCursor.h \
+src/event/ThumbnailManager.h \
+ \
+src/rtsp-stream/RtspStream.h \
+src/rtsp-stream/RtspStreamFrame.h \
+src/rtsp-stream/RtspStreamFrameFormatter.h \
+src/rtsp-stream/RtspStreamFrameQueue.h \
+src/rtsp-stream/RtspStreamThread.h \
+src/rtsp-stream/RtspStreamWorker.h \
+ \
+src/network/MediaDownloadManager.h \
+src/network/RemotePortChecker.h \
+src/network/SocketError.h \
+ \
+src/server/DVRServer.h \
+src/server/DVRServerConfiguration.h \
+src/server/DVRServerRepository.h \
+src/server/DVRServerSettingsReader.h \
+src/server/DVRServerSettingsWriter.h \
+ \
+src/ui/liveview/LiveViewWindow.h \
+src/ui/liveview/cameracontainerwidget.h \
+src/ui/liveview/PtzPresetsWindow.h \
+\
+src/ui/model/DVRServersModel.h \
+src/ui/model/DVRServersProxyModel.h \
+src/ui/model/EventsModel.h \
+src/ui/model/EventsProxyModel.h \
+src/ui/model/EventSourcesModel.h \
+src/ui/model/EventTagsModel.h \
+src/ui/model/SavedLayoutsModel.h \
+ \
+src/ui/AboutDialog.h \
+src/ui/CrashReportDialog.h \
+src/ui/DVRServersView.h \
+src/ui/EventCommentsWidget.h \
+src/ui/EventsView.h \
+src/ui/EventsWindow.h \
+src/ui/EventTagsDelegate.h \
+src/ui/EventTagsView.h \
+src/ui/EventTimelineDatePainter.h \
+src/ui/EventTimelineWidget.h \
+src/ui/EventTypesFilter.h \
+src/ui/EventVideoDownloadsWindow.h \
+src/ui/EventVideoDownloadWidget.h \
+src/ui/EventVideoPlayer.h \
+src/ui/EventViewWindow.h \
+src/ui/ExpandingTextEdit.h \
+src/ui/MacSplitter.h \
+src/ui/MacSplitterHandle.h \
+src/ui/MainWindow.h \
+src/ui/NumericOffsetWidget.h \
+src/ui/OptionsDialog.h \
+src/ui/OptionsGeneralPage.h \
+src/ui/OptionsServerPage.h \
+src/ui/RemotePortCheckerWidget.h \
+src/ui/ServerMenu.h \
+src/ui/SetupWizard.h \
+src/ui/StatusBarServerAlert.h \
+src/ui/SwitchEventsWidget.h \
+src/ui/TimeRangeScrollBar.h \
+src/ui/VisibleTimeRange.h \
+src/ui/WebRtpPortCheckerWidget.h \
+\
+src/ui/StatusBandwidthWidget.h \
+\
+src/utils/DateTimeRange.h \
+src/utils/DateTimeUtils.h \
+src/utils/FileUtils.h \
+src/utils/ImageDecodeTask.h \
+src/utils/Range.h \
+src/utils/RangeMap.h \
+src/utils/StringUtils.h \
+src/utils/ThreadTask.h \
+src/utils/ThreadTaskCourier.h \
+ \
+src/video/MediaDownload.h \
+src/video/VideoHttpBuffer.h \
+src/video/VideoPlayerBackend.h \
+src/video/VideoWidget.h \
+ \
+src/video/libmpv/MpvVideoWidget.h \
+src/video/libmpv/MpvVideoPlayerBackend.h \
+src/video/libmpv/MpvVideoPlayerFactory.h \
+\
+translations/bluecherryclient_de_DE.ts \
+translations/bluecherryclient_en.ts \
+translations/bluecherryclient_es.ts \
+translations/bluecherryclient_no.ts \
+translations/bluecherryclient_pl.ts \
+translations/bluecherryclient_pt_BR.ts \
+translations/bluecherryclient_ru.ts \
+translations/bluecherryclient_sv_SE.ts \
+res/windows.rc \
+res/resources.qrc
 
 nodist_bluecherry_client_SOURCES  = \
 moc_SetupWizard_p.cpp \
@@ -206,14 +413,10 @@ moc_ServerRequestManager.cpp \
 moc_CameraPtzControl.cpp \
 moc_MJpegStream.cpp \
 moc_LiveStream.cpp \
-qml_resources.cpp \
 resources.cpp
 
 resources.cpp: res/resources.qrc
 	$(RCC) -g cpp -name bluecherry $< > $@
-
-qml_resources.cpp: src/ui/qml.qrc
-	$(RCC) -g cpp -name bluecherry_qrc $< > $@
 
 moc_%.cpp: src/ui/%.h
 	$(MOC) $< -o $@
@@ -254,4 +457,6 @@ moc_%.cpp: src/video/libmpv/%.h
 moc_%.cpp: src/core/%.h
 	$(MOC) $< -o $@
 
+translations/%.qm: translations/%.ts
+	$(LRELEASE) $< -qm $@
 

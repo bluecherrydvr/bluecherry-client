@@ -32,6 +32,7 @@ AS_IF([test "x$qt_version" = xqt5],
 	QT_UIC_NAMES="uic-qt5 uic5 uic"
 	QT_MOC_NAMES="moc-qt5 moc5 moc"
 	QT_RCC_NAMES="rcc-qt5 rcc5 rcc"
+	QT_LRELEASE_NAMES="lrelease-qt5 lrelease5 lrelease"
 	CFLAGS="-fPIC $CFLAGS"
 	CXXFLAGS="-fPIC $CXXFLAGS"
 	CPPFLAGS="-DQT_DISABLE_DEPRECATED_BEFORE=0 $CPPFLAGS"
@@ -42,6 +43,7 @@ AS_IF([test "x$qt_version" = xqt5],
 	QT_UIC_NAMES="uic-qt4 uic4 uic"
 	QT_MOC_NAMES="moc-qt4 moc4 moc"
 	QT_RCC_NAMES="rcc-qt4 rcc4 rcc"
+	QT_LRELEASE_NAMES="lrelease-qt4 lrelease4 lrelease"
 	],
   [AC_MSG_ERROR(["Invalid Qt version"])])
 
@@ -55,9 +57,12 @@ AC_SUBST([QT_DEPENDENCIES_LIBS])
 AC_CHECK_PROGS([UIC], [$QT_UIC_NAMES], [notfound])
 AC_CHECK_PROGS([MOC], [$QT_MOC_NAMES], [notfound])
 AC_CHECK_PROGS([RCC], [$QT_RCC_NAMES], [notfound])
+AC_CHECK_PROGS([LRELEASE], [$QT_LRELEASE_NAMES], [notfound])
 #fail if not found ...
 AS_IF([test "x$UIC" = xnotfound],[AC_MSG_ERROR(["uic program not found. Please install Qt development package"])])
 AS_IF([test "x$MOC" = xnotfound],[AC_MSG_ERROR(["moc program not found. Please install Qt development package"])])
+AS_IF([test "x$RCC" = xnotfound],[AC_MSG_ERROR(["rcc program not found. Please install Qt development package"])])
+AS_IF([test "x$LRELEASE" = xnotfound],[AC_MSG_ERROR(["lrelease program not found. Please install Qt development package"])])
 
 AC_CHECK_LIB([pthread], [pthread_create])
 
