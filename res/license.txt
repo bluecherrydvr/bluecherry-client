@@ -1,4 +1,4 @@
-<center>Copyright &copy; 2016, Bluecherry LLC. All rights reserved.</center>
+<center>Copyright &copy; 2021, Bluecherry LLC. All rights reserved.</center>
 <br><hr><br>
 The following software is distributed under the terms of the GNU Lesser General Public License, either version 2.0, 2.1, or 2.1 or later, as indicated with their distribution:
 <ul>
@@ -15,29 +15,4 @@ SDL 2.0 is distributed under the <a href="http://www.gzip.org/zlib/zlib_license.
 <ul>
     <li><a href='http://www.libsdl.org/'>Simple DirectMedia Layer</a></li>
 </ul>
-<br><hr><br>
-The MPlayer is distributed under the terms of the GNU General Public License version 2:
-<ul>
-    <li><a href='http://mplayerhq.hu/'>MPlayer</a></li>
-</ul>
-<br><hr><br>
-The following software is distributed under the terms of the two-clause BSD license, included below:
-<ul>
-    <li><a href='http://www.webkit.org/'>Webkit</a> (portions of)</li>
-    <li><a href='http://liboil.freedesktop.org/'>liboil</a></li>
-</ul>
-
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:<br><br>
-    1.  Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.<br>
-    2.  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.<br>
 <br>
-    THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-<br><hr><br>
-Google Breakpad, Copyright (c) 2006, Google Inc. All rights reserved.<br><br>
-    Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:<br><br>
-        * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.<br>
-        * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer
-          in the documentation and/or other materials provided with the distribution.<br>
-        * Neither the name of Google Inc. nor the names of its contributors may be used to endorse or promote products derived from
-          this software without specific prior written permission.<br><br>
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.<br>
