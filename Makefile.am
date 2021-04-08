@@ -68,7 +68,6 @@ translations/bluecherryclient_en.qm \
 translations/bluecherryclient_es.qm \
 translations/bluecherryclient_no.qm \
 translations/bluecherryclient_pl.qm \
-translations/bluecherryclient_pt_BR.qm \
 translations/bluecherryclient_ru.qm \
 translations/bluecherryclient_sv_SE.qm
 
