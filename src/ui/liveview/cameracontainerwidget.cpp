@@ -127,7 +127,7 @@ void CameraContainerWidget::drawHeader(QPainter *p, const QRect &r)
         QPixmap pm;
         if (!QPixmapCache::find(key, pm))
         {
-            pm = QPixmap(QLatin1String(":/icons/%1.png").arg(key));
+            pm = QPixmap(QString(QLatin1String(":/icons/%1.png")).arg(key));
             QPixmapCache::insert(key, pm);
         }
         QRect audioIconRect(brect.x() - 20, r.y(), 20, 20);

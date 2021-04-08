@@ -415,7 +415,7 @@ moc_LiveStream.cpp \
 resources.cpp
 
 resources.cpp: res/resources.qrc
-	$(RCC) -g cpp -name bluecherry $< > $@
+	$(RCC) -name bluecherry $< > $@
 
 moc_%.cpp: src/ui/%.h
 	$(MOC) $< -o $@
