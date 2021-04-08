@@ -44,7 +44,7 @@ Install dependency packages and developer tools first:
 
 sudo apt-get install autoconf automake build-essential debhelper devscripts
 g++ git libasound2-dev libavdevice-dev libavfilter-dev libmpv-dev libsdl2-dev
-libva-dev qtbase5-dev qttools5-dev-tools
+libva-dev qtbase5-dev qttools5-dev-tools qt5-default
 
 then build the package:
 
