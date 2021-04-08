@@ -1,5 +1,5 @@
 AC_PREREQ([2.68])
-AC_INIT([Bluecherry client], [2.2.8dev], [https://github.com/bluecherrydvr/bluecherry-client/issues], [bluecherry-client], [https://bluecherrydvr.com])
+AC_INIT([Bluecherry client], [2.2.8], [https://github.com/bluecherrydvr/bluecherry-client/issues], [bluecherry-client], [https://bluecherrydvr.com])
 AM_INIT_AUTOMAKE([-Wall  foreign subdir-objects])
 AC_CONFIG_SRCDIR([src/main.cpp])
 

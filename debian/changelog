@@ -1,3 +1,12 @@
+bluecherry-client (1:2.2.8-1)  focal; urgency=low
+
+  * Ported to Qt5
+  * Reimplemented liveview GUI using Qt Widgets instead of QML
+  * Enabled switching between liveview substream & main stream
+  * Migrated to Autotools build system
+
+ -- Anton Sviridenko <anton@corp.bluecherry.net>  Thu, 08 Apr 2021 08:00:16 +0400
+
 bluecherry-client (1:2.2.7-1) trusty; urgency=low
 
   * New recordings player based on mpv project
