@@ -329,7 +329,6 @@ translations/bluecherryclient_en.ts \
 translations/bluecherryclient_es.ts \
 translations/bluecherryclient_no.ts \
 translations/bluecherryclient_pl.ts \
-translations/bluecherryclient_pt_BR.ts \
 translations/bluecherryclient_ru.ts \
 translations/bluecherryclient_sv_SE.ts \
 res/windows.rc \
