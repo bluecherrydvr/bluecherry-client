@@ -1,5 +1,0 @@
-include(ProcessorCount)
-ProcessorCount(CPU_CORES_COUNT)
-if( CPU_CORES_COUNT EQUAL 0 )
-    set(CPU_CORES_COUNT 1)
-endif()

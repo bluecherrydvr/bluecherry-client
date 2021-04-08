@@ -1,7 +1,0 @@
-<RCC>
-    <qresource prefix="/qml">
-        <file>liveview/LiveView.qml</file>
-        <file>liveview/LiveFeed.qml</file>
-        <file>liveview/HeaderPTZControl.qml</file>
-    </qresource>
-</RCC>
