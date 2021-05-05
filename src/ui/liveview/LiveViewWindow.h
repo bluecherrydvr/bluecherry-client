@@ -23,6 +23,8 @@
 #include "camera/DVRCamera.h"
 #include <QCloseEvent>
 #include <QGridLayout>
+#include <QDrag>
+#include <QPoint>
 
 class DVRServerRepository;
 class LiveViewArea;
@@ -100,6 +102,10 @@ protected:
     virtual void moveEvent(QMoveEvent *event);
     virtual void keyPressEvent(QKeyEvent *event);
     virtual bool event(QEvent *event);
+    virtual void mousePressEvent(QMouseEvent *event);
+    virtual void mouseMoveEvent(QMouseEvent *event);
+    virtual void dragEnterEvent(QDragEnterEvent *event);
+    virtual void dropEvent(QDropEvent *event);
 
 private slots:
     void savedLayoutChanged(int index);
@@ -129,6 +135,8 @@ private:
     static bool m_isSessionRestoring;
     QGridLayout *m_liveviewlayout;
     int m_rows, m_cols;
+    QPoint m_dragStartPosition;
+    int m_dragSrcRow, m_dragSrcCol;
 
     void retranslateUI();
     void geometryChanged();
@@ -139,6 +147,7 @@ private:
     void removeRows(int remove);
     void removeColumns(int remove);
     bool findEmptyLayoutCell(int *r, int *c);
+    void gridPos(const QPoint &pos, int *row, int *column);
 };
 
 #endif // LIVEVIEWWINDOW_H

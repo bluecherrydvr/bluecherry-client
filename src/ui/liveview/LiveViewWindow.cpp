@@ -40,6 +40,7 @@
 #include <QCloseEvent>
 #include <QKeyEvent>
 #include <QPainter>
+#include <QMimeData>
 
 
 #ifdef Q_OS_MAC
@@ -89,7 +90,8 @@ LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *p
     : QWidget(parent, f), m_serverRepository(serverRepository), m_savedLayouts(new QComboBox),
       m_lastLayoutIndex(-1), m_switchItemIndex(-1), m_autoSized(false), m_isLayoutChanging(false),
       m_wasOpenedFs(openfs), m_liveviewlayout(0),
-      m_rows(1), m_cols(1)
+      m_rows(1), m_cols(1), m_dragStartPosition(-1, -1),
+      m_dragSrcRow(-1), m_dragSrcCol(-1)
 {
     setBackgroundRole(QPalette::Shadow);
     QBoxLayout *layout = new QVBoxLayout(this);
@@ -210,6 +212,7 @@ LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *p
         m_liveviewlayout->addWidget(new CameraContainerWidget(), 0, 0);
     }
     updateLayoutActionStates();
+    setAcceptDrops(true);
 }
 
 bool LiveViewWindow::findEmptyLayoutCell(int *r, int *c)
@@ -943,6 +946,117 @@ bool LiveViewWindow::event(QEvent *event)
         bcApp->mainWindow->saveTopWindow(this);
 
     return QWidget::event(event);
+}
+
+void LiveViewWindow::gridPos(const QPoint &pos, int *row, int *column)
+{
+    Q_ASSERT(row && column);
+    Q_ASSERT(m_cols && m_rows);
+    int w, h, left, top;
+
+    w = width() / m_cols;
+    h = height() / m_rows;
+
+    left = width() % m_cols;
+    top = height() % m_rows;
+
+    if (pos.x() < 0 || pos.x() > width() || pos.y() < 0 || pos.y() > height())
+    {
+        *row = *column = -1;
+        return;
+    }
+
+    *row = (pos.y() - top) / h;
+    *column = (pos.x() - left) / w;
+}
+
+void LiveViewWindow::mouseMoveEvent(QMouseEvent *event)
+{
+    if (!(event->buttons() & Qt::LeftButton))
+        return;
+    if ((event->pos() - m_dragStartPosition).manhattanLength()
+         < QApplication::startDragDistance())
+        return;
+
+    CameraContainerWidget *cw = static_cast<CameraContainerWidget*>(childAt(event->pos()));
+
+    if (!cw)
+        return;
+    if (!cw->camera())
+        return;
+
+    gridPos(event->pos(), &m_dragSrcRow, &m_dragSrcCol);
+
+    QLayoutItem *item = m_liveviewlayout->itemAtPosition(m_dragSrcRow, m_dragSrcCol);
+
+    if (!(item && item->widget() == cw))
+        qDebug() << "drag source widget not found!!!!";
+    qDebug() << "drag source is at grid pos (" << m_dragSrcRow << "," << m_dragSrcCol << ")";
+
+    QDrag *drag = new QDrag(this);
+    QMimeData *mimeData = new QMimeData;
+
+    QByteArray emptydata;
+    mimeData->setData(QLatin1String("application/x-bluecherry-camerawidget"), emptydata);
+    mimeData->setText(QString("test"));
+    drag->setMimeData(mimeData);
+    if (cw->stream())
+        drag->setPixmap(QPixmap::fromImage(cw->stream()->currentFrame()));
+
+    Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);
+}
+
+void LiveViewWindow::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton)
+        m_dragStartPosition = event->pos();
+}
+
+void LiveViewWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+    event->acceptProposedAction();
+}
+
+void LiveViewWindow::dropEvent(QDropEvent *event)
+{
+    //drag from servers/cameras view on the left
+    if (event->mimeData()->hasFormat(QLatin1String("application/x-bluecherry-dvrcamera")))
+    {
+
+        QList<DVRCamera *> cameras = DVRCamera::fromMimeData(m_serverRepository, event->mimeData());
+        if (cameras.isEmpty())
+            return;
+        addCamera(cameras.at(0));
+        event->acceptProposedAction();
+        saveLayout();
+    }
+    else if(event->mimeData()->hasFormat(QLatin1String("application/x-bluecherry-camerawidget")))
+    {
+        int targetRow, targetCol;
+        QWidget *target, *source;
+        gridPos(event->pos(), &targetRow, &targetCol);
+
+        if (targetRow == m_dragSrcRow && targetCol == m_dragSrcCol)
+            return;
+
+        QLayoutItem *srcItem = m_liveviewlayout->itemAtPosition(m_dragSrcRow, m_dragSrcCol);
+        QLayoutItem *targetItem = m_liveviewlayout->itemAtPosition(targetRow, targetCol);
+
+        if (srcItem && targetItem)
+        {
+            target = targetItem->widget();
+            source = srcItem->widget();
+
+            m_liveviewlayout->removeWidget(source);
+
+            targetItem = m_liveviewlayout->replaceWidget(target, source);
+            m_liveviewlayout->addWidget(target, m_dragSrcRow, m_dragSrcCol);
+
+            delete(targetItem);
+            event->acceptProposedAction();
+            saveLayout();
+        }
+    }
 }
 
 void LiveViewWindow::keyPressEvent(QKeyEvent *event)
