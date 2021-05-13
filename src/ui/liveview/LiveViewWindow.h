@@ -56,6 +56,7 @@ public:
     QWidget *topWidget() { return m_topWidget; }
     QWidget *fullScreenWidget() { return m_fsSetWindow.data(); }
     void addCamera(DVRCamera *camera);
+    void addCamera_dragdrop(QDropEvent *event, DVRCamera *camera);
     static int maxRows();
     static int maxColumns();
     void setGridSize(int rows, int columns);

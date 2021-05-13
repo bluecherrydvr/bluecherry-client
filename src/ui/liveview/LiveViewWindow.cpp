@@ -1001,7 +1001,10 @@ void LiveViewWindow::mouseMoveEvent(QMouseEvent *event)
     mimeData->setText(QString("test"));
     drag->setMimeData(mimeData);
     if (cw->stream())
-        drag->setPixmap(QPixmap::fromImage(cw->stream()->currentFrame()));
+    {
+        QPixmap frame = QPixmap::fromImage(cw->stream()->currentFrame());
+        drag->setPixmap(frame.scaled(cw->width(),cw->height(),Qt::IgnoreAspectRatio));
+    }
 
     Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);
 }
@@ -1017,6 +1020,30 @@ void LiveViewWindow::dragEnterEvent(QDragEnterEvent *event)
     event->acceptProposedAction();
 }
 
+void LiveViewWindow::addCamera_dragdrop(QDropEvent *event, DVRCamera *camera)
+{
+    int ar = -1, ac = -1;
+
+    gridPos(event->pos(),&ar,&ac);
+
+    QLayoutItem *item = m_liveviewlayout->itemAtPosition(ar, ac);
+
+    if (!item)
+        return;
+
+    CameraContainerWidget *ccw = new CameraContainerWidget();
+    ccw->setCamera(camera);
+    ccw->setServerRepository(m_serverRepository);
+
+    item = m_liveviewlayout->replaceWidget(item->widget(), ccw);
+    item->widget()->deleteLater();
+    delete(item);
+    connect(ccw, SIGNAL(cameraClosed(QWidget*)), this, SLOT(removeCamera(QWidget*)));
+
+    updateLayoutActionStates();
+    saveLayout();
+}
+
 void LiveViewWindow::dropEvent(QDropEvent *event)
 {
     //drag from servers/cameras view on the left
@@ -1026,7 +1053,7 @@ void LiveViewWindow::dropEvent(QDropEvent *event)
         QList<DVRCamera *> cameras = DVRCamera::fromMimeData(m_serverRepository, event->mimeData());
         if (cameras.isEmpty())
             return;
-        addCamera(cameras.at(0));
+        addCamera_dragdrop(event,cameras.at(0));
         event->acceptProposedAction();
         saveLayout();
     }
