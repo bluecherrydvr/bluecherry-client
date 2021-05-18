@@ -29,9 +29,7 @@
 #include <QtPlugin>
 #include <QSettings>
 
-#if defined(Q_OS_WIN)
-#include <utils/explorerstyle.h>
-#elif defined(Q_OS_LINUX)
+#if defined(Q_OS_LINUX)
 #include <X11/Xlib.h>
 #endif
 
@@ -62,9 +60,6 @@ int main(int argc, char *argv[])
     a.setApplicationVersion(QLatin1String(PACKAGE_VERSION));
 
 #ifdef Q_OS_WIN
-    /* Use explorer style for fancier toolbars */
-    if (a.style()->inherits("QWindowsXPStyle"))
-        a.setStyle(new ExplorerStyle);
     /* Don't use the registry. */
     QSettings::setDefaultFormat(QSettings::IniFormat);
 #endif

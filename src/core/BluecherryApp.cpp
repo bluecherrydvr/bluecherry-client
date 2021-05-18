@@ -396,7 +396,7 @@ void BluecherryApp::releaseLive()
 }
 
 #ifdef Q_OS_WIN
-#include <Windows.h>
+#include <windows.h>
 #endif
 
 /*void BluecherryApp::setScreensaverInhibited(bool inhibit)
