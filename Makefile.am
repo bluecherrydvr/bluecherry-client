@@ -456,5 +456,6 @@ moc_%.cpp: src/core/%.h
 	$(MOC) $< -o $@
 
 translations/%.qm: translations/%.ts
+	$(MKDIR_P) $(@D)
 	$(LRELEASE) $< -qm $@
 
