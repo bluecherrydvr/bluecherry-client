@@ -1,0 +1,145 @@
+diff --git a/src/ffmpeg.mk b/src/ffmpeg.mk
+index 232d419f..b5829c80 100644
+--- a/src/ffmpeg.mk
++++ b/src/ffmpeg.mk
+@@ -8,9 +8,9 @@ $(PKG)_CHECKSUM := 217eb211c33303b37c5521a5abe1f0140854d6810c6a6ee399456cc963567
+ $(PKG)_SUBDIR   := $(PKG)-$($(PKG)_VERSION)
+ $(PKG)_FILE     := $(PKG)-$($(PKG)_VERSION).tar.bz2
+ $(PKG)_URL      := https://ffmpeg.org/releases/$($(PKG)_FILE)
+-$(PKG)_DEPS     := cc bzip2 gnutls lame libass libbluray libbs2b libcaca \
++$(PKG)_DEPS     := cc bzip2 openssl \
+                    libvpx opencore-amr opus sdl2 speex theora vidstab \
+-                   vo-amrwbenc vorbis x264 xvidcore yasm zlib
++                   vo-amrwbenc vorbis x264 x265 yasm zlib
+ 
+ # DO NOT ADD fdk-aac OR openssl SUPPORT.
+ # Although they are free softwares, their licenses are not compatible with
+@@ -44,24 +44,61 @@ define $(PKG)_BUILD
+         --enable-gpl \
+         --enable-version3 \
+         --extra-libs='-mconsole' \
+-        --enable-avisynth \
+-        --enable-gnutls \
+-        --enable-libass \
+-        --enable-libbluray \
+-        --enable-libbs2b \
+-        --enable-libcaca \
+-        --enable-libmp3lame \
++#        --enable-avisynth \
++#        --enable-gnutls \
++         --enable-openssl \
++#        --enable-libass \
++#        --enable-libbluray \
++#        --enable-libbs2b \
++#        --enable-libcaca \
++#        --enable-libmp3lame \
+         --enable-libopencore-amrnb \
+         --enable-libopencore-amrwb \
+         --enable-libopus \
+         --enable-libspeex \
+-        --enable-libtheora \
+-        --enable-libvidstab \
++#        --enable-libtheora \
++#        --enable-libvidstab \
+         --enable-libvo-amrwbenc \
+-        --enable-libvorbis \
++#        --enable-libvorbis \
+         --enable-libvpx \
+         --enable-libx264 \
+-        --enable-libxvid \
++        --enable-libx265 \
++#        --enable-libxvid \
++        --disable-programs \
++        --enable-protocol=file \
++        --enable-protocol=pipe \
++        --enable-protocol=http \
++        --enable-protocol=https \
++        --enable-muxer=matroska \
++        --enable-muxer=mjpeg \
++        --enable-muxer=rtp \
++        --enable-muxer=mp4 \
++        --enable-muxer=image2 \
++        --enable-muxer=rawvideo \
++        --enable-demuxer=matroska \
++        --enable-demuxer=mjpeg \
++        --enable-demuxer=rtp \
++        --enable-demuxer=rtsp \
++        --enable-demuxer=image2 \
++        --enable-demuxer=rawvideo \
++        --enable-decoder=h264 \
++        --enable-decoder=mpeg4 \
++        --enable-decoder=mjpeg \
++	--enable-decoder=rawvideo \
++        --enable-decoder=aac \
++	--enable-decoder=amrnb \
++	--enable-decoder=amrwb \
++	--enable-decoder=pcm_alaw \
++	--enable-decoder=pcm_mulaw \
++	--enable-decoder=gsm \
++	--enable-decoder=adpcm_g726 \
++	--enable-decoder=adpcm_g726le \
++	--enable-parser=h264 \
++        --enable-parser=mpeg4video \
++        --enable-parser=mjpeg \
++        --enable-encoder=mjpeg \
++        --enable-encoder=mpeg4 \
++        --enable-encoder=rawvideo \
+         $($(PKG)_CONFIGURE_OPTS)
+     $(MAKE) -C '$(BUILD_DIR)' -j '$(JOBS)'
+     $(MAKE) -C '$(BUILD_DIR)' -j 1 install
+diff --git a/src/python-markupsafe.mk b/src/python-markupsafe.mk
+index 5772e0c6..d1a465fb 100644
+--- a/src/python-markupsafe.mk
++++ b/src/python-markupsafe.mk
+@@ -7,7 +7,7 @@ $(PKG)_IGNORE   :=
+ $(PKG)_VERSION  := 1.1.1
+ $(PKG)_CHECKSUM := 222a10e3237d92a9cd45ed5ea882626bc72bc5e0264d3ed0f2c9129fa69fc167
+ $(PKG)_GH_CONF  := pallets/markupsafe/tags,,,a,
+-$(PKG)_DEPS     := python-conf $(BUILD)~python-setuptools
++$(PKG)_DEPS     := python-conf
+ $(PKG)_TARGETS  := $(BUILD)
+ 
+ define $(PKG)_BUILD
+diff --git a/src/qtbase.mk b/src/qtbase.mk
+index 99aaafc1..d94452a6 100644
+--- a/src/qtbase.mk
++++ b/src/qtbase.mk
+@@ -9,7 +9,7 @@ $(PKG)_CHECKSUM := 909fad2591ee367993a75d7e2ea50ad4db332f05e1c38dd7a5a274e156a4e
+ $(PKG)_SUBDIR   := $(PKG)-everywhere-src-$($(PKG)_VERSION)
+ $(PKG)_FILE     := $(PKG)-everywhere-src-$($(PKG)_VERSION).tar.xz
+ $(PKG)_URL      := https://download.qt.io/official_releases/qt/5.15/$($(PKG)_VERSION)/submodules/$($(PKG)_FILE)
+-$(PKG)_DEPS     := cc dbus fontconfig freetds freetype harfbuzz jpeg libmysqlclient libpng mesa openssl pcre2 postgresql sqlite zlib zstd $(BUILD)~zstd
++$(PKG)_DEPS     := cc fontconfig  freetype harfbuzz jpeg libpng mesa openssl pcre2  sqlite zlib zstd $(BUILD)~zstd
+ $(PKG)_DEPS_$(BUILD) :=
+ $(PKG)_TARGETS  := $(BUILD) $(MXE_TARGETS)
+ 
+@@ -25,8 +25,6 @@ define $(PKG)_BUILD
+     # ICU is buggy. See #653. TODO: reenable it some time in the future.
+     cd '$(1)' && \
+         OPENSSL_LIBS="`'$(TARGET)-pkg-config' --libs-only-l openssl`" \
+-        PSQL_LIBS="-lpq -lsecur32 `'$(TARGET)-pkg-config' --libs-only-l openssl pthreads` -lws2_32" \
+-        SYBASE_LIBS="-lsybdb `'$(TARGET)-pkg-config' --libs-only-l openssl` -liconv -lws2_32" \
+         PKG_CONFIG="${TARGET}-pkg-config" \
+         PKG_CONFIG_SYSROOT_DIR="/" \
+         PKG_CONFIG_LIBDIR="$(PREFIX)/$(TARGET)/lib/pkgconfig" \
+@@ -49,12 +47,6 @@ define $(PKG)_BUILD
+             -accessibility \
+             -nomake examples \
+             -nomake tests \
+-            -plugin-sql-mysql \
+-            -mysql_config $(PREFIX)/$(TARGET)/bin/mysql_config \
+-            -plugin-sql-sqlite \
+-            -plugin-sql-odbc \
+-            -plugin-sql-psql \
+-            -plugin-sql-tds -D Q_USE_SYBASE \
+             -system-zlib \
+             -system-libpng \
+             -system-libjpeg \
+@@ -64,7 +56,6 @@ define $(PKG)_BUILD
+             -system-harfbuzz \
+             -system-pcre \
+             -openssl-linked \
+-            -dbus-linked \
+             -no-pch \
+             -v \
+             $($(PKG)_CONFIGURE_OPTS)
