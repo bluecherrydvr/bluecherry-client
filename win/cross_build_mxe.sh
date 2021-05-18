@@ -6,13 +6,13 @@
 # make sure that MXE dependencies are installed on a host system first
 # see https://mxe.cc for details
 
-# git clone https://github.com/mxe/mxe.git
+git clone https://github.com/mxe/mxe.git
 
 cd mxe
-#git checkout 219c3ab34978f078faf4c7ed4c091752f95a272b
-#patch -p1 < ../mxe.patch || exit
+git checkout 219c3ab34978f078faf4c7ed4c091752f95a272b
+patch -p1 < ../mxe.patch || exit
 
-#make MXE_TARGETS='i686-w64-mingw32.shared' cc qtbase ffmpeg openssl sdl2 libass jpeg
+make MXE_TARGETS='i686-w64-mingw32.shared' cc qtbase ffmpeg openssl sdl2 libass jpeg
 
 export PATH=$PWD/usr/bin/:$PATH
 
