@@ -1,0 +1,84 @@
+!include MUI2.nsh
+
+!define VERSION "@VERSION@"
+
+Name "Bluecherry Client"
+OutFile "SetupBluecherryClient_${VERSION}_x64.exe"
+InstallDir "$PROGRAMFILES64\Bluecherry Client"
+InstallDirRegKey HKLM "Software\Bluecherry Client" ""
+RequestExecutionLevel admin
+SetCompressor /FINAL /SOLID lzma
+!define MUI_ICON "bluecherry.ico"
+!define MUI_UNICON "bluecherry.ico"
+
+!insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_LICENSE "COPYING"
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+!define MUI_FINISHPAGE_RUN $INSTDIR\BluecherryClient.exe
+!define MUI_FINISHPAGE_RUN_TEXT "Run Bluecherry Client"
+!insertmacro MUI_PAGE_FINISH
+
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+
+!insertmacro MUI_LANGUAGE "English"
+
+Section
+        SetOutPath "$INSTDIR"
+        SetShellVarContext all
+
+        # Main
+        File /oname=BluecherryClient.exe "bluecherry-client.exe"
+
+        #License
+        File "COPYING"
+
+!include dll_list.nsh
+
+        SetOutPath "$INSTDIR\platforms"
+        File platforms/qdirect2d.dll
+        File platforms/qminimal.dll
+        File platforms/qoffscreen.dll
+        File platforms/qwindows.dll
+        SetOutPath "$INSTDIR\imageformats"
+        File imageformats/qgif.dll
+        File imageformats/qico.dll
+        File imageformats/qjpeg.dll
+        SetOutPath "$INSTDIR"
+
+        # Translations
+        File "bluecherryclient_de_DE.qm"
+        File "bluecherryclient_en.qm"
+        File "bluecherryclient_es.qm"
+        File "bluecherryclient_no.qm"
+        File "bluecherryclient_pl.qm"
+        File "bluecherryclient_ru.qm"
+        File "bluecherryclient_sv_SE.qm"
+    
+
+        CreateDirectory "$SMPROGRAMS\Bluecherry"
+        CreateShortCut "$SMPROGRAMS\Bluecherry\Bluecherry Client.lnk" "$INSTDIR\BluecherryClient.exe"
+
+        WriteRegStr HKLM "Software\Bluecherry Client" "" $INSTDIR
+        WriteUninstaller "$INSTDIR\Uninstall.exe"
+        WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Bluecherry Client" \
+                    "DisplayName" "Bluecherry DVR Client"
+        WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Bluecherry Client" \
+                    "UninstallString" "$\"$INSTDIR\Uninstall.exe$\""
+        WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Bluecherry Client" \
+                    "Publisher" "Bluecherry"
+        WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Bluecherry Client" \
+                    "HelpLink" "http://support.bluecherrydvr.com"
+        WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Bluecherry Client" \
+                    "URLInfoAbout" "http://www.bluecherrydvr.com"
+SectionEnd
+
+Section "Uninstall"
+        SetShellVarContext all
+        Delete "$INSTDIR\Uninstall.exe"
+        RMDir /r "$INSTDIR"
+        RMDir /r "$SMPROGRAMS\Bluecherry"
+        DeleteRegKey HKLM "Software\Bluecherry Client"
+        DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Bluecherry Client"
+SectionEnd
