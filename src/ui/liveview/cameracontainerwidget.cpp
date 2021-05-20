@@ -640,19 +640,8 @@ void CameraContainerWidget::mouseMoveEvent(QMouseEvent *event)
 
 void CameraContainerWidget::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    if (!m_ptz)
-    {
-        event->ignore();
-        return;
-    }
-    CameraPtzControl::Movement movement = moveForPosition(event->x(), event->y());
-    if (movement == CameraPtzControl::NoMovement)
-    {
-        event->accept();
-        m_ptz->move(CameraPtzControl::MoveTele);
-    }
-    else
-        event->ignore();
+    event->accept();
+    openFullScreen();
 }
 
 void CameraContainerWidget::mousePressEvent(QMouseEvent *event)
