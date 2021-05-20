@@ -56,7 +56,8 @@ res/status-offline.png \
 res/status.png \
 res/system-monitor.png \
 res/tick.png \
-res/webcam.png
+res/webcam.png \
+res/windows.rc
 
 CLEANFILES = moc_*.cpp translations/*.qm resources.cpp
 
@@ -330,8 +331,11 @@ translations/bluecherryclient_no.ts \
 translations/bluecherryclient_pl.ts \
 translations/bluecherryclient_ru.ts \
 translations/bluecherryclient_sv_SE.ts \
-res/windows.rc \
 res/resources.qrc
+
+if TARGET_WINDOWS
+bluecherry_client_SOURCES += res/windows.rc
+endif
 
 nodist_bluecherry_client_SOURCES  = \
 moc_SetupWizard_p.cpp \
