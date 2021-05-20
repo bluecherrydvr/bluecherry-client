@@ -72,7 +72,7 @@ translations/bluecherryclient_ru.qm \
 translations/bluecherryclient_sv_SE.qm
 
 bluecherry_client_CPPFLAGS =  -I$(srcdir)/src
-bluecherry_client_CXXFLAGS = $(QT_DEPENDENCIES_CFLAGS) $(FFMPEG_CFLAGS) $(MPV_CFLAGS)
+bluecherry_client_CXXFLAGS = $(QT_DEPENDENCIES_CFLAGS) $(FFMPEG_CFLAGS) $(MPV_CFLAGS) -std=c++11
 bluecherry_client_LDADD = $(QT_DEPENDENCIES_LIBS) $(FFMPEG_LIBS) $(MPV_LIBS) $(SDL2_LIBS)
 
 bluecherry_client_SOURCES = \
