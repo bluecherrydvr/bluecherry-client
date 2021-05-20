@@ -459,3 +459,10 @@ translations/%.qm: translations/%.ts
 	$(MKDIR_P) $(@D)
 	$(LRELEASE) $< -qm $@
 
+
+if TARGET_WINDOWS
+
+.rc.o:
+	$(WINDRES) -i $< -o $@
+
+endif

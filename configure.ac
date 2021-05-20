@@ -14,9 +14,17 @@ AC_SYS_LARGEFILE
 
 # Platform-specific environment settings
 AS_CASE([$host],
-	[*-apple-darwin*], [LDFLAGS="$LDFLAGS -headerpad_max_install_names"],
+	[*-apple-darwin*], [
+			TARGET_OS=darwin
+			LDFLAGS="$LDFLAGS -headerpad_max_install_names"
+			],
         [*-w64-mingw*], [
+			TARGET_OS=windows
 			AC_CHECK_LIB([ws2_32], [main], [LIBS="$LIBS -lws2_32"], [])
+			AC_PATH_TOOL(WINDRES, windres, none)
+			if test x$WINDRES = xnone; then
+				AC_MSG_ERROR("windres not found")
+			fi
 			],
 			[]
 )
@@ -74,6 +82,8 @@ PKG_CHECK_MODULES(MPV, mpv, HAVE_MPV=yes, AC_MSG_ERROR(["libmpv not found"]))
 
 VERSION=$PACKAGE_VERSION
 AC_SUBST([VERSION])
+AM_CONDITIONAL([TARGET_WINDOWS], [test x$TARGET_OS = xwindows])
+AM_CONDITIONAL([TARGET_DARWIN], [test x$TARGET_OS = xdarwin])
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
