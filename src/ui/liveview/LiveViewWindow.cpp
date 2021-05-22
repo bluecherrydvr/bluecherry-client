@@ -620,14 +620,17 @@ QByteArray LiveViewWindow::serializeLayout() const
     /* -1, then version */
     data << -1 << 1;
     data << rc << cc;
-    for (int i = 0; i < rc * cc; i++)
+    for (int i = 0; i < m_rows; i++)
     {
-        QLayoutItem *item;
-        item = m_liveviewlayout->itemAt(i);
-        if (!item || !item->widget() || !((CameraContainerWidget*)(item->widget()))->camera())
-            data << -1;
-        else
-            ((CameraContainerWidget *)item->widget())->saveState(&data);
+        for(int j = 0;  j < m_cols; j++)
+        {
+            QLayoutItem *item;
+            item = m_liveviewlayout->itemAtPosition(i, j);
+            if (!item || !item->widget() || !((CameraContainerWidget*)(item->widget()))->camera())
+                data << -1;
+            else
+                ((CameraContainerWidget *)item->widget())->saveState(&data);
+        }
     }
 
     return re;
