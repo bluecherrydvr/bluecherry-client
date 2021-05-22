@@ -43,10 +43,6 @@
 #include <QMimeData>
 
 
-#ifdef Q_OS_MAC
-#include <QMacStyle>
-#endif
-
 bool LiveViewWindow::m_isSessionRestoring = false;
 QWidget *LiveViewWindow::m_topWidget = NULL;
 

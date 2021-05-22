@@ -470,3 +470,23 @@ if TARGET_WINDOWS
 	$(WINDRES) -i $< -o $@
 
 endif
+
+if TARGET_DARWIN
+deploy: bluecherry-client
+	$(MKDIR_P) BluecherryClient.app/Contents/Resources/translations
+	$(MKDIR_P) BluecherryClient.app/Contents/MacOS
+	$(MKDIR_P) BluecherryClient.app/Contents/Frameworks
+	cp mac/Info.plist BluecherryClient.app/Contents/
+	cp $(abs_top_srcdir)/res/bluecherry.icns BluecherryClient.app/Contents/Resources/
+	cp translations/*.qm BluecherryClient.app/Contents/Resources/translations/
+	cp bluecherry-client BluecherryClient.app/Contents/MacOS/
+	cp $(prefix)/lib/libssl.1.1.dylib BluecherryClient.app/Contents/Frameworks/
+	cp $(prefix)/lib/libcrypto.1.1.dylib BluecherryClient.app/Contents/Frameworks/
+	macdeployqt BluecherryClient.app
+	macdeployqt BluecherryClient.app
+	mac/replacepath.py --old @rpath --new @executable_path/../Frameworks/ --file BluecherryClient.app/Contents/MacOS/bluecherry-client
+	hdiutil create -srcfolder BluecherryClient.app BluecherryClient.dmg
+	hdiutil internet-enable -yes BluecherryClient.dmg
+	mv BluecherryClient.dmg BluecherryClient_$(VERSION).dmg
+endif
+

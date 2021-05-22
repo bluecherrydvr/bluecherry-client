@@ -20,7 +20,6 @@
 
 #include <QtGlobal>
 
-#ifndef Q_OS_MAC
 #include <QToolButton>
 
 class StatusBandwidthWidget : public QToolButton
@@ -35,40 +34,5 @@ private slots:
     void rateUpdated(unsigned currentRate);
 };
 
-#else /* Q_OS_MAC */
-
-#include <QMacCocoaViewContainer>
-
-#ifndef Q_FORWARD_DECLARE_OBJC_CLASS
-#  ifdef __OBJC__
-#    define Q_FORWARD_DECLARE_OBJC_CLASS(classname) @class classname
-#  else
-#    define Q_FORWARD_DECLARE_OBJC_CLASS(classname) typedef struct objc_object classname
-#  endif
-#endif
-
-Q_FORWARD_DECLARE_OBJC_CLASS(NSPopUpButton);
-
-class QMenu;
-class QAction;
-
-class StatusBandwidthWidget : public QMacCocoaViewContainer
-{
-    Q_OBJECT
-
-public:
-    explicit StatusBandwidthWidget(QWidget *parent);
-
-private slots:
-    void bandwidthModeChanged(int value);
-    void rateUpdated(unsigned currentRate);
-
-private:
-    NSPopUpButton *m_button;
-    QMenu *m_menu;
-    QAction *m_titleAction;
-};
-
-#endif
 
 #endif // STATUSBANDWIDTHWIDGET_H

@@ -448,14 +448,8 @@ void BluecherryApp::releaseLive()
     }
 }*/
 
-#ifdef Q_OS_MAC
-void resetSystemActivity(); // PlatformOSX.mm
-#endif
 
 void BluecherryApp::resetSystemActivity()
 {
-#ifdef Q_OS_MAC
-    ::resetSystemActivity();
-#endif
 }
 

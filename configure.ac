@@ -84,6 +84,6 @@ VERSION=$PACKAGE_VERSION
 AC_SUBST([VERSION])
 AM_CONDITIONAL([TARGET_WINDOWS], [test x$TARGET_OS = xwindows])
 AM_CONDITIONAL([TARGET_DARWIN], [test x$TARGET_OS = xdarwin])
-AC_CONFIG_FILES([Makefile win/installer32.nsi win/installer64.nsi])
+AC_CONFIG_FILES([Makefile win/installer32.nsi win/installer64.nsi mac/Info.plist])
 AC_OUTPUT
 
