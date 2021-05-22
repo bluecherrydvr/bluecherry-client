@@ -1000,7 +1000,8 @@ void LiveViewWindow::mouseMoveEvent(QMouseEvent *event)
     mimeData->setText(QString("test"));
     drag->setMimeData(mimeData);
     if (cw->stream())
-        drag->setPixmap(QPixmap::fromImage(cw->stream()->currentFrame()));
+        drag->setPixmap(QPixmap::fromImage(
+		cw->stream()->currentFrame()).scaled(cw->width() / 2,cw->height() / 2, Qt::KeepAspectRatio));
 
     Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);
 }
