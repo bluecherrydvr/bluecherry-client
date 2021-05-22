@@ -1,6 +1,6 @@
-bluecherry-client (1:2.2.9dev-1)  focal; urgency=low
+bluecherry-client (1:2.2.9-1)  focal; urgency=low
 
-  * Version 2.2.9 in development...
+  * Reimplemented drag & drop
 
  -- Anton Sviridenko <anton@corp.bluecherry.net>  Thu, 08 Apr 2021 08:00:16 +0400
 
