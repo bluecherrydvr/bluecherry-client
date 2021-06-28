@@ -70,7 +70,7 @@ cd ..
 git clone https://github.com/mxe/mxe.git
 
 cd mxe
-git checkout 219c3ab34978f078faf4c7ed4c091752f95a272b
+git checkout d0a79ac6ac7072eae1ddddb0efa5d20103390cb3
 patch -p1 < ../mxe.patch || exit
 
 make MXE_TARGETS='i686-w64-mingw32.shared x86_64-w64-mingw32.shared' cc qtbase ffmpeg openssl sdl2 libass jpeg
