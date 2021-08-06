@@ -44,7 +44,7 @@ AS_IF([test "x$qt_version" = xqt5],
 	QT_LRELEASE_NAMES="lrelease-qt5 lrelease5 lrelease"
 	CFLAGS="-fPIC $CFLAGS"
 	CXXFLAGS="-fPIC $CXXFLAGS"
-	CPPFLAGS="-DQT_DISABLE_DEPRECATED_BEFORE=0 $CPPFLAGS"
+        CPPFLAGS="-DQT_DISABLE_DEPRECATED_BEFORE=0 -DQT_DEPRECATED_WARNINGS $CPPFLAGS"
 	],
   [test "x$qt_version" = xqt4],
   	[
