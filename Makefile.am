@@ -59,7 +59,7 @@ res/tick.png \
 res/webcam.png \
 res/windows.rc
 
-CLEANFILES = moc_*.cpp translations/*.qm resources.cpp
+CLEANFILES = moc_*.cpp translations/*.qm qrc_*.cpp
 
 
 pkgbluecherryclientdir = ${datarootdir}/bluecherry-client/translations
@@ -415,9 +415,9 @@ moc_ServerRequestManager.cpp \
 moc_CameraPtzControl.cpp \
 moc_MJpegStream.cpp \
 moc_LiveStream.cpp \
-resources.cpp
+qrc_resources.cpp
 
-resources.cpp: res/resources.qrc
+qrc_resources.cpp: res/resources.qrc
 	$(RCC) -name bluecherry $< > $@
 
 moc_%.cpp: src/ui/%.h
