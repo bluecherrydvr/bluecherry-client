@@ -310,7 +310,7 @@ EventVideoPlayer::~EventVideoPlayer()
         qDebug() << "deleting videoBackend first, before VideoWidget\n";
         delete m_videoBackend;
 #else
-        m_videoBackend->metaObject()->invokeMethod(m_videoBackend, "deleteLater", Qt::QueuedConnection);
+        QMetaObject::invokeMethod(m_videoBackend, "deleteLater", Qt::QueuedConnection);
 #endif
     }
 
@@ -372,7 +372,7 @@ void EventVideoPlayer::setVideo(const QUrl &url, EventData *event)
     connect(m_videoBackend, SIGNAL(bufferingStopped()), SLOT(bufferingStopped()), Qt::QueuedConnection);
     connect(m_videoBackend, SIGNAL(bufferingStarted()), SLOT(bufferingStarted()));
 
-    bool ok = m_videoBackend->metaObject()->invokeMethod(m_videoBackend, "start", Qt::QueuedConnection, Q_ARG(QUrl, url));
+    bool ok = QMetaObject::invokeMethod(m_videoBackend, "start", Qt::QueuedConnection, Q_ARG(QUrl, url));
     Q_ASSERT(ok);
     Q_UNUSED(ok);
 
@@ -390,8 +390,8 @@ void EventVideoPlayer::clearVideo()
     if (m_videoBackend)
     {
         m_videoBackend->disconnect(this);
-        bool ok = m_videoBackend->metaObject()->invokeMethod(m_videoBackend, "clear", Qt::QueuedConnection);
-        ok &= m_videoBackend->metaObject()->invokeMethod(m_videoBackend, "deleteLater", Qt::QueuedConnection);
+        bool ok = QMetaObject::invokeMethod(m_videoBackend, "clear", Qt::QueuedConnection);
+        ok &= QMetaObject::invokeMethod(m_videoBackend, "deleteLater", Qt::QueuedConnection);
         Q_ASSERT(ok);
         Q_UNUSED(ok);
     }
@@ -421,7 +421,7 @@ void EventVideoPlayer::playPause()
             m_videoBackend->state() == VideoPlayerBackend::Backward ||
                  m_videoBackend->state() == VideoPlayerBackend::Forward)
     {
-        m_videoBackend->metaObject()->invokeMethod(m_videoBackend, "pause", Qt::QueuedConnection);
+        QMetaObject::invokeMethod(m_videoBackend, "pause", Qt::QueuedConnection);
     }
     else
         if (m_videoBackend->atEnd())
@@ -430,7 +430,7 @@ void EventVideoPlayer::playPause()
         }
         else
         {
-            m_videoBackend->metaObject()->invokeMethod(m_videoBackend, "play", Qt::QueuedConnection);
+            QMetaObject::invokeMethod(m_videoBackend, "play", Qt::QueuedConnection);
         }
 }
 
@@ -441,8 +441,8 @@ void EventVideoPlayer::restart()
         return;
     }
 
-    m_videoBackend->metaObject()->invokeMethod(m_videoBackend, "restart", Qt::QueuedConnection);
-    m_videoBackend->metaObject()->invokeMethod(m_videoBackend, "play", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(m_videoBackend, "restart", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(m_videoBackend, "play", Qt::QueuedConnection);
 }
 
 void EventVideoPlayer::seek(int position)
@@ -452,7 +452,7 @@ void EventVideoPlayer::seek(int position)
         return;
     }
 
-    bool ok = m_videoBackend->metaObject()->invokeMethod(m_videoBackend, "seek", Qt::QueuedConnection
+    bool ok = QMetaObject::invokeMethod(m_videoBackend, "seek", Qt::QueuedConnection
                                                          , Q_ARG(int, position));
     Q_ASSERT(ok);
     Q_UNUSED(ok);
@@ -495,7 +495,7 @@ void EventVideoPlayer::faster()
 
     speed = qBound(playbackRates[0], speed, playbackRates[playbackRateCount-1]);
     m_lastspeed = speed;
-    m_videoBackend->metaObject()->invokeMethod(m_videoBackend, "setSpeed", Qt::QueuedConnection, Q_ARG(double, speed));
+    QMetaObject::invokeMethod(m_videoBackend, "setSpeed", Qt::QueuedConnection, Q_ARG(double, speed));
 }
 
 void EventVideoPlayer::slower()
@@ -517,7 +517,7 @@ void EventVideoPlayer::slower()
 
     speed = qBound(playbackRates[0], speed, playbackRates[playbackRateCount-1]);
 
-    m_videoBackend->metaObject()->invokeMethod(m_videoBackend, "setSpeed", Qt::QueuedConnection, Q_ARG(double, speed));
+    QMetaObject::invokeMethod(m_videoBackend, "setSpeed", Qt::QueuedConnection, Q_ARG(double, speed));
 }
 
 void EventVideoPlayer::changeEvent(QEvent *event)
@@ -608,7 +608,7 @@ void EventVideoPlayer::mute()
         return;
     }
 
-    m_videoBackend->metaObject()->invokeMethod(m_videoBackend, "mute", Qt::QueuedConnection, Q_ARG(bool, m_muteBtn->isChecked()));
+    QMetaObject::invokeMethod(m_videoBackend, "mute", Qt::QueuedConnection, Q_ARG(bool, m_muteBtn->isChecked()));
 
     m_muteBtn->setIcon(m_muteBtn->isChecked() ? style()->standardIcon(QStyle::SP_MediaVolumeMuted) : style()->standardIcon(QStyle::SP_MediaVolume));
 }
@@ -620,8 +620,8 @@ void EventVideoPlayer::setVolume(int volume)
         return;
     }
 
-    m_videoBackend->metaObject()->invokeMethod(m_videoBackend, "setVolume", Qt::QueuedConnection, Q_ARG(double, volume/10.0));
-    m_videoBackend->metaObject()->invokeMethod(m_videoBackend, "mute", Qt::QueuedConnection, Q_ARG(bool, false));
+    QMetaObject::invokeMethod(m_videoBackend, "setVolume", Qt::QueuedConnection, Q_ARG(double, volume/10.0));
+    QMetaObject::invokeMethod(m_videoBackend, "mute", Qt::QueuedConnection, Q_ARG(bool, false));
 
     m_muteBtn->setIcon(style()->standardIcon(QStyle::SP_MediaVolume));
     m_muteBtn->setChecked(false);
@@ -640,8 +640,8 @@ void EventVideoPlayer::streamsInitialized(bool hasAudioSupport)
 {
     if (hasAudioSupport)
     {
-        m_videoBackend->metaObject()->invokeMethod(m_videoBackend, "setVolume", Qt::QueuedConnection, Q_ARG(double, m_volumeSlider->value()/10.0));
-        m_videoBackend->metaObject()->invokeMethod(m_videoBackend, "mute", Qt::QueuedConnection, Q_ARG(bool, m_muteBtn->isChecked()));
+        QMetaObject::invokeMethod(m_videoBackend, "setVolume", Qt::QueuedConnection, Q_ARG(double, m_volumeSlider->value()/10.0));
+        QMetaObject::invokeMethod(m_videoBackend, "mute", Qt::QueuedConnection, Q_ARG(bool, m_muteBtn->isChecked()));
     }
 
     m_volumeSlider->setEnabled(hasAudioSupport);
