@@ -18,9 +18,11 @@
 #ifndef EVENTVIDEOPLAYER_H
 #define EVENTVIDEOPLAYER_H
 
+#include <QPointer>
 #include <QWidget>
 #include <QUrl>
 #include <QTimer>
+
 
 class QFrame;
 class QToolButton;
@@ -84,8 +86,9 @@ private slots:
 private:
     EventData *m_event;
     //QWeakPointer<QThread> m_videoThread;
-    QWeakPointer<VideoPlayerBackend> m_videoBackend;
     VideoWidget *m_videoWidget;
+    QPointer<VideoPlayerBackend> m_videoBackend;
+
     QToolButton *m_playBtn, *m_restartBtn, *m_fastBtn, *m_slowBtn, *m_muteBtn, *m_forward, *m_backward;
     QPushButton *m_saveBtn;
     QPushButton *m_zoomInBtn;
