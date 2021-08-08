@@ -1,8 +1,49 @@
-*~
-*.o
-moc_*.cpp
+## Autotools
+
+# autoreconf output
+aclocal.m4
+autom4te.cache/
+compile
+config.guess
+config.sub
+configure
+depcomp
+install-sh
+missing
+Makefile.in
+
+# configure output
+.deps/
+config.log
+config.status
+Makefile
+mac/Info.plist
+win/installer32.nsi
+win/installer64.nsi
+
+
+## Make
+
+# make output
+.dirstamp
+
+# Qt lrelease output
+*.qm
+
+# Qt rcc output
 qrc_*.cpp
-/Makefile
+
+# Qt moc output
+moc_*.cpp
+
+# C/C++ compiler output
+*.o
+bluecherry-client
+
+
+##
+
+*~
 tests-build-*
 *.user
 *.obj
