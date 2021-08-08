@@ -75,8 +75,10 @@ protected:
 };
 
 EventVideoPlayer::EventVideoPlayer(QWidget *parent)
-    : QWidget(parent), m_event(0),
-      m_videoWidget(0), m_zoomFactor(1.0)
+    : QWidget(parent)
+    , m_event(nullptr)
+    , m_videoWidget(bcApp->videoPlayerFactory()->createWidget(this))
+    , m_zoomFactor(1.0)
 {
     connect(bcApp, SIGNAL(queryLivePaused()), SLOT(queryLivePaused()));
     connect(bcApp, SIGNAL(settingsChanged()), SLOT(settingsChanged()));
@@ -84,12 +86,12 @@ EventVideoPlayer::EventVideoPlayer(QWidget *parent)
 
     m_uiTimer.setInterval(333);
 
+
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     QBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
 
-    m_videoWidget = bcApp->videoPlayerFactory()->createWidget();
     m_videoWidget->setFrameStyle(QFrame::NoFrame);
     m_videoWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_videoWidget, SIGNAL(customContextMenuRequested(QPoint)), SLOT(videoContextMenu(QPoint)));
@@ -701,44 +703,34 @@ void EventVideoPlayer::setZoom(double z)
 
 void EventVideoPlayer::zoomIn()
 {
-    if (m_videoWidget)
-    {
-        m_videoWidget->zoomIn();
-        m_zoomText->setText(QString::fromLatin1("zoom %L1x").arg(m_videoWidget->zoom(), 0, 'f', 2));
-    }
+    m_videoWidget->zoomIn();
+    m_zoomText->setText(QString::fromLatin1("zoom %L1x").arg(m_videoWidget->zoom(), 0, 'f', 2));
 }
 
 void EventVideoPlayer::zoomOut()
 {
-    if (m_videoWidget)
-    {
-        m_videoWidget->zoomOut();
-        m_zoomText->setText(QString::fromLatin1("zoom %L1x").arg(m_videoWidget->zoom(), 0, 'f', 2));
-    }
+    m_videoWidget->zoomOut();
+    m_zoomText->setText(QString::fromLatin1("zoom %L1x").arg(m_videoWidget->zoom(), 0, 'f', 2));
 }
 
 void EventVideoPlayer::moveLeft()
 {
-    if (m_videoWidget)
-        m_videoWidget->moveFrame(-10, 0);
+    m_videoWidget->moveFrame(-10, 0);
 }
 
 void EventVideoPlayer::moveRight()
 {
-    if (m_videoWidget)
-        m_videoWidget->moveFrame(10, 0);
+    m_videoWidget->moveFrame(10, 0);
 }
 
 void EventVideoPlayer::moveUp()
 {
-    if (m_videoWidget)
-        m_videoWidget->moveFrame(0, -10);
+    m_videoWidget->moveFrame(0, -10);
 }
 
 void EventVideoPlayer::moveDown()
 {
-    if (m_videoWidget)
-        m_videoWidget->moveFrame(0, 10);
+    m_videoWidget->moveFrame(0, 10);
 }
 
 void EventVideoPlayer::saveSnapshot(const QString &ifile)
@@ -782,7 +774,7 @@ void EventVideoPlayer::videoContextMenu(const QPoint &rpos)
     if (qobject_cast<QWidget*>(sender()))
         pos = static_cast<QWidget*>(sender())->mapToGlobal(pos);
 
-    if (!m_videoBackend || !m_videoWidget)
+    if (!m_videoBackend)
         return;
 
     QMenu menu(qobject_cast<QWidget*>(sender()));
