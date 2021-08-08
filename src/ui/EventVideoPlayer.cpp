@@ -304,13 +304,17 @@ EventVideoPlayer::~EventVideoPlayer()
 
     if (m_videoBackend)
     {
-        m_videoBackend->clear();
+        // NOTE: Invoking MvpVideoPlayerBackend::clear() method before object destruction can lead to crashes in the MvpVideoPlayerBackend.
+        //  MvpVideoPlayerBackend::clear() already invoked from MvpVideoPlayerBackend dtor.
+//        m_videoBackend->clear();
 
 #ifdef Q_OS_MAC
         qDebug() << "deleting videoBackend first, before VideoWidget\n";
         delete m_videoBackend;
 #else
-        QMetaObject::invokeMethod(m_videoBackend, "deleteLater", Qt::QueuedConnection);
+        // NOTE: Why deleteLater is used here?
+//        QMetaObject::invokeMethod(m_videoBackend, "deleteLater", Qt::QueuedConnection);
+        delete m_videoBackend;
 #endif
     }
 
@@ -390,13 +394,21 @@ void EventVideoPlayer::clearVideo()
     if (m_videoBackend)
     {
         m_videoBackend->disconnect(this);
-        bool ok = QMetaObject::invokeMethod(m_videoBackend, "clear", Qt::QueuedConnection);
-        ok &= QMetaObject::invokeMethod(m_videoBackend, "deleteLater", Qt::QueuedConnection);
-        Q_ASSERT(ok);
-        Q_UNUSED(ok);
+
+        // NOTE: Invoking MvpVideoPlayerBackend::clear() method before object destruction can lead to crashes in the MvpVideoPlayerBackend.
+        //  MvpVideoPlayerBackend::clear() already invoked from MvpVideoPlayerBackend dtor.
+//        bool ok = QMetaObject::invokeMethod(m_videoBackend, "clear", Qt::QueuedConnection);
+
+        // NOTE: Why deleteLater is used here?
+//        ok &= QMetaObject::invokeMethod(m_videoBackend, "deleteLater", Qt::QueuedConnection);
+//        Q_ASSERT(ok);
+//        Q_UNUSED(ok);
+
+        delete m_videoBackend;
     }
 
-    m_videoBackend.clear();
+//    m_videoBackend.clear();
+
     m_event = 0;
 
     m_playBtn->setIcon(QIcon(QLatin1String(":/icons/control.png")));
