@@ -37,14 +37,14 @@ Section
 !include dll_list.nsh
 
         SetOutPath "$INSTDIR\platforms"
-        File platforms/qdirect2d.dll
-        File platforms/qminimal.dll
-        File platforms/qoffscreen.dll
-        File platforms/qwindows.dll
+        File platforms\qdirect2d.dll
+        File platforms\qminimal.dll
+        File platforms\qoffscreen.dll
+        File platforms\qwindows.dll
         SetOutPath "$INSTDIR\imageformats"
-        File imageformats/qgif.dll
-        File imageformats/qico.dll
-        File imageformats/qjpeg.dll
+        File imageformats\qgif.dll
+        File imageformats\qico.dll
+        File imageformats\qjpeg.dll
         SetOutPath "$INSTDIR"
 
         # Translations
