@@ -1,58 +1,48 @@
 #!/bin/bash
 
-# get target triplet (machine-vendor-operatingsystem)
-TARGET_TRIPLET=$(gcc -dumpmachine)
+# print current MSYSTEM
+echo "==== MSYSTEM: $MSYSTEM ===="
 
-# set target arch, prefix and nsis script filename
-if test $TARGET_TRIPLET = 'i686-w64-mingw32'
-then
-    ARCH=i686
-    PREFIX=/mingw32
-    LIB_SSL=libssl-1_1.dll
-    NSI_FILE=installer32.nsi
-elif test $TARGET_TRIPLET = 'x86_64-w64-mingw32'
-then
-    ARCH=x86_64
-    PREFIX=/mingw64
-    LIB_SSL=libssl-1_1-x64.dll
-    NSI_FILE=installer64.nsi
-fi
+# set SRC_DIR, BUILD_DIR and BUILD_INSTALLER_DIR variables
+SRC_DIR=bluecherry-client
+BUILD_DIR=build-$SRC_DIR-MSYS2-$MSYSTEM
+BUILD_INSTALLER_DIR=build-$SRC_DIR-installer-MSYS2-$MSYSTEM
 
-#
+# create build directory outside from source directory
 cd ../../
 
-mkdir -p build-bluecherry-client-installer-msys2_$ARCH
-cp build-bluecherry-client-msys2_$ARCH/win/$NSI_FILE build-bluecherry-client-installer-msys2_$ARCH/installer.nsi
+mkdir -p $BUILD_INSTALLER_DIR
 
-cp $PREFIX/bin/bluecherry-client.exe build-bluecherry-client-installer-msys2_$ARCH/
-cp $PREFIX/bin/$LIB_SSL build-bluecherry-client-installer-msys2_$ARCH/
+# copy files
+if [ "MINGW32" = $MSYSTEM ] 
+then
+    cp $BUILD_DIR/win/installer32.nsi $BUILD_INSTALLER_DIR/installer.nsi
+    cp $MSYSTEM_PREFIX/bin/libssl-1_1.dll $BUILD_INSTALLER_DIR/
+elif [ "MINGW64" = $MSYSTEM ]
+then
+    cp $BUILD_DIR/win/installer64.nsi $BUILD_INSTALLER_DIR/installer.nsi
+    cp $MSYSTEM_PREFIX/bin/libssl-1_1-x64.dll $BUILD_INSTALLER_DIR/
+else
+    echo "ERROR: Unknown MSYSTEM: $MSYSTEM"
+    exit 1
+fi
 
-# run copydlldeps.sh from destination dir, otherwise it recursively walks all MXE tree and copies excess DLLs
-cd build-bluecherry-client-installer-msys2_$ARCH
-../bluecherry-client/msys2/mxe/tools/copydlldeps.sh --infile ./bluecherry-client.exe --destdir ./ --srcdirs $PREFIX/bin --copy --enforcedir $PREFIX/share/qt5/plugins/platforms/ --enforcedir $PREFIX/share/qt5/plugins/imageformats/
-cd ..
+cp $MSYSTEM_PREFIX/bin/bluecherry-client.exe $BUILD_INSTALLER_DIR/
+cp $MSYSTEM_PREFIX/share/bluecherry-client/translations/*.qm $BUILD_INSTALLER_DIR/
+cp $SRC_DIR/COPYING $BUILD_INSTALLER_DIR/
+cp $SRC_DIR/res/bluecherry.ico $BUILD_INSTALLER_DIR/
 
-#strip
-strip build-bluecherry-client-installer-msys2_$ARCH/*.dll build-bluecherry-client-installer-msys2_$ARCH/*.exe build-bluecherry-client-installer-msys2_$ARCH/imageformats/*.dll build-bluecherry-client-installer-msys2_$ARCH/platforms/*.dll
+# copy dlls, strip, build installer 
+cd $BUILD_INSTALLER_DIR
 
+../$SRC_DIR/msys2/mxe/tools/copydlldeps.sh --infile ./bluecherry-client.exe --destdir ./ --srcdirs $MSYSTEM_PREFIX/bin --copy --enforcedir $MSYSTEM_PREFIX/share/qt5/plugins/platforms/ --enforcedir $MSYSTEM_PREFIX/share/qt5/plugins/imageformats/
+strip *.dll *.exe imageformats/*.dll platforms/*.dll
 
-#build installer
-cd build-bluecherry-client-installer-msys2_$ARCH
+rm -f dll_list.nsh
 
 for dll in *.dll
 do
 	echo "File $dll" >> dll_list.nsh
 done
 
-# copy license file
-cp ../bluecherry-client/COPYING ./
-
-# copy icon file
-cp ../bluecherry-client/res/bluecherry.ico ./
-
-# copy translation files
-cp $PREFIX/share/bluecherry-client/translations/*.qm ./
-
 makensis installer.nsi
-
-cd ..
