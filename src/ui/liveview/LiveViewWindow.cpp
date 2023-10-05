@@ -196,10 +196,11 @@ LiveViewWindow::LiveViewWindow(DVRServerRepository *serverRepository, QWidget *p
     //connect(m_liveView->layout(), SIGNAL(layoutChanged()), SLOT(saveLayout()));
     //connect(m_liveView, SIGNAL(forwardKey(QKeyEvent*)), SLOT(camerasBrowseKeys(QKeyEvent*)));
 
+    QSettings settings;
     QMainWindow *wnd = qobject_cast<QMainWindow*>(window());
     if (wnd)
 		wnd->addToolBar(Qt::TopToolBarArea, m_toolBar);
-    else
+    else if (!(settings.value(QLatin1String("ui/hideFullscreenToolbar"), false).toBool()))
                 layout->addWidget(m_toolBar);
     {
         m_liveviewlayout = new QGridLayout();
