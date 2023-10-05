@@ -102,6 +102,10 @@ OptionsGeneralPage::OptionsGeneralPage(QWidget *parent)
     m_fullScreen->setChecked(settings.value(QLatin1String("ui/startupFullscreen"), false).toBool());
     layout->addWidget(m_fullScreen);
 
+    m_hidetoolbar = new QCheckBox(tr("Hide toolbar in fullscreen"));
+    m_hidetoolbar->setChecked(settings.value(QLatin1String("ui/hideFullscreenToolbar"), false).toBool());
+    layout->addWidget(m_hidetoolbar);
+
     m_startup = new QCheckBox(tr("Run on startup"));
     m_startup->setChecked(settings.value(QLatin1String("ui/startup"), false).toBool());
     layout->addWidget(m_startup);
@@ -181,6 +185,7 @@ void OptionsGeneralPage::saveChanges()
     settings.setValue(QLatin1String("ui/enableThumbnails"), m_thumbnails->isChecked());
     settings.setValue(QLatin1String("ui/saveSession"), m_session->isChecked());
     settings.setValue(QLatin1String("ui/startupFullscreen"), m_fullScreen->isChecked());
+    settings.setValue(QLatin1String("ui/hideFullscreenToolbar"), m_hidetoolbar->isChecked());
     settings.setValue(QLatin1String("ui/startup"), m_startup->isChecked());
 
     if (m_vaapiDecodingAcceleration)
