@@ -1,2 +1,0 @@
-- [README.txt](README.txt)
-- [Building for Windows using MSYS2](msys2/README.md)
