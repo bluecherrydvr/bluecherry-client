@@ -1,3 +1,9 @@
+# This code is archived.  Please refer to the 'Unity' code base developed around Flutter / Dart - https://github.com/bluecherrydvr/unity
+
+
+
+
+
 Bluecherry cross platform video surveillance client application
 
 https://www.bluecherrydvr.com
